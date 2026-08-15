@@ -94,6 +94,7 @@ type DeliveryDisposition string
 const (
 	DispositionNotified       DeliveryDisposition = "notified"
 	DispositionDeliveryFailed DeliveryDisposition = "delivery_failed"
+	DispositionSkipped        DeliveryDisposition = "skipped"
 )
 
 type DeliveryResult struct {
@@ -102,7 +103,7 @@ type DeliveryResult struct {
 	Error       string              `json:"error,omitempty"`
 }
 
-func (c *TmuxConnector) Notify(ctx context.Context, address string, targetAgentID string, taskID string, isNewTask bool) DeliveryResult {
+func (c *TmuxConnector) deliverText(ctx context.Context, address string, text string) DeliveryResult {
 	if err := ValidateAddress(address); err != nil {
 		return DeliveryResult{
 			Disposition: DispositionDeliveryFailed,
@@ -118,19 +119,12 @@ func (c *TmuxConnector) Notify(ctx context.Context, address string, targetAgentI
 		}
 	}
 
-	var notificationText string
-	if isNewTask {
-		notificationText = fmt.Sprintf("[AgentBus] New task %s. Use AgentBus CLI: task get %s --agent %s", taskID, taskID, targetAgentID)
-	} else {
-		notificationText = fmt.Sprintf("[AgentBus] Task %s has a new message. Use AgentBus CLI: task get %s --agent %s", taskID, taskID, targetAgentID)
-	}
-
 	randBytes := make([]byte, 4)
 	_, _ = rand.Read(randBytes)
 	bufName := fmt.Sprintf("ab-%d-%s", time.Now().UnixNano(), hex.EncodeToString(randBytes))
 
 	// 1. Load buffer via stdin
-	if _, err := c.runner.Run(ctx, notificationText, "tmux", "load-buffer", "-b", bufName, "-"); err != nil {
+	if _, err := c.runner.Run(ctx, text, "tmux", "load-buffer", "-b", bufName, "-"); err != nil {
 		return DeliveryResult{
 			Disposition: DispositionDeliveryFailed,
 			PaneID:      paneID,
@@ -162,4 +156,49 @@ func (c *TmuxConnector) Notify(ctx context.Context, address string, targetAgentI
 		Disposition: DispositionNotified,
 		PaneID:      paneID,
 	}
+}
+
+func (c *TmuxConnector) NotifyBootstrap(ctx context.Context, address string, agentID string, role string, generation int64, instructionsPath string) DeliveryResult {
+	if strings.ContainsAny(agentID, "\r\n\t") || strings.ContainsAny(role, "\r\n\t") || strings.ContainsAny(instructionsPath, "\r\n\t") {
+		return DeliveryResult{
+			Disposition: DispositionDeliveryFailed,
+			Error:       "control characters in bootstrap parameters",
+		}
+	}
+	text := fmt.Sprintf("[AgentBus Bootstrap] agent_id=%s role=%s generation=%d. Read %s, then use AgentBus CLI: session ready --agent %s --generation %d",
+		agentID, role, generation, instructionsPath, agentID, generation)
+	return c.deliverText(ctx, address, text)
+}
+
+func (c *TmuxConnector) NotifyTask(ctx context.Context, address string, agentID string, role string, instructionsPath string, taskID string, isNewTask bool) DeliveryResult {
+	if strings.ContainsAny(agentID, "\r\n\t") || strings.ContainsAny(role, "\r\n\t") || strings.ContainsAny(instructionsPath, "\r\n\t") || strings.ContainsAny(taskID, "\r\n\t") {
+		return DeliveryResult{
+			Disposition: DispositionDeliveryFailed,
+			Error:       "control characters in task notification parameters",
+		}
+	}
+
+	var text string
+	roleTag := ""
+	if role != "" {
+		roleTag = fmt.Sprintf(" role=%s", role)
+	}
+	readHint := ""
+	if instructionsPath != "" {
+		readHint = fmt.Sprintf(" If role context is uncertain, read %s.", instructionsPath)
+	}
+
+	if isNewTask {
+		text = fmt.Sprintf("[AgentBus][agent=%s%s] New task %s.%s Use AgentBus CLI: task get %s --agent %s",
+			agentID, roleTag, taskID, readHint, taskID, agentID)
+	} else {
+		text = fmt.Sprintf("[AgentBus][agent=%s%s] New message for task %s.%s Use AgentBus CLI: task get %s --agent %s",
+			agentID, roleTag, taskID, readHint, taskID, agentID)
+	}
+
+	return c.deliverText(ctx, address, text)
+}
+
+func (c *TmuxConnector) Notify(ctx context.Context, address string, targetAgentID string, taskID string, isNewTask bool) DeliveryResult {
+	return c.NotifyTask(ctx, address, targetAgentID, "", "", taskID, isNewTask)
 }

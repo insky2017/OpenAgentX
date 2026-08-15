@@ -192,6 +192,41 @@ func (c *Client) RegisterAgent(ctx context.Context, agent *domain.Agent) (*domai
 	return resp.Agent, nil
 }
 
+func (c *Client) AttachAgent(ctx context.Context, req service.AttachAgentRequest) (*service.AttachAgentResponse, error) {
+	var resp service.AttachAgentResponse
+	if err := c.do(ctx, http.MethodPost, "/api/v1/agents/attach", nil, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) BootstrapAgent(ctx context.Context, id string) (*service.BootstrapAgentResponse, error) {
+	var resp service.BootstrapAgentResponse
+	if err := c.do(ctx, http.MethodPost, "/api/v1/agents/"+url.PathEscape(id)+"/bootstrap", nil, nil, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) GetSession(ctx context.Context, id string) (*service.GetSessionResponse, error) {
+	var resp service.GetSessionResponse
+	if err := c.do(ctx, http.MethodGet, "/api/v1/agents/"+url.PathEscape(id)+"/session", nil, nil, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) ReadySession(ctx context.Context, agentID string, generation int64) (*domain.AgentSession, error) {
+	reqBody := map[string]int64{"generation": generation}
+	var resp struct {
+		Session *domain.AgentSession `json:"session"`
+	}
+	if err := c.do(ctx, http.MethodPost, "/api/v1/sessions/"+url.PathEscape(agentID)+"/ready", nil, reqBody, &resp); err != nil {
+		return nil, err
+	}
+	return resp.Session, nil
+}
+
 func (c *Client) ListAgents(ctx context.Context) ([]*domain.Agent, error) {
 	var resp struct {
 		Agents []*domain.Agent `json:"agents"`

@@ -1,0 +1,13 @@
+version: 1
+id: coordinator
+role: coordinator
+runtime: codex
+connector: tmux
+address: "%50"
+workspace: ".."
+instructions: "ROLE.md"
+capabilities:
+  - understand
+  - decompose
+  - delegate
+  - review

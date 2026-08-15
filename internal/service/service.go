@@ -109,6 +109,214 @@ func (s *Service) ListAgents(ctx context.Context) ([]*domain.Agent, error) {
 	return s.store.ListAgents(ctx)
 }
 
+// V0.1 Attach / Bootstrap / Session
+
+type AttachAgentRequest struct {
+	Agent    *domain.Agent        `json:"agent"`
+	Profile  *domain.AgentProfile `json:"profile"`
+	NoNotify bool                 `json:"no_notify"`
+}
+
+type AttachAgentResponse struct {
+	Agent         *domain.Agent                 `json:"agent"`
+	Profile       *domain.AgentProfile          `json:"profile"`
+	Session       *domain.AgentSession          `json:"session"`
+	Disposition   connector.DeliveryDisposition `json:"disposition"`
+	DeliveryError string                        `json:"delivery_error,omitempty"`
+}
+
+func (s *Service) AttachAgent(ctx context.Context, req AttachAgentRequest) (*AttachAgentResponse, error) {
+	if req.Agent == nil {
+		return nil, domain.ErrInvalidInput("agent is required")
+	}
+	if req.Profile == nil {
+		return nil, domain.ErrInvalidInput("profile is required")
+	}
+	if err := req.Agent.Validate(); err != nil {
+		return nil, err
+	}
+	if err := req.Profile.Validate(); err != nil {
+		return nil, err
+	}
+	if req.Agent.ID != req.Profile.AgentID {
+		return nil, domain.ErrInvalidInput("agent ID must match profile agent ID")
+	}
+
+	sessionStatus := domain.SessionStatusBootstrapping
+	resolvedPane := req.Agent.Address
+	var delivErr *string
+	disposition := connector.DispositionSkipped
+
+	if req.Agent.Connector == domain.ConnectorTmux && s.connector != nil && !req.NoNotify {
+		paneID, err := s.connector.ProbePane(ctx, req.Agent.Address)
+		if err != nil {
+			errStr := err.Error()
+			delivErr = &errStr
+			sessionStatus = domain.SessionStatusDeliveryFailed
+			disposition = connector.DispositionDeliveryFailed
+		} else {
+			resolvedPane = paneID
+		}
+	}
+
+	session, err := s.store.AttachAgent(ctx, req.Agent, req.Profile, sessionStatus, resolvedPane, delivErr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Deliver bootstrap notification if tmux, probe succeeded, and not no-notify
+	if req.Agent.Connector == domain.ConnectorTmux && s.connector != nil && !req.NoNotify && sessionStatus == domain.SessionStatusBootstrapping {
+		deliv := s.connector.NotifyBootstrap(ctx, req.Agent.Address, req.Agent.ID, req.Agent.Role, session.Generation, req.Profile.InstructionsPath)
+		if deliv.Disposition == connector.DispositionDeliveryFailed {
+			delivErr = &deliv.Error
+			disposition = connector.DispositionDeliveryFailed
+			updatedSess, updateErr := s.store.UpdateSessionDelivery(ctx, req.Agent.ID, session.Generation, domain.SessionStatusDeliveryFailed, resolvedPane, &deliv.Error)
+			if updateErr != nil {
+				return nil, fmt.Errorf("bootstrap notification delivery failed (%s) and failed to persist delivery state: %w", deliv.Error, updateErr)
+			}
+			session = updatedSess
+		} else {
+			disposition = connector.DispositionNotified
+			s.logger.Info("agent bootstrap notified",
+				slog.String("agent_id", req.Agent.ID),
+				slog.Int64("generation", session.Generation),
+				slog.String("pane_id", deliv.PaneID),
+			)
+		}
+	} else if req.NoNotify {
+		s.logger.Info("agent attached with no-notify",
+			slog.String("agent_id", req.Agent.ID),
+			slog.Int64("generation", session.Generation),
+		)
+	}
+
+	return &AttachAgentResponse{
+		Agent:       req.Agent,
+		Profile:     req.Profile,
+		Session:     session,
+		Disposition: disposition,
+		DeliveryError: func() string {
+			if delivErr != nil {
+				return *delivErr
+			}
+			return ""
+		}(),
+	}, nil
+}
+
+type BootstrapAgentResponse struct {
+	Agent         *domain.Agent                 `json:"agent"`
+	Profile       *domain.AgentProfile          `json:"profile"`
+	Session       *domain.AgentSession          `json:"session"`
+	Disposition   connector.DeliveryDisposition `json:"disposition"`
+	DeliveryError string                        `json:"delivery_error,omitempty"`
+}
+
+func (s *Service) BootstrapAgent(ctx context.Context, agentID string) (*BootstrapAgentResponse, error) {
+	agent, profile, _, err := s.store.GetAgentSession(ctx, agentID)
+	if err != nil {
+		return nil, err
+	}
+
+	sessionStatus := domain.SessionStatusBootstrapping
+	resolvedPane := agent.Address
+	var delivErr *string
+	disposition := connector.DispositionSkipped
+
+	if agent.Connector == domain.ConnectorTmux && s.connector != nil {
+		paneID, err := s.connector.ProbePane(ctx, agent.Address)
+		if err != nil {
+			errStr := err.Error()
+			delivErr = &errStr
+			sessionStatus = domain.SessionStatusDeliveryFailed
+			disposition = connector.DispositionDeliveryFailed
+		} else {
+			resolvedPane = paneID
+		}
+	}
+
+	a, p, session, err := s.store.BootstrapAgent(ctx, agentID, sessionStatus, resolvedPane, delivErr)
+	if err != nil {
+		return nil, err
+	}
+
+	if agent.Connector == domain.ConnectorTmux && s.connector != nil && sessionStatus == domain.SessionStatusBootstrapping {
+		deliv := s.connector.NotifyBootstrap(ctx, agent.Address, agent.ID, agent.Role, session.Generation, profile.InstructionsPath)
+		if deliv.Disposition == connector.DispositionDeliveryFailed {
+			delivErr = &deliv.Error
+			disposition = connector.DispositionDeliveryFailed
+			updatedSess, updateErr := s.store.UpdateSessionDelivery(ctx, agentID, session.Generation, domain.SessionStatusDeliveryFailed, resolvedPane, &deliv.Error)
+			if updateErr != nil {
+				return nil, fmt.Errorf("bootstrap notification delivery failed (%s) and failed to persist delivery state: %w", deliv.Error, updateErr)
+			}
+			session = updatedSess
+		} else {
+			disposition = connector.DispositionNotified
+			s.logger.Info("agent bootstrap re-notified",
+				slog.String("agent_id", agent.ID),
+				slog.Int64("generation", session.Generation),
+				slog.String("pane_id", deliv.PaneID),
+			)
+		}
+	}
+
+	return &BootstrapAgentResponse{
+		Agent:       a,
+		Profile:     p,
+		Session:     session,
+		Disposition: disposition,
+		DeliveryError: func() string {
+			if delivErr != nil {
+				return *delivErr
+			}
+			return ""
+		}(),
+	}, nil
+}
+
+func (s *Service) ReadySession(ctx context.Context, agentID string, generation int64) (*domain.AgentSession, error) {
+	session, err := s.store.ReadySession(ctx, agentID, generation)
+	if err != nil {
+		return nil, err
+	}
+	s.logger.Info("agent session ready",
+		slog.String("agent_id", agentID),
+		slog.Int64("generation", generation),
+	)
+	return session, nil
+}
+
+type GetSessionResponse struct {
+	Agent   *domain.Agent        `json:"agent"`
+	Profile *domain.AgentProfile `json:"profile"`
+	Session *domain.AgentSession `json:"session"`
+}
+
+func (s *Service) GetSession(ctx context.Context, agentID string) (*GetSessionResponse, error) {
+	a, p, sess, err := s.store.GetAgentSession(ctx, agentID)
+	if err != nil {
+		return nil, err
+	}
+	return &GetSessionResponse{
+		Agent:   a,
+		Profile: p,
+		Session: sess,
+	}, nil
+}
+
+// Ready Gate Helper
+
+func (s *Service) verifyAgentReady(ctx context.Context, agentID string, roleName string) error {
+	ready, err := s.store.IsAgentReady(ctx, agentID)
+	if err != nil {
+		return err
+	}
+	if !ready {
+		return fmt.Errorf("%w: %s '%s' has not completed session bootstrap/ready", domain.ErrAgentNotReady, roleName, agentID)
+	}
+	return nil
+}
+
 type SubmitTaskRequest struct {
 	SenderAgentID  string `json:"sender_agent_id"`
 	TargetAgentID  string `json:"target_agent_id"`
@@ -122,6 +330,14 @@ type SubmitTaskResponse struct {
 }
 
 func (s *Service) SubmitTask(ctx context.Context, req SubmitTaskRequest) (*SubmitTaskResponse, error) {
+	// Ready Gate: verify sender and target are both ready
+	if err := s.verifyAgentReady(ctx, req.SenderAgentID, "sender agent"); err != nil {
+		return nil, err
+	}
+	if err := s.verifyAgentReady(ctx, req.TargetAgentID, "target agent"); err != nil {
+		return nil, err
+	}
+
 	taskID := fmt.Sprintf("task-%s", uuid.New().String())
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 
@@ -191,10 +407,14 @@ func (s *Service) SubmitTask(ctx context.Context, req SubmitTaskRequest) (*Submi
 	)
 	s.broker.Publish(createdTask.ID)
 
-	// Trigger connector notification
-	targetAgent, err := s.store.GetAgent(ctx, createdTask.TargetAgentID)
+	// Trigger connector notification with identity reminder
+	targetAgent, targetProfile, _, err := s.store.GetAgentSession(ctx, createdTask.TargetAgentID)
 	if err == nil && targetAgent.Connector == domain.ConnectorTmux && s.connector != nil {
-		deliv := s.connector.Notify(ctx, targetAgent.Address, targetAgent.ID, createdTask.ID, true)
+		instrPath := ""
+		if targetProfile != nil {
+			instrPath = targetProfile.InstructionsPath
+		}
+		deliv := s.connector.NotifyTask(ctx, targetAgent.Address, targetAgent.ID, targetAgent.Role, instrPath, createdTask.ID, true)
 		delivNow := time.Now().UTC().Format(time.RFC3339Nano)
 		if deliv.Disposition == connector.DispositionNotified {
 			p, _ := json.Marshal(map[string]any{"pane_id": deliv.PaneID, "disposition": deliv.Disposition})
@@ -256,8 +476,8 @@ func (s *Service) GetTask(ctx context.Context, taskID string, callerAgentID stri
 	if caller == "" {
 		return nil, domain.ErrInvalidInput("caller --agent is required to get task")
 	}
-	if _, err := s.store.GetAgent(ctx, caller); err != nil {
-		return nil, fmt.Errorf("%w: caller agent '%s'", domain.ErrAgentNotFound, caller)
+	if err := s.verifyAgentReady(ctx, caller, "caller agent"); err != nil {
+		return nil, err
 	}
 
 	task, err := s.store.GetTask(ctx, taskID)
@@ -277,13 +497,17 @@ func (s *Service) ListTasks(ctx context.Context, agentID string, status string) 
 	if agent == "" {
 		return nil, domain.ErrInvalidInput("filter --agent is required to list tasks")
 	}
-	if _, err := s.store.GetAgent(ctx, agent); err != nil {
-		return nil, fmt.Errorf("%w: agent '%s'", domain.ErrAgentNotFound, agent)
+	if err := s.verifyAgentReady(ctx, agent, "filter agent"); err != nil {
+		return nil, err
 	}
 	return s.store.ListTasks(ctx, agent, status)
 }
 
 func (s *Service) AckTask(ctx context.Context, taskID string, actorAgentID string) (*domain.Task, error) {
+	if err := s.verifyAgentReady(ctx, actorAgentID, "actor agent"); err != nil {
+		return nil, err
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	payload, _ := json.Marshal(map[string]any{"actor_agent_id": actorAgentID, "status": domain.TaskStatusRunning})
 	evt := &domain.Event{
@@ -315,6 +539,10 @@ func (s *Service) AckTask(ctx context.Context, taskID string, actorAgentID strin
 }
 
 func (s *Service) UpdateTaskStatus(ctx context.Context, taskID string, actorAgentID string, message string) error {
+	if err := s.verifyAgentReady(ctx, actorAgentID, "actor agent"); err != nil {
+		return err
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	msg := &domain.Message{
 		ID:            fmt.Sprintf("msg-%s", uuid.New().String()),
@@ -354,6 +582,10 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, taskID string, actorAgen
 }
 
 func (s *Service) SendMessage(ctx context.Context, taskID string, senderAgentID string, content string) error {
+	if err := s.verifyAgentReady(ctx, senderAgentID, "sender agent"); err != nil {
+		return err
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	msg := &domain.Message{
 		ID:            fmt.Sprintf("msg-%s", uuid.New().String()),
@@ -389,12 +621,16 @@ func (s *Service) SendMessage(ctx context.Context, taskID string, senderAgentID 
 	)
 	s.broker.Publish(taskID)
 
-	// Trigger supplemental notification to target agent
+	// Trigger supplemental notification to target agent with identity reminder
 	task, err := s.store.GetTask(ctx, taskID)
 	if err == nil {
-		targetAgent, err := s.store.GetAgent(ctx, task.TargetAgentID)
+		targetAgent, targetProfile, _, err := s.store.GetAgentSession(ctx, task.TargetAgentID)
 		if err == nil && targetAgent.Connector == domain.ConnectorTmux && s.connector != nil {
-			deliv := s.connector.Notify(ctx, targetAgent.Address, targetAgent.ID, task.ID, false)
+			instrPath := ""
+			if targetProfile != nil {
+				instrPath = targetProfile.InstructionsPath
+			}
+			deliv := s.connector.NotifyTask(ctx, targetAgent.Address, targetAgent.ID, targetAgent.Role, instrPath, task.ID, false)
 			delivNow := time.Now().UTC().Format(time.RFC3339Nano)
 			if deliv.Disposition == connector.DispositionNotified {
 				p, _ := json.Marshal(map[string]any{"pane_id": deliv.PaneID, "disposition": deliv.Disposition})
@@ -440,6 +676,10 @@ func (s *Service) SendMessage(ctx context.Context, taskID string, senderAgentID 
 }
 
 func (s *Service) CompleteTask(ctx context.Context, taskID string, actorAgentID string, result string) (*domain.Task, error) {
+	if err := s.verifyAgentReady(ctx, actorAgentID, "actor agent"); err != nil {
+		return nil, err
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	payload, _ := json.Marshal(map[string]any{"actor_agent_id": actorAgentID, "result": result, "status": domain.TaskStatusSucceeded})
 	evt := &domain.Event{
@@ -471,6 +711,10 @@ func (s *Service) CompleteTask(ctx context.Context, taskID string, actorAgentID 
 }
 
 func (s *Service) FailTask(ctx context.Context, taskID string, actorAgentID string, errStr string) (*domain.Task, error) {
+	if err := s.verifyAgentReady(ctx, actorAgentID, "actor agent"); err != nil {
+		return nil, err
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	payload, _ := json.Marshal(map[string]any{"actor_agent_id": actorAgentID, "error": errStr, "status": domain.TaskStatusFailed})
 	evt := &domain.Event{
@@ -503,6 +747,10 @@ func (s *Service) FailTask(ctx context.Context, taskID string, actorAgentID stri
 }
 
 func (s *Service) CancelTask(ctx context.Context, taskID string, actorAgentID string) (*domain.Task, error) {
+	if err := s.verifyAgentReady(ctx, actorAgentID, "actor agent"); err != nil {
+		return nil, err
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	payload, _ := json.Marshal(map[string]any{"actor_agent_id": actorAgentID, "status": domain.TaskStatusCanceled})
 	evt := &domain.Event{
@@ -538,8 +786,8 @@ func (s *Service) GetEvents(ctx context.Context, taskID string, callerAgentID st
 	if caller == "" {
 		return nil, domain.ErrInvalidInput("caller --agent is required to watch events")
 	}
-	if _, err := s.store.GetAgent(ctx, caller); err != nil {
-		return nil, fmt.Errorf("%w: caller agent '%s'", domain.ErrAgentNotFound, caller)
+	if err := s.verifyAgentReady(ctx, caller, "caller agent"); err != nil {
+		return nil, err
 	}
 
 	// Check task exists and authorization
@@ -589,8 +837,8 @@ func (s *Service) GetTaskMessages(ctx context.Context, taskID string, callerAgen
 	if caller == "" {
 		return nil, domain.ErrInvalidInput("caller --agent is required to get task messages")
 	}
-	if _, err := s.store.GetAgent(ctx, caller); err != nil {
-		return nil, fmt.Errorf("%w: caller agent '%s'", domain.ErrAgentNotFound, caller)
+	if err := s.verifyAgentReady(ctx, caller, "caller agent"); err != nil {
+		return nil, err
 	}
 
 	task, err := s.store.GetTask(ctx, taskID)

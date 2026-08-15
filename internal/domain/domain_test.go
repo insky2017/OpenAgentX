@@ -1,6 +1,8 @@
 package domain_test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"agentbus/internal/domain"
@@ -65,5 +67,98 @@ func TestTaskValidationEdgeCases(t *testing.T) {
 		if err := tCase.Validate(); err == nil {
 			t.Errorf("expected error for invalid task %+v, got nil", tCase)
 		}
+	}
+}
+
+func TestManifestLoadingAndValidation(t *testing.T) {
+	dir, err := os.MkdirTemp("", "manifest-test-*")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(dir)
+
+	rolePath := filepath.Join(dir, "ROLE.md")
+	if err := os.WriteFile(rolePath, []byte("# Test Role\nRole instructions"), 0644); err != nil {
+		t.Fatalf("failed to write role file: %v", err)
+	}
+
+	validYAML := `version: 1
+id: test-agent
+role: tester
+runtime: agy
+connector: tmux
+address: "%51"
+workspace: "."
+instructions: "ROLE.md"
+capabilities:
+  - testing
+  - automation
+  - testing
+`
+	validConfig := filepath.Join(dir, "agent.yaml")
+	if err := os.WriteFile(validConfig, []byte(validYAML), 0644); err != nil {
+		t.Fatalf("failed to write valid agent.yaml: %v", err)
+	}
+
+	manifest, profile, agent, err := domain.LoadManifest(validConfig, dir)
+	if err != nil {
+		t.Fatalf("LoadManifest failed on valid yaml: %v", err)
+	}
+	if manifest.ID != "test-agent" || profile.Runtime != "agy" || agent.Role != "tester" {
+		t.Fatalf("unexpected loaded data: %+v", manifest)
+	}
+	if len(manifest.Capabilities) != 2 || manifest.Capabilities[0] != "automation" || manifest.Capabilities[1] != "testing" {
+		t.Fatalf("capabilities not properly deduplicated and sorted: %+v", manifest.Capabilities)
+	}
+
+	// 1. Unknown fields rejection
+	unknownYAML := `version: 1
+id: test-agent
+role: tester
+runtime: agy
+connector: tmux
+address: "%51"
+workspace: "."
+instructions: "ROLE.md"
+unknown_field: "disallowed"
+`
+	unknownConfig := filepath.Join(dir, "unknown.yaml")
+	_ = os.WriteFile(unknownConfig, []byte(unknownYAML), 0644)
+	if _, _, _, err := domain.LoadManifest(unknownConfig, dir); err == nil {
+		t.Fatalf("expected error for YAML with unknown fields, got nil")
+	}
+
+	// 2. Empty ROLE file rejection
+	emptyRole := filepath.Join(dir, "EMPTY_ROLE.md")
+	_ = os.WriteFile(emptyRole, []byte(""), 0644)
+	emptyRoleYAML := `version: 1
+id: test-agent
+role: tester
+runtime: agy
+connector: tmux
+address: "%51"
+workspace: "."
+instructions: "EMPTY_ROLE.md"
+`
+	emptyRoleConfig := filepath.Join(dir, "empty_role.yaml")
+	_ = os.WriteFile(emptyRoleConfig, []byte(emptyRoleYAML), 0644)
+	if _, _, _, err := domain.LoadManifest(emptyRoleConfig, dir); err == nil {
+		t.Fatalf("expected error for empty ROLE file, got nil")
+	}
+
+	// 3. Nonexistent instructions rejection
+	missingRoleYAML := `version: 1
+id: test-agent
+role: tester
+runtime: agy
+connector: tmux
+address: "%51"
+workspace: "."
+instructions: "NONEXISTENT.md"
+`
+	missingRoleConfig := filepath.Join(dir, "missing_role.yaml")
+	_ = os.WriteFile(missingRoleConfig, []byte(missingRoleYAML), 0644)
+	if _, _, _, err := domain.LoadManifest(missingRoleConfig, dir); err == nil {
+		t.Fatalf("expected error for missing ROLE file, got nil")
 	}
 }

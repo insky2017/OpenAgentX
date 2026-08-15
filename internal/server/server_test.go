@@ -25,7 +25,7 @@ func (m *mockRunner) Run(ctx context.Context, stdin string, name string, args ..
 	return "%51 0\n", nil
 }
 
-func setupTestServer(t *testing.T) (*http.Client, string, *store.SQLiteStore, func()) {
+func setupTestServer(t *testing.T) (*http.Client, string, string, *store.SQLiteStore, func()) {
 	t.Helper()
 	dir, err := os.MkdirTemp("", "agentbus-server-test-*")
 	if err != nil {
@@ -75,38 +75,102 @@ func setupTestServer(t *testing.T) (*http.Client, string, *store.SQLiteStore, fu
 		os.RemoveAll(dir)
 	}
 
-	return client, socketPath, s, cleanup
+	return client, socketPath, dir, s, cleanup
+}
+
+func createServerTestProfileData(dir string, id string, runtime string) (string, string) {
+	roleFile := filepath.Join(dir, id+"_ROLE.md")
+	_ = os.WriteFile(roleFile, []byte("# Role\nValid instructions."), 0644)
+	cfgFile := filepath.Join(dir, id+".yaml")
+	_ = os.WriteFile(cfgFile, []byte("version: 1"), 0644)
+	return cfgFile, roleFile
 }
 
 func TestServerE2EUnixSocket(t *testing.T) {
-	client, socketPath, _, cleanup := setupTestServer(t)
+	client, socketPath, dir, _, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Register coordinator
+	coordCfg, coordRole := createServerTestProfileData(dir, "coordinator", "codex")
+	quoteCfg, quoteRole := createServerTestProfileData(dir, "quote", "agy")
+
+	// 1. Attach coordinator
 	coordBody, _ := json.Marshal(map[string]any{
-		"id":        "coordinator",
-		"role":      "coordinator",
-		"connector": "tmux",
-		"address":   "%50",
+		"agent": map[string]any{
+			"id":        "coordinator",
+			"role":      "coordinator",
+			"connector": "tmux",
+			"address":   "%50",
+			"status":    "registered",
+		},
+		"profile": map[string]any{
+			"agent_id":          "coordinator",
+			"manifest_version":  1,
+			"runtime":           "codex",
+			"workspace":         dir,
+			"config_path":       coordCfg,
+			"instructions_path": coordRole,
+			"capabilities":      []string{"understand", "delegate"},
+		},
+		"no_notify": true,
 	})
-	resp, err := client.Post("http://unix/api/v1/agents", "application/json", bytes.NewReader(coordBody))
-	if err != nil {
-		t.Fatalf("Register coordinator failed: %v", err)
+	resp, err := client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(coordBody))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("Attach coordinator failed: %v, status: %d", err, resp.StatusCode)
 	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", resp.StatusCode)
+	var attachCoordResp struct {
+		Session     *domain.AgentSession          `json:"session"`
+		Disposition connector.DeliveryDisposition `json:"disposition"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&attachCoordResp)
+	if attachCoordResp.Disposition != connector.DispositionSkipped {
+		t.Fatalf("expected disposition 'skipped' for no-notify attach, got: %s", attachCoordResp.Disposition)
 	}
 
-	// 2. Register quote
-	quoteBody, _ := json.Marshal(map[string]any{
-		"id":        "quote",
-		"role":      "quote",
-		"connector": "tmux",
-		"address":   "%51",
-	})
-	resp, err = client.Post("http://unix/api/v1/agents", "application/json", bytes.NewReader(quoteBody))
+	// Ready coordinator
+	readyCoordBody, _ := json.Marshal(map[string]any{"generation": attachCoordResp.Session.Generation})
+	resp, err = client.Post("http://unix/api/v1/sessions/coordinator/ready", "application/json", bytes.NewReader(readyCoordBody))
 	if err != nil || resp.StatusCode != http.StatusOK {
-		t.Fatalf("Register quote failed: %v, status: %d", err, resp.StatusCode)
+		t.Fatalf("Ready coordinator failed: %v, status: %d", err, resp.StatusCode)
+	}
+
+	// 2. Attach quote
+	quoteBody, _ := json.Marshal(map[string]any{
+		"agent": map[string]any{
+			"id":        "quote",
+			"role":      "quote",
+			"connector": "tmux",
+			"address":   "%51",
+			"status":    "registered",
+		},
+		"profile": map[string]any{
+			"agent_id":          "quote",
+			"manifest_version":  1,
+			"runtime":           "agy",
+			"workspace":         dir,
+			"config_path":       quoteCfg,
+			"instructions_path": quoteRole,
+			"capabilities":      []string{"quote"},
+		},
+		"no_notify": false,
+	})
+	resp, err = client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(quoteBody))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("Attach quote failed: %v, status: %d", err, resp.StatusCode)
+	}
+	var attachQuoteResp struct {
+		Session     *domain.AgentSession          `json:"session"`
+		Disposition connector.DeliveryDisposition `json:"disposition"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&attachQuoteResp)
+	if attachQuoteResp.Disposition != connector.DispositionNotified {
+		t.Fatalf("expected disposition 'notified' for tmux attach, got: %s", attachQuoteResp.Disposition)
+	}
+
+	// Ready quote
+	readyQuoteBody, _ := json.Marshal(map[string]any{"generation": attachQuoteResp.Session.Generation})
+	resp, err = client.Post("http://unix/api/v1/sessions/quote/ready", "application/json", bytes.NewReader(readyQuoteBody))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("Ready quote failed: %v, status: %d", err, resp.StatusCode)
 	}
 
 	// 3. List agents
@@ -225,8 +289,80 @@ func TestServerE2EUnixSocket(t *testing.T) {
 	}
 }
 
+func TestServerAttachAndBootstrapEndpoints(t *testing.T) {
+	client, _, dir, _, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	wCfg, wRole := createServerTestProfileData(dir, "worker-1", "agy")
+
+	// 1. Attach agent
+	attachBody, _ := json.Marshal(map[string]any{
+		"agent": map[string]any{
+			"id":        "worker-1",
+			"role":      "worker",
+			"connector": "none",
+			"address":   "",
+			"status":    "registered",
+		},
+		"profile": map[string]any{
+			"agent_id":          "worker-1",
+			"manifest_version":  1,
+			"runtime":           "agy",
+			"workspace":         dir,
+			"config_path":       wCfg,
+			"instructions_path": wRole,
+			"capabilities":      []string{"work"},
+		},
+		"no_notify": true,
+	})
+	resp, err := client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(attachBody))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("Attach agent failed: %v, status: %d", err, resp.StatusCode)
+	}
+
+	// 2. Get Session
+	resp, err = client.Get("http://unix/api/v1/agents/worker-1/session")
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("Get session failed: %v, status: %d", err, resp.StatusCode)
+	}
+	var getSessResp struct {
+		Session *domain.AgentSession `json:"session"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&getSessResp)
+	if getSessResp.Session.Generation != 1 || getSessResp.Session.Status != domain.SessionStatusBootstrapping {
+		t.Fatalf("unexpected session data: %+v", getSessResp.Session)
+	}
+
+	// 3. Ready session with wrong generation -> 409
+	wrongReadyBody, _ := json.Marshal(map[string]any{"generation": 999})
+	resp, err = client.Post("http://unix/api/v1/sessions/worker-1/ready", "application/json", bytes.NewReader(wrongReadyBody))
+	if err != nil || resp.StatusCode != http.StatusConflict {
+		t.Fatalf("expected 409 conflict for wrong generation, got: %d", resp.StatusCode)
+	}
+
+	// 4. Ready session with correct generation 1 -> 200
+	correctReadyBody, _ := json.Marshal(map[string]any{"generation": 1})
+	resp, err = client.Post("http://unix/api/v1/sessions/worker-1/ready", "application/json", bytes.NewReader(correctReadyBody))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("Ready session failed: %v, status: %d", err, resp.StatusCode)
+	}
+
+	// 5. Bootstrap agent -> generation 2
+	resp, err = client.Post("http://unix/api/v1/agents/worker-1/bootstrap", "application/json", nil)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("Bootstrap agent failed: %v, status: %d", err, resp.StatusCode)
+	}
+	var bootResp struct {
+		Session *domain.AgentSession `json:"session"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&bootResp)
+	if bootResp.Session.Generation != 2 || bootResp.Session.Status != domain.SessionStatusBootstrapping {
+		t.Fatalf("unexpected bootstrapped session data: %+v", bootResp.Session)
+	}
+}
+
 func TestServerLiveSocketRefusal(t *testing.T) {
-	_, socketPath, storeRef, cleanup := setupTestServer(t)
+	_, socketPath, _, storeRef, cleanup := setupTestServer(t)
 	defer cleanup()
 
 	// Try starting a second server on the same live socket
@@ -325,7 +461,7 @@ func TestServerCleanSocketRecreate(t *testing.T) {
 }
 
 func TestServerInvalidQueryParams(t *testing.T) {
-	client, _, _, cleanup := setupTestServer(t)
+	client, _, _, _, cleanup := setupTestServer(t)
 	defer cleanup()
 
 	// 1. Missing agent query param on /events -> 400

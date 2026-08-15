@@ -57,13 +57,15 @@ func Execute(args []string) int {
 		return runServe(cmdArgs)
 	case "agent":
 		return runAgent(cmdArgs)
+	case "session":
+		return runSession(cmdArgs)
 	case "task":
 		return runTask(cmdArgs)
 	case "help", "--help", "-h":
 		printUsage()
 		return 0
 	case "version", "--version", "-v":
-		fmt.Println("AgentBus Go V0 (1.22)")
+		fmt.Println("AgentBus Go V0.1 (1.22)")
 		return 0
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", cmd)
@@ -73,14 +75,15 @@ func Execute(args []string) int {
 }
 
 func printUsage() {
-	fmt.Fprintf(os.Stderr, `AgentBus - Heterogeneous Agent Runtime Communication & Control Plane (Go V0)
+	fmt.Fprintf(os.Stderr, `AgentBus - Heterogeneous Agent Runtime Communication & Control Plane (Go V0.1)
 
 Usage:
   agentbus <command> [subcommand] [flags]
 
 Commands:
   serve                 Start the AgentBus daemon server
-  agent                 Manage registered agents (register, list, get)
+  agent                 Manage registered agents (whoami, attach, bootstrap, launch, register, list, get)
+  session               Manage agent sessions (ready, show)
   task                  Manage tasks (submit, get, list, ack, status, send, complete, fail, cancel, watch)
   help                  Show help
   version               Show version information
@@ -90,9 +93,17 @@ Flags:
 
 Examples:
   agentbus serve --db data/agentbus.db --socket run/agentbus.sock
-  agentbus agent register --id coordinator --role coordinator --connector tmux --address %%50
-  agentbus agent register --id agentbus-agent --role agentbus --connector tmux --address %%51
-  agentbus agent register --id quote-service --role quote --connector tmux --address %%52
+
+  # Agent Bootstrap & Session Ready
+  agentbus agent whoami --config agents/coordinator/agent.yaml
+  agentbus agent attach --config agents/coordinator/agent.yaml --no-notify
+  agentbus session ready --agent coordinator --generation 1
+  agentbus agent attach --config agents/quote-service/agent.yaml --address %%52
+  agentbus session ready --agent quote-service --generation 1
+  agentbus session show --agent quote-service
+  agentbus agent bootstrap --id quote-service
+
+  # Tasks
   agentbus task submit --from coordinator --to quote-service --idempotency-key k1 --content "Inspect Quote Service"
   agentbus task get <task-id> --agent quote-service
   agentbus task list --agent quote-service

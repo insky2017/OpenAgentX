@@ -55,6 +55,12 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/v1/agents", s.handleListAgents)
 	mux.HandleFunc("GET /api/v1/agents/{id}", s.handleGetAgent)
 
+	// V0.1 Attach / Bootstrap / Session
+	mux.HandleFunc("POST /api/v1/agents/attach", s.handleAttachAgent)
+	mux.HandleFunc("POST /api/v1/agents/{id}/bootstrap", s.handleBootstrapAgent)
+	mux.HandleFunc("GET /api/v1/agents/{id}/session", s.handleGetSession)
+	mux.HandleFunc("POST /api/v1/sessions/{agent_id}/ready", s.handleReadySession)
+
 	mux.HandleFunc("POST /api/v1/tasks", s.handleSubmitTask)
 	mux.HandleFunc("GET /api/v1/tasks", s.handleListTasks)
 	mux.HandleFunc("GET /api/v1/tasks/{id}", s.handleGetTask)
@@ -217,12 +223,24 @@ func (s *Server) writeError(w http.ResponseWriter, err error) {
 	} else if errors.Is(err, domain.ErrNotFound) || errors.Is(err, domain.ErrAgentNotFound) || errors.Is(err, domain.ErrTaskNotFound) {
 		status = http.StatusNotFound
 		code = "NOT_FOUND"
+	} else if errors.Is(err, domain.ErrAgentSessionNotFound) {
+		status = http.StatusNotFound
+		code = "AGENT_SESSION_NOT_FOUND"
+	} else if errors.Is(err, domain.ErrAgentProfileNotFound) {
+		status = http.StatusNotFound
+		code = "AGENT_PROFILE_NOT_FOUND"
 	} else if errors.Is(err, domain.ErrUnauthorized) {
 		status = http.StatusForbidden
 		code = "UNAUTHORIZED"
 	} else if errors.Is(err, domain.ErrWorkerBusy) {
 		status = http.StatusConflict
 		code = "WORKER_BUSY"
+	} else if errors.Is(err, domain.ErrAgentNotReady) {
+		status = http.StatusConflict
+		code = "AGENT_NOT_READY"
+	} else if errors.Is(err, domain.ErrSessionGenerationConflict) {
+		status = http.StatusConflict
+		code = "SESSION_GENERATION_CONFLICT"
 	} else if errors.Is(err, domain.ErrIdempotencyConflict) {
 		status = http.StatusConflict
 		code = "IDEMPOTENCY_CONFLICT"
@@ -232,6 +250,9 @@ func (s *Server) writeError(w http.ResponseWriter, err error) {
 	} else if errors.Is(err, domain.ErrInvalidAddress) {
 		status = http.StatusBadRequest
 		code = "INVALID_ADDRESS"
+	} else if errors.Is(err, domain.ErrInvalidManifest) {
+		status = http.StatusBadRequest
+		code = "INVALID_MANIFEST"
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -278,6 +299,75 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.writeJSON(w, http.StatusOK, map[string]any{"agent": agent})
+}
+
+func (s *Server) handleAttachAgent(w http.ResponseWriter, r *http.Request) {
+	var req service.AttachAgentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.writeError(w, domain.ErrInvalidInput("invalid json request body"))
+		return
+	}
+	resp, err := s.svc.AttachAgent(r.Context(), req)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+	s.writeJSON(w, http.StatusOK, resp)
+}
+
+func (s *Server) handleBootstrapAgent(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		s.writeError(w, domain.ErrInvalidInput("agent id required"))
+		return
+	}
+	resp, err := s.svc.BootstrapAgent(r.Context(), id)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+	s.writeJSON(w, http.StatusOK, resp)
+}
+
+func (s *Server) handleGetSession(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		s.writeError(w, domain.ErrInvalidInput("agent id required"))
+		return
+	}
+	resp, err := s.svc.GetSession(r.Context(), id)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+	s.writeJSON(w, http.StatusOK, resp)
+}
+
+type readySessionReq struct {
+	Generation int64 `json:"generation"`
+}
+
+func (s *Server) handleReadySession(w http.ResponseWriter, r *http.Request) {
+	agentID := r.PathValue("agent_id")
+	if agentID == "" {
+		s.writeError(w, domain.ErrInvalidInput("agent_id required"))
+		return
+	}
+	var req readySessionReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.writeError(w, domain.ErrInvalidInput("invalid json request body"))
+		return
+	}
+	if req.Generation <= 0 {
+		s.writeError(w, domain.ErrInvalidInput("generation must be > 0"))
+		return
+	}
+	session, err := s.svc.ReadySession(r.Context(), agentID, req.Generation)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+	s.writeJSON(w, http.StatusOK, map[string]any{"session": session})
 }
 
 func (s *Server) handleSubmitTask(w http.ResponseWriter, r *http.Request) {

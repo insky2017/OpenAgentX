@@ -1,0 +1,12 @@
+version: 1
+id: quote-service
+role: quote
+runtime: agy
+connector: tmux
+address: "%52"
+workspace: ".."
+instructions: "ROLE.md"
+capabilities:
+  - quote-service-development
+  - quote-service-testing
+  - quote-market-integration

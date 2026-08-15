@@ -77,54 +77,47 @@ func TestAddressValidation(t *testing.T) {
 	}
 }
 
-func TestNotifyNewTask(t *testing.T) {
+func TestNotifyBootstrap(t *testing.T) {
 	runner := &mockRunner{
 		probeOutput: "%51 0\n",
 	}
 	c := connector.NewTmuxConnector(runner)
 
 	ctx := context.Background()
-	res := c.Notify(ctx, "%51", "quote", "task-abc-123", true)
+	res := c.NotifyBootstrap(ctx, "%51", "agentbus-agent", "agentbus", 2, "/path/to/ROLE.md")
 
 	if res.Disposition != connector.DispositionNotified {
 		t.Fatalf("expected disposition 'notified', got '%s' (err: %s)", res.Disposition, res.Error)
-	}
-	if res.PaneID != "%51" {
-		t.Fatalf("expected pane_id '%%51', got '%s'", res.PaneID)
 	}
 
 	runner.mu.Lock()
 	defer runner.mu.Unlock()
 
-	if len(runner.calls) != 4 {
-		t.Fatalf("expected 4 tmux calls, got %d", len(runner.calls))
+	expectedText := "[AgentBus Bootstrap] agent_id=agentbus-agent role=agentbus generation=2. Read /path/to/ROLE.md, then use AgentBus CLI: session ready --agent agentbus-agent --generation 2"
+	if runner.calls[1].Stdin != expectedText {
+		t.Fatalf("expected stdin '%s', got '%s'", expectedText, runner.calls[1].Stdin)
+	}
+}
+
+func TestNotifyTaskWithIdentityReminder(t *testing.T) {
+	runner := &mockRunner{
+		probeOutput: "%52 0\n",
+	}
+	c := connector.NewTmuxConnector(runner)
+
+	ctx := context.Background()
+	res := c.NotifyTask(ctx, "%52", "quote-service", "quote", "/path/to/quote/ROLE.md", "task-abc-123", true)
+
+	if res.Disposition != connector.DispositionNotified {
+		t.Fatalf("expected disposition 'notified', got '%s' (err: %s)", res.Disposition, res.Error)
 	}
 
-	// 1. Check probe call
-	if runner.calls[0].Name != "tmux" || runner.calls[0].Args[0] != "display-message" || runner.calls[0].Args[3] != "%51" {
-		t.Fatalf("unexpected probe call: %+v", runner.calls[0])
-	}
+	runner.mu.Lock()
+	defer runner.mu.Unlock()
 
-	// 2. Check load-buffer call
-	loadCall := runner.calls[1]
-	if loadCall.Name != "tmux" || loadCall.Args[0] != "load-buffer" {
-		t.Fatalf("unexpected load call: %+v", loadCall)
-	}
-	expectedText := "[AgentBus] New task task-abc-123. Use AgentBus CLI: task get task-abc-123 --agent quote"
-	if loadCall.Stdin != expectedText {
-		t.Fatalf("expected stdin '%s', got '%s'", expectedText, loadCall.Stdin)
-	}
-
-	// 3. Check paste-buffer call
-	pasteCall := runner.calls[2]
-	if pasteCall.Name != "tmux" || pasteCall.Args[0] != "paste-buffer" || pasteCall.Args[5] != "%51" {
-		t.Fatalf("unexpected paste call: %+v", pasteCall)
-	}
-
-	// 4. Check send-keys call
-	sendCall := runner.calls[3]
-	if sendCall.Name != "tmux" || sendCall.Args[0] != "send-keys" || sendCall.Args[3] != "Enter" {
-		t.Fatalf("unexpected send-keys call: %+v", sendCall)
+	expectedText := "[AgentBus][agent=quote-service role=quote] New task task-abc-123. If role context is uncertain, read /path/to/quote/ROLE.md. Use AgentBus CLI: task get task-abc-123 --agent quote-service"
+	if runner.calls[1].Stdin != expectedText {
+		t.Fatalf("expected stdin '%s', got '%s'", expectedText, runner.calls[1].Stdin)
 	}
 }
 
@@ -135,7 +128,7 @@ func TestNotifySupplement(t *testing.T) {
 	c := connector.NewTmuxConnector(runner)
 
 	ctx := context.Background()
-	res := c.Notify(ctx, "%50", "coordinator", "task-xyz", false)
+	res := c.NotifyTask(ctx, "%50", "coordinator", "coordinator", "/path/to/coord/ROLE.md", "task-xyz", false)
 
 	if res.Disposition != connector.DispositionNotified {
 		t.Fatalf("expected disposition 'notified', got '%s'", res.Disposition)
@@ -144,7 +137,7 @@ func TestNotifySupplement(t *testing.T) {
 	runner.mu.Lock()
 	defer runner.mu.Unlock()
 
-	expectedText := "[AgentBus] Task task-xyz has a new message. Use AgentBus CLI: task get task-xyz --agent coordinator"
+	expectedText := "[AgentBus][agent=coordinator role=coordinator] New message for task task-xyz. If role context is uncertain, read /path/to/coord/ROLE.md. Use AgentBus CLI: task get task-xyz --agent coordinator"
 	if runner.calls[1].Stdin != expectedText {
 		t.Fatalf("expected stdin '%s', got '%s'", expectedText, runner.calls[1].Stdin)
 	}
