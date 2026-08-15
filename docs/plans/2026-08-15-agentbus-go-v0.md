@@ -1,7 +1,7 @@
 ---
 doc_type: implementation_plan
 status: completed
-updated_at: 2026-08-15
+updated_at: 2026-08-16
 ---
 
 # AgentBus Go V0 实施计划
@@ -22,7 +22,7 @@ AGY AgentBus Agent / AGY Quote Service Agent
 Go AgentBus daemon
 ```
 
-## 2. V0 范围
+## 2. V0 / V0.1 范围
 
 - Go 1.22 单二进制；
 - Unix socket 本机 API；
@@ -33,8 +33,12 @@ Go AgentBus daemon
 - TmuxConnector pane 映射、存活检查、短通知注入；
 - 每个 Worker 最多一个 `queued/running` Task；
 - 结构化日志输出到 daemon stdout。
+- canonical Agent manifest 与 ROLE；
+- attach/bootstrap/session generation/ready 生命周期；
+- 未 ready Agent 的事务内 Task gate；
+- generic `agent launch` 生命周期封装。
 
-明确不做：MCP、ACP、A2A、AgyBatch、Runtime spawn、Web UI、自动角色路由、远程网络、多租户和 pane 输出解析。
+明确不做：MCP、ACP、A2A、AgyBatch、专用 Runtime Adapter、Web UI、自动角色路由、远程网络、多租户和 pane 输出解析。V0.1 的 generic launcher 只包装现有 Runtime 命令，不负责 Runtime 私有协议。
 
 ## 3. 技术基线
 
@@ -69,6 +73,12 @@ agentbus agent register --id agentbus-agent --role agentbus \
 agentbus agent register --id quote-service --role quote \
   --connector tmux --address %52
 agentbus agent list
+
+agentbus agent whoami --config agents/coordinator/agent.yaml
+agentbus agent attach --config agents/agentbus-agent/agent.yaml --address %51
+agentbus agent bootstrap --id agentbus-agent
+agentbus session ready --agent agentbus-agent --generation 1
+agentbus session show --agent agentbus-agent
 
 agentbus task submit --from coordinator --to agentbus-agent \
   --idempotency-key demo-001 --content "执行 AgentBus 自检"
@@ -151,6 +161,14 @@ Connector 不注入用户正文，不解析 pane 输出。实现使用唯一 tmu
 - [01-core-daemon-store.md](2026-08-15-agentbus-go-v0/01-core-daemon-store.md)：Go 工程、领域模型、SQLite 和 Unix socket daemon。
 - [02-cli-tmux-connector.md](2026-08-15-agentbus-go-v0/02-cli-tmux-connector.md)：CLI、权限/状态校验与 TmuxConnector。
 - [03-review-e2e-runtime.md](2026-08-15-agentbus-go-v0/03-review-e2e-runtime.md)：独立审核、测试和真实 tmux 运行验收。
+- [04-role-bootstrap.md](2026-08-15-agentbus-go-v0/04-role-bootstrap.md)：canonical 角色、attach/bootstrap/ready、Task gate 与三 Agent 实机验收。
+
+过程指令与审核记录：
+
+- [AGY_IMPLEMENTATION_PROMPT.md](2026-08-15-agentbus-go-v0/AGY_IMPLEMENTATION_PROMPT.md)、[AGY_REVIEW_ROUND1.md](2026-08-15-agentbus-go-v0/AGY_REVIEW_ROUND1.md)、[AGY_REVIEW_ROUND2.md](2026-08-15-agentbus-go-v0/AGY_REVIEW_ROUND2.md)、[AGY_REVIEW_ROUND3.md](2026-08-15-agentbus-go-v0/AGY_REVIEW_ROUND3.md)：V0 实现和三轮审核记录；
+- [AGY_GIT_COMMIT_CODE.md](2026-08-15-agentbus-go-v0/AGY_GIT_COMMIT_CODE.md)：V0 实现提交边界；
+- [AGY_ROLE_BOOTSTRAP_REVIEW_ROUND1.md](2026-08-15-agentbus-go-v0/AGY_ROLE_BOOTSTRAP_REVIEW_ROUND1.md)、[AGY_ROLE_BOOTSTRAP_REVIEW_ROUND2.md](2026-08-15-agentbus-go-v0/AGY_ROLE_BOOTSTRAP_REVIEW_ROUND2.md)：V0.1 生命周期审核记录；
+- [AGY_ROLE_BOOTSTRAP_COMMIT.md](2026-08-15-agentbus-go-v0/AGY_ROLE_BOOTSTRAP_COMMIT.md)：V0.1 实现提交边界。
 
 ## 9. 验收条件
 
@@ -164,7 +182,12 @@ Connector 不注入用户正文，不解析 pane 输出。实现使用唯一 tmu
 8. daemon 重启后 Agent、Task、Message 和 Event 仍存在。
 9. `go test ./...`、`go test -race ./...`、`go vet ./...` 通过。
 10. daemon 最终在用户指定 tmux pane 中运行并持续输出结构化日志。
+11. Coordinator 与两个南向 Agent 均从 canonical manifest/ROLE 恢复身份，并用 generation 精确确认 ready。
+12. re-bootstrap 后旧 ready 立即失效，Task 在同一数据库事务内因 `AGENT_NOT_READY` 被拒绝。
+13. daemon 重启后 Profile、Session generation、ready 状态和既有 Task 仍可读取。
 
 ## 10. 完成记录
 
 V0 已于 2026-08-15 完成实现、独立审核、全量测试、真实 tmux 双 Agent 闭环与 daemon 重启持久化验收。详情见 [Go V0 tmux E2E 验证报告](../reports/validation/2026-08-15-agentbus-go-v0-tmux-e2e.md)。
+
+V0.1 角色生命周期已于 2026-08-16 完成实现、两轮代码审核、全量测试与真实 `%50/%51/%52` 角色恢复验收。该版本以当前契约正确性为准，不承诺兼容旧数据库、旧 API 或旧 CLI。详情见 [角色 Bootstrap E2E 验证报告](../reports/validation/2026-08-16-agent-role-bootstrap-e2e.md)。

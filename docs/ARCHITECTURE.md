@@ -1,13 +1,13 @@
 ---
 doc_type: architecture
-status: draft
+status: active_baseline
 canonical: true
-updated_at: 2026-08-15
+updated_at: 2026-08-16
 ---
 
 # AgentBus 架构设想
 
-> 状态：架构草案。本文描述基于当前讨论形成的建议基线，供实现与评审使用。选型推导、备选路线和调研证据见 [IMPLEMENTATION_DISCUSSION.md](IMPLEMENTATION_DISCUSSION.md)。
+> 状态：当前架构基线。V0/V0.1 已落地，后续阶段仍按本文演进。选型推导、备选路线和调研证据见 [IMPLEMENTATION_DISCUSSION.md](IMPLEMENTATION_DISCUSSION.md)。
 
 ## 1. 定位
 
@@ -86,13 +86,15 @@ AgentBus 不是：
 
 ```text
 agentbus agent register/list/get
+agentbus agent whoami/attach/bootstrap/launch
+agentbus session ready/show
 agentbus task submit/get/list
 agentbus task ack/status/send
 agentbus task complete/fail/cancel
 agentbus task watch
 ```
 
-Coordinator 通过 CLI 提交任务，立即取得 `task_id`，再通过 watch/get 获取状态。目标 Agent（如 Quote Service Agent / AgentBus Agent）收到 TmuxConnector 的短通知后调用 `task get <task-id> --agent <agent-id>` 获取完整内容，并显式调用 `ack/status/complete/fail`。MCP tools 与 `delegate_and_wait` 便利操作留到后续，但必须复用同一服务层和状态机。
+Coordinator 通过 CLI 提交任务，立即取得 `task_id`，再通过 watch/get 获取状态。所有受管 Agent 先从 canonical manifest/ROLE 完成 `attach → bootstrap → session ready`；目标 Agent（如 Quote Service Agent / AgentBus Agent）收到 TmuxConnector 的短通知后调用 `task get <task-id> --agent <agent-id>` 获取完整内容，并显式调用 `ack/status/complete/fail`。MCP tools 与 `delegate_and_wait` 便利操作留到后续，但必须复用同一服务层和状态机。
 
 ### 4.2 V0 TmuxConnector
 
@@ -100,6 +102,7 @@ TmuxConnector 是透明通知层，只负责：
 
 - 保存逻辑 Agent 到 `session:window.pane` 的映射；
 - 使用 tmux 原生命令检查 pane 是否存在、是否死亡；
+- 在 attach/bootstrap 时注入包含 agent ID、role、generation 和 canonical ROLE 路径的短通知；
 - 在新任务或补充消息到达时注入不含完整任务正文的短通知；
 - 返回 `notified` 或 `delivery_failed` 处置结果并记录事件。
 
@@ -116,13 +119,15 @@ TmuxConnector 是透明通知层，只负责：
 Registry 保存：
 
 - Agent profile 与逻辑地址；
+- canonical manifest、ROLE 路径、Runtime、workspace 和 capabilities；
+- 当前 Agent Session generation、`bootstrapping/ready/delivery_failed` 状态；
 - Adapter 类型、版本和配置；
 - Runtime instance 与 provider 版本；
 - health、readiness、auth state；
 - capabilities 与 degradation mode；
 - 可接受的 workspace、模型、权限和并发范围。
 
-进程存在只代表 `alive`，不代表 `ready`。只有通过 probe、认证、最小 session/turn 检查后，才能进入可调度状态。
+进程存在只代表 `alive`，不代表 `ready`。V0.1 要求 Agent 读取 canonical ROLE 并以精确 generation 执行 `session ready`；重新 bootstrap 后旧 ready 立即失效。所有 Task 操作在数据库事务内检查参与者 ready，未完成角色恢复时 fail closed。后续 Runtime Adapter 还要叠加认证与最小 session/turn probe。
 
 ### 4.4 Router / Scheduler
 
@@ -568,7 +573,7 @@ Go V0 通过 Unix socket 暴露本机 API，同一个 `agentbus` 二进制同时
 
 ## 15. 演进路线
 
-### P0：兼容性验证
+### P0：可行性验证
 
 - hcom Codex ↔ AGY 终端互通；
 - ACP Adapter conformance harness；
@@ -586,6 +591,10 @@ AGY Quote Service CLI (%52) ───┘
 ```
 
 实现 Go daemon/CLI、SQLite WAL、Agent Registry、Task/Message/Event 最小状态机和 TmuxConnector。V0 不启动 Runtime，不实现 AgyBatch/ACP/MCP，也不解析 pane 输出。
+
+### V0.1：角色 Bootstrap 生命周期
+
+为 Coordinator 与南向 Agent 增加 canonical manifest/ROLE、Profile、Session generation、attach/bootstrap/ready、事务内 Task ready gate 和 generic Runtime launcher。AgentBus 通过可持久恢复的生命周期协议维持角色认知，不依赖一次性人工 prompt。V0.1 已完成真实 `%50/%51/%52` 验收，详情见 [角色 Bootstrap 验证报告](reports/validation/2026-08-16-agent-role-bootstrap-e2e.md)。
 
 ### V1：双向与恢复
 
@@ -614,7 +623,7 @@ AGY Quote Service CLI (%52) ───┘
 
 ## 17. 当前未决项
 
-- AgentBus 目前先位于本工作区的 `AgentBus/`，稳定后是否拆为独立仓库。
+- AgentBus 已是独立 Git 工程，并以 submodule 形式接入 SteadyFlow；远端发布与版本策略仍待确定。
 - MCP Server 后续与 daemon 同进程还是独立进程。
 - Artifact 的本地目录布局、内容寻址和保留策略。
 - SessionBinding 在 Runtime 大版本升级后的自动迁移策略。
