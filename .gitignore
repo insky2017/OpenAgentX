@@ -1,0 +1,6 @@
+bin/
+data/
+run/
+*.db
+*.db-*
+*.sock
