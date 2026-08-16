@@ -13,7 +13,7 @@ AgentBus Go V0 已通过代码审查、自动化验证、真实 tmux 双 Agent �
 ## 2. 实际拓扑
 
 ```text
-%50  Codex Coordinator       agent_id=coordinator
+%50  Codex Orchestrator       agent_id=orchestrator
 %51  AGY AgentBus Agent      agent_id=agentbus-agent, role=agentbus
 %52  AGY Quote Service Agent agent_id=quote-service, role=quote
 %53  AgentBus daemon/log
@@ -64,7 +64,7 @@ target:  quote-service (%52)
 result:  agent_id=quote-service handshake=ok supplement=ok
 ```
 
-Agent 先 ACK 并上报 `waiting-for-supplement`。Coordinator 通过 `task send` 写入 `supplement=ok`，AgentBus 记录 `task.message_sent`，TmuxConnector 再次向 `%52` 发送短通知；Agent 重新 `task get` 后完成任务。最终 Task Messages 包含 instruction、status update 与 supplement。
+Agent 先 ACK 并上报 `waiting-for-supplement`。Orchestrator 通过 `task send` 写入 `supplement=ok`，AgentBus 记录 `task.message_sent`，TmuxConnector 再次向 `%52` 发送短通知；Agent 重新 `task get` 后完成任务。最终 Task Messages 包含 instruction、status update 与 supplement。
 
 ## 6. 重启与持久化
 

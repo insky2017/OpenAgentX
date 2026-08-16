@@ -13,7 +13,7 @@ updated_at: 2026-08-16
 ```text
 User
   ↓
-Codex Coordinator
+Codex Orchestrator
   ↓ agentbus task submit/watch
 Go AgentBus daemon + SQLite
   ↓ TmuxConnector 短通知
@@ -66,7 +66,7 @@ AgentBus/run/agentbus.sock
 ```bash
 agentbus serve --db data/agentbus.db --socket run/agentbus.sock
 
-agentbus agent register --id coordinator --role coordinator \
+agentbus agent register --id orchestrator --role orchestrator \
   --connector tmux --address %50
 agentbus agent register --id agentbus-agent --role agentbus \
   --connector tmux --address %51
@@ -74,22 +74,22 @@ agentbus agent register --id quote-service --role quote \
   --connector tmux --address %52
 agentbus agent list
 
-agentbus agent whoami --config agents/coordinator/agent.yaml
+agentbus agent whoami --config agents/orchestrator/agent.yaml
 agentbus agent attach --config agents/agentbus-agent/agent.yaml --address %51
 agentbus agent bootstrap --id agentbus-agent
 agentbus session ready --agent agentbus-agent --generation 1
 agentbus session show --agent agentbus-agent
 
-agentbus task submit --from coordinator --to agentbus-agent \
+agentbus task submit --from orchestrator --to agentbus-agent \
   --idempotency-key demo-001 --content "执行 AgentBus 自检"
 agentbus task get <task-id> --agent agentbus-agent
 agentbus task ack <task-id> --agent agentbus-agent
 agentbus task status <task-id> --agent agentbus-agent --message "正在自检"
-agentbus task send <task-id> --from coordinator --content "补充检查缓存"
+agentbus task send <task-id> --from orchestrator --content "补充检查缓存"
 agentbus task complete <task-id> --agent agentbus-agent --result "检查完成"
 agentbus task fail <task-id> --agent agentbus-agent --error "失败原因"
-agentbus task cancel <task-id> --agent coordinator
-agentbus task watch <task-id> --agent coordinator --after 0 --timeout 30s
+agentbus task cancel <task-id> --agent orchestrator
+agentbus task watch <task-id> --agent orchestrator --after 0 --timeout 30s
 ```
 
 所有 CLI 支持 `--socket`，也读取 `AGENTBUS_SOCKET`。输出默认 JSON，便于 Agent 稳定解析。
@@ -99,54 +99,96 @@ agentbus task watch <task-id> --agent coordinator --after 0 --timeout 30s
 ### agents
 
 ```text
-id, role, connector, address, status, created_at, updated_at
+id          TEXT PRIMARY KEY
+role        TEXT NOT NULL
+connector   TEXT NOT NULL DEFAULT 'none'
+address     TEXT NOT NULL DEFAULT ''
+status      TEXT NOT NULL DEFAULT 'registered'
+created_at  DATETIME NOT NULL
+updated_at  DATETIME NOT NULL
 ```
 
 ### tasks
 
 ```text
-id, sender_agent_id, target_agent_id, idempotency_key,
-content, status, result, error, created_at, updated_at
+id               TEXT PRIMARY KEY
+sender_agent_id  TEXT NOT NULL REFERENCES agents(id)
+target_agent_id  TEXT NOT NULL REFERENCES agents(id)
+idempotency_key  TEXT NOT NULL UNIQUE
+content          TEXT NOT NULL
+status           TEXT NOT NULL DEFAULT 'queued'
+result           TEXT
+error            TEXT
+created_at       DATETIME NOT NULL
+updated_at       DATETIME NOT NULL
 ```
 
-约束：`(sender_agent_id, idempotency_key)` 唯一；同一 target 最多一个 `queued/running` Task。
+在数据库层 hard constrain：
 
-### messages
+```sql
+CREATE UNIQUE INDEX IF NOT EXISTS uq_tasks_target_active
+ON tasks(target_agent_id)
+WHERE status IN ('queued', 'running');
+```
+
+### task_messages
 
 ```text
-id, task_id, sender_agent_id, kind, content, created_at
+id          TEXT PRIMARY KEY
+task_id     TEXT NOT NULL REFERENCES tasks(id)
+from_agent  TEXT NOT NULL REFERENCES agents(id)
+kind        TEXT NOT NULL
+content     TEXT NOT NULL
+sequence    INTEGER NOT NULL
+created_at  DATETIME NOT NULL
 ```
 
 ### events
 
 ```text
-sequence, id, task_id, actor_agent_id, type, payload, created_at
+id          TEXT PRIMARY KEY
+task_id     TEXT NOT NULL REFERENCES tasks(id)
+type        TEXT NOT NULL
+actor_agent TEXT NOT NULL
+payload     TEXT NOT NULL DEFAULT '{}'
+sequence    INTEGER NOT NULL
+created_at  DATETIME NOT NULL
 ```
 
-`sequence` 由 SQLite 自增，`watch --after` 用它增量读取。
-
-## 6. 状态转换
+## 6. 状态机与并发规则
 
 ```text
-queued --ack--> running --complete--> succeeded
-                     └--fail-------> failed
-queued --cancel--------------------> canceled
+       ┌───────────┐
+       │  queued   ├───────────┐
+       └─────┬─────┘           │ cancel (sender)
+             │ ack (target)    ▼
+       ┌─────▼─────┐     ┌───────────┐
+       │  running  │     │  canceled │
+       └──┬──────┬─┘     └───────────┘
+ complete │      │ fail
+ (target) │      │ (target)
+       ┌──▼──┐ ┌─▼───┐
+       │ succ│ │ fail│
+       └─────┘ └─────┘
 ```
 
-- V0 不支持强制停止正在执行的交互式 Agent；`running` Task 的 cancel 返回明确错误。
-- 只有目标 Agent可以 ACK、完成或失败。
-- 只有任务发起方可以补充消息或取消 queued Task。
-- 终态不可再次转换。
+1. 发起方提交任务，状态进入 `queued`，写入 `task.submitted` 事件。
+2. 目标 Agent ACK，状态进入 `running`，写入 `task.acknowledged` 事件。
+3. 目标 Agent 在处理过程中可调用 `task status`，写入 `task.status_updated` 事件与 message。
+4. 发起方可在 `running` 阶段调用 `task send` 补充消息，写入 `task.message_sent` 事件与 message，向目标 Agent 注入补充通知。
+5. 目标 Agent 显式调用 `complete` 或 `fail` 结束任务，分别写入 `task.succeeded` / `task.failed` 事件。
+6. 发起方可在 `queued` 阶段取消任务，进入 `canceled` 并写入 `task.canceled`。`running` 状态取消留给后续版本。
+7. 每个目标 Agent 最多一个处于 `queued/running` 的任务；并发提交相同目标返回 409 Conflict。
 
 ## 7. TmuxConnector 契约
 
-新任务通知固定为：
+短通知模板：
 
 ```text
-[AgentBus] New task <task-id>. Use AgentBus CLI: task get <task-id> --agent <agent-id>
+[AgentBus] New task <task-id> from <sender-id>. Use AgentBus CLI: task get <task-id> --agent <agent-id>
 ```
 
-补充消息通知固定为：
+补充消息通知模板：
 
 ```text
 [AgentBus] Task <task-id> has a new message. Use AgentBus CLI: task get <task-id> --agent <agent-id>
@@ -154,7 +196,7 @@ queued --cancel--------------------> canceled
 
 Connector 不注入用户正文，不解析 pane 输出。实现使用唯一 tmux buffer，经 `load-buffer`/`paste-buffer` 后发送 Enter；所有 ID 和地址先校验，所有 tmux 调用都使用直接 argv。
 
-当前验收映射使用 tmux 稳定 pane ID：Coordinator `%50`、AgentBus Agent `%51`、Quote Service Agent `%52`、daemon 日志 pane `%53`。Connector 同时接受标准 `session:window.pane` 地址，但运行记录优先保存稳定 pane ID，避免分屏重排导致 `pane_index` 变化。
+当前验收映射使用 tmux 稳定 pane ID：Orchestrator `%50`、AgentBus Agent `%51`、Quote Service Agent `%52`、daemon 日志 pane `%53`。Connector 同时接受标准 `session:window.pane` 地址，但运行记录优先保存稳定 pane ID，避免分屏重排导致 `pane_index` 变化。
 
 ## 8. 分任务文档
 
@@ -178,11 +220,11 @@ Connector 不注入用户正文，不解析 pane 输出。实现使用唯一 tmu
 4. pane 不存在时 Task 仍可诊断，记录 `delivery_failed`，不能伪造已通知。
 5. TmuxConnector 不把用户正文直接注入终端，也不通过 shell 执行拼接字符串。
 6. AgentBus Agent 与 Quote Service Agent 都能接入；AgentBus Agent 可通过 CLI 完成 `get → ack → status → complete`。
-7. Coordinator 的 watch 能按 sequence 看到完整事件和最终结果。
+7. Orchestrator 的 watch 能按 sequence 看到完整事件和最终结果。
 8. daemon 重启后 Agent、Task、Message 和 Event 仍存在。
 9. `go test ./...`、`go test -race ./...`、`go vet ./...` 通过。
 10. daemon 最终在用户指定 tmux pane 中运行并持续输出结构化日志。
-11. Coordinator 与两个南向 Agent 均从 canonical manifest/ROLE 恢复身份，并用 generation 精确确认 ready。
+11. Orchestrator 与两个南向 Agent 均从 canonical manifest/ROLE 恢复身份，并用 generation 精确确认 ready。
 12. re-bootstrap 后旧 ready 立即失效，Task 在同一数据库事务内因 `AGENT_NOT_READY` 被拒绝。
 13. daemon 重启后 Profile、Session generation、ready 状态和既有 Task 仍可读取。
 

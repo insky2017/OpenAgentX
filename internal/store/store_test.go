@@ -59,23 +59,23 @@ func registerAndReadyTestAgents(t *testing.T, s *store.SQLiteStore) {
 	}
 	t.Cleanup(func() { os.RemoveAll(dir) })
 
-	coordProf, err := createTestProfile(dir, "coordinator", "coordinator", "codex")
+	orchProf, err := createTestProfile(dir, "orchestrator", "orchestrator", "codex")
 	if err != nil {
-		t.Fatalf("createTestProfile coordinator failed: %v", err)
+		t.Fatalf("createTestProfile orchestrator failed: %v", err)
 	}
-	coordinator := &domain.Agent{
-		ID:        "coordinator",
-		Role:      "coordinator",
+	orchestrator := &domain.Agent{
+		ID:        "orchestrator",
+		Role:      "orchestrator",
 		Connector: domain.ConnectorTmux,
 		Address:   "%50",
 		Status:    domain.AgentStatusRegistered,
 	}
-	sessCoord, err := s.AttachAgent(ctx, coordinator, coordProf, domain.SessionStatusBootstrapping, "%50", nil)
+	sessOrch, err := s.AttachAgent(ctx, orchestrator, orchProf, domain.SessionStatusBootstrapping, "%50", nil)
 	if err != nil {
-		t.Fatalf("Attach coordinator failed: %v", err)
+		t.Fatalf("Attach orchestrator failed: %v", err)
 	}
-	if _, err := s.ReadySession(ctx, "coordinator", sessCoord.Generation); err != nil {
-		t.Fatalf("Ready coordinator failed: %v", err)
+	if _, err := s.ReadySession(ctx, "orchestrator", sessOrch.Generation); err != nil {
+		t.Fatalf("Ready orchestrator failed: %v", err)
 	}
 
 	quoteProf, err := createTestProfile(dir, "quote", "quote", "agy")
@@ -113,11 +113,11 @@ func TestAgentRegistrationAndListing(t *testing.T) {
 		t.Fatalf("expected 2 agents, got %d", len(agents))
 	}
 
-	a, err := s.GetAgent(ctx, "coordinator")
+	a, err := s.GetAgent(ctx, "orchestrator")
 	if err != nil {
 		t.Fatalf("GetAgent failed: %v", err)
 	}
-	if a.Address != "%50" || a.Role != "coordinator" {
+	if a.Address != "%50" || a.Role != "orchestrator" {
 		t.Fatalf("unexpected agent data: %+v", a)
 	}
 
@@ -136,7 +136,7 @@ func TestTaskSubmissionAndIdempotency(t *testing.T) {
 
 	task := &domain.Task{
 		ID:             "task-1",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "idem-001",
 		Content:        "Check quote service",
@@ -145,14 +145,14 @@ func TestTaskSubmissionAndIdempotency(t *testing.T) {
 	msg := &domain.Message{
 		ID:            "msg-1",
 		TaskID:        "task-1",
-		SenderAgentID: "coordinator",
+		SenderAgentID: "orchestrator",
 		Kind:          domain.MessageKindInstruction,
 		Content:       "Check quote service",
 	}
 	evt := &domain.Event{
 		ID:           "evt-1",
 		TaskID:       "task-1",
-		ActorAgentID: "coordinator",
+		ActorAgentID: "orchestrator",
 		Type:         domain.EventTaskSubmitted,
 		Payload:      `{"status":"queued"}`,
 	}
@@ -171,7 +171,7 @@ func TestTaskSubmissionAndIdempotency(t *testing.T) {
 	// Submit again with same idempotency key and identical payload
 	dupTask := &domain.Task{
 		ID:             "task-2",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "idem-001",
 		Content:        "Check quote service",
@@ -191,7 +191,7 @@ func TestTaskSubmissionAndIdempotency(t *testing.T) {
 	// Submit again with same key but different content -> ErrIdempotencyConflict
 	diffTask := &domain.Task{
 		ID:             "task-3",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "idem-001",
 		Content:        "Check quote service with different payload",
@@ -220,10 +220,10 @@ func TestSingleActiveTaskConstraintAndDatabaseLevelIndex(t *testing.T) {
 	ctx := context.Background()
 	registerAndReadyTestAgents(t, s1)
 
-	// Task 1: coordinator -> quote (status: queued)
+	// Task 1: orchestrator -> quote (status: queued)
 	t1 := &domain.Task{
 		ID:             "t1",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "k1",
 		Content:        "Work 1",
@@ -236,7 +236,7 @@ func TestSingleActiveTaskConstraintAndDatabaseLevelIndex(t *testing.T) {
 	// Task 2: concurrent submission to same target -> worker busy
 	t2 := &domain.Task{
 		ID:             "t2",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "k2",
 		Content:        "Work 2",
@@ -255,7 +255,7 @@ func TestSingleActiveTaskConstraintAndDatabaseLevelIndex(t *testing.T) {
 	// Task 3: still rejected while t1 is running
 	t3 := &domain.Task{
 		ID:             "t3",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "k3",
 		Content:        "Work 3",
@@ -274,7 +274,7 @@ func TestSingleActiveTaskConstraintAndDatabaseLevelIndex(t *testing.T) {
 	// Task 4: submission now succeeds after t1 is in terminal state
 	t4 := &domain.Task{
 		ID:             "t4",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "k4",
 		Content:        "Work 4",
@@ -303,7 +303,7 @@ func TestTaskStateTransitionsAndAuthorization(t *testing.T) {
 	// Submit task
 	task := &domain.Task{
 		ID:             "task-auth",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "k-auth",
 		Content:        "Auth check",
@@ -341,19 +341,19 @@ func TestTaskStateTransitionsAndAuthorization(t *testing.T) {
 		t.Fatalf("UpdateTaskStatus failed: %v", err)
 	}
 
-	// 6. Send Message from non-sender (coordinator is sender)
+	// 6. Send Message from non-sender (orchestrator is sender)
 	err = s.SendMessage(ctx, "task-auth", "worker_03", nil, nil)
 	if !errors.Is(err, domain.ErrUnauthorized) {
 		t.Fatalf("expected ErrUnauthorized for SendMessage by non-initiator, got: %v", err)
 	}
 
 	// 7. Send Message from sender
-	if err := s.SendMessage(ctx, "task-auth", "coordinator", nil, nil); err != nil {
+	if err := s.SendMessage(ctx, "task-auth", "orchestrator", nil, nil); err != nil {
 		t.Fatalf("SendMessage failed: %v", err)
 	}
 
 	// 8. Cancel on running task (cannot cancel running task)
-	_, err = s.CancelTask(ctx, "task-auth", "coordinator", nil)
+	_, err = s.CancelTask(ctx, "task-auth", "orchestrator", nil)
 	if !errors.Is(err, domain.ErrInvalidTransition) {
 		t.Fatalf("expected ErrInvalidTransition for Cancel on running task, got: %v", err)
 	}
@@ -364,7 +364,7 @@ func TestTaskStateTransitionsAndAuthorization(t *testing.T) {
 	}
 
 	// 10. SendMessage after terminal state
-	err = s.SendMessage(ctx, "task-auth", "coordinator", nil, nil)
+	err = s.SendMessage(ctx, "task-auth", "orchestrator", nil, nil)
 	if !errors.Is(err, domain.ErrTerminalState) {
 		t.Fatalf("expected ErrTerminalState for SendMessage after completion, got: %v", err)
 	}
@@ -385,7 +385,7 @@ func TestStoreReadyGateAtomicFailClosed(t *testing.T) {
 	// 1. Submit task when neither agent exists -> ErrAgentNotReady
 	t1 := &domain.Task{
 		ID:             "task-gate-1",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "k-gate-1",
 		Content:        "Gate test 1",
@@ -396,21 +396,21 @@ func TestStoreReadyGateAtomicFailClosed(t *testing.T) {
 		t.Fatalf("expected ErrAgentNotReady on non-existent agents, got: %v", err)
 	}
 
-	// 2. Attach coordinator (bootstrapping, not ready)
-	coordProf, _ := createTestProfile(dir, "coordinator", "coordinator", "codex")
-	coord := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorNone, Status: domain.AgentStatusRegistered}
-	sessCoord, err := s.AttachAgent(ctx, coord, coordProf, domain.SessionStatusBootstrapping, "", nil)
+	// 2. Attach orchestrator (bootstrapping, not ready)
+	orchProf, _ := createTestProfile(dir, "orchestrator", "orchestrator", "codex")
+	orch := &domain.Agent{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorNone, Status: domain.AgentStatusRegistered}
+	sessOrch, err := s.AttachAgent(ctx, orch, orchProf, domain.SessionStatusBootstrapping, "", nil)
 	if err != nil {
-		t.Fatalf("attach coord failed: %v", err)
+		t.Fatalf("attach orch failed: %v", err)
 	}
 
 	_, _, err = s.SubmitTask(ctx, t1, nil, nil)
 	if !errors.Is(err, domain.ErrAgentNotReady) {
-		t.Fatalf("expected ErrAgentNotReady while coordinator is bootstrapping, got: %v", err)
+		t.Fatalf("expected ErrAgentNotReady while orchestrator is bootstrapping, got: %v", err)
 	}
 
-	// Ready coordinator
-	_, _ = s.ReadySession(ctx, "coordinator", sessCoord.Generation)
+	// Ready orchestrator
+	_, _ = s.ReadySession(ctx, "orchestrator", sessOrch.Generation)
 
 	// 3. Attach quote (bootstrapping, not ready)
 	quoteProf, _ := createTestProfile(dir, "quote", "quote", "agy")
@@ -459,25 +459,25 @@ func TestStoreReadyGateAtomicFailClosed(t *testing.T) {
 		t.Fatalf("AckTask failed after quote re-ready: %v", err)
 	}
 
-	// Re-bootstrap coordinator (generation 2, bootstrapping)
-	_, _, _, _ = s.BootstrapAgent(ctx, "coordinator", domain.SessionStatusBootstrapping, "", nil)
+	// Re-bootstrap orchestrator (generation 2, bootstrapping)
+	_, _, _, _ = s.BootstrapAgent(ctx, "orchestrator", domain.SessionStatusBootstrapping, "", nil)
 
-	// c) SendMessage by coordinator fails closed
-	err = s.SendMessage(ctx, "task-gate-1", "coordinator", nil, nil)
+	// c) SendMessage by orchestrator fails closed
+	err = s.SendMessage(ctx, "task-gate-1", "orchestrator", nil, nil)
 	if !errors.Is(err, domain.ErrAgentNotReady) {
-		t.Fatalf("expected ErrAgentNotReady on SendMessage when coordinator in bootstrapping, got: %v", err)
+		t.Fatalf("expected ErrAgentNotReady on SendMessage when orchestrator in bootstrapping, got: %v", err)
 	}
 
 	// d) CancelTask on new queued task fails closed
-	t2 := &domain.Task{ID: "t-cancel", SenderAgentID: "coordinator", TargetAgentID: "quote", IdempotencyKey: "k-c", Content: "c", Status: domain.TaskStatusQueued}
-	// Submit fails because coordinator is not ready
+	t2 := &domain.Task{ID: "t-cancel", SenderAgentID: "orchestrator", TargetAgentID: "quote", IdempotencyKey: "k-c", Content: "c", Status: domain.TaskStatusQueued}
+	// Submit fails because orchestrator is not ready
 	_, _, err = s.SubmitTask(ctx, t2, nil, nil)
 	if !errors.Is(err, domain.ErrAgentNotReady) {
 		t.Fatalf("expected ErrAgentNotReady on submit t2, got: %v", err)
 	}
 
-	// Ready coordinator generation 2
-	_, _ = s.ReadySession(ctx, "coordinator", 2)
+	// Ready orchestrator generation 2
+	_, _ = s.ReadySession(ctx, "orchestrator", 2)
 
 	// Complete task-gate-1 first so quote worker is free
 	if _, err := s.CompleteTask(ctx, "task-gate-1", "quote", "done", nil); err != nil {
@@ -489,11 +489,11 @@ func TestStoreReadyGateAtomicFailClosed(t *testing.T) {
 		t.Fatalf("submit t2 failed: %v", err)
 	}
 
-	// Re-bootstrap coordinator again -> cancel t2 fails closed
-	_, _, _, _ = s.BootstrapAgent(ctx, "coordinator", domain.SessionStatusBootstrapping, "", nil)
-	_, err = s.CancelTask(ctx, "t-cancel", "coordinator", nil)
+	// Re-bootstrap orchestrator again -> cancel t2 fails closed
+	_, _, _, _ = s.BootstrapAgent(ctx, "orchestrator", domain.SessionStatusBootstrapping, "", nil)
+	_, err = s.CancelTask(ctx, "t-cancel", "orchestrator", nil)
 	if !errors.Is(err, domain.ErrAgentNotReady) {
-		t.Fatalf("expected ErrAgentNotReady on CancelTask when coordinator in bootstrapping, got: %v", err)
+		t.Fatalf("expected ErrAgentNotReady on CancelTask when orchestrator in bootstrapping, got: %v", err)
 	}
 }
 
@@ -572,7 +572,7 @@ func TestPersistenceAcrossReopen(t *testing.T) {
 
 	task := &domain.Task{
 		ID:             "task-p",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "kp",
 		Content:        "Persistence test",
@@ -581,7 +581,7 @@ func TestPersistenceAcrossReopen(t *testing.T) {
 	evt1 := &domain.Event{
 		ID:           "evt-p1",
 		TaskID:       "task-p",
-		ActorAgentID: "coordinator",
+		ActorAgentID: "orchestrator",
 		Type:         domain.EventTaskSubmitted,
 		Payload:      `{}`,
 	}
@@ -656,21 +656,21 @@ func TestAttachAndSessionLifecycle(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	profile, err := createTestProfile(dir, "coordinator", "coordinator", "codex")
+	profile, err := createTestProfile(dir, "orchestrator", "orchestrator", "codex")
 	if err != nil {
 		t.Fatalf("createTestProfile failed: %v", err)
 	}
 
-	coord := &domain.Agent{
-		ID:        "coordinator",
-		Role:      "coordinator",
+	orch := &domain.Agent{
+		ID:        "orchestrator",
+		Role:      "orchestrator",
 		Connector: domain.ConnectorTmux,
 		Address:   "%50",
 		Status:    domain.AgentStatusRegistered,
 	}
 
 	// 1. Initial Attach -> generation 1
-	sess1, err := s.AttachAgent(ctx, coord, profile, domain.SessionStatusBootstrapping, "%50", nil)
+	sess1, err := s.AttachAgent(ctx, orch, profile, domain.SessionStatusBootstrapping, "%50", nil)
 	if err != nil {
 		t.Fatalf("AttachAgent failed: %v", err)
 	}
@@ -678,19 +678,19 @@ func TestAttachAndSessionLifecycle(t *testing.T) {
 		t.Fatalf("expected generation 1 and bootstrapping, got: %+v", sess1)
 	}
 
-	ready, err := s.IsAgentReady(ctx, "coordinator")
+	ready, err := s.IsAgentReady(ctx, "orchestrator")
 	if err != nil || ready {
 		t.Fatalf("expected IsAgentReady false while bootstrapping, got %v (err: %v)", ready, err)
 	}
 
 	// 2. Ready with wrong generation -> conflict
-	_, err = s.ReadySession(ctx, "coordinator", 999)
+	_, err = s.ReadySession(ctx, "orchestrator", 999)
 	if !errors.Is(err, domain.ErrSessionGenerationConflict) {
 		t.Fatalf("expected ErrSessionGenerationConflict on wrong generation, got: %v", err)
 	}
 
 	// 3. Ready with correct generation 1 -> success
-	sessReady, err := s.ReadySession(ctx, "coordinator", 1)
+	sessReady, err := s.ReadySession(ctx, "orchestrator", 1)
 	if err != nil {
 		t.Fatalf("ReadySession failed: %v", err)
 	}
@@ -698,13 +698,13 @@ func TestAttachAndSessionLifecycle(t *testing.T) {
 		t.Fatalf("expected status ready with ready_at timestamp, got: %+v", sessReady)
 	}
 
-	ready, err = s.IsAgentReady(ctx, "coordinator")
+	ready, err = s.IsAgentReady(ctx, "orchestrator")
 	if err != nil || !ready {
 		t.Fatalf("expected IsAgentReady true, got %v (err: %v)", ready, err)
 	}
 
 	// 4. Re-Attach -> generation 2, status goes back to bootstrapping
-	sess2, err := s.AttachAgent(ctx, coord, profile, domain.SessionStatusBootstrapping, "%50", nil)
+	sess2, err := s.AttachAgent(ctx, orch, profile, domain.SessionStatusBootstrapping, "%50", nil)
 	if err != nil {
 		t.Fatalf("re-attach failed: %v", err)
 	}
@@ -712,13 +712,13 @@ func TestAttachAndSessionLifecycle(t *testing.T) {
 		t.Fatalf("expected generation 2 and bootstrapping on re-attach, got: %+v", sess2)
 	}
 
-	ready, err = s.IsAgentReady(ctx, "coordinator")
+	ready, err = s.IsAgentReady(ctx, "orchestrator")
 	if err != nil || ready {
 		t.Fatalf("expected IsAgentReady false after re-attach, got %v", ready)
 	}
 
 	// 5. BootstrapAgent -> generation 3
-	_, _, sess3, err := s.BootstrapAgent(ctx, "coordinator", domain.SessionStatusBootstrapping, "%50", nil)
+	_, _, sess3, err := s.BootstrapAgent(ctx, "orchestrator", domain.SessionStatusBootstrapping, "%50", nil)
 	if err != nil {
 		t.Fatalf("BootstrapAgent failed: %v", err)
 	}
@@ -727,17 +727,17 @@ func TestAttachAndSessionLifecycle(t *testing.T) {
 	}
 
 	// Ready with generation 3
-	_, err = s.ReadySession(ctx, "coordinator", 3)
+	_, err = s.ReadySession(ctx, "orchestrator", 3)
 	if err != nil {
 		t.Fatalf("ready with generation 3 failed: %v", err)
 	}
 
 	// 6. GetAgentSession
-	a, p, sessLoaded, err := s.GetAgentSession(ctx, "coordinator")
+	a, p, sessLoaded, err := s.GetAgentSession(ctx, "orchestrator")
 	if err != nil {
 		t.Fatalf("GetAgentSession failed: %v", err)
 	}
-	if a.ID != "coordinator" || p.Runtime != "codex" || sessLoaded.Generation != 3 || sessLoaded.Status != domain.SessionStatusReady {
+	if a.ID != "orchestrator" || p.Runtime != "codex" || sessLoaded.Generation != 3 || sessLoaded.Status != domain.SessionStatusReady {
 		t.Fatalf("unexpected loaded session data: %+v, %+v, %+v", a, p, sessLoaded)
 	}
 	if len(p.Capabilities) != 2 || p.Capabilities[0] != "cap1" || p.Capabilities[1] != "cap2" {
@@ -773,15 +773,15 @@ func TestSchemaUpgradeOnExistingDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("createTestProfile failed: %v", err)
 	}
-	coord := &domain.Agent{
+	orch := &domain.Agent{
 		ID:        "upgrade-agent",
-		Role:      "coordinator",
+		Role:      "orchestrator",
 		Connector: domain.ConnectorNone,
 		Address:   "",
 		Status:    domain.AgentStatusRegistered,
 	}
 
-	sess, err := sUpgraded.AttachAgent(context.Background(), coord, profile, domain.SessionStatusBootstrapping, "", nil)
+	sess, err := sUpgraded.AttachAgent(context.Background(), orch, profile, domain.SessionStatusBootstrapping, "", nil)
 	if err != nil {
 		t.Fatalf("AttachAgent on upgraded schema failed: %v", err)
 	}

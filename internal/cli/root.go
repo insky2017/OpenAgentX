@@ -98,25 +98,25 @@ Examples:
   agentbus serve --db data/agentbus.db --socket run/agentbus.sock
 
   # Agent Bootstrap & Session Ready
-  agentbus agent whoami --config agents/coordinator/agent.yaml
-  agentbus agent attach --config agents/coordinator/agent.yaml --no-notify
-  agentbus session ready --agent coordinator --generation 1
+  agentbus agent whoami --config agents/orchestrator/agent.yaml
+  agentbus agent attach --config agents/orchestrator/agent.yaml --no-notify
+  agentbus session ready --agent orchestrator --generation 1
   agentbus agent attach --config agents/quote-service/agent.yaml --address %%52
   agentbus session ready --agent quote-service --generation 1
   agentbus session show --agent quote-service
   agentbus agent bootstrap --id quote-service
 
   # Tasks
-  agentbus task submit --from coordinator --to quote-service --idempotency-key k1 --content "Inspect Quote Service"
+  agentbus task submit --from orchestrator --to quote-service --idempotency-key k1 --content "Inspect Quote Service"
   agentbus task get <task-id> --agent quote-service
   agentbus task list --agent quote-service
   agentbus task ack <task-id> --agent quote-service
   agentbus task status <task-id> --agent quote-service --message "Checking routes"
-  agentbus task send <task-id> --from coordinator --content "Also check cache"
+  agentbus task send <task-id> --from orchestrator --content "Also check cache"
   agentbus task complete <task-id> --agent quote-service --result "Inspection done"
   agentbus task fail <task-id> --agent quote-service --error "Route error"
-  agentbus task cancel <task-id> --agent coordinator
-  agentbus task watch <task-id> --agent coordinator --after 0 --timeout 30s
-  agentbus task wait <task-id> --agent coordinator --timeout 30m
+  agentbus task cancel <task-id> --agent orchestrator
+  agentbus task watch <task-id> --agent orchestrator --after 0 --timeout 30s
+  agentbus task wait <task-id> --agent orchestrator --timeout 30m
 `)
 }

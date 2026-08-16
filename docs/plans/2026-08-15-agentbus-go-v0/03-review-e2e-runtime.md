@@ -19,10 +19,10 @@
 
 1. 构建 `AgentBus/bin/agentbus`。
 2. 在确认后的 daemon pane 启动 `serve`，保留 stdout/stderr 日志。
-3. 注册 `coordinator`、`agentbus-agent` 和 `quote-service`。
-4. Coordinator 提交一个无代码副作用的演示 Task。
+3. 注册 `orchestrator`、`agentbus-agent` 和 `quote-service`。
+4. Orchestrator 提交一个无代码副作用的演示 Task。
 5. AgentBus Agent 收到短通知，主动 `get`、`ack`、`status`、`complete`；Quote Service Agent 完成注册与无副作用连通检查。
-6. Coordinator watch/get 看到顺序事件与最终结果。
+6. Orchestrator watch/get 看到顺序事件与最终结果。
 7. 重启 daemon，确认数据仍可读取。
 
 ## 验收结果
@@ -30,7 +30,7 @@
 - Codex 已独立完成 `gofmt`、`go vet`、普通测试、race test 与构建，全部通过。
 - `%51` AgentBus Agent 完成 `get → ack → status → complete` 真实闭环。
 - `%52` Quote Service Agent 完成 `get → ack → status → 等待 supplement → 再次 get → complete` 真实闭环。
-- Coordinator 通过 `watch/get` 读取完整 Event sequence、Messages 与最终结果。
+- Orchestrator 通过 `watch/get` 读取完整 Event sequence、Messages 与最终结果。
 - `%53` daemon 受控重启后，Agent、Task、Message、Event 均持久可读，并继续留驻运行。
 - 详细证据见 [验证报告](../../reports/validation/2026-08-15-agentbus-go-v0-tmux-e2e.md)。
 

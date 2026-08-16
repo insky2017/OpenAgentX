@@ -162,7 +162,7 @@ POST /api/v1/tasks/{task-id}/runtime-events
 
 1. **生命周期事件链实测**：
    - 原生 AGY Hook 成功在任务执行期间连续记录 `PreInvocation`、`PostInvocation` 及 `Stop` 三类 `runtime.event_observed` 事件；
-   - Event Stream 单调递增序列完整，Coordinator 可实时通过 `task watch` 观测到 Agent 的执行进展。
+   - Event Stream 单调递增序列完整，Orchestrator 可实时通过 `task watch` 观测到 Agent 的执行进展。
 
 2. **Stop 门禁与安全闭环验证**：
    - 在 Task 处于 `running` 状态时，AGY 尝试停机触发 Stop Hook，Hook 准确实时识别 active Task 并向 stdout 输出 `{"decision": "continue", "reason": "..."}`；

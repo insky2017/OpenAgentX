@@ -114,12 +114,12 @@ func TestServiceSubmitAndConnectorNotification(t *testing.T) {
 	ctx := context.Background()
 
 	// Attach and ready agents
-	attachAndReadyAgent(t, svc, dir, "coordinator", "coordinator", domain.ConnectorTmux, "%50")
+	attachAndReadyAgent(t, svc, dir, "orchestrator", "orchestrator", domain.ConnectorTmux, "%50")
 	attachAndReadyAgent(t, svc, dir, "quote", "quote", domain.ConnectorTmux, "%51")
 
 	// Submit task
 	resp, err := svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "svc-idem-1",
 		Content:        "Run quote check",
@@ -132,7 +132,7 @@ func TestServiceSubmitAndConnectorNotification(t *testing.T) {
 	}
 
 	// Check events for task.notified
-	events, err := svc.GetEvents(ctx, resp.Task.ID, "coordinator", 0, 0)
+	events, err := svc.GetEvents(ctx, resp.Task.ID, "orchestrator", 0, 0)
 	if err != nil {
 		t.Fatalf("GetEvents failed: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestTaskReadyGate(t *testing.T) {
 
 	// 1. Submit when neither agent is attached/ready
 	_, err := svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "gate-1",
 		Content:        "Test gate",
@@ -162,30 +162,30 @@ func TestTaskReadyGate(t *testing.T) {
 		t.Fatalf("expected ErrAgentNotReady when agents not ready, got: %v", err)
 	}
 
-	// 2. Attach coordinator (bootstrapping, not yet ready)
-	coord := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorNone}
-	coordProf := createServiceTestProfile(dir, "coordinator", "codex")
-	sessCoord, err := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: coord, Profile: coordProf, NoNotify: true})
+	// 2. Attach orchestrator (bootstrapping, not yet ready)
+	orch := &domain.Agent{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorNone}
+	orchProf := createServiceTestProfile(dir, "orchestrator", "codex")
+	sessOrch, err := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: orch, Profile: orchProf, NoNotify: true})
 	if err != nil {
-		t.Fatalf("Attach coord failed: %v", err)
+		t.Fatalf("Attach orch failed: %v", err)
 	}
 
 	_, err = svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "gate-2",
 		Content:        "Test gate",
 	})
 	if !errors.Is(err, domain.ErrAgentNotReady) {
-		t.Fatalf("expected ErrAgentNotReady while coordinator is bootstrapping, got: %v", err)
+		t.Fatalf("expected ErrAgentNotReady while orchestrator is bootstrapping, got: %v", err)
 	}
 
-	// Ready coordinator
-	_, _ = svc.ReadySession(ctx, "coordinator", sessCoord.Session.Generation)
+	// Ready orchestrator
+	_, _ = svc.ReadySession(ctx, "orchestrator", sessOrch.Session.Generation)
 
 	// Quote is still not ready
 	_, err = svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "gate-3",
 		Content:        "Test gate",
@@ -202,7 +202,7 @@ func TestTaskReadyGate(t *testing.T) {
 
 	// Now both are ready -> submit succeeds!
 	submitResp, err := svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "gate-4",
 		Content:        "Test gate success",
@@ -328,9 +328,9 @@ func TestDispositionHonesty(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. --no-notify -> disposition must be 'skipped'
-	coord := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorTmux, Address: "%50"}
-	coordProf := createServiceTestProfile(dir, "coordinator", "codex")
-	resp, err := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: coord, Profile: coordProf, NoNotify: true})
+	orch := &domain.Agent{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorTmux, Address: "%50"}
+	orchProf := createServiceTestProfile(dir, "orchestrator", "codex")
+	resp, err := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: orch, Profile: orchProf, NoNotify: true})
 	if err != nil {
 		t.Fatalf("AttachAgent failed: %v", err)
 	}
@@ -366,12 +366,12 @@ func TestServiceCallerAuthorization(t *testing.T) {
 
 	ctx := context.Background()
 
-	attachAndReadyAgent(t, svc, dir, "coordinator", "coordinator", domain.ConnectorNone, "")
+	attachAndReadyAgent(t, svc, dir, "orchestrator", "orchestrator", domain.ConnectorNone, "")
 	attachAndReadyAgent(t, svc, dir, "quote", "quote", domain.ConnectorNone, "")
 	attachAndReadyAgent(t, svc, dir, "third_party", "worker", domain.ConnectorNone, "")
 
 	resp, err := svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "auth-idem-1",
 		Content:        "Confidential task content",
@@ -394,8 +394,8 @@ func TestServiceCallerAuthorization(t *testing.T) {
 	}
 
 	// 3. Sender and Target on GetTask -> success
-	if _, err := svc.GetTask(ctx, taskID, "coordinator"); err != nil {
-		t.Fatalf("coordinator GetTask failed: %v", err)
+	if _, err := svc.GetTask(ctx, taskID, "orchestrator"); err != nil {
+		t.Fatalf("orchestrator GetTask failed: %v", err)
 	}
 	if _, err := svc.GetTask(ctx, taskID, "quote"); err != nil {
 		t.Fatalf("quote GetTask failed: %v", err)
@@ -436,11 +436,11 @@ func TestServiceWatchBlocking(t *testing.T) {
 
 	ctx := context.Background()
 
-	attachAndReadyAgent(t, svc, dir, "coordinator", "coordinator", domain.ConnectorNone, "")
+	attachAndReadyAgent(t, svc, dir, "orchestrator", "orchestrator", domain.ConnectorNone, "")
 	attachAndReadyAgent(t, svc, dir, "quote", "quote", domain.ConnectorNone, "")
 
 	resp, err := svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "watch-idem-1",
 		Content:        "Watch test",
@@ -449,7 +449,7 @@ func TestServiceWatchBlocking(t *testing.T) {
 		t.Fatalf("SubmitTask failed: %v", err)
 	}
 
-	events1, err := svc.GetEvents(ctx, resp.Task.ID, "coordinator", 0, 0)
+	events1, err := svc.GetEvents(ctx, resp.Task.ID, "orchestrator", 0, 0)
 	if err != nil || len(events1) == 0 {
 		t.Fatalf("failed to get initial events: %v", err)
 	}
@@ -463,7 +463,7 @@ func TestServiceWatchBlocking(t *testing.T) {
 
 	// Blocking watch with 1s timeout
 	watchStart := time.Now()
-	newEvents, err := svc.GetEvents(ctx, resp.Task.ID, "coordinator", lastSeq, 1*time.Second)
+	newEvents, err := svc.GetEvents(ctx, resp.Task.ID, "orchestrator", lastSeq, 1*time.Second)
 	watchElapsed := time.Since(watchStart)
 
 	if err != nil {
@@ -567,11 +567,11 @@ func TestServiceRecordRuntimeEvent(t *testing.T) {
 
 	ctx := context.Background()
 
-	// 1. Setup agents: coordinator (codex) and quote (agy)
-	coordProf := createServiceTestProfile(dir, "coordinator", "codex")
-	coordAgent := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorNone}
-	sessCoord, _ := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: coordAgent, Profile: coordProf, NoNotify: true})
-	_, _ = svc.ReadySession(ctx, "coordinator", sessCoord.Session.Generation)
+	// 1. Setup agents: orchestrator (codex) and quote (agy)
+	orchProf := createServiceTestProfile(dir, "orchestrator", "codex")
+	orchAgent := &domain.Agent{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorNone}
+	sessOrch, _ := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: orchAgent, Profile: orchProf, NoNotify: true})
+	_, _ = svc.ReadySession(ctx, "orchestrator", sessOrch.Session.Generation)
 
 	quoteProf := createServiceTestProfile(dir, "quote", "agy")
 	quoteAgent := &domain.Agent{ID: "quote", Role: "quote", Connector: domain.ConnectorNone}
@@ -580,7 +580,7 @@ func TestServiceRecordRuntimeEvent(t *testing.T) {
 
 	// 2. Submit task
 	submitResp, err := svc.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "rt-task-1",
 		Content:        "Runtime event test task",
@@ -612,9 +612,9 @@ func TestServiceRecordRuntimeEvent(t *testing.T) {
 		t.Fatalf("expected error for unsupported runtime, got nil")
 	}
 
-	// 5. Runtime mismatch with agent profile (coordinator is codex, request has agy) -> error
+	// 5. Runtime mismatch with agent profile (orchestrator is codex, request has agy) -> error
 	_, err = svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
-		Agent:   "coordinator",
+		Agent:   "orchestrator",
 		Runtime: "agy",
 		Event:   "PreToolUse",
 		Payload: []byte(`{}`),
@@ -712,7 +712,7 @@ func TestServiceRecordRuntimeEvent(t *testing.T) {
 	}()
 
 	watchStart := time.Now()
-	latestEvents, err := svc.GetEvents(ctx, taskID, "coordinator", eventsAfter[len(eventsAfter)-1].Sequence, 1*time.Second)
+	latestEvents, err := svc.GetEvents(ctx, taskID, "orchestrator", eventsAfter[len(eventsAfter)-1].Sequence, 1*time.Second)
 	watchElapsed := time.Since(watchStart)
 	if err != nil {
 		t.Fatalf("GetEvents blocking watch failed: %v", err)

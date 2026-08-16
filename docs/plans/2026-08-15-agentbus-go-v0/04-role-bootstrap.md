@@ -8,7 +8,7 @@ completed_at: 2026-08-16
 
 ## 目标
 
-让 Coordinator 和所有南向 Agent 不依赖一次性人工提示，而是在每个受管 session 中从 canonical manifest/ROLE 恢复身份，并在 ready 前禁止参与 Task。
+让 Orchestrator 和所有南向 Agent 不依赖一次性人工提示，而是在每个受管 session 中从 canonical manifest/ROLE 恢复身份，并在 ready 前禁止参与 Task。
 
 ## 实施内容
 
@@ -32,7 +32,7 @@ completed_at: 2026-08-16
 ## 验收结果
 
 - `gofmt`、`go vet`、普通测试、race test、build、`git diff --check` 全部通过；
-- Coordinator、AgentBus Agent、Quote Service Agent 均 attach/ready 成功；
+- Orchestrator、AgentBus Agent、Quote Service Agent 均 attach/ready 成功；
 - Quote Service Agent re-bootstrap 到 generation 2 后，未 ready submit 返回 HTTP 409 `AGENT_NOT_READY`；
 - 再次 ready 后任务恢复成功；
 - daemon 重启后三个 Profile/Session 和验收 Task 持久可读。

@@ -90,47 +90,47 @@ func TestServerE2EUnixSocket(t *testing.T) {
 	client, socketPath, dir, _, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	coordCfg, coordRole := createServerTestProfileData(dir, "coordinator", "codex")
+	orchCfg, orchRole := createServerTestProfileData(dir, "orchestrator", "codex")
 	quoteCfg, quoteRole := createServerTestProfileData(dir, "quote", "agy")
 
-	// 1. Attach coordinator
-	coordBody, _ := json.Marshal(map[string]any{
+	// 1. Attach orchestrator
+	orchBody, _ := json.Marshal(map[string]any{
 		"agent": map[string]any{
-			"id":        "coordinator",
-			"role":      "coordinator",
+			"id":        "orchestrator",
+			"role":      "orchestrator",
 			"connector": "tmux",
 			"address":   "%50",
 			"status":    "registered",
 		},
 		"profile": map[string]any{
-			"agent_id":          "coordinator",
+			"agent_id":          "orchestrator",
 			"manifest_version":  1,
 			"runtime":           "codex",
 			"workspace":         dir,
-			"config_path":       coordCfg,
-			"instructions_path": coordRole,
+			"config_path":       orchCfg,
+			"instructions_path": orchRole,
 			"capabilities":      []string{"understand", "delegate"},
 		},
 		"no_notify": true,
 	})
-	resp, err := client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(coordBody))
+	resp, err := client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(orchBody))
 	if err != nil || resp.StatusCode != http.StatusOK {
-		t.Fatalf("Attach coordinator failed: %v, status: %d", err, resp.StatusCode)
+		t.Fatalf("Attach orchestrator failed: %v, status: %d", err, resp.StatusCode)
 	}
-	var attachCoordResp struct {
+	var attachOrchResp struct {
 		Session     *domain.AgentSession          `json:"session"`
 		Disposition connector.DeliveryDisposition `json:"disposition"`
 	}
-	_ = json.NewDecoder(resp.Body).Decode(&attachCoordResp)
-	if attachCoordResp.Disposition != connector.DispositionSkipped {
-		t.Fatalf("expected disposition 'skipped' for no-notify attach, got: %s", attachCoordResp.Disposition)
+	_ = json.NewDecoder(resp.Body).Decode(&attachOrchResp)
+	if attachOrchResp.Disposition != connector.DispositionSkipped {
+		t.Fatalf("expected disposition 'skipped' for no-notify attach, got: %s", attachOrchResp.Disposition)
 	}
 
-	// Ready coordinator
-	readyCoordBody, _ := json.Marshal(map[string]any{"generation": attachCoordResp.Session.Generation})
-	resp, err = client.Post("http://unix/api/v1/sessions/coordinator/ready", "application/json", bytes.NewReader(readyCoordBody))
+	// Ready orchestrator
+	readyOrchBody, _ := json.Marshal(map[string]any{"generation": attachOrchResp.Session.Generation})
+	resp, err = client.Post("http://unix/api/v1/sessions/orchestrator/ready", "application/json", bytes.NewReader(readyOrchBody))
 	if err != nil || resp.StatusCode != http.StatusOK {
-		t.Fatalf("Ready coordinator failed: %v, status: %d", err, resp.StatusCode)
+		t.Fatalf("Ready orchestrator failed: %v, status: %d", err, resp.StatusCode)
 	}
 
 	// 2. Attach quote
@@ -188,7 +188,7 @@ func TestServerE2EUnixSocket(t *testing.T) {
 
 	// 4. Submit task
 	submitBody, _ := json.Marshal(map[string]any{
-		"sender_agent_id": "coordinator",
+		"sender_agent_id": "orchestrator",
 		"target_agent_id": "quote",
 		"idempotency_key": "e2e-demo-1",
 		"content":         "E2E test task",
@@ -232,8 +232,8 @@ func TestServerE2EUnixSocket(t *testing.T) {
 		t.Fatalf("Status update failed: %v", err)
 	}
 
-	// 8. Send supplemental message as coordinator
-	sendMsgBody, _ := json.Marshal(map[string]any{"from": "coordinator", "content": "supplemental input"})
+	// 8. Send supplemental message as orchestrator
+	sendMsgBody, _ := json.Marshal(map[string]any{"from": "orchestrator", "content": "supplemental input"})
 	resp, err = client.Post("http://unix/api/v1/tasks/"+taskID+"/send", "application/json", bytes.NewReader(sendMsgBody))
 	if err != nil || resp.StatusCode != http.StatusOK {
 		t.Fatalf("Send supplemental msg failed: %v", err)
@@ -271,7 +271,7 @@ func TestServerE2EUnixSocket(t *testing.T) {
 	}
 
 	// 10. Query events with caller agent
-	resp, err = client.Get("http://unix/api/v1/tasks/" + taskID + "/events?agent=coordinator&after=0")
+	resp, err = client.Get("http://unix/api/v1/tasks/" + taskID + "/events?agent=orchestrator&after=0")
 	if err != nil || resp.StatusCode != http.StatusOK {
 		t.Fatalf("Get events failed: %v", err)
 	}
@@ -474,7 +474,7 @@ func TestServerInvalidQueryParams(t *testing.T) {
 	}
 
 	// 2. Invalid after parameter -> 400
-	resp, err = client.Get("http://unix/api/v1/tasks/task-123/events?agent=coord&after=invalid_seq")
+	resp, err = client.Get("http://unix/api/v1/tasks/task-123/events?agent=orch&after=invalid_seq")
 	if err != nil {
 		t.Fatalf("Get events failed: %v", err)
 	}
@@ -483,7 +483,7 @@ func TestServerInvalidQueryParams(t *testing.T) {
 	}
 
 	// 3. Invalid timeout parameter -> 400
-	resp, err = client.Get("http://unix/api/v1/tasks/task-123/events?agent=coord&timeout=invalid_timeout")
+	resp, err = client.Get("http://unix/api/v1/tasks/task-123/events?agent=orch&timeout=invalid_timeout")
 	if err != nil {
 		t.Fatalf("Get events failed: %v", err)
 	}
@@ -561,36 +561,36 @@ func TestServerRecordRuntimeEventEndpoint(t *testing.T) {
 	client, _, dir, _, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	coordCfg, coordRole := createServerTestProfileData(dir, "coordinator", "codex")
+	orchCfg, orchRole := createServerTestProfileData(dir, "orchestrator", "codex")
 	quoteCfg, quoteRole := createServerTestProfileData(dir, "quote", "agy")
 
-	// 1. Attach and ready coordinator
-	coordBody, _ := json.Marshal(map[string]any{
+	// 1. Attach and ready orchestrator
+	orchBody, _ := json.Marshal(map[string]any{
 		"agent": map[string]any{
-			"id":        "coordinator",
-			"role":      "coordinator",
+			"id":        "orchestrator",
+			"role":      "orchestrator",
 			"connector": "tmux",
 			"address":   "%50",
 			"status":    "registered",
 		},
 		"profile": map[string]any{
-			"agent_id":          "coordinator",
+			"agent_id":          "orchestrator",
 			"manifest_version":  1,
 			"runtime":           "codex",
 			"workspace":         dir,
-			"config_path":       coordCfg,
-			"instructions_path": coordRole,
+			"config_path":       orchCfg,
+			"instructions_path": orchRole,
 			"capabilities":      []string{"understand"},
 		},
 		"no_notify": true,
 	})
-	resp, _ := client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(coordBody))
-	var attachCoordResp struct {
+	resp, _ := client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(orchBody))
+	var attachOrchResp struct {
 		Session *domain.AgentSession `json:"session"`
 	}
-	_ = json.NewDecoder(resp.Body).Decode(&attachCoordResp)
-	readyCoordBody, _ := json.Marshal(map[string]any{"generation": attachCoordResp.Session.Generation})
-	_, _ = client.Post("http://unix/api/v1/sessions/coordinator/ready", "application/json", bytes.NewReader(readyCoordBody))
+	_ = json.NewDecoder(resp.Body).Decode(&attachOrchResp)
+	readyOrchBody, _ := json.Marshal(map[string]any{"generation": attachOrchResp.Session.Generation})
+	_, _ = client.Post("http://unix/api/v1/sessions/orchestrator/ready", "application/json", bytes.NewReader(readyOrchBody))
 
 	// 2. Attach and ready quote
 	quoteBody, _ := json.Marshal(map[string]any{
@@ -622,7 +622,7 @@ func TestServerRecordRuntimeEventEndpoint(t *testing.T) {
 
 	// 3. Submit task
 	submitBody, _ := json.Marshal(map[string]any{
-		"sender_agent_id": "coordinator",
+		"sender_agent_id": "orchestrator",
 		"target_agent_id": "quote",
 		"idempotency_key": "rt-server-1",
 		"content":         "Server runtime event test",

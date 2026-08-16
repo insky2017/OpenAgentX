@@ -10,7 +10,7 @@ import (
 
 func TestAgentValidationEdgeCases(t *testing.T) {
 	validAgents := []*domain.Agent{
-		{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorTmux, Address: "%50"},
+		{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorTmux, Address: "%50"},
 		{ID: "quote-1", Role: "quote_service", Connector: domain.ConnectorTmux, Address: "%51"},
 		{ID: "worker.agent_01", Role: "worker", Connector: domain.ConnectorNone},
 	}
@@ -28,12 +28,12 @@ func TestAgentValidationEdgeCases(t *testing.T) {
 		{ID: "agent`id`", Role: "worker"},
 		{ID: "-invalid-leading-hyphen", Role: "worker"},
 		{ID: ".invalid-leading-dot", Role: "worker"},
-		{ID: "coordinator", Role: ""},
-		{ID: "coordinator", Role: "role\nwith\nnewline"},
-		{ID: "coordinator", Role: "role with space"},
-		{ID: "coordinator", Role: "worker", Connector: "invalid_connector"},
-		{ID: "coordinator", Role: "worker", Connector: domain.ConnectorTmux, Address: ""},
-		{ID: "coordinator", Role: "worker", Connector: domain.ConnectorTmux, Address: "%50\nnewline"},
+		{ID: "orchestrator", Role: ""},
+		{ID: "orchestrator", Role: "role\nwith\nnewline"},
+		{ID: "orchestrator", Role: "role with space"},
+		{ID: "orchestrator", Role: "worker", Connector: "invalid_connector"},
+		{ID: "orchestrator", Role: "worker", Connector: domain.ConnectorTmux, Address: ""},
+		{ID: "orchestrator", Role: "worker", Connector: domain.ConnectorTmux, Address: "%50\nnewline"},
 	}
 	for _, a := range invalidAgents {
 		if err := a.Validate(); err == nil {
@@ -45,7 +45,7 @@ func TestAgentValidationEdgeCases(t *testing.T) {
 func TestTaskValidationEdgeCases(t *testing.T) {
 	validTask := &domain.Task{
 		ID:             "task-12345",
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote",
 		IdempotencyKey: "idem-valid-01",
 		Content:        "Task content",
@@ -55,13 +55,13 @@ func TestTaskValidationEdgeCases(t *testing.T) {
 	}
 
 	invalidTasks := []*domain.Task{
-		{ID: "", SenderAgentID: "coordinator", TargetAgentID: "quote", IdempotencyKey: "k1", Content: "c"},
-		{ID: "task\nnewline", SenderAgentID: "coordinator", TargetAgentID: "quote", IdempotencyKey: "k1", Content: "c"},
+		{ID: "", SenderAgentID: "orchestrator", TargetAgentID: "quote", IdempotencyKey: "k1", Content: "c"},
+		{ID: "task\nnewline", SenderAgentID: "orchestrator", TargetAgentID: "quote", IdempotencyKey: "k1", Content: "c"},
 		{ID: "t1", SenderAgentID: "invalid sender space", TargetAgentID: "quote", IdempotencyKey: "k1", Content: "c"},
-		{ID: "t1", SenderAgentID: "coordinator", TargetAgentID: "invalid;target", IdempotencyKey: "k1", Content: "c"},
-		{ID: "t1", SenderAgentID: "coordinator", TargetAgentID: "quote", IdempotencyKey: "", Content: "c"},
-		{ID: "t1", SenderAgentID: "coordinator", TargetAgentID: "quote", IdempotencyKey: "key\nwith\nnewline", Content: "c"},
-		{ID: "t1", SenderAgentID: "coordinator", TargetAgentID: "quote", IdempotencyKey: "k1", Content: ""},
+		{ID: "t1", SenderAgentID: "orchestrator", TargetAgentID: "invalid;target", IdempotencyKey: "k1", Content: "c"},
+		{ID: "t1", SenderAgentID: "orchestrator", TargetAgentID: "quote", IdempotencyKey: "", Content: "c"},
+		{ID: "t1", SenderAgentID: "orchestrator", TargetAgentID: "quote", IdempotencyKey: "key\nwith\nnewline", Content: "c"},
+		{ID: "t1", SenderAgentID: "orchestrator", TargetAgentID: "quote", IdempotencyKey: "k1", Content: ""},
 	}
 	for _, tCase := range invalidTasks {
 		if err := tCase.Validate(); err == nil {

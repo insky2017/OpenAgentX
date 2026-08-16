@@ -13,7 +13,7 @@ updated_at: 2026-08-16
 
 AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。它让 Codex、AGY、Claude Code、OpenCode 等终端 Agent 互相表现为可调用的远程 sub-agent，同时保留各自 Runtime、会话、工具和权限模型。
 
-首版采用 Coordinator/Worker 角色模型：Codex CLI 作为 Northbound Coordinator，负责需求理解、拆解与协调；一个 AGY CLI 作为 AgentBus Agent，另一个 AGY CLI 作为 Quote Service Agent。AgentBus 只负责注册、路由、状态和消息，不承担需求推理。
+首版采用 Orchestrator/Worker 角色模型：Codex CLI 作为 Northbound Orchestrator，负责需求理解、拆解与协调；一个 AGY CLI 作为 AgentBus Agent，另一个 AGY CLI 作为 Quote Service Agent。AgentBus 只负责注册、路由、状态和消息，不承担需求推理。
 
 AgentBus 不是：
 
@@ -40,7 +40,7 @@ AgentBus 不是：
                              User
                               │
                               ▼
-              Codex Northbound Coordinator
+              Codex Northbound Orchestrator
                    理解 / 拆解 / 协调
                               │ AgentBus CLI
                               ▼
@@ -52,7 +52,7 @@ AgentBus 不是：
 │ Router / Scheduler / Admission Control                   │
 │ Task Manager / Run Supervisor / Session Broker           │
 │ Policy / Approval / Delegation Guard                     │
-│ Workspace Coordinator / Lease Manager                    │
+│ Workspace Lease Manager                                  │
 │ Event Store / Transactional Outbox / Artifact Store      │
 ├───────────────────────────────────────────────────────────┤
 │ Connector / Adapter Host                                 │
@@ -96,7 +96,7 @@ agentbus task wait
 agentbus runtime agy-hook
 ```
 
-Coordinator 通过 CLI 提交任务，立即取得 `task_id`；生产调度默认使用 `task wait` 在单个本地进程内消费 EventBroker/HTTP 长轮询，并只在终态输出一次结构化结果。`task watch` 用于调试和审计完整事件流，`task get` 用于读取即时快照。所有受管 Agent 先从 canonical manifest/ROLE 完成 `attach → bootstrap → session ready`；目标 Agent（如 Quote Service Agent / AgentBus Agent）收到 TmuxConnector 的短通知后调用 `task get <task-id> --agent <agent-id>` 获取完整内容，并显式调用 `ack/status/complete/fail`。V0.2 引入 `agentbus runtime agy-hook` 作为生命周期接入点与 Stop 门禁。MCP tools 与合并 submit+wait 的 `delegate_and_wait` 便利操作留到后续，但必须复用同一服务层和状态机。
+Orchestrator 通过 CLI 提交任务，立即取得 `task_id`；生产调度默认使用 `task wait` 在单个本地进程内消费 EventBroker/HTTP 长轮询，并只在终态输出一次结构化结果。`task watch` 用于调试和审计完整事件流，`task get` 用于读取即时快照。所有受管 Agent 先从 canonical manifest/ROLE 完成 `attach → bootstrap → session ready`；目标 Agent（如 Quote Service Agent / AgentBus Agent）收到 TmuxConnector 的短通知后调用 `task get <task-id> --agent <agent-id>` 获取完整内容，并显式调用 `ack/status/complete/fail`。V0.2 引入 `agentbus runtime agy-hook` 作为生命周期接入点与 Stop 门禁。MCP tools 与合并 submit+wait 的 `delegate_and_wait` 便利操作留到后续，但必须复用同一服务层和状态机。
 
 ### 4.2 V0 TmuxConnector
 
@@ -188,9 +188,9 @@ Session Broker 将 AgentBus 内部 `context_id` 与 provider 会话绑定：
 - 未授权 target、workspace 或外部能力；
 - 预算已耗尽后继续派生任务。
 
-### 4.8 Workspace Coordinator
+### 4.8 Workspace Lease Manager
 
-Workspace Coordinator 是 Coding Agent 场景的关键安全边界：
+Workspace Lease Manager 是 Coding Agent 场景的关键安全边界：
 
 - 对 workspace/path scope 建立 read/write lease；
 - 同一工作区默认只允许一个 writer；
@@ -437,7 +437,7 @@ agy --print --conversation ...
 1. Caller 通过 MCP/CLI 提交 task.submit(idempotency_key, target, workspace, policy)
 2. Northbound API 认证 Caller，持久化 Task + queued Event
 3. Router 校验 target、capability、delegation、budget 和 deadline
-4. Workspace Coordinator 获取 read/write lease
+4. Workspace Lease Manager 获取 read/write lease
 5. Scheduler 创建 RunAttempt，状态变为 dispatching
 6. Session Broker 新建或恢复 provider session binding
 7. Adapter 启动 turn，确认后状态变为 running
@@ -496,7 +496,7 @@ AgentBus 分别限制：
   write + write     可允许，每个 worktree 独立 lease
 ```
 
-任何 Adapter 都不得绕过 Workspace Coordinator 直接声明自己拥有写权限。
+任何 Adapter 都不得绕过 Workspace Lease Manager 直接声明自己拥有写权限。
 
 ## 12. 身份、权限与安全
 
@@ -586,17 +586,17 @@ Go V0 通过 Unix socket 暴露本机 API，同一个 `agentbus` 二进制同时
 ### V0：现有交互 Agent 最小闭环
 
 ```text
-Codex Coordinator CLI (%50) ───┐
+Codex Orchestrator CLI (%50) ───┐
 AGY AgentBus Agent CLI (%51) ──┼──> AgentBus Hub ──> TmuxConnector ──> 目标 Agent Pane
 AGY Quote Service CLI (%52) ───┘
-目标 Agent CLI (ack/status/complete) ──> AgentBus Hub ──> wait/watch/get (Coordinator)
+目标 Agent CLI (ack/status/complete) ──> AgentBus Hub ──> wait/watch/get (Orchestrator)
 ```
 
 实现 Go daemon/CLI、SQLite WAL、Agent Registry、Task/Message/Event 最小状态机和 TmuxConnector。V0 不启动 Runtime，不实现 AgyBatch/ACP/MCP，也不解析 pane 输出。
 
 ### V0.1：角色 Bootstrap 生命周期
 
-为 Coordinator 与南向 Agent 增加 canonical manifest/ROLE、Profile、Session generation、attach/bootstrap/ready、事务内 Task ready gate 和 generic Runtime launcher。AgentBus 通过可持久恢复的生命周期协议维持角色认知，不依赖一次性人工 prompt。V0.1 已完成真实 `%50/%51/%52` 验收，详情见 [角色 Bootstrap 验证报告](reports/validation/2026-08-16-agent-role-bootstrap-e2e.md)。
+为 Orchestrator 与南向 Agent 增加 canonical manifest/ROLE、Profile、Session generation、attach/bootstrap/ready、事务内 Task ready gate 和 generic Runtime launcher。AgentBus 通过可持久恢复的生命周期协议维持角色认知，不依赖一次性人工 prompt。V0.1 已完成真实 `%50/%51/%52` 验收，详情见 [角色 Bootstrap 验证报告](reports/validation/2026-08-16-agent-role-bootstrap-e2e.md)。
 
 ### V1：双向与恢复
 

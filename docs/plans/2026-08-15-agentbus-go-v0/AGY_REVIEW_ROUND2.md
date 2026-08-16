@@ -24,7 +24,7 @@
 同时把示例角色与真实映射统一：
 
 ```text
-%50 coordinator
+%50 orchestrator
 %51 agentbus-agent（role=agentbus）
 %52 quote-service（role=quote）
 %53 daemon/log
@@ -34,7 +34,7 @@
 
 - `README.md` 中 `%51` 注册示例改为 `--id agentbus-agent --role agentbus --address %51`；`%52` 使用 `--id quote-service --role quote --address %52`。
 - `docs/ARCHITECTURE.md` 第 95 行附近不要把唯一 Worker 写成 `Quote Agent`，改成通用 Worker/目标 Agent 表述。
-- `docs/ARCHITECTURE.md` V0 链路图同步为 Coordinator、AgentBus Agent、Quote Service Agent 均经 AgentBus CLI/TmuxConnector 协作，避免残留 `%51` 是 Quote Agent 的旧模型。
+- `docs/ARCHITECTURE.md` V0 链路图同步为 Orchestrator、AgentBus Agent、Quote Service Agent 均经 AgentBus CLI/TmuxConnector 协作，避免残留 `%51` 是 Quote Agent 的旧模型。
 - 历史指令文件 `AGY_IMPLEMENTATION_PROMPT.md` 不需要回写，它是当时委派记录。
 
 ## 5. 验证与汇报

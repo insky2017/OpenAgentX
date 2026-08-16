@@ -78,7 +78,7 @@ func TestTaskWaitServerHangFailsFastInternal(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"task": map[string]any{
 				"id":              id,
-				"sender_agent_id": "coordinator",
+				"sender_agent_id": "orchestrator",
 				"target_agent_id": "worker",
 				"status":          "running",
 			},
@@ -99,7 +99,7 @@ func TestTaskWaitServerHangFailsFastInternal(t *testing.T) {
 	waitStart := time.Now()
 	code, stdout, errOut := runWaitWithPipes("", []string{
 		"task-hang-1",
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--timeout", "10s",
 		"--socket", hangSocket,
 	}, 50*time.Millisecond)

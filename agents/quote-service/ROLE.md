@@ -6,7 +6,7 @@
 - **Role**: `quote`
 - **Runtime**: `agy`
 - **当前默认部署 Pane**: `%52`（注：通过 `--address` 覆盖实际 pane 时角色身份与职责不变）
-- **Coordinator**: `coordinator` (`%50`)
+- **Orchestrator**: `orchestrator` (`%50`)
 - **定位**: SteadyFlow 行情服务（Quote Service）的专职研发、集成与测试 Agent。
 
 ## 2. 职责范围与边界

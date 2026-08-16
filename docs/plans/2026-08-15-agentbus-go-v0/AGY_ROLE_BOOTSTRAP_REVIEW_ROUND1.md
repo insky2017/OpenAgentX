@@ -66,7 +66,7 @@
 要求：
 
 - README 目录树加入 `agents/`，架构说明加入 Role Manifest/Profile/Session Generation/Ready Gate。
-- 快速上手改为 `whoami → attach → session ready → task`；说明 Coordinator 用 `--no-notify` 后手工 ready，南向 Agent 从 Bootstrap 通知读取 generation 并 ready。
+- 快速上手改为 `whoami → attach → session ready → task`；说明 Orchestrator 用 `--no-notify` 后手工 ready，南向 Agent 从 Bootstrap 通知读取 generation 并 ready。
 - 增加 `agent bootstrap`、`session show` 与 `agent launch` 的简短说明。
 - 将 ROLE 中 `%50/%51/%52` 明确写成“当前默认部署 pane”，不能暗示 address override 后角色身份也改变。
 - 不删除设计文档；不要修改其中的兼容策略文字，Codex 会按用户最新决定单独同步设计决策。

@@ -8,7 +8,7 @@ updated_at: 2026-08-16
 
 ## 1. 背景与目标
 
-当前 Agent Registry 只让 Hub 知道 `agent_id/role/address`，不会自动把身份与职责写入 Agent 的上下文。现有 `%51/%52` 依赖人工发送“读取运行说明”的一次性提示；当前 `%50` Codex 也只因本次对话知道自己是 Coordinator。Runtime 重启、新 pane、上下文清空或未来新增南向 Agent 后，这种认知不会自动恢复。
+当前 Agent Registry 只让 Hub 知道 `agent_id/role/address`，不会自动把身份与职责写入 Agent 的上下文。现有 `%51/%52` 依赖人工发送“读取运行说明”的一次性提示；当前 `%50` Codex 也只因本次对话知道自己是 Orchestrator。Runtime 重启、新 pane、上下文清空或未来新增南向 Agent 后，这种认知不会自动恢复。
 
 本设计将角色认知变成 AgentBus 的正式生命周期协议：
 
@@ -30,7 +30,7 @@ session ready
 
 目标：
 
-1. Coordinator 与南向 Agent 使用同一种角色定义和握手协议。
+1. Orchestrator 与南向 Agent 使用同一种角色定义和握手协议。
 2. 每次启动、重新 attach 或主动 bootstrap 都生成新 generation，旧 ready 不能误确认新 session。
 3. Agent 未完成 `session ready` 时不能作为 Task sender/target 执行任务协议。
 4. 每条 Task 通知都携带简短身份提醒和 ROLE 路径，降低上下文压缩后的角色遗忘风险。
@@ -60,7 +60,7 @@ V0.1 不承诺兼容旧版 V0 的数据库、API 或命令行为。验收只以�
 ```text
 AgentBus/
 ├── agents/
-│   ├── coordinator/
+│   ├── orchestrator/
 │   │   ├── agent.yaml
 │   │   └── ROLE.md
 │   ├── agentbus-agent/
@@ -80,8 +80,8 @@ AgentBus/
 
 ```yaml
 version: 1
-id: coordinator
-role: coordinator
+id: orchestrator
+role: orchestrator
 runtime: codex
 connector: tmux
 address: "%50"
@@ -108,9 +108,9 @@ capabilities:
 三个首发 manifest：
 
 ```text
-coordinator     role=coordinator runtime=codex address=%50
-agentbus-agent  role=agentbus    runtime=agy   address=%51
-quote-service   role=quote       runtime=agy   address=%52
+orchestrator     role=orchestrator runtime=codex address=%50
+agentbus-agent   role=agentbus     runtime=agy   address=%51
+quote-service    role=quote        runtime=agy   address=%52
 ```
 
 ## 5. ROLE.md 最小内容
@@ -118,7 +118,7 @@ quote-service   role=quote       runtime=agy   address=%52
 每个 ROLE 文件必须明确：
 
 - `agent_id`、角色、Runtime 与当前职责；
-- 与 Coordinator/其他 Agent 的协作关系；
+- 与 Orchestrator/其他 Agent 的协作关系；
 - 可执行能力和禁止边界；
 - AgentBus CLI 路径发现方式；
 - `get → ack → status → complete/fail` 任务循环；
@@ -127,7 +127,7 @@ quote-service   role=quote       runtime=agy   address=%52
 - 启动后使用通知给出的 generation 调用 `session ready`；
 - context 重置或身份不确定时先 `agent whoami`，必要时请求重新 bootstrap，不能猜测角色。
 
-Coordinator ROLE 还必须规定：理解用户需求、拆解与路由、通过 AgentBus 委派、审查结果；除非任务明确要求，不替南向 Agent执行其实现职责。
+Orchestrator ROLE 还必须规定：理解用户需求、拆解与路由、通过 AgentBus 委派、审查结果；除非任务明确要求，不替南向 Agent执行其实现职责。
 
 ## 6. 数据模型
 
@@ -180,10 +180,10 @@ delivery_failed
 
 ```bash
 # 读取本地 canonical 身份，不需要 daemon
-agentbus agent whoami --config agents/coordinator/agent.yaml
+agentbus agent whoami --config agents/orchestrator/agent.yaml
 
 # 把已经运行的交互 Agent 绑定到 AgentBus，并注入 Bootstrap
-agentbus agent attach --config agents/coordinator/agent.yaml
+agentbus agent attach --config agents/orchestrator/agent.yaml
 agentbus agent attach --config agents/quote-service/agent.yaml --address %52
 
 # 重新注入角色（context reset / 手工恢复）；generation 自动 +1
@@ -215,7 +215,7 @@ agentbus agent launch --config agents/quote-service/agent.yaml -- <runtime-comma
 - 调用 daemon attach API，原子 upsert Agent/Profile/Session；
 - daemon 用 TmuxConnector probe 并注入 Bootstrap；
 - JSON 输出 profile、session generation 和 delivery disposition；
-- 支持 `--no-notify`，只用于当前 Coordinator 自绑定或自动化测试：仍创建 bootstrapping session，但不注入 pane；调用者随后必须手工读取 ROLE 并 `session ready`。
+- 支持 `--no-notify`，只用于当前 Orchestrator 自绑定或自动化测试：仍创建 bootstrapping session，但不注入 pane；调用者随后必须手工读取 ROLE 并 `session ready`。
 
 ### 7.3 `agent bootstrap`
 
@@ -306,9 +306,9 @@ Supplement 通知同样携带 `agent/role/ROLE.md`。所有字段拒绝 CR/LF/TA
 
 ## 11. 首发 ROLE 定义
 
-### Coordinator `%50`
+### Orchestrator `%50`
 
-- `id=coordinator role=coordinator runtime=codex`；
+- `id=orchestrator role=orchestrator runtime=codex`；
 - 用户北向入口；负责理解、拆解、路由、补充消息、watch 和审核；
 - 通过 AgentBus 委派，不把所有工作上下文混入同一 session；
 - 当前活跃会话可用 `attach --no-notify`，由操作者读取 ROLE 后手工 ready，避免向正在执行的 Codex turn 注入文本。
@@ -357,7 +357,7 @@ go build -o bin/agentbus ./cmd/agentbus
 代码审核通过后由 Codex 执行，不由实现 Agent 抢占真实 pane：
 
 1. 重启 `%53` daemon。
-2. `%50` 使用 Coordinator manifest `attach --no-notify`，Codex 读取 ROLE 后执行 ready。
+2. `%50` 使用 Orchestrator manifest `attach --no-notify`，Codex 读取 ROLE 后执行 ready。
 3. `%51/%52` 执行 attach，确认收到 Bootstrap、读取各自 ROLE 并 ready。
 4. `session show` 三者均为 ready，generation 一致。
 5. 对 `%51/%52` 各提交无副作用 Task，验证通知带 identity reminder、完整任务状态成功。

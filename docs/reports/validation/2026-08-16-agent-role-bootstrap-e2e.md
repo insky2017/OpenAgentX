@@ -13,7 +13,7 @@ AgentBus V0.1 已通过独立代码审核、全量 Go 验证、真实三 Agent �
 ## 2. 实际拓扑
 
 ```text
-%50  Codex Coordinator       agent_id=coordinator, role=coordinator
+%50  Codex Orchestrator       agent_id=orchestrator, role=orchestrator
 %51  AGY AgentBus Agent      agent_id=agentbus-agent, role=agentbus
 %52  AGY Quote Service Agent agent_id=quote-service, role=quote
 %53  AgentBus daemon/log
@@ -42,7 +42,7 @@ git diff --check                         PASS
 
 ## 4. 三 Agent Bootstrap
 
-- Coordinator 使用 `agents/coordinator/agent.yaml` 执行 `whoami` 与 `attach --no-notify`，读取 ROLE 后以 generation 1 ready；workspace 解析到 SteadyFlow 根目录。
+- Orchestrator 使用 `agents/orchestrator/agent.yaml` 执行 `whoami` 与 `attach --no-notify`，读取 ROLE 后以 generation 1 ready；workspace 解析到 SteadyFlow 根目录。
 - `%51` 收到 Bootstrap 短通知，读取 `agents/agentbus-agent/ROLE.md` 后以 generation 1 ready。
 - `%52` 收到 Bootstrap 短通知，读取 `agents/quote-service/ROLE.md` 后以 generation 1 ready。
 - 三者 `session show` 均返回 canonical Profile 和 `status=ready`。
@@ -69,7 +69,7 @@ status:  succeeded
 
 ## 6. Generation Ready Gate
 
-Quote Service Agent 重新 bootstrap 后进入 generation 2、`status=bootstrapping`。Coordinator 在其 ready 前立即 submit，服务返回：
+Quote Service Agent 重新 bootstrap 后进入 generation 2、`status=bootstrapping`。Orchestrator 在其 ready 前立即 submit，服务返回：
 
 ```text
 HTTP 409
@@ -90,7 +90,7 @@ status:  succeeded
 
 最终重启 `%53` daemon 后：
 
-- Coordinator：generation 1，ready；
+- Orchestrator：generation 1，ready；
 - AgentBus Agent：generation 1，ready；
 - Quote Service Agent：generation 2，ready；
 - 上述 Task、result、Profile 与 Session 均可重新读取；

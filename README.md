@@ -1,7 +1,7 @@
 # AgentBus (Go V0.2)
 
 AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。
-提供单机控制面，支持 Coordinator（如 Codex CLI）与 Worker（如 AGY CLI / Quote Service Agent）通过 Unix Domain Socket、Tmux 注入及 Runtime Lifecycle Hook 实现受控协作。
+提供单机控制面，支持 Orchestrator（如 Codex CLI）与 Worker（如 AGY CLI / Quote Service Agent）通过 Unix Domain Socket、Tmux 注入及 Runtime Lifecycle Hook 实现受控协作。
 
 ## 架构与安全模型
 
@@ -21,7 +21,7 @@ AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。
 - **Runtime Lifecycle Hook (AGY Ingress & Stop Gate)**：
   - 新增 `agentbus runtime agy-hook` 入口，无缝接收 Antigravity / AGY Lifecycle Hook（Pre/Post ToolUse、Pre/Post Invocation、Stop）；
   - 区分受管与未受管 Agent：未受管 Agent 中性放行 (`{}`)，不阻碍普通开发；受管 Agent 自动识别执行任务；
-  - 写入 `runtime.event_observed` 不可变事件，实时唤醒 Coordinator 观察者；
+  - 写入 `runtime.event_observed` 不可变事件，实时唤醒 Orchestrator 观察者；
   - **Stop 门禁**：在 active Task 未完成前，Stop Hook 强制返回 `decision: continue`，阻止 Agent 异常退出；Task 完成后放行；若遇到控制面异常，受管 Agent 的 Stop 判定 fail-closed 阻止停机；
 - **受控状态机与数据库级并发约束**：
   - 任务状态流转：`queued -> running -> succeeded / failed`，`queued -> canceled`；
@@ -36,7 +36,7 @@ AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。
 ## 真实 Tmux Pane 映射（当前默认部署）
 
 ```text
-%50  Codex Coordinator        (agents/coordinator/)
+%50  Codex Orchestrator        (agents/orchestrator/)
 %51  AGY AgentBus Agent       (agents/agentbus-agent/)
 %52  AGY Quote Service Agent  (agents/quote-service/)
 %53  AgentBus daemon/log pane
@@ -48,7 +48,7 @@ AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。
 ```text
 AgentBus/
 ├── agents/              # Canonical Agent 定义与规范
-│   ├── coordinator/     # Coordinator agent.yaml + ROLE.md
+│   ├── orchestrator/    # Orchestrator agent.yaml + ROLE.md
 │   ├── agentbus-agent/  # AgentBus Agent agent.yaml + ROLE.md
 │   └── quote-service/   # Quote Service Agent agent.yaml + ROLE.md
 ├── bin/                 # 构建产物 (git ignored)
@@ -106,10 +106,10 @@ CLI 默认自动推导 AgentBus 根目录下的绝对路径（`<AgentBus-Root>/r
 
 ```bash
 # 1. 验证 Manifest 配置与环境变量 (任何 Agent 可本地执行)
-./AgentBus/bin/agentbus agent whoami --config AgentBus/agents/coordinator/agent.yaml
+./AgentBus/bin/agentbus agent whoami --config AgentBus/agents/orchestrator/agent.yaml
 
-# 2. Attach Coordinator (北向交互方使用 --no-notify 免注入)
-./AgentBus/bin/agentbus agent attach --config AgentBus/agents/coordinator/agent.yaml --no-notify
+# 2. Attach Orchestrator (北向交互方使用 --no-notify 免注入)
+./AgentBus/bin/agentbus agent attach --config AgentBus/agents/orchestrator/agent.yaml --no-notify
 
 # 3. Attach 南向 Worker (自动向目标 pane 注入 Bootstrap 短通知)
 ./AgentBus/bin/agentbus agent attach --config AgentBus/agents/quote-service/agent.yaml --address %52
@@ -119,8 +119,8 @@ CLI 默认自动推导 AgentBus 根目录下的绝对路径（`<AgentBus-Root>/r
 ### 3. Session Ready 握手 (解封 Task Ready Gate)
 
 ```bash
-# Coordinator 确认就绪 (手工执行)
-./AgentBus/bin/agentbus session ready --agent coordinator --generation 1
+# Orchestrator 确认就绪 (手工执行)
+./AgentBus/bin/agentbus session ready --agent orchestrator --generation 1
 
 # Quote Service Agent 收到注入通知后确认就绪
 # 提示: [AgentBus Bootstrap] agent_id=quote-service role=quote generation=1. Read .../ROLE.md, then use AgentBus CLI: session ready --agent quote-service --generation 1
@@ -135,19 +135,19 @@ CLI 默认自动推导 AgentBus 根目录下的绝对路径（`<AgentBus-Root>/r
 双方均处于 `ready` 状态后，任务即可正常提交与执行：
 
 ```bash
-# 1. 发起任务 (Coordinator)
+# 1. 发起任务 (Orchestrator)
 ./AgentBus/bin/agentbus task submit \
-  --from coordinator \
+  --from orchestrator \
   --to quote-service \
   --idempotency-key task-001 \
   --content "检查 Quote Service 行情服务健康状态"
 
-# 2. 观察任务事件流 (Coordinator 调试/诊断用)
-./AgentBus/bin/agentbus task watch <task-id> --agent coordinator --after 0 --timeout 30s
+# 2. 观察任务事件流 (Orchestrator 调试/诊断用)
+./AgentBus/bin/agentbus task watch <task-id> --agent orchestrator --after 0 --timeout 30s
 
 # 2b. 单次阻塞等待任务完成 (Orchestrator 低 Token 推荐)
 # 内部长轮询等待，静默无噪声事件流，终态时输出单一 TaskDetail JSON Object
-./AgentBus/bin/agentbus task wait <task-id> --agent coordinator --timeout 30m
+./AgentBus/bin/agentbus task wait <task-id> --agent orchestrator --timeout 30m
 
 # 3. 接收通知与接单 (Quote Service Agent)
 ./AgentBus/bin/agentbus task get <task-id> --agent quote-service
@@ -156,8 +156,8 @@ CLI 默认自动推导 AgentBus 根目录下的绝对路径（`<AgentBus-Root>/r
 # 4. 上报执行进度 (Quote Service Agent)
 ./AgentBus/bin/agentbus task status <task-id> --agent quote-service --message "正在验证行情路由与日线缓存"
 
-# 5. 发起方补充消息 (Coordinator)
-./AgentBus/bin/agentbus task send <task-id> --from coordinator --content "补充检查 /portfolio 端点返回值"
+# 5. 发起方补充消息 (Orchestrator)
+./AgentBus/bin/agentbus task send <task-id> --from orchestrator --content "补充检查 /portfolio 端点返回值"
 
 # 6. 完成任务并提交结果 (Quote Service Agent)
 ./AgentBus/bin/agentbus task complete <task-id> --agent quote-service --result "Quote Service 接口与端点验证全部通过"

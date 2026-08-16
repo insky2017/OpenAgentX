@@ -122,8 +122,8 @@ func TestCLIFullWorkflow(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	// 1. Attach and ready coordinator
-	attachAndReadyCLIAgent(t, socketPath, dir, "coordinator", "coordinator", "tmux", "%50")
+	// 1. Attach and ready orchestrator
+	attachAndReadyCLIAgent(t, socketPath, dir, "orchestrator", "orchestrator", "tmux", "%50")
 
 	// 2. Attach and ready quote
 	attachAndReadyCLIAgent(t, socketPath, dir, "quote", "quote", "tmux", "%51")
@@ -142,7 +142,7 @@ func TestCLIFullWorkflow(t *testing.T) {
 
 	// 4. Get agent
 	code = cli.Execute([]string{
-		"agent", "get", "coordinator",
+		"agent", "get", "orchestrator",
 		"--socket", socketPath,
 	})
 	if code != 0 {
@@ -152,7 +152,7 @@ func TestCLIFullWorkflow(t *testing.T) {
 	// 5. Submit task
 	code = cli.Execute([]string{
 		"task", "submit",
-		"--from", "coordinator",
+		"--from", "orchestrator",
 		"--to", "quote",
 		"--idempotency-key", "cli-workflow-1",
 		"--content", "Check Quote Service CLI",
@@ -223,7 +223,7 @@ func TestCLIFullWorkflow(t *testing.T) {
 	// 9. Send supplemental message
 	code = cli.Execute([]string{
 		"task", "send", taskID,
-		"--from", "coordinator",
+		"--from", "orchestrator",
 		"--content", "Also verify /portfolio endpoint",
 		"--socket", socketPath,
 	})
@@ -261,10 +261,10 @@ func TestCLIFullWorkflow(t *testing.T) {
 		t.Fatalf("task complete failed with code %d", code)
 	}
 
-	// 11. Watch completed task (with --agent coordinator)
+	// 11. Watch completed task (with --agent orchestrator)
 	code = cli.Execute([]string{
 		"task", "watch", taskID,
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--after", "0",
 		"--timeout", "1s",
 		"--socket", socketPath,
@@ -284,7 +284,7 @@ func TestCLIFailAndCancelWorkflow(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	attachAndReadyCLIAgent(t, socketPath, dir, "c", "coordinator", "none", "")
+	attachAndReadyCLIAgent(t, socketPath, dir, "c", "orchestrator", "none", "")
 	attachAndReadyCLIAgent(t, socketPath, dir, "q", "quote", "none", "")
 
 	// Test Cancel on Queued task
@@ -829,16 +829,16 @@ func TestCLIRuntimeAGYHookAgentAndTaskResolution(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	roleCoord := filepath.Join(dir, "coord_ROLE.md")
-	_ = os.WriteFile(roleCoord, []byte("# Coord\nRole"), 0644)
+	roleOrch := filepath.Join(dir, "orch_ROLE.md")
+	_ = os.WriteFile(roleOrch, []byte("# Orch\nRole"), 0644)
 	roleQuote := filepath.Join(dir, "quote_ROLE.md")
 	_ = os.WriteFile(roleQuote, []byte("# Quote\nRole"), 0644)
 
-	// 1. Attach & ready coordinator (codex, %50)
-	coordAgent := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorTmux, Address: "%50"}
-	coordProf := &domain.AgentProfile{AgentID: "coordinator", ManifestVersion: 1, Runtime: "codex", Workspace: dir, ConfigPath: filepath.Join(dir, "c.yaml"), InstructionsPath: roleCoord, Capabilities: []string{"c"}}
-	sessCoord, _ := c.AttachAgent(ctx, service.AttachAgentRequest{Agent: coordAgent, Profile: coordProf, NoNotify: true})
-	_, _ = c.ReadySession(ctx, "coordinator", sessCoord.Session.Generation)
+	// 1. Attach & ready orchestrator (codex, %50)
+	orchAgent := &domain.Agent{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorTmux, Address: "%50"}
+	orchProf := &domain.AgentProfile{AgentID: "orchestrator", ManifestVersion: 1, Runtime: "codex", Workspace: dir, ConfigPath: filepath.Join(dir, "c.yaml"), InstructionsPath: roleOrch, Capabilities: []string{"c"}}
+	sessOrch, _ := c.AttachAgent(ctx, service.AttachAgentRequest{Agent: orchAgent, Profile: orchProf, NoNotify: true})
+	_, _ = c.ReadySession(ctx, "orchestrator", sessOrch.Session.Generation)
 
 	// 2. Attach & ready quote-service (agy, %51)
 	quoteAgent := &domain.Agent{ID: "quote-service", Role: "quote", Connector: domain.ConnectorTmux, Address: "%51"}
@@ -846,9 +846,9 @@ func TestCLIRuntimeAGYHookAgentAndTaskResolution(t *testing.T) {
 	sessQuote, _ := c.AttachAgent(ctx, service.AttachAgentRequest{Agent: quoteAgent, Profile: quoteProf, NoNotify: true})
 	_, _ = c.ReadySession(ctx, "quote-service", sessQuote.Session.Generation)
 
-	// 3. Submit task from coordinator to quote-service
+	// 3. Submit task from orchestrator to quote-service
 	submitResp, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote-service",
 		IdempotencyKey: "agy-hook-res-1",
 		Content:        "Work for quote",
@@ -890,7 +890,7 @@ func TestCLIRuntimeAGYHookAgentAndTaskResolution(t *testing.T) {
 	code, _, errOut = runWithPipes(`{}`, []string{
 		"runtime", "agy-hook",
 		"--event", "PreToolUse",
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--task", taskID,
 		"--socket", socketPath,
 	})
@@ -902,7 +902,7 @@ func TestCLIRuntimeAGYHookAgentAndTaskResolution(t *testing.T) {
 	code, stdout, errOut = runWithPipes(`{}`, []string{
 		"runtime", "agy-hook",
 		"--event", "Stop",
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--task", taskID,
 		"--socket", socketPath,
 	})
@@ -935,9 +935,9 @@ func TestCLIRuntimeAGYHookAgentAndTaskResolution(t *testing.T) {
 	}
 
 	// Case E: Active task selection ignores sender-only tasks
-	_ = os.Setenv("AGENTBUS_AGENT_ID", "coordinator")
+	_ = os.Setenv("AGENTBUS_AGENT_ID", "orchestrator")
 	_ = os.Unsetenv("TMUX_PANE")
-	// coordinator has 0 active tasks as target (it only sent taskID)
+	// orchestrator has 0 active tasks as target (it only sent taskID)
 	code, stdout, errOut = runWithPipes(`{}`, []string{
 		"runtime", "agy-hook",
 		"--event", "PreInvocation",
@@ -961,15 +961,15 @@ func TestCLIRuntimeAGYHookStopGate(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	roleCoord := filepath.Join(dir, "coord_ROLE.md")
-	_ = os.WriteFile(roleCoord, []byte("# Coord\nRole"), 0644)
+	roleOrch := filepath.Join(dir, "orch_ROLE.md")
+	_ = os.WriteFile(roleOrch, []byte("# Orch\nRole"), 0644)
 	roleQuote := filepath.Join(dir, "quote_ROLE.md")
 	_ = os.WriteFile(roleQuote, []byte("# Quote\nRole"), 0644)
 
-	coordAgent := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorNone}
-	coordProf := &domain.AgentProfile{AgentID: "coordinator", ManifestVersion: 1, Runtime: "codex", Workspace: dir, ConfigPath: filepath.Join(dir, "c.yaml"), InstructionsPath: roleCoord, Capabilities: []string{"c"}}
-	sessCoord, _ := c.AttachAgent(ctx, service.AttachAgentRequest{Agent: coordAgent, Profile: coordProf, NoNotify: true})
-	_, _ = c.ReadySession(ctx, "coordinator", sessCoord.Session.Generation)
+	orchAgent := &domain.Agent{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorNone}
+	orchProf := &domain.AgentProfile{AgentID: "orchestrator", ManifestVersion: 1, Runtime: "codex", Workspace: dir, ConfigPath: filepath.Join(dir, "c.yaml"), InstructionsPath: roleOrch, Capabilities: []string{"c"}}
+	sessOrch, _ := c.AttachAgent(ctx, service.AttachAgentRequest{Agent: orchAgent, Profile: orchProf, NoNotify: true})
+	_, _ = c.ReadySession(ctx, "orchestrator", sessOrch.Session.Generation)
 
 	quoteAgent := &domain.Agent{ID: "quote-service", Role: "quote", Connector: domain.ConnectorNone}
 	quoteProf := &domain.AgentProfile{AgentID: "quote-service", ManifestVersion: 1, Runtime: "agy", Workspace: dir, ConfigPath: filepath.Join(dir, "q.yaml"), InstructionsPath: roleQuote, Capabilities: []string{"q"}}
@@ -978,7 +978,7 @@ func TestCLIRuntimeAGYHookStopGate(t *testing.T) {
 
 	// 1. Submit task (status: queued)
 	submitResp, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "quote-service",
 		IdempotencyKey: "stop-gate-task-1",
 		Content:        "Stop gate test task",
@@ -1152,16 +1152,16 @@ func TestCLITaskWait(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	roleCoord := filepath.Join(dir, "coord_ROLE.md")
-	_ = os.WriteFile(roleCoord, []byte("# Coord\nRole"), 0644)
+	roleOrch := filepath.Join(dir, "orch_ROLE.md")
+	_ = os.WriteFile(roleOrch, []byte("# Orch\nRole"), 0644)
 	roleWorker := filepath.Join(dir, "worker_ROLE.md")
 	_ = os.WriteFile(roleWorker, []byte("# Worker\nRole"), 0644)
 
-	// Attach & ready coordinator
-	coordAgent := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorNone}
-	coordProf := &domain.AgentProfile{AgentID: "coordinator", ManifestVersion: 1, Runtime: "codex", Workspace: dir, ConfigPath: filepath.Join(dir, "c.yaml"), InstructionsPath: roleCoord, Capabilities: []string{"c"}}
-	sessCoord, _ := c.AttachAgent(ctx, service.AttachAgentRequest{Agent: coordAgent, Profile: coordProf, NoNotify: true})
-	_, _ = c.ReadySession(ctx, "coordinator", sessCoord.Session.Generation)
+	// Attach & ready orchestrator
+	orchAgent := &domain.Agent{ID: "orchestrator", Role: "orchestrator", Connector: domain.ConnectorNone}
+	orchProf := &domain.AgentProfile{AgentID: "orchestrator", ManifestVersion: 1, Runtime: "codex", Workspace: dir, ConfigPath: filepath.Join(dir, "c.yaml"), InstructionsPath: roleOrch, Capabilities: []string{"c"}}
+	sessOrch, _ := c.AttachAgent(ctx, service.AttachAgentRequest{Agent: orchAgent, Profile: orchProf, NoNotify: true})
+	_, _ = c.ReadySession(ctx, "orchestrator", sessOrch.Session.Generation)
 
 	// Attach & ready worker
 	workerAgent := &domain.Agent{ID: "worker", Role: "worker", Connector: domain.ConnectorNone}
@@ -1180,24 +1180,24 @@ func TestCLITaskWait(t *testing.T) {
 		t.Fatalf("expected code 1 for missing --agent, got %d: %s", code, errOut)
 	}
 
-	code, _, errOut = runWithPipes("", []string{"task", "wait", "task-123", "--agent", "coordinator", "--timeout", "invalid"})
+	code, _, errOut = runWithPipes("", []string{"task", "wait", "task-123", "--agent", "orchestrator", "--timeout", "invalid"})
 	if code != 1 || !strings.Contains(errOut, "invalid --timeout") {
 		t.Fatalf("expected code 1 for invalid --timeout, got %d: %s", code, errOut)
 	}
 
-	code, _, errOut = runWithPipes("", []string{"task", "wait", "task-123", "--agent", "coordinator", "--timeout", "0s"})
+	code, _, errOut = runWithPipes("", []string{"task", "wait", "task-123", "--agent", "orchestrator", "--timeout", "0s"})
 	if code != 1 || !strings.Contains(errOut, "must be greater than 0") {
 		t.Fatalf("expected code 1 for 0s timeout, got %d: %s", code, errOut)
 	}
 
-	code, _, errOut = runWithPipes("", []string{"task", "wait", "task-123", "--agent", "coordinator", "--timeout", "-5s"})
+	code, _, errOut = runWithPipes("", []string{"task", "wait", "task-123", "--agent", "orchestrator", "--timeout", "-5s"})
 	if code != 1 || !strings.Contains(errOut, "must be greater than 0") {
 		t.Fatalf("expected code 1 for negative timeout, got %d: %s", code, errOut)
 	}
 
 	// 2. Immediate return on already terminal task
 	submitResp1, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "worker",
 		IdempotencyKey: "wait-task-succeeded-1",
 		Content:        "Task to succeed",
@@ -1209,7 +1209,7 @@ func TestCLITaskWait(t *testing.T) {
 	_, _ = c.AckTask(ctx, taskID1, "worker")
 	_, _ = c.CompleteTask(ctx, taskID1, "worker", "Done 1")
 
-	code, stdout, errOut := runWithPipes("", []string{"task", "wait", taskID1, "--agent", "coordinator", "--socket", socketPath})
+	code, stdout, errOut := runWithPipes("", []string{"task", "wait", taskID1, "--agent", "orchestrator", "--socket", socketPath})
 	if code != 0 {
 		t.Fatalf("expected code 0 for succeeded task, got %d (err: %s)", code, errOut)
 	}
@@ -1223,7 +1223,7 @@ func TestCLITaskWait(t *testing.T) {
 
 	// 3. Failed task exit code 2
 	submitResp2, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "worker",
 		IdempotencyKey: "wait-task-failed-2",
 		Content:        "Task to fail",
@@ -1235,7 +1235,7 @@ func TestCLITaskWait(t *testing.T) {
 	_, _ = c.AckTask(ctx, taskID2, "worker")
 	_, _ = c.FailTask(ctx, taskID2, "worker", "Failed reason")
 
-	code, stdout, errOut = runWithPipes("", []string{"task", "wait", taskID2, "--agent", "coordinator", "--socket", socketPath})
+	code, stdout, errOut = runWithPipes("", []string{"task", "wait", taskID2, "--agent", "orchestrator", "--socket", socketPath})
 	if code != 2 {
 		t.Fatalf("expected code 2 for failed task, got %d (err: %s)", code, errOut)
 	}
@@ -1248,7 +1248,7 @@ func TestCLITaskWait(t *testing.T) {
 
 	// 4. Canceled task exit code 3
 	submitResp3, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "worker",
 		IdempotencyKey: "wait-task-canceled-3",
 		Content:        "Task to cancel",
@@ -1257,9 +1257,9 @@ func TestCLITaskWait(t *testing.T) {
 		t.Fatalf("SubmitTask 3 failed: %v", err)
 	}
 	taskID3 := submitResp3.Task.ID
-	_, _ = c.CancelTask(ctx, taskID3, "coordinator")
+	_, _ = c.CancelTask(ctx, taskID3, "orchestrator")
 
-	code, stdout, errOut = runWithPipes("", []string{"task", "wait", taskID3, "--agent", "coordinator", "--socket", socketPath})
+	code, stdout, errOut = runWithPipes("", []string{"task", "wait", taskID3, "--agent", "orchestrator", "--socket", socketPath})
 	if code != 3 {
 		t.Fatalf("expected code 3 for canceled task, got %d (err: %s)", code, errOut)
 	}
@@ -1272,7 +1272,7 @@ func TestCLITaskWait(t *testing.T) {
 
 	// 5. Blocking wait awakened by event and completion
 	submitResp4, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "worker",
 		IdempotencyKey: "wait-task-active-4",
 		Content:        "Task to run and complete",
@@ -1299,7 +1299,7 @@ func TestCLITaskWait(t *testing.T) {
 	waitStart := time.Now()
 	code, stdout, errOut = runWithPipes("", []string{
 		"task", "wait", taskID4,
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--timeout", "5s",
 		"--socket", socketPath,
 	})
@@ -1325,7 +1325,7 @@ func TestCLITaskWait(t *testing.T) {
 
 	// 6. Overall timeout exit code 4 (stdout must be strictly empty)
 	submitResp5, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "worker",
 		IdempotencyKey: "wait-task-timeout-5",
 		Content:        "Task to time out",
@@ -1338,7 +1338,7 @@ func TestCLITaskWait(t *testing.T) {
 	timeoutStart := time.Now()
 	code, stdout, errOut = runWithPipes("", []string{
 		"task", "wait", taskID5,
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--timeout", "100ms",
 		"--socket", socketPath,
 	})
@@ -1358,7 +1358,7 @@ func TestCLITaskWait(t *testing.T) {
 	}
 
 	// Clean up taskID5 to free up worker
-	_, _ = c.CancelTask(ctx, taskID5, "coordinator")
+	_, _ = c.CancelTask(ctx, taskID5, "orchestrator")
 
 	// 7. Attached but not ready caller -> code 1
 	unreadyAgent := &domain.Agent{ID: "unready-agent", Role: "worker", Connector: domain.ConnectorNone}
@@ -1379,7 +1379,7 @@ func TestCLITaskWait(t *testing.T) {
 
 	// 8. Session loses ready state during wait -> quickly returns code 1 (does not wait for full timeout)
 	submitResp6, err := c.SubmitTask(ctx, service.SubmitTaskRequest{
-		SenderAgentID:  "coordinator",
+		SenderAgentID:  "orchestrator",
 		TargetAgentID:  "worker",
 		IdempotencyKey: "wait-task-lost-ready-6",
 		Content:        "Task where session loses ready",
@@ -1391,8 +1391,8 @@ func TestCLITaskWait(t *testing.T) {
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		// Bootstrap coordinator again -> puts session into bootstrapping (not ready)
-		_, _ = c.BootstrapAgent(context.Background(), "coordinator")
+		// Bootstrap orchestrator again -> puts session into bootstrapping (not ready)
+		_, _ = c.BootstrapAgent(context.Background(), "orchestrator")
 		// Worker records an event to wake up the waiting broker
 		_, _ = c.RecordRuntimeEvent(context.Background(), taskID6, service.RecordRuntimeEventRequest{
 			Agent:   "worker",
@@ -1405,7 +1405,7 @@ func TestCLITaskWait(t *testing.T) {
 	lostReadyStart := time.Now()
 	code, stdout, errOut = runWithPipes("", []string{
 		"task", "wait", taskID6,
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--timeout", "10s",
 		"--socket", socketPath,
 	})
@@ -1422,7 +1422,7 @@ func TestCLITaskWait(t *testing.T) {
 	deadSocket := filepath.Join(os.TempDir(), "nonexistent-wait-dead.sock")
 	code, _, errOut = runWithPipes("", []string{
 		"task", "wait", taskID1,
-		"--agent", "coordinator",
+		"--agent", "orchestrator",
 		"--socket", deadSocket,
 	})
 	if code != 1 || errOut == "" {

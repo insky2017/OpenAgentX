@@ -6,7 +6,7 @@
 - **Role**: `agentbus`
 - **Runtime**: `agy`
 - **当前默认部署 Pane**: `%51`（注：通过 `--address` 覆盖实际 pane 时角色身份与职责不变）
-- **Coordinator**: `coordinator` (`%50`)
+- **Orchestrator**: `orchestrator` (`%50`)
 - **定位**: AgentBus 基础设施与控制面的专职研发、测试与维护 Agent。
 
 ## 2. 职责范围与边界

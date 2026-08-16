@@ -128,7 +128,7 @@ func TestNotifySupplement(t *testing.T) {
 	c := connector.NewTmuxConnector(runner)
 
 	ctx := context.Background()
-	res := c.NotifyTask(ctx, "%50", "coordinator", "coordinator", "/path/to/coord/ROLE.md", "task-xyz", false)
+	res := c.NotifyTask(ctx, "%50", "orchestrator", "orchestrator", "/path/to/orch/ROLE.md", "task-xyz", false)
 
 	if res.Disposition != connector.DispositionNotified {
 		t.Fatalf("expected disposition 'notified', got '%s'", res.Disposition)
@@ -137,7 +137,7 @@ func TestNotifySupplement(t *testing.T) {
 	runner.mu.Lock()
 	defer runner.mu.Unlock()
 
-	expectedText := "[AgentBus][agent=coordinator role=coordinator] New message for task task-xyz. If role context is uncertain, read /path/to/coord/ROLE.md. Use AgentBus CLI: task get task-xyz --agent coordinator"
+	expectedText := "[AgentBus][agent=orchestrator role=orchestrator] New message for task task-xyz. If role context is uncertain, read /path/to/orch/ROLE.md. Use AgentBus CLI: task get task-xyz --agent orchestrator"
 	if runner.calls[1].Stdin != expectedText {
 		t.Fatalf("expected stdin '%s', got '%s'", expectedText, runner.calls[1].Stdin)
 	}

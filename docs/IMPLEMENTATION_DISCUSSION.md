@@ -11,14 +11,14 @@ updated_at: 2026-08-15
 
 ## 0. 2026-08-15 实施方向调整
 
-用户进一步明确了首版运行形态：现有 tmux `AgentBus` session 中的 Codex CLI 是 Coordinator Agent；当前负责 AgentBus 代码的 AGY CLI 作为 AgentBus Agent，另一个 AGY CLI 作为 Quote Service Agent。三者都作为 AgentBus 节点接入，而不是由 Hub 启动新的 batch Runtime。
+用户进一步明确了首版运行形态：现有 tmux `AgentBus` session 中的 Codex CLI 是 Orchestrator Agent；当前负责 AgentBus 代码的 AGY CLI 作为 AgentBus Agent，另一个 AGY CLI 作为 Quote Service Agent。三者都作为 AgentBus 节点接入，而不是由 Hub 启动新的 batch Runtime。
 
 因此 V0 调整为：
 
 ```text
 User
   ↓
-Codex Coordinator（现有 tmux pane）
+Codex Orchestrator（现有 tmux pane）
   ↓ AgentBus CLI
 AgentBus daemon（Go）
   ↓ TmuxConnector 通知
@@ -26,7 +26,7 @@ AGY AgentBus Agent / AGY Quote Service Agent（现有 tmux panes）
   ↓ AgentBus CLI 显式 ACK/状态/结果
 AgentBus
   ↓ watch/get
-Codex Coordinator
+Codex Orchestrator
 ```
 
 本轮采用以下新决策：
@@ -37,7 +37,7 @@ Codex Coordinator
 - TmuxConnector 只负责逻辑 Agent 与 pane 的映射、存活检查和短通知注入；
 - 完整任务内容由 Agent 主动调用 `task get` 获取；
 - 完成状态由 Agent 显式调用 `task ack/status/complete/fail` 上报，不解析 pane 输出推断；
-- Coordinator/Quote 是业务角色，Codex/AGY 是 Runtime 类型，二者不混为一个字段。
+- Orchestrator/Quote 是业务角色，Codex/AGY 是 Runtime 类型，二者不混为一个字段。
 
 早期 ACP-first、MCP 和 AgyBatch 分析仍作为后续演进依据保留，不再属于本次最小实现范围。
 

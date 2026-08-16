@@ -48,7 +48,7 @@
 更新 README：
 
 ```text
-%50  Codex Coordinator
+%50  Codex Orchestrator
 %51  AGY AgentBus Agent
 %52  AGY Quote Service Agent
 %53  AgentBus daemon/log pane

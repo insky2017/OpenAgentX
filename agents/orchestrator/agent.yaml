@@ -1,6 +1,6 @@
 version: 1
-id: coordinator
-role: coordinator
+id: orchestrator
+role: orchestrator
 runtime: codex
 connector: tmux
 address: "%50"
