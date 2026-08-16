@@ -17,7 +17,28 @@ const (
 	EventTaskSucceeded      EventType = "task.succeeded"
 	EventTaskFailed         EventType = "task.failed"
 	EventTaskCanceled       EventType = "task.canceled"
+	EventRuntimeObserved    EventType = "runtime.event_observed"
 )
+
+const (
+	AGYEventPreToolUse     = "PreToolUse"
+	AGYEventPostToolUse    = "PostToolUse"
+	AGYEventPreInvocation  = "PreInvocation"
+	AGYEventPostInvocation = "PostInvocation"
+	AGYEventStop           = "Stop"
+)
+
+var AllowedAGYEvents = map[string]bool{
+	AGYEventPreToolUse:     true,
+	AGYEventPostToolUse:    true,
+	AGYEventPreInvocation:  true,
+	AGYEventPostInvocation: true,
+	AGYEventStop:           true,
+}
+
+func IsValidAGYEvent(ev string) bool {
+	return AllowedAGYEvents[ev]
+}
 
 type Event struct {
 	Sequence     int64     `json:"sequence"`

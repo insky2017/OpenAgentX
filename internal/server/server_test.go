@@ -556,3 +556,120 @@ func TestServerSocketCleanupOwnershipRace(t *testing.T) {
 	}
 	connB.Close()
 }
+
+func TestServerRecordRuntimeEventEndpoint(t *testing.T) {
+	client, _, dir, _, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	coordCfg, coordRole := createServerTestProfileData(dir, "coordinator", "codex")
+	quoteCfg, quoteRole := createServerTestProfileData(dir, "quote", "agy")
+
+	// 1. Attach and ready coordinator
+	coordBody, _ := json.Marshal(map[string]any{
+		"agent": map[string]any{
+			"id":        "coordinator",
+			"role":      "coordinator",
+			"connector": "tmux",
+			"address":   "%50",
+			"status":    "registered",
+		},
+		"profile": map[string]any{
+			"agent_id":          "coordinator",
+			"manifest_version":  1,
+			"runtime":           "codex",
+			"workspace":         dir,
+			"config_path":       coordCfg,
+			"instructions_path": coordRole,
+			"capabilities":      []string{"understand"},
+		},
+		"no_notify": true,
+	})
+	resp, _ := client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(coordBody))
+	var attachCoordResp struct {
+		Session *domain.AgentSession `json:"session"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&attachCoordResp)
+	readyCoordBody, _ := json.Marshal(map[string]any{"generation": attachCoordResp.Session.Generation})
+	_, _ = client.Post("http://unix/api/v1/sessions/coordinator/ready", "application/json", bytes.NewReader(readyCoordBody))
+
+	// 2. Attach and ready quote
+	quoteBody, _ := json.Marshal(map[string]any{
+		"agent": map[string]any{
+			"id":        "quote",
+			"role":      "quote",
+			"connector": "tmux",
+			"address":   "%51",
+			"status":    "registered",
+		},
+		"profile": map[string]any{
+			"agent_id":          "quote",
+			"manifest_version":  1,
+			"runtime":           "agy",
+			"workspace":         dir,
+			"config_path":       quoteCfg,
+			"instructions_path": quoteRole,
+			"capabilities":      []string{"quote"},
+		},
+		"no_notify": true,
+	})
+	resp, _ = client.Post("http://unix/api/v1/agents/attach", "application/json", bytes.NewReader(quoteBody))
+	var attachQuoteResp struct {
+		Session *domain.AgentSession `json:"session"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&attachQuoteResp)
+	readyQuoteBody, _ := json.Marshal(map[string]any{"generation": attachQuoteResp.Session.Generation})
+	_, _ = client.Post("http://unix/api/v1/sessions/quote/ready", "application/json", bytes.NewReader(readyQuoteBody))
+
+	// 3. Submit task
+	submitBody, _ := json.Marshal(map[string]any{
+		"sender_agent_id": "coordinator",
+		"target_agent_id": "quote",
+		"idempotency_key": "rt-server-1",
+		"content":         "Server runtime event test",
+	})
+	resp, err := client.Post("http://unix/api/v1/tasks", "application/json", bytes.NewReader(submitBody))
+	if err != nil || resp.StatusCode != http.StatusCreated {
+		t.Fatalf("Submit task failed: %v, status: %d", err, resp.StatusCode)
+	}
+	var submitResp struct {
+		Task *domain.Task `json:"task"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&submitResp)
+	taskID := submitResp.Task.ID
+
+	// 4. POST runtime event via HTTP
+	rtEventBody, _ := json.Marshal(map[string]any{
+		"agent":      "quote",
+		"runtime":    "agy",
+		"event":      "PreToolUse",
+		"session_id": "sess-http-1",
+		"payload": map[string]any{
+			"tool": "read_file",
+		},
+	})
+	resp, err = client.Post("http://unix/api/v1/tasks/"+taskID+"/runtime-events", "application/json", bytes.NewReader(rtEventBody))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("POST runtime event failed: %v, status: %d", err, resp.StatusCode)
+	}
+	var recResp service.RecordRuntimeEventResponse
+	if err := json.NewDecoder(resp.Body).Decode(&recResp); err != nil {
+		t.Fatalf("Decode runtime event response failed: %v", err)
+	}
+	if recResp.TaskID != taskID || recResp.EventSequence <= 0 {
+		t.Fatalf("unexpected record response: %+v", recResp)
+	}
+
+	// 5. POST runtime event with multiple JSON values -> 400
+	multiJSONBody := `{"agent":"quote","runtime":"agy","event":"PreToolUse","payload":{"tool":"read_file"}}{"another":"json"}`
+	resp, err = client.Post("http://unix/api/v1/tasks/"+taskID+"/runtime-events", "application/json", strings.NewReader(multiJSONBody))
+	if err != nil || resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("expected 400 for multi-json body, got: status=%d, err=%v", resp.StatusCode, err)
+	}
+
+	// 6. POST runtime event with trailing garbage -> 400
+	trailingBody := `{"agent":"quote","runtime":"agy","event":"PreToolUse","payload":{"tool":"read_file"}} trailing garbage`
+	resp, err = client.Post("http://unix/api/v1/tasks/"+taskID+"/runtime-events", "application/json", strings.NewReader(trailingBody))
+	if err != nil || resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("expected 400 for trailing body, got: status=%d, err=%v", resp.StatusCode, err)
+	}
+}

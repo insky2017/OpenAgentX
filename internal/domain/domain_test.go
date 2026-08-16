@@ -162,3 +162,32 @@ instructions: "NONEXISTENT.md"
 		t.Fatalf("expected error for missing ROLE file, got nil")
 	}
 }
+
+func TestAGYEventValidation(t *testing.T) {
+	validEvents := []string{
+		domain.AGYEventPreToolUse,
+		domain.AGYEventPostToolUse,
+		domain.AGYEventPreInvocation,
+		domain.AGYEventPostInvocation,
+		domain.AGYEventStop,
+	}
+	for _, ev := range validEvents {
+		if !domain.IsValidAGYEvent(ev) {
+			t.Errorf("expected valid event for '%s', got false", ev)
+		}
+	}
+
+	invalidEvents := []string{
+		"",
+		"pretooluse",
+		"STOP",
+		"ToolUse",
+		"Start",
+		"UnknownEvent",
+	}
+	for _, ev := range invalidEvents {
+		if domain.IsValidAGYEvent(ev) {
+			t.Errorf("expected invalid event for '%s', got true", ev)
+		}
+	}
+}

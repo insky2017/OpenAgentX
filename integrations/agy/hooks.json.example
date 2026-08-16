@@ -1,0 +1,25 @@
+{
+  "agentbus-lifecycle": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "../AgentBus/bin/agentbus runtime agy-hook --event PreInvocation --control-timeout 5s",
+        "timeout": 10
+      }
+    ],
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "../AgentBus/bin/agentbus runtime agy-hook --event PostInvocation --control-timeout 5s",
+        "timeout": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "../AgentBus/bin/agentbus runtime agy-hook --event Stop --control-timeout 5s",
+        "timeout": 10
+      }
+    ]
+  }
+}

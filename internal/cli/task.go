@@ -10,12 +10,21 @@ import (
 	"time"
 
 	"agentbus/internal/client"
+	"agentbus/internal/domain"
 	"agentbus/internal/service"
+)
+
+const (
+	ExitCodeTaskSucceeded = 0
+	ExitCodeGeneralError  = 1
+	ExitCodeTaskFailed    = 2
+	ExitCodeTaskCanceled  = 3
+	ExitCodeWaitTimeout   = 4
 )
 
 func runTask(args []string) int {
 	if len(args) == 0 {
-		fmt.Fprintf(os.Stderr, "Usage: agentbus task <submit|get|list|ack|status|send|complete|fail|cancel|watch> [flags]\n")
+		fmt.Fprintf(os.Stderr, "Usage: agentbus task <submit|get|list|ack|status|send|complete|fail|cancel|watch|wait> [flags]\n")
 		return 1
 	}
 
@@ -43,6 +52,8 @@ func runTask(args []string) int {
 		return runTaskCancel(subArgs)
 	case "watch":
 		return runTaskWatch(subArgs)
+	case "wait":
+		return runTaskWait(subArgs)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown task subcommand: %s\n", sub)
 		return 1
@@ -442,4 +453,139 @@ func runTaskWatch(args []string) int {
 	}
 
 	return 0
+}
+
+func runTaskWait(args []string) int {
+	return runTaskWaitWithPollInterval(args, 30*time.Second)
+}
+
+func runTaskWaitWithPollInterval(args []string, pollInterval time.Duration) int {
+	fs := flag.NewFlagSet("task wait", flag.ContinueOnError)
+	idFlag := fs.String("id", "", "Task ID")
+	agentID := fs.String("agent", "", "Caller agent ID (required)")
+	timeoutStr := fs.String("timeout", "30m", "Overall wait timeout (default: 30m, must be > 0)")
+	socketPath := fs.String("socket", "", "Unix socket path")
+
+	if err := fs.Parse(ReorderArgs(args)); err != nil {
+		return ExitCodeGeneralError
+	}
+
+	taskID := extractPositionalID(fs, idFlag)
+	if strings.TrimSpace(taskID) == "" {
+		PrintError(fmt.Errorf("task ID is required (e.g. agentbus task wait <task-id> --agent <caller-agent-id> --timeout 30m)"))
+		return ExitCodeGeneralError
+	}
+	if strings.TrimSpace(*agentID) == "" {
+		PrintError(fmt.Errorf("flag --agent is required to wait for task"))
+		return ExitCodeGeneralError
+	}
+
+	timeout, err := time.ParseDuration(*timeoutStr)
+	if err != nil {
+		PrintError(fmt.Errorf("invalid --timeout '%s': %w", *timeoutStr, err))
+		return ExitCodeGeneralError
+	}
+	if timeout <= 0 {
+		PrintError(fmt.Errorf("--timeout must be greater than 0"))
+		return ExitCodeGeneralError
+	}
+	if pollInterval <= 0 {
+		pollInterval = 30 * time.Second
+	}
+
+	c := client.NewClient(*socketPath)
+	overallCtx, overallCancel := context.WithTimeout(context.Background(), timeout)
+	defer overallCancel()
+
+	// 1. Initial check: if task is already terminal, return immediately
+	detail, err := c.GetTask(overallCtx, taskID, *agentID)
+	if err != nil {
+		PrintError(err)
+		return ExitCodeGeneralError
+	}
+	if detail.Task != nil && detail.Task.IsTerminal() {
+		PrintJSON(detail)
+		return exitCodeForTaskStatus(detail.Task.Status)
+	}
+
+	var currSeq int64 = 0
+
+	// 2. Long-polling wait loop
+	for {
+		if overallCtx.Err() != nil {
+			break
+		}
+
+		deadline, ok := overallCtx.Deadline()
+		if !ok || time.Now().After(deadline) {
+			break
+		}
+		remTimeout := time.Until(deadline)
+		if remTimeout <= 0 {
+			break
+		}
+
+		// Single HTTP long-poll timeout capped at pollInterval (default 30s)
+		pollTimeout := remTimeout
+		if pollTimeout > pollInterval {
+			pollTimeout = pollInterval
+		}
+
+		grace := 2 * time.Second
+		if pollInterval < 1*time.Second {
+			grace = 100 * time.Millisecond
+		}
+
+		pollCtx, pollCancel := context.WithTimeout(overallCtx, pollTimeout+grace)
+		events, err := c.GetEvents(pollCtx, taskID, *agentID, currSeq, pollTimeout)
+		pollCancel()
+
+		if err != nil {
+			if overallCtx.Err() != nil {
+				break
+			}
+			PrintError(err)
+			return ExitCodeGeneralError
+		}
+
+		for _, evt := range events {
+			if evt.Sequence > currSeq {
+				currSeq = evt.Sequence
+			}
+		}
+
+		// Re-fetch latest task after events or long poll
+		latestDetail, err := c.GetTask(overallCtx, taskID, *agentID)
+		if err != nil {
+			if overallCtx.Err() != nil {
+				break
+			}
+			PrintError(err)
+			return ExitCodeGeneralError
+		}
+		if latestDetail.Task != nil && latestDetail.Task.IsTerminal() {
+			PrintJSON(latestDetail)
+			return exitCodeForTaskStatus(latestDetail.Task.Status)
+		}
+		if overallCtx.Err() != nil {
+			break
+		}
+	}
+
+	// 3. Timed out
+	fmt.Fprintf(os.Stderr, "Error: timed out waiting for task %s after %v\n", taskID, timeout)
+	return ExitCodeWaitTimeout
+}
+
+func exitCodeForTaskStatus(status domain.TaskStatus) int {
+	switch status {
+	case domain.TaskStatusSucceeded:
+		return ExitCodeTaskSucceeded
+	case domain.TaskStatusFailed:
+		return ExitCodeTaskFailed
+	case domain.TaskStatusCanceled:
+		return ExitCodeTaskCanceled
+	default:
+		return ExitCodeGeneralError
+	}
 }

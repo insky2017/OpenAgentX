@@ -1,7 +1,7 @@
-# AgentBus (Go V0.1)
+# AgentBus (Go V0.2)
 
 AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。
-提供单机控制面，支持 Coordinator（如 Codex CLI）与 Worker（如 AGY CLI / Quote Service Agent）通过 Unix Domain Socket 和 Tmux 注入实现受控协作。
+提供单机控制面，支持 Coordinator（如 Codex CLI）与 Worker（如 AGY CLI / Quote Service Agent）通过 Unix Domain Socket、Tmux 注入及 Runtime Lifecycle Hook 实现受控协作。
 
 ## 架构与安全模型
 
@@ -18,6 +18,11 @@ AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。
   - 在服务层与数据库事务层强制双重拦截：任务发起方与目标方必须均处于 `ready` 会话状态；
   - 处于 `bootstrapping` 或 `delivery_failed` 状态的 Agent 无法创建任务或执行 `ack/status/send/complete/fail/cancel` 写操作，直接返回 409 `AGENT_NOT_READY`；
   - `session ready` 采用 CAS 校验请求 generation 与当前活动 generation 一致性；
+- **Runtime Lifecycle Hook (AGY Ingress & Stop Gate)**：
+  - 新增 `agentbus runtime agy-hook` 入口，无缝接收 Antigravity / AGY Lifecycle Hook（Pre/Post ToolUse、Pre/Post Invocation、Stop）；
+  - 区分受管与未受管 Agent：未受管 Agent 中性放行 (`{}`)，不阻碍普通开发；受管 Agent 自动识别执行任务；
+  - 写入 `runtime.event_observed` 不可变事件，实时唤醒 Coordinator 观察者；
+  - **Stop 门禁**：在 active Task 未完成前，Stop Hook 强制返回 `decision: continue`，阻止 Agent 异常退出；Task 完成后放行；若遇到控制面异常，受管 Agent 的 Stop 判定 fail-closed 阻止停机；
 - **受控状态机与数据库级并发约束**：
   - 任务状态流转：`queued -> running -> succeeded / failed`，`queued -> canceled`；
   - SQLite 部分唯一索引（`uq_tasks_target_active`）在数据库层面硬性保证每个 target 最多一个处于 `queued`/`running` 状态的 Task；
@@ -51,9 +56,11 @@ AgentBus/
 │   └── agentbus/        # main 入口
 ├── data/                # SQLite 数据文件 (git ignored)
 ├── docs/                # 架构、设计与实施文档
+├── integrations/        # 外部 Runtime 集成配置模板
+│   └── agy/             # AGY (Antigravity) hooks.json 示例
 ├── internal/
 │   ├── client/          # Unix socket HTTP client 与路径解析
-│   ├── cli/             # CLI 子命令实现
+│   ├── cli/             # CLI 子命令实现 (serve, agent, session, task, runtime)
 │   ├── connector/       # TmuxConnector 通知与探针
 │   ├── domain/          # 核心领域模型、Manifest 解析与校验
 │   ├── server/          # Unix socket HTTP 服务器与安全探测
@@ -135,8 +142,12 @@ CLI 默认自动推导 AgentBus 根目录下的绝对路径（`<AgentBus-Root>/r
   --idempotency-key task-001 \
   --content "检查 Quote Service 行情服务健康状态"
 
-# 2. 观察任务事件 (Coordinator)
+# 2. 观察任务事件流 (Coordinator 调试/诊断用)
 ./AgentBus/bin/agentbus task watch <task-id> --agent coordinator --after 0 --timeout 30s
+
+# 2b. 单次阻塞等待任务完成 (Orchestrator 低 Token 推荐)
+# 内部长轮询等待，静默无噪声事件流，终态时输出单一 TaskDetail JSON Object
+./AgentBus/bin/agentbus task wait <task-id> --agent coordinator --timeout 30m
 
 # 3. 接收通知与接单 (Quote Service Agent)
 ./AgentBus/bin/agentbus task get <task-id> --agent quote-service
@@ -152,6 +163,16 @@ CLI 默认自动推导 AgentBus 根目录下的绝对路径（`<AgentBus-Root>/r
 ./AgentBus/bin/agentbus task complete <task-id> --agent quote-service --result "Quote Service 接口与端点验证全部通过"
 ```
 
+#### `task wait` 退出码契约
+
+| 退出码 | 含义 | 说明 |
+|---|---|---|
+| `0` | **`succeeded`** | 任务成功终态，stdout 输出包含 `task` 与 `messages` 的 `TaskDetail` JSON |
+| `1` | **参数 / 鉴权错误** | 缺少参数、非法 timeout、调用方未就绪或无法连接 daemon |
+| `2` | **`failed`** | 任务失败终态，stdout 输出包含失败详情的 `TaskDetail` JSON |
+| `3` | **`canceled`** | 任务已被取消，stdout 输出包含取消详情的 `TaskDetail` JSON |
+| `4` | **等待超时 (`timeout`)** | 在指定 `--timeout` 内未达到终态，stderr 输出超时诊断 |
+
 ### 5. 辅助命令
 
 ```bash
@@ -159,5 +180,24 @@ CLI 默认自动推导 AgentBus 根目录下的绝对路径（`<AgentBus-Root>/r
 ./AgentBus/bin/agentbus agent bootstrap --id quote-service
 
 # 受管启动新 Agent 进程 (需在 tmux pane 环境中执行，自动注入环境变量并在指定延迟后发起 attach)
-./AgentBus/bin/agentbus agent launch --config AgentBus/agents/quote-service/agent.yaml --bootstrap-delay 2s -- <command> [args...]
+# 生产运维建议：慢启动 Runtime (如需网络初始化或大模型握手) 建议设置 --bootstrap-delay 10s
+./AgentBus/bin/agentbus agent launch --config AgentBus/agents/quote-service/agent.yaml --bootstrap-delay 10s -- <command> [args...]
 ```
+
+*运维说明：若 Agent 启动较慢导致初始 bootstrap 通知未被消费，待 Agent 进程稳定进入可用状态后，可随时安全执行 `./AgentBus/bin/agentbus agent bootstrap --id <agent-id>` 重新注入通知并完成 ready 握手。*
+
+### 6. Runtime Lifecycle Hook (AGY Ingress)
+
+```bash
+# AGY Hook 自动调用（从 stdin 传入事件上下文，支持 --control-timeout 5s）
+cat << 'EOF' | ./AgentBus/bin/agentbus runtime agy-hook --event Stop --control-timeout 5s
+{
+  "conversationId": "conv-123"
+}
+EOF
+```
+
+- **配置加载时机**：Hook 配置由 AGY CLI 在启动初始化时加载。修改 `.agents/hooks.json` 后，已在运行的 AGY 进程必须重启才能生效。
+- **强受管身份建议**：生产及长期运行的 Domain Agent 应当使用 `agentbus agent launch` 启动，自动注入 `AGENTBUS_AGENT_ID`，确保控制面异常或网络抖动时 `Stop` 严格 fail closed。
+- **受管边界说明**：显式 `--agent` 或 `AGENTBUS_AGENT_ID` 是强受管身份，控制面超时或异常时 `Stop` 严格 fail closed（返回 `continue` 阻止停机）；未受管 Agent（`--agent auto` 且无环境变量/无 ready Session）中性放行（输出 `{}` 并退出 0）。
+- **任务终态事实源**：Hook 仅提供生命周期事件观察与安全 Stop 门禁；任务的终态事实始终由受管 Agent 显式调用 `task complete`、`task fail` 或发起方 `task cancel` 确定。

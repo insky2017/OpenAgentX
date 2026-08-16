@@ -61,11 +61,13 @@ func Execute(args []string) int {
 		return runSession(cmdArgs)
 	case "task":
 		return runTask(cmdArgs)
+	case "runtime":
+		return runRuntime(cmdArgs)
 	case "help", "--help", "-h":
 		printUsage()
 		return 0
 	case "version", "--version", "-v":
-		fmt.Println("AgentBus Go V0.1 (1.22)")
+		fmt.Println("AgentBus Go V0.2 (1.22)")
 		return 0
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", cmd)
@@ -75,7 +77,7 @@ func Execute(args []string) int {
 }
 
 func printUsage() {
-	fmt.Fprintf(os.Stderr, `AgentBus - Heterogeneous Agent Runtime Communication & Control Plane (Go V0.1)
+	fmt.Fprintf(os.Stderr, `AgentBus - Heterogeneous Agent Runtime Communication & Control Plane (Go V0.2)
 
 Usage:
   agentbus <command> [subcommand] [flags]
@@ -84,7 +86,8 @@ Commands:
   serve                 Start the AgentBus daemon server
   agent                 Manage registered agents (whoami, attach, bootstrap, launch, register, list, get)
   session               Manage agent sessions (ready, show)
-  task                  Manage tasks (submit, get, list, ack, status, send, complete, fail, cancel, watch)
+  task                  Manage tasks (submit, get, list, ack, status, send, complete, fail, cancel, watch, wait)
+  runtime               Runtime hooks and integrations (agy-hook)
   help                  Show help
   version               Show version information
 
@@ -114,5 +117,6 @@ Examples:
   agentbus task fail <task-id> --agent quote-service --error "Route error"
   agentbus task cancel <task-id> --agent coordinator
   agentbus task watch <task-id> --agent coordinator --after 0 --timeout 30s
+  agentbus task wait <task-id> --agent coordinator --timeout 30m
 `)
 }

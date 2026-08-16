@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -556,5 +557,216 @@ func TestServiceUpdateSessionDeliveryCASFailure(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "simulated CAS error") || !strings.Contains(err.Error(), "tmux paste failed") {
 		t.Fatalf("expected combined error context, got: %v", err)
+	}
+}
+
+func TestServiceRecordRuntimeEvent(t *testing.T) {
+	runner := &mockRunner{probeOutput: "%51 0\n"}
+	svc, dir, cleanup := setupTestService(t, runner)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	// 1. Setup agents: coordinator (codex) and quote (agy)
+	coordProf := createServiceTestProfile(dir, "coordinator", "codex")
+	coordAgent := &domain.Agent{ID: "coordinator", Role: "coordinator", Connector: domain.ConnectorNone}
+	sessCoord, _ := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: coordAgent, Profile: coordProf, NoNotify: true})
+	_, _ = svc.ReadySession(ctx, "coordinator", sessCoord.Session.Generation)
+
+	quoteProf := createServiceTestProfile(dir, "quote", "agy")
+	quoteAgent := &domain.Agent{ID: "quote", Role: "quote", Connector: domain.ConnectorNone}
+	sessQuote, _ := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: quoteAgent, Profile: quoteProf, NoNotify: true})
+	_, _ = svc.ReadySession(ctx, "quote", sessQuote.Session.Generation)
+
+	// 2. Submit task
+	submitResp, err := svc.SubmitTask(ctx, service.SubmitTaskRequest{
+		SenderAgentID:  "coordinator",
+		TargetAgentID:  "quote",
+		IdempotencyKey: "rt-task-1",
+		Content:        "Runtime event test task",
+	})
+	if err != nil {
+		t.Fatalf("SubmitTask failed: %v", err)
+	}
+	taskID := submitResp.Task.ID
+
+	// 3. Invalid event -> error
+	_, err = svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
+		Agent:   "quote",
+		Runtime: "agy",
+		Event:   "InvalidEvent",
+		Payload: []byte(`{}`),
+	})
+	if err == nil {
+		t.Fatalf("expected error for invalid event type, got nil")
+	}
+
+	// 4. Unsupported runtime -> error
+	_, err = svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
+		Agent:   "quote",
+		Runtime: "claude",
+		Event:   "PreToolUse",
+		Payload: []byte(`{}`),
+	})
+	if err == nil {
+		t.Fatalf("expected error for unsupported runtime, got nil")
+	}
+
+	// 5. Runtime mismatch with agent profile (coordinator is codex, request has agy) -> error
+	_, err = svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
+		Agent:   "coordinator",
+		Runtime: "agy",
+		Event:   "PreToolUse",
+		Payload: []byte(`{}`),
+	})
+	if err == nil {
+		t.Fatalf("expected error for runtime mismatch with profile, got nil")
+	}
+
+	// 6. Actor is sender not target -> unauthorized error
+	// Let's create an agy sender to test target authorization
+	senderAgyProf := createServiceTestProfile(dir, "sender-agy", "agy")
+	senderAgy := &domain.Agent{ID: "sender-agy", Role: "worker", Connector: domain.ConnectorNone}
+	sessSender, _ := svc.AttachAgent(ctx, service.AttachAgentRequest{Agent: senderAgy, Profile: senderAgyProf, NoNotify: true})
+	_, _ = svc.ReadySession(ctx, "sender-agy", sessSender.Session.Generation)
+
+	_, err = svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
+		Agent:   "sender-agy",
+		Runtime: "agy",
+		Event:   "PreToolUse",
+		Payload: []byte(`{}`),
+	})
+	if !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("expected ErrUnauthorized for non-target actor, got: %v", err)
+	}
+
+	// 7. Non-existent task -> not found error
+	_, err = svc.RecordRuntimeEvent(ctx, "task-nonexistent", service.RecordRuntimeEventRequest{
+		Agent:   "quote",
+		Runtime: "agy",
+		Event:   "PreToolUse",
+		Payload: []byte(`{}`),
+	})
+	if !errors.Is(err, domain.ErrTaskNotFound) {
+		t.Fatalf("expected ErrTaskNotFound, got: %v", err)
+	}
+
+	// 8. Valid RecordRuntimeEvent with event observation
+	eventsBefore, err := svc.GetEvents(ctx, taskID, "quote", 0, 0)
+	if err != nil {
+		t.Fatalf("GetEvents failed: %v", err)
+	}
+	lastSeqBefore := eventsBefore[len(eventsBefore)-1].Sequence
+
+	// Test all 5 events
+	for _, ev := range []string{
+		domain.AGYEventPreInvocation,
+		domain.AGYEventPreToolUse,
+		domain.AGYEventPostToolUse,
+		domain.AGYEventPostInvocation,
+		domain.AGYEventStop,
+	} {
+		hookPayload := fmt.Sprintf(`{"hook_event":"%s","tool_name":"run_command"}`, ev)
+		resp, err := svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
+			Agent:     "quote",
+			Runtime:   "agy",
+			Event:     ev,
+			SessionID: "conv-12345",
+			Payload:   []byte(hookPayload),
+		})
+		if err != nil {
+			t.Fatalf("RecordRuntimeEvent '%s' failed: %v", ev, err)
+		}
+		if resp.TaskID != taskID || resp.Status != string(domain.TaskStatusQueued) {
+			t.Fatalf("unexpected RecordRuntimeEvent response for '%s': %+v", ev, resp)
+		}
+	}
+
+	// Verify events were added
+	eventsAfter, err := svc.GetEvents(ctx, taskID, "quote", lastSeqBefore, 0)
+	if err != nil {
+		t.Fatalf("GetEvents after recording failed: %v", err)
+	}
+	if len(eventsAfter) != 5 {
+		t.Fatalf("expected 5 runtime events, got %d", len(eventsAfter))
+	}
+	for i, evt := range eventsAfter {
+		if evt.Type != domain.EventRuntimeObserved {
+			t.Errorf("event %d type mismatch: expected %s, got %s", i, domain.EventRuntimeObserved, evt.Type)
+		}
+		if !strings.Contains(evt.Payload, "conv-12345") || !strings.Contains(evt.Payload, "run_command") {
+			t.Errorf("event %d payload missing normalized fields: %s", i, evt.Payload)
+		}
+	}
+
+	// 9. Watcher awakening: background RecordRuntimeEvent wakes up GetEvents blocking watch
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		_, _ = svc.RecordRuntimeEvent(context.Background(), taskID, service.RecordRuntimeEventRequest{
+			Agent:     "quote",
+			Runtime:   "agy",
+			Event:     domain.AGYEventStop,
+			SessionID: "conv-watch-test",
+			Payload:   []byte(`{"stop_reason":"completed"}`),
+		})
+	}()
+
+	watchStart := time.Now()
+	latestEvents, err := svc.GetEvents(ctx, taskID, "coordinator", eventsAfter[len(eventsAfter)-1].Sequence, 1*time.Second)
+	watchElapsed := time.Since(watchStart)
+	if err != nil {
+		t.Fatalf("GetEvents blocking watch failed: %v", err)
+	}
+	if len(latestEvents) != 1 {
+		t.Fatalf("expected 1 new event from watch, got %d", len(latestEvents))
+	}
+	if watchElapsed > 500*time.Millisecond {
+		t.Fatalf("watch took unexpectedly long (%v), expected ~50ms", watchElapsed)
+	}
+
+	// 10. Strict payload validation tests
+	invalidPayloads := [][]byte{
+		[]byte(``),
+		[]byte(`null`),
+		[]byte(`[1, 2, 3]`),
+		[]byte(`"string-primitive"`),
+		[]byte(`12345`),
+		[]byte(`true`),
+		[]byte(`{"a":1}{"b":2}`),
+		[]byte(`{"a":1} trailing garbage`),
+	}
+	for _, p := range invalidPayloads {
+		_, err := svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
+			Agent:   "quote",
+			Runtime: "agy",
+			Event:   domain.AGYEventStop,
+			Payload: p,
+		})
+		if err == nil {
+			t.Errorf("expected error for invalid payload '%s', got nil", string(p))
+		}
+	}
+
+	// 11. Latest task status re-fetch after completion
+	_, err = svc.AckTask(ctx, taskID, "quote")
+	if err != nil {
+		t.Fatalf("AckTask failed: %v", err)
+	}
+	_, err = svc.CompleteTask(ctx, taskID, "quote", "Task finished")
+	if err != nil {
+		t.Fatalf("CompleteTask failed: %v", err)
+	}
+
+	recRespAfterComplete, err := svc.RecordRuntimeEvent(ctx, taskID, service.RecordRuntimeEventRequest{
+		Agent:   "quote",
+		Runtime: "agy",
+		Event:   domain.AGYEventStop,
+		Payload: []byte(`{"event":"Stop"}`),
+	})
+	if err != nil {
+		t.Fatalf("RecordRuntimeEvent on completed task failed: %v", err)
+	}
+	if recRespAfterComplete.Status != string(domain.TaskStatusSucceeded) {
+		t.Fatalf("expected re-fetched status 'succeeded', got: %s", recRespAfterComplete.Status)
 	}
 }

@@ -92,9 +92,11 @@ agentbus task submit/get/list
 agentbus task ack/status/send
 agentbus task complete/fail/cancel
 agentbus task watch
+agentbus task wait
+agentbus runtime agy-hook
 ```
 
-Coordinator 通过 CLI 提交任务，立即取得 `task_id`，再通过 watch/get 获取状态。所有受管 Agent 先从 canonical manifest/ROLE 完成 `attach → bootstrap → session ready`；目标 Agent（如 Quote Service Agent / AgentBus Agent）收到 TmuxConnector 的短通知后调用 `task get <task-id> --agent <agent-id>` 获取完整内容，并显式调用 `ack/status/complete/fail`。MCP tools 与 `delegate_and_wait` 便利操作留到后续，但必须复用同一服务层和状态机。
+Coordinator 通过 CLI 提交任务，立即取得 `task_id`；生产调度默认使用 `task wait` 在单个本地进程内消费 EventBroker/HTTP 长轮询，并只在终态输出一次结构化结果。`task watch` 用于调试和审计完整事件流，`task get` 用于读取即时快照。所有受管 Agent 先从 canonical manifest/ROLE 完成 `attach → bootstrap → session ready`；目标 Agent（如 Quote Service Agent / AgentBus Agent）收到 TmuxConnector 的短通知后调用 `task get <task-id> --agent <agent-id>` 获取完整内容，并显式调用 `ack/status/complete/fail`。V0.2 引入 `agentbus runtime agy-hook` 作为生命周期接入点与 Stop 门禁。MCP tools 与合并 submit+wait 的 `delegate_and_wait` 便利操作留到后续，但必须复用同一服务层和状态机。
 
 ### 4.2 V0 TmuxConnector
 
@@ -587,7 +589,7 @@ Go V0 通过 Unix socket 暴露本机 API，同一个 `agentbus` 二进制同时
 Codex Coordinator CLI (%50) ───┐
 AGY AgentBus Agent CLI (%51) ──┼──> AgentBus Hub ──> TmuxConnector ──> 目标 Agent Pane
 AGY Quote Service CLI (%52) ───┘
-目标 Agent CLI (ack/status/complete) ──> AgentBus Hub ──> watch/get (Coordinator)
+目标 Agent CLI (ack/status/complete) ──> AgentBus Hub ──> wait/watch/get (Coordinator)
 ```
 
 实现 Go daemon/CLI、SQLite WAL、Agent Registry、Task/Message/Event 最小状态机和 TmuxConnector。V0 不启动 Runtime，不实现 AgyBatch/ACP/MCP，也不解析 pane 输出。

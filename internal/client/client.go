@@ -369,3 +369,11 @@ func (c *Client) GetEvents(ctx context.Context, id string, callerAgentID string,
 	}
 	return resp.Events, nil
 }
+
+func (c *Client) RecordRuntimeEvent(ctx context.Context, id string, req service.RecordRuntimeEventRequest) (*service.RecordRuntimeEventResponse, error) {
+	var resp service.RecordRuntimeEventResponse
+	if err := c.do(ctx, http.MethodPost, "/api/v1/tasks/"+url.PathEscape(id)+"/runtime-events", nil, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}

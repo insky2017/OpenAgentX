@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"net/http"
@@ -71,6 +72,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/v1/tasks/{id}/complete", s.handleCompleteTask)
 	mux.HandleFunc("POST /api/v1/tasks/{id}/fail", s.handleFailTask)
 	mux.HandleFunc("POST /api/v1/tasks/{id}/cancel", s.handleCancelTask)
+	mux.HandleFunc("POST /api/v1/tasks/{id}/runtime-events", s.handleRecordRuntimeEvent)
 	mux.HandleFunc("GET /api/v1/tasks/{id}/events", s.handleGetEvents)
 }
 
@@ -580,4 +582,36 @@ func (s *Server) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.writeJSON(w, http.StatusOK, map[string]any{"events": events})
+}
+
+func (s *Server) handleRecordRuntimeEvent(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if strings.TrimSpace(id) == "" {
+		s.writeError(w, domain.ErrInvalidInput("task ID is required in URL path"))
+		return
+	}
+
+	var req service.RecordRuntimeEventRequest
+	dec := json.NewDecoder(r.Body)
+	if err := dec.Decode(&req); err != nil {
+		s.writeError(w, domain.ErrInvalidInput(fmt.Sprintf("invalid json body: %v", err)))
+		return
+	}
+	if dec.More() {
+		s.writeError(w, domain.ErrInvalidInput("request body contains multiple JSON values"))
+		return
+	}
+	var trailing json.RawMessage
+	if err := dec.Decode(&trailing); err != io.EOF {
+		s.writeError(w, domain.ErrInvalidInput("request body contains trailing characters"))
+		return
+	}
+
+	resp, err := s.svc.RecordRuntimeEvent(r.Context(), id, req)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	s.writeJSON(w, http.StatusOK, resp)
 }

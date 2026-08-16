@@ -1,9 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"strings"
 	"sync"
@@ -851,4 +853,131 @@ func (s *Service) GetTaskMessages(ctx context.Context, taskID string, callerAgen
 	}
 
 	return s.store.GetTaskMessages(ctx, taskID)
+}
+
+type RecordRuntimeEventRequest struct {
+	Agent     string          `json:"agent"`
+	Runtime   string          `json:"runtime"`
+	Event     string          `json:"event"`
+	SessionID string          `json:"session_id,omitempty"`
+	Payload   json.RawMessage `json:"payload"`
+}
+
+type RecordRuntimeEventResponse struct {
+	TaskID        string `json:"task_id"`
+	Status        string `json:"status"`
+	EventSequence int64  `json:"event_sequence"`
+}
+
+func (s *Service) RecordRuntimeEvent(ctx context.Context, taskID string, req RecordRuntimeEventRequest) (*RecordRuntimeEventResponse, error) {
+	if strings.TrimSpace(taskID) == "" {
+		return nil, domain.ErrInvalidInput("task ID cannot be empty")
+	}
+	if strings.TrimSpace(req.Agent) == "" {
+		return nil, domain.ErrInvalidInput("agent is required")
+	}
+	if req.Runtime != "agy" {
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("unsupported runtime '%s' (only 'agy' is supported in V0.2)", req.Runtime))
+	}
+	if !domain.IsValidAGYEvent(req.Event) {
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("invalid or unsupported event '%s'", req.Event))
+	}
+
+	// 1. Verify agent session is ready
+	if err := s.verifyAgentReady(ctx, req.Agent, "actor agent"); err != nil {
+		return nil, err
+	}
+
+	// 2. Verify agent profile runtime matches
+	_, profile, _, err := s.store.GetAgentSession(ctx, req.Agent)
+	if err != nil {
+		return nil, err
+	}
+	if profile.Runtime != req.Runtime {
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("agent '%s' configured runtime '%s' does not match request runtime '%s'", req.Agent, profile.Runtime, req.Runtime))
+	}
+
+	// 3. Verify Task exists and target agent matches actor agent
+	task, err := s.store.GetTask(ctx, taskID)
+	if err != nil {
+		return nil, err
+	}
+	if task.TargetAgentID != req.Agent {
+		return nil, fmt.Errorf("%w: actor '%s' is not target agent '%s' for task '%s'", domain.ErrUnauthorized, req.Agent, task.TargetAgentID, taskID)
+	}
+
+	// 4. Validate payload: must be a single non-null JSON object
+	trimmedPayload := bytes.TrimSpace(req.Payload)
+	if len(trimmedPayload) == 0 || string(trimmedPayload) == "null" {
+		return nil, domain.ErrInvalidInput("payload is required and must be a valid JSON object")
+	}
+	var rawPayload map[string]any
+	dec := json.NewDecoder(bytes.NewReader(trimmedPayload))
+	if err := dec.Decode(&rawPayload); err != nil || rawPayload == nil {
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("payload must be a valid JSON object (cannot be array, primitive or null): %v", err))
+	}
+	if dec.More() {
+		return nil, domain.ErrInvalidInput("payload contains multiple JSON values")
+	}
+	var trailing json.RawMessage
+	if err := dec.Decode(&trailing); err != io.EOF {
+		return nil, domain.ErrInvalidInput("payload contains trailing characters")
+	}
+
+	normPayload := map[string]any{
+		"runtime":      req.Runtime,
+		"event":        req.Event,
+		"session_id":   req.SessionID,
+		"hook_payload": rawPayload,
+	}
+	normBytes, err := json.Marshal(normPayload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal normalized runtime event payload: %w", err)
+	}
+
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	evt := &domain.Event{
+		ID:           fmt.Sprintf("evt-%s", uuid.New().String()),
+		TaskID:       taskID,
+		ActorAgentID: req.Agent,
+		Type:         domain.EventRuntimeObserved,
+		Payload:      string(normBytes),
+		CreatedAt:    now,
+	}
+
+	seq, err := s.store.AddEvent(ctx, evt)
+	if err != nil {
+		s.logger.Warn("failed to record runtime event",
+			slog.String("task_id", taskID),
+			slog.String("agent_id", req.Agent),
+			slog.String("event", req.Event),
+			slog.String("error", err.Error()),
+		)
+		return nil, fmt.Errorf("failed to store runtime event: %w", err)
+	}
+
+	s.logger.Info("runtime event recorded",
+		slog.String("task_id", taskID),
+		slog.String("agent_id", req.Agent),
+		slog.String("event", req.Event),
+		slog.Int64("sequence", seq),
+	)
+
+	s.broker.Publish(taskID)
+
+	// Re-fetch latest task after AddEvent to avoid returning stale status during concurrent transitions
+	latestTask, err := s.store.GetTask(ctx, taskID)
+	if err != nil {
+		s.logger.Warn("failed to refetch task after recording runtime event",
+			slog.String("task_id", taskID),
+			slog.String("error", err.Error()),
+		)
+		return nil, fmt.Errorf("failed to fetch updated task status: %w", err)
+	}
+
+	return &RecordRuntimeEventResponse{
+		TaskID:        taskID,
+		Status:        string(latestTask.Status),
+		EventSequence: seq,
+	}, nil
 }
