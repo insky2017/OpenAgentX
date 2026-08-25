@@ -65,6 +65,9 @@ func DefaultAgentBusDir() string {
 			if _, err := os.Stat(filepath.Join(curr, "go.mod")); err == nil {
 				return curr
 			}
+			if _, err := os.Stat(filepath.Join(curr, "OpenAgentX", "go.mod")); err == nil {
+				return filepath.Join(curr, "OpenAgentX")
+			}
 			if _, err := os.Stat(filepath.Join(curr, "AgentBus", "go.mod")); err == nil {
 				return filepath.Join(curr, "AgentBus")
 			}
