@@ -7,7 +7,7 @@ updated_at: 2026-08-16
 
 # AgentBus 架构设想
 
-> 状态：当前架构基线。V0/V0.1 已落地，后续阶段仍按本文演进。选型推导、备选路线和调研证据见 [IMPLEMENTATION_DISCUSSION.md](IMPLEMENTATION_DISCUSSION.md)。
+> 状态：当前实现基线。目标架构及一次性切换边界以 [ADR-001: OpenAgentX 组织控制面、Resident Worker 与移动指挥台决策](decisions/ADR-001-resident-agent-worker-runtime-observability.md) 为准。选型推导和调研证据见 [IMPLEMENTATION_DISCUSSION.md](IMPLEMENTATION_DISCUSSION.md)。
 
 ## 1. 定位
 

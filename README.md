@@ -3,6 +3,8 @@
 AgentBus 是一个**异构 Agent Runtime 的通信与协作控制面**。
 提供单机控制面，支持 Orchestrator（如 Codex CLI）与 Worker（如 AGY CLI / Quote Service Agent）通过 Unix Domain Socket、Tmux 注入及 Runtime Lifecycle Hook 实现受控协作。
 
+目标架构与一次性切换边界见 [ADR-001: OpenAgentX 组织控制面、Resident Worker 与移动指挥台决策](docs/decisions/ADR-001-resident-agent-worker-runtime-observability.md)。
+
 ## 架构与安全模型
 
 - **Go 1.22 单二进制**：同一个 `agentbus` 二进制同时作为 daemon 服务端与 CLI 客户端；
