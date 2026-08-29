@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -45,3 +45,13 @@ updated_at: 2026-08-30
 - 可复用基础设施与领域语义明确分开；
 - 任务 02 可以据此定义不依赖旧 service DTO 的目标契约；
 - 未修改产品运行行为。
+
+## 完成记录
+
+- 产出：[当前实现到目标架构映射](../../design/OPENAGENTX_CURRENT_TO_TARGET_MAP.md)；
+- 产出：`scripts/check-legacy-control-paths.sh`，支持 `--inventory` 与 `--release`；
+- `--inventory` 建立 3 个禁止路径和 8 类符号命中基线；
+- `--release` 在当前 V0 上按预期返回退出码 `1`；
+- `go test ./...`、`go test -race ./...`、`go vet ./...` 通过；
+- ADR-001 与任务开始时的 `HEAD` 完全一致；
+- 本任务未修改产品运行代码。
