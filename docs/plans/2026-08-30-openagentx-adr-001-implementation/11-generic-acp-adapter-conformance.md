@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -43,9 +43,20 @@ OpenAgentX/internal/runtime/descriptors/
 - provider metadata namespaced 保存，不污染核心领域枚举；
 - conformance 同时覆盖 AGY、fake ACP 和已启用真实 ACP Backend。
 
+## 实施结果
+
+- 新增 `runtime/acp` Generic ACP Adapter，统一处理结构化 session prompt、JSON 事件流、provider session id、断流/非零退出和取消信号。
+- 新增 Codex、Claude Code、OpenCode 版本化 descriptor catalog；核心 Worker 只消费统一 `AgentRuntimeAdapter` 能力描述。
+- 新增 `runtime/conformance` 共享 descriptor/ExecutionSpec 校验入口，AGY、ACP 和后续 Backend 可复用同一契约。
+- ACP 不支持的 steer/approval 能力返回稳定错误，不伪造 native 成功。
+
 ## 退出条件
 
 - 至少一个 ACP Backend 完成真实 turn 闭环；
 - AGY/ACP 在核心 Worker 看来只有 descriptor 能力差异，没有分叉调度逻辑；
 - capability 与 ExecutionSpec 验证一致；
 - G3 验收报告完成。
+
+## 验证
+
+详见 [Task 11 验证报告](../../reports/validation/2026-08-30-openagentx-task11-acp-conformance.md)。
