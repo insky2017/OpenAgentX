@@ -32,6 +32,8 @@ type WorkerState interface {
 	BeginClaimedRunAttempt(context.Context, domain.WorkerWriteGuard, string, int64, *domain.RunAttempt, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
 	AppendRunEvents(context.Context, domain.WorkerWriteGuard, string, int64, []*domain.JournalEvent) error
 	FinishRun(context.Context, domain.WorkerWriteGuard, string, int64, int64, openruntime.TurnResult, *domain.JournalEvent, *domain.JournalEvent) error
+	ClaimWorkerCommand(context.Context, string, int64, time.Time, *domain.JournalEvent) (*domain.WorkerCommand, error)
+	AcknowledgeWorkerCommand(context.Context, string, int64, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
 }
 
 type TurnPlan struct {
@@ -350,6 +352,34 @@ func (s *WorkerService) Finish(ctx context.Context, principalID string, token st
 	// mismatches; leave it empty here so the transaction supplies the authority.
 	return s.state.FinishRun(ctx, guard, runID, request.ExpectedTaskVersion,
 		request.ExpectedRunVersion, request.Result, taskEvent, runEvent)
+}
+
+func (s *WorkerService) ClaimWorkerCommand(ctx context.Context, principalID string, token string, request api.ControlClaimRequest) (*domain.WorkerCommand, error) {
+	if err := request.Validate(); err != nil {
+		return nil, err
+	}
+	credential, err := s.state.GetWorkerCredential(ctx, request.WorkerInstanceID)
+	if err != nil {
+		return nil, domain.ErrUnauthorized
+	}
+	if credential.Worker.Generation != request.Generation || credential.Worker.AuthenticatedPrincipal != principalID {
+		return nil, domain.ErrUnauthorized
+	}
+	return s.state.ClaimWorkerCommand(ctx, request.WorkerInstanceID, request.Generation, s.now().UTC().Add(s.mailboxLease), s.event("worker_command", "worker_command.claimed", principalID, "", "", nil))
+}
+
+func (s *WorkerService) AcknowledgeWorkerCommand(ctx context.Context, principalID string, token string, commandID string, request api.ControlAckRequest) error {
+	if err := request.Validate(); err != nil {
+		return err
+	}
+	if strings.TrimSpace(token) == "" {
+		return domain.ErrUnauthorized
+	}
+	credential, err := s.state.GetWorkerCredential(ctx, request.WorkerInstanceID)
+	if err != nil || credential.Worker.AuthenticatedPrincipal != principalID || credential.Worker.Generation != request.Generation {
+		return domain.ErrUnauthorized
+	}
+	return s.state.AcknowledgeWorkerCommand(ctx, request.WorkerInstanceID, request.Generation, commandID, request.State, request.Result, s.event("worker_command", "worker_command.acknowledged", principalID, "", commandID, map[string]any{"state": request.State}))
 }
 
 func (s *WorkerService) guard(ctx context.Context, principalID string, token string, workerID string, requestedAgentID string, generation int64, fencingToken int64) (domain.WorkerWriteGuard, error) {

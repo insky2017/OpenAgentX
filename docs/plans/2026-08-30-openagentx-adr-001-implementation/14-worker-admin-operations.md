@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -35,9 +35,20 @@ updated_at: 2026-08-30
 - 正常 stop 不被 systemd 自动拉起，手动启动产生新 instance/generation；
 - lease revoke 后旧 Worker 的 heartbeat、Event 和 finish 立即失败。
 
+## 实施结果
+
+- 新增 WorkerCommand create/claim/ack 持久化，按 `worker_instance_id + generation` 绑定并支持幂等键。
+- Worker API 增加 control claim/ack 路由，Worker Control Loop 可通过与 UDS/HTTPS 相同的协议领取命令。
+- 新增 `WorkerAdminService`，提供 drain、health-check、stop 命令创建和无 Worker 在线依赖的 lease revoke；revoke 推进 fencing token 并立即拒绝旧写入。
+- Admin 命令与 Agent Mailbox 分离，stop 只针对当前 Worker Instance。
+
 ## 退出条件
 
 - 本机与远程 Worker 的 drain/health/stop/revoke E2E 通过；
 - WorkerCommand 与 Agent Mailbox 物理和领域边界清楚；
 - Admin 操作有完整 Event Journal 审计；
 - G4 验收报告完成。
+
+## 验证
+
+详见 [Task 14 验证报告](../../reports/validation/2026-08-30-openagentx-task14-worker-admin.md)。

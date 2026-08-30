@@ -21,6 +21,8 @@ type Service interface {
 	BeginAttempt(context.Context, string, string, string, openapi.BeginAttemptRequest) (*openapi.BeginAttemptResponse, error)
 	AppendEvents(context.Context, string, string, string, openapi.EventBatch) error
 	Finish(context.Context, string, string, string, openapi.FinishRunRequest) error
+	ClaimWorkerCommand(context.Context, string, string, openapi.ControlClaimRequest) (*domain.WorkerCommand, error)
+	AcknowledgeWorkerCommand(context.Context, string, string, string, openapi.ControlAckRequest) error
 }
 
 type PrincipalResolver interface {
@@ -65,6 +67,47 @@ func (h *Handler) registerRoutes() {
 	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/begin-attempt", h.beginAttempt)
 	h.mux.HandleFunc("POST /api/v1/run-attempts/{runID}/events", h.appendEvents)
 	h.mux.HandleFunc("POST /api/v1/run-attempts/{runID}/finish", h.finishRun)
+	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/control/claim", h.claimCommand)
+	h.mux.HandleFunc("POST /api/v1/worker-commands/{commandID}/ack", h.ackCommand)
+}
+
+func (h *Handler) claimCommand(w http.ResponseWriter, r *http.Request) {
+	principal, token, ok := h.authenticate(w, r)
+	if !ok {
+		return
+	}
+	var body openapi.ControlClaimRequest
+	if err := openapi.DecodeStrictJSON(r.Body, &body); err != nil {
+		h.writeError(w, domain.ErrInvalidInput("invalid JSON request body"))
+		return
+	}
+	if !matchPathID(r.PathValue("workerID"), body.WorkerInstanceID) {
+		h.writeError(w, domain.ErrInvalidInput("path Worker ID does not match request body"))
+		return
+	}
+	command, err := h.service.ClaimWorkerCommand(r.Context(), principal, token, body)
+	if err != nil {
+		h.writeError(w, err)
+		return
+	}
+	h.writeJSON(w, http.StatusOK, openapi.ControlClaimResponse{Command: command})
+}
+
+func (h *Handler) ackCommand(w http.ResponseWriter, r *http.Request) {
+	principal, token, ok := h.authenticate(w, r)
+	if !ok {
+		return
+	}
+	var body openapi.ControlAckRequest
+	if err := openapi.DecodeStrictJSON(r.Body, &body); err != nil {
+		h.writeError(w, domain.ErrInvalidInput("invalid JSON request body"))
+		return
+	}
+	if err := h.service.AcknowledgeWorkerCommand(r.Context(), principal, token, r.PathValue("commandID"), body); err != nil {
+		h.writeError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
