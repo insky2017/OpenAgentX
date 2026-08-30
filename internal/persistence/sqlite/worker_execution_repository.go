@@ -328,10 +328,26 @@ func (r *Repository) FinishRun(
 	if err != nil {
 		return err
 	}
-	if task.Version != expectedTaskVersion {
+	// Control-plane inputs may advance the Task version while the physical turn
+	// is still running. Message/finish races are safe to reconcile against the
+	// latest non-terminal Task; cancellation is handled as a durable intent.
+	cancelVersionDelta := task.Status == domain.TaskStatusCancelRequested && task.Version >= expectedTaskVersion+1
+	messageVersionDelta := task.Version != expectedTaskVersion && !cancelVersionDelta &&
+		(task.Status == domain.TaskStatusRunning || task.Status == domain.TaskStatusWaitingApproval || task.Status == domain.TaskStatusWaitingInput) && task.Version > expectedTaskVersion
+	if task.Version != expectedTaskVersion && !cancelVersionDelta && !messageVersionDelta {
 		return domain.ErrStaleVersion
 	}
 	runStatus, taskStatus := terminalStatuses(turnResult.Status)
+	// Task cancellation is a durable intent. Once it linearizes before finish,
+	// a late successful/failed turn must not overwrite that intent or reopen the
+	// task; the run itself still records the physical turn result.
+	if task.Status == domain.TaskStatusCancelRequested {
+		taskStatus = domain.TaskStatusCanceled
+	} else if messageVersionDelta && (taskStatus == domain.TaskStatusSucceeded || taskStatus == domain.TaskStatusFailed) {
+		// A message committed before finish is a durable follow-up. Keep the
+		// Task open so the queued message can be consumed by the next turn.
+		taskStatus = domain.TaskStatusWaitingInput
+	}
 	finishedAt := guard.CheckedAt
 	run.Version++
 	run.Status = runStatus
@@ -364,9 +380,13 @@ func (r *Repository) FinishRun(
 	if err != nil || affected != 1 {
 		return domain.ErrStaleVersion
 	}
+	currentTaskVersion := expectedTaskVersion
+	if cancelVersionDelta || messageVersionDelta {
+		currentTaskVersion = task.Version - 1
+	}
 	result, err = tx.ExecContext(ctx, `UPDATE tasks SET version=?, status=?, result=?, error=?, updated_at=?
 		WHERE task_id=? AND version=?`, task.Version, task.Status, nullableString(task.Result), nullableString(task.Error),
-		task.UpdatedAt, task.ID, expectedTaskVersion)
+		task.UpdatedAt, task.ID, currentTaskVersion)
 	if err != nil {
 		return fmt.Errorf("settle Task from RunAttempt: %w", err)
 	}

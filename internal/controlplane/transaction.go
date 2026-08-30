@@ -19,8 +19,13 @@ type TransactionalState interface {
 	GetTask(context.Context, string) (*domain.Task, error)
 	ListTasks(context.Context, string, int) ([]domain.Task, error)
 	CreateMessage(context.Context, int64, *domain.Message, *domain.MailboxItem, *domain.JournalEvent) (*domain.CreateMessageResult, error)
+	RequestTaskCancel(context.Context, string, int64, string, *domain.MailboxItem, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	TransitionTask(context.Context, domain.TaskTransition) (*domain.Task, error)
+	CreateApprovalRequest(context.Context, *domain.ApprovalRequest, *domain.JournalEvent) error
+	GetApprovalRequest(context.Context, string) (*domain.ApprovalRequest, error)
+	DecideApproval(context.Context, string, *domain.ApprovalDecision, *domain.MailboxItem, *domain.JournalEvent, *domain.JournalEvent) (*domain.ApprovalDecision, *domain.MailboxItem, error)
+	ConsumePreflightApproval(context.Context, string, string, *domain.JournalEvent) (*domain.ApprovalRequest, error)
 
 	CreateWorkerInstance(context.Context, *domain.WorkerInstance, *domain.JournalEvent) error
 	GetWorkerInstance(context.Context, string) (*domain.WorkerInstance, error)
