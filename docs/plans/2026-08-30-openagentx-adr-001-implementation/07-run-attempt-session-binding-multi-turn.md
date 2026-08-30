@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -51,3 +51,13 @@ OpenAgentX/internal/worker/run_manager.go
 - Task 与 turn/RunAttempt 的成功边界不混用；
 - 指挥台未来所需的 RunAttempt/SessionBinding read model 字段已稳定；
 - 后续竞态任务可以用 version/CAS 识别当前活动执行。
+
+## 完成记录
+
+- 已增加 `waiting_input` TurnResult，并将本次 Run 结算为终止 Run、Task 保持可继续派发的 `waiting_input`；
+- 已实现 SessionBinding 的 create/update CAS 保存，保持 `context_id + agent_id + backend_id` 唯一，并拒绝 stale writer；
+- 已验证 waiting_input Task 收到补充 Message 后重新进入 work lane，Task 终态与单个 turn 的成功边界不混用；
+- AGY Adapter 已支持同一 SessionBinding 的 conversation resume 参数，Backend 切换通过不同 binding key 隔离；
+- `go test -count=20` 与 `go test -race -count=10` 聚焦 controlplane/persistence/runtime 通过；
+- 验收报告：[Task 07 Multi-turn 与 SessionBinding 验证报告](../../reports/validation/2026-08-30-openagentx-task07-multi-turn.md)；
+- 冻结 ADR-001 未修改。

@@ -36,6 +36,64 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 	return registrations, nil
 }
 
+func (r *Repository) SaveSessionBinding(ctx context.Context, binding *domain.SessionBinding, expectedVersion int64, event *domain.JournalEvent) error {
+	if binding == nil {
+		return domain.ErrInvalidInput("session binding is required")
+	}
+	now := r.now().UTC()
+	if expectedVersion < 0 {
+		return domain.ErrInvalidInput("expected SessionBinding version cannot be negative")
+	}
+	binding.UpdatedAt = normalizeTime(binding.UpdatedAt, now)
+	if binding.CreatedAt.IsZero() {
+		binding.CreatedAt = now
+	}
+	if binding.Version == 0 {
+		binding.Version = 1
+	}
+	if err := binding.Validate(); err != nil {
+		return err
+	}
+	tx, err := r.begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if expectedVersion == 0 {
+		_, err = tx.ExecContext(ctx, `INSERT INTO session_bindings
+			(session_binding_id, context_id, agent_id, backend_id, provider_session_id, state, version, created_at, updated_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, binding.ID, binding.ContextID, binding.AgentID, binding.BackendID,
+			binding.ProviderSessionID, binding.State, binding.Version, formatTime(binding.CreatedAt), formatTime(binding.UpdatedAt))
+	} else {
+		binding.Version = expectedVersion + 1
+		var result sql.Result
+		result, err = tx.ExecContext(ctx, `UPDATE session_bindings SET provider_session_id=?, state=?, version=?, updated_at=?
+			WHERE context_id=? AND agent_id=? AND backend_id=? AND version=?`, binding.ProviderSessionID, binding.State,
+			binding.Version, formatTime(binding.UpdatedAt), binding.ContextID, binding.AgentID, binding.BackendID, expectedVersion)
+		if err == nil {
+			if affected, affectedErr := result.RowsAffected(); affectedErr != nil || affected != 1 {
+				return domain.ErrStaleVersion
+			}
+		}
+	}
+	if err != nil {
+		return fmt.Errorf("save SessionBinding: %w", err)
+	}
+	if event == nil {
+		return domain.ErrInvalidInput("SessionBinding event is required")
+	}
+	if event.AggregateID == "" {
+		event.AggregateID = binding.ID
+	}
+	if err := validateJournalForAggregate(event, "session_binding", binding.ID, now); err != nil {
+		return err
+	}
+	if err := insertJournal(ctx, tx, event); err != nil {
+		return err
+	}
+	return commit(tx)
+}
+
 func (r *Repository) BeginClaimedRunAttempt(
 	ctx context.Context,
 	guard domain.WorkerWriteGuard,
@@ -335,6 +393,8 @@ func terminalStatuses(status openruntime.TurnResultStatus) (domain.RunAttemptSta
 		return domain.RunAttemptFailed, domain.TaskStatusFailed
 	case openruntime.TurnResultCanceled:
 		return domain.RunAttemptCanceled, domain.TaskStatusCanceled
+	case openruntime.TurnResultWaitingInput:
+		return domain.RunAttemptSucceeded, domain.TaskStatusWaitingInput
 	default:
 		return domain.RunAttemptUncertain, domain.TaskStatusUncertain
 	}

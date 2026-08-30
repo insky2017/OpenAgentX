@@ -191,14 +191,15 @@ type TurnRequest struct {
 type TurnResultStatus string
 
 const (
-	TurnResultSucceeded TurnResultStatus = "succeeded"
-	TurnResultFailed    TurnResultStatus = "failed"
-	TurnResultCanceled  TurnResultStatus = "canceled"
-	TurnResultUncertain TurnResultStatus = "uncertain"
+	TurnResultSucceeded    TurnResultStatus = "succeeded"
+	TurnResultFailed       TurnResultStatus = "failed"
+	TurnResultCanceled     TurnResultStatus = "canceled"
+	TurnResultUncertain    TurnResultStatus = "uncertain"
+	TurnResultWaitingInput TurnResultStatus = "waiting_input"
 )
 
 func (s TurnResultStatus) Valid() bool {
-	return s == TurnResultSucceeded || s == TurnResultFailed || s == TurnResultCanceled || s == TurnResultUncertain
+	return s == TurnResultSucceeded || s == TurnResultFailed || s == TurnResultCanceled || s == TurnResultUncertain || s == TurnResultWaitingInput
 }
 
 type TurnResult struct {

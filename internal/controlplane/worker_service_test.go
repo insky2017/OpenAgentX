@@ -287,6 +287,47 @@ func TestHeartbeatSlidesTokenAndRenewsActiveRunLease(t *testing.T) {
 	}
 }
 
+func TestWorkerFinishWaitingInputKeepsTaskEligibleForQueuedFollowUp(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	session := environment.register(t, "worker-waiting-input")
+	environment.heartbeat(t, session)
+	created := environment.createTask(t, "waiting-input")
+	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: created.Task.Version,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, api.FinishRunRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+		ExpectedTaskVersion: begin.Turn.Task.Version, ExpectedRunVersion: begin.Turn.RunAttempt.Version,
+		Result: openruntime.TurnResult{Status: openruntime.TurnResultWaitingInput, Result: "need clarification", SideEffectsKnown: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	task, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil || task.Status != domain.TaskStatusWaitingInput {
+		t.Fatalf("waiting-input Task=%+v err=%v", task, err)
+	}
+	followup := &domain.Message{ID: "message-waiting-followup", TaskID: task.ID, SenderPrincipalID: environment.ownerID,
+		Kind: domain.MessageKindSupplement, Content: "clarification"}
+	followupMailbox := &domain.MailboxItem{ID: "mailbox-waiting-followup", Lane: domain.MailboxLaneWork}
+	if _, err := environment.repository.CreateMessage(context.Background(), task.Version, followup, followupMailbox, &domain.JournalEvent{
+		ID: "event-waiting-followup", OrganizationID: environment.orgID, EventType: "message.created", ActorPrincipalID: environment.ownerID, Payload: json.RawMessage(`{}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	item, err = environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil || item.ID != followupMailbox.ID {
+		t.Fatalf("follow-up item=%+v err=%v", item, err)
+	}
+}
+
 func TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed(t *testing.T) {
 	tests := []struct {
 		name      string

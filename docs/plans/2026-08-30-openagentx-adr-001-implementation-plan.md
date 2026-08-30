@@ -34,7 +34,7 @@ updated_at: 2026-08-30
 | 04 | M1 | [Mailbox 与 Worker Lease API](2026-08-30-openagentx-adr-001-implementation/04-mailbox-worker-lease-api.md) | 03 | completed |
 | 05 | M1 | [并发 Resident Worker](2026-08-30-openagentx-adr-001-implementation/05-concurrent-resident-worker.md) | 04 | completed |
 | 06 | M1 | [AGY Batch + UDS 端到端闭环](2026-08-30-openagentx-adr-001-implementation/06-agy-uds-end-to-end.md) | 05 | completed |
-| 07 | M2 | [RunAttempt、SessionBinding 与 multi-turn](2026-08-30-openagentx-adr-001-implementation/07-run-attempt-session-binding-multi-turn.md) | 06 | pending |
+| 07 | M2 | [RunAttempt、SessionBinding 与 multi-turn](2026-08-30-openagentx-adr-001-implementation/07-run-attempt-session-binding-multi-turn.md) | 06 | completed |
 | 08 | M2 | [Message、Cancel 与 Approval 竞态](2026-08-30-openagentx-adr-001-implementation/08-message-cancel-approval-races.md) | 07 | pending |
 | 09 | M2 | [恢复、fencing 与故障注入](2026-08-30-openagentx-adr-001-implementation/09-recovery-fencing-fault-injection.md) | 08 | pending |
 | 10 | M3 | [ExecutionSpec 与 Adapter Registry](2026-08-30-openagentx-adr-001-implementation/10-execution-spec-adapter-registry.md) | 09 | pending |
