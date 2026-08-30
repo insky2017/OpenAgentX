@@ -41,7 +41,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	web.SetSessionCookie(w, s)
-	json.NewEncoder(w).Encode(openapi.WebSessionResponse{Principal: openapi.WebPrincipal{UserID: s.User.ID, Username: s.User.Username}, CSRFToken: s.CSRFToken, IdleExpiresAt: s.IdleExpiresAt, AbsoluteExpiresAt: s.AbsoluteExpiresAt})
+	json.NewEncoder(w).Encode(sessionResponse(s))
 }
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 	if s, err := h.manager.Authenticate(r); err == nil {
@@ -56,5 +56,13 @@ func (h *Handler) session(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	json.NewEncoder(w).Encode(openapi.WebSessionResponse{Principal: openapi.WebPrincipal{UserID: s.User.ID, Username: s.User.Username}, CSRFToken: s.CSRFToken, IdleExpiresAt: s.IdleExpiresAt, AbsoluteExpiresAt: s.AbsoluteExpiresAt})
+	json.NewEncoder(w).Encode(sessionResponse(s))
+}
+
+func sessionResponse(s *web.Session) openapi.WebSessionResponse {
+	roles := make([]string, 0, len(s.User.Roles))
+	for _, role := range s.User.Roles {
+		roles = append(roles, string(role))
+	}
+	return openapi.WebSessionResponse{Principal: openapi.WebPrincipal{UserID: s.User.ID, Username: s.User.Username, Roles: roles}, CSRFToken: s.CSRFToken, IdleExpiresAt: s.IdleExpiresAt, AbsoluteExpiresAt: s.AbsoluteExpiresAt}
 }
