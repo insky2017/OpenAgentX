@@ -24,6 +24,7 @@ type State interface {
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error)
 	GetRunAttempt(context.Context, string) (*domain.RunAttempt, error)
+	ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error)
 }
 
 type Handler struct {
@@ -85,7 +86,8 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
 	agents, _ := h.state.ListAgents(r.Context(), 100)
 	workers, _ := h.state.ListWorkers(r.Context(), 100)
 	tasks, _ := h.state.ListTasks(r.Context(), "", 100)
-	writeJSON(w, map[string]any{"agents": agents, "workers": workers, "tasks": tasks, "server_time": time.Now().UTC()})
+	approvals, _ := h.state.ListPendingApprovals(r.Context(), 100)
+	writeJSON(w, map[string]any{"agents": agents, "workers": workers, "tasks": tasks, "approvals": approvals, "server_time": time.Now().UTC()})
 }
 func (h *Handler) agents(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {

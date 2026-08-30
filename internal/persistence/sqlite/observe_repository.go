@@ -92,3 +92,23 @@ func (r *Repository) GetActiveRunForAgent(ctx context.Context, agentID string) (
 	}
 	return r.GetRunAttempt(ctx, id)
 }
+
+func (r *Repository) ListPendingApprovals(ctx context.Context, limit int) ([]domain.ApprovalRequest, error) {
+	if limit <= 0 || limit > 1000 {
+		return nil, domain.ErrInvalidInput("approval limit must be between 1 and 1000")
+	}
+	rows, err := r.db.QueryContext(ctx, `SELECT approval_request_id, task_id, mode, target_run_id, expected_run_version, scope_digest, state, expires_at, created_at FROM approval_requests WHERE state='pending' ORDER BY created_at ASC LIMIT ?`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	result := make([]domain.ApprovalRequest, 0)
+	for rows.Next() {
+		v, err := scanApprovalRequest(rows)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, *v)
+	}
+	return result, rows.Err()
+}
