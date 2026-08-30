@@ -67,3 +67,5 @@ Worker 完成一个 Task 后释放当前 RunAttempt，继续等待 Mailbox 中�
 ./scripts/check-legacy-control-paths.sh --release
 python3 scripts/check_docs.py
 ```
+
+ADR-001 的分阶段实机验收入口见 [ADR-001 测试计划](docs/plans/2026-08-30-openagentx-adr-001-test-plan.md)。测试按 T01-T10 顺序执行，失败关卡修复并重测后才能继续。
