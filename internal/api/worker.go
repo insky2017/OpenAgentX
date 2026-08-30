@@ -21,12 +21,12 @@ const (
 )
 
 type RegisterRequest struct {
-	ContractVersion  string                      `json:"contract_version"`
-	AgentID          string                      `json:"agent_id"`
-	WorkerInstanceID string                      `json:"worker_instance_id"`
-	Transport        domain.WorkerTransport      `json:"transport"`
-	Capabilities     []string                    `json:"capabilities"`
-	Adapters         []runtime.AdapterDescriptor `json:"adapters"`
+	ContractVersion  string                        `json:"contract_version"`
+	AgentID          string                        `json:"agent_id"`
+	WorkerInstanceID string                        `json:"worker_instance_id"`
+	Transport        domain.WorkerTransport        `json:"transport"`
+	Capabilities     []string                      `json:"capabilities"`
+	Backends         []runtime.BackendRegistration `json:"backends"`
 }
 
 func (r RegisterRequest) Validate() error {
@@ -47,11 +47,11 @@ func (r RegisterRequest) Validate() error {
 			return err
 		}
 	}
-	if len(r.Adapters) == 0 {
-		return domain.ErrInvalidInput("worker must register at least one adapter")
+	if len(r.Backends) == 0 {
+		return domain.ErrInvalidInput("worker must register at least one Backend")
 	}
-	for _, adapter := range r.Adapters {
-		if err := adapter.Validate(); err != nil {
+	for _, backend := range r.Backends {
+		if err := backend.Validate(); err != nil {
 			return err
 		}
 	}
@@ -65,11 +65,11 @@ type WorkerSession struct {
 }
 
 type HeartbeatRequest struct {
-	WorkerInstanceID string              `json:"worker_instance_id"`
-	Generation       int64               `json:"generation"`
-	FencingToken     int64               `json:"fencing_token"`
-	Status           domain.WorkerStatus `json:"status"`
-	BackendHealth    map[string]string   `json:"backend_health"`
+	WorkerInstanceID string                           `json:"worker_instance_id"`
+	Generation       int64                            `json:"generation"`
+	FencingToken     int64                            `json:"fencing_token"`
+	Status           domain.WorkerStatus              `json:"status"`
+	BackendHealth    map[string]runtime.BackendHealth `json:"backend_health"`
 }
 
 func (r HeartbeatRequest) Validate() error {
@@ -84,6 +84,14 @@ func (r HeartbeatRequest) Validate() error {
 	}
 	if !r.Status.Valid() {
 		return domain.ErrInvalidInput("unsupported worker status")
+	}
+	for backendID, health := range r.BackendHealth {
+		if err := domain.ValidateIdentifier("backend_id", backendID); err != nil {
+			return err
+		}
+		if !health.Valid() {
+			return domain.ErrInvalidInput("unsupported Backend health")
+		}
 	}
 	return nil
 }
@@ -125,6 +133,8 @@ type AcceptRequest struct {
 	Generation        int64               `json:"generation"`
 	FencingToken      int64               `json:"fencing_token"`
 	ExpectedItemState domain.MailboxState `json:"expected_item_state"`
+	Outcome           domain.MailboxState `json:"outcome"`
+	Result            string              `json:"result,omitempty"`
 }
 
 func (r AcceptRequest) Validate() error {
@@ -139,6 +149,9 @@ func (r AcceptRequest) Validate() error {
 	}
 	if !r.ExpectedItemState.Valid() {
 		return domain.ErrInvalidInput("unsupported expected mailbox state")
+	}
+	if r.Outcome != domain.MailboxStateAccepted && r.Outcome != domain.MailboxStateSuperseded && r.Outcome != domain.MailboxStateFailed {
+		return domain.ErrInvalidInput("mailbox outcome must be accepted, superseded, or failed")
 	}
 	return nil
 }

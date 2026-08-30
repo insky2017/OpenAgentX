@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -51,3 +51,13 @@ OpenAgentX/internal/client/worker/
 - Mailbox at-least-once 与幂等 accept 行为稳定；
 - Active Run 唯一约束由 daemon 跨 Worker 强制；
 - API handler 不包含具体 Runtime Adapter 分支。
+
+## 完成记录
+
+- 已实现协议无关 `WorkerService`、双 lane Mailbox long poll、Worker/Run lease 续期、generation/fencing 校验和安全幂等终态写入；
+- 已实现严格 Worker HTTP handler、`UnixHTTPWorkerClient` 和 socket `0600`/所有权保护；
+- token、principal、Agent、generation、lease、fencing、未知字段和缺少 Bearer Token 的负向测试均通过；
+- Mailbox 顺序、backpressure、at-least-once、丢失 wakeup 数据库重查和替代 Worker 并发竞争已通过重复与 race 验证；
+- `go test -count=1 ./...`、`go test -race -count=1 ./...`、`go vet ./...` 和 UDS 真实端到端链路通过；
+- 验收报告：[Task 04 Worker Control API 验证报告](../../reports/validation/2026-08-30-openagentx-task04-worker-control-api.md)；
+- 冻结 ADR-001 未修改，handler 不依赖具体 Runtime Adapter，UDS 不承载业务语义。

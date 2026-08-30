@@ -72,6 +72,37 @@ type AdapterDescriptor struct {
 	MaxConcurrency     int                    `json:"max_concurrency"`
 }
 
+type BackendHealth string
+
+const (
+	BackendHealthy     BackendHealth = "healthy"
+	BackendDegraded    BackendHealth = "degraded"
+	BackendUnavailable BackendHealth = "unavailable"
+)
+
+func (h BackendHealth) Valid() bool {
+	return h == BackendHealthy || h == BackendDegraded || h == BackendUnavailable
+}
+
+type BackendRegistration struct {
+	BackendID  string            `json:"backend_id"`
+	Descriptor AdapterDescriptor `json:"descriptor"`
+	Health     BackendHealth     `json:"health"`
+}
+
+func (r BackendRegistration) Validate() error {
+	if err := domain.ValidateIdentifier("backend_id", r.BackendID); err != nil {
+		return err
+	}
+	if err := r.Descriptor.Validate(); err != nil {
+		return err
+	}
+	if !r.Health.Valid() {
+		return domain.ErrInvalidInput("unsupported Backend health")
+	}
+	return nil
+}
+
 func (d AdapterDescriptor) Validate() error {
 	if err := domain.ValidateIdentifier("adapter_id", d.AdapterID); err != nil {
 		return err

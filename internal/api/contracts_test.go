@@ -79,7 +79,8 @@ func TestWorkerRequestsRejectStaleOrUnknownContractValues(t *testing.T) {
 	}
 	register := api.RegisterRequest{
 		ContractVersion: api.ContractVersion, AgentID: "quote", WorkerInstanceID: "worker-1",
-		Transport: domain.WorkerTransportUnix, Adapters: []openruntime.AdapterDescriptor{descriptor},
+		Transport: domain.WorkerTransportUnix,
+		Backends:  []openruntime.BackendRegistration{{BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy}},
 	}
 	if err := register.Validate(); err != nil {
 		t.Fatalf("valid register request rejected: %v", err)

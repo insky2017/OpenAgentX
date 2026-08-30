@@ -163,21 +163,8 @@ func (r *Repository) BeginRunAttempt(
 	if err != nil || affected != 1 {
 		return nil, domain.ErrStaleVersion
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO run_attempts (
-		run_id, task_id, agent_id, version, status, worker_instance_id, fencing_token, lease_until,
-		execution_spec_version, requested_execution_json, resolved_execution_json, adapter_id,
-		backend_id, model, reasoning_mode, reasoning_value, started_at, finished_at, result_json,
-		created_at, updated_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		run.ID, run.TaskID, run.AgentID, run.Version, run.Status, run.WorkerInstanceID, run.FencingToken,
-		formatTime(run.LeaseUntil), run.ExecutionSpecVersion, run.RequestedExecutionJSON,
-		run.ResolvedExecutionJSON, run.AdapterID, run.BackendID, run.Model, run.ReasoningMode,
-		run.ReasoningValue, formatTime(run.StartedAt), nullableTime(run.FinishedAt),
-		nullableJSON(run.ResultJSON), formatTime(run.CreatedAt), formatTime(run.UpdatedAt)); err != nil {
-		if isUniqueConstraint(err, "uq_run_attempts_agent_active") || strings.Contains(err.Error(), "run_attempts.agent_id") {
-			return nil, domain.ErrConflict("logical Agent already has an Active RunAttempt")
-		}
-		return nil, fmt.Errorf("create RunAttempt: %w", err)
+	if err := insertRunAttempt(ctx, tx, run); err != nil {
+		return nil, err
 	}
 	if err := r.inject(FaultAfterStateWrite); err != nil {
 		return nil, err
@@ -195,6 +182,26 @@ func (r *Repository) BeginRunAttempt(
 		return nil, err
 	}
 	return task, nil
+}
+
+func insertRunAttempt(ctx context.Context, tx *sql.Tx, run *domain.RunAttempt) error {
+	if _, err := tx.ExecContext(ctx, `INSERT INTO run_attempts (
+		run_id, task_id, agent_id, version, status, worker_instance_id, fencing_token, lease_until,
+		execution_spec_version, requested_execution_json, resolved_execution_json, adapter_id,
+		backend_id, model, reasoning_mode, reasoning_value, started_at, finished_at, result_json,
+		created_at, updated_at
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		run.ID, run.TaskID, run.AgentID, run.Version, run.Status, run.WorkerInstanceID, run.FencingToken,
+		formatTime(run.LeaseUntil), run.ExecutionSpecVersion, run.RequestedExecutionJSON,
+		run.ResolvedExecutionJSON, run.AdapterID, run.BackendID, run.Model, run.ReasoningMode,
+		run.ReasoningValue, formatTime(run.StartedAt), nullableTime(run.FinishedAt),
+		nullableJSON(run.ResultJSON), formatTime(run.CreatedAt), formatTime(run.UpdatedAt)); err != nil {
+		if isUniqueConstraint(err, "uq_run_attempts_agent_active") || strings.Contains(err.Error(), "run_attempts.agent_id") {
+			return domain.ErrConflict("logical Agent already has an Active RunAttempt")
+		}
+		return fmt.Errorf("create RunAttempt: %w", err)
+	}
+	return nil
 }
 
 func nullableJSON(value string) any {
