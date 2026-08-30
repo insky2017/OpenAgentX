@@ -71,7 +71,7 @@ Runtime Backend 由 `ExecutionSpec` 选择，运行时可指定 Backend、模型
 - `approval=preflight`：作为下一 Turn 前置条件；
 - `cancel=native`：尝试中断当前 Runtime Process。
 
-AGY Batch 和 Generic ACP 共用 conformance suite；新增 CLI 只需实现 Adapter，不改变 daemon/Worker 协议。
+AGY Batch、CodeBuddy CLI 和 Generic ACP 实现同一 Adapter/TurnHandle 契约；新增 CLI 只需实现 Adapter，不改变 daemon/Worker 协议。目前 CodeBuddy CLI 已由 `internal/runtime/conformance` suite 实际覆盖，AGY/ACP 接入该 suite 仍是待补事项。
 
 ## 7. 发布边界
 

@@ -1,0 +1,11 @@
+version: 1
+agent_id: verification-runner
+principal_id: agent-verification-runner
+organization_id: default
+display_name: Verification Runner
+profile:
+  instructions_path: ROLE.md
+  workspace_root: ../../..
+  capabilities:
+    - adr-001-verification
+    - adr-001-defect-fixing

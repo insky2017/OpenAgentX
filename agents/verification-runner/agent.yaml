@@ -1,0 +1,17 @@
+version: 1
+agent_id: verification-runner
+transport: unix
+unix_socket: run/openagentx.sock
+capabilities:
+  - adr-001-verification
+  - adr-001-defect-fixing
+runtime_backends:
+  - backend_id: primary
+    adapter_id: codebuddy-cli
+    options:
+      binary: codebuddy
+      working_dir: ../../..
+      model: hy4-preview
+      effort: high
+      permission_mode: acceptEdits
+      max_turns: 40

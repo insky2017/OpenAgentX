@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -15,6 +16,7 @@ import (
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/runtime/agy"
+	"openagentx/internal/runtime/codebuddy"
 	"openagentx/internal/runtime/fake"
 	residentworker "openagentx/internal/worker"
 )
@@ -63,8 +65,9 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 	}
 	defer client.Close()
 	backends := make([]residentworker.RuntimeBackend, 0, len(processConfig.RuntimeBackendConfig))
+	configDir := filepath.Dir(configPath)
 	for _, backendConfig := range processConfig.RuntimeBackendConfig {
-		adapter, err := assembleM1Adapter(backendConfig)
+		adapter, err := assembleM1Adapter(backendConfig, configDir)
 		if err != nil {
 			return err
 		}
@@ -81,7 +84,7 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 	return runner.Run(ctx)
 }
 
-func assembleM1Adapter(config residentworker.RuntimeBackendConfig) (openruntime.AgentRuntimeAdapter, error) {
+func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir string) (openruntime.AgentRuntimeAdapter, error) {
 	if config.AdapterID == "agy-batch" {
 		binary, _ := config.Options["binary"].(string)
 		adapter, err := agy.NewAdapter(agy.Config{Binary: binary})
@@ -89,6 +92,13 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig) (openruntime.
 			return nil, err
 		}
 		return adapter, nil
+	}
+	if config.AdapterID == "codebuddy-cli" {
+		adapterConfig, err := codebuddyConfigFromOptions(config.Options, configDir)
+		if err != nil {
+			return nil, err
+		}
+		return codebuddy.NewAdapter(adapterConfig)
 	}
 	if config.AdapterID != "fake" {
 		return nil, fmt.Errorf("Runtime Adapter %q is not assembled in the M1 Worker build", config.AdapterID)
@@ -119,4 +129,122 @@ func printOpenAgentXUsage() {
 
 Usage:
   openagentx worker run --config <agent.yaml>`)
+}
+
+// defaultCodeBuddyModel is the explicit fallback model when a Worker config
+// does not declare model or models for the codebuddy-cli Runtime Adapter.
+// CodeBuddy 任务只允许使用免费模型，因此默认固定为 hy4-preview。
+const defaultCodeBuddyModel = "hy4-preview"
+
+var codeBuddyOptionKeys = map[string]struct{}{
+	"binary": {}, "working_dir": {}, "model": {}, "models": {},
+	"effort": {}, "permission_mode": {}, "max_turns": {},
+}
+
+// codebuddyConfigFromOptions translates Worker YAML options into a CodeBuddy
+// Adapter Config. Relative working_dir values are resolved against the
+// directory of the Worker config file; unset options fall back to the safe
+// defaults enforced by codebuddy.NewAdapter.
+func codebuddyConfigFromOptions(options map[string]any, configDir string) (codebuddy.Config, error) {
+	var config codebuddy.Config
+	for key := range options {
+		if _, supported := codeBuddyOptionKeys[key]; !supported {
+			return config, domain.ErrInvalidInput("unsupported CodeBuddy option " + key)
+		}
+	}
+	binary, err := codebuddyStringOption(options, "binary")
+	if err != nil {
+		return config, err
+	}
+	config.Binary = binary
+	workingDir, err := codebuddyStringOption(options, "working_dir")
+	if err != nil {
+		return config, err
+	}
+	if workingDir != "" {
+		if !filepath.IsAbs(workingDir) && configDir != "" {
+			workingDir = filepath.Join(configDir, workingDir)
+		}
+		if info, statErr := os.Stat(workingDir); statErr != nil || !info.IsDir() {
+			return config, domain.ErrInvalidInput("CodeBuddy working_dir must be an existing directory")
+		}
+		config.WorkingDir = workingDir
+	}
+	models, err := codebuddyModelsOption(options)
+	if err != nil {
+		return config, err
+	}
+	config.Models = models
+	effort, err := codebuddyStringOption(options, "effort")
+	if err != nil {
+		return config, err
+	}
+	config.DefaultEffort = effort
+	permissionMode, err := codebuddyStringOption(options, "permission_mode")
+	if err != nil {
+		return config, err
+	}
+	config.PermissionMode = permissionMode
+	maxTurns, err := codebuddyMaxTurnsOption(options)
+	if err != nil {
+		return config, err
+	}
+	config.MaxTurns = maxTurns
+	return config, nil
+}
+
+func codebuddyStringOption(options map[string]any, key string) (string, error) {
+	value, exists := options[key]
+	if !exists || value == nil {
+		return "", nil
+	}
+	text, ok := value.(string)
+	if !ok {
+		return "", domain.ErrInvalidInput("CodeBuddy option " + key + " must be a string")
+	}
+	if strings.TrimSpace(text) == "" {
+		return "", domain.ErrInvalidInput("CodeBuddy option " + key + " cannot be blank")
+	}
+	return strings.TrimSpace(text), nil
+}
+
+func codebuddyModelsOption(options map[string]any) ([]string, error) {
+	single, err := codebuddyStringOption(options, "model")
+	if err != nil {
+		return nil, err
+	}
+	if list, exists := options["models"]; exists && list != nil {
+		if single != "" {
+			return nil, domain.ErrInvalidInput("CodeBuddy options model and models are mutually exclusive")
+		}
+		entries, ok := list.([]any)
+		if !ok || len(entries) == 0 {
+			return nil, domain.ErrInvalidInput("CodeBuddy option models must be a non-empty list of strings")
+		}
+		models := make([]string, 0, len(entries))
+		for _, entry := range entries {
+			text, isString := entry.(string)
+			if !isString || strings.TrimSpace(text) == "" {
+				return nil, domain.ErrInvalidInput("CodeBuddy option models must be a non-empty list of strings")
+			}
+			models = append(models, strings.TrimSpace(text))
+		}
+		return models, nil
+	}
+	if single != "" {
+		return []string{single}, nil
+	}
+	return []string{defaultCodeBuddyModel}, nil
+}
+
+func codebuddyMaxTurnsOption(options map[string]any) (int, error) {
+	value, exists := options["max_turns"]
+	if !exists || value == nil {
+		return 0, nil
+	}
+	turns, ok := value.(int)
+	if !ok || turns <= 0 {
+		return 0, domain.ErrInvalidInput("CodeBuddy option max_turns must be a positive integer")
+	}
+	return turns, nil
 }
