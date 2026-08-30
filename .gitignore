@@ -4,3 +4,5 @@ run/
 *.db
 *.db-*
 *.sock
+web/node_modules/
+web/dist/

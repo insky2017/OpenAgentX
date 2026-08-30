@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -45,9 +45,19 @@ updated_at: 2026-08-30
 - 不使用 Background Sync，不缓存 API/SSE/Task/Message/Artifact/Auth；
 - 组件测试覆盖权限、loading/error/empty/stale/offline 状态。
 
+## 实施结果
+
+- 新增 `web/` Vite + React PWA，首屏提供“指挥 / 任务 / 组织”移动优先入口。
+- 支持审批、回复和业务指令输入，Agent 状态、待办和任务列表使用单列窄屏布局并适配桌面宽屏。
+- 增加 Manifest、standalone 配置和 Service Worker；Service Worker 只处理静态应用壳，跳过 `/api/` 请求。
+
 ## 退出条件
 
 - 手机可完整执行登录、创建 Task、补充 Message、审批、取消和查看结果；
 - PC 可完成组织、队列、执行和 Worker 运维观察；
 - PWA 可生成安装资产并由 Go embed 提供；
 - 所有已完成页面都有真实浏览器验证记录。
+
+## 验证
+
+详见 [Task 16 验证报告](../../reports/validation/2026-08-30-openagentx-task16-react-pwa.md)。
