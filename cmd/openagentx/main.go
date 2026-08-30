@@ -34,7 +34,7 @@ func execute(args []string) int {
 	switch args[0] {
 	case "worker":
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
-	case "serve", "daemon":
+	case "serve":
 		return runDaemon(args[1:])
 	case "schema":
 		return runSchema(args[1:])
