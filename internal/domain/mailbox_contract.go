@@ -109,6 +109,12 @@ func (m MailboxItem) Validate() error {
 	return nil
 }
 
+func (m MailboxItem) ValidateForInsert() error {
+	copy := m
+	copy.Sequence = 1
+	return copy.Validate()
+}
+
 func SortMailboxItems(items []MailboxItem) {
 	sort.SliceStable(items, func(i, j int) bool {
 		leftPriority := items[i].Lane.Priority()

@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type RunAttemptStatus string
 
@@ -44,8 +47,11 @@ type RunAttempt struct {
 	AdapterID              string           `json:"adapter_id"`
 	BackendID              string           `json:"backend_id"`
 	Model                  string           `json:"model"`
-	ReasoningMode          string           `json:"reasoning_mode"`
+	ReasoningMode          ReasoningMode    `json:"reasoning_mode"`
 	ReasoningValue         string           `json:"reasoning_value"`
+	StartedAt              time.Time        `json:"started_at"`
+	FinishedAt             *time.Time       `json:"finished_at,omitempty"`
+	ResultJSON             string           `json:"result_json,omitempty"`
 	CreatedAt              time.Time        `json:"created_at"`
 	UpdatedAt              time.Time        `json:"updated_at"`
 }
@@ -71,6 +77,30 @@ func (r RunAttempt) Validate() error {
 	}
 	if err := ValidatePositiveVersion("fencing_token", r.FencingToken); err != nil {
 		return err
+	}
+	if r.LeaseUntil.IsZero() || r.StartedAt.IsZero() {
+		return ErrInvalidInput("run lease_until and started_at are required")
+	}
+	if err := ValidatePositiveVersion("execution_spec_version", r.ExecutionSpecVersion); err != nil {
+		return err
+	}
+	if !json.Valid([]byte(r.RequestedExecutionJSON)) || !json.Valid([]byte(r.ResolvedExecutionJSON)) {
+		return ErrInvalidInput("run execution specs must be valid JSON")
+	}
+	if err := ValidateIdentifier("adapter_id", r.AdapterID); err != nil {
+		return err
+	}
+	if err := ValidateIdentifier("backend_id", r.BackendID); err != nil {
+		return err
+	}
+	if err := ValidateOpaqueID("model", r.Model); err != nil {
+		return err
+	}
+	if !r.ReasoningMode.Valid() {
+		return ErrInvalidInput("unsupported run reasoning_mode")
+	}
+	if r.ResultJSON != "" && !json.Valid([]byte(r.ResultJSON)) {
+		return ErrInvalidInput("run result_json must be valid JSON")
 	}
 	return nil
 }

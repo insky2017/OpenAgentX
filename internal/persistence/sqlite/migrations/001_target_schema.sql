@@ -369,6 +369,18 @@ CREATE TABLE event_journal (
 CREATE INDEX idx_event_journal_aggregate
 ON event_journal(aggregate_type, aggregate_id, sequence);
 
+CREATE TRIGGER event_journal_reject_update
+BEFORE UPDATE ON event_journal
+BEGIN
+    SELECT RAISE(ABORT, 'event_journal is append-only');
+END;
+
+CREATE TRIGGER event_journal_reject_delete
+BEFORE DELETE ON event_journal
+BEGIN
+    SELECT RAISE(ABORT, 'event_journal is append-only');
+END;
+
 CREATE TABLE web_users (
     web_user_id TEXT PRIMARY KEY,
     principal_id TEXT NOT NULL UNIQUE REFERENCES principals(principal_id),

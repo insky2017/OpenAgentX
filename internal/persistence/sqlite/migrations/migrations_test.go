@@ -77,6 +77,20 @@ func TestApplyRejectsLegacyAndUnsupportedSchemas(t *testing.T) {
 	}
 }
 
+func TestApplyRejectsPartialCurrentSchema(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	db := openDB(t)
+	if _, err := db.ExecContext(ctx, `CREATE TABLE schema_meta (
+		singleton INTEGER PRIMARY KEY, version INTEGER NOT NULL, applied_at TEXT NOT NULL
+	); INSERT INTO schema_meta VALUES (1, 1, 'now')`); err != nil {
+		t.Fatal(err)
+	}
+	if err := migrations.Apply(ctx, db); !errors.Is(err, migrations.ErrIncompleteSchema) {
+		t.Fatalf("partial current schema error = %v", err)
+	}
+}
+
 func TestTargetSchemaAllowsQueuedTasksButRejectsTwoActiveRuns(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()

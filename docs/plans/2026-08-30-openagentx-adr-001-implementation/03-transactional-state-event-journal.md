@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -48,3 +48,13 @@ OpenAgentX/internal/controlplane/transaction.go
 - 当前状态读取不依赖 Event replay；
 - Task 可以积压多个 queued 工作，但同 Agent 不能有两个有效 Active Run；
 - SQLite 并发和重启测试通过。
+
+## 完成记录
+
+- 已实现目标 SQLite Repository、`TransactionalState` 边界、schema 完整性校验和 append-only Event Journal trigger；
+- Agent/Profile、Task、Message、WorkerInstance、MailboxItem、RunAttempt 与 SessionBinding 可直接从权威状态表读写；
+- Task/Message/RunAttempt 的复合写入、CAS、幂等、外键和故障回滚测试通过；
+- 并发幂等提交与单 Agent Active Run 竞争重复 20 轮并通过 race；
+- `go test -count=1 ./...`、`go test -race -count=1 ./...`、`go vet ./...` 通过；
+- 验收报告：[Task 03 Transactional State 验证报告](../../reports/validation/2026-08-30-openagentx-task03-transactional-state.md)；
+- 冻结 ADR-001 未修改，目标 persistence/controlplane 不依赖旧 store/service/tmux 路径。
