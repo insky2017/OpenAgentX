@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -50,3 +50,12 @@ OpenAgentX/docs/reports/validation/
 - Worker 在两个 Task 之间保持在线、Backend process 不常驻占用 turn；
 - 所有任务投递和结果都有状态表与 Event Journal 证据；
 - G1 验收报告完成，才允许进入 M2。
+
+## 完成记录
+
+- 已实现 `AgyBatchAdapter`、descriptor、health probe、direct argv 启动、stream-json parser、stderr/超时/退出分类和 process-signal cancel；
+- 已实现 AGY conversation resume 参数传递和 prompt/Backend 参数不经 shell 的测试；
+- 已通过 Worker + UDS 连续 Task A/Task B 验证，Worker 在两个 AGY turn 之间保持在线；
+- `go test -count=20 ./internal/runtime/agy`、`go test -race -count=10 ./internal/runtime/agy`、全仓 test/race/vet 通过；
+- 验收报告：[Task 06 AGY Batch 与 UDS 验证报告](../../reports/validation/2026-08-30-openagentx-task06-agy-uds.md)；
+- 冻结 ADR-001 未修改，AGY Adapter 不依赖 tmux connector、pane 或 Stop Hook。

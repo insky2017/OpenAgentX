@@ -13,6 +13,7 @@ import (
 	workerclient "agentbus/internal/client/worker"
 	"agentbus/internal/domain"
 	openruntime "agentbus/internal/runtime"
+	"agentbus/internal/runtime/agy"
 	"agentbus/internal/runtime/fake"
 	residentworker "agentbus/internal/worker"
 	"github.com/google/uuid"
@@ -81,6 +82,14 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 }
 
 func assembleM1Adapter(config residentworker.RuntimeBackendConfig) (openruntime.AgentRuntimeAdapter, error) {
+	if config.AdapterID == "agy-batch" {
+		binary, _ := config.Options["binary"].(string)
+		adapter, err := agy.NewAdapter(agy.Config{Binary: binary})
+		if err != nil {
+			return nil, err
+		}
+		return adapter, nil
+	}
 	if config.AdapterID != "fake" {
 		return nil, fmt.Errorf("Runtime Adapter %q is not assembled in the M1 Worker build", config.AdapterID)
 	}
