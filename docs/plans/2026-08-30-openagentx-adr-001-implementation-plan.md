@@ -45,9 +45,9 @@ updated_at: 2026-08-30
 | 15 | M5 | [Web Auth、HTTP API 与 SSE](2026-08-30-openagentx-adr-001-implementation/15-web-auth-api-sse.md) | 14 | completed |
 | 16 | M5 | [React mobile-first PWA](2026-08-30-openagentx-adr-001-implementation/16-react-mobile-first-pwa.md) | 15 | completed |
 | 17 | M5 | [浏览器、安全与 PWA E2E](2026-08-30-openagentx-adr-001-implementation/17-browser-security-pwa-e2e.md) | 16 | completed |
-| 18 | Release | [统一命名、目标 schema 与旧控制路径删除](2026-08-30-openagentx-adr-001-implementation/18-name-schema-legacy-removal.md) | 17 | pending |
-| 19 | Release | [部署与原子切换演练](2026-08-30-openagentx-adr-001-implementation/19-deployment-cutover-rehearsal.md) | 18 | pending |
-| 20 | Release | [原子发布验收与旧库归档](2026-08-30-openagentx-adr-001-implementation/20-atomic-release-acceptance.md) | 19 | pending |
+| 18 | Release | [统一命名、目标 schema 与旧控制路径删除](2026-08-30-openagentx-adr-001-implementation/18-name-schema-legacy-removal.md) | 17 | completed |
+| 19 | Release | [部署与原子切换演练](2026-08-30-openagentx-adr-001-implementation/19-deployment-cutover-rehearsal.md) | 18 | completed |
+| 20 | Release | [原子发布验收与旧库归档](2026-08-30-openagentx-adr-001-implementation/20-atomic-release-acceptance.md) | 19 | completed |
 
 M4 中任务 12 与 13 可在 G3 后并行；其他任务按依赖顺序推进。并行不允许复制领域规则或提前绕过尚未冻结的接口。
 

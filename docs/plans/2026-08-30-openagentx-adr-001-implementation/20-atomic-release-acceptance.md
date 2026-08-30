@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -53,3 +53,10 @@ updated_at: 2026-08-30
 - 旧库有 hash、位置、权限和只读验证记录；
 - 当前文档、服务和操作入口只描述 OpenAgentX；
 - 主计划更新为 completed，ADR-001 保持 Accepted/冻结。
+
+## 实施结果
+
+- canonical CLI 增加 `daemon` 和 `schema verify` 子命令，部署 unit 与切换脚本引用的入口可执行。
+- 完成空库 schema 校验、daemon Unix Socket 启停和 SIGINT 优雅退出检查。
+- 完成全量 Go/前端构建、race、vet、文档和 legacy release scanner 审计；当前运行代码不存在旧控制路径。
+- 形成最终验收报告；生产主机切换仍需由运维人员在真实 systemd/Nginx/Tailscale 环境按 Task 19 runbook 执行，仓库验证不直接触碰生产数据。

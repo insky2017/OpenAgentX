@@ -39,7 +39,7 @@ runtime_backends:
 agent_id: quote
 transport: unix
 unix_socket: /run/openagentx/openagentx.sock
-legacy_tmux_pane: "%51"
+legacy_terminal_field: deprecated
 runtime_backends:
   - backend_id: local
     adapter_id: fake
