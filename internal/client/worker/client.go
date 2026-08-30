@@ -30,6 +30,7 @@ func (e *APIError) Error() string {
 
 type UnixHTTPWorkerClient struct {
 	httpClient *http.Client
+	transport  *http.Transport
 
 	mu           sync.RWMutex
 	sessionToken string
@@ -45,8 +46,15 @@ func NewUnixHTTPWorkerClient(socketPath string) (*UnixHTTPWorkerClient, error) {
 		},
 	}
 	return &UnixHTTPWorkerClient{
-		httpClient: &http.Client{Transport: transport, Timeout: 40 * time.Second},
+		httpClient: &http.Client{Transport: transport, Timeout: 40 * time.Second}, transport: transport,
 	}, nil
+}
+
+func (c *UnixHTTPWorkerClient) Close() error {
+	if c.transport != nil {
+		c.transport.CloseIdleConnections()
+	}
+	return nil
 }
 
 func (c *UnixHTTPWorkerClient) RegisterWorker(ctx context.Context, request openapi.RegisterRequest) (*openapi.WorkerSession, error) {

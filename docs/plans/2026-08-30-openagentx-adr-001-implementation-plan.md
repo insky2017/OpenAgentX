@@ -32,7 +32,7 @@ updated_at: 2026-08-30
 | 02 | M0 | [目标契约、schema 与测试骨架](2026-08-30-openagentx-adr-001-implementation/02-target-contract-schema-test-harness.md) | 01 | completed |
 | 03 | M1 | [Transactional State 与 Event Journal](2026-08-30-openagentx-adr-001-implementation/03-transactional-state-event-journal.md) | 02 | completed |
 | 04 | M1 | [Mailbox 与 Worker Lease API](2026-08-30-openagentx-adr-001-implementation/04-mailbox-worker-lease-api.md) | 03 | completed |
-| 05 | M1 | [并发 Resident Worker](2026-08-30-openagentx-adr-001-implementation/05-concurrent-resident-worker.md) | 04 | pending |
+| 05 | M1 | [并发 Resident Worker](2026-08-30-openagentx-adr-001-implementation/05-concurrent-resident-worker.md) | 04 | completed |
 | 06 | M1 | [AGY Batch + UDS 端到端闭环](2026-08-30-openagentx-adr-001-implementation/06-agy-uds-end-to-end.md) | 05 | pending |
 | 07 | M2 | [RunAttempt、SessionBinding 与 multi-turn](2026-08-30-openagentx-adr-001-implementation/07-run-attempt-session-binding-multi-turn.md) | 06 | pending |
 | 08 | M2 | [Message、Cancel 与 Approval 竞态](2026-08-30-openagentx-adr-001-implementation/08-message-cancel-approval-races.md) | 07 | pending |

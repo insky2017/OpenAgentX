@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -50,3 +50,12 @@ OpenAgentX/cmd/openagentx/
 - 活动 turn 不阻塞合法控制输入；
 - 旧 Worker 失去 lease 后不能继续写入；
 - Worker 代码不导入 tmux connector 或旧 pane session 类型。
+
+## 完成记录
+
+- 已实现独立 `openagentx worker run --config`、严格 Worker 配置、四个常驻 loop 和单 actor Active Run Manager；
+- 已实现 fake Runtime Adapter/TurnHandle，覆盖阻塞 Wait、native steer/approval/cancel、late completion、drain、stop 和 lease loss；
+- 已实现 M1 fake Backend 进程装配与真实 UDS 连续 Task A/Task B 测试；
+- `go test -count=1 ./...`、`go test -race -count=1 ./...`、聚焦 20 轮普通/race 和 Worker 进程 20/10 轮验证、`go vet ./...` 通过；
+- 验收报告：[Task 05 并发 Resident Worker 验证报告](../../reports/validation/2026-08-30-openagentx-task05-concurrent-resident-worker.md)；
+- 冻结 ADR-001 未修改，Worker 代码不依赖 tmux connector 或旧 pane session 类型。
