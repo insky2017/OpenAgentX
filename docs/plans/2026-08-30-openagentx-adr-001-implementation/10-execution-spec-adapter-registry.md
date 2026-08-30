@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -44,9 +44,19 @@ OpenAgentX/internal/controlplane/execution_resolver.go
 - ResolvedExecutionSpec 可从持久记录解释每个字段来源；
 - 用户输入不能形成 shell fragment、任意环境变量或未声明参数。
 
+## 实施结果
+
+- 新增类型安全的 `runtime/registry`，以 Adapter descriptor + Backend registration 组成可验证目录，拒绝重复或不匹配注册。
+- 新增 `runtime/spec` 分层解析器，按请求覆盖 profile/default，并记录字段来源；对 Adapter、Backend、model、reasoning、session、timeout、budget 执行 capability 与 policy hard limit 校验。
+- Resolver 输出 `ResolvedExecutionSpec`，可直接写入 RunAttempt 的 requested/resolved JSON，不接受 raw argv 或任意未声明组合。
+
 ## 退出条件
 
 - AGY descriptor 迁移到 Registry 并通过 resolver/conformance；
 - 同一 Task 的不同 turn 可在授权范围内解析不同 spec；
 - Backend 切换强制新 SessionBinding；
 - API 可稳定列出目标 Agent 的合法 execution options。
+
+## 验证
+
+详见 [Task 10 验证报告](../../reports/validation/2026-08-30-openagentx-task10-execution-spec-registry.md)。
