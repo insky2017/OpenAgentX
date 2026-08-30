@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -48,9 +48,19 @@ OpenAgentX/internal/transport/sse/
 - SSE 断线重连按 sequence 回放，客户端重复应用安全；
 - API 不返回密码摘要、token、私钥、完整 fencing、环境变量或隐藏推理。
 
+## 实施结果
+
+- 新增 `auth/web` 安全核心：Argon2id 密码摘要、随机不透明 Session、idle/absolute timeout、立即撤销、角色 RBAC 和 CSRF 校验。
+- 新增 Auth HTTP handler，登录、Session 查询和登出固定使用 `Secure; HttpOnly; SameSite=Strict` Cookie；登录失败不区分用户不存在与密码错误。
+- Worker/Remote Worker API 仍与 Web 路由隔离，Web 认证不暴露密码摘要、Session token 或 fencing token。
+
 ## 退出条件
 
 - 未登录、过期、撤销 Session 无法访问页面/API/SSE；
 - CLI/MCP/Web 写入共用同一 Command Service；
 - Observe API 保持只读，Admin API 不能创建业务 Task；
 - Web 后端安全负向测试通过。
+
+## 验证
+
+详见 [Task 15 验证报告](../../reports/validation/2026-08-30-openagentx-task15-web-auth.md)。
