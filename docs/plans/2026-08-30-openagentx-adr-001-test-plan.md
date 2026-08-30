@@ -49,7 +49,7 @@ ADR-001 保持冻结。本计划只定义测试顺序、证据、失败处理和
 |---|---|---|---|
 | T01 | [测试准备、身份初始化与环境门槛](2026-08-30-openagentx-adr-001-testing/01-test-fixture-and-preflight.md) | ADR-001 | passed |
 | T02 | [Web 登录、安全、SSE、PWA 与离线](2026-08-30-openagentx-adr-001-testing/02-web-auth-security-pwa.md) | T01 | passed |
-| T03 | [Fake Worker 连续任务闭环](2026-08-30-openagentx-adr-001-testing/03-fake-worker-consecutive-tasks.md) | T01 | pending |
+| T03 | [Fake Worker 连续任务闭环](2026-08-30-openagentx-adr-001-testing/03-fake-worker-consecutive-tasks.md) | T01 | passed |
 | T04 | [AGY Worker 真实连续任务闭环](2026-08-30-openagentx-adr-001-testing/04-agy-worker-consecutive-tasks.md) | T03 | pending |
 | T05 | [Multi-turn、Message 与 queued steer](2026-08-30-openagentx-adr-001-testing/05-multiturn-message-steer.md) | T03 | pending |
 | T06 | [Cancel、Approval 与 finish 竞态](2026-08-30-openagentx-adr-001-testing/06-cancel-approval-races.md) | T05 | pending |
