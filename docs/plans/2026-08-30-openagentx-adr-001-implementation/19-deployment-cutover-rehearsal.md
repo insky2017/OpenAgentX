@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -43,3 +43,10 @@ updated_at: 2026-08-30
 - 运行手册可由未参与实现的操作者按步骤复现；
 - 证书、服务、数据库和移动访问检查点齐全；
 - 正式发布清单和 go/no-go 条件冻结。
+
+## 实施结果
+
+- 新增 `deploy/systemd/openagentx.service` 与 `openagentx-worker@.service`，Worker 使用 `Restart=on-failure`，受控正常退出不自动重启。
+- 新增 `deploy/nginx/openagentx.conf`，固定 TLS 1.3、安全响应头、SSE `proxy_buffering off`、长连接超时和 API 禁缓存。
+- 新增默认 dry-run 的 `deploy/scripts/rehearse-cutover.sh`，覆盖旧库副本/hash/权限、目标 schema verify、服务顺序、Nginx 检查和失败即停边界。
+- 新增部署切换 runbook，明确 Tailscale 证书、Worker 出站 mTLS、ready gate、故障恢复和 go/no-go。

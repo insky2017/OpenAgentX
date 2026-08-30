@@ -1,0 +1,21 @@
+[Unit]
+Description=OpenAgentX Worker (%i)
+After=openagentx.service
+Requires=openagentx.service
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/opt/openagentx
+ExecStart=/opt/openagentx/bin/openagentx worker run --config /etc/openagentx/workers/%i.yaml
+Restart=on-failure
+RestartSec=3s
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/openagentx /run/openagentx
+
+[Install]
+WantedBy=multi-user.target
