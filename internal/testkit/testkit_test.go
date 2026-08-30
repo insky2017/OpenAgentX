@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
-	"agentbus/internal/testkit"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/testkit"
 )
 
 func descriptor() openruntime.AdapterDescriptor {

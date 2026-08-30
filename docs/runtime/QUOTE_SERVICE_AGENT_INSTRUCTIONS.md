@@ -1,7 +1,3 @@
-# Quote Service Agent 运行指令（导航入口）
+# Quote Service Agent 运行指令
 
-本文件仅提供导航。权威角色规范与操作指引位于 canonical 文件：
-
-👉 **[AgentBus/agents/quote-service/ROLE.md](../../agents/quote-service/ROLE.md)**
-
-Manifest 配置见：**[AgentBus/agents/quote-service/agent.yaml](../../agents/quote-service/agent.yaml)**
+Quote Service Worker 使用 `agents/quote-service/agent.yaml` 启动，向 OpenAgentX 注册后持续等待 Agent Mailbox。每个 Task 在独立 RunAttempt 中执行，完成后继续等待下一项；补充、审批和取消遵循当前 Adapter 能力与 RunAttempt 版本校验。

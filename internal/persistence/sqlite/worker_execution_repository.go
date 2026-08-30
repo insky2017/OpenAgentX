@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([]openruntime.BackendRegistration, error) {

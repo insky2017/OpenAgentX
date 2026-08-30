@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
+	"openagentx/internal/api"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 type ControlPayloadResolver interface {

@@ -1,7 +1,3 @@
-# Orchestrator 运行指令（导航入口）
+# Orchestrator 运行指令
 
-本文件仅提供导航。权威角色规范与操作指引位于 canonical 文件：
-
-👉 **[AgentBus/agents/orchestrator/ROLE.md](../../agents/orchestrator/ROLE.md)**
-
-Manifest 配置见：**[AgentBus/agents/orchestrator/agent.yaml](../../agents/orchestrator/agent.yaml)**
+Orchestrator 通过 OpenAgentX 指挥台或 `openagentx` CLI 创建 Task、发送补充 Message、处理 Approval/Cancel，并通过 Observe API/SSE 跟踪状态。业务寻址只使用逻辑 `agent_id`；不要依赖执行进程、终端布局或主机路径。

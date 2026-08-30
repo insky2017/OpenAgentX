@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 type Config struct {

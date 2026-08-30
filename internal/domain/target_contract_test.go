@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 func TestTargetEnumsRejectUnknownValues(t *testing.T) {

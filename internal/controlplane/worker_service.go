@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
 	"github.com/google/uuid"
+	"openagentx/internal/api"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 type WorkerState interface {

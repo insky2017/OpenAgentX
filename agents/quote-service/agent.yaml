@@ -1,12 +1,13 @@
 version: 1
-id: quote-service
-role: quote
-runtime: agy
-connector: tmux
-address: "%52"
-workspace: ".."
-instructions: "ROLE.md"
+agent_id: quote-service
+transport: unix
+unix_socket: run/openagentx.sock
 capabilities:
   - quote-service-development
   - quote-service-testing
   - quote-market-integration
+runtime_backends:
+  - backend_id: primary
+    adapter_id: agy-batch
+    options:
+      binary: agy

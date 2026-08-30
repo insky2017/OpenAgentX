@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 type Entry struct {

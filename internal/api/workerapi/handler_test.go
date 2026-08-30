@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	openapi "agentbus/internal/api"
-	"agentbus/internal/domain"
+	openapi "openagentx/internal/api"
+	"openagentx/internal/domain"
 )
 
 func TestClassifyErrorDoesNotExposeInternalDetails(t *testing.T) {

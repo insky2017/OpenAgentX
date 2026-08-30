@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 const workerCommandColumns = `worker_command_id, worker_instance_id, generation, kind, state, requested_by, idempotency_key, lease_until, attempts, created_at, claimed_at, applied_at, result`

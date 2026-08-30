@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 const approvalRequestColumns = `approval_request_id, task_id, mode, target_run_id, expected_run_version,

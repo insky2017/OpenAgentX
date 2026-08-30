@@ -1,4 +1,4 @@
-module agentbus
+module openagentx
 
 go 1.22.4
 

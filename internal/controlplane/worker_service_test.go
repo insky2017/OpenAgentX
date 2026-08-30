@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/domain"
-	openagentsqlite "agentbus/internal/persistence/sqlite"
-	openruntime "agentbus/internal/runtime"
-	"agentbus/internal/testkit"
+	"openagentx/internal/api"
+	"openagentx/internal/domain"
+	openagentsqlite "openagentx/internal/persistence/sqlite"
+	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/testkit"
 )
 
 type workerTestEnvironment struct {

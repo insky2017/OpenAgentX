@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -42,3 +42,11 @@ updated_at: 2026-08-30
 - 目标 schema 在空库创建并校验，旧库保持未修改；
 - 当前文档和部署文件没有旧路径操作说明；
 - 不存在运行时兼容分支或双写逻辑。
+
+## 实施结果
+
+- Go module、所有 import、CLI 和构建入口统一为 `openagentx`；删除 `cmd/agentbus` 与旧 CLI。
+- 删除旧 `internal/service`、`internal/server`、`internal/store`、`internal/connector`、旧 Agent manifest/session 模型及 AGY Hook 示例；Worker/Runtime/Controlplane 栈成为唯一执行路径。
+- Agent 配置改为 `agent_id + transport + runtime_backends`，不再暴露 connector、address 或 pane 生命周期字段。
+- README、架构和运行指令改写为 OpenAgentX 目标流程；旧历史文档保留为不可执行的历史记录。
+- 目标 SQLite schema 版本严格校验，已有非目标表或不完整/未知版本数据库直接拒绝启动。

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"agentbus/internal/domain"
-	"agentbus/internal/runtime"
+	"openagentx/internal/domain"
+	"openagentx/internal/runtime"
 )
 
 const (

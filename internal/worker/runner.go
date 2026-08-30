@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
 	"golang.org/x/sync/errgroup"
+	"openagentx/internal/api"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 var errControlledStop = errors.New("controlled Worker stop")

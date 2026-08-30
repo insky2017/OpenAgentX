@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/domain"
+	"openagentx/internal/api"
+	"openagentx/internal/domain"
 )
 
 type WorkerAdminState interface {

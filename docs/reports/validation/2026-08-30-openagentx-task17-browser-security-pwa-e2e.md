@@ -43,7 +43,7 @@ python3 scripts/check_docs.py
 
 ## 服务端安全头
 
-`TestServerSecurityHeaders` 与 `internal/api/auth.TestSecurityHeaders` 通过，验证 daemon HTTP 和 Web Auth 响应包含：
+`internal/api/auth.TestSecurityHeaders` 通过；保留的 Worker API 与 Web Auth 入口均设置以下安全响应头：
 
 - `Cache-Control: no-store` 与 `Pragma: no-cache`；
 - `X-Content-Type-Options: nosniff`；

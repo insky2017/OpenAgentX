@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
-	"agentbus/internal/runtime/fake"
+	"openagentx/internal/api"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/runtime/fake"
 )
 
 type finishRecord struct {

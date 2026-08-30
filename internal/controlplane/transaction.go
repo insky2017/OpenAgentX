@@ -3,7 +3,7 @@ package controlplane
 import (
 	"context"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 // TransactionalState is the M1 authoritative-state boundary. Implementations

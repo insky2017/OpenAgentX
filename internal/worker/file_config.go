@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"agentbus/internal/domain"
 	"gopkg.in/yaml.v3"
+	"openagentx/internal/domain"
 )
 
 type RuntimeBackendConfig struct {

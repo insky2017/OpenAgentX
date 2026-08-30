@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	workerclient "agentbus/internal/client/worker"
+	workerclient "openagentx/internal/client/worker"
 )
 
 func NewWorkerClient(baseURL string, tlsConfig Config) (*workerclient.UnixHTTPWorkerClient, error) {

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	workercli "agentbus/internal/cli/worker"
+	workercli "openagentx/internal/cli/worker"
 )
 
 func main() {

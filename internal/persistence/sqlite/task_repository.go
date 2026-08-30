@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 const taskColumns = `task_id, version, status, sender_principal_id, target_agent_id, dispatch_mode,

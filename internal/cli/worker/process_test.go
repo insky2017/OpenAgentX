@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/api/workerapi"
-	"agentbus/internal/controlplane"
-	"agentbus/internal/domain"
-	openagentsqlite "agentbus/internal/persistence/sqlite"
-	"agentbus/internal/transport/unixhttp"
+	"openagentx/internal/api/workerapi"
+	"openagentx/internal/controlplane"
+	"openagentx/internal/domain"
+	openagentsqlite "openagentx/internal/persistence/sqlite"
+	"openagentx/internal/transport/unixhttp"
 )
 
 func TestRunWorkerProcessCompletesConsecutiveTasksWithoutTerminalInput(t *testing.T) {

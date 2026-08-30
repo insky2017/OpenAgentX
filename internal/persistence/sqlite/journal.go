@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 func insertJournal(ctx context.Context, tx *sql.Tx, event *domain.JournalEvent) error {

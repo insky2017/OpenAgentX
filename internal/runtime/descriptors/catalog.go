@@ -1,8 +1,8 @@
 package descriptors
 
 import (
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func CodexACP() openruntime.AdapterDescriptor {

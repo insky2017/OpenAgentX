@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 var repositoryTestTime = time.Date(2026, 8, 30, 12, 0, 0, 0, time.UTC)

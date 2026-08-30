@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	openapi "agentbus/internal/api"
-	"agentbus/internal/domain"
+	openapi "openagentx/internal/api"
+	"openagentx/internal/domain"
 )
 
 type Service interface {
@@ -111,6 +111,12 @@ func (h *Handler) ackCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Cache-Control", "no-store")
+	response.Header().Set("Pragma", "no-cache")
+	response.Header().Set("X-Content-Type-Options", "nosniff")
+	response.Header().Set("Referrer-Policy", "no-referrer")
+	response.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+	response.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
 	request.Body = http.MaxBytesReader(response, request.Body, 1<<20)
 	h.mux.ServeHTTP(response, request)
 }

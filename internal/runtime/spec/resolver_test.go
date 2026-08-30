@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func TestResolveRejectsModelOutsideWorkerDescriptor(t *testing.T) {

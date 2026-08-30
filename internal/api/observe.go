@@ -1,7 +1,7 @@
 package api
 
 import (
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 const (

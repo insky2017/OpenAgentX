@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/api/workerapi"
-	workerclient "agentbus/internal/client/worker"
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
-	"agentbus/internal/transport/unixhttp"
+	"openagentx/internal/api"
+	"openagentx/internal/api/workerapi"
+	workerclient "openagentx/internal/client/worker"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/transport/unixhttp"
 )
 
 func TestWorkerAPIRejectsUnknownFieldsAndMissingBearerToken(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	openruntime "agentbus/internal/runtime"
+	openruntime "openagentx/internal/runtime"
 )
 
 const maxStreamLine = 4 << 20

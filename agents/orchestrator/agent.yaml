@@ -1,13 +1,14 @@
 version: 1
-id: orchestrator
-role: orchestrator
-runtime: codex
-connector: tmux
-address: "%50"
-workspace: ".."
-instructions: "ROLE.md"
+agent_id: orchestrator
+transport: unix
+unix_socket: run/openagentx.sock
 capabilities:
   - understand
   - decompose
   - delegate
   - review
+runtime_backends:
+  - backend_id: primary
+    adapter_id: acp
+    options:
+      provider: codex

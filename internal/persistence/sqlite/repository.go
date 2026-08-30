@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"agentbus/internal/domain"
-	"agentbus/internal/persistence/sqlite/migrations"
 	_ "github.com/mattn/go-sqlite3"
+	"openagentx/internal/domain"
+	"openagentx/internal/persistence/sqlite/migrations"
 )
 
 const sqliteTimeLayout = time.RFC3339Nano

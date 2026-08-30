@@ -10,13 +10,13 @@ import (
 	"strings"
 	"syscall"
 
-	workerclient "agentbus/internal/client/worker"
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
-	"agentbus/internal/runtime/agy"
-	"agentbus/internal/runtime/fake"
-	residentworker "agentbus/internal/worker"
 	"github.com/google/uuid"
+	workerclient "openagentx/internal/client/worker"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/runtime/agy"
+	"openagentx/internal/runtime/fake"
+	residentworker "openagentx/internal/worker"
 )
 
 type WorkerRunFunc func(context.Context, string) error

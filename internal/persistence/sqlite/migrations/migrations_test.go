@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/persistence/sqlite/migrations"
 	_ "github.com/mattn/go-sqlite3"
+	"openagentx/internal/persistence/sqlite/migrations"
 )
 
 func openDB(t *testing.T) *sql.DB {

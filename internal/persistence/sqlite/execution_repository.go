@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 func (r *Repository) CreateWorkerInstance(ctx context.Context, worker *domain.WorkerInstance, event *domain.JournalEvent) error {

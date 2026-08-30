@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"agentbus/internal/persistence/sqlite/migrations"
 	_ "github.com/mattn/go-sqlite3"
+	"openagentx/internal/persistence/sqlite/migrations"
 )
 
 func OpenTargetSQLite(tb testing.TB) *sql.DB {

@@ -1,7 +1,3 @@
-# AgentBus Agent 运行指令（导航入口）
+# 平台 Worker 运行指令
 
-本文件仅提供导航。权威角色规范与操作指引位于 canonical 文件：
-
-👉 **[AgentBus/agents/agentbus-agent/ROLE.md](../../agents/agentbus-agent/ROLE.md)**
-
-Manifest 配置见：**[AgentBus/agents/agentbus-agent/agent.yaml](../../agents/agentbus-agent/agent.yaml)**
+平台级 Worker 使用与 Domain Worker 相同的 OpenAgentX Worker API、lease 和 fencing token。Worker 是可迁移的独立进程，Runtime Adapter 可以替换具体 Agent CLI/ACP，而不改变 daemon 协议。

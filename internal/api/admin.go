@@ -1,6 +1,6 @@
 package api
 
-import "agentbus/internal/domain"
+import "openagentx/internal/domain"
 
 const (
 	AdminWorkerDrainPath       = "/api/admin/v1/workers/{worker-id}/drain"

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 var (

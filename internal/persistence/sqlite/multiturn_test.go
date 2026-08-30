@@ -1,9 +1,9 @@
 package sqlite
 
 import (
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
 	"context"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 	"testing"
 	"time"
 )

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 const mailboxColumns = `sequence, mailbox_item_id, target_agent_id, kind, lane, task_id, message_id,

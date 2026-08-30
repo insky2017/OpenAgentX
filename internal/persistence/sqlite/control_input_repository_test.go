@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 func TestRequestTaskCancelIsTaskLevelAndIdempotent(t *testing.T) {

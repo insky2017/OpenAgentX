@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sort"
 
-	"agentbus/internal/domain"
+	"openagentx/internal/domain"
 )
 
 func (r *Repository) CreatePrincipal(ctx context.Context, principal *domain.Principal, event *domain.JournalEvent) error {

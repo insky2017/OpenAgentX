@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	openapi "agentbus/internal/api"
-	"agentbus/internal/domain"
+	openapi "openagentx/internal/api"
+	"openagentx/internal/domain"
 )
 
 type APIError struct {

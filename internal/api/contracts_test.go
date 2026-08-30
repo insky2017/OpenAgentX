@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/api"
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
+	"openagentx/internal/api"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func TestDecodeStrictJSON(t *testing.T) {

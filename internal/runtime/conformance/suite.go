@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"agentbus/internal/domain"
-	openruntime "agentbus/internal/runtime"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 // ValidateDescriptor is shared by AGY, ACP and future adapters. It keeps

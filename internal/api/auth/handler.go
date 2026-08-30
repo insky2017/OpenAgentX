@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	openapi "agentbus/internal/api"
-	web "agentbus/internal/auth/web"
+	openapi "openagentx/internal/api"
+	web "openagentx/internal/auth/web"
 )
 
 type Handler struct {
