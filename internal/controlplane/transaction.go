@@ -10,6 +10,7 @@ import (
 // commit each method's state changes and Journal/Mailbox side effects in one
 // database transaction; callers never reconstruct current state by replay.
 type TransactionalState interface {
+	ReconcileExpired(context.Context) error
 	CreatePrincipal(context.Context, *domain.Principal, *domain.JournalEvent) error
 	CreateOrganization(context.Context, *domain.Organization, *domain.JournalEvent) error
 	CreateAgent(context.Context, *domain.AgentIdentity, *domain.AgentProfileRecord, *domain.JournalEvent) error

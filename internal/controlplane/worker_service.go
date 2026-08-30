@@ -19,6 +19,7 @@ import (
 )
 
 type WorkerState interface {
+	ReconcileExpired(context.Context) error
 	RegisterWorker(context.Context, domain.WorkerRegistration, []openruntime.BackendRegistration, *domain.JournalEvent) (*domain.WorkerInstance, error)
 	GetWorkerCredential(context.Context, string) (*domain.WorkerCredential, error)
 	HeartbeatWorker(context.Context, domain.WorkerWriteGuard, domain.WorkerStatus, map[string]openruntime.BackendHealth, time.Time, time.Time, *domain.JournalEvent) (*domain.WorkerInstance, error)
@@ -64,6 +65,13 @@ type WorkerService struct {
 	mailboxLease    time.Duration
 	runLease        time.Duration
 	planner         TurnPlanner
+}
+
+// Reconcile runs daemon-start recovery before Workers are allowed to claim
+// new work. It is intentionally explicit so a daemon can fail startup when
+// recovery cannot establish a consistent state.
+func (s *WorkerService) Reconcile(ctx context.Context) error {
+	return s.state.ReconcileExpired(ctx)
 }
 
 func NewWorkerService(state WorkerState, broker WakeupBroker, options WorkerServiceOptions) (*WorkerService, error) {

@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -35,9 +35,20 @@ updated_at: 2026-08-30
 - claim lease 过期与 Worker lease 过期分别处理，不互相替代；
 - 同一故障重复执行得到确定状态，不依赖真实时间随机性。
 
+## 实施结果
+
+- 新增 `Repository.ReconcileExpired` 与 `WorkerService.Reconcile`，可在 daemon 启动阶段执行确定性恢复。
+- 过期 mailbox claim 重新进入 `pending`；过期 Worker lease 进入 `offline`；过期 Active RunAttempt 因副作用不可核实进入 `uncertain`，关联 Task 按取消意图收敛为 `canceled` 或 `uncertain`。
+- Worker 重新注册沿用 generation/fencing 递增规则，旧 Worker 的 heartbeat、事件、finish 继续由现有 guard 拒绝。
+- 使用固定 repository clock 验证恢复结果，不依赖真实时间随机性。
+
 ## 退出条件
 
 - 故障矩阵覆盖 daemon、Worker、Backend、network、Broker 和 SQLite；
 - 所有恢复分支明确为 resume、retry、terminal 或 `uncertain`；
 - stale writer 负向测试通过；
 - G2 验收报告完成。
+
+## 验证
+
+详见 [Task 09 验证报告](../../reports/validation/2026-08-30-openagentx-task09-recovery-fencing.md)。
