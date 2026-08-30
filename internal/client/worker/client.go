@@ -31,6 +31,7 @@ func (e *APIError) Error() string {
 type UnixHTTPWorkerClient struct {
 	httpClient *http.Client
 	transport  *http.Transport
+	baseURL    string
 
 	mu           sync.RWMutex
 	sessionToken string
@@ -46,8 +47,17 @@ func NewUnixHTTPWorkerClient(socketPath string) (*UnixHTTPWorkerClient, error) {
 		},
 	}
 	return &UnixHTTPWorkerClient{
-		httpClient: &http.Client{Transport: transport, Timeout: 40 * time.Second}, transport: transport,
+		httpClient: &http.Client{Transport: transport, Timeout: 40 * time.Second}, transport: transport, baseURL: "http://unix",
 	}, nil
+}
+
+// NewHTTPWorkerClient reuses the Worker API contract over HTTPS (typically
+// configured with mTLS by the remotehttps transport package).
+func NewHTTPWorkerClient(baseURL string, httpClient *http.Client) (*UnixHTTPWorkerClient, error) {
+	if strings.TrimSpace(baseURL) == "" || httpClient == nil {
+		return nil, fmt.Errorf("Worker base URL and HTTP client are required")
+	}
+	return &UnixHTTPWorkerClient{httpClient: httpClient, baseURL: strings.TrimRight(baseURL, "/")}, nil
 }
 
 func (c *UnixHTTPWorkerClient) Close() error {
@@ -123,7 +133,7 @@ func (c *UnixHTTPWorkerClient) FinishRun(ctx context.Context, runID string, requ
 }
 
 func (c *UnixHTTPWorkerClient) do(ctx context.Context, method string, path string, query url.Values, requestBody any, responseBody any, authenticated bool) error {
-	requestURL := "http://unix" + path
+	requestURL := c.baseURL + path
 	if len(query) != 0 {
 		requestURL += "?" + query.Encode()
 	}

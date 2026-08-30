@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -44,9 +44,19 @@ OpenAgentX/deploy/pki/
 - UDS 与 HTTPS conformance 的状态结果完全一致；
 - mTLS 私钥、Session Token 和完整 fencing token 不进入日志/Event。
 
+## 实施结果
+
+- 新增 `transport/remotehttps` mTLS TLS 1.3 配置加载与 HTTPS Worker client 构造。
+- Worker API client 抽象出 HTTPS base URL，复用与 UDS 完全相同的注册、heartbeat、Mailbox、WorkerCommand、Event 和 finish 契约。
+- 证书私钥仅进入 TLS 配置，不写入日志或 Event；非 HTTPS endpoint 直接拒绝。
+
 ## 退出条件
 
 - 同一 Domain Agent 可从本机 Worker 迁移到远程 Worker，Task/SessionBinding 契约不变；
 - Remote Gateway 不暴露 Observe/Control/Admin/Web 接口；
 - 证书轮换和吊销 E2E 通过；
 - 远程执行不要求 tmux 或 daemon 入站连接 Worker。
+
+## 验证
+
+详见 [Task 13 验证报告](../../reports/validation/2026-08-30-openagentx-task13-remote-worker-mtls.md)。
