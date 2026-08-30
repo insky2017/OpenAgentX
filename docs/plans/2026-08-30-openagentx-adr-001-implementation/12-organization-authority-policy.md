@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -35,9 +35,19 @@ updated_at: 2026-08-30
 - ReportingLine 变更不追溯改写历史审计事实；
 - policy evaluation 使用稳定 principal/action/resource/context 输入。
 
+## 实施结果
+
+- 新增组织契约类型：`OrgUnit`、`Position`、`Role`、`PositionAssignment` 和 `ReportingLine`。
+- 新增纯函数 `AuthorityPolicy`，以稳定 principal/action/resource/context 输入校验组织边界、direct dispatch 和 ExecutionSpec override 权限。
+- 明确 Worker Instance 不是组织成员，也不能作为业务目标；coordinated/direct dispatch 的越权和跨组织请求 fail closed。
+
 ## 退出条件
 
 - coordinated/direct dispatch 正负向测试完整；
 - 组织 read model 能回答谁负责什么、谁可以指挥谁；
 - Command Service 成为 CLI/MCP/Web 唯一业务写入入口；
 - Worker API 和 Admin API 不能携带业务 prompt。
+
+## 验证
+
+详见 [Task 12 验证报告](../../reports/validation/2026-08-30-openagentx-task12-organization-authority.md)。
