@@ -21,6 +21,12 @@ var (
 	ErrAgentNotReady             = errors.New("agent is not ready to participate in tasks")
 	ErrSessionGenerationConflict = errors.New("session generation conflict")
 	ErrInvalidManifest           = errors.New("invalid agent manifest")
+	ErrUnsupportedCapability     = errors.New("unsupported capability")
+	ErrStaleVersion              = errors.New("stale resource version")
+	ErrLeaseExpired              = errors.New("lease expired")
+	ErrFencingRejected           = errors.New("fencing token rejected")
+	ErrTaskCancelRequested       = errors.New("task cancellation requested")
+	ErrApprovalStale             = errors.New("approval request is stale")
 )
 
 type DomainError struct {

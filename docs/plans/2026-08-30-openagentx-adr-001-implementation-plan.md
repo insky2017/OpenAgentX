@@ -29,7 +29,7 @@ updated_at: 2026-08-30
 | ID | 阶段 | 任务 | 依赖 | 状态 |
 |---|---|---|---|---|
 | 01 | M0 | [现状边界与删除映射](2026-08-30-openagentx-adr-001-implementation/01-current-boundary-and-removal-map.md) | ADR-001 | completed |
-| 02 | M0 | [目标契约、schema 与测试骨架](2026-08-30-openagentx-adr-001-implementation/02-target-contract-schema-test-harness.md) | 01 | pending |
+| 02 | M0 | [目标契约、schema 与测试骨架](2026-08-30-openagentx-adr-001-implementation/02-target-contract-schema-test-harness.md) | 01 | completed |
 | 03 | M1 | [Transactional State 与 Event Journal](2026-08-30-openagentx-adr-001-implementation/03-transactional-state-event-journal.md) | 02 | pending |
 | 04 | M1 | [Mailbox 与 Worker Lease API](2026-08-30-openagentx-adr-001-implementation/04-mailbox-worker-lease-api.md) | 03 | pending |
 | 05 | M1 | [并发 Resident Worker](2026-08-30-openagentx-adr-001-implementation/05-concurrent-resident-worker.md) | 04 | pending |

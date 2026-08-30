@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -52,3 +52,12 @@ M0 可以新增只承载契约和测试骨架的代码，但不能形成绕过�
 - 后续任务不需要直接依赖旧 `service` DTO；
 - 不变量清单与 ADR-001 一致；
 - G0 验收记录完成。
+
+## 完成记录
+
+- 已建立目标领域、Worker/API、Runtime Adapter、schema v1 和 testkit 契约；
+- 空库 migration、旧 schema 拒绝、单 Agent 单 Active Run、Mailbox lane、Cancel gate 与 Approval scope 测试通过；
+- DTO 与目标 package 不依赖旧 `internal/service`，domain 不依赖基础设施；
+- `go test ./...`、`go test -race ./...`、`go vet ./...` 和文档检查通过；
+- G0 验收报告：[OpenAgentX ADR-001 G0 契约基线验证报告](../../reports/validation/2026-08-30-openagentx-g0-contract-baseline.md)；
+- 冻结 ADR-001 未修改，目标契约尚未接入旧 V0 生产调度路径。
