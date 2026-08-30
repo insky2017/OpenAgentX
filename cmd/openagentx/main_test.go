@@ -9,6 +9,7 @@ import (
 )
 
 type staticWebUsers struct {
+	webAuth.SessionStore
 	users []domain.WebUserRecord
 	err   error
 }
@@ -18,14 +19,15 @@ func (s staticWebUsers) ListWebUsers(context.Context) ([]domain.WebUserRecord, e
 }
 
 func TestLoadAuthManagerUsesPersistentWebUsersAndFailsClosedWhenEmpty(t *testing.T) {
-	if _, err := loadAuthManager(context.Background(), staticWebUsers{}); err == nil {
+	store := webAuth.NewMemorySessionStore()
+	if _, err := loadAuthManager(context.Background(), staticWebUsers{SessionStore: store}); err == nil {
 		t.Fatal("daemon auth accepted an uninitialized user store")
 	}
 	digest, err := webAuth.HashPassword("correct horse battery staple")
 	if err != nil {
 		t.Fatal(err)
 	}
-	manager, err := loadAuthManager(context.Background(), staticWebUsers{users: []domain.WebUserRecord{{
+	manager, err := loadAuthManager(context.Background(), staticWebUsers{SessionStore: store, users: []domain.WebUserRecord{{
 		ID: "web-owner", PrincipalID: "human-owner", Username: "owner", PasswordDigest: digest,
 		Roles: []domain.WebRole{domain.WebRoleOwner}, Status: domain.IdentityActive,
 	}}})

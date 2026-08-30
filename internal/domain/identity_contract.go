@@ -97,6 +97,35 @@ type WebUserRecord struct {
 	UpdatedAt      time.Time      `json:"updated_at"`
 }
 
+type WebSessionRecord struct {
+	ID                string     `json:"web_session_id"`
+	WebUserID         string     `json:"web_user_id"`
+	SessionDigest     string     `json:"-"`
+	CSRFDigest        string     `json:"-"`
+	CreatedAt         time.Time  `json:"created_at"`
+	LastActivityAt    time.Time  `json:"last_activity_at"`
+	IdleExpiresAt     time.Time  `json:"idle_expires_at"`
+	AbsoluteExpiresAt time.Time  `json:"absolute_expires_at"`
+	RevokedAt         *time.Time `json:"revoked_at,omitempty"`
+}
+
+func (s WebSessionRecord) Validate() error {
+	if err := ValidateOpaqueID("web_session_id", s.ID); err != nil {
+		return err
+	}
+	if err := ValidateOpaqueID("web_user_id", s.WebUserID); err != nil {
+		return err
+	}
+	if strings.TrimSpace(s.SessionDigest) == "" || strings.TrimSpace(s.CSRFDigest) == "" {
+		return ErrInvalidInput("Web Session and CSRF digests are required")
+	}
+	if s.CreatedAt.IsZero() || s.LastActivityAt.Before(s.CreatedAt) ||
+		!s.IdleExpiresAt.After(s.LastActivityAt) || !s.AbsoluteExpiresAt.After(s.CreatedAt) {
+		return ErrInvalidInput("Web Session timestamps are invalid")
+	}
+	return nil
+}
+
 func (u WebUserRecord) Validate() error {
 	if err := ValidateOpaqueID("web_user_id", u.ID); err != nil {
 		return err

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	openapi "openagentx/internal/api"
+	adminapi "openagentx/internal/api/admin"
 	apiauth "openagentx/internal/api/auth"
 	"openagentx/internal/api/panel"
 	"openagentx/internal/api/workerapi"
@@ -111,11 +112,22 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create panel handler: %v\n", err)
 		return 1
 	}
+	workerAdminService, err := controlplane.NewWorkerAdminService(repository, time.Now, nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create Worker admin service: %v\n", err)
+		return 1
+	}
+	adminHandler, err := adminapi.NewHandler(workerAdminService, authManager)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create Worker admin handler: %v\n", err)
+		return 1
+	}
 	authHandler := apiauth.NewHandler(authManager)
 	webMux := http.NewServeMux()
 	webMux.Handle(openapi.AuthLoginPath, authHandler)
 	webMux.Handle(openapi.AuthLogoutPath, authHandler)
 	webMux.Handle(openapi.AuthSessionPath, authHandler)
+	webMux.Handle("/api/admin/", adminHandler)
 	webMux.Handle("/api/", panelHandler)
 	webFS, err := os.Open(filepath.Clean(*webDir))
 	if err != nil {
@@ -124,7 +136,13 @@ func runDaemon(args []string) int {
 	}
 	defer webFS.Close()
 	webMux.Handle("/", staticHandler(filepath.Clean(*webDir)))
-	httpServer := &http.Server{Addr: *httpAddr, Handler: webMux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 40 * time.Second, WriteTimeout: 40 * time.Second}
+	httpServer := &http.Server{
+		Addr:              *httpAddr,
+		Handler:           webMux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       40 * time.Second,
+		IdleTimeout:       90 * time.Second,
+	}
 	go func() {
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			slog.Error("web panel stopped", "error", err)
@@ -152,7 +170,11 @@ func loadAuthManager(ctx context.Context, source webUserSource) (*webAuth.Manage
 	if len(users) == 0 {
 		return nil, fmt.Errorf("OpenAgentX is not initialized; run openagentx init --db <path>")
 	}
-	manager := webAuth.NewManager(webAuth.Config{})
+	store, ok := source.(webAuth.SessionStore)
+	if !ok {
+		return nil, fmt.Errorf("web user source does not provide persistent Web Sessions")
+	}
+	manager := webAuth.NewManager(webAuth.Config{Store: store})
 	for _, record := range users {
 		roles := make([]webAuth.Role, 0, len(record.Roles))
 		for _, role := range record.Roles {
@@ -167,7 +189,7 @@ func loadAuthManager(ctx context.Context, source webUserSource) (*webAuth.Manage
 				return nil, fmt.Errorf("web user %q has unsupported role %q", record.Username, role)
 			}
 		}
-		if err := manager.AddUser(webAuth.User{ID: record.PrincipalID, Username: record.Username, Roles: roles, PasswordDigest: record.PasswordDigest}); err != nil {
+		if err := manager.AddUser(webAuth.User{ID: record.PrincipalID, WebUserID: record.ID, Username: record.Username, Roles: roles, PasswordDigest: record.PasswordDigest}); err != nil {
 			return nil, fmt.Errorf("load web user %q: %w", record.Username, err)
 		}
 	}
@@ -186,6 +208,9 @@ func staticHandler(directory string) http.Handler {
 		r.URL.Path = path
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Referrer-Policy", "no-referrer")
+		w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self'; img-src 'self'; manifest-src 'self'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
 		content, err := os.ReadFile(filepath.Join(directory, filepath.FromSlash(path)))
 		if err != nil {
 			http.NotFound(w, r)

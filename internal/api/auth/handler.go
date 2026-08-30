@@ -15,9 +15,9 @@ type Handler struct {
 
 func NewHandler(manager *web.Manager) *Handler {
 	h := &Handler{manager: manager, mux: http.NewServeMux()}
-	h.mux.HandleFunc(openapi.AuthLoginPath, h.login)
-	h.mux.HandleFunc(openapi.AuthLogoutPath, h.logout)
-	h.mux.HandleFunc(openapi.AuthSessionPath, h.session)
+	h.mux.HandleFunc("POST "+openapi.AuthLoginPath, h.login)
+	h.mux.HandleFunc("POST "+openapi.AuthLogoutPath, h.logout)
+	h.mux.HandleFunc("GET "+openapi.AuthSessionPath, h.session)
 	return h
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +31,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	var req openapi.LoginRequest
-	if json.NewDecoder(r.Body).Decode(&req) != nil || req.Validate() != nil {
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil || req.Validate() != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
@@ -41,11 +41,22 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	web.SetSessionCookie(w, s)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sessionResponse(s))
 }
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	if s, err := h.manager.Authenticate(r); err == nil {
-		h.manager.Revoke(s)
+	s, err := h.manager.Authenticate(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if web.ValidateCSRF(s, r.Header.Get("X-CSRF-Token")) != nil {
+		http.Error(w, "invalid csrf token", http.StatusForbidden)
+		return
+	}
+	if err := h.manager.Revoke(r.Context(), s); err != nil {
+		http.Error(w, "logout failed", http.StatusInternalServerError)
+		return
 	}
 	http.SetCookie(w, &http.Cookie{Name: "openagentx_session", Value: "", Path: "/", MaxAge: -1, Secure: true, HttpOnly: true, SameSite: http.SameSiteStrictMode})
 	w.WriteHeader(http.StatusNoContent)
@@ -56,6 +67,11 @@ func (h *Handler) session(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
+	if err := h.manager.RefreshCSRF(r.Context(), s); err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sessionResponse(s))
 }
 

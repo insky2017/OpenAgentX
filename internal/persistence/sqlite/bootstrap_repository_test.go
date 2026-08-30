@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -84,6 +85,58 @@ func TestInitializeRollsBackAllIdentityStateOnFailure(t *testing.T) {
 	var principals int
 	if err := repository.db.QueryRow(`SELECT COUNT(*) FROM principals`).Scan(&principals); err != nil || principals != 0 {
 		t.Fatalf("principal count=%d err=%v after rollback", principals, err)
+	}
+}
+
+func TestWebSessionPersistsAcrossRepositoryAndManagerRestart(t *testing.T) {
+	repository, databasePath := openTestRepository(t, nil)
+	ctx := context.Background()
+	digest, err := webAuth.HashPassword("correct horse battery staple")
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner := &domain.Principal{ID: "human-owner-session", Kind: domain.PrincipalHuman, DisplayName: "Owner", Status: domain.IdentityActive}
+	daemon := &domain.Principal{ID: "daemon", Kind: domain.PrincipalSystem, DisplayName: "OpenAgentX daemon", Status: domain.IdentityActive}
+	organization := &domain.Organization{ID: "default", Name: "Default", Status: domain.IdentityActive}
+	user := &domain.WebUserRecord{ID: "web-owner-session", PrincipalID: owner.ID, Username: "owner", PasswordDigest: digest, Roles: []domain.WebRole{domain.WebRoleOwner}, Status: domain.IdentityActive}
+	if created, err := repository.Initialize(ctx, owner, daemon, organization, user, bootstrapEvents("session", owner.ID, organization.ID, user.ID)); err != nil || !created {
+		t.Fatalf("initialize session fixture created=%v err=%v", created, err)
+	}
+	manager := webAuth.NewManager(webAuth.Config{Store: repository})
+	if err := manager.AddUser(webAuth.User{ID: owner.ID, WebUserID: user.ID, Username: user.Username, Roles: []webAuth.Role{webAuth.RoleOwner}, PasswordDigest: digest}); err != nil {
+		t.Fatal(err)
+	}
+	session, err := manager.Login("owner", "correct horse battery staple")
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+	webAuth.SetSessionCookie(response, session)
+	request := httptest.NewRequest("GET", "/", nil)
+	request.AddCookie(response.Result().Cookies()[0])
+	if err := repository.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	reopened, err := Open(ctx, databasePath, Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	replacement := webAuth.NewManager(webAuth.Config{Store: reopened})
+	if err := replacement.AddUser(webAuth.User{ID: owner.ID, WebUserID: user.ID, Username: user.Username, Roles: []webAuth.Role{webAuth.RoleOwner}, PasswordDigest: digest}); err != nil {
+		t.Fatal(err)
+	}
+	restored, err := replacement.Authenticate(request)
+	if err != nil || webAuth.ValidateCSRF(restored, session.CSRFToken) != nil {
+		t.Fatalf("restored Session=%+v err=%v", restored, err)
+	}
+	if err := replacement.RefreshCSRF(ctx, restored); err != nil {
+		t.Fatal(err)
+	}
+	record, err := reopened.GetWebSession(ctx, restored.IDDigest)
+	if err != nil || record.SessionDigest == "" || record.CSRFDigest == "" || strings.Contains(record.CSRFDigest, restored.CSRFToken) {
+		t.Fatalf("persisted Session record=%+v err=%v", record, err)
 	}
 }
 

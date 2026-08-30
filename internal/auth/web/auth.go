@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/argon2"
+	"openagentx/internal/domain"
 )
 
 type Role string
@@ -23,24 +25,27 @@ const (
 )
 
 type User struct {
-	ID, Username   string
-	Roles          []Role
-	PasswordDigest string
+	ID, WebUserID, Username string
+	Roles                   []Role
+	PasswordDigest          string
 }
 type Session struct {
-	IDDigest                                              string
-	token                                                 string
+	IDDigest, token, CSRFDigest                           string
 	User                                                  User
 	CSRFToken                                             string
 	CreatedAt, LastSeen, IdleExpiresAt, AbsoluteExpiresAt time.Time
 	Revoked                                               bool
 }
-type Config struct{ IdleTimeout, AbsoluteTimeout time.Duration }
+type Config struct {
+	IdleTimeout, AbsoluteTimeout time.Duration
+	Store                        SessionStore
+	Now                          func() time.Time
+}
 type Manager struct {
-	mu       sync.Mutex
-	users    map[string]User
-	sessions map[string]*Session
-	config   Config
+	mu           sync.RWMutex
+	users        map[string]User
+	usersByWebID map[string]User
+	config       Config
 }
 
 func NewManager(config Config) *Manager {
@@ -50,7 +55,13 @@ func NewManager(config Config) *Manager {
 	if config.AbsoluteTimeout <= 0 {
 		config.AbsoluteTimeout = 24 * time.Hour
 	}
-	return &Manager{users: make(map[string]User), sessions: make(map[string]*Session), config: config}
+	if config.Store == nil {
+		config.Store = NewMemorySessionStore()
+	}
+	if config.Now == nil {
+		config.Now = time.Now
+	}
+	return &Manager{users: make(map[string]User), usersByWebID: make(map[string]User), config: config}
 }
 
 func HashPassword(password string) (string, error) {
@@ -81,18 +92,25 @@ func (m *Manager) AddUser(user User) error {
 	if strings.TrimSpace(user.ID) == "" || strings.TrimSpace(user.Username) == "" || user.PasswordDigest == "" {
 		return fmt.Errorf("user identity and password digest are required")
 	}
+	if strings.TrimSpace(user.WebUserID) == "" {
+		user.WebUserID = user.ID
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if _, ok := m.users[user.Username]; ok {
 		return fmt.Errorf("user already exists")
 	}
+	if _, ok := m.usersByWebID[user.WebUserID]; ok {
+		return fmt.Errorf("web user identity already exists")
+	}
 	m.users[user.Username] = user
+	m.usersByWebID[user.WebUserID] = user
 	return nil
 }
 func (m *Manager) Login(username, password string) (*Session, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.mu.RLock()
 	user, ok := m.users[username]
+	m.mu.RUnlock()
 	if !ok || !VerifyPassword(user.PasswordDigest, password) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
@@ -104,11 +122,20 @@ func (m *Manager) Login(username, password string) (*Session, error) {
 	if _, err := rand.Read(csrf); err != nil {
 		return nil, err
 	}
-	now := time.Now().UTC()
+	now := m.config.Now().UTC()
 	id := base64.RawURLEncoding.EncodeToString(raw)
 	digest := sha256.Sum256([]byte(id))
-	s := &Session{IDDigest: base64.RawURLEncoding.EncodeToString(digest[:]), token: id, User: user, CSRFToken: base64.RawURLEncoding.EncodeToString(csrf), CreatedAt: now, LastSeen: now, IdleExpiresAt: now.Add(m.config.IdleTimeout), AbsoluteExpiresAt: now.Add(m.config.AbsoluteTimeout)}
-	m.sessions[s.IDDigest] = s
+	csrfToken := base64.RawURLEncoding.EncodeToString(csrf)
+	csrfDigest := sha256.Sum256([]byte(csrfToken))
+	s := &Session{IDDigest: base64.RawURLEncoding.EncodeToString(digest[:]), token: id, User: user,
+		CSRFToken: csrfToken, CSRFDigest: base64.RawURLEncoding.EncodeToString(csrfDigest[:]),
+		CreatedAt: now, LastSeen: now, IdleExpiresAt: now.Add(m.config.IdleTimeout), AbsoluteExpiresAt: now.Add(m.config.AbsoluteTimeout)}
+	record := &domain.WebSessionRecord{ID: s.IDDigest, WebUserID: user.WebUserID, SessionDigest: s.IDDigest,
+		CSRFDigest: s.CSRFDigest, CreatedAt: s.CreatedAt, LastActivityAt: s.LastSeen,
+		IdleExpiresAt: s.IdleExpiresAt, AbsoluteExpiresAt: s.AbsoluteExpiresAt}
+	if err := m.config.Store.CreateWebSession(context.Background(), record); err != nil {
+		return nil, err
+	}
 	return s, nil
 }
 func (m *Manager) Authenticate(r *http.Request) (*Session, error) {
@@ -118,26 +145,58 @@ func (m *Manager) Authenticate(r *http.Request) (*Session, error) {
 	}
 	sum := sha256.Sum256([]byte(cookie.Value))
 	key := base64.RawURLEncoding.EncodeToString(sum[:])
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	s, ok := m.sessions[key]
-	now := time.Now().UTC()
-	if !ok || s.Revoked || !now.Before(s.IdleExpiresAt) || !now.Before(s.AbsoluteExpiresAt) {
+	record, err := m.config.Store.GetWebSession(r.Context(), key)
+	if err != nil {
 		return nil, fmt.Errorf("session expired")
 	}
-	s.LastSeen = now
-	s.IdleExpiresAt = now.Add(m.config.IdleTimeout)
+	now := m.config.Now().UTC()
+	if record.RevokedAt != nil || !now.Before(record.IdleExpiresAt) || !now.Before(record.AbsoluteExpiresAt) {
+		return nil, fmt.Errorf("session expired")
+	}
+	m.mu.RLock()
+	user, ok := m.usersByWebID[record.WebUserID]
+	m.mu.RUnlock()
+	if !ok {
+		return nil, fmt.Errorf("session user unavailable")
+	}
+	idleExpires := now.Add(m.config.IdleTimeout)
+	if idleExpires.After(record.AbsoluteExpiresAt) {
+		idleExpires = record.AbsoluteExpiresAt
+	}
+	if err := m.config.Store.TouchWebSession(r.Context(), key, now, idleExpires); err != nil {
+		return nil, fmt.Errorf("session expired")
+	}
+	s := &Session{IDDigest: key, User: user, CSRFDigest: record.CSRFDigest, CreatedAt: record.CreatedAt,
+		LastSeen: now, IdleExpiresAt: idleExpires, AbsoluteExpiresAt: record.AbsoluteExpiresAt}
 	return s, nil
 }
-func (m *Manager) Revoke(session *Session) {
+func (m *Manager) RefreshCSRF(ctx context.Context, session *Session) error {
+	if session == nil || session.IDDigest == "" {
+		return fmt.Errorf("session is required")
+	}
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return err
+	}
+	token := base64.RawURLEncoding.EncodeToString(raw)
+	digest := sha256.Sum256([]byte(token))
+	digestString := base64.RawURLEncoding.EncodeToString(digest[:])
+	if err := m.config.Store.RotateWebSessionCSRF(ctx, session.IDDigest, digestString, m.config.Now().UTC()); err != nil {
+		return err
+	}
+	session.CSRFToken = token
+	session.CSRFDigest = digestString
+	return nil
+}
+func (m *Manager) Revoke(ctx context.Context, session *Session) error {
 	if session == nil {
-		return
+		return nil
 	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if current, ok := m.sessions[session.IDDigest]; ok {
-		current.Revoked = true
+	if err := m.config.Store.RevokeWebSession(ctx, session.IDDigest, m.config.Now().UTC()); err != nil {
+		return err
 	}
+	session.Revoked = true
+	return nil
 }
 func SetSessionCookie(response http.ResponseWriter, session *Session) {
 	if session == nil || session.token == "" {
@@ -157,7 +216,12 @@ func RequireRole(session *Session, role Role) error {
 	return fmt.Errorf("forbidden")
 }
 func ValidateCSRF(session *Session, token string) error {
-	if session == nil || token == "" || subtle.ConstantTimeCompare([]byte(session.CSRFToken), []byte(token)) != 1 {
+	if session == nil || token == "" || session.CSRFDigest == "" {
+		return fmt.Errorf("invalid csrf token")
+	}
+	digest := sha256.Sum256([]byte(token))
+	encoded := base64.RawURLEncoding.EncodeToString(digest[:])
+	if subtle.ConstantTimeCompare([]byte(session.CSRFDigest), []byte(encoded)) != 1 {
 		return fmt.Errorf("invalid csrf token")
 	}
 	return nil

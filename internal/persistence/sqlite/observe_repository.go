@@ -38,6 +38,14 @@ func (r *Repository) ListAgents(ctx context.Context, limit int) ([]domain.AgentI
 	return result, rows.Err()
 }
 
+func (r *Repository) LatestJournalSequence(ctx context.Context) (int64, error) {
+	var sequence int64
+	if err := r.db.QueryRowContext(ctx, `SELECT COALESCE(MAX(sequence), 0) FROM event_journal`).Scan(&sequence); err != nil {
+		return 0, fmt.Errorf("read latest Event Journal sequence: %w", err)
+	}
+	return sequence, nil
+}
+
 func (r *Repository) ListWorkers(ctx context.Context, limit int) ([]domain.WorkerInstance, error) {
 	if limit <= 0 || limit > 1000 {
 		return nil, domain.ErrInvalidInput("worker limit must be between 1 and 1000")

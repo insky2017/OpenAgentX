@@ -25,6 +25,7 @@ type State interface {
 	ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error)
 	GetRunAttempt(context.Context, string) (*domain.RunAttempt, error)
 	ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error)
+	LatestJournalSequence(context.Context) (int64, error)
 }
 
 type Handler struct {
@@ -53,8 +54,12 @@ func NewHandler(state State, commands *controlplane.CommandService, auth *web.Ma
 	return h, nil
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Referrer-Policy", "no-referrer")
+	w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
 	h.mux.ServeHTTP(w, r)
 }
 func (h *Handler) session(w http.ResponseWriter, r *http.Request, write bool) (*web.Session, bool) {
@@ -87,7 +92,8 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
 	workers, _ := h.state.ListWorkers(r.Context(), 100)
 	tasks, _ := h.state.ListTasks(r.Context(), "", 100)
 	approvals, _ := h.state.ListPendingApprovals(r.Context(), 100)
-	writeJSON(w, map[string]any{"agents": agents, "workers": workers, "tasks": tasks, "approvals": approvals, "server_time": time.Now().UTC()})
+	latestSequence, _ := h.state.LatestJournalSequence(r.Context())
+	writeJSON(w, map[string]any{"agents": agents, "workers": workers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "server_time": time.Now().UTC()})
 }
 func (h *Handler) agents(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
@@ -155,9 +161,28 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "stream unsupported", 500)
 		return
 	}
-	after, _ := strconv.ParseInt(r.URL.Query().Get("after"), 10, 64)
+	var after int64
+	for _, afterValue := range []string{r.URL.Query().Get("after_sequence"), r.Header.Get("Last-Event-ID")} {
+		if afterValue == "" {
+			continue
+		}
+		parsed, err := strconv.ParseInt(afterValue, 10, 64)
+		if err != nil || parsed < 0 {
+			http.Error(w, "invalid after_sequence", http.StatusBadRequest)
+			return
+		}
+		if parsed > after {
+			after = parsed
+		}
+	}
+	_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("X-Accel-Buffering", "no")
+	ticker := time.NewTicker(time.Second)
+	keepalive := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+	defer keepalive.Stop()
 	for {
 		events, e := h.state.ListJournal(r.Context(), after, 100)
 		if e != nil {
@@ -172,7 +197,10 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-r.Context().Done():
 			return
-		case <-time.After(time.Second):
+		case <-ticker.C:
+		case <-keepalive.C:
+			fmt.Fprint(w, ": keepalive\n\n")
+			fl.Flush()
 		}
 	}
 }
@@ -184,6 +212,9 @@ func (h *Handler) createTask(w http.ResponseWriter, r *http.Request) {
 	var req openapi.CreateTaskRequest
 	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
 		http.Error(w, "invalid request", 400)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
 	req.SenderPrincipalID = s.User.ID
@@ -204,6 +235,9 @@ func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request", 400)
 		return
 	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
 	v, e := h.commands.CreateMessage(r.Context(), s.User.ID, r.PathValue("taskID"), req)
 	if e != nil {
 		http.Error(w, e.Error(), 400)
@@ -219,6 +253,9 @@ func (h *Handler) cancelTask(w http.ResponseWriter, r *http.Request) {
 	var req openapi.CancelTaskRequest
 	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
 		http.Error(w, "invalid request", 400)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
 	req.RequestedBy = s.User.ID
@@ -244,10 +281,23 @@ func (h *Handler) decideApproval(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	req.DecidedBy = s.User.ID
 	result, err := h.commands.DecideApproval(r.Context(), s.User.ID, r.PathValue("approvalID"), req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 	writeJSON(w, result)
+}
+
+func requireIdempotencyHeader(w http.ResponseWriter, r *http.Request, meta openapi.CommandMeta) bool {
+	value := r.Header.Get("Idempotency-Key")
+	if value == "" || value != meta.IdempotencyKey {
+		http.Error(w, "Idempotency-Key header must match request meta", http.StatusBadRequest)
+		return false
+	}
+	return true
 }

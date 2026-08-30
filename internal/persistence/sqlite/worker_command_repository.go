@@ -15,8 +15,13 @@ const workerCommandColumns = `worker_command_id, worker_instance_id, generation,
 
 func scanWorkerCommand(scanner rowScanner) (*domain.WorkerCommand, error) {
 	var c domain.WorkerCommand
-	var lease, claimed, applied sql.NullString
-	if err := scanner.Scan(&c.ID, &c.WorkerInstanceID, &c.Generation, &c.Kind, &c.State, &c.RequestedBy, &c.IdempotencyKey, &lease, &c.Attempts, &c.CreatedAt, &claimed, &applied, &c.Result); err != nil {
+	var lease, claimed, applied, result sql.NullString
+	var created string
+	if err := scanner.Scan(&c.ID, &c.WorkerInstanceID, &c.Generation, &c.Kind, &c.State, &c.RequestedBy, &c.IdempotencyKey, &lease, &c.Attempts, &created, &claimed, &applied, &result); err != nil {
+		return nil, err
+	}
+	var err error
+	if c.CreatedAt, err = parseTime(created); err != nil {
 		return nil, err
 	}
 	if lease.Valid {
@@ -39,6 +44,9 @@ func scanWorkerCommand(scanner rowScanner) (*domain.WorkerCommand, error) {
 			return nil, e
 		}
 		c.AppliedAt = &v
+	}
+	if result.Valid {
+		c.Result = result.String
 	}
 	return &c, nil
 }
