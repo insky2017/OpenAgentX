@@ -48,6 +48,7 @@ func NewHandler(state State, commands *controlplane.CommandService, auth *web.Ma
 	h.mux.HandleFunc("POST /api/control/v1/tasks", h.createTask)
 	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/messages", h.createMessage)
 	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/cancel", h.cancelTask)
+	h.mux.HandleFunc("POST /api/control/v1/approvals/{approvalID}/decisions", h.decideApproval)
 	return h, nil
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -229,4 +230,22 @@ func (h *Handler) cancelTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, v)
+}
+
+func (h *Handler) decideApproval(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok {
+		return
+	}
+	var req openapi.DecideApprovalRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	result, err := h.commands.DecideApproval(r.Context(), s.User.ID, r.PathValue("approvalID"), req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusConflict)
+		return
+	}
+	writeJSON(w, result)
 }

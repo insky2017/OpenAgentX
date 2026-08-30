@@ -17,6 +17,7 @@ type CommandState interface {
 	GetTask(context.Context, string) (*domain.Task, error)
 	CreateMessage(context.Context, int64, *domain.Message, *domain.MailboxItem, *domain.JournalEvent) (*domain.CreateMessageResult, error)
 	RequestTaskCancel(context.Context, string, int64, string, *domain.MailboxItem, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
+	GetApprovalRequest(context.Context, string) (*domain.ApprovalRequest, error)
 	DecideApproval(context.Context, string, *domain.ApprovalDecision, *domain.MailboxItem, *domain.JournalEvent, *domain.JournalEvent) (*domain.ApprovalDecision, *domain.MailboxItem, error)
 }
 
@@ -100,4 +101,25 @@ func (s *CommandService) CancelTask(ctx context.Context, principal, taskID strin
 	}
 	s.broker.Publish(AgentMailboxTopic(task.TargetAgentID))
 	return &api.CancelTaskResponse{Task: *updated}, nil
+}
+
+func (s *CommandService) DecideApproval(ctx context.Context, principal, requestID string, req api.DecideApprovalRequest) (*api.DecideApprovalResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	request, err := s.state.GetApprovalRequest(ctx, requestID)
+	if err != nil {
+		return nil, err
+	}
+	now := s.now().UTC()
+	decision := &domain.ApprovalDecision{ID: commandID("approval-decision"), ApprovalRequestID: requestID, DecidedBy: principal, Decision: req.Decision, IdempotencyKey: req.Meta.IdempotencyKey}
+	item := &domain.MailboxItem{ID: commandID("mailbox"), State: domain.MailboxStatePending, CreatedAt: now}
+	result, _, err := s.state.DecideApproval(ctx, requestID, decision, item, commandEvent(requestID, "approval.decided", principal, "approval_request", nil, now), commandEvent(item.ID, "mailbox.approval_created", principal, "mailbox_item", nil, now))
+	if err != nil {
+		return nil, err
+	}
+	if task, taskErr := s.state.GetTask(ctx, request.TaskID); taskErr == nil {
+		s.broker.Publish(AgentMailboxTopic(task.TargetAgentID))
+	}
+	return &api.DecideApprovalResponse{Decision: *result}, nil
 }
