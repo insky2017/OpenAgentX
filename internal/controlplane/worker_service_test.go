@@ -124,6 +124,18 @@ func (environment *workerTestEnvironment) register(t *testing.T, workerInstanceI
 	return session
 }
 
+func TestRegisterWorkerRejectsUnknownLogicalAgent(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	_, err := environment.service.Register(context.Background(), environment.workerID, api.RegisterRequest{
+		ContractVersion: api.ContractVersion, AgentID: "missing-agent", WorkerInstanceID: "worker-missing-agent",
+		Transport: domain.WorkerTransportUnix, Capabilities: []string{"coding"},
+		Backends: []openruntime.BackendRegistration{environment.backend},
+	})
+	if !errors.Is(err, domain.ErrAgentNotFound) {
+		t.Fatalf("register unknown Agent error=%v", err)
+	}
+}
+
 func (environment *workerTestEnvironment) heartbeat(t *testing.T, session *api.WorkerSession) {
 	t.Helper()
 	err := environment.service.Heartbeat(context.Background(), environment.workerID, session.SessionToken, api.HeartbeatRequest{

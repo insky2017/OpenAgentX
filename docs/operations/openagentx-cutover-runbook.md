@@ -13,9 +13,16 @@
    ./scripts/check-legacy-control-paths.sh --release
    ```
 
-2. 准备 `/opt/openagentx/bin/openagentx`、`/etc/openagentx/workers/*.yaml` 和权限为 0600 的 Worker 凭据。
-3. 由 Tailscale 签发 `openagentx.tailnet` 证书，写入 Nginx 配置声明的位置；不得把私钥放入仓库。
-4. 确认 daemon 仅监听 tailnet 私有地址，Worker 仅出站连接。
+2. 在 daemon 启动前，通过本机交互式 CLI 创建初始 owner 和 Organization；不得使用默认密码或将密码放入命令行：
+
+   ```bash
+   /opt/openagentx/bin/openagentx init --db /var/lib/openagentx/openagentx.db
+   ```
+
+3. 由 owner 使用 `openagentx agent apply` 应用所需逻辑 Agent 身份，重复 apply 必须为无事件幂等操作。
+4. 准备 `/opt/openagentx/bin/openagentx`、`/etc/openagentx/workers/*.yaml` 和权限为 0600 的 Worker 凭据。
+5. 由 Tailscale 签发 `openagentx.tailnet` 证书，写入 Nginx 配置声明的位置；不得把私钥放入仓库。
+6. 确认 daemon 仅监听 tailnet 私有地址，Worker 仅出站连接。
 
 ## 演练步骤
 

@@ -1,0 +1,12 @@
+version: 1
+agent_id: test-fake-agent
+transport: unix
+unix_socket: run/openagentx.sock
+capabilities:
+  - control-plane-testing
+runtime_backends:
+  - backend_id: primary
+    adapter_id: fake
+    options:
+      model: fake-model
+      result: fake turn completed

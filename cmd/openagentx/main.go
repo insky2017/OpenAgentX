@@ -17,8 +17,10 @@ import (
 	"openagentx/internal/api/panel"
 	"openagentx/internal/api/workerapi"
 	webAuth "openagentx/internal/auth/web"
+	admincli "openagentx/internal/cli/admin"
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
+	"openagentx/internal/domain"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	"openagentx/internal/transport/unixhttp"
 )
@@ -32,6 +34,10 @@ func execute(args []string) int {
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
 	}
 	switch args[0] {
+	case "init":
+		return admincli.ExecuteInit(args[1:], admincli.DefaultDependencies())
+	case "agent":
+		return admincli.ExecuteAgent(args[1:], admincli.DefaultDependencies())
 	case "worker":
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
 	case "serve":
@@ -40,6 +46,8 @@ func execute(args []string) int {
 		return runSchema(args[1:])
 	case "help", "--help", "-h":
 		fmt.Fprintln(os.Stderr, "OpenAgentX - Agent Organization Control Plane")
+		fmt.Fprintln(os.Stderr, "Usage: openagentx init --db <path>")
+		fmt.Fprintln(os.Stderr, "       openagentx agent apply --db <path> --file <identity.yaml>")
 		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx schema verify --db <path>")
@@ -88,19 +96,9 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create Unix server: %v\n", err)
 		return 1
 	}
-	password := os.Getenv("OPENAGENTX_ADMIN_PASSWORD")
-	if password == "" {
-		password = "openagentx-local"
-		slog.Warn("OPENAGENTX_ADMIN_PASSWORD is unset; using development password")
-	}
-	digest, err := webAuth.HashPassword(password)
+	authManager, err := loadAuthManager(ctx, repository)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "hash admin password: %v\n", err)
-		return 1
-	}
-	authManager := webAuth.NewManager(webAuth.Config{})
-	if err := authManager.AddUser(webAuth.User{ID: "owner", Username: "owner", Roles: []webAuth.Role{webAuth.RoleOwner}, PasswordDigest: digest}); err != nil {
-		fmt.Fprintf(os.Stderr, "configure web user: %v\n", err)
+		fmt.Fprintf(os.Stderr, "configure web users: %v\n", err)
 		return 1
 	}
 	commands, err := controlplane.NewCommandService(repository, broker, time.Now)
@@ -140,6 +138,40 @@ func runDaemon(args []string) int {
 	defer cancelShutdown()
 	_ = httpServer.Shutdown(shutdownCtx)
 	return 0
+}
+
+type webUserSource interface {
+	ListWebUsers(context.Context) ([]domain.WebUserRecord, error)
+}
+
+func loadAuthManager(ctx context.Context, source webUserSource) (*webAuth.Manager, error) {
+	users, err := source.ListWebUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, fmt.Errorf("OpenAgentX is not initialized; run openagentx init --db <path>")
+	}
+	manager := webAuth.NewManager(webAuth.Config{})
+	for _, record := range users {
+		roles := make([]webAuth.Role, 0, len(record.Roles))
+		for _, role := range record.Roles {
+			switch role {
+			case domain.WebRoleOwner:
+				roles = append(roles, webAuth.RoleOwner)
+			case domain.WebRoleOperator:
+				roles = append(roles, webAuth.RoleOperator)
+			case domain.WebRoleViewer:
+				roles = append(roles, webAuth.RoleViewer)
+			default:
+				return nil, fmt.Errorf("web user %q has unsupported role %q", record.Username, role)
+			}
+		}
+		if err := manager.AddUser(webAuth.User{ID: record.PrincipalID, Username: record.Username, Roles: roles, PasswordDigest: record.PasswordDigest}); err != nil {
+			return nil, fmt.Errorf("load web user %q: %w", record.Username, err)
+		}
+	}
+	return manager, nil
 }
 
 func staticHandler(directory string) http.Handler {

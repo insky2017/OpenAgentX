@@ -29,6 +29,24 @@ go build -o bin/openagentx ./cmd/openagentx
 cd web && npm install --no-audit --no-fund && npm run build
 ```
 
+## 首次初始化
+
+daemon 启动前，必须通过本机交互式 CLI 创建首个 owner 和默认 Organization。密码使用隐藏输入，不支持默认密码、命令行密码参数或 Web 自助注册：
+
+```bash
+./bin/openagentx init --db data/openagentx.db
+```
+
+随后由 owner 应用逻辑 Agent 身份。`identity.yaml` 只描述稳定的 Agent Principal、AgentIdentity 和 AgentProfile；Worker 进程配置仍单独保存在 `agent.yaml`：
+
+```bash
+./bin/openagentx agent apply \
+  --db data/openagentx.db \
+  --file agents/quote-service/identity.yaml
+```
+
+相同定义重复 apply 是无事件的幂等操作；定义与现有身份不一致时明确失败。
+
 ## Worker
 
 为每个 Domain Agent 准备严格校验的 Worker 配置：
@@ -50,7 +68,7 @@ runtime_backends:
 启动常驻 Worker：
 
 ```bash
-./bin/openagentx worker run --config agents/quote-service/worker.yaml
+./bin/openagentx worker run --config agents/quote-service/agent.yaml
 ```
 
 Worker 完成一个 Task 后释放当前 RunAttempt，继续等待 Mailbox 中的下一项工作。取消、审批和补充消息通过控制面持久化，不依赖 Worker 所在主机的终端布局。

@@ -21,6 +21,7 @@ func TestClassifyErrorDoesNotExposeInternalDetails(t *testing.T) {
 		{name: "lease", err: domain.ErrLeaseExpired, wantStatus: http.StatusConflict, wantCode: openapi.ErrorLeaseExpired},
 		{name: "fencing", err: domain.ErrFencingRejected, wantStatus: http.StatusConflict, wantCode: openapi.ErrorFencingRejected},
 		{name: "bootstrapping", err: domain.ErrAgentNotReady, wantStatus: http.StatusConflict, wantCode: openapi.ErrorConflict},
+		{name: "missing Agent", err: domain.ErrAgentNotFound, wantStatus: http.StatusNotFound, wantCode: openapi.ErrorNotFound},
 		{name: "internal", err: errors.New("database secret detail"), wantStatus: http.StatusInternalServerError, wantCode: openapi.ErrorInternal},
 	}
 	for _, test := range tests {

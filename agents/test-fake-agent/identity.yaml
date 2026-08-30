@@ -1,0 +1,10 @@
+version: 1
+agent_id: test-fake-agent
+principal_id: agent-test-fake-agent
+organization_id: default
+display_name: Test Fake Agent
+profile:
+  instructions_path: ROLE.md
+  workspace_root: ../../..
+  capabilities:
+    - control-plane-testing

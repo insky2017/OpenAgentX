@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"sort"
 	"strings"
 	"time"
 )
@@ -70,4 +71,75 @@ func (o Organization) Validate() error {
 		return ErrInvalidInput("unsupported organization status")
 	}
 	return nil
+}
+
+type WebRole string
+
+const (
+	WebRoleOwner    WebRole = "owner"
+	WebRoleOperator WebRole = "operator"
+	WebRoleViewer   WebRole = "viewer"
+)
+
+func (r WebRole) Valid() bool {
+	return r == WebRoleOwner || r == WebRoleOperator || r == WebRoleViewer
+}
+
+type WebUserRecord struct {
+	ID             string         `json:"web_user_id"`
+	PrincipalID    string         `json:"principal_id"`
+	Username       string         `json:"username"`
+	PasswordDigest string         `json:"-"`
+	Roles          []WebRole      `json:"roles"`
+	Status         IdentityStatus `json:"status"`
+	PasswordSetAt  time.Time      `json:"password_changed_at"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+}
+
+func (u WebUserRecord) Validate() error {
+	if err := ValidateOpaqueID("web_user_id", u.ID); err != nil {
+		return err
+	}
+	if err := ValidateOpaqueID("principal_id", u.PrincipalID); err != nil {
+		return err
+	}
+	if strings.TrimSpace(u.Username) == "" || strings.ContainsAny(u.Username, "\r\n\t") {
+		return ErrInvalidInput("web username cannot be empty or contain control characters")
+	}
+	if strings.TrimSpace(u.PasswordDigest) == "" {
+		return ErrInvalidInput("web password digest cannot be empty")
+	}
+	if !u.Status.Valid() {
+		return ErrInvalidInput("unsupported web user status")
+	}
+	if len(u.Roles) == 0 {
+		return ErrInvalidInput("web user requires at least one role")
+	}
+	seen := make(map[WebRole]struct{}, len(u.Roles))
+	for _, role := range u.Roles {
+		if !role.Valid() {
+			return ErrInvalidInput("unsupported web user role")
+		}
+		if _, exists := seen[role]; exists {
+			return ErrInvalidInput("web user roles must be unique")
+		}
+		seen[role] = struct{}{}
+	}
+	return nil
+}
+
+func (u WebUserRecord) HasRole(role WebRole) bool {
+	for _, candidate := range u.Roles {
+		if candidate == role {
+			return true
+		}
+	}
+	return false
+}
+
+func SortWebRoles(roles []WebRole) []WebRole {
+	result := append([]WebRole(nil), roles...)
+	sort.Slice(result, func(i, j int) bool { return result[i] < result[j] })
+	return result
 }

@@ -55,6 +55,16 @@ func (r *Repository) RegisterWorker(
 		return nil, err
 	}
 	defer tx.Rollback()
+	var agentStatus domain.AgentIdentityStatus
+	if err := tx.QueryRowContext(ctx, `SELECT status FROM agents WHERE agent_id=?`, registration.AgentID).Scan(&agentStatus); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrAgentNotFound
+		}
+		return nil, fmt.Errorf("load Worker Agent identity: %w", err)
+	}
+	if agentStatus != domain.AgentIdentityActive {
+		return nil, domain.ErrAgentNotReady
+	}
 	var validActive int
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM worker_instances
 		WHERE agent_id = ? AND status IN ('bootstrapping','online','degraded','draining')

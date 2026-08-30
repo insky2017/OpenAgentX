@@ -1,0 +1,12 @@
+version: 1
+agent_id: quote-service
+principal_id: agent-quote-service
+organization_id: default
+display_name: Quote Service
+profile:
+  instructions_path: ROLE.md
+  workspace_root: ../../..
+  capabilities:
+    - quote-service-development
+    - quote-service-testing
+    - quote-market-integration
