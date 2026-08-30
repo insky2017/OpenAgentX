@@ -4,12 +4,20 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
+	"time"
 
+	openapi "openagentx/internal/api"
+	apiauth "openagentx/internal/api/auth"
+	"openagentx/internal/api/panel"
 	"openagentx/internal/api/workerapi"
+	webAuth "openagentx/internal/auth/web"
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
@@ -27,13 +35,13 @@ func execute(args []string) int {
 	switch args[0] {
 	case "worker":
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
-	case "daemon":
+	case "serve", "daemon":
 		return runDaemon(args[1:])
 	case "schema":
 		return runSchema(args[1:])
 	case "help", "--help", "-h":
 		fmt.Fprintln(os.Stderr, "OpenAgentX - Agent Organization Control Plane")
-		fmt.Fprintln(os.Stderr, "Usage: openagentx daemon --db <path> --socket <path>")
+		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx schema verify --db <path>")
 		return 0
@@ -44,11 +52,13 @@ func execute(args []string) int {
 }
 
 func runDaemon(args []string) int {
-	flags := flag.NewFlagSet("daemon", flag.ContinueOnError)
+	flags := flag.NewFlagSet("serve", flag.ContinueOnError)
 	dbPath := flags.String("db", "", "Target SQLite database path")
 	socketPath := flags.String("socket", "", "Unix Socket path")
+	httpAddr := flags.String("http-addr", ":18100", "Private HTTP listen address for Web Panel")
+	webDir := flags.String("web-dir", "web/dist", "Built Web Panel directory")
 	if err := flags.Parse(args); err != nil || *dbPath == "" || *socketPath == "" {
-		fmt.Fprintln(os.Stderr, "Usage: openagentx daemon --db <path> --socket <path>")
+		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
 		return 2
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -59,7 +69,8 @@ func runDaemon(args []string) int {
 		return 1
 	}
 	defer repository.Close()
-	service, err := controlplane.NewWorkerService(repository, controlplane.NewMemoryWakeupBroker(), controlplane.WorkerServiceOptions{})
+	broker := controlplane.NewMemoryWakeupBroker()
+	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Worker service: %v\n", err)
 		return 1
@@ -78,11 +89,75 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create Unix server: %v\n", err)
 		return 1
 	}
+	password := os.Getenv("OPENAGENTX_ADMIN_PASSWORD")
+	if password == "" {
+		password = "openagentx-local"
+		slog.Warn("OPENAGENTX_ADMIN_PASSWORD is unset; using development password")
+	}
+	digest, err := webAuth.HashPassword(password)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "hash admin password: %v\n", err)
+		return 1
+	}
+	authManager := webAuth.NewManager(webAuth.Config{})
+	if err := authManager.AddUser(webAuth.User{ID: "owner", Username: "owner", Roles: []webAuth.Role{webAuth.RoleOwner}, PasswordDigest: digest}); err != nil {
+		fmt.Fprintf(os.Stderr, "configure web user: %v\n", err)
+		return 1
+	}
+	commands, err := controlplane.NewCommandService(repository, broker, time.Now)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create command service: %v\n", err)
+		return 1
+	}
+	panelHandler, err := panel.NewHandler(repository, commands, authManager)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create panel handler: %v\n", err)
+		return 1
+	}
+	authHandler := apiauth.NewHandler(authManager)
+	webMux := http.NewServeMux()
+	webMux.Handle(openapi.AuthLoginPath, authHandler)
+	webMux.Handle(openapi.AuthLogoutPath, authHandler)
+	webMux.Handle(openapi.AuthSessionPath, authHandler)
+	webMux.Handle("/api/", panelHandler)
+	webFS, err := os.Open(filepath.Clean(*webDir))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "open web directory: %v\n", err)
+		return 1
+	}
+	defer webFS.Close()
+	webMux.Handle("/", staticHandler(os.DirFS(filepath.Clean(*webDir))))
+	httpServer := &http.Server{Addr: *httpAddr, Handler: webMux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 40 * time.Second, WriteTimeout: 40 * time.Second}
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("web panel stopped", "error", err)
+		}
+	}()
 	if err := server.Start(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "daemon stopped: %v\n", err)
 		return 1
 	}
+	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelShutdown()
+	_ = httpServer.Shutdown(shutdownCtx)
 	return 0
+}
+
+func staticHandler(root fs.FS) http.Handler {
+	files := http.FileServer(http.FS(root))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := filepath.Clean(r.URL.Path)
+		if path == "." || path == "/" {
+			path = "/index.html"
+		}
+		if _, err := fs.Stat(root, path[1:]); err != nil {
+			path = "/index.html"
+		}
+		r.URL.Path = path
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		files.ServeHTTP(w, r)
+	})
 }
 
 func runSchema(args []string) int {

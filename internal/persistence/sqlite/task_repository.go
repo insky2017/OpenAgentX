@@ -228,8 +228,10 @@ func (r *Repository) ListTasks(ctx context.Context, targetAgentID string, limit 
 	if limit <= 0 || limit > 1000 {
 		return nil, domain.ErrInvalidInput("task limit must be between 1 and 1000")
 	}
-	rows, err := r.db.QueryContext(ctx, `SELECT `+taskColumns+`
-		FROM tasks WHERE target_agent_id = ? ORDER BY created_at ASC, task_id ASC LIMIT ?`, targetAgentID, limit)
+	query := `SELECT `+taskColumns+` FROM tasks `
+	args := []any{limit}
+	if targetAgentID == "" { query += `ORDER BY created_at ASC, task_id ASC LIMIT ?` } else { query += `WHERE target_agent_id = ? ORDER BY created_at ASC, task_id ASC LIMIT ?`; args = []any{targetAgentID, limit} }
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("list tasks: %w", err)
 	}
