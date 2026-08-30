@@ -1,0 +1,21 @@
+[Unit]
+Description=OpenAgentX control plane and command center
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX
+EnvironmentFile=-%h/.config/openagentx/openagentx.env
+ExecStart=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/bin/openagentx serve --db /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/data/openagentx.db --socket /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/run/openagentx.sock --http-addr rtx4090:18100 --web-dir /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/web/dist
+Restart=on-failure
+RestartSec=3s
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/data /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/run
+
+[Install]
+WantedBy=default.target
