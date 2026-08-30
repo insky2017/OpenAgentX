@@ -1,1 +1,1 @@
-{"name":"OpenAgentX 指挥台","short_name":"指挥台","start_url":"/","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117","icons":[]}
+{"name":"OpenAgentX 指挥台","short_name":"指挥台","start_url":"/","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117","icons":[{"src":"/icon.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}

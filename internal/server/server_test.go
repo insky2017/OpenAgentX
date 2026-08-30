@@ -289,6 +289,31 @@ func TestServerE2EUnixSocket(t *testing.T) {
 	}
 }
 
+func TestServerSecurityHeaders(t *testing.T) {
+	client, _, _, _, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	resp, err := client.Get("http://unix/api/v1/agents")
+	if err != nil {
+		t.Fatalf("GET agents failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	expected := map[string]string{
+		"Cache-Control":           "no-store",
+		"Pragma":                  "no-cache",
+		"X-Content-Type-Options":  "nosniff",
+		"Referrer-Policy":         "no-referrer",
+		"Permissions-Policy":      "camera=(), geolocation=(), microphone=()",
+		"Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+	}
+	for header, value := range expected {
+		if got := resp.Header.Get(header); got != value {
+			t.Errorf("%s = %q, want %q", header, got, value)
+		}
+	}
+}
+
 func TestServerAttachAndBootstrapEndpoints(t *testing.T) {
 	client, _, dir, _, cleanup := setupTestServer(t)
 	defer cleanup()

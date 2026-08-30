@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-08-30
 ---
@@ -43,3 +43,14 @@ updated_at: 2026-08-30
 - iOS Safari、Android Chrome 和桌面 Chromium 的安装验证有记录；
 - 移动网络 SSE 重连无事件丢失或重复状态副作用；
 - G5 验收报告完成，才允许进入 Release。
+
+## 实施结果
+
+- 前端监听 `online`/`offline` 事件；离线时显示全局状态并禁用审批、回复、发送、取消及指令输入，不使用 Background Sync，也不在恢复在线后自动提交旧指令。
+- Service Worker 对 `/api/` 和 SSE 请求保持网络直通，仅允许静态应用壳使用网络失败回退；Manifest 增加 `any maskable` 图标。
+- daemon HTTP 与 Web Auth 入口统一返回 `Cache-Control: no-store`、`X-Content-Type-Options`、`Referrer-Policy`、`Permissions-Policy` 和 frame-ancestors CSP。
+- 增加服务端安全响应头回归测试。
+
+## 验证
+
+详见 [Task 17 验证报告](../../reports/validation/2026-08-30-openagentx-task17-browser-security-pwa-e2e.md)。

@@ -78,6 +78,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 
 func (s *Server) requestMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		setSecurityHeaders(w)
 		start := time.Now()
 		// Limit request body size to 1 MiB
 		r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
@@ -89,6 +90,15 @@ func (s *Server) requestMiddleware(next http.Handler) http.Handler {
 			slog.Duration("duration", time.Since(start)),
 		)
 	})
+}
+
+func setSecurityHeaders(w http.ResponseWriter) {
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+	w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
 }
 
 func (s *Server) Start(ctx context.Context) error {

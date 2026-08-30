@@ -20,7 +20,15 @@ func NewHandler(manager *web.Manager) *Handler {
 	h.mux.HandleFunc(openapi.AuthSessionPath, h.session)
 	return h
 }
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) { h.mux.ServeHTTP(w, r) }
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+	w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+	h.mux.ServeHTTP(w, r)
+}
 func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	var req openapi.LoginRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil || req.Validate() != nil {

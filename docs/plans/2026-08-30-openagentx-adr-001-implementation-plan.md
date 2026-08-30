@@ -35,16 +35,16 @@ updated_at: 2026-08-30
 | 05 | M1 | [并发 Resident Worker](2026-08-30-openagentx-adr-001-implementation/05-concurrent-resident-worker.md) | 04 | completed |
 | 06 | M1 | [AGY Batch + UDS 端到端闭环](2026-08-30-openagentx-adr-001-implementation/06-agy-uds-end-to-end.md) | 05 | completed |
 | 07 | M2 | [RunAttempt、SessionBinding 与 multi-turn](2026-08-30-openagentx-adr-001-implementation/07-run-attempt-session-binding-multi-turn.md) | 06 | completed |
-| 08 | M2 | [Message、Cancel 与 Approval 竞态](2026-08-30-openagentx-adr-001-implementation/08-message-cancel-approval-races.md) | 07 | pending |
-| 09 | M2 | [恢复、fencing 与故障注入](2026-08-30-openagentx-adr-001-implementation/09-recovery-fencing-fault-injection.md) | 08 | pending |
-| 10 | M3 | [ExecutionSpec 与 Adapter Registry](2026-08-30-openagentx-adr-001-implementation/10-execution-spec-adapter-registry.md) | 09 | pending |
-| 11 | M3 | [Generic ACP Adapter 与 conformance](2026-08-30-openagentx-adr-001-implementation/11-generic-acp-adapter-conformance.md) | 10 | pending |
-| 12 | M4 | [Organization 与 AuthorityPolicy](2026-08-30-openagentx-adr-001-implementation/12-organization-authority-policy.md) | 11 | pending |
-| 13 | M4 | [远程 Worker mTLS binding](2026-08-30-openagentx-adr-001-implementation/13-remote-worker-mtls-binding.md) | 11 | pending |
-| 14 | M4 | [Worker Admin 与运维控制](2026-08-30-openagentx-adr-001-implementation/14-worker-admin-operations.md) | 12, 13 | pending |
-| 15 | M5 | [Web Auth、HTTP API 与 SSE](2026-08-30-openagentx-adr-001-implementation/15-web-auth-api-sse.md) | 14 | pending |
-| 16 | M5 | [React mobile-first PWA](2026-08-30-openagentx-adr-001-implementation/16-react-mobile-first-pwa.md) | 15 | pending |
-| 17 | M5 | [浏览器、安全与 PWA E2E](2026-08-30-openagentx-adr-001-implementation/17-browser-security-pwa-e2e.md) | 16 | pending |
+| 08 | M2 | [Message、Cancel 与 Approval 竞态](2026-08-30-openagentx-adr-001-implementation/08-message-cancel-approval-races.md) | 07 | completed |
+| 09 | M2 | [恢复、fencing 与故障注入](2026-08-30-openagentx-adr-001-implementation/09-recovery-fencing-fault-injection.md) | 08 | completed |
+| 10 | M3 | [ExecutionSpec 与 Adapter Registry](2026-08-30-openagentx-adr-001-implementation/10-execution-spec-adapter-registry.md) | 09 | completed |
+| 11 | M3 | [Generic ACP Adapter 与 conformance](2026-08-30-openagentx-adr-001-implementation/11-generic-acp-adapter-conformance.md) | 10 | completed |
+| 12 | M4 | [Organization 与 AuthorityPolicy](2026-08-30-openagentx-adr-001-implementation/12-organization-authority-policy.md) | 11 | completed |
+| 13 | M4 | [远程 Worker mTLS binding](2026-08-30-openagentx-adr-001-implementation/13-remote-worker-mtls-binding.md) | 11 | completed |
+| 14 | M4 | [Worker Admin 与运维控制](2026-08-30-openagentx-adr-001-implementation/14-worker-admin-operations.md) | 12, 13 | completed |
+| 15 | M5 | [Web Auth、HTTP API 与 SSE](2026-08-30-openagentx-adr-001-implementation/15-web-auth-api-sse.md) | 14 | completed |
+| 16 | M5 | [React mobile-first PWA](2026-08-30-openagentx-adr-001-implementation/16-react-mobile-first-pwa.md) | 15 | completed |
+| 17 | M5 | [浏览器、安全与 PWA E2E](2026-08-30-openagentx-adr-001-implementation/17-browser-security-pwa-e2e.md) | 16 | completed |
 | 18 | Release | [统一命名、目标 schema 与旧控制路径删除](2026-08-30-openagentx-adr-001-implementation/18-name-schema-legacy-removal.md) | 17 | pending |
 | 19 | Release | [部署与原子切换演练](2026-08-30-openagentx-adr-001-implementation/19-deployment-cutover-rehearsal.md) | 18 | pending |
 | 20 | Release | [原子发布验收与旧库归档](2026-08-30-openagentx-adr-001-implementation/20-atomic-release-acceptance.md) | 19 | pending |
