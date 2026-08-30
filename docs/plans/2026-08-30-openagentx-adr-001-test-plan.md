@@ -47,7 +47,7 @@ ADR-001 保持冻结。本计划只定义测试顺序、证据、失败处理和
 
 | ID | 测试任务 | 依赖 | 状态 |
 |---|---|---|---|
-| T01 | [测试准备、身份初始化与环境门槛](2026-08-30-openagentx-adr-001-testing/01-test-fixture-and-preflight.md) | ADR-001 | active |
+| T01 | [测试准备、身份初始化与环境门槛](2026-08-30-openagentx-adr-001-testing/01-test-fixture-and-preflight.md) | ADR-001 | passed |
 | T02 | [Web 登录、安全、SSE、PWA 与离线](2026-08-30-openagentx-adr-001-testing/02-web-auth-security-pwa.md) | T01 | pending |
 | T03 | [Fake Worker 连续任务闭环](2026-08-30-openagentx-adr-001-testing/03-fake-worker-consecutive-tasks.md) | T01 | pending |
 | T04 | [AGY Worker 真实连续任务闭环](2026-08-30-openagentx-adr-001-testing/04-agy-worker-consecutive-tasks.md) | T03 | pending |
@@ -98,14 +98,12 @@ flowchart TD
 
 任何凭据、密码、Session Token、私钥和完整 Cookie 不进入报告或 Git。
 
-## 7. 当前已知测试前置缺口
+## 7. 当前剩余测试前置缺口
 
-截至本计划创建时：
+T01 已提供正式初始化和 Agent apply 入口。后续关卡仍需验证：
 
-1. 正式数据库中尚无可测试的 Organization/Agent；Worker 注册因此返回错误。
-2. 尚未发现公开的 Organization/Agent bootstrap CLI/API，不能通过产品入口建立测试夹具。
-3. `orchestrator` 配置声明 ACP，但当前 Worker 组装入口仅组装 `agy-batch` 和 `fake`。
-4. Approval Decision 后端路径存在，但手机页面的审批操作必须在 T02/T06 中确认真正接通。
+1. `orchestrator` 配置声明 ACP，但当前 Worker 组装入口仅组装 `agy-batch` 和 `fake`。
+2. Approval Decision 后端路径存在，但手机页面的审批操作必须在 T02/T06 中确认真正接通。
 
 这些缺口均在对应关卡修复和重测，不允许手工写库绕过。
 

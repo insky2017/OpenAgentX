@@ -1,6 +1,6 @@
 ---
 doc_type: test_task
-status: active
+status: completed
 owner: openagentx
 test_id: T01
 updated_at: 2026-08-30
@@ -28,6 +28,12 @@ updated_at: 2026-08-30
 - Worker 注册错误可解释，合法 Worker 可 online；
 - 没有直接数据库写入或测试专用后门。
 
-## 当前基线
+## 验收结果
 
-公开 bootstrap 入口尚未发现；当前 Worker 对不存在 Agent 注册返回 `500 INTERNAL_ERROR`。本任务在修复前为 BLOCKED。
+- `openagentx init` 已通过本机交互式隐藏密码输入创建 owner、`default` Organization 和 daemon system principal；daemon 不再使用默认密码或环境变量构造内存 owner。
+- `openagentx agent apply` 已创建 `quote-service` 与 `test-fake-agent` 的 Principal、AgentIdentity 和 AgentProfile；重复 apply 后 Event 数量保持不变。
+- 初始化与 Agent apply 的事务回滚、owner 负向认证和 Event 敏感字段检查均有自动化测试。
+- 未知 Agent 的 Worker 注册返回 `404 NOT_FOUND`；合法 Fake Worker 为 `online`，generation、lease、fencing token 和 Backend health 均有效。
+- daemon、UDS `0600`、本地 HTTP、远程 HTTPS/TLS 和 owner 登录均通过。
+
+证据见 [T01 验证报告](../../reports/validation/2026-08-30-openagentx-adr001-t01-environment-identity.md)。
