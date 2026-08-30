@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
@@ -126,7 +125,7 @@ func runDaemon(args []string) int {
 		return 1
 	}
 	defer webFS.Close()
-	webMux.Handle("/", staticHandler(os.DirFS(filepath.Clean(*webDir))))
+	webMux.Handle("/", staticHandler(filepath.Clean(*webDir)))
 	httpServer := &http.Server{Addr: *httpAddr, Handler: webMux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 40 * time.Second, WriteTimeout: 40 * time.Second}
 	go func() {
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -143,20 +142,33 @@ func runDaemon(args []string) int {
 	return 0
 }
 
-func staticHandler(root fs.FS) http.Handler {
-	files := http.FileServer(http.FS(root))
+func staticHandler(directory string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := filepath.Clean(r.URL.Path)
 		if path == "." || path == "/" {
 			path = "/index.html"
 		}
-		if _, err := fs.Stat(root, path[1:]); err != nil {
+		if _, err := os.Stat(filepath.Join(directory, filepath.FromSlash(path))); err != nil {
 			path = "/index.html"
 		}
 		r.URL.Path = path
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
-		files.ServeHTTP(w, r)
+		content, err := os.ReadFile(filepath.Join(directory, filepath.FromSlash(path)))
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		if filepath.Ext(path) == ".html" {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		} else if filepath.Ext(path) == ".js" {
+			w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+		} else if filepath.Ext(path) == ".css" {
+			w.Header().Set("Content-Type", "text/css; charset=utf-8")
+		} else if filepath.Ext(path) == ".webmanifest" {
+			w.Header().Set("Content-Type", "application/manifest+json")
+		}
+		_, _ = w.Write(content)
 	})
 }
 
