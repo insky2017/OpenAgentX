@@ -20,6 +20,7 @@ type streamRecord struct {
 	Status           string
 	Text             string
 	Result           string
+	Error            string
 	ConversationID   string
 	SessionID        string
 	Usage            json.RawMessage
@@ -32,6 +33,8 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 	var result openruntime.TurnResult
 	var output bytes.Buffer
 	seen := false
+	terminal := false
+	sideEffectsReported := false
 	for scanner.Scan() {
 		line := bytes.TrimSpace(scanner.Bytes())
 		if len(line) == 0 {
@@ -51,6 +54,10 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 		if record.Usage != nil && json.Valid(record.Usage) {
 			result.UsageJSON = append([]byte(nil), record.Usage...)
 		}
+		if record.SideEffectsKnown != nil {
+			result.SideEffectsKnown = *record.SideEffectsKnown
+			sideEffectsReported = true
+		}
 		text := record.Result
 		if text == "" {
 			text = record.Text
@@ -68,8 +75,23 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 				result.Status = openruntime.TurnResultFailed
 			}
 		}
-		if record.Type != "" && strings.Contains(strings.ToLower(record.Type), "error") {
+		recordType := strings.ToLower(record.Type)
+		if recordType == "result" {
+			terminal = true
+			if result.Status == "" {
+				if record.Error != "" {
+					result.Status = openruntime.TurnResultFailed
+				} else {
+					result.Status = openruntime.TurnResultSucceeded
+				}
+			}
+		}
+		if record.Error != "" {
+			result.Error = record.Error
+		}
+		if recordType != "" && strings.Contains(recordType, "error") {
 			result.Status = openruntime.TurnResultFailed
+			terminal = true
 		}
 		if sink != nil {
 			payload, _ := json.Marshal(raw)
@@ -87,42 +109,68 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 		return openruntime.TurnResult{}, fmt.Errorf("AGY stream-json was empty")
 	}
 	result.Result = strings.TrimSpace(output.String())
-	if result.Status == "" {
-		result.Status = openruntime.TurnResultSucceeded
+	if !terminal {
+		return result, fmt.Errorf("AGY stream-json ended without a terminal event")
 	}
-	if result.Status == openruntime.TurnResultSucceeded {
+	if result.Status == openruntime.TurnResultSucceeded && !sideEffectsReported {
 		known := true
 		result.SideEffectsKnown = known
 	}
-	if result.Result == "" && result.Status == openruntime.TurnResultFailed {
+	if result.Result == "" && result.Error == "" && result.Status == openruntime.TurnResultFailed {
 		result.Error = "AGY reported a failed turn"
 	}
 	return result, nil
 }
 
 func decodeRecord(raw map[string]any) streamRecord {
-	encoded, _ := json.Marshal(raw)
-	var record streamRecord
-	_ = json.Unmarshal(encoded, &record)
-	for _, key := range []string{"conversation_id", "conversationId", "session_id", "sessionId"} {
-		if value, ok := raw[key].(string); ok && value != "" {
-			if strings.Contains(strings.ToLower(key), "conversation") {
-				record.ConversationID = value
-			} else {
-				record.SessionID = value
-			}
-		}
+	recordType := firstString(raw, "event", "type")
+	payload := raw
+	if nested, ok := raw[recordType].(map[string]any); ok {
+		payload = nested
 	}
-	for _, key := range []string{"output", "text", "message", "content", "result"} {
-		if value, ok := raw[key].(string); ok && value != "" {
-			if key == "result" {
+	record := streamRecord{
+		Type:           recordType,
+		Status:         firstString(payload, "status"),
+		Error:          firstString(payload, "error"),
+		ConversationID: firstString(payload, "conversation_id", "conversationId"),
+		SessionID:      firstString(payload, "session_id", "sessionId"),
+	}
+	if record.Type == "" {
+		record.Type = firstString(payload, "event", "type")
+	}
+	if record.ConversationID == "" {
+		record.ConversationID = firstString(raw, "conversation_id", "conversationId")
+	}
+	if record.SessionID == "" {
+		record.SessionID = firstString(raw, "session_id", "sessionId")
+	}
+	for _, key := range []string{"response", "output", "text", "message", "content", "result"} {
+		if value, ok := payload[key].(string); ok && value != "" {
+			if key == "response" || key == "result" {
 				record.Result = value
 			} else if record.Text == "" {
 				record.Text = value
 			}
 		}
 	}
+	if usage, ok := payload["usage"]; ok {
+		if encoded, err := json.Marshal(usage); err == nil {
+			record.Usage = encoded
+		}
+	}
+	if known, ok := payload["side_effects_known"].(bool); ok {
+		record.SideEffectsKnown = &known
+	}
 	return record
+}
+
+func firstString(values map[string]any, keys ...string) string {
+	for _, key := range keys {
+		if value, ok := values[key].(string); ok && value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func normalizeEventType(value string) string {

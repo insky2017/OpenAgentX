@@ -192,6 +192,7 @@ type BeginAttemptResponse struct {
 type ControlClaimRequest struct {
 	WorkerInstanceID string `json:"worker_instance_id"`
 	Generation       int64  `json:"generation"`
+	FencingToken     int64  `json:"fencing_token"`
 	WaitSeconds      int    `json:"wait_seconds"`
 }
 
@@ -200,6 +201,9 @@ func (r ControlClaimRequest) Validate() error {
 		return err
 	}
 	if err := domain.ValidatePositiveVersion("generation", r.Generation); err != nil {
+		return err
+	}
+	if err := domain.ValidatePositiveVersion("fencing_token", r.FencingToken); err != nil {
 		return err
 	}
 	if r.WaitSeconds < 0 || r.WaitSeconds > 30 {

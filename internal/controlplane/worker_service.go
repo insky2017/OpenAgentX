@@ -32,7 +32,7 @@ type WorkerState interface {
 	BeginClaimedRunAttempt(context.Context, domain.WorkerWriteGuard, string, int64, *domain.RunAttempt, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
 	AppendRunEvents(context.Context, domain.WorkerWriteGuard, string, int64, []*domain.JournalEvent) error
 	FinishRun(context.Context, domain.WorkerWriteGuard, string, int64, int64, openruntime.TurnResult, *domain.JournalEvent, *domain.JournalEvent) error
-	ClaimWorkerCommand(context.Context, string, int64, time.Time, *domain.JournalEvent) (*domain.WorkerCommand, error)
+	ClaimWorkerCommand(context.Context, domain.WorkerWriteGuard, time.Time, *domain.JournalEvent) (*domain.WorkerCommand, error)
 	AcknowledgeWorkerCommand(context.Context, string, int64, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
 }
 
@@ -212,15 +212,11 @@ func (s *WorkerService) ClaimMailbox(ctx context.Context, principalID string, to
 		timer := time.NewTimer(remaining)
 		select {
 		case <-ctx.Done():
-			if !timer.Stop() {
-				<-timer.C
-			}
+			stopAndDrainTimer(timer)
 			unsubscribe()
 			return nil, ctx.Err()
 		case <-wakeup:
-			if !timer.Stop() {
-				<-timer.C
-			}
+			stopAndDrainTimer(timer)
 			unsubscribe()
 			continue
 		case <-timer.C:
@@ -229,6 +225,16 @@ func (s *WorkerService) ClaimMailbox(ctx context.Context, principalID string, to
 			return s.state.TryClaimMailbox(ctx, guard, request.WorkCapacity,
 				guard.CheckedAt.Add(s.mailboxLease), s.event("mailbox", "mailbox.claimed", principalID, "", "", nil))
 		}
+	}
+}
+
+func stopAndDrainTimer(timer *time.Timer) {
+	if timer.Stop() {
+		return
+	}
+	select {
+	case <-timer.C:
+	default:
 	}
 }
 
@@ -358,14 +364,49 @@ func (s *WorkerService) ClaimWorkerCommand(ctx context.Context, principalID stri
 	if err := request.Validate(); err != nil {
 		return nil, err
 	}
-	credential, err := s.state.GetWorkerCredential(ctx, request.WorkerInstanceID)
+	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
 	if err != nil {
-		return nil, domain.ErrUnauthorized
+		return nil, err
 	}
-	if credential.Worker.Generation != request.Generation || credential.Worker.AuthenticatedPrincipal != principalID {
-		return nil, domain.ErrUnauthorized
+	wait := time.Duration(request.WaitSeconds) * time.Second
+	deadline := time.Now().Add(wait)
+	claim := func() (*domain.WorkerCommand, error) {
+		guard.CheckedAt = s.now().UTC()
+		return s.state.ClaimWorkerCommand(ctx, guard, guard.CheckedAt.Add(s.mailboxLease),
+			s.event("worker_command", "worker_command.claimed", principalID, "", "", nil))
 	}
-	return s.state.ClaimWorkerCommand(ctx, request.WorkerInstanceID, request.Generation, s.now().UTC().Add(s.mailboxLease), s.event("worker_command", "worker_command.claimed", principalID, "", "", nil))
+	for {
+		command, err := claim()
+		if err != nil || command != nil || wait == 0 {
+			return command, err
+		}
+		remaining := time.Until(deadline)
+		if remaining <= 0 {
+			return nil, nil
+		}
+		wakeup, unsubscribe := s.broker.Subscribe(WorkerControlTopic(guard.WorkerInstanceID))
+		// Recheck after subscribing so a commit between the previous query and
+		// subscription cannot be lost.
+		command, err = claim()
+		if err != nil || command != nil {
+			unsubscribe()
+			return command, err
+		}
+		timer := time.NewTimer(remaining)
+		select {
+		case <-ctx.Done():
+			stopAndDrainTimer(timer)
+			unsubscribe()
+			return nil, ctx.Err()
+		case <-wakeup:
+			stopAndDrainTimer(timer)
+			unsubscribe()
+			continue
+		case <-timer.C:
+			unsubscribe()
+			return claim()
+		}
+	}
 }
 
 func (s *WorkerService) AcknowledgeWorkerCommand(ctx context.Context, principalID string, token string, commandID string, request api.ControlAckRequest) error {

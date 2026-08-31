@@ -21,6 +21,10 @@ func TestWorkerCommandLifecycleParsesPersistedTimestamps(t *testing.T) {
 		journalEvent("event-worker-command", "worker.registered", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := repository.db.Exec(`UPDATE worker_instances SET session_token_digest=?, session_token_expires_at=? WHERE worker_instance_id=?`,
+		"worker-command-token-digest", formatTime(repositoryTestTime.Add(time.Hour)), worker.ID); err != nil {
+		t.Fatal(err)
+	}
 
 	command := &domain.WorkerCommand{
 		ID: "worker-command-health-check", WorkerInstanceID: worker.ID, Generation: worker.Generation,
@@ -34,7 +38,11 @@ func TestWorkerCommandLifecycleParsesPersistedTimestamps(t *testing.T) {
 	}
 
 	leaseUntil := repositoryTestTime.Add(time.Minute)
-	claimed, err := repository.ClaimWorkerCommand(context.Background(), worker.ID, worker.Generation, leaseUntil,
+	claimed, err := repository.ClaimWorkerCommand(context.Background(), domain.WorkerWriteGuard{
+		WorkerInstanceID: worker.ID, AgentID: worker.AgentID, PrincipalID: worker.AuthenticatedPrincipal,
+		SessionTokenDigest: "worker-command-token-digest", Generation: worker.Generation,
+		FencingToken: worker.FencingToken, CheckedAt: repositoryTestTime,
+	}, leaseUntil,
 		journalEvent("event-worker-command-claimed", "worker_command.claimed", fixture.ownerPrincipal, fixture.organizationID))
 	if err != nil {
 		t.Fatalf("claim Worker command: %v", err)

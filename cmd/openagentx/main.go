@@ -112,7 +112,7 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create panel handler: %v\n", err)
 		return 1
 	}
-	workerAdminService, err := controlplane.NewWorkerAdminService(repository, time.Now, nil)
+	workerAdminService, err := controlplane.NewWorkerAdminService(repository, broker, time.Now, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Worker admin service: %v\n", err)
 		return 1

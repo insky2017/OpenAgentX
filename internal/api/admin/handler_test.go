@@ -55,7 +55,7 @@ func newAdminFixture(t *testing.T, role web.Role) adminFixture {
 	cookieResponse := httptest.NewRecorder()
 	web.SetSessionCookie(cookieResponse, session)
 	state := &recordingAdminState{}
-	service, err := controlplane.NewWorkerAdminService(state, time.Now, func(prefix string) string { return prefix + "-test" })
+	service, err := controlplane.NewWorkerAdminService(state, controlplane.NewMemoryWakeupBroker(), time.Now, func(prefix string) string { return prefix + "-test" })
 	if err != nil {
 		t.Fatal(err)
 	}

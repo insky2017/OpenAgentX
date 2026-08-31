@@ -176,6 +176,9 @@ func (c *fakeWorkerClient) AcceptMailboxItem(_ context.Context, itemID string, r
 }
 
 func (c *fakeWorkerClient) ClaimWorkerCommand(ctx context.Context, request api.ControlClaimRequest) (*domain.WorkerCommand, error) {
+	if err := request.Validate(); err != nil {
+		return nil, err
+	}
 	c.mu.Lock()
 	if len(c.commands) != 0 {
 		command := c.commands[0]
@@ -452,6 +455,32 @@ func TestControlledStopCancelsAndReconcilesBeforeAcknowledgement(t *testing.T) {
 	}
 	if len(client.finishes) != 1 || client.finishes[0].request.Result.Status != openruntime.TurnResultUncertain {
 		t.Fatalf("shutdown reconciliation=%+v", client.finishes)
+	}
+}
+
+func TestRunManagerPreservesAdapterDiagnosticWhenWaitReturnsError(t *testing.T) {
+	client := newFakeWorkerClient()
+	manager := &ActiveRunManager{client: client, session: api.WorkerSession{Worker: domain.WorkerInstance{
+		ID: "worker-1", Generation: 1, FencingToken: 1,
+	}}}
+	active := &activeTurn{request: openruntime.TurnRequest{
+		Task:       domain.Task{ID: "task-1", Version: 2},
+		RunAttempt: domain.RunAttempt{ID: "run-1", Version: 1},
+	}}
+	diagnostic := "AGY stream-json ended without a terminal event; AGY stderr: provider unavailable"
+	err := manager.finish(context.Background(), active, waitResult{
+		runID:  "run-1",
+		result: openruntime.TurnResult{Status: openruntime.TurnResultUncertain, Error: diagnostic},
+		err:    errors.New("AGY stream parse failed"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if len(client.finishes) != 1 || client.finishes[0].request.Result.Error != diagnostic ||
+		client.finishes[0].request.Result.Status != openruntime.TurnResultUncertain || client.finishes[0].request.Result.SideEffectsKnown {
+		t.Fatalf("finish=%+v", client.finishes)
 	}
 }
 

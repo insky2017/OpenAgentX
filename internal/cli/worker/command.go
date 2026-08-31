@@ -86,8 +86,11 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 
 func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir string) (openruntime.AgentRuntimeAdapter, error) {
 	if config.AdapterID == "agy-batch" {
-		binary, _ := config.Options["binary"].(string)
-		adapter, err := agy.NewAdapter(agy.Config{Binary: binary})
+		agyConfig, err := agyConfigFromOptions(config.Options, configDir)
+		if err != nil {
+			return nil, err
+		}
+		adapter, err := agy.NewAdapter(agyConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -122,6 +125,57 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir str
 		Status: openruntime.TurnResultSucceeded, Result: resultText,
 		UsageJSON: json.RawMessage(`{"fixture":true}`), SideEffectsKnown: true,
 	})
+}
+
+func agyConfigFromOptions(options map[string]any, configDir string) (agy.Config, error) {
+	var config agy.Config
+	for key := range options {
+		if key != "binary" && key != "models" && key != "working_dir" {
+			return config, domain.ErrInvalidInput("unsupported AGY option " + key)
+		}
+	}
+	if value, exists := options["binary"]; exists {
+		binary, ok := value.(string)
+		if !ok || strings.TrimSpace(binary) == "" {
+			return config, domain.ErrInvalidInput("AGY option binary must be a non-empty string")
+		}
+		config.Binary = strings.TrimSpace(binary)
+	}
+	if value, exists := options["working_dir"]; exists {
+		workingDir, ok := value.(string)
+		workingDir = strings.TrimSpace(workingDir)
+		if !ok || workingDir == "" {
+			return config, domain.ErrInvalidInput("AGY option working_dir must be a non-empty string")
+		}
+		if !filepath.IsAbs(workingDir) && configDir != "" {
+			workingDir = filepath.Join(configDir, workingDir)
+		}
+		workingDir = filepath.Clean(workingDir)
+		if info, statErr := os.Stat(workingDir); statErr != nil || !info.IsDir() {
+			return config, domain.ErrInvalidInput("AGY working_dir must be an existing directory")
+		}
+		config.WorkingDir = workingDir
+	}
+	if value, exists := options["models"]; exists {
+		entries, ok := value.([]any)
+		if !ok || len(entries) == 0 {
+			return config, domain.ErrInvalidInput("AGY option models must be a non-empty list of strings")
+		}
+		seen := make(map[string]struct{}, len(entries))
+		for _, entry := range entries {
+			model, ok := entry.(string)
+			model = strings.TrimSpace(model)
+			if !ok || model == "" {
+				return config, domain.ErrInvalidInput("AGY option models must be a non-empty list of strings")
+			}
+			if _, duplicate := seen[model]; duplicate {
+				return config, domain.ErrInvalidInput("AGY option models must not contain duplicates")
+			}
+			seen[model] = struct{}{}
+			config.Models = append(config.Models, model)
+		}
+	}
+	return config, nil
 }
 
 func printOpenAgentXUsage() {

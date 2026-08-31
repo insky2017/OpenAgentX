@@ -100,14 +100,21 @@ func (r *Repository) CreateWorkerCommand(ctx context.Context, command *domain.Wo
 	return command, nil
 }
 
-func (r *Repository) ClaimWorkerCommand(ctx context.Context, workerID string, generation int64, leaseUntil time.Time, event *domain.JournalEvent) (*domain.WorkerCommand, error) {
+func (r *Repository) ClaimWorkerCommand(ctx context.Context, guard domain.WorkerWriteGuard, leaseUntil time.Time, event *domain.JournalEvent) (*domain.WorkerCommand, error) {
 	now := r.now().UTC()
 	tx, err := r.begin(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
-	c, err := scanWorkerCommand(tx.QueryRowContext(ctx, `SELECT `+workerCommandColumns+` FROM worker_commands WHERE worker_instance_id=? AND generation=? AND (state='pending' OR (state='claimed' AND lease_until<=?)) ORDER BY created_at ASC LIMIT 1`, workerID, generation, formatTime(now)))
+	credential, err := loadGuardedWorker(ctx, tx, guard)
+	if err != nil {
+		return nil, err
+	}
+	if leaseUntil.After(credential.Worker.LeaseUntil) {
+		leaseUntil = credential.Worker.LeaseUntil
+	}
+	c, err := scanWorkerCommand(tx.QueryRowContext(ctx, `SELECT `+workerCommandColumns+` FROM worker_commands WHERE worker_instance_id=? AND generation=? AND (state='pending' OR (state='claimed' AND lease_until<=?)) ORDER BY created_at ASC LIMIT 1`, guard.WorkerInstanceID, guard.Generation, formatTime(now)))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

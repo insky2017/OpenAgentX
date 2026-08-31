@@ -250,9 +250,10 @@ func (m *ActiveRunManager) applyControl(ctx context.Context, active *activeTurn,
 func (m *ActiveRunManager) finish(ctx context.Context, active *activeTurn, completion waitResult) error {
 	result := completion.result
 	if completion.err != nil {
-		result = openruntime.TurnResult{
-			Status: openruntime.TurnResultUncertain, Error: "Runtime Backend ended without a verifiable result",
-			SideEffectsKnown: false,
+		result.Status = openruntime.TurnResultUncertain
+		result.SideEffectsKnown = false
+		if result.Error == "" {
+			result.Error = "Runtime Backend ended without a verifiable result"
 		}
 	}
 	if err := result.Validate(); err != nil {

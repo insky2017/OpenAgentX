@@ -204,7 +204,8 @@ func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSessi
 	for {
 		command, err := r.client.ClaimWorkerCommand(ctx, api.ControlClaimRequest{
 			WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
-			WaitSeconds: int(r.config.ControlWait / time.Second),
+			FencingToken: session.Worker.FencingToken,
+			WaitSeconds:  int(r.config.ControlWait / time.Second),
 		})
 		if err != nil {
 			if ctx.Err() != nil {

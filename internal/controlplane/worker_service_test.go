@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -176,6 +177,36 @@ func claimRequest(session *api.WorkerSession, workCapacity int) api.ClaimRequest
 	}
 }
 
+func controlClaimRequest(session *api.WorkerSession, waitSeconds int) api.ControlClaimRequest {
+	return api.ControlClaimRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, WaitSeconds: waitSeconds,
+	}
+}
+
+func newWorkerAdminTestService(t *testing.T, environment *workerTestEnvironment, broker WakeupBroker) *WorkerAdminService {
+	t.Helper()
+	service, err := NewWorkerAdminService(environment.repository, broker, environment.clock.Now,
+		func(prefix string) string { return prefix + "-control-test" })
+	if err != nil {
+		t.Fatal(err)
+	}
+	return service
+}
+
+func createWorkerCommand(t *testing.T, service *WorkerAdminService, environment *workerTestEnvironment, session *api.WorkerSession, suffix string) *domain.WorkerCommand {
+	t.Helper()
+	command, err := service.Command(context.Background(), environment.ownerID, session.Worker.ID,
+		domain.WorkerCommandHealthCheck, api.WorkerAdminRequest{
+			Meta:        api.CommandMeta{IdempotencyKey: "control-" + suffix, ExpectedVersion: 1},
+			RequestedBy: environment.ownerID, ExpectedGeneration: session.Worker.Generation,
+		})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return command
+}
+
 func TestWorkerServiceRegisterClaimBeginEventsAndFinish(t *testing.T) {
 	environment := newWorkerTestEnvironment(t, nil)
 	session := environment.register(t, "worker-1")
@@ -244,6 +275,57 @@ func TestWorkerServiceRegisterClaimBeginEventsAndFinish(t *testing.T) {
 	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken,
 		begin.Turn.RunAttempt.ID, finishRequest); err == nil {
 		t.Fatal("different terminal result must not be accepted as an idempotent retry")
+	}
+}
+
+func TestWorkerFinishPersistsRuntimeDiagnosticToRunTaskAndEvents(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	session := environment.register(t, "worker-error-persistence")
+	environment.heartbeat(t, session)
+	created := environment.createTask(t, "runtime-error")
+	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil {
+		t.Fatalf("claim item=%+v err=%v", item, err)
+	}
+	begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken,
+		item.ID, api.BeginAttemptRequest{
+			WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID,
+			Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+			ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: 1,
+		})
+	if err != nil {
+		t.Fatal(err)
+	}
+	diagnostic := "AGY stream-json ended without a terminal event; AGY stderr: provider unavailable"
+	result := openruntime.TurnResult{Status: openruntime.TurnResultUncertain, Error: diagnostic, SideEffectsKnown: false}
+	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken,
+		begin.Turn.RunAttempt.ID, api.FinishRunRequest{
+			WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+			FencingToken: session.Worker.FencingToken, ExpectedTaskVersion: begin.Turn.Task.Version,
+			ExpectedRunVersion: begin.Turn.RunAttempt.Version, Result: result,
+		}); err != nil {
+		t.Fatal(err)
+	}
+	settledRun, err := environment.repository.GetRunAttempt(context.Background(), begin.Turn.RunAttempt.ID)
+	if err != nil || !strings.Contains(settledRun.ResultJSON, diagnostic) {
+		t.Fatalf("run=%+v err=%v", settledRun, err)
+	}
+	settledTask, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil || settledTask.Error == nil || *settledTask.Error != diagnostic {
+		t.Fatalf("task=%+v err=%v", settledTask, err)
+	}
+	events, err := environment.repository.ListJournal(context.Background(), 0, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	matched := map[string]bool{"run_attempt.finished": false, "task.settled": false}
+	for _, event := range events {
+		if _, ok := matched[event.EventType]; ok && strings.Contains(string(event.Payload), diagnostic) {
+			matched[event.EventType] = true
+		}
+	}
+	if !matched["run_attempt.finished"] || !matched["task.settled"] {
+		t.Fatalf("terminal error events=%v", matched)
 	}
 }
 
@@ -501,6 +583,265 @@ func (droppingBroker) Subscribe(string) (<-chan struct{}, func()) {
 	return make(chan struct{}), func() {}
 }
 func (droppingBroker) Publish(string) {}
+
+type observedBroker struct {
+	inner      *MemoryWakeupBroker
+	subscribed chan string
+}
+
+func newObservedBroker() *observedBroker {
+	return &observedBroker{inner: NewMemoryWakeupBroker(), subscribed: make(chan string, 1)}
+}
+
+func (b *observedBroker) Subscribe(topic string) (<-chan struct{}, func()) {
+	wakeup, unsubscribe := b.inner.Subscribe(topic)
+	select {
+	case b.subscribed <- topic:
+	default:
+	}
+	return wakeup, unsubscribe
+}
+
+func (b *observedBroker) Publish(topic string) { b.inner.Publish(topic) }
+
+type subscribeHookBroker struct {
+	once sync.Once
+	hook func()
+}
+
+func (b *subscribeHookBroker) Subscribe(string) (<-chan struct{}, func()) {
+	b.once.Do(b.hook)
+	return make(chan struct{}), func() {}
+}
+
+func (*subscribeHookBroker) Publish(string) {}
+
+func TestWorkerControlLongPollWaitsAndTimesOut(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	session := environment.register(t, "worker-control-timeout")
+	environment.heartbeat(t, session)
+	started := time.Now()
+	command, err := environment.service.ClaimWorkerCommand(context.Background(), environment.workerID,
+		session.SessionToken, controlClaimRequest(session, 1))
+	elapsed := time.Since(started)
+	if err != nil || command != nil {
+		t.Fatalf("control timeout command=%+v err=%v", command, err)
+	}
+	if elapsed < 900*time.Millisecond || elapsed > 2*time.Second {
+		t.Fatalf("control long poll elapsed=%s want approximately 1s", elapsed)
+	}
+}
+
+func TestWorkerControlLongPollWakesWhenAdminCommandCommits(t *testing.T) {
+	broker := newObservedBroker()
+	environment := newWorkerTestEnvironment(t, nil)
+	environment.broker = broker.inner
+	service, err := NewWorkerService(environment.repository, broker, WorkerServiceOptions{
+		Now: environment.clock.Now, NewID: func(prefix string) string { return prefix + "-wakeup" },
+		NewSessionToken: func() (string, error) { return "worker-control-wakeup-token-000000000000000000", nil },
+		WorkerLease:     time.Minute, TokenLifetime: 10 * time.Minute, MailboxLease: 10 * time.Second, RunLease: 2 * time.Minute,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment.service = service
+	session := environment.register(t, "worker-control-wakeup")
+	environment.heartbeat(t, session)
+	result := make(chan *domain.WorkerCommand, 1)
+	errorsChannel := make(chan error, 1)
+	go func() {
+		command, claimErr := service.ClaimWorkerCommand(context.Background(), environment.workerID,
+			session.SessionToken, controlClaimRequest(session, 5))
+		result <- command
+		errorsChannel <- claimErr
+	}()
+	select {
+	case topic := <-broker.subscribed:
+		if topic != WorkerControlTopic(session.Worker.ID) {
+			t.Fatalf("subscribed topic=%q", topic)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("control claim did not subscribe")
+	}
+	created := createWorkerCommand(t, newWorkerAdminTestService(t, environment, broker), environment, session, "wakeup")
+	select {
+	case command := <-result:
+		if err := <-errorsChannel; err != nil || command == nil || command.ID != created.ID {
+			t.Fatalf("woken command=%+v err=%v", command, err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("committed Worker command did not wake control long poll")
+	}
+}
+
+func TestWorkerControlLongPollRechecksAfterSubscribeRace(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	broker := &subscribeHookBroker{}
+	service, err := NewWorkerService(environment.repository, broker, WorkerServiceOptions{
+		Now: environment.clock.Now, NewID: func(prefix string) string { return prefix + "-subscribe-race" },
+		NewSessionToken: func() (string, error) { return "worker-control-subscribe-race-token-00000000000000", nil },
+		WorkerLease:     time.Minute, TokenLifetime: 10 * time.Minute, MailboxLease: 10 * time.Second, RunLease: 2 * time.Minute,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment.service = service
+	session := environment.register(t, "worker-control-subscribe-race")
+	environment.heartbeat(t, session)
+	admin := newWorkerAdminTestService(t, environment, droppingBroker{})
+	var created *domain.WorkerCommand
+	broker.hook = func() { created = createWorkerCommand(t, admin, environment, session, "subscribe-race") }
+	started := time.Now()
+	command, err := service.ClaimWorkerCommand(context.Background(), environment.workerID,
+		session.SessionToken, controlClaimRequest(session, 5))
+	if err != nil || command == nil || created == nil || command.ID != created.ID {
+		t.Fatalf("subscribe-race command=%+v created=%+v err=%v", command, created, err)
+	}
+	if elapsed := time.Since(started); elapsed > time.Second {
+		t.Fatalf("subscribe recheck relied on timeout: %s", elapsed)
+	}
+}
+
+func TestWorkerControlLongPollRechecksDatabaseWhenWakeupIsLost(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	service, err := NewWorkerService(environment.repository, droppingBroker{}, WorkerServiceOptions{
+		Now: environment.clock.Now, NewID: func(prefix string) string { return prefix + "-control-lost-wakeup" },
+		NewSessionToken: func() (string, error) { return "worker-control-lost-wakeup-token-000000000000000", nil },
+		WorkerLease:     2 * time.Minute, TokenLifetime: 10 * time.Minute, MailboxLease: 10 * time.Second, RunLease: time.Minute,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment.service = service
+	session := environment.register(t, "worker-control-lost-wakeup")
+	environment.heartbeat(t, session)
+	result := make(chan *domain.WorkerCommand, 1)
+	errorsChannel := make(chan error, 1)
+	go func() {
+		command, claimErr := service.ClaimWorkerCommand(context.Background(), environment.workerID,
+			session.SessionToken, controlClaimRequest(session, 1))
+		result <- command
+		errorsChannel <- claimErr
+	}()
+	time.Sleep(100 * time.Millisecond)
+	created := createWorkerCommand(t, newWorkerAdminTestService(t, environment, droppingBroker{}), environment, session, "lost-wakeup")
+	select {
+	case command := <-result:
+		if err := <-errorsChannel; err != nil || command == nil || command.ID != created.ID {
+			t.Fatalf("lost-wakeup command=%+v err=%v", command, err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("control long poll did not recheck after lost wakeup")
+	}
+}
+
+func TestWorkerControlLongPollHonorsContextCancellation(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	session := environment.register(t, "worker-control-cancel")
+	environment.heartbeat(t, session)
+	ctx, cancel := context.WithCancel(context.Background())
+	result := make(chan error, 1)
+	go func() {
+		_, err := environment.service.ClaimWorkerCommand(ctx, environment.workerID,
+			session.SessionToken, controlClaimRequest(session, 5))
+		result <- err
+	}()
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+	select {
+	case err := <-result:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("cancel error=%v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("control long poll ignored context cancellation")
+	}
+}
+
+func TestWorkerControlClaimAuthorityFailsClosed(t *testing.T) {
+	tests := []struct {
+		name      string
+		customize func(*WorkerServiceOptions)
+		mutate    func(*workerTestEnvironment, *api.WorkerSession) (string, api.ControlClaimRequest)
+		want      error
+	}{
+		{name: "wrong token", mutate: func(_ *workerTestEnvironment, session *api.WorkerSession) (string, api.ControlClaimRequest) {
+			return "wrong-worker-control-session-token", controlClaimRequest(session, 0)
+		}, want: domain.ErrUnauthorized},
+		{name: "stale generation", mutate: func(_ *workerTestEnvironment, session *api.WorkerSession) (string, api.ControlClaimRequest) {
+			request := controlClaimRequest(session, 0)
+			request.Generation++
+			return session.SessionToken, request
+		}, want: domain.ErrSessionGenerationConflict},
+		{name: "stale fencing", mutate: func(_ *workerTestEnvironment, session *api.WorkerSession) (string, api.ControlClaimRequest) {
+			request := controlClaimRequest(session, 0)
+			request.FencingToken++
+			return session.SessionToken, request
+		}, want: domain.ErrFencingRejected},
+		{name: "expired token", customize: func(options *WorkerServiceOptions) {
+			options.TokenLifetime = 30 * time.Second
+			options.WorkerLease = 2 * time.Minute
+		}, mutate: func(environment *workerTestEnvironment, session *api.WorkerSession) (string, api.ControlClaimRequest) {
+			environment.clock.Advance(31 * time.Second)
+			return session.SessionToken, controlClaimRequest(session, 0)
+		}, want: domain.ErrUnauthorized},
+		{name: "expired lease", mutate: func(environment *workerTestEnvironment, session *api.WorkerSession) (string, api.ControlClaimRequest) {
+			environment.clock.Advance(61 * time.Second)
+			return session.SessionToken, controlClaimRequest(session, 0)
+		}, want: domain.ErrLeaseExpired},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			environment := newWorkerTestEnvironment(t, test.customize)
+			session := environment.register(t, "worker-control-authority")
+			environment.heartbeat(t, session)
+			token, request := test.mutate(environment, session)
+			_, err := environment.service.ClaimWorkerCommand(context.Background(), environment.workerID, token, request)
+			if !errors.Is(err, test.want) {
+				t.Fatalf("control authority error=%v want=%v", err, test.want)
+			}
+		})
+	}
+}
+
+func TestWorkerControlClaimFailsClosedAfterLeaseRevoke(t *testing.T) {
+	broker := newObservedBroker()
+	environment := newWorkerTestEnvironment(t, nil)
+	service, err := NewWorkerService(environment.repository, broker, WorkerServiceOptions{
+		Now: environment.clock.Now, NewID: func(prefix string) string { return prefix + "-revoke" },
+		NewSessionToken: func() (string, error) { return "worker-control-revoke-token-00000000000000000000", nil },
+		WorkerLease:     time.Minute, TokenLifetime: 10 * time.Minute, MailboxLease: 10 * time.Second, RunLease: 2 * time.Minute,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment.service = service
+	session := environment.register(t, "worker-control-revoke")
+	environment.heartbeat(t, session)
+	result := make(chan error, 1)
+	go func() {
+		_, claimErr := service.ClaimWorkerCommand(context.Background(), environment.workerID,
+			session.SessionToken, controlClaimRequest(session, 5))
+		result <- claimErr
+	}()
+	select {
+	case <-broker.subscribed:
+	case <-time.After(time.Second):
+		t.Fatal("revocation test control claim did not subscribe")
+	}
+	admin := newWorkerAdminTestService(t, environment, broker)
+	if _, err := admin.Revoke(context.Background(), environment.ownerID, session.Worker.ID, session.Worker.Generation); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case claimErr := <-result:
+		if !errors.Is(claimErr, domain.ErrFencingRejected) && !errors.Is(claimErr, domain.ErrLeaseExpired) {
+			t.Fatalf("revoked control claim error=%v", claimErr)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("lease revoke did not wake and reject control claim")
+	}
+}
 
 func TestLongPollRechecksDatabaseWhenBrokerWakeupIsLost(t *testing.T) {
 	environment := newWorkerTestEnvironment(t, nil)

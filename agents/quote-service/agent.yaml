@@ -10,4 +10,7 @@ runtime_backends:
   - backend_id: primary
     adapter_id: agy-batch
     options:
-      binary: agy
+      binary: agy-graft
+      working_dir: ../../..
+      models:
+        - gemini-3.7-flash-low

@@ -16,14 +16,18 @@ type WorkerAdminState interface {
 }
 
 type WorkerAdminService struct {
-	state WorkerAdminState
-	now   func() time.Time
-	newID func(string) string
+	state  WorkerAdminState
+	broker WakeupBroker
+	now    func() time.Time
+	newID  func(string) string
 }
 
-func NewWorkerAdminService(state WorkerAdminState, now func() time.Time, newID func(string) string) (*WorkerAdminService, error) {
+func NewWorkerAdminService(state WorkerAdminState, broker WakeupBroker, now func() time.Time, newID func(string) string) (*WorkerAdminService, error) {
 	if state == nil {
 		return nil, fmt.Errorf("Worker admin state is required")
+	}
+	if broker == nil {
+		return nil, fmt.Errorf("shared Worker wakeup Broker is required")
 	}
 	if now == nil {
 		now = time.Now
@@ -31,7 +35,7 @@ func NewWorkerAdminService(state WorkerAdminState, now func() time.Time, newID f
 	if newID == nil {
 		newID = func(prefix string) string { return prefix + "-" + fmt.Sprint(now().UnixNano()) }
 	}
-	return &WorkerAdminService{state: state, now: now, newID: newID}, nil
+	return &WorkerAdminService{state: state, broker: broker, now: now, newID: newID}, nil
 }
 
 func (s *WorkerAdminService) Command(ctx context.Context, principalID, workerID string, kind domain.WorkerCommandKind, request api.WorkerAdminRequest) (*domain.WorkerCommand, error) {
@@ -47,7 +51,12 @@ func (s *WorkerAdminService) Command(ctx context.Context, principalID, workerID 
 	c := &domain.WorkerCommand{ID: s.newID("worker-command"), WorkerInstanceID: workerID, Generation: request.ExpectedGeneration, Kind: kind, RequestedBy: principalID, IdempotencyKey: request.Meta.IdempotencyKey, State: domain.WorkerCommandPending, CreatedAt: s.now().UTC()}
 	payload, _ := json.Marshal(map[string]any{"kind": kind, "worker_instance_id": workerID, "generation": request.ExpectedGeneration})
 	e := &domain.JournalEvent{ID: s.newID("event-worker-command"), AggregateType: "worker_command", AggregateID: c.ID, EventType: "worker_command.created", ActorPrincipalID: principalID, Payload: payload, CreatedAt: s.now().UTC()}
-	return s.state.CreateWorkerCommand(ctx, c, e)
+	created, err := s.state.CreateWorkerCommand(ctx, c, e)
+	if err != nil {
+		return nil, err
+	}
+	s.broker.Publish(WorkerControlTopic(workerID))
+	return created, nil
 }
 
 func (s *WorkerAdminService) Revoke(ctx context.Context, principalID, workerID string, generation int64) (*domain.WorkerInstance, error) {
@@ -61,5 +70,10 @@ func (s *WorkerAdminService) Revoke(ctx context.Context, principalID, workerID s
 		return nil, domain.ErrInvalidInput("generation must be positive")
 	}
 	e := &domain.JournalEvent{ID: s.newID("event-worker-revoke"), AggregateType: "worker_instance", AggregateID: workerID, EventType: "worker.lease_revoked", ActorPrincipalID: principalID, Payload: json.RawMessage(`{}`), CreatedAt: s.now().UTC()}
-	return s.state.RevokeWorkerLease(ctx, workerID, generation, e)
+	worker, err := s.state.RevokeWorkerLease(ctx, workerID, generation, e)
+	if err != nil {
+		return nil, err
+	}
+	s.broker.Publish(WorkerControlTopic(workerID))
+	return worker, nil
 }

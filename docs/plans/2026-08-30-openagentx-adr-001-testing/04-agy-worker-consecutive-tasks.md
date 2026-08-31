@@ -1,9 +1,9 @@
 ---
 doc_type: test_task
-status: pending
+status: passed
 owner: openagentx
 test_id: T04
-updated_at: 2026-08-30
+updated_at: 2026-08-31
 ---
 
 # T04：AGY Worker 真实连续任务闭环
@@ -24,3 +24,12 @@ updated_at: 2026-08-30
 ## 通过条件
 
 真实 AGY 连续完成两次工作，模型/推理参数按 ExecutionSpec 生效，Worker 生命周期明显长于两个 turn，且日志中不存在 tmux 控制路径。
+
+## 验证结果
+
+- Task A `task-86aec3e6-a87a-4ab6-aac4-c59174d97ae3` 与 Task B `task-874ebc71-6fd2-4ada-a618-cf1d867ea7a0` 均由真实 `agy-graft` turn 完成并进入 `succeeded`；
+- 两个 Task 分别形成独立 RunAttempt，但共用 WorkerInstance `worker-c8c03350-4b43-4690-b283-ab48c435cfad`、generation `9` 和 fencing token `17`；
+- Mailbox sequence `16`、`17` 均只领取一次；Task A 结束后 Worker 持续 heartbeat，Task B 由持久 Mailbox 自动唤醒；
+- Runtime Event 证明实际模型为 `gemini-3.7-flash-low`，工作目录为 SteadyFlow 根目录；`backend_default` 推理模式按 ExecutionSpec 正确省略显式 effort；
+- 自动化覆盖超时、非零退出、空流、畸形流、缺失终态和未知副作用，均保持 fail closed；
+- 详细证据：[T04 AGY Resident Worker 连续任务验证报告](../../reports/validation/2026-08-31-openagentx-adr001-t04-resident-agy-e2e.md)。

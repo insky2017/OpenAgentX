@@ -85,6 +85,10 @@ func (h *Handler) claimCommand(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, domain.ErrInvalidInput("path Worker ID does not match request body"))
 		return
 	}
+	if err := applyWaitQuery(r, &body.WaitSeconds); err != nil {
+		h.writeError(w, err)
+		return
+	}
 	command, err := h.service.ClaimWorkerCommand(r.Context(), principal, token, body)
 	if err != nil {
 		h.writeError(w, err)
@@ -175,13 +179,9 @@ func (h *Handler) claimMailbox(response http.ResponseWriter, request *http.Reque
 		h.writeError(response, domain.ErrInvalidInput("path Worker ID does not match request body"))
 		return
 	}
-	if rawWait := request.URL.Query().Get("wait"); rawWait != "" {
-		wait, err := time.ParseDuration(rawWait)
-		if err != nil || wait < 0 || wait > 30*time.Second || wait%time.Second != 0 {
-			h.writeError(response, domain.ErrInvalidInput("wait must be whole seconds between 0s and 30s"))
-			return
-		}
-		body.WaitSeconds = int(wait / time.Second)
+	if err := applyWaitQuery(request, &body.WaitSeconds); err != nil {
+		h.writeError(response, err)
+		return
 	}
 	item, err := h.service.ClaimMailbox(request.Context(), principal, token, body)
 	if err != nil {
@@ -189,6 +189,19 @@ func (h *Handler) claimMailbox(response http.ResponseWriter, request *http.Reque
 		return
 	}
 	h.writeJSON(response, http.StatusOK, openapi.ClaimResponse{Item: item})
+}
+
+func applyWaitQuery(request *http.Request, waitSeconds *int) error {
+	rawWait := request.URL.Query().Get("wait")
+	if rawWait == "" {
+		return nil
+	}
+	wait, err := time.ParseDuration(rawWait)
+	if err != nil || wait < 0 || wait > 30*time.Second || wait%time.Second != 0 {
+		return domain.ErrInvalidInput("wait must be whole seconds between 0s and 30s")
+	}
+	*waitSeconds = int(wait / time.Second)
+	return nil
 }
 
 func (h *Handler) acceptMailbox(response http.ResponseWriter, request *http.Request) {

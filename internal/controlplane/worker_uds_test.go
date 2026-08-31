@@ -129,6 +129,76 @@ func TestUnixHTTPWorkerAPIEndToEnd(t *testing.T) {
 	}
 }
 
+func TestUnixHTTPWorkerControlClaimWaitsAndWakesThroughSharedBroker(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	handler, err := workerapi.NewHandler(environment.service, workerapi.StaticPrincipal(environment.workerID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	socketPath := filepath.Join(t.TempDir(), "run", "openagentx.sock")
+	server, err := unixhttp.NewServer(socketPath, handler, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverContext, cancelServer := context.WithCancel(context.Background())
+	serverResult := make(chan error, 1)
+	go func() { serverResult <- server.Start(serverContext) }()
+	waitForSocket(t, socketPath)
+	t.Cleanup(func() {
+		cancelServer()
+		select {
+		case <-serverResult:
+		case <-time.After(5 * time.Second):
+		}
+	})
+	client, err := workerclient.NewUnixHTTPWorkerClient(socketPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := client.RegisterWorker(context.Background(), api.RegisterRequest{
+		ContractVersion: api.ContractVersion, AgentID: environment.agentID, WorkerInstanceID: "worker-uds-control",
+		Transport: domain.WorkerTransportUnix, Capabilities: []string{"coding"},
+		Backends: []openruntime.BackendRegistration{environment.backend},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Heartbeat(context.Background(), api.HeartbeatRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, Status: domain.WorkerStatusOnline,
+		BackendHealth: map[string]openruntime.BackendHealth{"local": openruntime.BackendHealthy},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	started := time.Now()
+	command, err := client.ClaimWorkerCommand(context.Background(), controlClaimRequest(session, 1))
+	if err != nil || command != nil {
+		t.Fatalf("UDS control timeout command=%+v err=%v", command, err)
+	}
+	if elapsed := time.Since(started); elapsed < 900*time.Millisecond || elapsed > 2*time.Second {
+		t.Fatalf("UDS control timeout elapsed=%s", elapsed)
+	}
+
+	result := make(chan *domain.WorkerCommand, 1)
+	errorsChannel := make(chan error, 1)
+	go func() {
+		claimed, claimErr := client.ClaimWorkerCommand(context.Background(), controlClaimRequest(session, 5))
+		result <- claimed
+		errorsChannel <- claimErr
+	}()
+	time.Sleep(100 * time.Millisecond)
+	created := createWorkerCommand(t, newWorkerAdminTestService(t, environment, environment.broker), environment, session, "uds-wakeup")
+	select {
+	case claimed := <-result:
+		if err := <-errorsChannel; err != nil || claimed == nil || claimed.ID != created.ID {
+			t.Fatalf("UDS woken command=%+v err=%v", claimed, err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("UDS control claim was not woken by shared Broker")
+	}
+}
+
 func waitForSocket(t *testing.T, socketPath string) {
 	t.Helper()
 	deadline := time.Now().Add(3 * time.Second)
