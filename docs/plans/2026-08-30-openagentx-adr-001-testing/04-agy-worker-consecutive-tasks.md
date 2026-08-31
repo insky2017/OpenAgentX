@@ -1,9 +1,9 @@
 ---
 doc_type: test_task
-status: passed
+status: retest_required
 owner: openagentx
 test_id: T04
-updated_at: 2026-08-31
+updated_at: 2026-09-01
 ---
 
 # T04：AGY Worker 真实连续任务闭环
@@ -11,6 +11,10 @@ updated_at: 2026-08-31
 ## 目标
 
 使用真实 `agy-batch` Adapter 重复 T03，验证 Agent CLI 按 turn 启动而 Resident Worker 长期在线。
+
+## 前置 Runtime Contract Gate
+
+在执行业务任务前，使用正式 `agy-graft` 和 `set_proxy_server` 环境记录并验证：版本、argv、stdin/NDJSON、stdout/stderr、退出码、超时、工作目录、模型、reasoning effort、权限及代理变量。未通过该 Gate，不得把 AGY 结果计入 T04。
 
 ## 步骤
 
@@ -20,10 +24,11 @@ updated_at: 2026-08-31
 4. turn 完成后确认 AGY 子进程释放、Worker 保持 online。
 5. 不通过 tmux 发送 Task B，确认自动唤醒和独立 RunAttempt。
 6. 验证超时、AGY 非零退出、输出解析失败均形成确定 Task/Run 状态。
+7. 由于 T05 修复共享 Worker/Session/鉴权逻辑，重新执行 T03 的核心连续任务断言，确认 T04 历史结论未被回归破坏。
 
 ## 通过条件
 
-真实 AGY 连续完成两次工作，模型/推理参数按 ExecutionSpec 生效，Worker 生命周期明显长于两个 turn，且日志中不存在 tmux 控制路径。
+真实 AGY 连续完成两次工作，Runtime Contract Gate 证据完整，模型/推理参数按 ExecutionSpec 生效，Worker 生命周期明显长于两个 turn，且日志中不存在 tmux 控制路径。T05 共享修复后的回归也必须通过。
 
 ## 验证结果
 

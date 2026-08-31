@@ -3,7 +3,7 @@ doc_type: test_plan
 status: active
 owner: openagentx
 adr: ADR-001
-updated_at: 2026-08-31
+updated_at: 2026-09-01
 ---
 
 # OpenAgentX ADR-001 测试计划
@@ -24,13 +24,14 @@ ADR-001 保持冻结。本计划只定义测试顺序、证据、失败处理和
 
 ## 2. 测试原则
 
-1. 测试按 T01-T10 顺序执行，前一关未通过不得进入依赖它的下一关。
+1. 测试按 T01-T10 顺序执行，前一关未通过不得进入依赖它的下一关；共享代码发生影响时，历史关卡必须回开并重新验证。
 2. 不直接写 SQLite 建立 Organization、Agent、Task、Approval 或 Worker 状态；测试必须走公开 CLI/API/服务入口。
 3. 控制面先使用确定性的 Fake Adapter，再测试 AGY 和 ACP，避免把 Runtime 波动误判为控制面问题。
-4. 每个测试记录输入、预期、实际结果、Event sequence、相关日志、截图和提交版本。
+4. 每个测试记录输入、预期、实际结果、Event sequence、相关日志、截图和提交版本；测试运行中的源码 commit、二进制 SHA-256、配置版本和 schema 版本必须一致。
 5. 失败先形成缺陷记录；修复后完整重跑当前关卡，不以临时绕过标记通过。
 6. 故障注入使用隔离数据库和隔离端口；生产 HTTPS 入口只执行非破坏性最终验收。
 7. 前端每个功能必须使用真实浏览器验证 DOM、渲染、交互和移动视口。
+8. 每个关卡固定采用“一个实现批次 → 一次完整测试矩阵 → 一次独立审计 → 独立提交”；不得将重复审计或重复长测作为默认流程。
 
 ## 3. 环境分层
 
@@ -50,8 +51,8 @@ ADR-001 保持冻结。本计划只定义测试顺序、证据、失败处理和
 | T01 | [测试准备、身份初始化与环境门槛](2026-08-30-openagentx-adr-001-testing/01-test-fixture-and-preflight.md) | ADR-001 | passed |
 | T02 | [Web 登录、安全、SSE、PWA 与离线](2026-08-30-openagentx-adr-001-testing/02-web-auth-security-pwa.md) | T01 | passed |
 | T03 | [Fake Worker 连续任务闭环](2026-08-30-openagentx-adr-001-testing/03-fake-worker-consecutive-tasks.md) | T01 | passed |
-| T04 | [AGY Worker 真实连续任务闭环](2026-08-30-openagentx-adr-001-testing/04-agy-worker-consecutive-tasks.md) | T03 | passed |
-| T05 | [Multi-turn、Message 与 queued steer](2026-08-30-openagentx-adr-001-testing/05-multiturn-message-steer.md) | T03 | pending |
+| T04 | [AGY Worker 真实连续任务闭环](2026-08-30-openagentx-adr-001-testing/04-agy-worker-consecutive-tasks.md) | T03 | retest_required |
+| T05 | [Multi-turn、Message 与 queued steer](2026-08-30-openagentx-adr-001-testing/05-multiturn-message-steer.md) | T03,T04-runtime-gate | in_progress |
 | T06 | [Cancel、Approval 与 finish 竞态](2026-08-30-openagentx-adr-001-testing/06-cancel-approval-races.md) | T05 | pending |
 | T07 | [恢复、lease、generation 与 fencing](2026-08-30-openagentx-adr-001-testing/07-recovery-lease-fencing.md) | T06 | pending |
 | T08 | [mTLS、组织权限与 Worker Admin](2026-08-30-openagentx-adr-001-testing/08-mtls-authority-worker-admin.md) | T03 | pending |
@@ -69,7 +70,7 @@ flowchart TD
     I --> B[从指挥台提交 Task B]
     B --> BR[Task B running -> succeeded]
     BR --> C[T04 使用真实 AGY 重复闭环]
-    C --> M[T05 Multi-turn Message]
+    C --> M[T05 Multi-turn Message / routing / idempotency]
     M --> R[T06 Cancel / Approval 竞态]
     R --> F[T07 故障恢复]
     F --> UI[T09 手机生产入口验收]
@@ -98,7 +99,22 @@ flowchart TD
 
 任何凭据、密码、Session Token、私钥和完整 Cookie 不进入报告或 Git。
 
-## 7. 当前剩余测试前置缺口
+证据按强度分层，不能互相替代：
+
+| 等级 | 证据 | 可证明范围 |
+|---|---|---|
+| L1 | 单元、仓储、`go test -race`、`go vet` | 局部状态机、事务和并发不变量 |
+| L2 | 隔离 daemon + UDS/HTTP E2E | 真实服务边界、凭据、Mailbox 和恢复 |
+| L3 | 真实 `agy-graft`/其他 Runtime E2E | CLI argv、NDJSON、模型/推理参数、退出码和业务副作用 |
+| L4 | 生产 HTTPS + 真实浏览器 | Nginx、认证、SSE、PWA、PC/手机交互 |
+
+报告必须标注每条结论所需的最低证据等级。
+
+## 7. Runtime Contract Gate（T04 前置）
+
+在真实 AGY 测试前必须固定并记录 Runtime 契约：`agy-graft` 版本、完整 argv、stdin/NDJSON、stdout/stderr、退出码、超时、工作目录、模型、reasoning effort、权限配置及代理环境。只有正式 wrapper 和正式代理环境下的实测结果才能作为 T04 证据。
+
+## 8. 当前剩余测试前置缺口
 
 T01 已提供正式初始化和 Agent apply 入口。后续关卡仍需验证：
 
@@ -107,14 +123,15 @@ T01 已提供正式初始化和 Agent apply 入口。后续关卡仍需验证：
 
 这些缺口均在对应关卡修复和重测，不允许手工写库绕过。
 
-## 8. 失败处理
+## 9. 失败处理
 
 - **FAIL**：实现行为与 ADR 断言不一致，立即停止依赖关卡并建立缺陷修复。
 - **BLOCKED**：缺少受支持入口、外部 Runtime 或安全凭据；保留证据，不伪造 PASS。
 - **FLAKY**：同一测试至少重复 20 次并定位非确定性来源，未消除前按 FAIL 处理。
 - **安全失败**：认证、授权、CSRF、fencing、mTLS 或离线写入任一 fail-open，直接判定 no-go。
 - **数据不确定**：存在潜在副作用而无法确认结果时必须进入 `uncertain`，不得自动重试为成功。
+- **历史关卡回开**：后续共享代码或配置影响已通过关卡时，标记受影响关卡为 `retest_required`，先完成回归并更新报告，再恢复依赖关系。
 
-## 9. 最终 Go/No-Go
+## 10. 最终 Go/No-Go
 
 只有 T01-T10 全部 PASS，且冻结 ADR 未修改、工作树可解释、生产服务 active、远程 HTTPS 正常、测试证据完整，才可判定 Go。任一核心流程、安全边界、连续任务、恢复或手机指挥入口失败，均判定 No-Go。
