@@ -1,9 +1,9 @@
 ---
 doc_type: test_task
-status: pending
+status: passed
 owner: openagentx
 test_id: T07
-updated_at: 2026-08-30
+updated_at: 2026-09-01
 ---
 
 # T07：恢复、lease、generation 与 fencing
@@ -25,3 +25,7 @@ updated_at: 2026-08-30
 ## 通过条件
 
 没有双 Active Run、重复副作用或失联工作；恢复决策由持久状态和 lease/fencing 驱动，不依赖内存 Broker。
+
+## 当前结果
+
+恢复、lease/generation/fencing、替换 Worker 竞态、恢复事件 sequence 和故障回滚矩阵已通过（含 `go test -race -count=20`）；真实 Worker 进程经 UDS 的连续/多轮任务与 SSE 断点 replay 也已通过。详见 [T07 验证报告](../../reports/validation/2026-09-01-openagentx-adr001-t07-recovery-lease-fencing.md)。真实 daemon 二进制 kill/restart 尚未独立执行，保留为 T10 部署回归边界。
