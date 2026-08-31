@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 	"time"
@@ -33,7 +34,7 @@ type WorkerState interface {
 	GetSessionBinding(context.Context, string, string, string) (*domain.SessionBinding, error)
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	ListWorkerBackends(context.Context, string) ([]openruntime.BackendRegistration, error)
-	BeginClaimedRunAttempt(context.Context, domain.WorkerWriteGuard, string, int64, *domain.RunAttempt, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
+	BeginClaimedRunAttempt(context.Context, domain.WorkerWriteGuard, string, int64, *domain.RunAttempt, string, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
 	AppendRunEvents(context.Context, domain.WorkerWriteGuard, string, int64, []*domain.JournalEvent) error
 	FinishRun(context.Context, domain.WorkerWriteGuard, string, int64, int64, openruntime.TurnResult, *domain.SessionBinding, int64, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) error
 	ClaimWorkerCommand(context.Context, domain.WorkerWriteGuard, time.Time, *domain.JournalEvent) (*domain.WorkerCommand, error)
@@ -41,8 +42,9 @@ type WorkerState interface {
 }
 
 type TurnPlan struct {
-	Execution      domain.ResolvedExecutionSpec
-	SessionBinding *domain.SessionBinding
+	Execution            domain.ResolvedExecutionSpec
+	SessionBinding       *domain.SessionBinding
+	PreflightScopeDigest string
 }
 
 type TurnPlanner interface {
@@ -303,6 +305,23 @@ func (s *WorkerService) BeginAttempt(ctx context.Context, principalID string, to
 	if err != nil {
 		return nil, err
 	}
+	if plan.PreflightScopeDigest != "" {
+		if err := domain.ValidateOpaqueID("preflight_scope_digest", plan.PreflightScopeDigest); err != nil {
+			return nil, err
+		}
+		preflightCapable := false
+		for _, backend := range backends {
+			if backend.BackendID == plan.Execution.Spec.BackendID &&
+				backend.Descriptor.AdapterID == plan.Execution.Spec.AdapterID &&
+				backend.Descriptor.Approval == openruntime.ApprovalPreflight {
+				preflightCapable = true
+				break
+			}
+		}
+		if !preflightCapable {
+			return nil, domain.ErrUnsupportedCapability
+		}
+	}
 	requestedJSON, err := json.Marshal(plan.Execution.Spec)
 	if err != nil {
 		return nil, err
@@ -324,8 +343,14 @@ func (s *WorkerService) BeginAttempt(ctx context.Context, principalID string, to
 	taskEvent := s.event("task", "task.running", principalID, task.OrganizationID, task.ID, map[string]any{"run_id": run.ID})
 	runEvent := s.event("run", "run_attempt.started", principalID, task.OrganizationID, run.ID, map[string]any{"task_id": task.ID})
 	mailboxEvent := s.event("mailbox", "mailbox.accepted", principalID, task.OrganizationID, itemID, map[string]any{"run_id": run.ID})
+	var preflightEvent *domain.JournalEvent
+	if plan.PreflightScopeDigest != "" {
+		preflightEvent = s.event("approval", "approval.consumed", principalID, task.OrganizationID, "", map[string]any{
+			"task_id": task.ID, "scope_digest": plan.PreflightScopeDigest, "run_id": run.ID,
+		})
+	}
 	updatedTask, acceptedItem, err := s.state.BeginClaimedRunAttempt(ctx, guard, itemID,
-		task.Version, run, taskEvent, runEvent, mailboxEvent)
+		task.Version, run, plan.PreflightScopeDigest, preflightEvent, taskEvent, runEvent, mailboxEvent)
 	if err != nil {
 		return nil, err
 	}
@@ -348,6 +373,11 @@ func (s *WorkerService) AppendEvents(ctx context.Context, principalID string, to
 	}
 	events := make([]*domain.JournalEvent, 0, len(batch.Events))
 	for _, runtimeEvent := range batch.Events {
+		if runtimeEvent.Type == "approval.requested" {
+			if _, err := decodeNativeApprovalPayload(runtimeEvent.Payload, guard.CheckedAt); err != nil {
+				return err
+			}
+		}
 		payload, err := json.Marshal(map[string]any{
 			"runtime_event_type": runtimeEvent.Type, "payload": runtimeEvent.Payload,
 			"occurred_at": runtimeEvent.OccurredAt,
@@ -359,6 +389,45 @@ func (s *WorkerService) AppendEvents(ctx context.Context, principalID string, to
 			"", runID, json.RawMessage(payload)))
 	}
 	return s.state.AppendRunEvents(ctx, guard, runID, batch.ExpectedRunVersion, events)
+}
+
+// nativeApprovalPayload is the only RuntimeEvent payload that has control
+// plane semantics.  The task/run binding is deliberately not accepted from
+// the runtime: it is derived from the authenticated active RunAttempt inside
+// the repository transaction.
+type nativeApprovalPayload struct {
+	ApprovalRequestID string    `json:"approval_request_id"`
+	ScopeDigest       string    `json:"scope_digest"`
+	ExpiresAt         time.Time `json:"expires_at"`
+}
+
+func decodeNativeApprovalPayload(raw json.RawMessage, now time.Time) (nativeApprovalPayload, error) {
+	var payload nativeApprovalPayload
+	decoder := json.NewDecoder(strings.NewReader(string(raw)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&payload); err != nil {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval.requested payload must be strict JSON")
+	}
+	var extra any
+	if err := decoder.Decode(&extra); err != io.EOF {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval.requested payload must contain one JSON object")
+	}
+	if err := domain.ValidateOpaqueID("approval_request_id", payload.ApprovalRequestID); err != nil {
+		return nativeApprovalPayload{}, err
+	}
+	if payload.ApprovalRequestID != strings.TrimSpace(payload.ApprovalRequestID) {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval_request_id cannot contain surrounding whitespace")
+	}
+	if err := domain.ValidateOpaqueID("scope_digest", payload.ScopeDigest); err != nil {
+		return nativeApprovalPayload{}, err
+	}
+	if payload.ScopeDigest != strings.TrimSpace(payload.ScopeDigest) {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("scope_digest cannot contain surrounding whitespace")
+	}
+	if payload.ExpiresAt.IsZero() || !payload.ExpiresAt.After(now) {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval expires_at must be in the future")
+	}
+	return payload, nil
 }
 
 func (s *WorkerService) Finish(ctx context.Context, principalID string, token string, runID string, request api.FinishRunRequest) error {

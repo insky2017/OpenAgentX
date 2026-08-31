@@ -166,17 +166,18 @@ func (r *Repository) ResolveMailboxPayload(ctx context.Context, guard domain.Wor
 		return &domain.MailboxPayload{Message: &message}, nil
 	case domain.MailboxKindApproval:
 		var decision domain.ApprovalDecision
-		var requestTaskID, requestTargetRunID, createdAt string
+		var requestTaskID, requestTargetRunID, requestMode, requestState, createdAt string
 		var requestExpectedRunVersion int64
 		err := tx.QueryRowContext(ctx, `SELECT d.approval_decision_id, d.approval_request_id,
 			d.decided_by, d.decision, d.state, d.idempotency_key, d.created_at,
-			r.task_id, COALESCE(r.target_run_id, ''), COALESCE(r.expected_run_version, 0)
+			r.task_id, COALESCE(r.target_run_id, ''), COALESCE(r.expected_run_version, 0),
+			r.mode, r.state
 			FROM approval_decisions d
 			JOIN approval_requests r ON r.approval_request_id=d.approval_request_id
 			WHERE d.approval_decision_id=?`, item.ApprovalDecisionID).Scan(
 			&decision.ID, &decision.ApprovalRequestID, &decision.DecidedBy, &decision.Decision,
 			&decision.State, &decision.IdempotencyKey, &createdAt, &requestTaskID,
-			&requestTargetRunID, &requestExpectedRunVersion)
+			&requestTargetRunID, &requestExpectedRunVersion, &requestMode, &requestState)
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrForbidden("Approval payload does not match mailbox authority")
 		}
@@ -189,7 +190,10 @@ func (r *Repository) ResolveMailboxPayload(ctx context.Context, guard domain.Wor
 		}
 		if decision.ID != item.ApprovalDecisionID || decision.ApprovalRequestID != item.ApprovalRequestID ||
 			requestTaskID != item.TaskID || requestTargetRunID != item.TargetRunID ||
-			requestExpectedRunVersion != item.ExpectedRunVersion {
+			requestExpectedRunVersion != item.ExpectedRunVersion || requestMode != string(domain.ApprovalModeNative) ||
+			decision.State != domain.ApprovalDecisionPersisted ||
+			(decision.Decision == domain.ApprovalDecisionApprove && requestState != string(domain.ApprovalRequestApproved)) ||
+			(decision.Decision == domain.ApprovalDecisionReject && requestState != string(domain.ApprovalRequestRejected)) {
 			return nil, domain.ErrForbidden("Approval payload does not match mailbox authority")
 		}
 		return &domain.MailboxPayload{ApprovalDecision: &decision}, nil

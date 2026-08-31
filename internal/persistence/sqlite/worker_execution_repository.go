@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"strings"
+	"time"
 
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
@@ -103,6 +106,8 @@ func (r *Repository) BeginClaimedRunAttempt(
 	mailboxItemID string,
 	expectedTaskVersion int64,
 	run *domain.RunAttempt,
+	preflightScopeDigest string,
+	preflightEvent *domain.JournalEvent,
 	taskEvent *domain.JournalEvent,
 	runEvent *domain.JournalEvent,
 	mailboxEvent *domain.JournalEvent,
@@ -155,6 +160,35 @@ func (r *Repository) BeginClaimedRunAttempt(
 			return nil, nil, domain.ErrTaskCancelRequested
 		}
 		return nil, nil, domain.ErrInvalidTransition
+	}
+	var preflightRequest *domain.ApprovalRequest
+	if preflightScopeDigest != "" {
+		preflightRequest, err = scanApprovalRequest(tx.QueryRowContext(ctx, `SELECT `+approvalRequestColumns+`
+			FROM approval_requests WHERE task_id=? AND mode='preflight' AND state='approved'
+			AND scope_digest=? AND expires_at>? ORDER BY created_at ASC LIMIT 1`,
+			task.ID, preflightScopeDigest, formatTime(guard.CheckedAt)))
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil, domain.ErrApprovalStale
+		}
+		if err != nil {
+			return nil, nil, fmt.Errorf("load preflight Approval for RunAttempt: %w", err)
+		}
+		if preflightEvent == nil {
+			return nil, nil, domain.ErrInvalidInput("preflight Approval consume event is required")
+		}
+		if err := validateJournalForAggregate(preflightEvent, "approval_request", preflightRequest.ID, guard.CheckedAt); err != nil {
+			return nil, nil, err
+		}
+		result, err := tx.ExecContext(ctx, `UPDATE approval_requests SET state='consumed'
+			WHERE approval_request_id=? AND mode='preflight' AND state='approved' AND scope_digest=? AND expires_at>?`,
+			preflightRequest.ID, preflightScopeDigest, formatTime(guard.CheckedAt))
+		if err != nil {
+			return nil, nil, fmt.Errorf("consume preflight Approval for RunAttempt: %w", err)
+		}
+		affected, err := result.RowsAffected()
+		if err != nil || affected != 1 {
+			return nil, nil, domain.ErrApprovalStale
+		}
 	}
 	run.WorkerInstanceID = guard.WorkerInstanceID
 	run.FencingToken = guard.FencingToken
@@ -211,7 +245,11 @@ func (r *Repository) BeginClaimedRunAttempt(
 	if err := r.inject(FaultAfterDelivery); err != nil {
 		return nil, nil, err
 	}
-	for _, event := range []*domain.JournalEvent{taskEvent, runEvent, mailboxEvent} {
+	events := []*domain.JournalEvent{taskEvent, runEvent, mailboxEvent}
+	if preflightRequest != nil {
+		events = append(events, preflightEvent)
+	}
+	for _, event := range events {
 		if err := insertJournal(ctx, tx, event); err != nil {
 			return nil, nil, err
 		}
@@ -265,7 +303,81 @@ func (r *Repository) AppendRunEvents(
 	if !run.Status.Active() || !guard.CheckedAt.Before(run.LeaseUntil) {
 		return domain.ErrLeaseExpired
 	}
+	task, err := scanTask(tx.QueryRowContext(ctx, `SELECT `+taskColumns+` FROM tasks WHERE task_id=?`, run.TaskID))
+	if err != nil {
+		return err
+	}
+	approvalSeen := false
 	for _, event := range events {
+		var envelope struct {
+			RuntimeEventType string          `json:"runtime_event_type"`
+			Payload          json.RawMessage `json:"payload"`
+		}
+		if err := json.Unmarshal(event.Payload, &envelope); err == nil && envelope.RuntimeEventType == "approval.requested" {
+			if approvalSeen {
+				return domain.ErrConflict("event batch contains multiple approval.requested events")
+			}
+			approvalSeen = true
+			payload, err := decodeNativeApprovalPayload(envelope.Payload, guard.CheckedAt)
+			if err != nil {
+				return err
+			}
+			var existing *domain.ApprovalRequest
+			existing, err = scanApprovalRequest(tx.QueryRowContext(ctx, `SELECT `+approvalRequestColumns+` FROM approval_requests WHERE approval_request_id=?`, payload.ApprovalRequestID))
+			if err == nil {
+				if existing.TaskID != run.TaskID || existing.Mode != domain.ApprovalModeNative || existing.TargetRunID != run.ID || existing.ExpectedRunVersion != run.Version || existing.ScopeDigest != payload.ScopeDigest || !existing.ExpiresAt.Equal(payload.ExpiresAt) {
+					return domain.ErrIdempotencyConflict
+				}
+				// Identical Runtime retry is a no-op. Do not duplicate Journal or
+				// advance the Task version a second time.
+				continue
+			}
+			if !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+			if task.IsTerminal() || task.Status == domain.TaskStatusCancelRequested {
+				return domain.ErrInvalidTransition
+			}
+			if task.Status == domain.TaskStatusWaitingApproval {
+				return domain.ErrConflict("another native Approval is already pending for Task")
+			}
+			request := &domain.ApprovalRequest{ID: payload.ApprovalRequestID, TaskID: run.TaskID, Mode: domain.ApprovalModeNative, TargetRunID: run.ID, ExpectedRunVersion: run.Version, ScopeDigest: payload.ScopeDigest, State: domain.ApprovalRequestPending, ExpiresAt: payload.ExpiresAt, CreatedAt: guard.CheckedAt}
+			if err := request.Validate(); err != nil {
+				return err
+			}
+			task.Version++
+			task.Status = domain.TaskStatusWaitingApproval
+			task.UpdatedAt = formatTime(guard.CheckedAt)
+			result, err := tx.ExecContext(ctx, `UPDATE tasks SET version=?, status=?, updated_at=? WHERE task_id=? AND version=?`, task.Version, task.Status, task.UpdatedAt, task.ID, task.Version-1)
+			if err != nil {
+				return err
+			}
+			affected, _ := result.RowsAffected()
+			if affected != 1 {
+				return domain.ErrStaleVersion
+			}
+			if _, err := tx.ExecContext(ctx, `INSERT INTO approval_requests (approval_request_id, task_id, mode, target_run_id, expected_run_version, scope_digest, state, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, request.ID, request.TaskID, request.Mode, request.TargetRunID, request.ExpectedRunVersion, request.ScopeDigest, request.State, formatTime(request.ExpiresAt), formatTime(request.CreatedAt)); err != nil {
+				return err
+			}
+			approvalEvent := &domain.JournalEvent{ID: event.ID + "-approval", OrganizationID: task.OrganizationID, AggregateType: "approval_request", AggregateID: request.ID, EventType: "approval.created", ActorPrincipalID: guard.PrincipalID, Payload: event.Payload, CreatedAt: guard.CheckedAt}
+			taskEvent := &domain.JournalEvent{ID: event.ID + "-task", OrganizationID: task.OrganizationID, AggregateType: "task", AggregateID: task.ID, EventType: "task.waiting_approval", ActorPrincipalID: guard.PrincipalID, Payload: event.Payload, CreatedAt: guard.CheckedAt}
+			if err := validateJournalForAggregate(approvalEvent, "approval_request", request.ID, guard.CheckedAt); err != nil {
+				return err
+			}
+			if err := validateJournalForAggregate(taskEvent, "task", task.ID, guard.CheckedAt); err != nil {
+				return err
+			}
+			if err := insertJournal(ctx, tx, event); err != nil {
+				return err
+			}
+			if err := insertJournal(ctx, tx, approvalEvent); err != nil {
+				return err
+			}
+			if err := insertJournal(ctx, tx, taskEvent); err != nil {
+				return err
+			}
+			continue
+		}
 		if err := insertJournal(ctx, tx, event); err != nil {
 			return err
 		}
@@ -488,4 +600,39 @@ func terminalStatuses(status openruntime.TurnResultStatus) (domain.RunAttemptSta
 	default:
 		return domain.RunAttemptUncertain, domain.TaskStatusUncertain
 	}
+}
+
+type nativeApprovalPayload struct {
+	ApprovalRequestID string    `json:"approval_request_id"`
+	ScopeDigest       string    `json:"scope_digest"`
+	ExpiresAt         time.Time `json:"expires_at"`
+}
+
+func decodeNativeApprovalPayload(raw json.RawMessage, now time.Time) (nativeApprovalPayload, error) {
+	var payload nativeApprovalPayload
+	decoder := json.NewDecoder(strings.NewReader(string(raw)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&payload); err != nil {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval.requested payload must be strict JSON")
+	}
+	var extra any
+	if err := decoder.Decode(&extra); err != io.EOF {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval.requested payload must contain one JSON object")
+	}
+	if err := domain.ValidateOpaqueID("approval_request_id", payload.ApprovalRequestID); err != nil {
+		return nativeApprovalPayload{}, err
+	}
+	if payload.ApprovalRequestID != strings.TrimSpace(payload.ApprovalRequestID) {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval_request_id cannot contain surrounding whitespace")
+	}
+	if err := domain.ValidateOpaqueID("scope_digest", payload.ScopeDigest); err != nil {
+		return nativeApprovalPayload{}, err
+	}
+	if payload.ScopeDigest != strings.TrimSpace(payload.ScopeDigest) {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("scope_digest cannot contain surrounding whitespace")
+	}
+	if payload.ExpiresAt.IsZero() || !payload.ExpiresAt.After(now) {
+		return nativeApprovalPayload{}, domain.ErrInvalidInput("approval expires_at must be in the future")
+	}
+	return payload, nil
 }

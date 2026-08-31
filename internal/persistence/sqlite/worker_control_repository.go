@@ -468,6 +468,62 @@ func (r *Repository) AcceptMailboxItem(
 		}
 		return commit(tx)
 	}
+	if item.Kind == domain.MailboxKindApproval {
+		decisionState := domain.ApprovalDecisionSuperseded
+		if outcome == domain.MailboxStateAccepted {
+			decisionState = domain.ApprovalDecisionApplied
+		}
+		result, err := tx.ExecContext(ctx, `UPDATE approval_decisions SET state=?
+			WHERE approval_decision_id=? AND approval_request_id=? AND state='persisted'`,
+			decisionState, item.ApprovalDecisionID, item.ApprovalRequestID)
+		if err != nil {
+			return fmt.Errorf("settle native Approval decision: %w", err)
+		}
+		affected, err := result.RowsAffected()
+		if err != nil || affected != 1 {
+			return domain.ErrConflict("native Approval decision settlement CAS lost")
+		}
+		if outcome != domain.MailboxStateAccepted {
+			if _, err := tx.ExecContext(ctx, `UPDATE approval_requests SET state='stale'
+				WHERE approval_request_id=? AND mode='native' AND state IN ('approved','rejected')`,
+				item.ApprovalRequestID); err != nil {
+				return fmt.Errorf("mark native Approval request stale: %w", err)
+			}
+		}
+		if outcome == domain.MailboxStateAccepted {
+			// Applying a native approval is the Task-level linearization point:
+			// reopen exactly the waiting Task in this same transaction. A
+			// superseded approval never reaches this branch and cannot reopen it.
+			task, err := scanTask(tx.QueryRowContext(ctx, `SELECT `+taskColumns+` FROM tasks WHERE task_id=?`, item.TaskID))
+			if err != nil {
+				return fmt.Errorf("load native Approval Task: %w", err)
+			}
+			if task.Status == domain.TaskStatusWaitingApproval {
+				previousVersion := task.Version
+				task.Version++
+				task.Status = domain.TaskStatusRunning
+				task.UpdatedAt = formatTime(guard.CheckedAt)
+				result, err := tx.ExecContext(ctx, `UPDATE tasks SET version=?, status='running', updated_at=? WHERE task_id=? AND version=? AND status='waiting_approval'`, task.Version, task.UpdatedAt, task.ID, previousVersion)
+				if err != nil {
+					return fmt.Errorf("resume native Approval Task: %w", err)
+				}
+				affected, _ := result.RowsAffected()
+				if affected != 1 {
+					return domain.ErrStaleVersion
+				}
+				taskPayload, _ := json.Marshal(map[string]string{"mailbox_item_id": item.ID})
+				taskEvent := &domain.JournalEvent{ID: item.ID + "-task-running", OrganizationID: task.OrganizationID, AggregateType: "task", AggregateID: task.ID, EventType: "task.running", ActorPrincipalID: guard.PrincipalID, Payload: taskPayload, CreatedAt: guard.CheckedAt}
+				if err := validateJournalForAggregate(taskEvent, "task", task.ID, guard.CheckedAt); err != nil {
+					return err
+				}
+				if err := insertJournal(ctx, tx, taskEvent); err != nil {
+					return err
+				}
+			} else if task.Status != domain.TaskStatusRunning && !task.IsTerminal() {
+				return domain.ErrConflict("native Approval Task is not waiting for approval")
+			}
+		}
+	}
 	result, err := tx.ExecContext(ctx, `UPDATE mailbox_items SET state=?, accepted_at=?
 		WHERE mailbox_item_id=? AND state=? AND worker_instance_id=? AND fencing_token=? AND lease_until>?`,
 		outcome, formatTime(guard.CheckedAt), itemID, expected, guard.WorkerInstanceID,

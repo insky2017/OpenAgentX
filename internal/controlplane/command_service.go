@@ -99,12 +99,16 @@ func (s *CommandService) CancelTask(ctx context.Context, principal, taskID strin
 		return nil, err
 	}
 	item := &domain.MailboxItem{ID: commandID("mailbox")}
-	updated, _, err := s.state.RequestTaskCancel(ctx, taskID, task.Version, principal, item, commandEvent(taskID, "task.cancel_requested", principal, "task", nil, s.now()), commandEvent(item.ID, "mailbox.cancel_created", principal, "mailbox_item", nil, s.now()))
+	updated, createdItem, err := s.state.RequestTaskCancel(ctx, taskID, req.Meta.ExpectedVersion, principal, item, commandEvent(taskID, "task.cancel_requested", principal, "task", nil, s.now()), commandEvent(item.ID, "mailbox.cancel_created", principal, "mailbox_item", nil, s.now()))
 	if err != nil {
 		return nil, err
 	}
 	s.broker.Publish(AgentMailboxTopic(task.TargetAgentID))
-	return &api.CancelTaskResponse{Task: *updated}, nil
+	response := &api.CancelTaskResponse{Task: *updated}
+	if createdItem != nil {
+		response.Sequence = createdItem.Sequence
+	}
+	return response, nil
 }
 
 func (s *CommandService) DecideApproval(ctx context.Context, principal, requestID string, req api.DecideApprovalRequest) (*api.DecideApprovalResponse, error) {
@@ -118,12 +122,16 @@ func (s *CommandService) DecideApproval(ctx context.Context, principal, requestI
 	now := s.now().UTC()
 	decision := &domain.ApprovalDecision{ID: commandID("approval-decision"), ApprovalRequestID: requestID, DecidedBy: principal, Decision: req.Decision, IdempotencyKey: req.Meta.IdempotencyKey}
 	item := &domain.MailboxItem{ID: commandID("mailbox"), State: domain.MailboxStatePending, CreatedAt: now}
-	result, _, err := s.state.DecideApproval(ctx, requestID, decision, item, commandEvent(requestID, "approval.decided", principal, "approval_request", nil, now), commandEvent(item.ID, "mailbox.approval_created", principal, "mailbox_item", nil, now))
+	result, createdItem, err := s.state.DecideApproval(ctx, requestID, decision, item, commandEvent(requestID, "approval.decided", principal, "approval_request", nil, now), commandEvent(item.ID, "mailbox.approval_created", principal, "mailbox_item", nil, now))
 	if err != nil {
 		return nil, err
 	}
 	if task, taskErr := s.state.GetTask(ctx, request.TaskID); taskErr == nil {
 		s.broker.Publish(AgentMailboxTopic(task.TargetAgentID))
 	}
-	return &api.DecideApprovalResponse{Decision: *result}, nil
+	response := &api.DecideApprovalResponse{Decision: *result}
+	if createdItem != nil {
+		response.Sequence = createdItem.Sequence
+	}
+	return response, nil
 }

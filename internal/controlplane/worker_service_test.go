@@ -31,6 +31,19 @@ type workerTestEnvironment struct {
 	backend    openruntime.BackendRegistration
 }
 
+type preflightTurnPlanner struct {
+	scopeDigest string
+}
+
+func (p preflightTurnPlanner) Plan(ctx context.Context, task domain.Task, messages []domain.Message, backends []openruntime.BackendRegistration) (TurnPlan, error) {
+	plan, err := (M1TurnPlanner{}).Plan(ctx, task, messages, backends)
+	if err != nil {
+		return TurnPlan{}, err
+	}
+	plan.PreflightScopeDigest = p.scopeDigest
+	return plan, nil
+}
+
 func newWorkerTestEnvironment(t *testing.T, customize func(*WorkerServiceOptions)) *workerTestEnvironment {
 	t.Helper()
 	ctx := context.Background()
@@ -278,6 +291,75 @@ func TestWorkerServiceRegisterClaimBeginEventsAndFinish(t *testing.T) {
 	}
 }
 
+func TestWorkerAppendApprovalRequestedAtomicIdempotentAndApply(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	session := environment.register(t, "worker-approval-requested")
+	environment.heartbeat(t, session)
+	created := environment.createTask(t, "approval-requested")
+	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil {
+		t.Fatalf("claim item=%+v err=%v", item, err)
+	}
+	begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload := json.RawMessage(`{"approval_request_id":"approval-runtime-1","scope_digest":"scope-runtime-1","expires_at":"2026-08-30T16:00:00Z"}`)
+	batch := api.EventBatch{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken, ExpectedRunVersion: begin.Turn.RunAttempt.Version,
+		Events: []openruntime.RuntimeEvent{{Type: "approval.requested", Payload: payload, OccurredAt: environment.clock.Now()}}}
+	if err := environment.service.AppendEvents(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, batch); err != nil {
+		t.Fatalf("append approval.requested: %v", err)
+	}
+	task, _ := environment.repository.GetTask(context.Background(), created.Task.ID)
+	run, _ := environment.repository.GetRunAttempt(context.Background(), begin.Turn.RunAttempt.ID)
+	if task.Status != domain.TaskStatusWaitingApproval || task.Version != begin.Turn.Task.Version+1 || run.Version != begin.Turn.RunAttempt.Version {
+		t.Fatalf("approval state task=%+v run=%+v", task, run)
+	}
+	if err := environment.service.AppendEvents(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, batch); err != nil {
+		t.Fatalf("idempotent approval retry: %v", err)
+	}
+	taskAfterRetry, _ := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if taskAfterRetry.Version != task.Version {
+		t.Fatalf("retry advanced task version: before=%d after=%d", task.Version, taskAfterRetry.Version)
+	}
+	conflict := batch
+	conflict.Events = []openruntime.RuntimeEvent{{Type: "approval.requested", Payload: json.RawMessage(`{"approval_request_id":"approval-runtime-1","scope_digest":"different-scope","expires_at":"2026-08-30T16:00:00Z"}`), OccurredAt: environment.clock.Now()}}
+	if err := environment.service.AppendEvents(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, conflict); !errors.Is(err, domain.ErrIdempotencyConflict) {
+		t.Fatalf("conflicting approval retry error=%v", err)
+	}
+	bad := batch
+	bad.Events = []openruntime.RuntimeEvent{{Type: "approval.requested", Payload: json.RawMessage(`{"approval_request_id":"approval-runtime-2","scope_digest":"scope-runtime-2","expires_at":"2026-08-30T16:00:00Z","extra":true}`), OccurredAt: environment.clock.Now()}}
+	if err := environment.service.AppendEvents(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, bad); err == nil {
+		t.Fatal("malformed approval payload accepted")
+	}
+	commands, err := NewCommandService(environment.repository, environment.broker, environment.clock.Now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decisionResponse, err := commands.DecideApproval(context.Background(), environment.ownerID, "approval-runtime-1", api.DecideApprovalRequest{Meta: api.CommandMeta{IdempotencyKey: "approval-runtime-decision", ExpectedVersion: task.Version}, DecidedBy: environment.ownerID, Decision: domain.ApprovalDecisionApprove})
+	if err != nil {
+		t.Fatal(err)
+	}
+	claimed, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 0))
+	if err != nil || claimed == nil || claimed.Kind != domain.MailboxKindApproval {
+		t.Fatalf("claim approval=%+v err=%v", claimed, err)
+	}
+	if err := environment.service.AcceptMailbox(context.Background(), environment.workerID, session.SessionToken, claimed.ID, api.AcceptRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed, Outcome: domain.MailboxStateAccepted}); err != nil {
+		t.Fatal(err)
+	}
+	task, _ = environment.repository.GetTask(context.Background(), created.Task.ID)
+	decision, _ := environment.repository.GetApprovalDecision(context.Background(), decisionResponse.Decision.ID)
+	if task.Status != domain.TaskStatusRunning || decision == nil || decision.State != domain.ApprovalDecisionApplied {
+		t.Fatalf("applied approval task=%+v decision=%+v", task, decision)
+	}
+	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, api.FinishRunRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken, ExpectedTaskVersion: begin.Turn.Task.Version, ExpectedRunVersion: begin.Turn.RunAttempt.Version, Result: openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "approved", SideEffectsKnown: true}}); err != nil {
+		t.Fatalf("finish after approval version delta: %v", err)
+	}
+}
+
 func TestWorkerFinishPersistsRuntimeDiagnosticToRunTaskAndEvents(t *testing.T) {
 	environment := newWorkerTestEnvironment(t, nil)
 	session := environment.register(t, "worker-error-persistence")
@@ -419,6 +501,90 @@ func TestWorkerFinishWaitingInputKeepsTaskEligibleForQueuedFollowUp(t *testing.T
 	item, err = environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
 	if err != nil || item == nil || item.ID != followupMailbox.ID {
 		t.Fatalf("follow-up item=%+v err=%v", item, err)
+	}
+}
+
+func TestBeginAttemptAtomicallyConsumesMatchingPreflightApprovalOnce(t *testing.T) {
+	const scopeDigest = "scope-preflight-begin"
+	environment := newWorkerTestEnvironment(t, func(options *WorkerServiceOptions) {
+		options.Planner = preflightTurnPlanner{scopeDigest: scopeDigest}
+	})
+	session := environment.register(t, "worker-preflight-begin")
+	environment.heartbeat(t, session)
+	created := environment.createTask(t, "preflight-begin")
+	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil {
+		t.Fatalf("claim preflight work=%+v err=%v", item, err)
+	}
+	beginRequest := api.BeginAttemptRequest{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+	}
+	if _, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, beginRequest); !errors.Is(err, domain.ErrApprovalStale) {
+		t.Fatalf("BeginAttempt without preflight Approval error=%v", err)
+	}
+	unchangedTask, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil || unchangedTask.Status != domain.TaskStatusQueued || unchangedTask.Version != created.Task.Version {
+		t.Fatalf("failed preflight BeginAttempt changed Task=%+v err=%v", unchangedTask, err)
+	}
+	unchangedItem, err := environment.repository.GetMailboxItem(context.Background(), item.ID)
+	if err != nil || unchangedItem.State != domain.MailboxStateClaimed {
+		t.Fatalf("failed preflight BeginAttempt changed mailbox=%+v err=%v", unchangedItem, err)
+	}
+
+	approval := &domain.ApprovalRequest{
+		ID: "approval-preflight-begin", TaskID: created.Task.ID, Mode: domain.ApprovalModePreflight,
+		ScopeDigest: scopeDigest, State: domain.ApprovalRequestPending, ExpiresAt: environment.clock.Now().Add(time.Hour),
+	}
+	if err := environment.repository.CreateApprovalRequest(context.Background(), approval, &domain.JournalEvent{
+		ID: "event-approval-preflight-begin", OrganizationID: environment.orgID, EventType: "approval.created",
+		ActorPrincipalID: environment.ownerID, Payload: json.RawMessage(`{}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := environment.repository.DecideApproval(context.Background(), approval.ID, &domain.ApprovalDecision{
+		ID: "decision-preflight-begin", ApprovalRequestID: approval.ID, DecidedBy: environment.ownerID,
+		Decision: domain.ApprovalDecisionApprove, State: domain.ApprovalDecisionPersisted, IdempotencyKey: "preflight-begin-idem",
+	}, nil, &domain.JournalEvent{
+		ID: "event-decision-preflight-begin", OrganizationID: environment.orgID, EventType: "approval.decided",
+		ActorPrincipalID: environment.ownerID, Payload: json.RawMessage(`{}`),
+	}, nil); err != nil {
+		t.Fatal(err)
+	}
+	begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, beginRequest)
+	if err != nil {
+		t.Fatalf("BeginAttempt with matching preflight Approval: %v", err)
+	}
+	persistedApproval, err := environment.repository.GetApprovalRequest(context.Background(), approval.ID)
+	if err != nil || persistedApproval.State != domain.ApprovalRequestConsumed {
+		t.Fatalf("consumed preflight Approval=%+v err=%v", persistedApproval, err)
+	}
+	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, api.FinishRunRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+		ExpectedTaskVersion: begin.Turn.Task.Version, ExpectedRunVersion: begin.Turn.RunAttempt.Version,
+		Result: openruntime.TurnResult{Status: openruntime.TurnResultWaitingInput, Result: "need another turn", SideEffectsKnown: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	waitingTask, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	followup := &domain.Message{ID: "message-preflight-second-turn", TaskID: created.Task.ID,
+		SenderPrincipalID: environment.ownerID, Kind: domain.MessageKindSupplement, Content: "continue"}
+	followupItem := &domain.MailboxItem{ID: "mailbox-preflight-second-turn", Lane: domain.MailboxLaneWork}
+	if _, err := environment.repository.CreateMessage(context.Background(), waitingTask.Version, followup, followupItem, &domain.JournalEvent{
+		ID: "event-preflight-second-turn", OrganizationID: environment.orgID, EventType: "message.created",
+		ActorPrincipalID: environment.ownerID, Payload: json.RawMessage(`{}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	item, err = environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil || item.ID != followupItem.ID {
+		t.Fatalf("claim second preflight turn=%+v err=%v", item, err)
+	}
+	if _, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, beginRequest); !errors.Is(err, domain.ErrApprovalStale) {
+		t.Fatalf("consumed preflight Approval was reused: %v", err)
 	}
 }
 

@@ -56,6 +56,29 @@ func (r *Repository) CreateApprovalRequest(ctx context.Context, request *domain.
 		return err
 	}
 	defer tx.Rollback()
+	var taskStatus domain.TaskStatus
+	if err := tx.QueryRowContext(ctx, `SELECT status FROM tasks WHERE task_id=?`, request.TaskID).Scan(&taskStatus); errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrTaskNotFound
+	} else if err != nil {
+		return fmt.Errorf("load Approval Task: %w", err)
+	}
+	if (&domain.Task{Status: taskStatus}).IsTerminal() || taskStatus == domain.TaskStatusCancelRequested {
+		return domain.ErrInvalidTransition
+	}
+	if request.Mode == domain.ApprovalModeNative {
+		var runTaskID string
+		var runStatus domain.RunAttemptStatus
+		var runVersion int64
+		if err := tx.QueryRowContext(ctx, `SELECT task_id, status, version FROM run_attempts WHERE run_id=?`, request.TargetRunID).
+			Scan(&runTaskID, &runStatus, &runVersion); errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrApprovalStale
+		} else if err != nil {
+			return fmt.Errorf("load native Approval RunAttempt: %w", err)
+		}
+		if runTaskID != request.TaskID || !runStatus.Active() || runVersion != request.ExpectedRunVersion {
+			return domain.ErrApprovalStale
+		}
+	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO approval_requests (
 		approval_request_id, task_id, mode, target_run_id, expected_run_version, scope_digest, state, expires_at, created_at
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, request.ID, request.TaskID, request.Mode,
@@ -157,6 +180,7 @@ func (r *Repository) RequestTaskCancel(ctx context.Context, taskID string, expec
 		return nil, nil, err
 	}
 	var active *domain.RunAttempt
+	var createdItem *domain.MailboxItem
 	active, err = scanRunAttempt(tx.QueryRowContext(ctx, `SELECT run_id, task_id, agent_id, version, status, worker_instance_id, fencing_token, lease_until,
 		execution_spec_version, requested_execution_json, resolved_execution_json, adapter_id, backend_id, model, reasoning_mode, reasoning_value,
 		started_at, finished_at, result_json, created_at, updated_at FROM run_attempts WHERE task_id=? AND status IN ('starting','running','waiting_approval','finishing') LIMIT 1`, task.ID))
@@ -184,13 +208,17 @@ func (r *Repository) RequestTaskCancel(ctx context.Context, taskID string, expec
 		if err := insertJournal(ctx, tx, mailboxEvent); err != nil {
 			return nil, nil, err
 		}
+		createdItem = item
 	} else if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, nil, fmt.Errorf("find active run for cancel: %w", err)
+	}
+	if err := r.inject(FaultBeforeCommit); err != nil {
+		return nil, nil, err
 	}
 	if err := commit(tx); err != nil {
 		return nil, nil, err
 	}
-	return task, item, nil
+	return task, createdItem, nil
 }
 
 func (r *Repository) DecideApproval(ctx context.Context, requestID string, decision *domain.ApprovalDecision, item *domain.MailboxItem,
@@ -221,31 +249,82 @@ func (r *Repository) DecideApproval(ctx context.Context, requestID string, decis
 		return nil, nil, domain.ErrInvalidInput("decision request mismatch")
 	}
 	var existing domain.ApprovalDecision
-	err = tx.QueryRowContext(ctx, `SELECT approval_decision_id, approval_request_id, decided_by, decision, state, idempotency_key, created_at FROM approval_decisions WHERE decided_by=? AND idempotency_key=?`, decision.DecidedBy, decision.IdempotencyKey).Scan(&existing.ID, &existing.ApprovalRequestID, &existing.DecidedBy, &existing.Decision, &existing.State, &existing.IdempotencyKey, new(string))
+	var existingCreatedAt string
+	err = tx.QueryRowContext(ctx, `SELECT approval_decision_id, approval_request_id, decided_by, decision, state, idempotency_key, created_at FROM approval_decisions WHERE decided_by=? AND idempotency_key=?`, decision.DecidedBy, decision.IdempotencyKey).Scan(&existing.ID, &existing.ApprovalRequestID, &existing.DecidedBy, &existing.Decision, &existing.State, &existing.IdempotencyKey, &existingCreatedAt)
 	if err == nil {
 		if existing.ApprovalRequestID != request.ID || existing.Decision != decision.Decision {
 			return nil, nil, domain.ErrIdempotencyConflict
+		}
+		existing.CreatedAt, err = parseTime(existingCreatedAt)
+		if err != nil {
+			return nil, nil, err
 		}
 		return &existing, nil, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return nil, nil, err
 	}
-	if request.State != domain.ApprovalRequestPending || !now.Before(request.ExpiresAt) {
-		_, _ = tx.ExecContext(ctx, `UPDATE approval_requests SET state=? WHERE approval_request_id=? AND state='pending'`, domain.ApprovalRequestExpired, request.ID)
+	if request.State != domain.ApprovalRequestPending {
+		return nil, nil, domain.ErrApprovalStale
+	}
+	if !now.Before(request.ExpiresAt) {
+		if _, err := tx.ExecContext(ctx, `UPDATE approval_requests SET state=? WHERE approval_request_id=? AND state='pending'`, domain.ApprovalRequestExpired, request.ID); err != nil {
+			return nil, nil, err
+		}
+		if decisionEvent == nil {
+			return nil, nil, domain.ErrInvalidInput("expired approval event is required")
+		}
+		decisionEvent.EventType = "approval.expired"
+		if err := validateJournalForAggregate(decisionEvent, "approval_request", request.ID, now); err != nil {
+			return nil, nil, err
+		}
+		if err := insertJournal(ctx, tx, decisionEvent); err != nil {
+			return nil, nil, err
+		}
+		if err := commit(tx); err != nil {
+			return nil, nil, err
+		}
+		return nil, nil, domain.ErrApprovalStale
+	}
+	var targetAgentID string
+	var taskStatus domain.TaskStatus
+	if err := tx.QueryRowContext(ctx, `SELECT target_agent_id, status FROM tasks WHERE task_id=?`, request.TaskID).Scan(&targetAgentID, &taskStatus); err != nil {
+		return nil, nil, fmt.Errorf("load Approval target Agent: %w", err)
+	}
+	markStale := func() error {
+		if _, err := tx.ExecContext(ctx, `UPDATE approval_requests SET state=? WHERE approval_request_id=? AND state='pending'`, domain.ApprovalRequestStale, request.ID); err != nil {
+			return err
+		}
+		if decisionEvent == nil {
+			return domain.ErrInvalidInput("stale approval event is required")
+		}
+		decisionEvent.EventType = "approval.stale"
+		if err := validateJournalForAggregate(decisionEvent, "approval_request", request.ID, now); err != nil {
+			return err
+		}
+		if err := insertJournal(ctx, tx, decisionEvent); err != nil {
+			return err
+		}
+		return commit(tx)
+	}
+	if taskStatus == domain.TaskStatusCancelRequested || (&domain.Task{Status: taskStatus}).IsTerminal() {
+		if err := markStale(); err != nil {
+			return nil, nil, err
+		}
 		return nil, nil, domain.ErrApprovalStale
 	}
 	if request.Mode == domain.ApprovalModeNative {
+		var runTaskID string
 		var status string
 		var version int64
-		if err := tx.QueryRowContext(ctx, `SELECT status, version FROM run_attempts WHERE run_id=?`, request.TargetRunID).Scan(&status, &version); err != nil || version != request.ExpectedRunVersion || !domain.RunAttemptStatus(status).Active() {
-			_, _ = tx.ExecContext(ctx, `UPDATE approval_requests SET state=? WHERE approval_request_id=? AND state='pending'`, domain.ApprovalRequestStale, request.ID)
-			if decisionEvent != nil {
-				if validateErr := validateJournalForAggregate(decisionEvent, "approval_request", request.ID, now); validateErr == nil {
-					_ = insertJournal(ctx, tx, decisionEvent)
-				}
+		runErr := tx.QueryRowContext(ctx, `SELECT task_id, status, version FROM run_attempts WHERE run_id=?`, request.TargetRunID).Scan(&runTaskID, &status, &version)
+		if runErr != nil && !errors.Is(runErr, sql.ErrNoRows) {
+			return nil, nil, fmt.Errorf("load native Approval RunAttempt: %w", runErr)
+		}
+		if errors.Is(runErr, sql.ErrNoRows) || runTaskID != request.TaskID || version != request.ExpectedRunVersion || !domain.RunAttemptStatus(status).Active() {
+			if err := markStale(); err != nil {
+				return nil, nil, err
 			}
-			_ = commit(tx)
 			return nil, nil, domain.ErrApprovalStale
 		}
 	}
@@ -270,7 +349,12 @@ func (r *Repository) DecideApproval(ctx context.Context, requestID string, decis
 	if err := insertJournal(ctx, tx, decisionEvent); err != nil {
 		return nil, nil, err
 	}
-	if request.Mode == domain.ApprovalModeNative && decision.Decision == domain.ApprovalDecisionApprove && item != nil {
+	var createdItem *domain.MailboxItem
+	if request.Mode == domain.ApprovalModeNative {
+		if item == nil {
+			return nil, nil, domain.ErrInvalidInput("native approval mailbox item is required")
+		}
+		item.TargetAgentID = targetAgentID
 		item.Kind = domain.MailboxKindApproval
 		item.Lane = domain.MailboxLaneControl
 		item.TaskID = request.TaskID
@@ -292,11 +376,15 @@ func (r *Repository) DecideApproval(ctx context.Context, requestID string, decis
 		if err := insertJournal(ctx, tx, mailboxEvent); err != nil {
 			return nil, nil, err
 		}
+		createdItem = item
+	}
+	if err := r.inject(FaultBeforeCommit); err != nil {
+		return nil, nil, err
 	}
 	if err := commit(tx); err != nil {
 		return nil, nil, err
 	}
-	return decision, item, nil
+	return decision, createdItem, nil
 }
 
 func (r *Repository) ConsumePreflightApproval(ctx context.Context, taskID string, scopeDigest string, event *domain.JournalEvent) (*domain.ApprovalRequest, error) {
@@ -321,13 +409,21 @@ func (r *Repository) ConsumePreflightApproval(ctx context.Context, taskID string
 	if event == nil {
 		return nil, domain.ErrInvalidInput("approval consume event is required")
 	}
-	if _, err := tx.ExecContext(ctx, `UPDATE approval_requests SET state='consumed' WHERE approval_request_id=? AND state='approved'`, request.ID); err != nil {
+	result, err := tx.ExecContext(ctx, `UPDATE approval_requests SET state='consumed' WHERE approval_request_id=? AND state='approved'`, request.ID)
+	if err != nil {
 		return nil, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil || affected != 1 {
+		return nil, domain.ErrApprovalStale
 	}
 	if err := validateJournalForAggregate(event, "approval_request", request.ID, now); err != nil {
 		return nil, err
 	}
 	if err := insertJournal(ctx, tx, event); err != nil {
+		return nil, err
+	}
+	if err := r.inject(FaultBeforeCommit); err != nil {
 		return nil, err
 	}
 	if err := commit(tx); err != nil {
