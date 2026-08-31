@@ -2,7 +2,6 @@ package sqlite
 
 import (
 	"context"
-	"crypto/subtle"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -182,9 +181,6 @@ func scanWorkerCredential(scanner rowScanner) (*domain.WorkerCredential, error) 
 }
 
 func loadGuardedWorker(ctx context.Context, tx *sql.Tx, guard domain.WorkerWriteGuard) (*domain.WorkerCredential, error) {
-	if err := guard.Validate(); err != nil {
-		return nil, err
-	}
 	credential, err := scanWorkerCredential(tx.QueryRowContext(ctx, `SELECT
 		worker_instance_id, agent_id, generation, transport, authenticated_principal,
 		capabilities_json, status, last_heartbeat_at, lease_until, fencing_token,
@@ -196,27 +192,8 @@ func loadGuardedWorker(ctx context.Context, tx *sql.Tx, guard domain.WorkerWrite
 	if err != nil {
 		return nil, fmt.Errorf("load guarded Worker: %w", err)
 	}
-	if credential.Worker.AgentID != guard.AgentID {
-		return nil, domain.ErrForbidden("Worker is not bound to requested Agent")
-	}
-	if credential.Worker.AuthenticatedPrincipal != guard.PrincipalID ||
-		subtle.ConstantTimeCompare([]byte(credential.SessionTokenDigest), []byte(guard.SessionTokenDigest)) != 1 {
-		return nil, domain.ErrUnauthorized
-	}
-	if credential.Worker.Generation != guard.Generation {
-		return nil, domain.ErrSessionGenerationConflict
-	}
-	if credential.Worker.FencingToken != guard.FencingToken {
-		return nil, domain.ErrFencingRejected
-	}
-	if !guard.CheckedAt.Before(credential.TokenExpiresAt) {
-		return nil, domain.ErrUnauthorized
-	}
-	if !guard.CheckedAt.Before(credential.Worker.LeaseUntil) {
-		return nil, domain.ErrLeaseExpired
-	}
-	if credential.Worker.Status == domain.WorkerStatusOffline {
-		return nil, domain.ErrLeaseExpired
+	if err := credential.Authorize(guard); err != nil {
+		return nil, err
 	}
 	return credential, nil
 }
@@ -419,6 +396,19 @@ func (r *Repository) AcceptMailboxItem(
 	if err != nil {
 		return err
 	}
+	if expected == domain.MailboxStateClaimed && outcome == domain.MailboxStateSuperseded &&
+		item.Kind == domain.MailboxKindMessage && item.Lane == domain.MailboxLaneWork {
+		var deferred int
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS(
+			SELECT 1 FROM event_journal WHERE aggregate_type='mailbox_item' AND aggregate_id=?
+			AND event_type='mailbox.message_deferred'
+		)`, item.ID).Scan(&deferred); err != nil {
+			return fmt.Errorf("check idempotent Message defer: %w", err)
+		}
+		if deferred == 1 {
+			return nil
+		}
+	}
 	if item.State == outcome && item.TargetAgentID == guard.AgentID &&
 		item.WorkerInstanceID == guard.WorkerInstanceID && item.FencingToken == guard.FencingToken {
 		return nil
@@ -428,6 +418,55 @@ func (r *Repository) AcceptMailboxItem(
 	}
 	if item.LeaseUntil == nil || !guard.CheckedAt.Before(*item.LeaseUntil) {
 		return domain.ErrLeaseExpired
+	}
+	deferMessage := false
+	if outcome == domain.MailboxStateSuperseded && item.Kind == domain.MailboxKindMessage && item.Lane == domain.MailboxLaneControl {
+		var status domain.RunAttemptStatus
+		var version int64
+		runErr := tx.QueryRowContext(ctx, `SELECT status, version FROM run_attempts WHERE run_id=?`, item.TargetRunID).Scan(&status, &version)
+		if errors.Is(runErr, sql.ErrNoRows) || (runErr == nil && (!status.Active() || version != item.ExpectedRunVersion)) {
+			var taskStatus domain.TaskStatus
+			taskErr := tx.QueryRowContext(ctx, `SELECT status FROM tasks WHERE task_id=?`, item.TaskID).Scan(&taskStatus)
+			if taskErr != nil {
+				return fmt.Errorf("inspect superseded Message Task: %w", taskErr)
+			}
+			deferMessage = taskStatus != domain.TaskStatusCancelRequested &&
+				taskStatus != domain.TaskStatusSucceeded && taskStatus != domain.TaskStatusFailed &&
+				taskStatus != domain.TaskStatusCanceled && taskStatus != domain.TaskStatusUncertain
+		} else if runErr != nil {
+			return fmt.Errorf("inspect superseded Message target RunAttempt: %w", runErr)
+		}
+	}
+	if deferMessage {
+		// A native steer that loses its RunAttempt CAS remains a valid business
+		// Message. Requeue the same item atomically for the next turn; Approval
+		// and Cancel have narrower authority and must never take this path.
+		result, err := tx.ExecContext(ctx, `UPDATE mailbox_items SET lane='work', state='pending',
+			target_run_id=NULL, expected_run_version=NULL, worker_instance_id=NULL,
+			fencing_token=NULL, lease_until=NULL, accepted_at=NULL
+			WHERE mailbox_item_id=? AND state=? AND worker_instance_id=? AND fencing_token=? AND lease_until>?`,
+			itemID, expected, guard.WorkerInstanceID, guard.FencingToken, formatTime(guard.CheckedAt))
+		if err != nil {
+			return fmt.Errorf("defer superseded Message mailbox item: %w", err)
+		}
+		affected, err := result.RowsAffected()
+		if err != nil || affected != 1 {
+			return domain.ErrConflict("message mailbox defer CAS lost")
+		}
+		if event == nil {
+			return domain.ErrInvalidInput("message defer event is required")
+		}
+		event.EventType = "mailbox.message_deferred"
+		if err := validateJournalForAggregate(event, "mailbox_item", itemID, guard.CheckedAt); err != nil {
+			return err
+		}
+		if err := insertJournal(ctx, tx, event); err != nil {
+			return err
+		}
+		if err := r.inject(FaultBeforeCommit); err != nil {
+			return err
+		}
+		return commit(tx)
 	}
 	result, err := tx.ExecContext(ctx, `UPDATE mailbox_items SET state=?, accepted_at=?
 		WHERE mailbox_item_id=? AND state=? AND worker_instance_id=? AND fencing_token=? AND lease_until>?`,

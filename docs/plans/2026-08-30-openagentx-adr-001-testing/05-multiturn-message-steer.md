@@ -1,6 +1,6 @@
 ---
 doc_type: test_task
-status: pending
+status: passed
 owner: openagentx
 test_id: T05
 updated_at: 2026-09-01
@@ -28,3 +28,12 @@ updated_at: 2026-09-01
 ## 通过条件
 
 Task 不因一次 turn 结束而错误 complete；Message 无丢失、无越权、无重复，跨 Task 路由、幂等 replay、defer/reclaim、run/version/session 归属和鉴权结果可从事件和状态表审计。完整矩阵、race、vet 和隔离 UDS E2E 均通过后，才可将 T05 标记 PASS。
+
+## 验证结果
+
+- L1 完整矩阵通过：聚焦测试、相关包 race/vet、`go test -count=1 ./...`、`git diff --check`；独立审计未发现 P0/P1；
+- L2 隔离 UDS 覆盖 native Message、payload fencing 拒绝、Mailbox accept/finish、control long poll wakeup；仓储和服务矩阵覆盖跨 Task 隔离、并发幂等、defer/reclaim 及 token/principal/generation/lease/fencing 负向；
+- L3 使用新构建和正式 `agy-graft` 验证 queued steer：Task `task-d27444c9-72da-43d2-bd3b-2c4984caf4b5` 在首个 run 活动时接收 Message sequence `20`，随后形成第二个 RunAttempt；
+- 两个 RunAttempt 均由同一 WorkerInstance 执行，SessionBinding `binding-3ec80c23-4780-4abf-847b-47b0e7c8865b` 从 version `1` 更新为 `2`，provider session 保持一致；
+- 第二 turn 最终返回指定标记 `QUEUED_FOLLOWUP_ACK`，Task version `6`、状态 `succeeded`；Message 对应 work-lane MailboxItem 最终为 `accepted`，未使用 tmux 或人工终端注入；
+- 冻结 ADR SHA-256 保持 `587e9b8f...1db403`。详细证据见 [T05 验证报告](../../reports/validation/2026-09-01-openagentx-adr001-t05-multiturn-message-steer.md)。

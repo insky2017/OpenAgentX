@@ -92,7 +92,7 @@ func TestWorkerRequestsRejectStaleOrUnknownContractValues(t *testing.T) {
 
 	begin := api.BeginAttemptRequest{
 		WorkerInstanceID: "worker-1", AgentID: "quote", Generation: 1, FencingToken: 2,
-		ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: 3,
+		ExpectedItemState: domain.MailboxStateClaimed,
 	}
 	if err := begin.Validate(); err != nil {
 		t.Fatalf("valid begin attempt request rejected: %v", err)

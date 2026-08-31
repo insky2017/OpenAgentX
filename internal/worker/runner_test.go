@@ -167,6 +167,10 @@ func (c *fakeWorkerClient) BeginAttempt(_ context.Context, itemID string, reques
 	}, nil
 }
 
+func (c *fakeWorkerClient) ResolveMailboxPayload(context.Context, string, api.MailboxPayloadRequest) (*api.MailboxPayloadResponse, error) {
+	return nil, errors.New("fake Worker client does not resolve payloads")
+}
+
 func (c *fakeWorkerClient) AcceptMailboxItem(_ context.Context, itemID string, request api.AcceptRequest) error {
 	c.mu.Lock()
 	c.accepts = append(c.accepts, acceptRecord{itemID: itemID, request: request})

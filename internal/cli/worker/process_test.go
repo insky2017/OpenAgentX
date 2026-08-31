@@ -13,6 +13,7 @@ import (
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
+	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/transport/unixhttp"
 )
 
@@ -92,6 +93,181 @@ runtime_backends:
 	cancelServer()
 	if err := <-serverResult; err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestRunWorkerProcessCompletesMultiTurnTaskWithSessionResume(t *testing.T) {
+	ctx := context.Background()
+	repository, err := openagentsqlite.Open(ctx, filepath.Join(t.TempDir(), "worker-process-multiturn.db"), openagentsqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = repository.Close() })
+	seedWorkerProcessIdentity(t, repository)
+	broker := controlplane.NewMemoryWakeupBroker()
+	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := workerapi.NewHandler(service, workerapi.StaticPrincipal("worker-principal"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	socketPath := filepath.Join(t.TempDir(), "run", "openagentx.sock")
+	server, err := unixhttp.NewServer(socketPath, handler, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverContext, cancelServer := context.WithCancel(ctx)
+	serverResult := make(chan error, 1)
+	go func() { serverResult <- server.Start(serverContext) }()
+	waitForPath(t, socketPath)
+
+	configPath := filepath.Join(t.TempDir(), "agent.yaml")
+	config := fmt.Sprintf(`version: 1
+agent_id: quote
+transport: unix
+unix_socket: %s
+capabilities: [coding]
+heartbeat_interval: 20ms
+mailbox_wait: 1s
+control_wait: 1s
+shutdown_timeout: 1s
+enable_worker_control: false
+runtime_backends:
+  - backend_id: local
+    adapter_id: fake
+    options:
+      model: fake-multiturn-model
+      result: completed-after-follow-up
+      result_status_sequence:
+        - waiting_input
+        - succeeded
+      provider_session_id: provider-session-multiturn-1
+`, socketPath)
+	if err := os.WriteFile(configPath, []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	workerContext, cancelWorker := context.WithCancel(ctx)
+	workerResult := make(chan error, 1)
+	go func() { workerResult <- RunWorkerProcess(workerContext, configPath) }()
+	t.Cleanup(func() {
+		cancelWorker()
+		select {
+		case <-workerResult:
+		case <-time.After(3 * time.Second):
+		}
+		cancelServer()
+		select {
+		case <-serverResult:
+		case <-time.After(3 * time.Second):
+		}
+	})
+
+	created := createWorkerProcessTask(t, repository, "multiturn")
+	broker.Publish(controlplane.AgentMailboxTopic("quote"))
+	waitForTaskStatus(t, repository, created.Task.ID, domain.TaskStatusWaitingInput, workerResult)
+	firstSettled, err := repository.GetTask(ctx, created.Task.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if firstSettled.Result == nil || *firstSettled.Result != "completed-after-follow-up" {
+		t.Fatalf("first Task result=%+v", firstSettled)
+	}
+	binding, err := repository.GetSessionBinding(ctx, created.Task.ID, "quote", "local")
+	if err != nil || binding.ProviderSessionID != "provider-session-multiturn-1" || binding.Version != 1 {
+		t.Fatalf("first SessionBinding=%+v err=%v", binding, err)
+	}
+
+	followup := &domain.Message{
+		ID: "message-process-multiturn-followup", TaskID: created.Task.ID,
+		SenderPrincipalID: "human-owner", Kind: domain.MessageKindSupplement,
+		Content: "continue and complete the task",
+	}
+	followupItem := &domain.MailboxItem{ID: "mailbox-process-multiturn-followup", Lane: domain.MailboxLaneWork}
+	if _, err := repository.CreateMessage(ctx, firstSettled.Version, followup, followupItem, &domain.JournalEvent{
+		ID: "event-process-multiturn-followup", OrganizationID: "org-main", EventType: "message.created",
+		ActorPrincipalID: "human-owner", Payload: json.RawMessage(`{}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	broker.Publish(controlplane.AgentMailboxTopic("quote"))
+	waitForTaskStatus(t, repository, created.Task.ID, domain.TaskStatusSucceeded, workerResult)
+
+	settled, err := repository.GetTask(ctx, created.Task.ID)
+	if err != nil || settled.Result == nil || *settled.Result != "completed-after-follow-up" {
+		t.Fatalf("final Task=%+v err=%v", settled, err)
+	}
+	binding, err = repository.GetSessionBinding(ctx, created.Task.ID, "quote", "local")
+	if err != nil || binding.ProviderSessionID != "provider-session-multiturn-1" || binding.Version != 2 {
+		t.Fatalf("final SessionBinding=%+v err=%v", binding, err)
+	}
+	messages, err := repository.ListMessages(ctx, created.Task.ID)
+	if err != nil || len(messages) != 2 || messages[1].Content != followup.Content || messages[1].Kind != domain.MessageKindSupplement {
+		t.Fatalf("messages=%+v err=%v", messages, err)
+	}
+	assertMultiTurnWorkerProcessAudit(t, repository, created.Task.ID)
+}
+
+func assertMultiTurnWorkerProcessAudit(t *testing.T, repository *openagentsqlite.Repository, taskID string) {
+	t.Helper()
+	events, err := repository.ListJournal(context.Background(), 0, 1000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runIDs := make([]string, 0, 2)
+	eventCounts := make(map[string]int)
+	var previousSequence int64
+	for _, event := range events {
+		if event.Sequence <= previousSequence {
+			t.Fatalf("Journal sequence not strictly increasing: previous=%d event=%+v", previousSequence, event)
+		}
+		previousSequence = event.Sequence
+		eventCounts[event.EventType]++
+		if event.EventType == "run_attempt.started" {
+			run, getErr := repository.GetRunAttempt(context.Background(), event.AggregateID)
+			if getErr == nil && run.TaskID == taskID {
+				runIDs = append(runIDs, run.ID)
+			}
+		}
+	}
+	if len(runIDs) != 2 {
+		t.Fatalf("run_attempt.started events for Task %s=%v; all event counts=%v", taskID, runIDs, eventCounts)
+	}
+	if eventCounts["run_attempt.finished"] != 2 || eventCounts["task.settled"] != 2 ||
+		eventCounts["session_binding.saved"] != 2 || eventCounts["message.created"] != 1 {
+		t.Fatalf("incomplete multi-turn Event Journal audit: %v", eventCounts)
+	}
+	first, err := repository.GetRunAttempt(context.Background(), runIDs[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := repository.GetRunAttempt(context.Background(), runIDs[1])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Status != domain.RunAttemptSucceeded || second.Status != domain.RunAttemptSucceeded || first.WorkerInstanceID != second.WorkerInstanceID {
+		t.Fatalf("RunAttempts first=%+v second=%+v", first, second)
+	}
+	var firstSpec, secondSpec domain.ResolvedExecutionSpec
+	if err := json.Unmarshal([]byte(first.ResolvedExecutionJSON), &firstSpec); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal([]byte(second.ResolvedExecutionJSON), &secondSpec); err != nil {
+		t.Fatal(err)
+	}
+	if firstSpec.Spec.Session.Mode != domain.SessionModeNew || secondSpec.Spec.Session.Mode != domain.SessionModeResume ||
+		firstSpec.Spec.Session.ContextID != taskID || secondSpec.Spec.Session.ContextID != taskID {
+		t.Fatalf("resolved sessions first=%+v second=%+v", firstSpec.Spec.Session, secondSpec.Spec.Session)
+	}
+	for _, run := range []*domain.RunAttempt{first, second} {
+		var result openruntime.TurnResult
+		if err := json.Unmarshal([]byte(run.ResultJSON), &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.ProviderSessionID != "provider-session-multiturn-1" {
+			t.Fatalf("RunAttempt %s provider session=%q", run.ID, result.ProviderSessionID)
+		}
 	}
 }
 

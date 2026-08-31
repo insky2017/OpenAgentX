@@ -28,6 +28,9 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 		if err := json.Unmarshal([]byte(descriptorJSON), &registration.Descriptor); err != nil {
 			return nil, fmt.Errorf("decode Worker Backend descriptor: %w", err)
 		}
+		if err := registration.Validate(); err != nil {
+			return nil, fmt.Errorf("invalid persisted Worker Backend registration: %w", err)
+		}
 		registrations = append(registrations, registration)
 	}
 	if err := rows.Err(); err != nil {
@@ -280,6 +283,9 @@ func (r *Repository) FinishRun(
 	expectedTaskVersion int64,
 	expectedRunVersion int64,
 	turnResult openruntime.TurnResult,
+	binding *domain.SessionBinding,
+	expectedBindingVersion int64,
+	bindingEvent *domain.JournalEvent,
 	taskEvent *domain.JournalEvent,
 	runEvent *domain.JournalEvent,
 ) error {
@@ -337,13 +343,24 @@ func (r *Repository) FinishRun(
 	if task.Version != expectedTaskVersion && !cancelVersionDelta && !messageVersionDelta {
 		return domain.ErrStaleVersion
 	}
+	hasPendingMessage := false
+	if messageVersionDelta {
+		var pending int
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS(
+			SELECT 1 FROM mailbox_items
+			WHERE task_id=? AND kind='message' AND state IN ('pending', 'claimed')
+		)`, task.ID).Scan(&pending); err != nil {
+			return fmt.Errorf("check pending Message at finish: %w", err)
+		}
+		hasPendingMessage = pending == 1
+	}
 	runStatus, taskStatus := terminalStatuses(turnResult.Status)
 	// Task cancellation is a durable intent. Once it linearizes before finish,
 	// a late successful/failed turn must not overwrite that intent or reopen the
 	// task; the run itself still records the physical turn result.
 	if task.Status == domain.TaskStatusCancelRequested {
 		taskStatus = domain.TaskStatusCanceled
-	} else if messageVersionDelta && (taskStatus == domain.TaskStatusSucceeded || taskStatus == domain.TaskStatusFailed) {
+	} else if hasPendingMessage && (taskStatus == domain.TaskStatusSucceeded || taskStatus == domain.TaskStatusFailed) {
 		// A message committed before finish is a durable follow-up. Keep the
 		// Task open so the queued message can be consumed by the next turn.
 		taskStatus = domain.TaskStatusWaitingInput
@@ -362,6 +379,59 @@ func (r *Repository) FinishRun(
 	}
 	if turnResult.Error != "" {
 		task.Error = &turnResult.Error
+	}
+	if binding != nil {
+		var resolved domain.ResolvedExecutionSpec
+		if err := json.Unmarshal([]byte(run.ResolvedExecutionJSON), &resolved); err != nil {
+			return fmt.Errorf("decode RunAttempt resolved execution for SessionBinding: %w", err)
+		}
+		binding.CreatedAt = normalizeTime(binding.CreatedAt, guard.CheckedAt)
+		binding.UpdatedAt = normalizeTime(binding.UpdatedAt, guard.CheckedAt)
+		if expectedBindingVersion == 0 {
+			binding.Version = 1
+		} else {
+			binding.Version = expectedBindingVersion + 1
+		}
+		if err := binding.Validate(); err != nil {
+			return err
+		}
+		if binding.ContextID != resolved.Spec.Session.ContextID || binding.AgentID != run.AgentID || binding.BackendID != run.BackendID {
+			return domain.ErrConflict("SessionBinding does not match RunAttempt")
+		}
+		if err := validateJournalForAggregate(bindingEvent, "session_binding", binding.ID, guard.CheckedAt); err != nil {
+			return err
+		}
+		if expectedBindingVersion == 0 {
+			result, err := tx.ExecContext(ctx, `INSERT INTO session_bindings
+				(session_binding_id, context_id, agent_id, backend_id, provider_session_id, state, version, created_at, updated_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+				ON CONFLICT(context_id, agent_id, backend_id) DO NOTHING`, binding.ID, binding.ContextID,
+				binding.AgentID, binding.BackendID, binding.ProviderSessionID, binding.State, binding.Version,
+				formatTime(binding.CreatedAt), formatTime(binding.UpdatedAt))
+			if err != nil {
+				return fmt.Errorf("create SessionBinding while finishing RunAttempt: %w", err)
+			}
+			affected, err := result.RowsAffected()
+			if err != nil || affected != 1 {
+				return domain.ErrStaleVersion
+			}
+		} else {
+			result, err := tx.ExecContext(ctx, `UPDATE session_bindings
+				SET provider_session_id=?, state=?, version=?, updated_at=?
+				WHERE session_binding_id=? AND context_id=? AND agent_id=? AND backend_id=? AND version=?`,
+				binding.ProviderSessionID, binding.State, binding.Version, formatTime(binding.UpdatedAt), binding.ID,
+				binding.ContextID, binding.AgentID, binding.BackendID, expectedBindingVersion)
+			if err != nil {
+				return fmt.Errorf("update SessionBinding while finishing RunAttempt: %w", err)
+			}
+			affected, err := result.RowsAffected()
+			if err != nil || affected != 1 {
+				return domain.ErrStaleVersion
+			}
+		}
+		if err := insertJournal(ctx, tx, bindingEvent); err != nil {
+			return err
+		}
 	}
 	if err := validateJournalForAggregate(taskEvent, "task", task.ID, guard.CheckedAt); err != nil {
 		return err

@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"crypto/subtle"
+	"time"
+)
 
 type WorkerRegistration struct {
 	WorkerInstanceID   string
@@ -44,6 +47,33 @@ type WorkerCredential struct {
 	Worker             WorkerInstance
 	SessionTokenDigest string
 	TokenExpiresAt     time.Time
+}
+
+func (c WorkerCredential) Authorize(guard WorkerWriteGuard) error {
+	if err := guard.Validate(); err != nil {
+		return err
+	}
+	if c.Worker.ID != guard.WorkerInstanceID ||
+		c.Worker.AuthenticatedPrincipal != guard.PrincipalID ||
+		subtle.ConstantTimeCompare([]byte(c.SessionTokenDigest), []byte(guard.SessionTokenDigest)) != 1 {
+		return ErrUnauthorized
+	}
+	if c.Worker.AgentID != guard.AgentID {
+		return ErrForbidden("Worker is not bound to requested Agent")
+	}
+	if c.Worker.Generation != guard.Generation {
+		return ErrSessionGenerationConflict
+	}
+	if c.Worker.FencingToken != guard.FencingToken {
+		return ErrFencingRejected
+	}
+	if !guard.CheckedAt.Before(c.TokenExpiresAt) {
+		return ErrUnauthorized
+	}
+	if !guard.CheckedAt.Before(c.Worker.LeaseUntil) || c.Worker.Status == WorkerStatusOffline {
+		return ErrLeaseExpired
+	}
+	return nil
 }
 
 type WorkerWriteGuard struct {

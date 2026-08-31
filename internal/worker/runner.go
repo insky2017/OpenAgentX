@@ -78,7 +78,8 @@ func (r *Runner) Run(ctx context.Context) error {
 			defer cancel()
 			if ackErr := r.client.AcknowledgeWorkerCommand(ackContext, command.ID, api.ControlAckRequest{
 				WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
-				State: domain.WorkerCommandApplied, Result: "Worker stopped after controlled reconciliation",
+				FencingToken: session.Worker.FencingToken,
+				State:        domain.WorkerCommandApplied, Result: "Worker stopped after controlled reconciliation",
 			}); ackErr != nil {
 				return fmt.Errorf("acknowledge controlled Worker stop: %w", ackErr)
 			}
@@ -224,14 +225,16 @@ func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSessi
 			}
 			if err := r.client.AcknowledgeWorkerCommand(ctx, command.ID, api.ControlAckRequest{
 				WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
-				State: domain.WorkerCommandApplied, Result: "Worker is draining",
+				FencingToken: session.Worker.FencingToken,
+				State:        domain.WorkerCommandApplied, Result: "Worker is draining",
 			}); err != nil {
 				return fmt.Errorf("acknowledge Worker drain: %w", err)
 			}
 		case domain.WorkerCommandHealthCheck:
 			if err := r.client.AcknowledgeWorkerCommand(ctx, command.ID, api.ControlAckRequest{
 				WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
-				State: domain.WorkerCommandApplied, Result: "Worker heartbeat and Runtime Backend probes are active",
+				FencingToken: session.Worker.FencingToken,
+				State:        domain.WorkerCommandApplied, Result: "Worker heartbeat and Runtime Backend probes are active",
 			}); err != nil {
 				return fmt.Errorf("acknowledge Worker health check: %w", err)
 			}
@@ -246,7 +249,8 @@ func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSessi
 		default:
 			if err := r.client.AcknowledgeWorkerCommand(ctx, command.ID, api.ControlAckRequest{
 				WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
-				State: domain.WorkerCommandFailed, Result: "Unsupported Worker command",
+				FencingToken: session.Worker.FencingToken,
+				State:        domain.WorkerCommandFailed, Result: "Unsupported Worker command",
 			}); err != nil {
 				return fmt.Errorf("reject unsupported Worker command: %w", err)
 			}

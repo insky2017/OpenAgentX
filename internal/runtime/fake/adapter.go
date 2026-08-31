@@ -16,6 +16,8 @@ type Adapter struct {
 	healthErr error
 	started   chan *Handle
 	auto      *openruntime.TurnResult
+	scripted  []openruntime.TurnResult
+	nextAuto  int
 }
 
 func NewAdapter(descriptor openruntime.AdapterDescriptor) (*Adapter, error) {
@@ -33,6 +35,28 @@ func NewAutoAdapter(descriptor openruntime.AdapterDescriptor, result openruntime
 		return nil, err
 	}
 	return &Adapter{descriptor: descriptor, auto: &result}, nil
+}
+
+// NewScriptedAutoAdapter completes each started turn with the next scripted
+// result. A script is deliberately finite: starting another turn after the
+// configured results are exhausted fails instead of silently reusing a prior
+// outcome.
+func NewScriptedAutoAdapter(descriptor openruntime.AdapterDescriptor, results []openruntime.TurnResult) (*Adapter, error) {
+	if err := descriptor.Validate(); err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, domain.ErrInvalidInput("fake Runtime result script cannot be empty")
+	}
+	for _, result := range results {
+		if err := result.Validate(); err != nil {
+			return nil, err
+		}
+	}
+	return &Adapter{
+		descriptor: descriptor,
+		scripted:   append([]openruntime.TurnResult(nil), results...),
+	}, nil
 }
 
 func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, error) {
@@ -67,6 +91,10 @@ func (a *Adapter) SetHealthError(err error) {
 }
 
 func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, sink openruntime.EventSink) (openruntime.TurnHandle, error) {
+	result, scripted, err := a.nextScriptedResult()
+	if err != nil {
+		return nil, err
+	}
 	handle := &Handle{
 		request: request, sink: sink, result: make(chan completion, 1),
 		steers: make(chan domain.Message, 16), approvals: make(chan domain.ApprovalDecision, 16),
@@ -79,11 +107,27 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 			return nil, ctx.Err()
 		}
 	}
-	if a.auto != nil {
+	if scripted {
+		go handle.Complete(result)
+	} else if a.auto != nil {
 		result := *a.auto
 		go handle.Complete(result)
 	}
 	return handle, nil
+}
+
+func (a *Adapter) nextScriptedResult() (openruntime.TurnResult, bool, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.scripted == nil {
+		return openruntime.TurnResult{}, false, nil
+	}
+	if a.nextAuto >= len(a.scripted) {
+		return openruntime.TurnResult{}, false, errors.New("fake Runtime result script exhausted")
+	}
+	result := a.scripted[a.nextAuto]
+	a.nextAuto++
+	return result, true, nil
 }
 
 func (a *Adapter) NextHandle(ctx context.Context) (*Handle, error) {

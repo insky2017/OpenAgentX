@@ -3,12 +3,14 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 const taskColumns = `task_id, version, status, sender_principal_id, target_agent_id, dispatch_mode,
@@ -228,9 +230,14 @@ func (r *Repository) ListTasks(ctx context.Context, targetAgentID string, limit 
 	if limit <= 0 || limit > 1000 {
 		return nil, domain.ErrInvalidInput("task limit must be between 1 and 1000")
 	}
-	query := `SELECT `+taskColumns+` FROM tasks `
+	query := `SELECT ` + taskColumns + ` FROM tasks `
 	args := []any{limit}
-	if targetAgentID == "" { query += `ORDER BY created_at ASC, task_id ASC LIMIT ?` } else { query += `WHERE target_agent_id = ? ORDER BY created_at ASC, task_id ASC LIMIT ?`; args = []any{targetAgentID, limit} }
+	if targetAgentID == "" {
+		query += `ORDER BY created_at ASC, task_id ASC LIMIT ?`
+	} else {
+		query += `WHERE target_agent_id = ? ORDER BY created_at ASC, task_id ASC LIMIT ?`
+		args = []any{targetAgentID, limit}
+	}
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("list tasks: %w", err)
@@ -275,6 +282,18 @@ func (r *Repository) CreateMessage(
 	if err != nil {
 		return nil, fmt.Errorf("load task for message: %w", err)
 	}
+	// The target Agent is an immutable Task-owned routing field. Public command
+	// callers intentionally omit it; normalize it before replay comparison so
+	// the same idempotent request is not mistaken for a conflicting payload.
+	message.TargetAgentID = task.TargetAgentID
+	// Command Service derives the Message ID from its idempotency key.  Check
+	// that identity before the Task CAS so a lost response can be replayed even
+	// though the original command already advanced the Task version.
+	if replay, replayErr := loadMessageReplay(ctx, tx, task, message); replayErr != nil {
+		return nil, replayErr
+	} else if replay != nil {
+		return replay, nil
+	}
 	if task.Version != expectedTaskVersion {
 		return nil, domain.ErrStaleVersion
 	}
@@ -295,6 +314,18 @@ func (r *Repository) CreateMessage(
 		return nil, err
 	}
 	if err := insertMessage(ctx, tx, message); err != nil {
+		// A concurrent writer (or a pre-existing malformed row) may win the
+		// deterministic message_id unique key between the replay probe and
+		// INSERT. Resolve that race to the same replay/conflict contract rather
+		// than exposing SQLite's 500-level unique-constraint error.
+		if isUniqueConstraint(err, "messages.message_id") || isUniqueConstraint(err, "messages") {
+			if replay, replayErr := loadMessageReplay(ctx, tx, task, message); replayErr != nil {
+				return nil, replayErr
+			} else if replay != nil {
+				return replay, nil
+			}
+			return nil, domain.ErrIdempotencyConflict
+		}
 		return nil, err
 	}
 	task.Version++
@@ -315,6 +346,11 @@ func (r *Repository) CreateMessage(
 	mailboxItem.TaskID = task.ID
 	mailboxItem.MessageID = message.ID
 	mailboxItem.Kind = domain.MailboxKindMessage
+	if mailboxItem.Lane == "" {
+		if err := routeMessageMailbox(ctx, tx, task.TargetAgentID, now, mailboxItem); err != nil {
+			return nil, err
+		}
+	}
 	if mailboxItem.State == "" {
 		mailboxItem.State = domain.MailboxStatePending
 	}
@@ -340,6 +376,205 @@ func (r *Repository) CreateMessage(
 	return &CreateMessageResult{Task: *task, Message: *message, MailboxItem: *mailboxItem, Event: *event}, nil
 }
 
+// loadMessageReplay resolves the deterministic Message identity inside the
+// caller's transaction. A matching row is replayable only when its immutable
+// payload and mailbox association are intact; any mismatch is an idempotency
+// conflict. A missing row returns (nil, nil).
+func loadMessageReplay(ctx context.Context, tx *sql.Tx, task *domain.Task, message *domain.Message) (*CreateMessageResult, error) {
+	var existing domain.Message
+	var createdAt string
+	err := tx.QueryRowContext(ctx, `SELECT message_id, task_id, version, sequence,
+		sender_principal_id, target_agent_id, kind, content, created_at
+		FROM messages WHERE message_id=?`, message.ID).Scan(&existing.ID, &existing.TaskID,
+		&existing.Version, &existing.Sequence, &existing.SenderPrincipalID, &existing.TargetAgentID,
+		&existing.Kind, &existing.Content, &createdAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("check message idempotency: %w", err)
+	}
+	if existing.TaskID != task.ID || existing.SenderPrincipalID != message.SenderPrincipalID ||
+		existing.TargetAgentID != task.TargetAgentID || existing.TargetAgentID != message.TargetAgentID ||
+		existing.Kind != message.Kind || existing.Content != message.Content {
+		return nil, domain.ErrIdempotencyConflict
+	}
+	if _, err := parseTime(createdAt); err != nil {
+		return nil, domain.ErrIdempotencyConflict
+	}
+	existing.CreatedAt = createdAt
+	existingMailbox, mailboxErr := scanMailbox(tx.QueryRowContext(ctx, `SELECT `+mailboxColumns+`
+		FROM mailbox_items WHERE message_id=? AND task_id=? ORDER BY sequence ASC LIMIT 1`, existing.ID, task.ID))
+	if errors.Is(mailboxErr, sql.ErrNoRows) {
+		return nil, domain.ErrIdempotencyConflict
+	}
+	if mailboxErr != nil {
+		return nil, fmt.Errorf("load idempotent message mailbox: %w", mailboxErr)
+	}
+	if existingMailbox.TargetAgentID != task.TargetAgentID || existingMailbox.TaskID != task.ID ||
+		existingMailbox.MessageID != existing.ID || existingMailbox.Kind != domain.MailboxKindMessage {
+		return nil, domain.ErrIdempotencyConflict
+	}
+	return &CreateMessageResult{Task: *task, Message: existing, MailboxItem: *existingMailbox}, nil
+}
+
+// routeMessageMailbox determines the sole legal delivery route for a public
+// Message command.  An active run pins the decision to its registered backend;
+// otherwise a currently viable backend must explicitly support a deferred
+// follow-up.  Callers that construct an internal mailbox item with a lane keep
+// their explicit route for migration/test plumbing.
+func routeMessageMailbox(ctx context.Context, tx *sql.Tx, agentID string, now time.Time, item *domain.MailboxItem) error {
+	var runID, workerID, backendID string
+	var runVersion int64
+	err := tx.QueryRowContext(ctx, `SELECT run_id, worker_instance_id, backend_id, version
+		FROM run_attempts WHERE agent_id=? AND task_id=? AND status IN ('starting','running','waiting_approval','finishing')
+		ORDER BY started_at DESC LIMIT 1`, agentID, item.TaskID).Scan(&runID, &workerID, &backendID, &runVersion)
+	if err == nil {
+		descriptor, health, err := loadBackendDescriptor(ctx, tx, workerID, backendID)
+		if err != nil {
+			return err
+		}
+		if health == openruntime.BackendUnavailable {
+			return domain.ErrUnsupportedCapability
+		}
+		switch descriptor.Steer {
+		case openruntime.SteerNative:
+			item.Lane = domain.MailboxLaneControl
+			item.TargetRunID = runID
+			item.ExpectedRunVersion = runVersion
+			return nil
+		case openruntime.SteerQueued:
+			item.Lane = domain.MailboxLaneWork
+			return nil
+		default:
+			return domain.ErrUnsupportedCapability
+		}
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("find active RunAttempt for Message: %w", err)
+	}
+
+	rows, err := tx.QueryContext(ctx, `SELECT registration.backend_id, registration.worker_instance_id,
+		registration.descriptor_json, registration.health
+		FROM runtime_backend_registrations AS registration
+		JOIN worker_instances AS worker ON worker.worker_instance_id=registration.worker_instance_id
+		WHERE worker.agent_id=? AND worker.status IN ('online','degraded') AND worker.lease_until>?
+		ORDER BY registration.backend_id ASC`, agentID, formatTime(now))
+	if err != nil {
+		return fmt.Errorf("list effective Message Backends: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var backendID, workerID, raw string
+		var health openruntime.BackendHealth
+		if err := rows.Scan(&backendID, &workerID, &raw, &health); err != nil {
+			return fmt.Errorf("scan effective Message Backend: %w", err)
+		}
+		var descriptor openruntime.AdapterDescriptor
+		if err := json.Unmarshal([]byte(raw), &descriptor); err != nil {
+			return fmt.Errorf("decode effective Message Backend descriptor: %w", domain.ErrUnsupportedCapability)
+		}
+		if err := descriptor.Validate(); err != nil || !health.Valid() {
+			return fmt.Errorf("invalid effective Message Backend registration: %w", domain.ErrUnsupportedCapability)
+		}
+		if health != openruntime.BackendHealthy && health != openruntime.BackendDegraded {
+			continue
+		}
+		bindingActive, bindingErr := descriptorHasActiveBinding(ctx, tx, item.TaskID, agentID, backendID)
+		if bindingErr != nil {
+			return bindingErr
+		}
+		if (descriptor.Steer == openruntime.SteerNative || descriptor.Steer == openruntime.SteerQueued) &&
+			(len(descriptor.Models) > 0 && len(descriptor.ReasoningModes) > 0) &&
+			((descriptorSupportsNew(descriptor)) || (descriptorSupportsResume(descriptor) && bindingActive)) {
+			item.Lane = domain.MailboxLaneWork
+			return nil
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("iterate effective Message Backends: %w", err)
+	}
+	return domain.ErrUnsupportedCapability
+}
+
+func descriptorSupportsNew(descriptor openruntime.AdapterDescriptor) bool {
+	for _, mode := range descriptor.SessionModes {
+		if mode == domain.SessionModeNew {
+			return true
+		}
+	}
+	return false
+}
+
+func descriptorSupportsResume(descriptor openruntime.AdapterDescriptor) bool {
+	for _, mode := range descriptor.SessionModes {
+		if mode == domain.SessionModeResume {
+			return true
+		}
+	}
+	return false
+}
+
+// descriptorHasActiveBinding is deliberately fail-closed: a malformed
+// persisted binding is not treated as a resumable session.
+func descriptorHasActiveBinding(ctx context.Context, tx *sql.Tx, contextID, agentID, backendID string) (bool, error) {
+	var id, provider, state, createdAt, updatedAt string
+	var version int64
+	err := tx.QueryRowContext(ctx, `SELECT session_binding_id, provider_session_id, state, version, created_at, updated_at
+		FROM session_bindings WHERE context_id=? AND agent_id=? AND backend_id=?`, contextID, agentID, backendID).
+		Scan(&id, &provider, &state, &version, &createdAt, &updatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("inspect Message SessionBinding: %w", domain.ErrUnsupportedCapability)
+	}
+	if state != string(domain.SessionBindingActive) {
+		if domain.SessionBindingState(state).Valid() {
+			return false, nil
+		}
+		return false, fmt.Errorf("invalid Message SessionBinding state: %w", domain.ErrUnsupportedCapability)
+	}
+	if provider == "" || version <= 0 {
+		return false, fmt.Errorf("invalid active Message SessionBinding: %w", domain.ErrUnsupportedCapability)
+	}
+	created, err := parseTime(createdAt)
+	if err != nil {
+		return false, fmt.Errorf("invalid active Message SessionBinding: %w", domain.ErrUnsupportedCapability)
+	}
+	updated, err := parseTime(updatedAt)
+	if err != nil {
+		return false, fmt.Errorf("invalid active Message SessionBinding: %w", domain.ErrUnsupportedCapability)
+	}
+	binding := domain.SessionBinding{ID: id, ContextID: contextID, AgentID: agentID, BackendID: backendID,
+		ProviderSessionID: provider, State: domain.SessionBindingState(state), Version: version, CreatedAt: created, UpdatedAt: updated}
+	if err := binding.Validate(); err != nil {
+		return false, fmt.Errorf("invalid active Message SessionBinding: %w", domain.ErrUnsupportedCapability)
+	}
+	return true, nil
+}
+
+func loadBackendDescriptor(ctx context.Context, tx *sql.Tx, workerID, backendID string) (openruntime.AdapterDescriptor, openruntime.BackendHealth, error) {
+	var raw string
+	var health openruntime.BackendHealth
+	err := tx.QueryRowContext(ctx, `SELECT descriptor_json, health FROM runtime_backend_registrations
+		WHERE worker_instance_id=? AND backend_id=?`, workerID, backendID).Scan(&raw, &health)
+	if errors.Is(err, sql.ErrNoRows) {
+		return openruntime.AdapterDescriptor{}, "", domain.ErrUnsupportedCapability
+	}
+	if err != nil {
+		return openruntime.AdapterDescriptor{}, "", fmt.Errorf("load active RunAttempt Backend descriptor: %w", err)
+	}
+	var descriptor openruntime.AdapterDescriptor
+	if err := json.Unmarshal([]byte(raw), &descriptor); err != nil {
+		return openruntime.AdapterDescriptor{}, "", fmt.Errorf("decode active RunAttempt Backend descriptor: %w", domain.ErrUnsupportedCapability)
+	}
+	if err := descriptor.Validate(); err != nil || !health.Valid() {
+		return openruntime.AdapterDescriptor{}, "", fmt.Errorf("invalid active RunAttempt Backend registration: %w", domain.ErrUnsupportedCapability)
+	}
+	return descriptor, health, nil
+}
+
 func (r *Repository) ListMessages(ctx context.Context, taskID string) ([]domain.Message, error) {
 	rows, err := r.db.QueryContext(ctx, `SELECT message_id, task_id, version, sequence,
 		sender_principal_id, target_agent_id, kind, content, created_at
@@ -362,6 +597,22 @@ func (r *Repository) ListMessages(ctx context.Context, taskID string) ([]domain.
 		return nil, fmt.Errorf("iterate messages: %w", err)
 	}
 	return messages, nil
+}
+
+func (r *Repository) GetMessage(ctx context.Context, messageID string) (*domain.Message, error) {
+	var message domain.Message
+	err := r.db.QueryRowContext(ctx, `SELECT message_id, task_id, version, sequence,
+		sender_principal_id, target_agent_id, kind, content, created_at
+		FROM messages WHERE message_id=?`, messageID).Scan(&message.ID, &message.TaskID, &message.Version,
+		&message.Sequence, &message.SenderPrincipalID, &message.TargetAgentID, &message.Kind,
+		&message.Content, &message.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get Message: %w", err)
+	}
+	return &message, nil
 }
 
 type TaskTransition = domain.TaskTransition

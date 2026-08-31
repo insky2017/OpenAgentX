@@ -133,16 +133,13 @@ func (m *ActiveRunManager) startWork(ctx context.Context, active *activeTurn, it
 	request := api.BeginAttemptRequest{
 		WorkerInstanceID: m.session.Worker.ID, AgentID: m.session.Worker.AgentID,
 		Generation: m.session.Worker.Generation, FencingToken: m.session.Worker.FencingToken,
-		ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: 1,
+		ExpectedItemState: domain.MailboxStateClaimed,
 	}
-	// Task work items are created with the current Task version. M1 Task items
-	// begin at version 1; multi-turn version resolution is introduced in Task 07.
 	begin, err := m.client.BeginAttempt(ctx, item.ID, request)
 	if err != nil {
 		m.releaseCapacity()
 		return nil, fmt.Errorf("begin RunAttempt: %w", err)
 	}
-	request.ExpectedTaskVersion = begin.Turn.Task.Version
 	adapter, err := m.backends.Resolve(ctx, begin.Turn.Execution.Spec.AdapterID, begin.Turn.Execution.Spec.BackendID)
 	if err != nil {
 		return m.failStartedRun(ctx, begin.Turn, err)

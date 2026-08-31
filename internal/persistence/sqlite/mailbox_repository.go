@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -118,6 +119,83 @@ func (r *Repository) GetMailboxItem(ctx context.Context, itemID string) (*domain
 		return nil, fmt.Errorf("get mailbox item: %w", err)
 	}
 	return item, nil
+}
+
+func (r *Repository) ResolveMailboxPayload(ctx context.Context, guard domain.WorkerWriteGuard, itemID string) (*domain.MailboxPayload, error) {
+	tx, err := r.begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	if _, err := loadGuardedWorker(ctx, tx, guard); err != nil {
+		return nil, err
+	}
+	item, err := scanMailbox(tx.QueryRowContext(ctx, `SELECT `+mailboxColumns+`
+		FROM mailbox_items WHERE mailbox_item_id=?`, itemID))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrForbidden("mailbox payload is not owned by Worker")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("load mailbox payload item: %w", err)
+	}
+	if item.TargetAgentID != guard.AgentID || item.State != domain.MailboxStateClaimed ||
+		item.WorkerInstanceID != guard.WorkerInstanceID || item.FencingToken != guard.FencingToken {
+		return nil, domain.ErrForbidden("mailbox payload is not owned by Worker")
+	}
+	if item.LeaseUntil == nil || !guard.CheckedAt.Before(*item.LeaseUntil) {
+		return nil, domain.ErrLeaseExpired
+	}
+
+	switch item.Kind {
+	case domain.MailboxKindMessage:
+		var message domain.Message
+		err := tx.QueryRowContext(ctx, `SELECT message_id, task_id, version, sequence,
+			sender_principal_id, target_agent_id, kind, content, created_at
+			FROM messages WHERE message_id=?`, item.MessageID).Scan(&message.ID, &message.TaskID,
+			&message.Version, &message.Sequence, &message.SenderPrincipalID, &message.TargetAgentID,
+			&message.Kind, &message.Content, &message.CreatedAt)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrForbidden("Message payload does not match mailbox authority")
+		}
+		if err != nil {
+			return nil, fmt.Errorf("load mailbox Message payload: %w", err)
+		}
+		if message.ID != item.MessageID || message.TaskID != item.TaskID || message.TargetAgentID != guard.AgentID {
+			return nil, domain.ErrForbidden("Message payload does not match mailbox authority")
+		}
+		return &domain.MailboxPayload{Message: &message}, nil
+	case domain.MailboxKindApproval:
+		var decision domain.ApprovalDecision
+		var requestTaskID, requestTargetRunID, createdAt string
+		var requestExpectedRunVersion int64
+		err := tx.QueryRowContext(ctx, `SELECT d.approval_decision_id, d.approval_request_id,
+			d.decided_by, d.decision, d.state, d.idempotency_key, d.created_at,
+			r.task_id, COALESCE(r.target_run_id, ''), COALESCE(r.expected_run_version, 0)
+			FROM approval_decisions d
+			JOIN approval_requests r ON r.approval_request_id=d.approval_request_id
+			WHERE d.approval_decision_id=?`, item.ApprovalDecisionID).Scan(
+			&decision.ID, &decision.ApprovalRequestID, &decision.DecidedBy, &decision.Decision,
+			&decision.State, &decision.IdempotencyKey, &createdAt, &requestTaskID,
+			&requestTargetRunID, &requestExpectedRunVersion)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrForbidden("Approval payload does not match mailbox authority")
+		}
+		if err != nil {
+			return nil, fmt.Errorf("load mailbox Approval payload: %w", err)
+		}
+		decision.CreatedAt, err = parseTime(createdAt)
+		if err != nil {
+			return nil, fmt.Errorf("parse mailbox Approval payload: %w", err)
+		}
+		if decision.ID != item.ApprovalDecisionID || decision.ApprovalRequestID != item.ApprovalRequestID ||
+			requestTaskID != item.TaskID || requestTargetRunID != item.TargetRunID ||
+			requestExpectedRunVersion != item.ExpectedRunVersion {
+			return nil, domain.ErrForbidden("Approval payload does not match mailbox authority")
+		}
+		return &domain.MailboxPayload{ApprovalDecision: &decision}, nil
+	default:
+		return nil, domain.ErrForbidden("mailbox item has no resolvable control payload")
+	}
 }
 
 func (r *Repository) ListMailbox(ctx context.Context, agentID string, afterSequence int64, limit int) ([]domain.MailboxItem, error) {

@@ -81,6 +81,26 @@ func (r *Repository) GetApprovalRequest(ctx context.Context, id string) (*domain
 	return request, nil
 }
 
+func (r *Repository) GetApprovalDecision(ctx context.Context, id string) (*domain.ApprovalDecision, error) {
+	var decision domain.ApprovalDecision
+	var createdAt string
+	err := r.db.QueryRowContext(ctx, `SELECT approval_decision_id, approval_request_id, decided_by,
+		decision, state, idempotency_key, created_at FROM approval_decisions WHERE approval_decision_id=?`, id).Scan(
+		&decision.ID, &decision.ApprovalRequestID, &decision.DecidedBy, &decision.Decision,
+		&decision.State, &decision.IdempotencyKey, &createdAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get ApprovalDecision: %w", err)
+	}
+	decision.CreatedAt, err = parseTime(createdAt)
+	if err != nil {
+		return nil, err
+	}
+	return &decision, nil
+}
+
 // RequestTaskCancel is the Task-level cancellation linearization point. The
 // optional control item is only a best-effort interrupt for the active run.
 func (r *Repository) RequestTaskCancel(ctx context.Context, taskID string, expectedVersion int64, requestedBy string,

@@ -151,7 +151,7 @@ func (r *Repository) ClaimWorkerCommand(ctx context.Context, guard domain.Worker
 	return c, nil
 }
 
-func (r *Repository) AcknowledgeWorkerCommand(ctx context.Context, workerID string, generation int64, commandID string, state domain.WorkerCommandState, result string, event *domain.JournalEvent) error {
+func (r *Repository) AcknowledgeWorkerCommand(ctx context.Context, guard domain.WorkerWriteGuard, commandID string, state domain.WorkerCommandState, result string, event *domain.JournalEvent) error {
 	if state != domain.WorkerCommandApplied && state != domain.WorkerCommandFailed {
 		return domain.ErrInvalidInput("invalid Worker command state")
 	}
@@ -161,7 +161,29 @@ func (r *Repository) AcknowledgeWorkerCommand(ctx context.Context, workerID stri
 		return err
 	}
 	defer tx.Rollback()
-	res, err := tx.ExecContext(ctx, `UPDATE worker_commands SET state=?,result=?,applied_at=? WHERE worker_command_id=? AND worker_instance_id=? AND generation=? AND state='claimed' AND (lease_until IS NULL OR lease_until>?)`, state, result, formatTime(now), commandID, workerID, generation, formatTime(now))
+	if _, err := loadGuardedWorker(ctx, tx, guard); err != nil {
+		return err
+	}
+	// ACK delivery is at-least-once. A retry after a committed terminal ACK is
+	// a safe replay when the command/result are identical; do not append a
+	// duplicate journal event or surface a spurious claim conflict.
+	var commandWorkerID string
+	var commandGeneration int64
+	var currentState domain.WorkerCommandState
+	var currentResult sql.NullString
+	if err := tx.QueryRowContext(ctx, `SELECT worker_instance_id, generation, state, result
+		FROM worker_commands WHERE worker_command_id=?`, commandID).
+		Scan(&commandWorkerID, &commandGeneration, &currentState, &currentResult); errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrNotFound
+	} else if err != nil {
+		return fmt.Errorf("load Worker command for acknowledgement: %w", err)
+	} else if commandWorkerID != guard.WorkerInstanceID || commandGeneration != guard.Generation {
+		return domain.ErrForbidden("Worker command is not owned by Worker")
+	} else if (currentState == domain.WorkerCommandApplied || currentState == domain.WorkerCommandFailed) &&
+		currentState == state && currentResult.String == result {
+		return nil
+	}
+	res, err := tx.ExecContext(ctx, `UPDATE worker_commands SET state=?,result=?,applied_at=? WHERE worker_command_id=? AND worker_instance_id=? AND generation=? AND state='claimed' AND (lease_until IS NULL OR lease_until>?)`, state, result, formatTime(now), commandID, guard.WorkerInstanceID, guard.Generation, formatTime(guard.CheckedAt))
 	if err != nil {
 		return err
 	}

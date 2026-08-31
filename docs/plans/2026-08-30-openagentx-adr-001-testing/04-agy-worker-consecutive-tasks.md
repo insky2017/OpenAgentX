@@ -1,6 +1,6 @@
 ---
 doc_type: test_task
-status: retest_required
+status: passed
 owner: openagentx
 test_id: T04
 updated_at: 2026-09-01
@@ -38,3 +38,10 @@ updated_at: 2026-09-01
 - Runtime Event 证明实际模型为 `gemini-3.7-flash-low`，工作目录为 SteadyFlow 根目录；`backend_default` 推理模式按 ExecutionSpec 正确省略显式 effort；
 - 自动化覆盖超时、非零退出、空流、畸形流、缺失终态和未知副作用，均保持 fail closed；
 - 详细证据：[T04 AGY Resident Worker 连续任务验证报告](../../reports/validation/2026-08-31-openagentx-adr001-t04-resident-agy-e2e.md)。
+
+## 共享代码回归
+
+- T05 共享 Worker、SessionBinding 和鉴权修复后的二进制 SHA-256 为 `7959f659...ca651b`；
+- 新构建通过正式 HTTPS 创建真实 `agy-graft` Task `task-45ff30d2-f24b-4834-9424-7dab3880b516`，Task 进入 `succeeded`；
+- RunAttempt `run-113caee5-02f4-48f2-a5c9-2ba18b93ddd5` 使用模型 `gemini-3.7-flash-low`，实际结果确认工作目录为 SteadyFlow 根目录；
+- daemon 与 quote-service Worker 重启后均为 `active`，Worker generation `11`、fencing token `21`、UDS 权限 `0600`。

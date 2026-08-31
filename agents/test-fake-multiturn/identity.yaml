@@ -1,0 +1,10 @@
+version: 1
+agent_id: test-fake-multiturn
+principal_id: agent-test-fake-multiturn
+organization_id: default
+display_name: Test Fake Multi-turn Agent
+profile:
+  instructions_path: ROLE.md
+  workspace_root: ../../..
+  capabilities:
+    - control-plane-testing

@@ -224,7 +224,7 @@ func TestWorkerServiceRegisterClaimBeginEventsAndFinish(t *testing.T) {
 		item.ID, api.BeginAttemptRequest{
 			WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID,
 			Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
-			ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: 1,
+			ExpectedItemState: domain.MailboxStateClaimed,
 		})
 	if err != nil {
 		t.Fatalf("begin attempt: %v", err)
@@ -291,7 +291,7 @@ func TestWorkerFinishPersistsRuntimeDiagnosticToRunTaskAndEvents(t *testing.T) {
 		item.ID, api.BeginAttemptRequest{
 			WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID,
 			Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
-			ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: 1,
+			ExpectedItemState: domain.MailboxStateClaimed,
 		})
 	if err != nil {
 		t.Fatal(err)
@@ -337,7 +337,7 @@ func TestHeartbeatSlidesTokenAndRenewsActiveRunLease(t *testing.T) {
 	})
 	session := environment.register(t, "worker-renew")
 	environment.heartbeat(t, session)
-	created := environment.createTask(t, "renew")
+	environment.createTask(t, "renew")
 	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID,
 		session.SessionToken, claimRequest(session, 1))
 	if err != nil {
@@ -347,7 +347,7 @@ func TestHeartbeatSlidesTokenAndRenewsActiveRunLease(t *testing.T) {
 		item.ID, api.BeginAttemptRequest{
 			WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID,
 			Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
-			ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: created.Task.Version,
+			ExpectedItemState: domain.MailboxStateClaimed,
 		})
 	if err != nil {
 		t.Fatal(err)
@@ -392,7 +392,7 @@ func TestWorkerFinishWaitingInputKeepsTaskEligibleForQueuedFollowUp(t *testing.T
 	}
 	begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
 		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
-		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: created.Task.Version,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -419,6 +419,275 @@ func TestWorkerFinishWaitingInputKeepsTaskEligibleForQueuedFollowUp(t *testing.T
 	item, err = environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
 	if err != nil || item == nil || item.ID != followupMailbox.ID {
 		t.Fatalf("follow-up item=%+v err=%v", item, err)
+	}
+}
+
+func TestWorkerSessionBindingCreateResumeAndUpdateAcrossTurns(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	environment.backend.Descriptor.SessionModes = []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume}
+	session := environment.register(t, "worker-session-binding")
+	environment.heartbeat(t, session)
+	created := environment.createTask(t, "session-binding")
+
+	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil {
+		t.Fatalf("claim first turn item=%+v err=%v", item, err)
+	}
+	first, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Turn.Execution.Spec.Session.Mode != domain.SessionModeNew || first.Turn.SessionBinding != nil {
+		t.Fatalf("first turn must start a new session: %+v", first.Turn)
+	}
+	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, first.Turn.RunAttempt.ID, api.FinishRunRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+		ExpectedTaskVersion: first.Turn.Task.Version, ExpectedRunVersion: first.Turn.RunAttempt.Version,
+		Result: openruntime.TurnResult{Status: openruntime.TurnResultWaitingInput, Result: "need follow-up", ProviderSessionID: "provider-session-1", SideEffectsKnown: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	binding, err := environment.repository.GetSessionBinding(context.Background(), created.Task.ID, environment.agentID, environment.backend.BackendID)
+	if err != nil || binding.ProviderSessionID != "provider-session-1" || binding.Version != 1 {
+		t.Fatalf("created binding=%+v err=%v", binding, err)
+	}
+
+	waitingTask, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	followup := &domain.Message{ID: "message-session-binding-followup", TaskID: created.Task.ID,
+		SenderPrincipalID: environment.ownerID, Kind: domain.MessageKindSupplement, Content: "continue"}
+	followupItem := &domain.MailboxItem{ID: "mailbox-session-binding-followup", Lane: domain.MailboxLaneWork}
+	if _, err := environment.repository.CreateMessage(context.Background(), waitingTask.Version, followup, followupItem, &domain.JournalEvent{
+		ID: "event-session-binding-followup", OrganizationID: environment.orgID, EventType: "message.created",
+		ActorPrincipalID: environment.ownerID, Payload: json.RawMessage(`{}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	item, err = environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil {
+		t.Fatalf("claim second turn item=%+v err=%v", item, err)
+	}
+	second, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Turn.Execution.Spec.Session.Mode != domain.SessionModeResume || second.Turn.SessionBinding == nil ||
+		second.Turn.SessionBinding.ProviderSessionID != "provider-session-1" {
+		t.Fatalf("second turn did not resume binding: %+v", second.Turn)
+	}
+	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, second.Turn.RunAttempt.ID, api.FinishRunRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+		ExpectedTaskVersion: second.Turn.Task.Version, ExpectedRunVersion: second.Turn.RunAttempt.Version,
+		Result: openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "done", ProviderSessionID: "provider-session-2", SideEffectsKnown: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	binding, err = environment.repository.GetSessionBinding(context.Background(), created.Task.ID, environment.agentID, environment.backend.BackendID)
+	if err != nil || binding.ProviderSessionID != "provider-session-2" || binding.Version != 2 {
+		t.Fatalf("updated binding=%+v err=%v", binding, err)
+	}
+	settled, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil || settled.Status != domain.TaskStatusSucceeded {
+		t.Fatalf("second turn Task=%+v err=%v", settled, err)
+	}
+}
+
+type staticBindingReader struct {
+	binding *domain.SessionBinding
+}
+
+func (r staticBindingReader) GetSessionBinding(_ context.Context, contextID, agentID, backendID string) (*domain.SessionBinding, error) {
+	if r.binding != nil && r.binding.ContextID == contextID && r.binding.AgentID == agentID && r.binding.BackendID == backendID {
+		copy := *r.binding
+		return &copy, nil
+	}
+	return nil, domain.ErrNotFound
+}
+
+func TestM1TurnPlannerStartsNewSessionAfterBackendSwitch(t *testing.T) {
+	binding := &domain.SessionBinding{ID: "binding-old", ContextID: "task-switch", AgentID: "quote",
+		BackendID: "backend-old", ProviderSessionID: "provider-old", State: domain.SessionBindingActive, Version: 1}
+	descriptor := openruntime.AdapterDescriptor{AdapterID: "fake", Models: []string{"model-1"},
+		ReasoningModes: []domain.ReasoningMode{domain.ReasoningBackendDefault},
+		SessionModes:   []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume}}
+	plan, err := (M1TurnPlanner{Bindings: staticBindingReader{binding: binding}}).Plan(context.Background(), domain.Task{
+		ID: "task-switch", TargetAgentID: "quote",
+	}, nil, []openruntime.BackendRegistration{{BackendID: "backend-new", Descriptor: descriptor, Health: openruntime.BackendHealthy}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Execution.Spec.Session.Mode != domain.SessionModeNew || plan.SessionBinding != nil || plan.Execution.Spec.BackendID != "backend-new" {
+		t.Fatalf("backend switch plan=%+v", plan)
+	}
+}
+
+func TestM1TurnPlannerPrefersResumableBindingOverEarlierNewBackend(t *testing.T) {
+	binding := &domain.SessionBinding{ID: "binding-resume", ContextID: "task-resume", AgentID: "quote",
+		BackendID: "zzz-resume", ProviderSessionID: "provider-resume", State: domain.SessionBindingActive, Version: 1}
+	descriptor := openruntime.AdapterDescriptor{AdapterID: "fake", Models: []string{"model-1"},
+		ReasoningModes: []domain.ReasoningMode{domain.ReasoningBackendDefault},
+		SessionModes:   []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume}}
+	plan, err := (M1TurnPlanner{Bindings: staticBindingReader{binding: binding}}).Plan(context.Background(), domain.Task{
+		ID: "task-resume", TargetAgentID: "quote",
+	}, nil, []openruntime.BackendRegistration{
+		{BackendID: "aaa-new", Descriptor: descriptor, Health: openruntime.BackendHealthy},
+		{BackendID: "zzz-resume", Descriptor: descriptor, Health: openruntime.BackendHealthy},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Execution.Spec.BackendID != "zzz-resume" || plan.Execution.Spec.Session.Mode != domain.SessionModeResume ||
+		plan.SessionBinding == nil || plan.SessionBinding.ProviderSessionID != "provider-resume" {
+		t.Fatalf("planner discarded resumable binding: %+v", plan)
+	}
+}
+
+type bindingRaceState struct {
+	*openagentsqlite.Repository
+	raced bool
+}
+
+func (s *bindingRaceState) FinishRun(ctx context.Context, guard domain.WorkerWriteGuard, runID string,
+	expectedTaskVersion, expectedRunVersion int64, result openruntime.TurnResult, binding *domain.SessionBinding,
+	expectedBindingVersion int64, bindingEvent, taskEvent, runEvent *domain.JournalEvent,
+) error {
+	if binding != nil && expectedBindingVersion > 0 && !s.raced {
+		s.raced = true
+		concurrent := *binding
+		concurrent.ProviderSessionID = "provider-concurrent"
+		concurrent.Version = expectedBindingVersion + 1
+		if err := s.Repository.SaveSessionBinding(ctx, &concurrent, expectedBindingVersion, &domain.JournalEvent{
+			ID: "event-binding-concurrent", EventType: "session_binding.updated",
+			ActorPrincipalID: guard.PrincipalID, Payload: json.RawMessage(`{}`),
+		}); err != nil {
+			return err
+		}
+	}
+	return s.Repository.FinishRun(ctx, guard, runID, expectedTaskVersion, expectedRunVersion,
+		result, binding, expectedBindingVersion, bindingEvent, taskEvent, runEvent)
+}
+
+func TestWorkerFinishBindingCASFailureDoesNotSettleRunOrTask(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	environment.backend.Descriptor.SessionModes = []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume}
+	racingState := &bindingRaceState{Repository: environment.repository}
+	var idCounter atomic.Int64
+	service, err := NewWorkerService(racingState, environment.broker, WorkerServiceOptions{
+		Now: environment.clock.Now, NewID: func(prefix string) string { return fmt.Sprintf("%s-race-%d", prefix, idCounter.Add(1)) },
+		NewSessionToken: func() (string, error) { return "worker-session-token-binding-race-00000000000000000001", nil },
+		WorkerLease:     time.Minute, TokenLifetime: 10 * time.Minute, MailboxLease: 10 * time.Second, RunLease: 2 * time.Minute,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment.service = service
+	session := environment.register(t, "worker-binding-race")
+	environment.heartbeat(t, session)
+	created := environment.createTask(t, "binding-race")
+	if err := environment.repository.SaveSessionBinding(context.Background(), &domain.SessionBinding{
+		ID: "binding-race", ContextID: created.Task.ID, AgentID: environment.agentID, BackendID: environment.backend.BackendID,
+		ProviderSessionID: "provider-original", State: domain.SessionBindingActive, Version: 1,
+	}, 0, &domain.JournalEvent{ID: "event-binding-race", EventType: "session_binding.created", ActorPrincipalID: environment.ownerID, Payload: json.RawMessage(`{}`)}); err != nil {
+		t.Fatal(err)
+	}
+	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, api.FinishRunRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+		ExpectedTaskVersion: begin.Turn.Task.Version, ExpectedRunVersion: begin.Turn.RunAttempt.Version,
+		Result: openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, ProviderSessionID: "provider-finish", SideEffectsKnown: true},
+	})
+	if !errors.Is(err, domain.ErrStaleVersion) {
+		t.Fatalf("finish binding CAS error=%v", err)
+	}
+	run, err := environment.repository.GetRunAttempt(context.Background(), begin.Turn.RunAttempt.ID)
+	if err != nil || !run.Status.Active() || run.Version != begin.Turn.RunAttempt.Version {
+		t.Fatalf("Run must remain active after binding CAS failure: run=%+v err=%v", run, err)
+	}
+	task, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil || task.Status != domain.TaskStatusRunning || task.Version != begin.Turn.Task.Version {
+		t.Fatalf("Task must remain running after binding CAS failure: task=%+v err=%v", task, err)
+	}
+}
+
+func TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		lane       domain.MailboxLane
+		accept     bool
+		wantStatus domain.TaskStatus
+	}{
+		{name: "queued work", lane: domain.MailboxLaneWork, wantStatus: domain.TaskStatusWaitingInput},
+		{name: "pending native control", lane: domain.MailboxLaneControl, wantStatus: domain.TaskStatusWaitingInput},
+		{name: "accepted native control", lane: domain.MailboxLaneControl, accept: true, wantStatus: domain.TaskStatusSucceeded},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			environment := newWorkerTestEnvironment(t, nil)
+			session := environment.register(t, "worker-finish-message-"+strings.ReplaceAll(test.name, " ", "-"))
+			environment.heartbeat(t, session)
+			created := environment.createTask(t, "finish-message-"+strings.ReplaceAll(test.name, " ", "-"))
+			item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+			if err != nil {
+				t.Fatal(err)
+			}
+			begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
+				WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+				FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			message := &domain.Message{ID: "message-race-" + strings.ReplaceAll(test.name, " ", "-"), TaskID: created.Task.ID,
+				SenderPrincipalID: environment.ownerID, Kind: domain.MessageKindSupplement, Content: "follow-up"}
+			messageItem := &domain.MailboxItem{ID: "mailbox-race-" + strings.ReplaceAll(test.name, " ", "-"), Lane: test.lane,
+				TargetRunID: begin.Turn.RunAttempt.ID, ExpectedRunVersion: begin.Turn.RunAttempt.Version}
+			if _, err := environment.repository.CreateMessage(context.Background(), begin.Turn.Task.Version, message, messageItem, &domain.JournalEvent{
+				ID: "event-race-" + strings.ReplaceAll(test.name, " ", "-"), OrganizationID: environment.orgID,
+				EventType: "message.created", ActorPrincipalID: environment.ownerID, Payload: json.RawMessage(`{}`),
+			}); err != nil {
+				t.Fatal(err)
+			}
+			if test.accept {
+				claimed, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+				if err != nil || claimed == nil || claimed.ID != messageItem.ID {
+					t.Fatalf("claim native control=%+v err=%v", claimed, err)
+				}
+				if err := environment.service.AcceptMailbox(context.Background(), environment.workerID, session.SessionToken, claimed.ID, api.AcceptRequest{
+					WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+					ExpectedItemState: domain.MailboxStateClaimed, Outcome: domain.MailboxStateAccepted,
+				}); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, api.FinishRunRequest{
+				WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+				ExpectedTaskVersion: begin.Turn.Task.Version, ExpectedRunVersion: begin.Turn.RunAttempt.Version,
+				Result: openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, SideEffectsKnown: true},
+			}); err != nil {
+				t.Fatal(err)
+			}
+			settled, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+			if err != nil || settled.Status != test.wantStatus {
+				t.Fatalf("Task status=%+v err=%v want=%s", settled, err, test.wantStatus)
+			}
+		})
 	}
 }
 
@@ -497,7 +766,6 @@ func TestMailboxControlOrderingBackpressureAndAtLeastOnce(t *testing.T) {
 		activeItem.ID, api.BeginAttemptRequest{
 			WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
 			FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
-			ExpectedTaskVersion: activeTask.Task.Version,
 		})
 	if err != nil {
 		t.Fatal(err)

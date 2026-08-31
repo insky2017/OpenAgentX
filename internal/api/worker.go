@@ -15,6 +15,7 @@ const (
 	WorkerControlClaimPath  = "/api/v1/workers/{worker-id}/control/claim"
 	MailboxAcceptPath       = "/api/v1/mailbox/{item-id}/accept"
 	MailboxBeginAttemptPath = "/api/v1/mailbox/{item-id}/begin-attempt"
+	MailboxPayloadPath      = "/api/v1/mailbox/{item-id}/payload"
 	WorkerCommandAckPath    = "/api/v1/worker-commands/{command-id}/ack"
 	RunEventsPath           = "/api/v1/run-attempts/{run-id}/events"
 	RunFinishPath           = "/api/v1/run-attempts/{run-id}/finish"
@@ -157,12 +158,11 @@ func (r AcceptRequest) Validate() error {
 }
 
 type BeginAttemptRequest struct {
-	WorkerInstanceID    string              `json:"worker_instance_id"`
-	AgentID             string              `json:"agent_id"`
-	Generation          int64               `json:"generation"`
-	FencingToken        int64               `json:"fencing_token"`
-	ExpectedItemState   domain.MailboxState `json:"expected_item_state"`
-	ExpectedTaskVersion int64               `json:"expected_task_version"`
+	WorkerInstanceID  string              `json:"worker_instance_id"`
+	AgentID           string              `json:"agent_id"`
+	Generation        int64               `json:"generation"`
+	FencingToken      int64               `json:"fencing_token"`
+	ExpectedItemState domain.MailboxState `json:"expected_item_state"`
 }
 
 func (r BeginAttemptRequest) Validate() error {
@@ -181,12 +181,33 @@ func (r BeginAttemptRequest) Validate() error {
 	if r.ExpectedItemState != domain.MailboxStateClaimed {
 		return domain.ErrInvalidInput("begin attempt requires a claimed mailbox item")
 	}
-	return domain.ValidatePositiveVersion("expected_task_version", r.ExpectedTaskVersion)
+	return nil
 }
 
 type BeginAttemptResponse struct {
 	MailboxItem domain.MailboxItem  `json:"mailbox_item"`
 	Turn        runtime.TurnRequest `json:"turn"`
+}
+
+type MailboxPayloadRequest struct {
+	WorkerInstanceID string `json:"worker_instance_id"`
+	Generation       int64  `json:"generation"`
+	FencingToken     int64  `json:"fencing_token"`
+}
+
+func (r MailboxPayloadRequest) Validate() error {
+	if err := domain.ValidateOpaqueID("worker_instance_id", r.WorkerInstanceID); err != nil {
+		return err
+	}
+	if err := domain.ValidatePositiveVersion("generation", r.Generation); err != nil {
+		return err
+	}
+	return domain.ValidatePositiveVersion("fencing_token", r.FencingToken)
+}
+
+type MailboxPayloadResponse struct {
+	Message          *domain.Message          `json:"message,omitempty"`
+	ApprovalDecision *domain.ApprovalDecision `json:"approval_decision,omitempty"`
 }
 
 type ControlClaimRequest struct {
@@ -219,6 +240,7 @@ type ControlClaimResponse struct {
 type ControlAckRequest struct {
 	WorkerInstanceID string                    `json:"worker_instance_id"`
 	Generation       int64                     `json:"generation"`
+	FencingToken     int64                     `json:"fencing_token"`
 	State            domain.WorkerCommandState `json:"state"`
 	Result           string                    `json:"result,omitempty"`
 }
@@ -228,6 +250,9 @@ func (r ControlAckRequest) Validate() error {
 		return err
 	}
 	if err := domain.ValidatePositiveVersion("generation", r.Generation); err != nil {
+		return err
+	}
+	if err := domain.ValidatePositiveVersion("fencing_token", r.FencingToken); err != nil {
 		return err
 	}
 	if r.State != domain.WorkerCommandApplied && r.State != domain.WorkerCommandFailed {
@@ -303,6 +328,7 @@ type WorkerControlClient interface {
 	Heartbeat(context.Context, HeartbeatRequest) error
 	ClaimMailbox(context.Context, ClaimRequest) (*domain.MailboxItem, error)
 	BeginAttempt(context.Context, string, BeginAttemptRequest) (*BeginAttemptResponse, error)
+	ResolveMailboxPayload(context.Context, string, MailboxPayloadRequest) (*MailboxPayloadResponse, error)
 	AcceptMailboxItem(context.Context, string, AcceptRequest) error
 	ClaimWorkerCommand(context.Context, ControlClaimRequest) (*domain.WorkerCommand, error)
 	AcknowledgeWorkerCommand(context.Context, string, ControlAckRequest) error

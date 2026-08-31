@@ -76,6 +76,13 @@ type MailboxItem struct {
 	AcceptedAt         *time.Time   `json:"accepted_at,omitempty"`
 }
 
+// MailboxPayload is the control payload resolved under a claimed mailbox
+// item's Worker authority. Exactly one field is populated for supported kinds.
+type MailboxPayload struct {
+	Message          *Message
+	ApprovalDecision *ApprovalDecision
+}
+
 func (m MailboxItem) Validate() error {
 	if m.Sequence <= 0 {
 		return ErrInvalidInput("mailbox sequence must be positive")

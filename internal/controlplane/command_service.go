@@ -41,6 +41,9 @@ func NewCommandService(state CommandState, broker WakeupBroker, now func() time.
 }
 
 func commandID(prefix string) string { return prefix + "-" + uuid.NewString() }
+func commandIdempotentID(prefix, principal, key string) string {
+	return prefix + "-" + uuid.NewSHA1(uuid.NameSpaceURL, []byte("openagentx:"+prefix+":"+principal+":"+key)).String()
+}
 func commandEvent(id, typ, actor, aggregate string, payload any, now time.Time) *domain.JournalEvent {
 	b, _ := json.Marshal(payload)
 	return &domain.JournalEvent{ID: commandID("event"), AggregateType: aggregate, AggregateID: id, EventType: typ, ActorPrincipalID: actor, Payload: b, CreatedAt: now.UTC()}
@@ -76,9 +79,10 @@ func (s *CommandService) CreateMessage(ctx context.Context, principal, taskID st
 	if err != nil {
 		return nil, err
 	}
-	message := &domain.Message{ID: commandID("message"), TaskID: taskID, SenderAgentID: "command-center", SenderPrincipalID: principal, Kind: domain.MessageKindSupplement, Content: req.Content}
-	item := &domain.MailboxItem{ID: commandID("mailbox"), State: domain.MailboxStatePending, CreatedAt: s.now().UTC()}
-	result, err := s.state.CreateMessage(ctx, task.Version, message, item, commandEvent(taskID, "task.message_created", principal, "task", nil, s.now()))
+	messageID := commandIdempotentID("message", principal, req.Meta.IdempotencyKey)
+	message := &domain.Message{ID: messageID, TaskID: taskID, SenderAgentID: "command-center", SenderPrincipalID: principal, Kind: domain.MessageKindSupplement, Content: req.Content}
+	item := &domain.MailboxItem{ID: commandIdempotentID("mailbox", principal, req.Meta.IdempotencyKey), State: domain.MailboxStatePending, CreatedAt: s.now().UTC()}
+	result, err := s.state.CreateMessage(ctx, req.Meta.ExpectedVersion, message, item, commandEvent(taskID, "task.message_created", principal, "task", nil, s.now()))
 	if err != nil {
 		return nil, err
 	}

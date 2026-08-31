@@ -19,6 +19,7 @@ type Service interface {
 	ClaimMailbox(context.Context, string, string, openapi.ClaimRequest) (*domain.MailboxItem, error)
 	AcceptMailbox(context.Context, string, string, string, openapi.AcceptRequest) error
 	BeginAttempt(context.Context, string, string, string, openapi.BeginAttemptRequest) (*openapi.BeginAttemptResponse, error)
+	ResolveMailboxPayload(context.Context, string, string, string, openapi.MailboxPayloadRequest) (*openapi.MailboxPayloadResponse, error)
 	AppendEvents(context.Context, string, string, string, openapi.EventBatch) error
 	Finish(context.Context, string, string, string, openapi.FinishRunRequest) error
 	ClaimWorkerCommand(context.Context, string, string, openapi.ControlClaimRequest) (*domain.WorkerCommand, error)
@@ -65,6 +66,7 @@ func (h *Handler) registerRoutes() {
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/mailbox/claim", h.claimMailbox)
 	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/accept", h.acceptMailbox)
 	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/begin-attempt", h.beginAttempt)
+	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/payload", h.resolveMailboxPayload)
 	h.mux.HandleFunc("POST /api/v1/run-attempts/{runID}/events", h.appendEvents)
 	h.mux.HandleFunc("POST /api/v1/run-attempts/{runID}/finish", h.finishRun)
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/control/claim", h.claimCommand)
@@ -232,6 +234,24 @@ func (h *Handler) beginAttempt(response http.ResponseWriter, request *http.Reque
 		return
 	}
 	result, err := h.service.BeginAttempt(request.Context(), principal, token, request.PathValue("itemID"), body)
+	if err != nil {
+		h.writeError(response, err)
+		return
+	}
+	h.writeJSON(response, http.StatusOK, result)
+}
+
+func (h *Handler) resolveMailboxPayload(response http.ResponseWriter, request *http.Request) {
+	principal, token, ok := h.authenticate(response, request)
+	if !ok {
+		return
+	}
+	var body openapi.MailboxPayloadRequest
+	if err := openapi.DecodeStrictJSON(request.Body, &body); err != nil {
+		h.writeError(response, domain.ErrInvalidInput("invalid JSON request body"))
+		return
+	}
+	result, err := h.service.ResolveMailboxPayload(request.Context(), principal, token, request.PathValue("itemID"), body)
 	if err != nil {
 		h.writeError(response, err)
 		return

@@ -317,5 +317,8 @@ func (r *Repository) GetSessionBinding(ctx context.Context, contextID string, ag
 	if binding.UpdatedAt, err = parseTime(updatedAt); err != nil {
 		return nil, err
 	}
+	if err := binding.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid persisted SessionBinding: %w", err)
+	}
 	return &binding, nil
 }

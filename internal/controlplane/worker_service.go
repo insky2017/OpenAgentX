@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -25,15 +26,18 @@ type WorkerState interface {
 	HeartbeatWorker(context.Context, domain.WorkerWriteGuard, domain.WorkerStatus, map[string]openruntime.BackendHealth, time.Time, time.Time, *domain.JournalEvent) (*domain.WorkerInstance, error)
 	TryClaimMailbox(context.Context, domain.WorkerWriteGuard, int, time.Time, *domain.JournalEvent) (*domain.MailboxItem, error)
 	AcceptMailboxItem(context.Context, domain.WorkerWriteGuard, string, domain.MailboxState, domain.MailboxState, *domain.JournalEvent) error
+	ResolveMailboxPayload(context.Context, domain.WorkerWriteGuard, string) (*domain.MailboxPayload, error)
 	GetMailboxItem(context.Context, string) (*domain.MailboxItem, error)
 	GetTask(context.Context, string) (*domain.Task, error)
+	GetRunAttempt(context.Context, string) (*domain.RunAttempt, error)
+	GetSessionBinding(context.Context, string, string, string) (*domain.SessionBinding, error)
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	ListWorkerBackends(context.Context, string) ([]openruntime.BackendRegistration, error)
 	BeginClaimedRunAttempt(context.Context, domain.WorkerWriteGuard, string, int64, *domain.RunAttempt, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
 	AppendRunEvents(context.Context, domain.WorkerWriteGuard, string, int64, []*domain.JournalEvent) error
-	FinishRun(context.Context, domain.WorkerWriteGuard, string, int64, int64, openruntime.TurnResult, *domain.JournalEvent, *domain.JournalEvent) error
+	FinishRun(context.Context, domain.WorkerWriteGuard, string, int64, int64, openruntime.TurnResult, *domain.SessionBinding, int64, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) error
 	ClaimWorkerCommand(context.Context, domain.WorkerWriteGuard, time.Time, *domain.JournalEvent) (*domain.WorkerCommand, error)
-	AcknowledgeWorkerCommand(context.Context, string, int64, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
+	AcknowledgeWorkerCommand(context.Context, domain.WorkerWriteGuard, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
 }
 
 type TurnPlan struct {
@@ -105,7 +109,7 @@ func NewWorkerService(state WorkerState, broker WakeupBroker, options WorkerServ
 		options.RunLease = 5 * time.Minute
 	}
 	if options.Planner == nil {
-		options.Planner = M1TurnPlanner{}
+		options.Planner = M1TurnPlanner{Bindings: state}
 	}
 	return &WorkerService{
 		state: state, broker: broker, now: options.Now, newID: options.NewID,
@@ -251,6 +255,23 @@ func (s *WorkerService) AcceptMailbox(ctx context.Context, principalID string, t
 	return s.state.AcceptMailboxItem(ctx, guard, itemID, request.ExpectedItemState, request.Outcome, event)
 }
 
+func (s *WorkerService) ResolveMailboxPayload(ctx context.Context, principalID string, token string, itemID string, request api.MailboxPayloadRequest) (*api.MailboxPayloadResponse, error) {
+	if err := request.Validate(); err != nil {
+		return nil, err
+	}
+	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
+	if err != nil {
+		return nil, err
+	}
+	payload, err := s.state.ResolveMailboxPayload(ctx, guard, itemID)
+	if err != nil {
+		return nil, err
+	}
+	return &api.MailboxPayloadResponse{
+		Message: payload.Message, ApprovalDecision: payload.ApprovalDecision,
+	}, nil
+}
+
 func (s *WorkerService) BeginAttempt(ctx context.Context, principalID string, token string, itemID string, request api.BeginAttemptRequest) (*api.BeginAttemptResponse, error) {
 	if err := request.Validate(); err != nil {
 		return nil, err
@@ -304,7 +325,7 @@ func (s *WorkerService) BeginAttempt(ctx context.Context, principalID string, to
 	runEvent := s.event("run", "run_attempt.started", principalID, task.OrganizationID, run.ID, map[string]any{"task_id": task.ID})
 	mailboxEvent := s.event("mailbox", "mailbox.accepted", principalID, task.OrganizationID, itemID, map[string]any{"run_id": run.ID})
 	updatedTask, acceptedItem, err := s.state.BeginClaimedRunAttempt(ctx, guard, itemID,
-		request.ExpectedTaskVersion, run, taskEvent, runEvent, mailboxEvent)
+		task.Version, run, taskEvent, runEvent, mailboxEvent)
 	if err != nil {
 		return nil, err
 	}
@@ -354,10 +375,46 @@ func (s *WorkerService) Finish(ctx context.Context, principalID string, token st
 	}
 	runEvent := s.event("run", "run_attempt.finished", principalID, "", runID, json.RawMessage(payload))
 	taskEvent := s.event("task", "task.settled", principalID, "", "", json.RawMessage(payload))
+	var binding *domain.SessionBinding
+	var expectedBindingVersion int64
+	var bindingEvent *domain.JournalEvent
+	if request.Result.ProviderSessionID != "" {
+		run, loadErr := s.state.GetRunAttempt(ctx, runID)
+		if loadErr != nil {
+			return loadErr
+		}
+		var resolved domain.ResolvedExecutionSpec
+		if err := json.Unmarshal([]byte(run.ResolvedExecutionJSON), &resolved); err != nil {
+			return fmt.Errorf("decode RunAttempt resolved execution for SessionBinding: %w", err)
+		}
+		contextID := resolved.Spec.Session.ContextID
+		if err := domain.ValidateOpaqueID("session context_id", contextID); err != nil {
+			return err
+		}
+		existing, lookupErr := s.state.GetSessionBinding(ctx, contextID, run.AgentID, run.BackendID)
+		switch {
+		case lookupErr == nil:
+			binding = existing
+			expectedBindingVersion = existing.Version
+			binding.ProviderSessionID = request.Result.ProviderSessionID
+			binding.State = domain.SessionBindingActive
+			binding.Version = existing.Version + 1
+		case errors.Is(lookupErr, domain.ErrNotFound):
+			binding = &domain.SessionBinding{
+				ID: s.newID("binding"), ContextID: contextID, AgentID: run.AgentID,
+				BackendID: run.BackendID, ProviderSessionID: request.Result.ProviderSessionID,
+				State: domain.SessionBindingActive, Version: 1,
+			}
+		default:
+			return lookupErr
+		}
+		bindingEvent = s.event("session-binding", "session_binding.saved", principalID, "", binding.ID,
+			map[string]any{"context_id": contextID, "backend_id": run.BackendID, "run_id": runID})
+	}
 	// The repository binds the Task aggregate ID from the RunAttempt and rejects
 	// mismatches; leave it empty here so the transaction supplies the authority.
 	return s.state.FinishRun(ctx, guard, runID, request.ExpectedTaskVersion,
-		request.ExpectedRunVersion, request.Result, taskEvent, runEvent)
+		request.ExpectedRunVersion, request.Result, binding, expectedBindingVersion, bindingEvent, taskEvent, runEvent)
 }
 
 func (s *WorkerService) ClaimWorkerCommand(ctx context.Context, principalID string, token string, request api.ControlClaimRequest) (*domain.WorkerCommand, error) {
@@ -413,14 +470,11 @@ func (s *WorkerService) AcknowledgeWorkerCommand(ctx context.Context, principalI
 	if err := request.Validate(); err != nil {
 		return err
 	}
-	if strings.TrimSpace(token) == "" {
-		return domain.ErrUnauthorized
+	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
+	if err != nil {
+		return err
 	}
-	credential, err := s.state.GetWorkerCredential(ctx, request.WorkerInstanceID)
-	if err != nil || credential.Worker.AuthenticatedPrincipal != principalID || credential.Worker.Generation != request.Generation {
-		return domain.ErrUnauthorized
-	}
-	return s.state.AcknowledgeWorkerCommand(ctx, request.WorkerInstanceID, request.Generation, commandID, request.State, request.Result, s.event("worker_command", "worker_command.acknowledged", principalID, "", commandID, map[string]any{"state": request.State}))
+	return s.state.AcknowledgeWorkerCommand(ctx, guard, commandID, request.State, request.Result, s.event("worker_command", "worker_command.acknowledged", principalID, "", commandID, map[string]any{"state": request.State}))
 }
 
 func (s *WorkerService) guard(ctx context.Context, principalID string, token string, workerID string, requestedAgentID string, generation int64, fencingToken int64) (domain.WorkerWriteGuard, error) {
@@ -431,15 +485,18 @@ func (s *WorkerService) guard(ctx context.Context, principalID string, token str
 	if err != nil {
 		return domain.WorkerWriteGuard{}, domain.ErrUnauthorized
 	}
-	agentID := credential.Worker.AgentID
-	if requestedAgentID != "" && requestedAgentID != agentID {
-		return domain.WorkerWriteGuard{}, domain.ErrForbidden("Worker is not bound to requested Agent")
-	}
-	return domain.WorkerWriteGuard{
-		WorkerInstanceID: workerID, AgentID: agentID, PrincipalID: principalID,
+	guard := domain.WorkerWriteGuard{
+		WorkerInstanceID: workerID, AgentID: credential.Worker.AgentID, PrincipalID: principalID,
 		SessionTokenDigest: workerTokenDigest(token), Generation: generation,
 		FencingToken: fencingToken, CheckedAt: s.now().UTC(),
-	}, nil
+	}
+	if err := credential.Authorize(guard); err != nil {
+		return domain.WorkerWriteGuard{}, err
+	}
+	if requestedAgentID != "" && requestedAgentID != guard.AgentID {
+		return domain.WorkerWriteGuard{}, domain.ErrForbidden("Worker is not bound to requested Agent")
+	}
+	return guard, nil
 }
 
 func (s *WorkerService) event(prefix string, eventType string, actor string, organization string, aggregateID string, payload any) *domain.JournalEvent {
@@ -458,50 +515,77 @@ func (s *WorkerService) event(prefix string, eventType string, actor string, org
 	}
 }
 
-type M1TurnPlanner struct{}
+type SessionBindingReader interface {
+	GetSessionBinding(context.Context, string, string, string) (*domain.SessionBinding, error)
+}
 
-func (M1TurnPlanner) Plan(_ context.Context, task domain.Task, _ []domain.Message, backends []openruntime.BackendRegistration) (TurnPlan, error) {
+type M1TurnPlanner struct {
+	Bindings SessionBindingReader
+}
+
+func (p M1TurnPlanner) Plan(ctx context.Context, task domain.Task, _ []domain.Message, backends []openruntime.BackendRegistration) (TurnPlan, error) {
 	available := append([]openruntime.BackendRegistration(nil), backends...)
 	sort.Slice(available, func(i, j int) bool { return available[i].BackendID < available[j].BackendID })
+	// Preserve provider context whenever the currently available Backend can
+	// resume an active binding. Backend ordering is only a deterministic
+	// fallback for a genuinely new session.
+	if p.Bindings != nil {
+		for _, backend := range available {
+			if !m1BackendUsable(backend) || !containsSession(backend.Descriptor.SessionModes, domain.SessionModeResume) {
+				continue
+			}
+			binding, err := p.Bindings.GetSessionBinding(ctx, task.ID, task.TargetAgentID, backend.BackendID)
+			if err != nil && !errors.Is(err, domain.ErrNotFound) {
+				return TurnPlan{}, err
+			}
+			if err == nil && binding.State == domain.SessionBindingActive {
+				return m1PlanForBackend(task, backend, binding)
+			}
+		}
+	}
 	for _, backend := range available {
-		if backend.Health == openruntime.BackendUnavailable || len(backend.Descriptor.Models) == 0 {
+		if !m1BackendUsable(backend) || !containsSession(backend.Descriptor.SessionModes, domain.SessionModeNew) {
 			continue
 		}
-		reasoning := domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault}
-		if !containsReasoning(backend.Descriptor.ReasoningModes, reasoning.Mode) {
-			if len(backend.Descriptor.ReasoningModes) == 0 {
-				continue
-			}
-			reasoning.Mode = backend.Descriptor.ReasoningModes[0]
-			switch reasoning.Mode {
-			case domain.ReasoningEffort:
-				reasoning.Value = "medium"
-			case domain.ReasoningBudgetTokens:
-				reasoning.Value = "1024"
-			}
-		}
-		sessionMode := domain.SessionModeNew
-		if !containsSession(backend.Descriptor.SessionModes, sessionMode) {
-			if len(backend.Descriptor.SessionModes) == 0 {
-				continue
-			}
-			sessionMode = backend.Descriptor.SessionModes[0]
-		}
-		spec := domain.ExecutionSpec{
-			AdapterID: backend.Descriptor.AdapterID, BackendID: backend.BackendID,
-			Model: backend.Descriptor.Models[0], Reasoning: reasoning,
-			Session: domain.SessionSpec{Mode: sessionMode, ContextID: task.ID},
-			Timeout: 30 * time.Minute, BackendOptions: json.RawMessage(`{}`),
-		}
-		if err := spec.ValidateShape(); err != nil {
-			return TurnPlan{}, err
-		}
-		return TurnPlan{Execution: domain.ResolvedExecutionSpec{
-			Version: 1, Spec: spec,
-			Sources: map[string]string{"adapter": "worker_descriptor", "backend": "worker_descriptor", "model": "m1_default"},
-		}}, nil
+		return m1PlanForBackend(task, backend, nil)
 	}
 	return TurnPlan{}, domain.ErrUnsupportedCapability
+}
+
+func m1BackendUsable(backend openruntime.BackendRegistration) bool {
+	return (backend.Health == openruntime.BackendHealthy || backend.Health == openruntime.BackendDegraded) &&
+		len(backend.Descriptor.Models) > 0 &&
+		len(backend.Descriptor.ReasoningModes) > 0
+}
+
+func m1PlanForBackend(task domain.Task, backend openruntime.BackendRegistration, binding *domain.SessionBinding) (TurnPlan, error) {
+	reasoning := domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault}
+	if !containsReasoning(backend.Descriptor.ReasoningModes, reasoning.Mode) {
+		reasoning.Mode = backend.Descriptor.ReasoningModes[0]
+		switch reasoning.Mode {
+		case domain.ReasoningEffort:
+			reasoning.Value = "medium"
+		case domain.ReasoningBudgetTokens:
+			reasoning.Value = "1024"
+		}
+	}
+	sessionMode := domain.SessionModeNew
+	if binding != nil {
+		sessionMode = domain.SessionModeResume
+	}
+	spec := domain.ExecutionSpec{
+		AdapterID: backend.Descriptor.AdapterID, BackendID: backend.BackendID,
+		Model: backend.Descriptor.Models[0], Reasoning: reasoning,
+		Session: domain.SessionSpec{Mode: sessionMode, ContextID: task.ID},
+		Timeout: 30 * time.Minute, BackendOptions: json.RawMessage(`{}`),
+	}
+	if err := spec.ValidateShape(); err != nil {
+		return TurnPlan{}, err
+	}
+	return TurnPlan{Execution: domain.ResolvedExecutionSpec{
+		Version: 1, Spec: spec,
+		Sources: map[string]string{"adapter": "worker_descriptor", "backend": "worker_descriptor", "model": "m1_default"},
+	}, SessionBinding: binding}, nil
 }
 
 func containsReasoning(values []domain.ReasoningMode, target domain.ReasoningMode) bool {

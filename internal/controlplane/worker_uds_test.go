@@ -3,6 +3,7 @@ package controlplane
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -48,6 +49,7 @@ func TestWorkerAPIRejectsUnknownFieldsAndMissingBearerToken(t *testing.T) {
 
 func TestUnixHTTPWorkerAPIEndToEnd(t *testing.T) {
 	environment := newWorkerTestEnvironment(t, nil)
+	environment.backend.Descriptor.Steer = openruntime.SteerNative
 	handler, err := workerapi.NewHandler(environment.service, workerapi.StaticPrincipal(environment.workerID))
 	if err != nil {
 		t.Fatal(err)
@@ -95,9 +97,43 @@ func TestUnixHTTPWorkerAPIEndToEnd(t *testing.T) {
 	begin, err := client.BeginAttempt(context.Background(), item.ID, api.BeginAttemptRequest{
 		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID,
 		Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
-		ExpectedItemState: domain.MailboxStateClaimed, ExpectedTaskVersion: created.Task.Version,
+		ExpectedItemState: domain.MailboxStateClaimed,
 	})
 	if err != nil {
+		t.Fatal(err)
+	}
+	commandService, err := NewCommandService(environment.repository, environment.broker, environment.clock.Now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	messageResponse, err := commandService.CreateMessage(context.Background(), environment.ownerID, created.Task.ID, api.CreateMessageRequest{
+		Meta:              api.CommandMeta{IdempotencyKey: "uds-native-message", ExpectedVersion: begin.Turn.Task.Version},
+		SenderPrincipalID: environment.ownerID, Content: "steer the active UDS turn",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	controlItem, err := client.ClaimMailbox(context.Background(), claimRequest(session, 0))
+	if err != nil || controlItem == nil || controlItem.MessageID != messageResponse.MessageID || controlItem.Lane != domain.MailboxLaneControl {
+		t.Fatalf("UDS native Message claim=%+v response=%+v err=%v", controlItem, messageResponse, err)
+	}
+	_, err = client.ResolveMailboxPayload(context.Background(), controlItem.ID, api.MailboxPayloadRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken + 1,
+	})
+	var apiErr *workerclient.APIError
+	if !errors.As(err, &apiErr) || apiErr.Code != api.ErrorFencingRejected {
+		t.Fatalf("stale fencing payload error=%v", err)
+	}
+	message, err := client.ResolveMessage(context.Background(), *controlItem)
+	if err != nil || message.ID != messageResponse.MessageID || message.Content != "steer the active UDS turn" {
+		t.Fatalf("UDS Message payload=%+v err=%v", message, err)
+	}
+	if err := client.AcceptMailboxItem(context.Background(), controlItem.ID, api.AcceptRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+		Outcome: domain.MailboxStateAccepted,
+	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := client.AppendRunEvents(context.Background(), begin.Turn.RunAttempt.ID, api.EventBatch{

@@ -1,0 +1,16 @@
+version: 1
+agent_id: test-fake-multiturn
+transport: unix
+unix_socket: run/openagentx.sock
+capabilities:
+  - control-plane-testing
+runtime_backends:
+  - backend_id: primary
+    adapter_id: fake
+    options:
+      model: fake-multiturn-model
+      result: fake multi-turn completed
+      result_status_sequence:
+        - waiting_input
+        - succeeded
+      provider_session_id: fake-multiturn-session-1

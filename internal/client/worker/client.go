@@ -35,6 +35,7 @@ type UnixHTTPWorkerClient struct {
 
 	mu           sync.RWMutex
 	sessionToken string
+	session      *openapi.WorkerSession
 }
 
 func NewUnixHTTPWorkerClient(socketPath string) (*UnixHTTPWorkerClient, error) {
@@ -74,6 +75,8 @@ func (c *UnixHTTPWorkerClient) RegisterWorker(ctx context.Context, request opena
 	}
 	c.mu.Lock()
 	c.sessionToken = session.SessionToken
+	sessionCopy := session
+	c.session = &sessionCopy
 	c.mu.Unlock()
 	return &session, nil
 }
@@ -100,6 +103,54 @@ func (c *UnixHTTPWorkerClient) BeginAttempt(ctx context.Context, itemID string, 
 		return nil, err
 	}
 	return &response, nil
+}
+
+func (c *UnixHTTPWorkerClient) ResolveMailboxPayload(ctx context.Context, itemID string, request openapi.MailboxPayloadRequest) (*openapi.MailboxPayloadResponse, error) {
+	path := replacePath(openapi.MailboxPayloadPath, "{item-id}", itemID)
+	var response openapi.MailboxPayloadResponse
+	if err := c.do(ctx, http.MethodPost, path, nil, request, &response, true); err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+func (c *UnixHTTPWorkerClient) ResolveMessage(ctx context.Context, item domain.MailboxItem) (domain.Message, error) {
+	payload, err := c.resolveClaimedPayload(ctx, item)
+	if err != nil {
+		return domain.Message{}, err
+	}
+	if payload.Message == nil || payload.Message.ID != item.MessageID {
+		return domain.Message{}, fmt.Errorf("Worker API returned mismatched Message payload")
+	}
+	return *payload.Message, nil
+}
+
+func (c *UnixHTTPWorkerClient) ResolveApprovalDecision(ctx context.Context, item domain.MailboxItem) (domain.ApprovalDecision, error) {
+	payload, err := c.resolveClaimedPayload(ctx, item)
+	if err != nil {
+		return domain.ApprovalDecision{}, err
+	}
+	if payload.ApprovalDecision == nil || payload.ApprovalDecision.ID != item.ApprovalDecisionID {
+		return domain.ApprovalDecision{}, fmt.Errorf("Worker API returned mismatched ApprovalDecision payload")
+	}
+	return *payload.ApprovalDecision, nil
+}
+
+func (c *UnixHTTPWorkerClient) resolveClaimedPayload(ctx context.Context, item domain.MailboxItem) (*openapi.MailboxPayloadResponse, error) {
+	c.mu.RLock()
+	session := c.session
+	if session != nil {
+		copy := *session
+		session = &copy
+	}
+	c.mu.RUnlock()
+	if session == nil {
+		return nil, fmt.Errorf("Worker is not registered")
+	}
+	return c.ResolveMailboxPayload(ctx, item.ID, openapi.MailboxPayloadRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken,
+	})
 }
 
 func (c *UnixHTTPWorkerClient) AcceptMailboxItem(ctx context.Context, itemID string, request openapi.AcceptRequest) error {
