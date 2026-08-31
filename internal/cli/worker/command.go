@@ -18,6 +18,7 @@ import (
 	"openagentx/internal/runtime/agy"
 	"openagentx/internal/runtime/codebuddy"
 	"openagentx/internal/runtime/fake"
+	"openagentx/internal/transport/remotehttps"
 	residentworker "openagentx/internal/worker"
 )
 
@@ -59,7 +60,18 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 	if err != nil {
 		return err
 	}
-	client, err := workerclient.NewUnixHTTPWorkerClient(processConfig.UnixSocket)
+	var client *workerclient.UnixHTTPWorkerClient
+	switch processConfig.Transport {
+	case domain.WorkerTransportUnix:
+		client, err = workerclient.NewUnixHTTPWorkerClient(processConfig.UnixSocket)
+	case domain.WorkerTransportHTTPS:
+		client, err = remotehttps.NewWorkerClient(processConfig.Endpoint, remotehttps.Config{
+			CAFile: processConfig.CAFile, CertFile: processConfig.ClientCertFile,
+			KeyFile: processConfig.ClientKeyFile, ServerName: processConfig.ServerName,
+		})
+	default:
+		err = domain.ErrInvalidInput("unsupported Worker transport")
+	}
 	if err != nil {
 		return err
 	}

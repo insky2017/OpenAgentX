@@ -30,6 +30,17 @@ type PrincipalResolver interface {
 	ResolvePrincipal(*http.Request) (string, error)
 }
 
+// AgentBindingResolver adds the transport-specific registration boundary. It
+// is intentionally optional so the local UDS resolver can keep using the
+// operating-system socket identity while the remote resolver checks mTLS.
+type AgentBindingResolver interface {
+	ValidateAgent(*http.Request, string) error
+}
+
+type RegistrationBindingResolver interface {
+	ValidateRegistration(*http.Request, openapi.RegisterRequest) error
+}
+
 type PrincipalResolverFunc func(*http.Request) (string, error)
 
 func (f PrincipalResolverFunc) ResolvePrincipal(request *http.Request) (string, error) {
@@ -137,6 +148,18 @@ func (h *Handler) register(response http.ResponseWriter, request *http.Request) 
 	if err := openapi.DecodeStrictJSON(request.Body, &body); err != nil {
 		h.writeError(response, domain.ErrInvalidInput("invalid JSON request body"))
 		return
+	}
+	if binding, ok := h.principal.(AgentBindingResolver); ok {
+		if err := binding.ValidateAgent(request, body.AgentID); err != nil {
+			h.writeError(response, err)
+			return
+		}
+	}
+	if binding, ok := h.principal.(RegistrationBindingResolver); ok {
+		if err := binding.ValidateRegistration(request, body); err != nil {
+			h.writeError(response, err)
+			return
+		}
 	}
 	session, err := h.service.Register(request.Context(), principal, body)
 	if err != nil {

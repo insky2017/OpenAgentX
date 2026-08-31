@@ -55,7 +55,7 @@ ADR-001 保持冻结。本计划只定义测试顺序、证据、失败处理和
 | T05 | [Multi-turn、Message 与 queued steer](2026-08-30-openagentx-adr-001-testing/05-multiturn-message-steer.md) | T03,T04-runtime-gate | passed |
 | T06 | [Cancel、Approval 与 finish 竞态](2026-08-30-openagentx-adr-001-testing/06-cancel-approval-races.md) | T05 | passed |
 | T07 | [恢复、lease、generation 与 fencing](2026-08-30-openagentx-adr-001-testing/07-recovery-lease-fencing.md) | T06 | passed |
-| T08 | [mTLS、组织权限与 Worker Admin](2026-08-30-openagentx-adr-001-testing/08-mtls-authority-worker-admin.md) | T03 | pending |
+| T08 | [mTLS、组织权限与 Worker Admin](2026-08-30-openagentx-adr-001-testing/08-mtls-authority-worker-admin.md) | T03 | passed（远程 HTTPS listener stop/shutdown 修复并通过重复/race 矩阵） |
 | T09 | [手机与 PC 生产指挥台端到端](2026-08-30-openagentx-adr-001-testing/09-production-command-center-e2e.md) | T02,T04,T06,T08 | pending |
 | T10 | [全量回归、证据归档与 Go/No-Go](2026-08-30-openagentx-adr-001-testing/10-final-regression-go-no-go.md) | T07,T09 | pending |
 

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -21,6 +22,11 @@ type ProcessConfig struct {
 	AgentID              string                 `yaml:"agent_id"`
 	Transport            domain.WorkerTransport `yaml:"transport"`
 	UnixSocket           string                 `yaml:"unix_socket"`
+	Endpoint             string                 `yaml:"endpoint"`
+	CAFile               string                 `yaml:"ca_file"`
+	ClientCertFile       string                 `yaml:"client_cert_file"`
+	ClientKeyFile        string                 `yaml:"client_key_file"`
+	ServerName           string                 `yaml:"server_name"`
 	Capabilities         []string               `yaml:"capabilities"`
 	HeartbeatInterval    time.Duration          `yaml:"heartbeat_interval"`
 	MailboxWait          time.Duration          `yaml:"mailbox_wait"`
@@ -58,11 +64,23 @@ func (c *ProcessConfig) Validate() error {
 	if err := domain.ValidateIdentifier("agent_id", c.AgentID); err != nil {
 		return err
 	}
-	if c.Transport != domain.WorkerTransportUnix {
-		return domain.ErrInvalidInput("M1 Worker process requires unix transport")
-	}
-	if strings.TrimSpace(c.UnixSocket) == "" {
-		return domain.ErrInvalidInput("unix_socket is required")
+	switch c.Transport {
+	case domain.WorkerTransportUnix:
+		if strings.TrimSpace(c.UnixSocket) == "" {
+			return domain.ErrInvalidInput("unix_socket is required for unix transport")
+		}
+		if hasRemoteBinding(c) {
+			return domain.ErrInvalidInput("https Worker fields are not allowed with unix transport")
+		}
+	case domain.WorkerTransportHTTPS:
+		if strings.TrimSpace(c.UnixSocket) != "" {
+			return domain.ErrInvalidInput("unix_socket is not allowed with https transport")
+		}
+		if err := validateHTTPSWorkerEndpoint(c); err != nil {
+			return err
+		}
+	default:
+		return domain.ErrInvalidInput("unsupported Worker transport")
 	}
 	if len(c.RuntimeBackendConfig) == 0 {
 		return domain.ErrInvalidInput("Worker config requires at least one Runtime Backend")
@@ -79,6 +97,33 @@ func (c *ProcessConfig) Validate() error {
 			return domain.ErrInvalidInput("Worker config Backend IDs must be unique")
 		}
 		seen[backend.BackendID] = struct{}{}
+	}
+	return nil
+}
+
+func hasRemoteBinding(c *ProcessConfig) bool {
+	return strings.TrimSpace(c.Endpoint) != "" || strings.TrimSpace(c.CAFile) != "" ||
+		strings.TrimSpace(c.ClientCertFile) != "" || strings.TrimSpace(c.ClientKeyFile) != "" ||
+		strings.TrimSpace(c.ServerName) != ""
+}
+
+func validateHTTPSWorkerEndpoint(c *ProcessConfig) error {
+	if strings.TrimSpace(c.Endpoint) == "" {
+		return domain.ErrInvalidInput("endpoint is required for https transport")
+	}
+	parsed, err := url.Parse(strings.TrimSpace(c.Endpoint))
+	if err != nil || parsed.Scheme != "https" || parsed.Host == "" || parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return domain.ErrInvalidInput("endpoint must be an https URL without credentials, query, or fragment")
+	}
+	for name, value := range map[string]string{
+		"ca_file": c.CAFile, "client_cert_file": c.ClientCertFile, "client_key_file": c.ClientKeyFile,
+	} {
+		if strings.TrimSpace(value) == "" {
+			return domain.ErrInvalidInput(name + " is required for https transport")
+		}
+	}
+	if strings.ContainsAny(c.ServerName, "\r\n") {
+		return domain.ErrInvalidInput("server_name must not contain control characters")
 	}
 	return nil
 }

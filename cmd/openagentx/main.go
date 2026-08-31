@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -23,6 +24,7 @@ import (
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
+	"openagentx/internal/transport/remotehttps"
 	"openagentx/internal/transport/unixhttp"
 )
 
@@ -50,6 +52,7 @@ func execute(args []string) int {
 		fmt.Fprintln(os.Stderr, "Usage: openagentx init --db <path>")
 		fmt.Fprintln(os.Stderr, "       openagentx agent apply --db <path> --file <identity.yaml>")
 		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
+		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx schema verify --db <path>")
 		return 0
@@ -65,8 +68,18 @@ func runDaemon(args []string) int {
 	socketPath := flags.String("socket", "", "Unix Socket path")
 	httpAddr := flags.String("http-addr", ":18100", "Private HTTP listen address for Web Panel")
 	webDir := flags.String("web-dir", "web/dist", "Built Web Panel directory")
+	workerHTTPSAddr := flags.String("worker-https-addr", "", "Optional HTTPS listen address for remote Workers")
+	workerMTLSCA := flags.String("worker-mtls-ca", "", "Remote Worker mTLS client CA PEM")
+	workerMTLSCert := flags.String("worker-mtls-cert", "", "Remote Worker mTLS server certificate PEM")
+	workerMTLSKey := flags.String("worker-mtls-key", "", "Remote Worker mTLS server private key")
+	var workerBindings bindingFlags
+	flags.Var(&workerBindings, "worker-mtls-binding", "mTLS principal to Agent binding (principal=agent[,agent...]); repeatable")
 	if err := flags.Parse(args); err != nil || *dbPath == "" || *socketPath == "" {
 		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
+		return 2
+	}
+	if *workerHTTPSAddr == "" && (*workerMTLSCA != "" || *workerMTLSCert != "" || *workerMTLSKey != "" || len(workerBindings) != 0) {
+		fmt.Fprintln(os.Stderr, "remote Worker mTLS options require --worker-https-addr")
 		return 2
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -96,6 +109,38 @@ func runDaemon(args []string) int {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Unix server: %v\n", err)
 		return 1
+	}
+	if *workerHTTPSAddr != "" {
+		if *workerMTLSCA == "" || *workerMTLSCert == "" || *workerMTLSKey == "" || len(workerBindings) == 0 {
+			fmt.Fprintln(os.Stderr, "remote Worker HTTPS requires mTLS files and at least one --worker-mtls-binding")
+			return 2
+		}
+		principalResolver, err := remotehttps.NewCertificatePrincipalResolver(workerBindings)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "configure remote Worker mTLS bindings: %v\n", err)
+			return 1
+		}
+		remoteHandler, err := workerapi.NewHandler(service, principalResolver)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "create remote Worker API: %v\n", err)
+			return 1
+		}
+		remoteServer, err := remotehttps.NewConfiguredServer(remotehttps.ServerConfig{
+			ListenAddr: *workerHTTPSAddr, CAFile: *workerMTLSCA, CertFile: *workerMTLSCert, KeyFile: *workerMTLSKey,
+		}, remoteHandler, slog.Default())
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "configure remote Worker HTTPS: %v\n", err)
+			return 1
+		}
+		go func() {
+			if err := remoteServer.Start(ctx); err != nil {
+				slog.Error("remote Worker HTTPS stopped", "error", err)
+			}
+		}()
+		if err := remoteServer.WaitReady(ctx); err != nil {
+			fmt.Fprintf(os.Stderr, "start remote Worker HTTPS: %v\n", err)
+			return 1
+		}
 	}
 	authManager, err := loadAuthManager(ctx, repository)
 	if err != nil {
@@ -156,6 +201,29 @@ func runDaemon(args []string) int {
 	defer cancelShutdown()
 	_ = httpServer.Shutdown(shutdownCtx)
 	return 0
+}
+
+type bindingFlags map[string][]string
+
+func (f *bindingFlags) String() string { return fmt.Sprint(map[string][]string(*f)) }
+
+func (f *bindingFlags) Set(value string) error {
+	parts := strings.SplitN(value, "=", 2)
+	if len(parts) != 2 || strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
+		return fmt.Errorf("binding must be principal=agent[,agent...]")
+	}
+	if *f == nil {
+		*f = make(bindingFlags)
+	}
+	principal := strings.TrimSpace(parts[0])
+	for _, rawAgent := range strings.Split(parts[1], ",") {
+		agent := strings.TrimSpace(rawAgent)
+		if agent == "" {
+			return fmt.Errorf("binding contains empty Agent")
+		}
+		(*f)[principal] = append((*f)[principal], agent)
+	}
+	return nil
 }
 
 type webUserSource interface {
