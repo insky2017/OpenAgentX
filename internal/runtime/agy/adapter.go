@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -19,7 +20,10 @@ import (
 	openruntime "openagentx/internal/runtime"
 )
 
-const defaultCancelGrace = 10 * time.Second
+// Keep the escalation window below the externally observable cancellation SLA.
+// AGY tools can detach into a different process group, so waiting the full SLA
+// before escalating would allow those descendants to outlive cancellation.
+const defaultCancelGrace = 2 * time.Second
 
 type Config struct {
 	Binary        string
@@ -189,8 +193,15 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 		cancel()
 		return nil, fmt.Errorf("start AGY process: %w", err)
 	}
+	startTime, err := processStartTime(command.Process.Pid)
+	if err != nil {
+		_ = signalProcessGroup(command.Process.Pid, syscall.SIGKILL)
+		cancel()
+		return nil, fmt.Errorf("read AGY process identity: %w", err)
+	}
 	handle := &turnHandle{command: command, stdout: stdout, stderr: stderr, sink: sink,
-		stderrLimit: a.config.StderrLimit, prompt: prompt, cancel: cancel, done: make(chan struct{}), cancelGrace: a.config.CancelGrace}
+		stderrLimit: a.config.StderrLimit, prompt: prompt, cancel: cancel, done: make(chan struct{}), cancelGrace: a.config.CancelGrace,
+		process: processRef{pid: command.Process.Pid, startTime: startTime}}
 	go handle.collect()
 	return handle, nil
 }
@@ -242,7 +253,9 @@ type turnHandle struct {
 	cancel      context.CancelFunc
 	done        chan struct{}
 	cancelGrace time.Duration
+	process     processRef
 	once        sync.Once
+	cancelOnce  sync.Once
 	result      openruntime.TurnResult
 	err         error
 }
@@ -353,14 +366,24 @@ func (h *turnHandle) RequestCancel(_ context.Context) error {
 	if h.command.Process == nil {
 		return openruntime.ErrCancelUnsupported
 	}
-	pgid := h.command.Process.Pid
-	if err := signalProcessGroup(pgid, syscall.SIGTERM); err != nil {
-		return fmt.Errorf("signal AGY process group: %w", err)
-	}
-	time.AfterFunc(h.cancelGrace, func() {
-		_ = signalProcessGroup(pgid, syscall.SIGKILL)
+	var cancelErr error
+	h.cancelOnce.Do(func() {
+		descendants := descendantProcesses(h.process.pid)
+		if err := signalProcessGroup(h.process.pid, syscall.SIGTERM); err != nil {
+			cancelErr = fmt.Errorf("signal AGY process group: %w", err)
+			return
+		}
+		for _, child := range descendants {
+			_ = signalProcess(child, syscall.SIGTERM)
+		}
+		time.AfterFunc(h.cancelGrace, func() {
+			_ = signalProcessGroup(h.process.pid, syscall.SIGKILL)
+			for _, child := range descendants {
+				_ = signalProcess(child, syscall.SIGKILL)
+			}
+		})
 	})
-	return nil
+	return cancelErr
 }
 
 func signalProcessGroup(pgid int, signal syscall.Signal) error {
@@ -368,6 +391,105 @@ func signalProcessGroup(pgid int, signal syscall.Signal) error {
 		return err
 	}
 	return nil
+}
+
+type processRef struct {
+	pid       int
+	startTime uint64
+}
+
+// descendantProcesses snapshots the complete child tree before the leader is
+// signaled. This covers tools that call setsid and therefore escape the
+// leader's process group while retaining the original parent relationship.
+func descendantProcesses(rootPID int) []processRef {
+	type processInfo struct {
+		ref  processRef
+		ppid int
+	}
+	entries, err := os.ReadDir("/proc")
+	if err != nil {
+		return nil
+	}
+	children := make(map[int][]processInfo)
+	for _, entry := range entries {
+		pid, err := parsePID(entry.Name())
+		if err != nil {
+			continue
+		}
+		ppid, startTime, err := readProcessStat(pid)
+		if err != nil {
+			continue
+		}
+		children[ppid] = append(children[ppid], processInfo{ref: processRef{pid: pid, startTime: startTime}, ppid: ppid})
+	}
+	var descendants []processRef
+	queue := append([]int(nil), rootPID)
+	seen := map[int]struct{}{rootPID: {}}
+	for len(queue) != 0 {
+		parent := queue[0]
+		queue = queue[1:]
+		for _, child := range children[parent] {
+			if _, ok := seen[child.ref.pid]; ok {
+				continue
+			}
+			seen[child.ref.pid] = struct{}{}
+			descendants = append(descendants, child.ref)
+			queue = append(queue, child.ref.pid)
+		}
+	}
+	return descendants
+}
+
+func signalProcess(process processRef, signal syscall.Signal) error {
+	startTime, err := processStartTime(process.pid)
+	if err != nil || startTime != process.startTime {
+		return nil
+	}
+	if err := syscall.Kill(process.pid, signal); err != nil && !errors.Is(err, syscall.ESRCH) {
+		return err
+	}
+	return nil
+}
+
+func processStartTime(pid int) (uint64, error) {
+	_, startTime, err := readProcessStat(pid)
+	return startTime, err
+}
+
+func readProcessStat(pid int) (int, uint64, error) {
+	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return 0, 0, err
+	}
+	closeParen := strings.LastIndexByte(string(data), ')')
+	if closeParen < 0 {
+		return 0, 0, fmt.Errorf("malformed /proc/%d/stat", pid)
+	}
+	fields := strings.Fields(string(data[closeParen+1:]))
+	if len(fields) <= 19 {
+		return 0, 0, fmt.Errorf("incomplete /proc/%d/stat", pid)
+	}
+	ppid, err := strconv.Atoi(fields[1])
+	if err != nil {
+		return 0, 0, err
+	}
+	startTime, err := strconv.ParseUint(fields[19], 10, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	return ppid, startTime, nil
+}
+
+func parsePID(value string) (int, error) {
+	if value == "" {
+		return 0, errors.New("empty PID")
+	}
+	for _, char := range value {
+		if char < '0' || char > '9' {
+			return 0, errors.New("not a PID")
+		}
+	}
+	return strconv.Atoi(value)
 }
 
 func sanitizeOutput(output []byte, limit int) string {

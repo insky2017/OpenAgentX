@@ -234,7 +234,7 @@ func TestAgyBatchAdapterCancelTerminatesChildProcesses(t *testing.T) {
 	script := fmt.Sprintf(`#!/bin/sh
 if [ "$1" = "--version" ]; then exit 0; fi
 cat >/dev/null
-sh -c 'trap "" TERM; echo $$ > "%s"; while :; do sleep 1; done' >/dev/null 2>&1 </dev/null &
+setsid sh -c 'trap "" TERM; echo $$ > "%s"; while :; do sleep 1; done' >/dev/null 2>&1 </dev/null &
 while [ ! -s "%s" ]; do sleep 0.05; done
 : > "%s"
 trap 'exit 143' TERM
