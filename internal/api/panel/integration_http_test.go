@@ -217,6 +217,32 @@ func TestPanelHTTPCancelSuccessTraversesRepositoryAndWorkerSettlement(t *testing
 	assertJournalTypes(t, fixture.repository, "mailbox.claimed", "run_attempt.finished", "mailbox.accepted")
 }
 
+func TestPanelHTTPMessageUsesAuthenticatedPrincipalWhenBodyOmitsSender(t *testing.T) {
+	fixture := newPanelIntegrationFixture(t, false)
+	server := httptest.NewServer(panelIntegrationHandler(t, fixture))
+	defer server.Close()
+	client, err := cookiejar.New(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	httpClient := &http.Client{Jar: client}
+	var response openapi.CreateMessageResponse
+	idem := "panel-message-idem"
+	httpResponse := panelPOST(t, httpClient, server.URL+"/api/control/v1/tasks/"+fixture.task.ID+"/messages", fixture.cookie, fixture.session.CSRFToken, idem,
+		openapi.CreateMessageRequest{Meta: openapi.CommandMeta{IdempotencyKey: idem, ExpectedVersion: 2}, Content: "continue from the panel"}, &response)
+	if httpResponse.StatusCode != http.StatusOK || response.MessageID == "" || response.Sequence <= 0 {
+		t.Fatalf("message status=%d response=%+v", httpResponse.StatusCode, response)
+	}
+	messages, err := fixture.repository.ListMessages(context.Background(), fixture.task.ID)
+	if err != nil || len(messages) != 2 {
+		t.Fatalf("messages=%+v err=%v", messages, err)
+	}
+	message := messages[1]
+	if message.ID != response.MessageID || message.SenderPrincipalID != "human-owner" || message.Content != "continue from the panel" {
+		t.Fatalf("persisted panel message=%+v", message)
+	}
+}
+
 func TestPanelHTTPNativeApprovalSuccessTraversesPayloadAndSettlement(t *testing.T) {
 	fixture := newPanelIntegrationFixture(t, true)
 	server := httptest.NewServer(panelIntegrationHandler(t, fixture))

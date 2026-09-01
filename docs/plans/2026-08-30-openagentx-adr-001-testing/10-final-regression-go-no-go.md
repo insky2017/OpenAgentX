@@ -29,7 +29,7 @@ git diff --check
 
 ## 审计清单
 
-- T01-T09 均有验证报告且状态 PASS；
+- T01-T09 均有验证报告且状态 PASS；若 T09 存在未解除的真实长运行取消阻塞，不得进入 GO 判定；
 - 冻结 ADR-001 无修改；
 - 当前代码、配置和有效文档没有可执行的 agentbus/tmux/pane/Stop Gate fallback；
 - 生产密码、Cookie、Worker Session Token、mTLS 私钥未进入 Git 或报告；

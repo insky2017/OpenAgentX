@@ -238,6 +238,7 @@ func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
+	req.SenderPrincipalID = s.User.ID
 	v, e := h.commands.CreateMessage(r.Context(), s.User.ID, r.PathValue("taskID"), req)
 	if e != nil {
 		http.Error(w, e.Error(), 400)
