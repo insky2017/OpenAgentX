@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -223,6 +226,75 @@ func TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess(t *testing.T) {
 	}
 }
 
+func TestAgyBatchAdapterCancelTerminatesChildProcesses(t *testing.T) {
+	dir := t.TempDir()
+	readyPath := filepath.Join(dir, "child.ready")
+	pidPath := filepath.Join(dir, "child.pid")
+	scriptPath := filepath.Join(dir, "agy-cancel-fixture")
+	script := fmt.Sprintf(`#!/bin/sh
+if [ "$1" = "--version" ]; then exit 0; fi
+cat >/dev/null
+sh -c 'trap "" TERM; echo $$ > "%s"; while :; do sleep 1; done' >/dev/null 2>&1 </dev/null &
+while [ ! -s "%s" ]; do sleep 0.05; done
+: > "%s"
+trap 'exit 143' TERM
+while :; do sleep 0.1; done
+`, pidPath, pidPath, readyPath)
+	if err := os.WriteFile(scriptPath, []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	adapter := NewAdapterForTest(Config{Binary: scriptPath, WorkingDir: dir, CancelGrace: cancelTestGrace})
+	handle, err := adapter.StartTurn(context.Background(), testTurnRequest(validSpec()), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	leader, ok := handle.(*turnHandle)
+	if !ok || leader.command.Process == nil {
+		t.Fatalf("handle is not a *turnHandle with a live process: %T", handle)
+	}
+	var childPID int
+	t.Cleanup(func() {
+		_ = signalProcessGroup(leader.command.Process.Pid, syscall.SIGKILL)
+		if childPID != 0 {
+			_ = syscall.Kill(childPID, syscall.SIGKILL)
+		}
+	})
+	waitForFile(t, readyPath, "fixture child did not start")
+	pidText, err := os.ReadFile(pidPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	childPID, err = strconv.Atoi(strings.TrimSpace(string(pidText)))
+	if err != nil {
+		t.Fatalf("parse child pid from %q (%q): %v", pidPath, pidText, err)
+	}
+	if !processRunning(childPID) {
+		t.Fatalf("fixture child %d is not running before cancel", childPID)
+	}
+	if err := handle.RequestCancel(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if !processRunning(childPID) {
+		t.Fatalf("fixture child %d died on SIGTERM, so the SIGKILL escalation is not covered", childPID)
+	}
+	waitContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	result, waitErr := handle.Wait(waitContext)
+	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown {
+		t.Fatalf("result=%+v err=%v", result, waitErr)
+	}
+	deadline := time.Now().Add(cancelTestGrace + 15*time.Second)
+	for {
+		if !processRunning(childPID) {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("child process %d survived the post-grace process-group SIGKILL", childPID)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
 func TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain(t *testing.T) {
 	dir := t.TempDir()
 	scriptPath := filepath.Join(dir, "agy-no-terminal")
@@ -272,4 +344,35 @@ func testTurnRequest(spec domain.ExecutionSpec) openruntime.TurnRequest {
 		RunAttempt: domain.RunAttempt{ID: "run-1", TaskID: "task-1", AgentID: "quote", Version: 1, Status: domain.RunAttemptStarting, LeaseUntil: time.Now().Add(time.Minute), ExecutionSpecVersion: 1, StartedAt: time.Now(), CreatedAt: time.Now(), UpdatedAt: time.Now()},
 		Execution:  domain.ResolvedExecutionSpec{Version: 1, Spec: spec},
 	}
+}
+
+const cancelTestGrace = 2 * time.Second
+
+func waitForFile(t *testing.T, path, message string) {
+	t.Helper()
+	deadline := time.Now().Add(15 * time.Second)
+	for {
+		if _, err := os.Stat(path); err == nil {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("%s: %s never appeared", message, path)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
+func processRunning(pid int) bool {
+	if err := syscall.Kill(pid, 0); err != nil {
+		return false
+	}
+	stat, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return true
+	}
+	if index := strings.LastIndex(string(stat), ")"); index >= 0 {
+		stat = stat[index+1:]
+	}
+	fields := strings.Fields(string(stat))
+	return len(fields) > 0 && fields[0] != "Z"
 }

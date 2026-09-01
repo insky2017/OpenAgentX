@@ -19,6 +19,8 @@ import (
 	openruntime "openagentx/internal/runtime"
 )
 
+const defaultCancelGrace = 10 * time.Second
+
 type Config struct {
 	Binary        string
 	Models        []string
@@ -26,6 +28,7 @@ type Config struct {
 	Environment   []string
 	StderrLimit   int
 	HealthTimeout time.Duration
+	CancelGrace   time.Duration
 }
 
 type Adapter struct {
@@ -45,6 +48,9 @@ func NewAdapter(config Config) (*Adapter, error) {
 	if config.HealthTimeout <= 0 {
 		config.HealthTimeout = 5 * time.Second
 	}
+	if config.CancelGrace <= 0 {
+		config.CancelGrace = defaultCancelGrace
+	}
 	if _, err := exec.LookPath(config.Binary); err != nil {
 		return nil, fmt.Errorf("AGY binary is unavailable: %w", err)
 	}
@@ -60,6 +66,9 @@ func NewAdapterForTest(config Config) *Adapter {
 	}
 	if config.StderrLimit <= 0 {
 		config.StderrLimit = 64 << 10
+	}
+	if config.CancelGrace <= 0 {
+		config.CancelGrace = defaultCancelGrace
 	}
 	return &Adapter{config: config}
 }
@@ -151,6 +160,14 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	command := exec.CommandContext(turnContext, a.config.Binary, args...)
 	command.Dir = a.config.WorkingDir
 	command.Env = append(os.Environ(), a.config.Environment...)
+	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	command.WaitDelay = a.config.CancelGrace
+	command.Cancel = func() error {
+		if command.Process == nil {
+			return nil
+		}
+		return signalProcessGroup(command.Process.Pid, syscall.SIGKILL)
+	}
 	prompt := buildPrompt(request, a.config.WorkingDir)
 	input, err := encodeStreamInput(prompt)
 	if err != nil {
@@ -173,7 +190,7 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 		return nil, fmt.Errorf("start AGY process: %w", err)
 	}
 	handle := &turnHandle{command: command, stdout: stdout, stderr: stderr, sink: sink,
-		stderrLimit: a.config.StderrLimit, prompt: prompt, cancel: cancel, done: make(chan struct{})}
+		stderrLimit: a.config.StderrLimit, prompt: prompt, cancel: cancel, done: make(chan struct{}), cancelGrace: a.config.CancelGrace}
 	go handle.collect()
 	return handle, nil
 }
@@ -224,6 +241,7 @@ type turnHandle struct {
 	prompt      string
 	cancel      context.CancelFunc
 	done        chan struct{}
+	cancelGrace time.Duration
 	once        sync.Once
 	result      openruntime.TurnResult
 	err         error
@@ -335,8 +353,19 @@ func (h *turnHandle) RequestCancel(_ context.Context) error {
 	if h.command.Process == nil {
 		return openruntime.ErrCancelUnsupported
 	}
-	if err := h.command.Process.Signal(syscall.SIGTERM); err != nil {
-		return fmt.Errorf("signal AGY process: %w", err)
+	pgid := h.command.Process.Pid
+	if err := signalProcessGroup(pgid, syscall.SIGTERM); err != nil {
+		return fmt.Errorf("signal AGY process group: %w", err)
+	}
+	time.AfterFunc(h.cancelGrace, func() {
+		_ = signalProcessGroup(pgid, syscall.SIGKILL)
+	})
+	return nil
+}
+
+func signalProcessGroup(pgid int, signal syscall.Signal) error {
+	if err := syscall.Kill(-pgid, signal); err != nil && !errors.Is(err, syscall.ESRCH) {
+		return err
 	}
 	return nil
 }
