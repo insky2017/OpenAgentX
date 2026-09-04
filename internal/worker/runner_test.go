@@ -31,6 +31,8 @@ type commandAckRecord struct {
 	request   api.ControlAckRequest
 }
 
+type releaseRecord struct{ request api.WorkerReleaseRequest }
+
 type fakeWorkerClient struct {
 	mu sync.Mutex
 
@@ -42,6 +44,8 @@ type fakeWorkerClient struct {
 	finishes      []finishRecord
 	accepts       []acceptRecord
 	commandAcks   []commandAckRecord
+	releases      []releaseRecord
+	eventLog      []string
 	runtimeEvents []openruntime.RuntimeEvent
 	runCounter    int
 	heartbeatFail int
@@ -203,6 +207,24 @@ func (c *fakeWorkerClient) ClaimWorkerCommand(ctx context.Context, request api.C
 func (c *fakeWorkerClient) AcknowledgeWorkerCommand(_ context.Context, commandID string, request api.ControlAckRequest) error {
 	c.mu.Lock()
 	c.commandAcks = append(c.commandAcks, commandAckRecord{commandID: commandID, request: request})
+	c.eventLog = append(c.eventLog, "ack")
+	c.mu.Unlock()
+	signal(c.ackHit)
+	return nil
+}
+
+func (c *fakeWorkerClient) ReleaseWorker(_ context.Context, request api.WorkerReleaseRequest) error {
+	c.mu.Lock()
+	c.releases = append(c.releases, releaseRecord{request: request})
+	c.eventLog = append(c.eventLog, "release")
+	c.mu.Unlock()
+	return nil
+}
+
+func (c *fakeWorkerClient) AcknowledgeReleasedWorkerCommand(_ context.Context, commandID string, request api.ControlAckRequest) error {
+	c.mu.Lock()
+	c.commandAcks = append(c.commandAcks, commandAckRecord{commandID: commandID, request: request})
+	c.eventLog = append(c.eventLog, "released-ack")
 	c.mu.Unlock()
 	signal(c.ackHit)
 	return nil
@@ -366,6 +388,9 @@ func TestResidentWorkerWaitDoesNotBlockHeartbeatOrActiveControlAndContinuesToNex
 	if len(client.finishes) != 2 {
 		t.Fatalf("finish count=%d want=2", len(client.finishes))
 	}
+	if len(client.releases) != 1 {
+		t.Fatalf("graceful shutdown release count=%d want=1", len(client.releases))
+	}
 	foundZeroCapacity := false
 	for _, claim := range client.claims {
 		if claim.WorkCapacity == 0 {
@@ -456,6 +481,12 @@ func TestControlledStopCancelsAndReconcilesBeforeAcknowledgement(t *testing.T) {
 	defer client.mu.Unlock()
 	if len(client.commandAcks) != 1 || client.commandAcks[0].request.State != domain.WorkerCommandApplied {
 		t.Fatalf("stop acknowledgements=%+v", client.commandAcks)
+	}
+	if len(client.releases) != 1 || client.commandAcks[0].request.FencingToken != 2 {
+		t.Fatalf("release=%+v ack=%+v", client.releases, client.commandAcks)
+	}
+	if len(client.eventLog) < 2 || client.eventLog[len(client.eventLog)-2] != "release" || client.eventLog[len(client.eventLog)-1] != "released-ack" {
+		t.Fatalf("stop release/ack order=%v", client.eventLog)
 	}
 	if len(client.finishes) != 1 || client.finishes[0].request.Result.Status != openruntime.TurnResultUncertain {
 		t.Fatalf("shutdown reconciliation=%+v", client.finishes)

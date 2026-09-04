@@ -20,6 +20,8 @@ button:disabled{cursor:not-allowed}
 .connection{display:flex;align-items:center;gap:8px;color:#8b949e;font-size:13px}
 .connection i,.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3fb950}
 .connection i.offline-dot{background:#f85149}
+.install-button{border:1px solid #2f81f7;background:transparent;color:#79c0ff;border-radius:6px;padding:7px 10px;font-size:12px;white-space:nowrap}
+.install-hint{color:#8b949e;font-size:12px;max-width:240px;text-align:right}
 .avatar{border:1px solid #30363d;background:#21262d;color:#f0f6fc;border-radius:50%;width:32px;height:32px;margin-left:10px}
 .offline-banner{background:#3d1f22;color:#ffb4ab;border-bottom:1px solid #f85149;padding:10px 20px;text-align:center;font-size:13px}
 .readonly-banner{background:#292316;color:#f0cf79;border-bottom:1px solid #7a6428;padding:10px 20px;text-align:center;font-size:13px}
@@ -78,4 +80,4 @@ button:disabled{cursor:not-allowed}
 .bottom button span{font-size:20px}
 .bottom button.active{color:#58a6ff}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
-@media(max-width:640px){.top{padding:16px 18px}.hero{display:block;padding-top:24px}.hero h2{font-size:23px}.hero .primary{margin-top:18px;width:100%}.section,.page{padding:22px 18px}.agent-grid{grid-template-columns:1fr}.attention{align-items:flex-start;gap:12px}.attention-actions{flex-shrink:0}.attention button{white-space:nowrap}.org-node{display:block}.org-node span{display:block;margin-top:5px}.task-id{max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.composer-label{align-items:flex-start}.error-banner{margin:10px 18px 0}.login{place-items:start center;padding-top:12vh}}
+@media(max-width:640px){.top{padding:16px 18px}.hero{display:block;padding-top:24px}.hero h2{font-size:23px}.hero .primary{margin-top:18px;width:100%}.section,.page{padding:22px 18px}.agent-grid{grid-template-columns:1fr}.attention{align-items:flex-start;gap:12px}.attention-actions{flex-shrink:0}.attention button{white-space:nowrap}.org-node{display:block}.org-node span{display:block;margin-top:5px}.task-id{max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.composer-label{align-items:flex-start}.error-banner{margin:10px 18px 0}.login{place-items:start center;padding-top:12vh}.install-hint{max-width:145px}}

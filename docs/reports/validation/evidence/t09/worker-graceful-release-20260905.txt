@@ -1,0 +1,43 @@
+T09 graceful lease release restart revalidation (2026-09-05, Asia/Shanghai)
+
+Binary baseline:
+  OpenAgentX commit: 54c69c9 (T09 graceful release/restart fix)
+  openagentx SHA-256: 03ea07333ffa8e59b4649387f4114c8e0ba62321cb85952c7a9675f15665457a
+  Unit Restart=on-failure
+
+A. Before restart (02:42:47 CST)
+  Service: MainPID=1372557, NRestarts=0, ActiveState=active, SubState=running, ExecMainStatus=0
+  Worker: worker-dac3f7d7-ae9a-40ec-b0b7-0b264a8ac9cd, generation=24, fencing=47, status=online
+  Worker lease was valid before the controlled restart.
+
+B. Controlled restart and 1-2 second observation
+  Command: systemctl --user restart openagentx-quote-service-worker.service
+  Exit code: 0; restart window 02:42:47-02:42:49 CST.
+  At 02:42:49 service was already active/running with MainPID=1382938, NRestarts=0, ExecMainStatus=0.
+  Journal scan 02:42:47-02:43:40 found zero occurrences of 409 or "already has a valid Active Worker".
+
+C. Release/register ordering
+  Event 56726 worker.released old worker at 18:42:47.612637576Z UTC.
+  Old row: generation=24, fencing advanced 47 -> 48; status=offline; lease_until and updated_at both 18:42:47.612638483Z UTC (immediate release).
+  Event 56727 worker.registered new worker at 18:42:50.576315704Z UTC.
+  New row: worker-f62525c1-ba4e-4fe3-adcc-61047d46d3a3, generation=25, fencing=49, status=online.
+  Event 56728 initial worker.heartbeat at 18:42:50.578878777Z UTC.
+  Release precedes register by approximately 2.96 seconds; no lease-expiry wait or 409 retry occurred.
+
+D. 12-second stability sample (02:43:36 CST)
+  systemctl is-active openagentx.service openagentx-quote-service-worker.service => active / active
+  Worker service MainPID=1382938, NRestarts=0, ExecMainStatus=0.
+  New Worker generation=25/fencing=49 remains online; heartbeat through 18:43:30.840848342Z UTC.
+  Active RunAttempt count=0.
+  quote-service mailbox pending/claimed count=0; 42 historical items are accepted.
+  Heartbeat events 56729-56732 appear at roughly 10-second intervals.
+
+E. Admin stop
+  Not executed in this production pass. The endpoint requires an authenticated owner Session, CSRF token, Idempotency-Key, and target generation; no reusable credential was available in this validation context. No credential was read or emitted, and no production stop was attempted.
+  Code-level contract reference: internal/worker/runner.go performs lease release before the released stop acknowledgement and returns a clean controlled-stop error path; Restart=on-failure should not relaunch a clean exit. A live Admin stop remains a follow-up action requiring an authenticated browser/API session.
+
+Conclusion: PASS for graceful release/restart matrix A-D. The previous 409 handover defect is not reproduced on this deployed binary. E is explicitly NOT RUN due to safe-auth boundary, not a failure or fabricated pass.
+
+Proxy-wrapped read-only probe:
+  Command: zsh -ic 'set_proxy_server >/dev/null 2>&1; systemctl --user is-active openagentx.service openagentx-quote-service-worker.service'
+  Exit code: 0. No proxy environment, address, or credential was emitted.

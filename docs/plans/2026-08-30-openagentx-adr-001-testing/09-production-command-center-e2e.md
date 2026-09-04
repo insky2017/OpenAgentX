@@ -3,7 +3,7 @@ doc_type: test_task
 status: blocked
 owner: openagentx
 test_id: T09
-updated_at: 2026-09-01
+updated_at: 2026-09-05
 ---
 
 # T09：手机与 PC 生产指挥台端到端
@@ -37,7 +37,8 @@ updated_at: 2026-09-01
 
 ## 验证结论
 
-- 已确认生产 HTTPS/Nginx/SSE、PWA 基础资源、认证与 Session、生产 Task/Message/取消 API、事件流和 Worker 持续在线等基础链路；`running` Task 的取消已完成 `cancel_requested → mailbox → canceled` 闭环。
-- 现有归档截图覆盖 `390x844` 与 `1440x900`，但本轮仅保存到 `412x915` 登录页；没有一份可审计的认证后手机完整交互链路，也没有 PC 与手机独立 Session 对同一持久事实的成对证据。因此不能将手机/PC 指挥台全旅程、页面敏感信息隔离或离线写操作 fail-closed 标为本关已通过。
-- “真实长运行 AGY turn 被取消”同样阻塞：测试任务在执行 `sleep 30` 前，因 AGY eligibility 请求 DNS 失败而退出；因此不能证明真实长运行进程已被中断。
-- T09 暂不标记整体 PASS；需补齐生产浏览器双 Session/离线证据，并在不修改取消语义的前提下恢复 AGY eligibility 网络后重跑真实长运行取消子项。
+- 已确认生产 HTTPS/Nginx/SSE、PWA 基础资源、认证与 Session、生产 Task/Message/取消 API、事件流和 Worker 持续在线等基础链路；真实 AGY A/B/C 均有脱敏归档，A1 OAuth/EOF 失败后 A2/A3 成功，B 不可达代理 rc=2 且恢复后 wrapper 版本探针 rc=0。
+- 真实长运行取消已通过：观察到 `sleep 30` 后发送取消，任务完成 `running → cancel_requested → canceled`，事件包含 control mailbox 接收、`runtime.agy.result` 和 `run_attempt.finished`；Worker 保持同一实例并能继续接单。
+- `t09-final-pc` 与 `t09-final-mobile` 是两个独立生产浏览器 Session，均能创建/跟踪任务并读取持久事实；手机离线时写控件禁用，强制点击无请求，恢复后无自动重放。`beforeinstallprompt` 安装入口通过浏览器侧回归。
+- Worker graceful release 重测通过：受控重启在 2 秒内完成新 generation 接管，日志无 `409 logical Agent already has a valid Active Worker`，旧 Worker 写入 `worker.released`、原子 offline 并推进 fencing；12 秒心跳、active run 和 quote-service mailbox 均正常。
+- T09 暂不标记整体 PASS；当前唯一阻塞是 OS 级 PWA 安装证据，需在真实受控浏览器中记录安装前后的 standalone/installed 状态。

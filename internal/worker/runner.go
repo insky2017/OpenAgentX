@@ -76,7 +76,10 @@ func (r *Runner) Run(ctx context.Context) error {
 		case command := <-stopCommands:
 			ackContext, cancel := context.WithTimeout(context.Background(), r.config.ShutdownTimeout)
 			defer cancel()
-			if ackErr := r.client.AcknowledgeWorkerCommand(ackContext, command.ID, api.ControlAckRequest{
+			if releaseErr := r.releaseWorker(ackContext, session); releaseErr != nil {
+				return fmt.Errorf("release Worker lease before stop acknowledgement: %w", releaseErr)
+			}
+			if ackErr := r.client.AcknowledgeReleasedWorkerCommand(ackContext, command.ID, api.ControlAckRequest{
 				WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
 				FencingToken: session.Worker.FencingToken,
 				State:        domain.WorkerCommandApplied, Result: "Worker stopped after controlled reconciliation",
@@ -88,9 +91,29 @@ func (r *Runner) Run(ctx context.Context) error {
 			return fmt.Errorf("controlled Worker stop lost command context")
 		}
 	}
+	if err == nil && ctx.Err() != nil {
+		releaseContext, cancel := context.WithTimeout(context.Background(), r.config.ShutdownTimeout)
+		defer cancel()
+		if releaseErr := r.releaseWorker(releaseContext, session); releaseErr != nil {
+			return fmt.Errorf("release Worker lease during shutdown: %w", releaseErr)
+		}
+	}
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (r *Runner) releaseWorker(ctx context.Context, session *api.WorkerSession) error {
+	if err := r.client.ReleaseWorker(ctx, api.WorkerReleaseRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken,
+	}); err != nil {
+		return err
+	}
+	// ReleaseWorker advances the fencing token exactly once in its transaction;
+	// carry that value for the narrow released stop acknowledgement.
+	session.Worker.FencingToken++
 	return nil
 }
 

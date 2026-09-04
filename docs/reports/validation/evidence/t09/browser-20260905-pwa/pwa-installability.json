@@ -1,0 +1,14 @@
+{
+  "validated_at": "2026-09-05T01:59:18+08:00",
+  "pc": {
+    "session": "t09-final-pc",
+    "beforeinstallprompt": {"dispatched": true, "default_prevented": true, "install_button_visible": true},
+    "dismissal": {"prompt_called": true, "user_choice": "dismissed", "install_button_visible_after": false, "standalone": false}
+  },
+  "mobile": {
+    "session": "t09-final-mobile",
+    "beforeinstallprompt": {"dispatched": true, "default_prevented": true, "install_button_visible": true},
+    "dismissal": {"prompt_called": true, "user_choice": "dismissed", "install_button_visible_after": false, "standalone": false}
+  },
+  "os_level_install_claimed": false
+}

@@ -1,0 +1,39 @@
+- document:
+  - banner:
+    - text: OPENAGENTX
+    - heading "指挥台" [ref=e1] [level=1]
+    - text: 在线
+    - button "退出" [ref=e2]: 退
+  - main:
+    - paragraph: 组织态势
+    - heading "1 个 Agent 在线" [ref=e3] [level=2]
+    - paragraph: 0 个审批待处理 · 1 个有效 Worker
+    - button "查看任务 →" [ref=e4]
+    - heading "Agent 状态" [ref=e5] [level=3]
+    - button "组织视图" [ref=e6]
+    - article:
+      - strong: Quote Service
+      - text: online · idle
+      - paragraph: quote-service · 心跳 9 秒前
+      - button "进入工作台 ↗" [ref=e7]
+    - article:
+      - strong: Test Fake Agent
+      - text: offline · idle
+      - paragraph: test-fake-agent · 暂无有效 Worker
+      - button "进入工作台 ↗" [ref=e8] [nth=1]
+    - article:
+      - strong: Test Fake Multi-turn Agent
+      - text: offline · busy
+      - paragraph: test-fake-multiturn · 暂无有效 Worker
+      - button "进入工作台 ↗" [ref=e9] [nth=2]
+    - article:
+      - strong: Verification Runner
+      - text: offline · idle
+      - paragraph: verification-runner · 暂无有效 Worker
+      - button "进入工作台 ↗" [ref=e10] [nth=3]
+    - heading "需要你处理" [ref=e11] [level=3]
+    - text: "0"
+  - navigation "主导航" [ref=e12]:
+    - button "⌂ 指挥" [ref=e13]
+    - button "▣ 任务" [ref=e14]
+    - button "⌘ 组织" [ref=e15]

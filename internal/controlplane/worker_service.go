@@ -39,6 +39,8 @@ type WorkerState interface {
 	FinishRun(context.Context, domain.WorkerWriteGuard, string, int64, int64, openruntime.TurnResult, *domain.SessionBinding, int64, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) error
 	ClaimWorkerCommand(context.Context, domain.WorkerWriteGuard, time.Time, *domain.JournalEvent) (*domain.WorkerCommand, error)
 	AcknowledgeWorkerCommand(context.Context, domain.WorkerWriteGuard, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
+	ReleaseWorkerLease(context.Context, domain.WorkerWriteGuard, *domain.JournalEvent) (*domain.WorkerInstance, error)
+	AcknowledgeReleasedWorkerCommand(context.Context, domain.WorkerWriteGuard, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
 }
 
 type TurnPlan struct {
@@ -178,6 +180,18 @@ func (s *WorkerService) Heartbeat(ctx context.Context, principalID string, token
 	})
 	_, err = s.state.HeartbeatWorker(ctx, guard, request.Status, request.BackendHealth,
 		guard.CheckedAt.Add(s.workerLease), guard.CheckedAt.Add(s.tokenLifetime), event)
+	return err
+}
+
+func (s *WorkerService) Release(ctx context.Context, principalID string, token string, request api.WorkerReleaseRequest) error {
+	if err := request.Validate(); err != nil {
+		return err
+	}
+	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
+	if err != nil {
+		return err
+	}
+	_, err = s.state.ReleaseWorkerLease(ctx, guard, s.event("worker", "worker.released", principalID, "", request.WorkerInstanceID, nil))
 	return err
 }
 
@@ -544,6 +558,21 @@ func (s *WorkerService) AcknowledgeWorkerCommand(ctx context.Context, principalI
 		return err
 	}
 	return s.state.AcknowledgeWorkerCommand(ctx, guard, commandID, request.State, request.Result, s.event("worker_command", "worker_command.acknowledged", principalID, "", commandID, map[string]any{"state": request.State}))
+}
+
+func (s *WorkerService) AcknowledgeReleasedWorkerCommand(ctx context.Context, principalID string, token string, commandID string, request api.ControlAckRequest) error {
+	if err := request.Validate(); err != nil {
+		return err
+	}
+	credential, err := s.state.GetWorkerCredential(ctx, request.WorkerInstanceID)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+	guard := domain.WorkerWriteGuard{WorkerInstanceID: request.WorkerInstanceID, AgentID: credential.Worker.AgentID, PrincipalID: principalID, SessionTokenDigest: workerTokenDigest(token), Generation: request.Generation, FencingToken: request.FencingToken, CheckedAt: s.now().UTC()}
+	if err := credential.AuthorizeReleased(guard); err != nil {
+		return err
+	}
+	return s.state.AcknowledgeReleasedWorkerCommand(ctx, guard, commandID, request.State, request.Result, s.event("worker_command", "worker_command.acknowledged", principalID, "", commandID, map[string]any{"state": request.State, "released": true}))
 }
 
 func (s *WorkerService) guard(ctx context.Context, principalID string, token string, workerID string, requestedAgentID string, generation int64, fencingToken int64) (domain.WorkerWriteGuard, error) {

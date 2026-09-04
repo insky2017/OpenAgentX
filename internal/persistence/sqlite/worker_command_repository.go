@@ -245,3 +245,96 @@ func (r *Repository) RevokeWorkerLease(ctx context.Context, workerID string, gen
 	_ = json.Unmarshal([]byte(caps), &capabilities)
 	return &domain.WorkerInstance{ID: workerID, AgentID: agent, Generation: generation, Transport: transport, AuthenticatedPrincipal: principal, Capabilities: capabilities, Status: domain.WorkerStatusOffline, LastHeartbeatAt: parsedHeartbeat, LeaseUntil: now, FencingToken: token, StartedAt: parsedStarted, UpdatedAt: parsedUpdated}, nil
 }
+
+// ReleaseWorkerLease is the authenticated self-release path used during a
+// graceful Worker shutdown. It is a single transaction: lease expiry,
+// fencing advancement and the offline state are committed together.
+func (r *Repository) ReleaseWorkerLease(ctx context.Context, guard domain.WorkerWriteGuard, event *domain.JournalEvent) (*domain.WorkerInstance, error) {
+	now := r.now().UTC()
+	tx, err := r.begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	credential, err := loadGuardedWorker(ctx, tx, guard)
+	if err != nil {
+		return nil, err
+	}
+	if err := validateJournalForAggregate(event, "worker_instance", guard.WorkerInstanceID, now); err != nil {
+		return nil, err
+	}
+	result, err := tx.ExecContext(ctx, `UPDATE worker_instances SET status='offline', fencing_token=fencing_token+1, lease_until=?, updated_at=?
+		WHERE worker_instance_id=? AND generation=? AND fencing_token=? AND status <> 'offline' AND lease_until>?`,
+		formatTime(now), formatTime(now), guard.WorkerInstanceID, guard.Generation, guard.FencingToken, formatTime(guard.CheckedAt))
+	if err != nil {
+		return nil, fmt.Errorf("release Worker lease: %w", err)
+	}
+	if changed, _ := result.RowsAffected(); changed != 1 {
+		return nil, domain.ErrFencingRejected
+	}
+	if err := insertJournal(ctx, tx, event); err != nil {
+		return nil, err
+	}
+	if err := commit(tx); err != nil {
+		return nil, err
+	}
+	credential.Worker.Status = domain.WorkerStatusOffline
+	credential.Worker.FencingToken++
+	credential.Worker.LeaseUntil = now
+	credential.Worker.UpdatedAt = now
+	return &credential.Worker, nil
+}
+
+// AcknowledgeReleasedWorkerCommand is intentionally narrower than the normal
+// ACK path: only a claimed stop command may be acknowledged after the Worker
+// has atomically released its lease.
+func (r *Repository) AcknowledgeReleasedWorkerCommand(ctx context.Context, guard domain.WorkerWriteGuard, commandID string, state domain.WorkerCommandState, result string, event *domain.JournalEvent) error {
+	if state != domain.WorkerCommandApplied && state != domain.WorkerCommandFailed {
+		return domain.ErrInvalidInput("invalid Worker command state")
+	}
+	now := r.now().UTC()
+	tx, err := r.begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	credential, err := scanWorkerCredential(tx.QueryRowContext(ctx, `SELECT worker_instance_id, agent_id, generation, transport, authenticated_principal, capabilities_json, status, last_heartbeat_at, lease_until, fencing_token, started_at, updated_at, session_token_digest, session_token_expires_at FROM worker_instances WHERE worker_instance_id=?`, guard.WorkerInstanceID))
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrUnauthorized
+	}
+	if err != nil {
+		return err
+	}
+	if err := credential.AuthorizeReleased(guard); err != nil {
+		return err
+	}
+	var commandWorkerID string
+	var commandGeneration int64
+	var kind domain.WorkerCommandKind
+	var currentState domain.WorkerCommandState
+	if err := tx.QueryRowContext(ctx, `SELECT worker_instance_id, generation, kind, state FROM worker_commands WHERE worker_command_id=?`, commandID).Scan(&commandWorkerID, &commandGeneration, &kind, &currentState); errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrNotFound
+	} else if err != nil {
+		return err
+	}
+	if commandWorkerID != guard.WorkerInstanceID || commandGeneration != guard.Generation || kind != domain.WorkerCommandStop {
+		return domain.ErrForbidden("Worker command is not an acknowledged stop")
+	}
+	if currentState != domain.WorkerCommandClaimed {
+		return domain.ErrConflict("Worker command is not claimable")
+	}
+	if err := validateJournalForAggregate(event, "worker_command", commandID, now); err != nil {
+		return err
+	}
+	res, err := tx.ExecContext(ctx, `UPDATE worker_commands SET state=?,result=?,applied_at=? WHERE worker_command_id=? AND worker_instance_id=? AND generation=? AND state='claimed'`, state, result, formatTime(now), commandID, guard.WorkerInstanceID, guard.Generation)
+	if err != nil {
+		return err
+	}
+	if changed, _ := res.RowsAffected(); changed != 1 {
+		return domain.ErrConflict("Worker command acknowledgement lost")
+	}
+	if err := insertJournal(ctx, tx, event); err != nil {
+		return err
+	}
+	return commit(tx)
+}

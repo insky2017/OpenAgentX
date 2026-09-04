@@ -1,0 +1,12 @@
+- button "退出" [ref=e1] [disabled]: 退
+- button "返回" [ref=e2]
+- combobox "目标 Agent" [ref=e3]
+- option "Quote Service" [ref=e4] [selected]
+- option "Test Fake Agent" [ref=e5]
+- option "Test Fake Multi-turn Agent" [ref=e6]
+- option "Verification Runner" [ref=e7]
+- textbox "向 quote-service 发送业务指令" [ref=e8] [disabled]:
+- button "发送" [ref=e9] [disabled]: ↑
+- button "⌂ 指挥" [ref=e10]
+- button "▣ 任务" [ref=e11]
+- button "⌘ 组织" [ref=e12]

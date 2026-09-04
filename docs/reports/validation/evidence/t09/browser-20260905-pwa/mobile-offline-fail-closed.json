@@ -1,0 +1,13 @@
+{
+  "validated_at": "2026-09-05T01:59:18+08:00",
+  "session": "t09-final-mobile",
+  "viewport": [412, 915],
+  "offline": true,
+  "navigator_online": false,
+  "input_placeholder": "输入业务指令...",
+  "input_disabled": true,
+  "send_button_disabled": true,
+  "forced_click_fetch_calls": [],
+  "after_restore_navigator_online": true,
+  "automatic_replay_observed": false
+}

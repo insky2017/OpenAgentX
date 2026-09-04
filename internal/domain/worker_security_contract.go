@@ -76,6 +76,33 @@ func (c WorkerCredential) Authorize(guard WorkerWriteGuard) error {
 	return nil
 }
 
+// AuthorizeReleased permits only the narrow acknowledgement window after a
+// Worker has atomically released its lease. It deliberately does not accept
+// any ordinary Worker write while offline.
+func (c WorkerCredential) AuthorizeReleased(guard WorkerWriteGuard) error {
+	if err := guard.Validate(); err != nil {
+		return err
+	}
+	if c.Worker.ID != guard.WorkerInstanceID ||
+		c.Worker.AuthenticatedPrincipal != guard.PrincipalID ||
+		subtle.ConstantTimeCompare([]byte(c.SessionTokenDigest), []byte(guard.SessionTokenDigest)) != 1 {
+		return ErrUnauthorized
+	}
+	if c.Worker.AgentID != guard.AgentID {
+		return ErrForbidden("Worker is not bound to requested Agent")
+	}
+	if c.Worker.Generation != guard.Generation {
+		return ErrSessionGenerationConflict
+	}
+	if c.Worker.FencingToken != guard.FencingToken {
+		return ErrFencingRejected
+	}
+	if c.Worker.Status != WorkerStatusOffline {
+		return ErrInvalidState
+	}
+	return nil
+}
+
 type WorkerWriteGuard struct {
 	WorkerInstanceID   string
 	AgentID            string

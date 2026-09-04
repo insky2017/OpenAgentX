@@ -1,0 +1,52 @@
+- document:
+  - banner:
+    - text: OPENAGENTX
+    - heading "指挥台" [ref=e1] [level=1]
+    - text: 在线
+    - button "退出" [ref=e2]: 退
+  - main:
+    - button "返回" [ref=e3]: ←
+    - paragraph: 工作队列
+    - heading "任务" [ref=e4] [level=2]
+    - text: 目标 Agent
+    - combobox "目标 Agent" [ref=e5]:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - article:
+    - text: 向 quote-service 发送业务指令
+    - textbox "向 quote-service 发送业务指令" [ref=e6]:
+    - button "发送" [ref=e7] [disabled]: ↑
+  - navigation "主导航" [ref=e8]:
+    - button "⌂ 指挥" [ref=e9]
+    - button "▣ 任务" [ref=e10]
+    - button "⌘ 组织" [ref=e11]

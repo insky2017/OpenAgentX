@@ -1,0 +1,27 @@
+uid=1_0 RootWebArea "OpenAgentX 指挥台" url="https://agentx.oneaxe.cn/"
+  uid=1_1 ignored
+    uid=1_2 ignored
+      uid=1_3 generic
+        uid=1_4 main
+          uid=1_5 generic
+            uid=1_6 paragraph
+              uid=1_7 StaticText "OPENAGENTX"
+                uid=1_8 InlineTextBox "OPENAGENTX"
+            uid=1_9 heading "指挥台" level="1"
+              uid=1_10 StaticText "指挥台"
+                uid=1_8 InlineTextBox "指挥台"
+            uid=1_11 LabelText
+              uid=1_12 StaticText "用户名"
+                uid=1_8 InlineTextBox "用户名"
+            uid=1_13 textbox "用户名" value="owner"
+              uid=1_14 generic
+                uid=1_15 StaticText "owner"
+                  uid=1_8 InlineTextBox "owner"
+            uid=1_16 LabelText
+              uid=1_17 StaticText "密码"
+                uid=1_8 InlineTextBox "密码"
+            uid=1_18 textbox "密码"
+              uid=1_19 generic
+            uid=1_20 button "登录"
+              uid=1_21 StaticText "登录"
+                uid=1_8 InlineTextBox "登录"

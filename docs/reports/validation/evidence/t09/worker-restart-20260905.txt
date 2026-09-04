@@ -1,0 +1,33 @@
+T09 Worker lease/restart verification (2026-09-05, Asia/Shanghai)
+
+Commands:
+  systemctl --user show openagentx-quote-service-worker.service -p MainPID -p NRestarts -p ActiveState -p SubState -p ExecMainStatus -p ActiveEnterTimestamp --no-pager
+  sqlite3 OpenAgentX/data/openagentx.db "select worker_instance_id,agent_id,generation,fencing_token,status,last_heartbeat_at,lease_until,updated_at from worker_instances where agent_id='quote-service' order by generation desc limit 4;"
+  systemctl --user restart openagentx-quote-service-worker.service
+  sleep 35
+  journalctl --user -u openagentx-quote-service-worker.service --since '-50 seconds' --no-pager -o short-iso
+
+Before restart (02:22:53 CST):
+  service MainPID=1306012, NRestarts=4, ActiveState=active, SubState=running, ExecMainStatus=0
+  worker-f9e32b5b-94f5-4a35-92fc-b53eb1d0fd36 generation=21 fencing=41 status=online
+
+Restart window (02:22:53-02:23:11 CST):
+  Four successive starts exited with HTTP 409: logical Agent already has a valid Active Worker.
+  At 02:23:01 service was ActiveState=activating/SubState=auto-restart, MainPID=0, ExecMainStatus=1.
+  This is a bounded lease handover delay, not an immediate restart PASS.
+
+After lease expiry (02:23:54 CST):
+  service MainPID=1322265, NRestarts=4, ActiveState=active, SubState=running, ExecMainStatus=0
+  worker-18e4dbfd-fef8-4d3d-ad2e-3c3c8a9fce93 generation=22 fencing=43 status=online
+  worker-f9e32b5b-94f5-4a35-92fc-b53eb1d0fd36 generation=21 fencing=42 status=offline
+  systemctl --user is-active openagentx.service openagentx-quote-service-worker.service => active / active
+
+Conclusion: lease fencing eventually recovers safely after the old lease expires; the observed 409 retry window remains a T09 stability finding and prevents an immediate-stability PASS claim.
+
+Minimal regression after recovery (02:27:09 CST):
+  systemctl --user is-active openagentx.service openagentx-quote-service-worker.service => active / active
+  active RunAttempt count => 0
+  quote-service mailbox pending count => 0 (42 historical items accepted)
+  online Worker count => 1
+  event journal tail => consecutive worker.heartbeat events through 02:27:36 CST
+  Whole database has one historical pending item for test-fake-multiturn (sequence 48), unrelated to quote-service and not created by this check.

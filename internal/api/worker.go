@@ -9,16 +9,18 @@ import (
 )
 
 const (
-	WorkerRegisterPath      = "/api/v1/workers/register"
-	WorkerHeartbeatPath     = "/api/v1/workers/{worker-id}/heartbeat"
-	WorkerMailboxClaimPath  = "/api/v1/workers/{worker-id}/mailbox/claim"
-	WorkerControlClaimPath  = "/api/v1/workers/{worker-id}/control/claim"
-	MailboxAcceptPath       = "/api/v1/mailbox/{item-id}/accept"
-	MailboxBeginAttemptPath = "/api/v1/mailbox/{item-id}/begin-attempt"
-	MailboxPayloadPath      = "/api/v1/mailbox/{item-id}/payload"
-	WorkerCommandAckPath    = "/api/v1/worker-commands/{command-id}/ack"
-	RunEventsPath           = "/api/v1/run-attempts/{run-id}/events"
-	RunFinishPath           = "/api/v1/run-attempts/{run-id}/finish"
+	WorkerRegisterPath           = "/api/v1/workers/register"
+	WorkerHeartbeatPath          = "/api/v1/workers/{worker-id}/heartbeat"
+	WorkerMailboxClaimPath       = "/api/v1/workers/{worker-id}/mailbox/claim"
+	WorkerControlClaimPath       = "/api/v1/workers/{worker-id}/control/claim"
+	WorkerReleasePath            = "/api/v1/workers/{worker-id}/release"
+	MailboxAcceptPath            = "/api/v1/mailbox/{item-id}/accept"
+	MailboxBeginAttemptPath      = "/api/v1/mailbox/{item-id}/begin-attempt"
+	MailboxPayloadPath           = "/api/v1/mailbox/{item-id}/payload"
+	WorkerCommandAckPath         = "/api/v1/worker-commands/{command-id}/ack"
+	WorkerReleasedCommandAckPath = "/api/v1/worker-commands/{command-id}/released-ack"
+	RunEventsPath                = "/api/v1/run-attempts/{run-id}/events"
+	RunFinishPath                = "/api/v1/run-attempts/{run-id}/finish"
 )
 
 type RegisterRequest struct {
@@ -71,6 +73,22 @@ type HeartbeatRequest struct {
 	FencingToken     int64                            `json:"fencing_token"`
 	Status           domain.WorkerStatus              `json:"status"`
 	BackendHealth    map[string]runtime.BackendHealth `json:"backend_health"`
+}
+
+type WorkerReleaseRequest struct {
+	WorkerInstanceID string `json:"worker_instance_id"`
+	Generation       int64  `json:"generation"`
+	FencingToken     int64  `json:"fencing_token"`
+}
+
+func (r WorkerReleaseRequest) Validate() error {
+	if err := domain.ValidateOpaqueID("worker_instance_id", r.WorkerInstanceID); err != nil {
+		return err
+	}
+	if err := domain.ValidatePositiveVersion("generation", r.Generation); err != nil {
+		return err
+	}
+	return domain.ValidatePositiveVersion("fencing_token", r.FencingToken)
 }
 
 func (r HeartbeatRequest) Validate() error {
@@ -332,6 +350,8 @@ type WorkerControlClient interface {
 	AcceptMailboxItem(context.Context, string, AcceptRequest) error
 	ClaimWorkerCommand(context.Context, ControlClaimRequest) (*domain.WorkerCommand, error)
 	AcknowledgeWorkerCommand(context.Context, string, ControlAckRequest) error
+	ReleaseWorker(context.Context, WorkerReleaseRequest) error
+	AcknowledgeReleasedWorkerCommand(context.Context, string, ControlAckRequest) error
 	AppendRunEvents(context.Context, string, EventBatch) error
 	FinishRun(context.Context, string, FinishRunRequest) error
 }

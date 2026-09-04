@@ -1,0 +1,15 @@
+T09 controlled Chrome PWA OS-install check (2026-09-05)
+
+Target: https://agentx.oneaxe.cn/
+
+Chrome DevTools page evaluation:
+  {"secure":true,"standalone":false,"navigatorStandalone":null,
+   "manifest":"https://agentx.oneaxe.cn/manifest.webmanifest",
+   "serviceWorkers":1,"beforeInstallProperty":true}
+
+Reload with an early beforeinstallprompt listener completed with a navigation timeout because the production page keeps its event stream open; follow-up evaluation recorded {"seen":false,"standalone":false,"sw":"available"}.
+Console: "Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner."
+Screenshot: pc-os-install-blocked-1440x900.png
+DOM snapshot: pc-os-install-blocked.snapshot
+
+Result: browser-side installability/runtime is observable, but OS-level installation was not confirmed. standalone remains false and no installed-app state was observed. BLOCKED; do not promote to PASS.

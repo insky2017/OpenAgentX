@@ -1,0 +1,23 @@
+{
+  "validated_at": "2026-09-05T01:59:18+08:00",
+  "pc": {
+    "session": "t09-final-pc",
+    "url": "https://agentx.oneaxe.cn/",
+    "viewport": [1440, 900],
+    "manifest_display": "standalone",
+    "icons": ["/icon-192.png", "/icon-512.png"],
+    "service_workers": ["https://agentx.oneaxe.cn/sw.js"],
+    "standalone": false,
+    "related_apps": 0
+  },
+  "mobile": {
+    "session": "t09-final-mobile",
+    "url": "https://agentx.oneaxe.cn/",
+    "viewport": [412, 915],
+    "manifest_display": "standalone",
+    "icons": ["/icon-192.png", "/icon-512.png"],
+    "service_workers": ["https://agentx.oneaxe.cn/sw.js"],
+    "standalone": false,
+    "related_apps": 0
+  }
+}

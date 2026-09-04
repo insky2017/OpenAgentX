@@ -1,0 +1,6 @@
+2026-09-05T01:25:43+08:00
+rc=0
+8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968
+1.1.26
+(eval):1: can't change option: zle
+(eval):1: can't change option: zle

@@ -1,0 +1,17 @@
+{
+  "server_time": "2026-09-04T17:26:53.592344524Z",
+  "task": {
+    "task_id": "task-bd2ffba7-477e-434e-be44-1489c9ebd452",
+    "status": "succeeded",
+    "version": 3,
+    "target_agent_id": "quote-service",
+    "created_at": "2026-09-04T17:26:05.862363995Z",
+    "updated_at": "2026-09-04T17:26:16.90655533Z"
+  },
+  "worker": {
+    "agent_id": "quote-service",
+    "status": "online",
+    "instance_id": "worker-4c39d926-037d-4cb2-b6a1-4b6fd1d2dc29",
+    "generation": 20
+  }
+}

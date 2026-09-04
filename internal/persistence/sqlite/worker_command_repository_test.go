@@ -128,6 +128,37 @@ func TestAcknowledgeWorkerCommandRejectsInvalidGuardWithoutUpdating(t *testing.T
 	}
 }
 
+func TestReleaseWorkerLeaseFencesAndAllowsOnlyReleasedStopAck(t *testing.T) {
+	repository, fixture, worker, guard, command := setupClaimedWorkerCommand(t, "release")
+	if _, err := repository.db.Exec(`UPDATE worker_commands SET kind='stop' WHERE worker_command_id=?`, command.ID); err != nil {
+		t.Fatal(err)
+	}
+	released, err := repository.ReleaseWorkerLease(context.Background(), guard,
+		journalEvent("event-worker-released", "worker.released", fixture.ownerPrincipal, fixture.organizationID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if released.Status != domain.WorkerStatusOffline || released.FencingToken != worker.FencingToken+1 || !released.LeaseUntil.Equal(repositoryTestTime) {
+		t.Fatalf("released=%+v", released)
+	}
+	newGuard := guard
+	newGuard.FencingToken++
+	if err := repository.AcknowledgeReleasedWorkerCommand(context.Background(), newGuard, command.ID, domain.WorkerCommandApplied, "stopped",
+		journalEvent("event-released-ack", "worker_command.acknowledged", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repository.ReleaseWorkerLease(context.Background(), guard,
+		journalEvent("event-worker-released-retry", "worker.released", fixture.ownerPrincipal, fixture.organizationID)); !errors.Is(err, domain.ErrFencingRejected) {
+		t.Fatalf("duplicate release err=%v", err)
+	}
+	stale := newGuard
+	stale.FencingToken++
+	if err := repository.AcknowledgeReleasedWorkerCommand(context.Background(), stale, command.ID, domain.WorkerCommandApplied, "stopped",
+		journalEvent("event-released-ack-stale", "worker_command.acknowledged", fixture.ownerPrincipal, fixture.organizationID)); !errors.Is(err, domain.ErrFencingRejected) {
+		t.Fatalf("stale released ack err=%v", err)
+	}
+}
+
 func setupClaimedWorkerCommand(t *testing.T, suffix string) (*Repository, repositoryFixture, *domain.WorkerInstance, domain.WorkerWriteGuard, *domain.WorkerCommand) {
 	t.Helper()
 	repository, _ := openTestRepository(t, nil)

@@ -86,6 +86,11 @@ func (c *UnixHTTPWorkerClient) Heartbeat(ctx context.Context, request openapi.He
 	return c.do(ctx, http.MethodPost, path, nil, request, nil, true)
 }
 
+func (c *UnixHTTPWorkerClient) ReleaseWorker(ctx context.Context, request openapi.WorkerReleaseRequest) error {
+	path := replacePath(openapi.WorkerReleasePath, "{worker-id}", request.WorkerInstanceID)
+	return c.do(ctx, http.MethodPost, path, nil, request, nil, true)
+}
+
 func (c *UnixHTTPWorkerClient) ClaimMailbox(ctx context.Context, request openapi.ClaimRequest) (*domain.MailboxItem, error) {
 	path := replacePath(openapi.WorkerMailboxClaimPath, "{worker-id}", request.WorkerInstanceID)
 	query := url.Values{"wait": []string{strconv.Itoa(request.WaitSeconds) + "s"}}
@@ -170,6 +175,11 @@ func (c *UnixHTTPWorkerClient) ClaimWorkerCommand(ctx context.Context, request o
 
 func (c *UnixHTTPWorkerClient) AcknowledgeWorkerCommand(ctx context.Context, commandID string, request openapi.ControlAckRequest) error {
 	path := replacePath(openapi.WorkerCommandAckPath, "{command-id}", commandID)
+	return c.do(ctx, http.MethodPost, path, nil, request, nil, true)
+}
+
+func (c *UnixHTTPWorkerClient) AcknowledgeReleasedWorkerCommand(ctx context.Context, commandID string, request openapi.ControlAckRequest) error {
+	path := replacePath(openapi.WorkerReleasedCommandAckPath, "{command-id}", commandID)
 	return c.do(ctx, http.MethodPost, path, nil, request, nil, true)
 }
 

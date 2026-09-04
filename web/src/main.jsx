@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
 
@@ -31,6 +31,9 @@ const formatAge = (value) => {
   if (milliseconds < 60_000) return `${Math.max(0, Math.round(milliseconds / 1000))} 秒前`
   return `${Math.max(1, Math.round(milliseconds / 60_000))} 分钟前`
 }
+
+const isStandalone = () => window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState('owner')
@@ -85,17 +88,34 @@ function App() {
   const [error, setError] = useState('')
   const [writing, setWriting] = useState(false)
   const [now, setNow] = useState(Date.now())
+  const deferredInstallPrompt = useRef(null)
+  const [installState, setInstallState] = useState('hidden')
 
   useEffect(() => {
     api('/api/auth/v1/session').then(setSession).catch(() => setSession(false))
     const handleOnline = () => setBrowserOnline(true)
     const handleOffline = () => setBrowserOnline(false)
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault()
+      deferredInstallPrompt.current = event
+      setInstallState('available')
+    }
+    const handleAppInstalled = () => {
+      deferredInstallPrompt.current = null
+      setInstallState('installed')
+    }
     addEventListener('online', handleOnline)
     addEventListener('offline', handleOffline)
+    addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    addEventListener('appinstalled', handleAppInstalled)
+    if (isStandalone()) setInstallState('installed')
+    else if (isIOS()) setInstallState('manual')
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {})
     return () => {
       removeEventListener('online', handleOnline)
       removeEventListener('offline', handleOffline)
+      removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      removeEventListener('appinstalled', handleAppInstalled)
     }
   }, [])
 
@@ -174,6 +194,21 @@ function App() {
   const refreshOverview = async () => {
     const overview = await api('/api/observe/v1/overview')
     setData(overview)
+  }
+
+  const installPWA = async () => {
+    const prompt = deferredInstallPrompt.current
+    if (!prompt) return
+    try {
+      await prompt.prompt()
+      await prompt.userChoice
+    } catch {
+      // The browser owns the install dialog; a dismissed or unavailable
+      // prompt must not be presented as an installed app.
+    } finally {
+      deferredInstallPrompt.current = null
+      setInstallState('hidden')
+    }
   }
 
   const write = async (path, body, idempotencyKey) => {
@@ -276,6 +311,8 @@ function App() {
         <div className="connection">
           <i className={connectionLabel === '在线' ? '' : 'offline-dot'} />
           {connectionLabel}
+          {installState === 'available' && <button className="install-button" type="button" onClick={installPWA}>⇩ 安装</button>}
+          {installState === 'manual' && <span className="install-hint" role="status">可从浏览器菜单添加到主屏幕</span>}
           <button className="avatar" aria-label="退出" title="退出" disabled={!browserOnline} onClick={logout}>退</button>
         </div>
       </header>

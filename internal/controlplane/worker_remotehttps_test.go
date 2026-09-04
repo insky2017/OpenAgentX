@@ -99,6 +99,9 @@ func TestRemoteHTTPSWorkerAPIEndToEnd(t *testing.T) {
 	if err := client.FinishRun(context.Background(), begin.Turn.RunAttempt.ID, api.FinishRunRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken, ExpectedTaskVersion: begin.Turn.Task.Version, ExpectedRunVersion: begin.Turn.RunAttempt.Version, Result: openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "remote-done", SideEffectsKnown: true}}); err != nil {
 		t.Fatal(err)
 	}
+	if err := client.ReleaseWorker(context.Background(), api.WorkerReleaseRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken}); err != nil {
+		t.Fatalf("remote Worker release: %v", err)
+	}
 }
 
 func makeRemoteTestCertificate(t *testing.T, parent *remoteTestCertificate, isCA bool, commonName string, notBefore, notAfter time.Time) remoteTestCertificate {

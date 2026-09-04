@@ -151,6 +151,18 @@ func TestUnixHTTPWorkerAPIEndToEnd(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	if err := client.ReleaseWorker(context.Background(), api.WorkerReleaseRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken}); err != nil {
+		t.Fatalf("release Worker lease: %v", err)
+	}
+	if err := client.ReleaseWorker(context.Background(), api.WorkerReleaseRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken}); err == nil {
+		t.Fatal("duplicate release unexpectedly succeeded")
+	}
+	if _, err := client.RegisterWorker(context.Background(), api.RegisterRequest{
+		ContractVersion: api.ContractVersion, AgentID: environment.agentID, WorkerInstanceID: "worker-uds-replacement",
+		Transport: domain.WorkerTransportUnix, Capabilities: []string{"coding"}, Backends: []openruntime.BackendRegistration{environment.backend},
+	}); err != nil {
+		t.Fatalf("replacement Worker registration after release: %v", err)
+	}
 	cancelServer()
 	select {
 	case err := <-serverResult:
