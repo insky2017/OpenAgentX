@@ -1,0 +1,13 @@
+T09 OS-level PWA installation control availability (2026-09-05)
+
+Attempted controlled-browser setup:
+  Chrome extension/browser binding: unavailable (`Browser is not available: chrome`).
+  Default browser binding: unavailable (`No browser is available`).
+  Chrome DevTools MCP remained available only for isolated page-level control.
+
+Page-level evidence was collected from https://agentx.oneaxe.cn/:
+  secure context=true; manifest present; Service Worker registrations=1;
+  display-mode standalone=false; navigator.standalone=null;
+  browser console: installation banner not shown because beforeinstallprompt was preventDefault-ed.
+
+No browser cookies, passwords, Session tokens, or profile stores were inspected. No OS install was claimed. Result: BLOCKED pending a Chrome/Chromium session with browser-shell installation controls (or equivalent OS-level installed-app evidence).

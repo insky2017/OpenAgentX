@@ -1,0 +1,15 @@
+T09 controlled cleanup and direct isolated Chrome retry (2026-09-05)
+
+Cleanup:
+  Exact matches only: `chrome-devtools-mcp --headless --isolated` and children whose command line contained `/tmp/puppeteer_dev_chrome_profile-*` or `/tmp/playwright_chromiumdev_profile-*`.
+  Before count: 63. SIGTERM, wait 3 seconds: 1 remaining. SIGKILL exact remaining PID. Final count: 0.
+  `/proc/sys/fs/inotify/max_user_instances`=128; `max_user_watches`=65536. No profile was deleted; non-headless GUI Chrome, Codex, and `~/.config/google-chrome` were not targeted.
+
+Direct isolated retry:
+  New profile `/tmp/oax-t09-direct.XUaLw9`; real `/opt/google/chrome/chrome` on `DISPLAY=:1` with all HTTP(S)/ALL proxy environment variables explicitly unset.
+  Chrome created a visible isolated window titled `OpenAgentX 指挥台 - Google Chrome`; screenshot: `isolated-direct-before-install-20260905.png`.
+  Browser log recorded repeated TLS handshake `net_error -101`; page still rendered the production login shell and Chrome install icon was visible.
+  libXtst XTest focus/click attempts against the toolbar install icon (multiple coordinate checks) produced no native install dialog or state change. Follow-up screenshots: `isolated-direct-after-install-click-20260905.png`, `isolated-direct-after-install-click2-20260905.png`, `isolated-direct-after-install-click3-20260905.png`, `isolated-direct-after-install-click4-20260905.png`, `isolated-direct-after-focus-install-20260905.png`.
+  `_NET_ACTIVE_WINDOW` remained `0x0`; XTest events were not accepted by the window manager/browser shell. No `standalone=true`, installed-related-apps, chrome://apps, or installed-app launch evidence was available.
+
+Conclusion: direct no-proxy isolated Chrome did not produce OS-level installation evidence. The minimum remaining external action is a human click in a stable GUI Chrome session (or working browser-shell automation) followed by standalone/installed verification. T09 remains BLOCKED.

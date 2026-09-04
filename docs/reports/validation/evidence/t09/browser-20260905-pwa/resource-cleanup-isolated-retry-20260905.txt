@@ -1,0 +1,15 @@
+T09 controlled resource cleanup and isolated GUI Chrome retry (2026-09-05)
+
+Cleanup scope:
+  Matched only command lines containing `chrome-devtools-mcp --headless --isolated`, `/tmp/puppeteer_dev_chrome_profile-*`, or `/tmp/playwright_chromiumdev_profile-*`.
+  Before: 63 matching PIDs. Sent SIGTERM; after 3 seconds 1 matching PID remained; sent SIGKILL to that remaining exact match; final matching count 0.
+  User GUI Chrome (non-headless), Codex/desktop processes, and ~/.config/google-chrome were not targeted. No profile was deleted.
+  `/proc/sys/fs/inotify/max_user_instances`=128; `max_user_watches`=65536.
+
+Isolated retry:
+  Fresh profile was created under `/tmp/oax-t09-clean2.iYG8hJ` and real Google Chrome was launched on DISPLAY=:1 with proxy configured through `set_proxy_server` (proxy value intentionally omitted).
+  A visible isolated Chrome window appeared and was identified by its temporary-profile WM_CLASS. The process was controlled in-session with libXtst XTest and an install-toolbar click was attempted.
+  The page then displayed Chrome `ERR_NO_SUPPORTED_PROXIES`; no production document or install prompt was loaded, and no standalone/installed state could be recorded.
+  No ~/.config/google-chrome profile, password, Cookie, or Session Token was read.
+
+Conclusion: resource exhaustion was mitigated (headless matching count 0), but the isolated profile cannot reach the production page with the authenticated proxy URL accepted by the shell environment (`ERR_NO_SUPPORTED_PROXIES`). The remaining minimum external action is a stable GUI Chrome profile with supported proxy configuration, then one human/automation click on Install and standalone/installed verification. T09 remains BLOCKED.

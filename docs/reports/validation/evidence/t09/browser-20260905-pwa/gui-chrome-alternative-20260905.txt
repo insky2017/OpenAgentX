@@ -1,0 +1,20 @@
+T09 OS-level PWA installation alternative-path investigation (2026-09-05)
+
+Environment:
+  DISPLAY=:1; existing Google Chrome GUI window is available.
+  `xprop` identified a Chrome top-level window titled "OpenAgentX 指挥台 - Google Chrome".
+  `xwininfo` reports a visible 3840x2096 Chrome client window.
+  Screenshot: chrome-gui-openagentx-window-20260905.png.
+
+Alternative path:
+  Command: DISPLAY=:1 google-chrome --new-window https://agentx.oneaxe.cn/
+  Exit code: 0; Chrome reported it opened the URL in the existing browser session.
+  The GUI screenshot shows the production login page and Chrome toolbar install-app candidate icon.
+  No password was read or submitted; the autofilled password remained masked.
+
+Control attempts:
+  `xdotool`, `wmctrl`, `xte`, `xvkbd`, and `ydotool` are absent.
+  X11 XTest focus/mouse/key injection was attempted against the OpenAgentX Chrome window; the browser menu/install dialog did not open, and no system-installed app state was observed.
+  Existing Chrome has no exposed remote-debugging endpoint; the available DevTools MCP controls an isolated page, not browser chrome.
+
+Result: BLOCKED. The remaining minimum external operation is a human/operator click on Chrome's install-app toolbar/menu item (or an equivalent connected browser-shell automation session), followed by recording standalone/installed state and launching the installed app. No OS-level installation is claimed.

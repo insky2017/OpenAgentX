@@ -1,0 +1,16 @@
+T09 final isolated Chrome profile/XTest installation attempt (2026-09-05)
+
+Profile isolation:
+  Created a fresh profile under `/tmp/oax-t09-final.yhtKSg`; no ~/.config/google-chrome data was accessed.
+  Launched real `/opt/google/chrome/chrome` on DISPLAY=:1 with production URL and proxy configured through the existing `set_proxy_server` environment. Proxy values are intentionally omitted.
+
+Observed result:
+  Launcher returned successfully and child Chrome processes briefly appeared, but no isolated Chrome top-level window was created.
+  Chrome log (sanitized): `inotify_init() failed: Too many open files (24)` from file_path_watcher; no install dialog or app window followed.
+  The existing user Chrome window remained a separate profile and was not used for profile data or credential access.
+
+X11/XTest:
+  libXtst.so.6 is available; no xdotool/wmctrl/xte/xvkbd/ydotool are installed.
+  XTest focus/mouse/key events against the existing OpenAgentX window did not open the browser menu or install dialog. Screenshot `chrome-gui-three-dot-20260905.png` records the unchanged page.
+
+Conclusion: OS-level installation evidence remains unavailable. Minimum external action is a human click on Chrome's install-app toolbar/menu item in a stable GUI profile, followed by standalone/installed-app and launch verification. T09 remains BLOCKED.

@@ -42,6 +42,16 @@ T09 的生产入口、任务控制和真实 AGY 运行链路均已取得本轮�
 
 移动端离线验证使用 DevTools 将网络设为 Offline 后，`Quote Service` 工作台的输入框与发送按钮被禁用；脚本层强制点击也没有产生 fetch/API 请求，恢复网络后未观察到自动重放。对应证据保存于 `docs/reports/validation/evidence/t09/browser-20260905/` 的 offline 快照、点击结果和网络记录。
 
+2026-09-05 OS 级安装复验仍未取得安装确认。受控 Chrome DevTools 页面评估确认 HTTPS、manifest、Service Worker 注册数为 1，但 `display-mode: standalone` 为 `false`；Chrome 控制台提示安装事件被 `preventDefault`，且当前可用自动化连接为隔离页面控制，无法操作浏览器外壳的安装菜单或确认系统应用启动。未将浏览器侧 installability 证据升级为“已安装”；脱敏截图、DOM 与评估结果见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/pc-os-install-check.txt`、`pc-os-install-blocked-1440x900.png` 和 `pc-os-install-blocked.snapshot`。T09 继续 `BLOCKED`。
+
+替代路径调查确认 DISPLAY=:1 上存在真实 Google Chrome 图形窗口，并可通过 `google-chrome --new-window` 打开生产页面；但本机缺少浏览器外壳输入控制工具，现有 DevTools 连接也不能操作 Chrome 菜单。工具栏安装图标可见但未能触发原生安装对话框，未读取或提交自动填充密码，未声称系统已安装。详见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/gui-chrome-alternative-20260905.txt` 及对应截图。
+
+最后一次隔离 profile + XTest 尝试在 `/tmp` 启动真实 Chrome，进程因 `inotify_init() failed: Too many open files (24)` 未创建可操作窗口；未接触用户 Chrome profile。现有 GUI 窗口的 XTest 菜单点击仍无效，故没有 OS 安装/启动证据。详见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/isolated-profile-xtest-final-20260905.txt`。
+
+在受控清理 63 个匹配的 headless DevTools/临时 profile 进程后，inotify 资源恢复；新的 `/tmp` 隔离 Chrome 可创建窗口，但通过 `set_proxy_server` 注入的代理在 Chrome 中报 `ERR_NO_SUPPORTED_PROXIES`，页面未加载，XTest 无法进入安装流程。未接触用户 Chrome profile，未读取凭据。详见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/resource-cleanup-isolated-retry-20260905.txt`。
+
+随后对新的 `/tmp` 隔离 profile 显式清除 HTTP(S)/ALL proxy 环境后直连，Chrome 页面可渲染生产登录壳体并显示安装图标；XTest 聚焦/点击未被窗口管理器接受（`_NET_ACTIVE_WINDOW=0x0`），没有原生安装对话框、standalone 或 installed-app 启动证据。详见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/resource-cleanup-direct-no-proxy-20260905.txt`。
+
 ## 生产 API 多轮与持续 Worker
 
 真实 AGY A/B/C 证据已归档于 `docs/reports/validation/evidence/t09/agy-graft-20260905/`。A1 `task-5b114f4e-9ecb-4326-8a46-0d89287efe98` 为一次 OAuth/EOF 环境失败；按规则重试的 A2 `task-bd2ffba7-477e-434e-be44-1489c9ebd452` 与 A3 `task-b4d7022a-7926-4ee5-b536-7d1b82a0098a` 均为 `succeeded`，Worker 同实例、generation 20 保持在线。A 事件含 `runtime.agy.init`、`runtime.agy.step_update`、`runtime.agy.result`、`run_attempt.finished` 和 `task.settled`。
