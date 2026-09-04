@@ -7,6 +7,10 @@ Requires=openagentx.service
 Type=simple
 User=%i
 WorkingDirectory=/opt/openagentx
+# Keep Runtime startup independent from an interactive shell. Per-instance
+# AGY paths and optional proxy config belong in this instance EnvironmentFile.
+Environment=PATH=/opt/openagentx/bin:/usr/local/libexec/openagentx:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+EnvironmentFile=-/etc/openagentx/workers/%i.env
 ExecStart=/opt/openagentx/bin/openagentx worker run --config /etc/openagentx/workers/%i.yaml
 Restart=on-failure
 RestartSec=3s

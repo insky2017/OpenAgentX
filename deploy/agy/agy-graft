@@ -1,0 +1,324 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REAL_AGY="${AGY_GRAFT_REAL_BIN:-/home/sky/.local/bin/agy}"
+MGRAFTCP="${AGY_GRAFT_MGRAFTCP_BIN:-/home/sky/tools/bin/mgraftcp}"
+SELECT_PROXY_MODE="${AGY_GRAFT_SELECT_PROXY_MODE:-}"
+GOMAXPROCS_VALUE="${AGY_GRAFT_GOMAXPROCS:-1}"
+IPV4_ONLY_MODE="${AGY_GRAFT_IPV4_ONLY:-auto}"
+IPV4_ONLY_FILE="${AGY_GRAFT_IPV4_ONLY_FILE:-/home/sky/.config/graftcp/agy-graft-ipv4-only.txt}"
+CONFIG_FILE="${AGY_GRAFT_CONFIG:-}"
+
+first_set() {
+  local name
+  for name in "$@"; do
+    if [[ -n "${!name:-}" ]]; then
+      printf '%s\n' "${!name}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+parse_proxy() {
+  local raw="$1"
+  local default_scheme="$2"
+  proxy_scheme="$default_scheme"
+  proxy_addr="$raw"
+  proxy_username=""
+  proxy_password=""
+
+  if [[ "$proxy_addr" == *"://"* ]]; then
+    proxy_scheme="${proxy_addr%%://*}"
+    proxy_addr="${proxy_addr#*://}"
+  fi
+
+  proxy_addr="${proxy_addr%%/*}"
+  if [[ "$proxy_addr" == *"@"* ]]; then
+    local auth="${proxy_addr%@*}"
+    proxy_addr="${proxy_addr#*@}"
+    proxy_username="${auth%%:*}"
+    if [[ "$auth" == *":"* ]]; then
+      proxy_password="${auth#*:}"
+    fi
+  fi
+}
+
+validate_proxy_addr() {
+  local addr="$1"
+  local host="${addr%:*}"
+  local port="${addr##*:}"
+  if [[ -z "$host" || -z "$port" || "$host" == "$addr" ]]; then
+    echo "agy-graft: invalid proxy address: $addr" >&2
+    exit 2
+  fi
+
+  case "$host" in
+    127.*|localhost|::1)
+      if ! ss -ltn "sport = :${port}" | grep -q ":${port}"; then
+        echo "agy-graft: proxy port ${addr} is not listening." >&2
+        exit 2
+      fi
+      ;;
+  esac
+}
+
+config_value() {
+  local key="$1"
+  [[ -n "$CONFIG_FILE" && -r "$CONFIG_FILE" ]] || return 1
+  awk -F= -v wanted="$key" '
+    /^[[:space:]]*#/ { next }
+    NF < 2 { next }
+    {
+      key=$1
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
+      if (key == wanted) {
+        value=$0
+        sub(/^[^=]*=/, "", value)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+        print value
+        exit
+      }
+    }
+  ' "$CONFIG_FILE"
+}
+
+if [[ ! -x "$REAL_AGY" ]]; then
+  echo "agy-graft: real agy binary not found or not executable: $REAL_AGY" >&2
+  exit 127
+fi
+
+if [[ ! -x "$MGRAFTCP" ]]; then
+  echo "agy-graft: mgraftcp not found or not executable: $MGRAFTCP" >&2
+  exit 127
+fi
+
+if [[ -n "$CONFIG_FILE" ]]; then
+  if [[ -L "$CONFIG_FILE" || ! -f "$CONFIG_FILE" ]]; then
+    echo "agy-graft: AGY_GRAFT_CONFIG must be a regular file: $CONFIG_FILE" >&2
+    exit 2
+  fi
+  config_mode="$(stat -Lc '%a' "$CONFIG_FILE" 2>/dev/null || true)"
+  if [[ "$config_mode" != "600" ]]; then
+    echo "agy-graft: AGY_GRAFT_CONFIG must have mode 0600: $CONFIG_FILE" >&2
+    exit 2
+  fi
+  if [[ ! -r "$CONFIG_FILE" ]]; then
+    echo "agy-graft: AGY_GRAFT_CONFIG is not readable: $CONFIG_FILE" >&2
+    exit 2
+  fi
+fi
+
+proxy_scheme_of() {
+  local raw="$1"
+  local fallback="$2"
+  if [[ "$raw" == *"://"* ]]; then
+    printf '%s\n' "${raw%%://*}"
+  else
+    printf '%s\n' "$fallback"
+  fi
+}
+
+standard_proxy_for_mode() {
+  local mode="$1"
+  local name raw scheme fallback
+  for name in all_proxy ALL_PROXY http_proxy HTTP_PROXY https_proxy HTTPS_PROXY; do
+    raw="${!name:-}"
+    [[ -n "$raw" ]] || continue
+    fallback="http"
+    if [[ "$name" == "all_proxy" || "$name" == "ALL_PROXY" ]]; then
+      fallback="socks5"
+    fi
+    scheme="$(proxy_scheme_of "$raw" "$fallback")"
+    case "$mode:$scheme" in
+      only_http_proxy:http|only_http_proxy:https|only_socks5:socks5|only_socks5:socks5h)
+        printf '%s\n' "$raw"
+        return 0
+        ;;
+    esac
+  done
+  return 1
+}
+
+infer_standard_mode() {
+  local name raw scheme
+  for name in all_proxy ALL_PROXY http_proxy HTTP_PROXY https_proxy HTTPS_PROXY; do
+    raw="${!name:-}"
+    [[ -n "$raw" ]] || continue
+    scheme="$(proxy_scheme_of "$raw" "")"
+    case "$scheme" in
+      socks5|socks5h) printf '%s\n' only_socks5; return 0 ;;
+      http|https) printf '%s\n' only_http_proxy; return 0 ;;
+      "")
+        case "$name" in
+          http_proxy|HTTP_PROXY|https_proxy|HTTPS_PROXY) printf '%s\n' only_http_proxy; return 0 ;;
+        esac
+        ;;
+    esac
+  done
+  return 1
+}
+
+explicit_mode=0
+if [[ -n "$SELECT_PROXY_MODE" ]]; then
+  explicit_mode=1
+fi
+CONFIG_MODE_SELECTED=0
+CONFIG_ENDPOINT_CONSULTED=0
+if [[ "$explicit_mode" == "0" ]]; then
+  if [[ -n "${AGY_GRAFT_HTTP_PROXY:-}" ]]; then
+    SELECT_PROXY_MODE="only_http_proxy"
+  elif [[ -n "${AGY_GRAFT_SOCKS5:-}" ]]; then
+    SELECT_PROXY_MODE="only_socks5"
+  elif SELECT_PROXY_MODE="$(infer_standard_mode || true)"; [[ -n "$SELECT_PROXY_MODE" ]]; then
+    :
+  elif [[ -n "$CONFIG_FILE" ]]; then
+    SELECT_PROXY_MODE="$(config_value select_proxy_mode || true)"
+    if [[ -z "$SELECT_PROXY_MODE" && -n "$(config_value socks5 || true)" ]]; then
+      SELECT_PROXY_MODE="only_socks5"
+    elif [[ -z "$SELECT_PROXY_MODE" && -n "$(config_value http_proxy || true)" ]]; then
+      SELECT_PROXY_MODE="only_http_proxy"
+    fi
+    CONFIG_MODE_SELECTED=1
+  fi
+fi
+
+if [[ -z "$SELECT_PROXY_MODE" ]]; then
+  SELECT_PROXY_MODE="only_http_proxy"
+fi
+
+PROXY_SOURCE="default"
+raw_proxy=""
+case "$SELECT_PROXY_MODE" in
+  only_http_proxy)
+    if [[ -n "${AGY_GRAFT_HTTP_PROXY:-}" ]]; then
+      raw_proxy="$AGY_GRAFT_HTTP_PROXY"
+      PROXY_SOURCE="environment"
+    elif raw_proxy="$(standard_proxy_for_mode only_http_proxy || true)"; [[ -n "$raw_proxy" ]]; then
+      PROXY_SOURCE="environment"
+    elif [[ -n "$CONFIG_FILE" ]]; then
+      CONFIG_ENDPOINT_CONSULTED=1
+      raw_proxy="$(config_value http_proxy || true)"
+      if [[ -n "$raw_proxy" ]]; then PROXY_SOURCE="config"; fi
+    fi
+    ;;
+  only_socks5)
+    if [[ -n "${AGY_GRAFT_SOCKS5:-}" ]]; then
+      raw_proxy="$AGY_GRAFT_SOCKS5"
+      PROXY_SOURCE="environment"
+    elif raw_proxy="$(standard_proxy_for_mode only_socks5 || true)"; [[ -n "$raw_proxy" ]]; then
+      PROXY_SOURCE="environment"
+    elif [[ -n "$CONFIG_FILE" ]]; then
+      CONFIG_ENDPOINT_CONSULTED=1
+      raw_proxy="$(config_value socks5 || true)"
+      if [[ -n "$raw_proxy" ]]; then PROXY_SOURCE="config"; fi
+    fi
+    ;;
+esac
+
+if [[ -z "$raw_proxy" ]]; then
+  if [[ "$CONFIG_MODE_SELECTED" == "1" || "$CONFIG_ENDPOINT_CONSULTED" == "1" ]]; then
+    echo "agy-graft: AGY_GRAFT_CONFIG selected a mode but does not define its endpoint" >&2
+    exit 2
+  fi
+  raw_proxy="127.0.0.1:7897"
+fi
+
+case "$SELECT_PROXY_MODE" in
+  only_http_proxy)
+    parse_proxy "$raw_proxy" "http"
+    case "$proxy_scheme" in
+      http|https) ;;
+      *)
+        echo "agy-graft: HTTP proxy mode requires an http/https proxy scheme, got: $proxy_scheme" >&2
+        exit 2
+        ;;
+    esac
+    if [[ -n "$proxy_username" || -n "$proxy_password" ]]; then
+      echo "agy-graft: mgraftcp does not support HTTP proxy authentication; use SOCKS5 via all_proxy/ALL_PROXY instead." >&2
+      exit 2
+    fi
+    validate_proxy_addr "$proxy_addr"
+    proxy_flag=( --http_proxy "$proxy_addr" )
+    if [[ "$PROXY_SOURCE" == "config" ]]; then
+      proxy_flag=()
+    fi
+    ;;
+  only_socks5)
+    parse_proxy "$raw_proxy" "socks5"
+    case "$proxy_scheme" in
+      socks5|socks5h) ;;
+      *)
+        echo "agy-graft: SOCKS5 mode requires a socks5/socks5h proxy scheme, got: $proxy_scheme" >&2
+        exit 2
+        ;;
+    esac
+    validate_proxy_addr "$proxy_addr"
+    proxy_flag=()
+    if [[ "$PROXY_SOURCE" != "config" ]]; then
+      proxy_flag+=( --socks5 "$proxy_addr" )
+      if [[ -n "$proxy_username" ]]; then
+        proxy_flag+=( --socks5_username "$proxy_username" )
+      fi
+      if [[ -n "$proxy_password" ]]; then
+        proxy_flag+=( --socks5_password "$proxy_password" )
+      fi
+    fi
+    if [[ "$IPV4_ONLY_MODE" == "auto" ]]; then
+      case "${proxy_addr%:*}" in
+        127.*|localhost|::1)
+          IPV4_ONLY_MODE="0"
+          ;;
+        *)
+          IPV4_ONLY_MODE="1"
+          ;;
+      esac
+    fi
+    if [[ "$IPV4_ONLY_MODE" == "1" ]]; then
+      if [[ ! -r "$IPV4_ONLY_FILE" ]]; then
+        echo "agy-graft: IPv4-only whitelist is not readable: $IPV4_ONLY_FILE" >&2
+        exit 2
+      fi
+      proxy_flag+=( --whiteip-file "$IPV4_ONLY_FILE" )
+    elif [[ "$IPV4_ONLY_MODE" != "0" ]]; then
+      echo "agy-graft: AGY_GRAFT_IPV4_ONLY must be auto, 0, or 1" >&2
+      exit 2
+    fi
+    ;;
+  *)
+    echo "agy-graft: unsupported AGY_GRAFT_SELECT_PROXY_MODE: $SELECT_PROXY_MODE" >&2
+    echo "agy-graft: supported values: only_http_proxy, only_socks5" >&2
+    exit 2
+    ;;
+esac
+
+export GOMAXPROCS="$GOMAXPROCS_VALUE"
+
+# The traced program must connect to its real destinations. Leaving standard
+# proxy variables set here would make mgraftcp intercept the upstream proxy
+# itself, producing a nested proxy chain and even redirecting local DNS.
+unset http_proxy
+unset https_proxy
+unset all_proxy
+unset HTTP_PROXY
+unset HTTPS_PROXY
+unset ALL_PROXY
+
+mgraft_args=(
+  "${proxy_flag[@]}"
+  --select_proxy_mode "$SELECT_PROXY_MODE"
+)
+if [[ "$PROXY_SOURCE" == "config" ]]; then
+  mgraft_args+=( --config "$CONFIG_FILE" )
+fi
+
+# Do not expose wrapper control values (including credential-bearing endpoint
+# variables) to mgraftcp or the traced AGY process. The selected config path is
+# already copied into argv above when config sourcing is active.
+for agy_control in ${!AGY_GRAFT_@}; do
+  unset "$agy_control"
+done
+
+exec "$MGRAFTCP" \
+  "${mgraft_args[@]}" \
+  "$REAL_AGY" "$@"

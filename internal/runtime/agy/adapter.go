@@ -25,6 +25,18 @@ import (
 // before escalating would allow those descendants to outlive cancellation.
 const defaultCancelGrace = 2 * time.Second
 
+// A timeout still gives the traced AGY process a short chance to exit before
+// cleaning up its tracer, without exceeding os/exec's WaitDelay budget.
+const timeoutTraceeGrace = 100 * time.Millisecond
+
+// SIGKILL should reap a tracee quickly. Keep the tracer alive through this
+// bounded confirmation window before proceeding to tracer cancellation.
+const descendantKillGrace = 500 * time.Millisecond
+
+const cancellationPollInterval = 20 * time.Millisecond
+
+const cancellationStableScans = 3
+
 type Config struct {
 	Binary        string
 	Models        []string
@@ -166,12 +178,8 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	command.Env = append(os.Environ(), a.config.Environment...)
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.WaitDelay = a.config.CancelGrace
-	command.Cancel = func() error {
-		if command.Process == nil {
-			return nil
-		}
-		return signalProcessGroup(command.Process.Pid, syscall.SIGKILL)
-	}
+	cancelController := newProcessCancelController(command, a.config.CancelGrace)
+	command.Cancel = func() error { return cancelController.cancel(true) }
 	prompt := buildPrompt(request, a.config.WorkingDir)
 	input, err := encodeStreamInput(prompt)
 	if err != nil {
@@ -195,13 +203,13 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	}
 	startTime, err := processStartTime(command.Process.Pid)
 	if err != nil {
-		_ = signalProcessGroup(command.Process.Pid, syscall.SIGKILL)
+		cleanupErr := signalProcessGroup(command.Process.Pid, syscall.SIGKILL)
 		cancel()
-		return nil, fmt.Errorf("read AGY process identity: %w", err)
+		return nil, errors.Join(fmt.Errorf("read AGY process identity: %w", err), cleanupErr)
 	}
+	cancelController.setRoot(processRef{pid: command.Process.Pid, startTime: startTime})
 	handle := &turnHandle{command: command, stdout: stdout, stderr: stderr, sink: sink,
-		stderrLimit: a.config.StderrLimit, prompt: prompt, cancel: cancel, done: make(chan struct{}), cancelGrace: a.config.CancelGrace,
-		process: processRef{pid: command.Process.Pid, startTime: startTime}}
+		stderrLimit: a.config.StderrLimit, prompt: prompt, cancel: cancel, done: make(chan struct{}), cancelController: cancelController}
 	go handle.collect()
 	return handle, nil
 }
@@ -244,20 +252,18 @@ func buildPrompt(request openruntime.TurnRequest, workingDir string) string {
 }
 
 type turnHandle struct {
-	command     *exec.Cmd
-	stdout      io.ReadCloser
-	stderr      io.ReadCloser
-	sink        openruntime.EventSink
-	stderrLimit int
-	prompt      string
-	cancel      context.CancelFunc
-	done        chan struct{}
-	cancelGrace time.Duration
-	process     processRef
-	once        sync.Once
-	cancelOnce  sync.Once
-	result      openruntime.TurnResult
-	err         error
+	command          *exec.Cmd
+	stdout           io.ReadCloser
+	stderr           io.ReadCloser
+	sink             openruntime.EventSink
+	stderrLimit      int
+	prompt           string
+	cancel           context.CancelFunc
+	done             chan struct{}
+	cancelController *processCancelController
+	once             sync.Once
+	result           openruntime.TurnResult
+	err              error
 }
 
 func (h *turnHandle) collect() {
@@ -269,6 +275,7 @@ func (h *turnHandle) collect() {
 	result, parseErr := parseStreamJSON(h.stdout, h.sink)
 	stderr := <-stderrResult
 	waitErr := h.command.Wait()
+	cancelErr := h.cancelController.wait()
 	stderrDetail := sanitizeDiagnostic(stderr.output, h.stderrLimit, h.prompt)
 	if waitErr != nil {
 		if result.Status == openruntime.TurnResultSucceeded {
@@ -276,13 +283,13 @@ func (h *turnHandle) collect() {
 			result.SideEffectsKnown = false
 		}
 	}
-	runtimeErr := errors.Join(parseErr, stderr.err, waitErr)
+	runtimeErr := errors.Join(parseErr, stderr.err, waitErr, cancelErr)
 	if runtimeErr != nil {
 		result.Status = openruntime.TurnResultUncertain
 		result.SideEffectsKnown = false
 	}
 	if runtimeErr != nil || result.Status == openruntime.TurnResultFailed || result.Status == openruntime.TurnResultUncertain {
-		result.Error = joinDiagnostic(result.Error, parseErr, stderr.err, waitErr, stderrDetail, stderr.truncated)
+		result.Error = joinDiagnostic(result.Error, parseErr, stderr.err, waitErr, cancelErr, stderrDetail, stderr.truncated)
 	}
 	h.once.Do(func() {
 		h.result, h.err = result, runtimeErr
@@ -324,8 +331,8 @@ func (w *boundedCaptureWriter) Write(value []byte) (int, error) {
 	return originalLength, nil
 }
 
-func joinDiagnostic(existing string, parseErr error, stderrErr error, waitErr error, stderr string, truncated bool) string {
-	parts := make([]string, 0, 5)
+func joinDiagnostic(existing string, parseErr error, stderrErr error, waitErr error, cancelErr error, stderr string, truncated bool) string {
+	parts := make([]string, 0, 6)
 	if strings.TrimSpace(existing) != "" {
 		parts = append(parts, strings.TrimSpace(existing))
 	}
@@ -337,6 +344,9 @@ func joinDiagnostic(existing string, parseErr error, stderrErr error, waitErr er
 	}
 	if waitErr != nil {
 		parts = append(parts, fmt.Sprintf("AGY process exited: %v", waitErr))
+	}
+	if cancelErr != nil {
+		parts = append(parts, fmt.Sprintf("AGY cancellation cleanup: %v", cancelErr))
 	}
 	if stderr != "" {
 		parts = append(parts, "AGY stderr: "+stderr)
@@ -363,27 +373,323 @@ func (h *turnHandle) DecideApproval(context.Context, domain.ApprovalDecision) er
 	return openruntime.ErrApprovalUnsupported
 }
 func (h *turnHandle) RequestCancel(_ context.Context) error {
-	if h.command.Process == nil {
+	if h.command.Process == nil || h.cancelController == nil {
 		return openruntime.ErrCancelUnsupported
 	}
+	return h.cancelController.cancel(false)
+}
+
+// processCancelController keeps the tracer alive while its traced AGY
+// descendants receive cancellation. Killing the process group first can leave
+// a SECCOMP_RET_TRACE child without a tracer, which manifests as ENOSYS from
+// the next connect(2) call.
+type processCancelController struct {
+	command        *exec.Cmd
+	grace          time.Duration
+	rootMu         sync.RWMutex
+	root           processRef
+	once           sync.Once
+	cleanupMu      sync.Mutex
+	cleanupStarted bool
+	cleanupDone    chan struct{}
+	cleanupErr     error
+}
+
+func newProcessCancelController(command *exec.Cmd, grace time.Duration) *processCancelController {
+	return &processCancelController{command: command, grace: grace, cleanupDone: make(chan struct{})}
+}
+
+func (c *processCancelController) setRoot(root processRef) {
+	c.rootMu.Lock()
+	c.root = root
+	c.rootMu.Unlock()
+}
+
+func (c *processCancelController) getRoot() processRef {
+	c.rootMu.RLock()
+	defer c.rootMu.RUnlock()
+	return c.root
+}
+
+func (c *processCancelController) cancel(timeout bool) error {
 	var cancelErr error
-	h.cancelOnce.Do(func() {
-		descendants := descendantProcesses(h.process.pid)
-		if err := signalProcessGroup(h.process.pid, syscall.SIGTERM); err != nil {
-			cancelErr = fmt.Errorf("signal AGY process group: %w", err)
+	c.once.Do(func() {
+		root := c.getRoot()
+		if root.pid == 0 && c.command.Process != nil {
+			startTime, err := processStartTime(c.command.Process.Pid)
+			if err != nil {
+				if !errors.Is(err, os.ErrNotExist) {
+					cancelErr = fmt.Errorf("read AGY root process identity before cancellation: %w", err)
+					c.recordError(cancelErr)
+				}
+				return
+			}
+			root = processRef{pid: c.command.Process.Pid, startTime: startTime}
+			c.setRoot(root)
+		}
+		if root.pid == 0 || c.command.Process == nil {
 			return
 		}
-		for _, child := range descendants {
-			_ = signalProcess(child, syscall.SIGTERM)
-		}
-		time.AfterFunc(h.cancelGrace, func() {
-			_ = signalProcessGroup(h.process.pid, syscall.SIGKILL)
-			for _, child := range descendants {
-				_ = signalProcess(child, syscall.SIGKILL)
+		c.cleanupMu.Lock()
+		c.cleanupStarted = true
+		c.cleanupMu.Unlock()
+		descendants := descendantProcesses(root.pid)
+		// Signal descendants deepest-first while the mgraftcp tracer remains alive.
+		for index := len(descendants) - 1; index >= 0; index-- {
+			if err := signalProcess(descendants[index], syscall.SIGTERM); err != nil {
+				wrapped := fmt.Errorf("signal AGY descendant %d with SIGTERM: %w", descendants[index].pid, err)
+				c.recordError(wrapped)
+				cancelErr = errors.Join(cancelErr, wrapped)
 			}
-		})
+		}
+		traceeGrace := c.grace
+		if timeout && traceeGrace > timeoutTraceeGrace {
+			traceeGrace = timeoutTraceeGrace
+		}
+		go c.finish(root, descendants, traceeGrace)
 	})
 	return cancelErr
+}
+
+func (c *processCancelController) finish(root processRef, descendants []processRef, traceeGrace time.Duration) {
+	defer close(c.cleanupDone)
+	known := append([]processRef(nil), descendants...)
+	// Re-scan during the TERM phase so children spawned by a tracee after the
+	// initial snapshot are still terminated while the tracer remains alive.
+	termDeadline := time.Now().Add(traceeGrace)
+	emptyScans := 0
+	for time.Now().Before(termDeadline) {
+		current := descendantProcesses(root.pid)
+		known = mergeProcessRefs(known, current)
+		for index := len(current) - 1; index >= 0; index-- {
+			if err := signalProcess(current[index], syscall.SIGTERM); err != nil {
+				c.recordError(fmt.Errorf("signal AGY descendant %d with SIGTERM: %w", current[index].pid, err))
+			}
+		}
+		if len(current) == 0 {
+			emptyScans++
+			if emptyScans >= cancellationStableScans {
+				break
+			}
+		} else {
+			emptyScans = 0
+		}
+		time.Sleep(cancellationPollInterval)
+	}
+	// A traced child must be dead before its tracer is touched. This second
+	// phase handles tracees that ignored SIGTERM without creating an ENOSYS
+	// window in their seccomp-traced connect(2) calls.
+	descendantDeadline := time.Now().Add(descendantKillGrace)
+	emptyScans = 0
+	for time.Now().Before(descendantDeadline) {
+		current := descendantProcesses(root.pid)
+		known = mergeProcessRefs(known, current)
+		for index := len(current) - 1; index >= 0; index-- {
+			if processRefsAlive([]processRef{current[index]}) {
+				if err := signalProcess(current[index], syscall.SIGKILL); err != nil {
+					c.recordError(fmt.Errorf("signal AGY descendant %d with SIGKILL: %w", current[index].pid, err))
+				}
+			}
+		}
+		if !processRefsAlive(known) {
+			emptyScans++
+			if emptyScans >= cancellationStableScans {
+				break
+			}
+		} else {
+			emptyScans = 0
+		}
+		time.Sleep(cancellationPollInterval)
+	}
+	if processRefsAlive(known) {
+		c.recordError(fmt.Errorf("AGY descendants survived SIGKILL grace period"))
+		return
+	}
+
+	// Capture every member of the original process group while the root is
+	// still alive. This lets the final group sweep remain safe even if the root
+	// exits before an ordinary group child does.
+	groupMembers := processGroupMembers(root.pid)
+	known = mergeProcessRefs(known, groupMembers)
+	groupTracees := make([]processRef, 0, len(groupMembers))
+	for _, member := range groupMembers {
+		if member.pid != root.pid {
+			groupTracees = append(groupTracees, member)
+		}
+	}
+	// A child can have exited its parent tree while retaining the original
+	// process group. Treat those members as tracees too, before touching root.
+	for _, member := range groupTracees {
+		if err := signalProcess(member, syscall.SIGTERM); err != nil {
+			c.recordError(fmt.Errorf("signal AGY process-group tracee %d with SIGTERM: %w", member.pid, err))
+		}
+	}
+	groupTraceeDeadline := time.Now().Add(traceeGrace)
+	for time.Now().Before(groupTraceeDeadline) && processRefsAlive(groupTracees) {
+		time.Sleep(cancellationPollInterval)
+	}
+	for _, member := range groupTracees {
+		if processRefsAlive([]processRef{member}) {
+			if err := signalProcess(member, syscall.SIGKILL); err != nil {
+				c.recordError(fmt.Errorf("signal AGY process-group tracee %d with SIGKILL: %w", member.pid, err))
+			}
+		}
+	}
+	groupKillDeadline := time.Now().Add(descendantKillGrace)
+	for time.Now().Before(groupKillDeadline) && processRefsAlive(groupTracees) {
+		time.Sleep(cancellationPollInterval)
+	}
+	if processRefsAlive(groupTracees) {
+		c.recordError(fmt.Errorf("AGY process-group tracees survived SIGKILL grace period"))
+		return
+	}
+
+	// Only now is it safe to terminate the mgraftcp/AGY root tracer.
+	if err := signalProcess(root, syscall.SIGTERM); err != nil {
+		c.recordError(fmt.Errorf("signal AGY root %d with SIGTERM: %w", root.pid, err))
+	}
+	rootDeadline := time.Now().Add(c.grace)
+	for time.Now().Before(rootDeadline) && processRefsAlive([]processRef{root}) {
+		time.Sleep(20 * time.Millisecond)
+	}
+	if processRefsAlive([]processRef{root}) {
+		if err := signalProcess(root, syscall.SIGKILL); err != nil {
+			c.recordError(fmt.Errorf("signal AGY root %d with SIGKILL: %w", root.pid, err))
+		}
+	}
+	// A process-group sweep is only a last-resort cleanup after identity-
+	// checked individual signals, never the first cancellation action.
+	start, err := processStartTime(root.pid)
+	if err == nil && start == root.startTime {
+		if groupErr := signalProcessGroup(root.pid, syscall.SIGKILL); groupErr != nil {
+			c.recordError(fmt.Errorf("signal AGY process group %d with SIGKILL: %w", root.pid, groupErr))
+		}
+	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
+		c.recordError(fmt.Errorf("read AGY root process identity before process-group cleanup: %w", err))
+	} else if processGroupHasKnownMember(root.pid, known) {
+		if groupErr := signalProcessGroup(root.pid, syscall.SIGKILL); groupErr != nil {
+			c.recordError(fmt.Errorf("signal AGY process group %d with SIGKILL: %w", root.pid, groupErr))
+		}
+	}
+}
+
+func mergeProcessRefs(existing, discovered []processRef) []processRef {
+	seen := make(map[processRef]struct{}, len(existing)+len(discovered))
+	merged := make([]processRef, 0, len(existing)+len(discovered))
+	for _, process := range append(append([]processRef(nil), existing...), discovered...) {
+		if _, ok := seen[process]; ok {
+			continue
+		}
+		seen[process] = struct{}{}
+		merged = append(merged, process)
+	}
+	return merged
+}
+
+func processGroupHasKnownMember(pgid int, processes []processRef) bool {
+	for _, process := range processes {
+		if !processRefAlive(process) {
+			continue
+		}
+		group, err := processGroupID(process.pid)
+		if err == nil && group == pgid {
+			return true
+		}
+	}
+	return false
+}
+
+func processGroupMembers(pgid int) []processRef {
+	entries, err := os.ReadDir("/proc")
+	if err != nil {
+		return nil
+	}
+	members := make([]processRef, 0)
+	for _, entry := range entries {
+		pid, err := parsePID(entry.Name())
+		if err != nil {
+			continue
+		}
+		_, startTime, err := readProcessStat(pid)
+		if err != nil {
+			continue
+		}
+		group, err := processGroupID(pid)
+		if err == nil && group == pgid {
+			members = append(members, processRef{pid: pid, startTime: startTime})
+		}
+	}
+	return members
+}
+
+func processGroupID(pid int) (int, error) {
+	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return 0, err
+	}
+	closeParen := strings.LastIndexByte(string(data), ')')
+	if closeParen < 0 {
+		return 0, fmt.Errorf("malformed /proc/%d/stat", pid)
+	}
+	fields := strings.Fields(string(data[closeParen+1:]))
+	if len(fields) <= 2 {
+		return 0, fmt.Errorf("incomplete /proc/%d/stat", pid)
+	}
+	return strconv.Atoi(fields[2])
+}
+
+func (c *processCancelController) recordError(err error) {
+	if err == nil {
+		return
+	}
+	c.cleanupMu.Lock()
+	c.cleanupErr = errors.Join(c.cleanupErr, err)
+	c.cleanupMu.Unlock()
+}
+
+func (c *processCancelController) wait() error {
+	c.cleanupMu.Lock()
+	started := c.cleanupStarted
+	done := c.cleanupDone
+	c.cleanupMu.Unlock()
+	if started {
+		<-done
+	}
+	c.cleanupMu.Lock()
+	defer c.cleanupMu.Unlock()
+	return c.cleanupErr
+}
+
+func processRefsAlive(processes []processRef) bool {
+	for _, process := range processes {
+		if processRefAlive(process) {
+			return true
+		}
+	}
+	return false
+}
+
+func processRefAlive(process processRef) bool {
+	start, err := processStartTime(process.pid)
+	if errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	if err != nil || start != process.startTime {
+		return err != nil && !errors.Is(err, os.ErrNotExist)
+	}
+	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", process.pid))
+	if errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	if err != nil {
+		return true
+	}
+	closeParen := strings.LastIndexByte(string(data), ')')
+	if closeParen < 0 {
+		return true
+	}
+	fields := strings.Fields(string(data[closeParen+1:]))
+	return len(fields) == 0 || fields[0] != "Z"
 }
 
 func signalProcessGroup(pgid int, signal syscall.Signal) error {
@@ -442,7 +748,13 @@ func descendantProcesses(rootPID int) []processRef {
 
 func signalProcess(process processRef, signal syscall.Signal) error {
 	startTime, err := processStartTime(process.pid)
-	if err != nil || startTime != process.startTime {
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("read process identity: %w", err)
+	}
+	if startTime != process.startTime {
 		return nil
 	}
 	if err := syscall.Kill(process.pid, signal); err != nil && !errors.Is(err, syscall.ESRCH) {

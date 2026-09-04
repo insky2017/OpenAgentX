@@ -227,24 +227,42 @@ func TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess(t *testing.T) {
 }
 
 func TestAgyBatchAdapterCancelTerminatesChildProcesses(t *testing.T) {
+	testAgyBatchAdapterCancellation(t, false)
+}
+
+func TestAgyBatchAdapterTimeoutTerminatesTraceeBeforeTracer(t *testing.T) {
+	testAgyBatchAdapterCancellation(t, true)
+}
+
+func testAgyBatchAdapterCancellation(t *testing.T, timeout bool) {
+	t.Helper()
 	dir := t.TempDir()
 	readyPath := filepath.Join(dir, "child.ready")
 	pidPath := filepath.Join(dir, "child.pid")
+	latePIDPath := filepath.Join(dir, "late-child.pid")
+	markerPath := filepath.Join(dir, "signals.log")
 	scriptPath := filepath.Join(dir, "agy-cancel-fixture")
 	script := fmt.Sprintf(`#!/bin/sh
 if [ "$1" = "--version" ]; then exit 0; fi
 cat >/dev/null
-setsid sh -c 'trap "" TERM; echo $$ > "%s"; while :; do sleep 1; done' >/dev/null 2>&1 </dev/null &
+export AGY_TEST_MARKER="%s"
+export AGY_TEST_PID="%s"
+export AGY_TEST_LATE_PID="%s"
+sh -c "trap 'echo child-term >> \"\$AGY_TEST_MARKER\"; (trap \"\" TERM; echo \$\$ > \"\$AGY_TEST_LATE_PID\"; while :; do sleep 1; done) & exit 0' TERM; echo \$\$ > \"\$AGY_TEST_PID\"; while :; do sleep 0.05; done" >/dev/null 2>&1 </dev/null &
 while [ ! -s "%s" ]; do sleep 0.05; done
 : > "%s"
-trap 'exit 143' TERM
+trap 'if [ -r "/proc/$AGY_TEST_PID/stat" ] && [ "$(awk '\''{print $3}'\'' "/proc/$AGY_TEST_PID/stat")" != "Z" ]; then state=alive; else state=dead; fi; if [ -r "/proc/$AGY_TEST_LATE_PID/stat" ] && [ "$(awk '\''{print $3}'\'' "/proc/$AGY_TEST_LATE_PID/stat")" != "Z" ]; then late_state=alive; else late_state=dead; fi; printf "leader-term-child-$state-late-$late_state\\n" >> "%s"; exit 143' TERM
 while :; do sleep 0.1; done
-`, pidPath, pidPath, readyPath)
+`, markerPath, pidPath, latePIDPath, pidPath, readyPath, markerPath)
 	if err := os.WriteFile(scriptPath, []byte(script), 0o700); err != nil {
 		t.Fatal(err)
 	}
+	spec := validSpec()
+	if timeout {
+		spec.Timeout = 750 * time.Millisecond
+	}
 	adapter := NewAdapterForTest(Config{Binary: scriptPath, WorkingDir: dir, CancelGrace: cancelTestGrace})
-	handle, err := adapter.StartTurn(context.Background(), testTurnRequest(validSpec()), nil)
+	handle, err := adapter.StartTurn(context.Background(), testTurnRequest(spec), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -253,10 +271,14 @@ while :; do sleep 0.1; done
 		t.Fatalf("handle is not a *turnHandle with a live process: %T", handle)
 	}
 	var childPID int
+	var latePID int
 	t.Cleanup(func() {
 		_ = signalProcessGroup(leader.command.Process.Pid, syscall.SIGKILL)
 		if childPID != 0 {
 			_ = syscall.Kill(childPID, syscall.SIGKILL)
+		}
+		if latePID != 0 {
+			_ = syscall.Kill(latePID, syscall.SIGKILL)
 		}
 	})
 	waitForFile(t, readyPath, "fixture child did not start")
@@ -271,11 +293,14 @@ while :; do sleep 0.1; done
 	if !processRunning(childPID) {
 		t.Fatalf("fixture child %d is not running before cancel", childPID)
 	}
-	if err := handle.RequestCancel(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if !processRunning(childPID) {
-		t.Fatalf("fixture child %d died on SIGTERM, so the SIGKILL escalation is not covered", childPID)
+	if !timeout {
+		if err := handle.RequestCancel(context.Background()); err != nil {
+			t.Fatal(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+		if marker, err := os.ReadFile(markerPath); err == nil && strings.Contains(string(marker), "leader-term") {
+			t.Fatalf("leader/tracer received TERM before tracee grace elapsed: %q", marker)
+		}
 	}
 	waitContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -283,15 +308,37 @@ while :; do sleep 0.1; done
 	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown {
 		t.Fatalf("result=%+v err=%v", result, waitErr)
 	}
-	deadline := time.Now().Add(cancelTestGrace + 15*time.Second)
+	marker, err := os.ReadFile(markerPath)
+	if err != nil || !strings.Contains(string(marker), "leader-term-child-dead-late-dead") {
+		t.Fatalf("cancellation signal order was not recorded: %q err=%v", marker, err)
+	}
+	if childIndex := strings.Index(string(marker), "child-term"); childIndex >= 0 && childIndex > strings.Index(string(marker), "leader-term-child-dead-late-dead") {
+		t.Fatalf("leader/tracer was signaled before tracee: %q", marker)
+	}
+	waitForFile(t, latePIDPath, "fixture late child did not spawn during cancellation")
+	latePIDText, err := os.ReadFile(latePIDPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	latePID, err = strconv.Atoi(strings.TrimSpace(string(latePIDText)))
+	if err != nil {
+		t.Fatalf("parse late child pid from %q (%q): %v", latePIDPath, latePIDText, err)
+	}
+	if processRunning(latePID) {
+		t.Fatalf("late child process %d survived cancellation cleanup", latePID)
+	}
+	deadline := time.Now().Add(15 * time.Second)
 	for {
 		if !processRunning(childPID) {
-			return
+			break
 		}
 		if time.Now().After(deadline) {
-			t.Fatalf("child process %d survived the post-grace process-group SIGKILL", childPID)
+			t.Fatalf("child process %d survived cancellation cleanup", childPID)
 		}
 		time.Sleep(20 * time.Millisecond)
+	}
+	if processRunning(leader.command.Process.Pid) {
+		t.Fatalf("leader/tracer process %d survived cancellation cleanup", leader.command.Process.Pid)
 	}
 }
 
