@@ -12,9 +12,10 @@ import (
 )
 
 type RuntimeBackendConfig struct {
-	BackendID string         `yaml:"backend_id"`
-	AdapterID string         `yaml:"adapter_id"`
-	Options   map[string]any `yaml:"options,omitempty"`
+	BackendID string               `yaml:"backend_id"`
+	AdapterID string               `yaml:"adapter_id"`
+	Options   map[string]any       `yaml:"options,omitempty"`
+	Network   domain.NetworkPolicy `yaml:"network,omitempty"`
 }
 
 type ProcessConfig struct {
@@ -97,6 +98,9 @@ func (c *ProcessConfig) Validate() error {
 			return domain.ErrInvalidInput("Worker config Backend IDs must be unique")
 		}
 		seen[backend.BackendID] = struct{}{}
+		if err := backend.Network.Validate(); err != nil {
+			return fmt.Errorf("Worker Backend %s network: %w", backend.BackendID, err)
+		}
 	}
 	return nil
 }

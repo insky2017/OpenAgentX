@@ -15,6 +15,10 @@ import (
 )
 
 func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([]openruntime.BackendRegistration, error) {
+	var agentID string
+	if err := r.db.QueryRowContext(ctx, `SELECT agent_id FROM worker_instances WHERE worker_instance_id=?`, workerID).Scan(&agentID); err != nil {
+		return nil, fmt.Errorf("resolve Worker Agent: %w", err)
+	}
 	rows, err := r.db.QueryContext(ctx, `SELECT backend_id, descriptor_json, health
 		FROM runtime_backend_registrations WHERE worker_instance_id=? ORDER BY backend_id ASC`, workerID)
 	if err != nil {
@@ -33,6 +37,18 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 		}
 		if err := registration.Validate(); err != nil {
 			return nil, fmt.Errorf("invalid persisted Worker Backend registration: %w", err)
+		}
+		// A published control-plane binding is the authoritative default for
+		// new turns. The Worker still validates the worker-owned file when the
+		// adapter starts, so an invalid or missing file remains fail-closed.
+		var mode, profileID, configFile, proxyMode string
+		var profileVersion int64
+		err = r.db.QueryRowContext(ctx, `SELECT p.mode, p.profile_id, p.version, COALESCE(p.config_file,''), p.mode
+			FROM network_profile_bindings b JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
+			WHERE b.agent_id=? AND b.backend_id=? AND p.status='published'`, agentID, registration.BackendID).
+			Scan(&mode, &profileID, &profileVersion, &configFile, &proxyMode)
+		if err == nil && configFile != "" {
+			registration.Network = domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: profileID, ProfileVersion: profileVersion, ProxyMode: mode, ConfigFile: configFile}
 		}
 		registrations = append(registrations, registration)
 	}

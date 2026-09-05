@@ -50,6 +50,20 @@ func (s *testPanelState) ListJournal(_ context.Context, after int64, limit int) 
 	return result, nil
 }
 
+func (s *testPanelState) ListTaskJournal(_ context.Context, taskID string, after int64, limit int) ([]domain.JournalEvent, error) {
+	result := make([]domain.JournalEvent, 0, limit)
+	for _, event := range s.journal {
+		if event.Sequence <= after || (event.AggregateType != "task" || event.AggregateID != taskID) {
+			continue
+		}
+		result = append(result, event)
+		if len(result) == limit {
+			break
+		}
+	}
+	return result, nil
+}
+
 func (s *testPanelState) GetTask(context.Context, string) (*domain.Task, error) {
 	return nil, domain.ErrNotFound
 }
@@ -64,6 +78,10 @@ func (s *testPanelState) ListMailbox(context.Context, string, int64, int) ([]dom
 
 func (s *testPanelState) GetRunAttempt(context.Context, string) (*domain.RunAttempt, error) {
 	return nil, domain.ErrNotFound
+}
+
+func (s *testPanelState) ListRunAttemptsForTask(context.Context, string, int) ([]domain.RunAttempt, error) {
+	return []domain.RunAttempt{}, nil
 }
 
 func (s *testPanelState) ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error) {

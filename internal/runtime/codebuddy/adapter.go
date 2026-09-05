@@ -16,6 +16,7 @@ import (
 
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
+	runtimenetwork "openagentx/internal/runtime/network"
 )
 
 const (
@@ -37,6 +38,7 @@ type Config struct {
 	// SIGKILL escalation, and is also used as the exec WaitDelay so a CLI
 	// exit cannot leave Wait blocked on pipes held open by grandchildren.
 	CancelGrace time.Duration
+	Network     domain.NetworkPolicy
 }
 
 type Adapter struct{ config Config }
@@ -91,7 +93,7 @@ func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, er
 		},
 		SessionModes: []domain.SessionMode{domain.SessionModeNew}, Steer: openruntime.SteerQueued,
 		Approval: openruntime.ApprovalPreflight, Cancel: openruntime.CancelProcessSignal,
-		Streams: false, MaxConcurrency: 1, BackendOptionsJSON: []byte(`{"type":"object"}`),
+		Streams: false, MaxConcurrency: 1, NetworkModes: []string{"inherit", "direct"}, BackendOptionsJSON: []byte(`{"type":"object"}`),
 	}, nil
 }
 
@@ -119,7 +121,11 @@ func (a *Adapter) Health(ctx context.Context) error {
 	defer cancel()
 	command := exec.CommandContext(healthContext, a.config.Binary, "--version")
 	command.Dir = a.config.WorkingDir
-	command.Env = append(os.Environ(), a.config.Environment...)
+	env, err := a.environment(a.config.Network)
+	if err != nil {
+		return err
+	}
+	command.Env = env
 	if output, err := command.CombinedOutput(); err != nil {
 		return fmt.Errorf("CodeBuddy health probe failed: %w (%s)", err, boundedText(output, 4096))
 	}
@@ -142,7 +148,11 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	}
 	command := exec.CommandContext(ctx, a.config.Binary, args...)
 	command.Dir = a.config.WorkingDir
-	command.Env = append(os.Environ(), a.config.Environment...)
+	env, err := a.environment(spec.Network)
+	if err != nil {
+		return nil, err
+	}
+	command.Env = env
 	// The CLI runs in its own process group so cancellation signals reach
 	// every descendant, not only the CLI process itself.
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
@@ -166,6 +176,15 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	}
 	go handle.collect()
 	return handle, nil
+}
+
+func (a *Adapter) environment(policy domain.NetworkPolicy) ([]string, error) {
+	if policy.IsZero() {
+		policy = a.config.Network
+	}
+	base := append([]string{}, os.Environ()...)
+	base = append(base, a.config.Environment...)
+	return runtimenetwork.Environment(base, policy, "codebuddy-cli", a.config.Binary)
 }
 
 func buildPrompt(request openruntime.TurnRequest) string {

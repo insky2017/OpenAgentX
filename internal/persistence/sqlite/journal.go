@@ -74,3 +74,59 @@ func (r *Repository) ListJournal(ctx context.Context, afterSequence int64, limit
 	}
 	return events, nil
 }
+
+func (r *Repository) ListTaskJournal(ctx context.Context, taskID string, afterSequence int64, limit int) ([]domain.JournalEvent, error) {
+	if taskID == "" {
+		return nil, domain.ErrInvalidInput("task id is required")
+	}
+	if afterSequence < 0 {
+		return nil, domain.ErrInvalidInput("after_sequence cannot be negative")
+	}
+	if limit <= 0 || limit > 500 {
+		return nil, domain.ErrInvalidInput("task journal limit must be between 1 and 500")
+	}
+	rows, err := r.db.QueryContext(ctx, `SELECT e.sequence, e.event_id, e.organization_id,
+		e.aggregate_type, e.aggregate_id, e.event_type, e.actor_principal_id,
+		e.payload_json, e.created_at
+		FROM event_journal e
+		WHERE e.sequence > ? AND (
+			(e.aggregate_type = 'task' AND e.aggregate_id = ?) OR
+			(e.aggregate_type = 'run_attempt' AND EXISTS (
+				SELECT 1 FROM run_attempts r WHERE r.run_id = e.aggregate_id AND r.task_id = ?
+			))
+		)
+		ORDER BY e.sequence ASC LIMIT ?`, afterSequence, taskID, taskID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("list task journal: %w", err)
+	}
+	defer rows.Close()
+	return scanJournalRows(rows)
+}
+
+func scanJournalRows(rows *sql.Rows) ([]domain.JournalEvent, error) {
+	events := make([]domain.JournalEvent, 0)
+	for rows.Next() {
+		var event domain.JournalEvent
+		var organization sql.NullString
+		var payload string
+		var createdAt string
+		if err := rows.Scan(&event.Sequence, &event.ID, &organization, &event.AggregateType,
+			&event.AggregateID, &event.EventType, &event.ActorPrincipalID, &payload, &createdAt); err != nil {
+			return nil, fmt.Errorf("scan event journal: %w", err)
+		}
+		if organization.Valid {
+			event.OrganizationID = organization.String
+		}
+		event.Payload = []byte(payload)
+		var err error
+		event.CreatedAt, err = parseTime(createdAt)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate event journal: %w", err)
+	}
+	return events, nil
+}

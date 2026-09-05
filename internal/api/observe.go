@@ -1,6 +1,8 @@
 package api
 
 import (
+	"time"
+
 	"openagentx/internal/domain"
 )
 
@@ -12,6 +14,7 @@ const (
 	ObserveMailboxesPath        = "/api/observe/v1/mailboxes"
 	ObserveRunAttemptPath       = "/api/observe/v1/run-attempts/{run-id}"
 	ObserveExecutionOptionsPath = "/api/observe/v1/execution-options"
+	ObserveNetworkProfilesPath  = "/api/observe/v1/network-profiles"
 	ObserveEventsStreamPath     = "/api/observe/v1/events/stream"
 	ObserveHealthPath           = "/api/observe/v1/health"
 )
@@ -28,10 +31,61 @@ type AgentReadModel struct {
 }
 
 type TaskReadModel struct {
-	Task         domain.Task         `json:"task"`
-	Messages     []domain.Message    `json:"messages"`
-	RunAttempts  []domain.RunAttempt `json:"run_attempts"`
-	LastSequence int64               `json:"last_sequence"`
+	Task         TaskReadModelTask       `json:"task"`
+	Messages     []domain.Message        `json:"messages"`
+	RunAttempts  []RunAttemptReadModel   `json:"run_attempts"`
+	Events       []JournalEventReadModel `json:"events"`
+	LastSequence int64                   `json:"last_sequence"`
+	NextSequence int64                   `json:"next_sequence,omitempty"`
+}
+
+// TaskReadModelTask is the browser-safe subset of a Task. Idempotency keys,
+// sender principals and cancellation actors remain control-plane data.
+type TaskReadModelTask struct {
+	ID             string              `json:"id"`
+	Version        int64               `json:"version"`
+	TargetAgentID  string              `json:"target_agent_id"`
+	OrganizationID string              `json:"organization_id,omitempty"`
+	DispatchMode   domain.DispatchMode `json:"dispatch_mode,omitempty"`
+	Content        string              `json:"content"`
+	Status         domain.TaskStatus   `json:"status"`
+	Result         *string             `json:"result,omitempty"`
+	Error          *string             `json:"error,omitempty"`
+	CreatedAt      string              `json:"created_at"`
+	UpdatedAt      string              `json:"updated_at"`
+}
+
+// RunAttemptReadModel deliberately omits execution JSON and fencing material.
+// Those fields are control-plane evidence, not browser-facing observation data.
+type RunAttemptReadModel struct {
+	ID                    string                  `json:"run_id"`
+	TaskID                string                  `json:"task_id"`
+	AgentID               string                  `json:"agent_id"`
+	Version               int64                   `json:"version"`
+	Status                domain.RunAttemptStatus `json:"status"`
+	WorkerInstanceID      string                  `json:"worker_instance_id"`
+	ExecutionSpecVersion  int64                   `json:"execution_spec_version"`
+	AdapterID             string                  `json:"adapter_id"`
+	BackendID             string                  `json:"backend_id"`
+	Model                 string                  `json:"model"`
+	ReasoningMode         domain.ReasoningMode    `json:"reasoning_mode"`
+	ReasoningValue        string                  `json:"reasoning_value,omitempty"`
+	NetworkMode           domain.NetworkMode      `json:"network_mode,omitempty"`
+	NetworkProfileID      string                  `json:"network_profile_id,omitempty"`
+	NetworkProfileVersion int64                   `json:"network_profile_version,omitempty"`
+	StartedAt             time.Time               `json:"started_at"`
+	FinishedAt            *time.Time              `json:"finished_at,omitempty"`
+	CreatedAt             time.Time               `json:"created_at"`
+	UpdatedAt             time.Time               `json:"updated_at"`
+}
+
+type JournalEventReadModel struct {
+	Sequence      int64     `json:"sequence"`
+	ID            string    `json:"event_id"`
+	AggregateType string    `json:"aggregate_type"`
+	AggregateID   string    `json:"aggregate_id"`
+	EventType     string    `json:"event_type"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type EventPage struct {

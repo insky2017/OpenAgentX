@@ -85,9 +85,10 @@ func (h BackendHealth) Valid() bool {
 }
 
 type BackendRegistration struct {
-	BackendID  string            `json:"backend_id"`
-	Descriptor AdapterDescriptor `json:"descriptor"`
-	Health     BackendHealth     `json:"health"`
+	BackendID  string               `json:"backend_id"`
+	Descriptor AdapterDescriptor    `json:"descriptor"`
+	Health     BackendHealth        `json:"health"`
+	Network    domain.NetworkPolicy `json:"network,omitempty"`
 }
 
 func (r BackendRegistration) Validate() error {
@@ -99,6 +100,9 @@ func (r BackendRegistration) Validate() error {
 	}
 	if !r.Health.Valid() {
 		return domain.ErrInvalidInput("unsupported Backend health")
+	}
+	if err := r.Network.Validate(); err != nil {
+		return err
 	}
 	return nil
 }

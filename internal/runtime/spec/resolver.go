@@ -78,6 +78,17 @@ func Resolve(ctx context.Context, requested domain.ExecutionSpec, defaults domai
 		resolved.BackendOptions = requested.BackendOptions
 		sources["backend_options"] = "task_override"
 	}
+	if !requested.Network.IsZero() {
+		if defaults.Network.IsZero() || !sameNetworkProfile(requested.Network, defaults.Network) {
+			return domain.ResolvedExecutionSpec{}, domain.ErrForbidden("network policy is controlled by the Backend profile")
+		}
+		resolved.Network = requested.Network
+		sources["network"] = "task_override"
+	}
+	if resolved.Network.IsZero() && !defaults.Network.IsZero() {
+		resolved.Network = defaults.Network
+		sources["network"] = "profile_default"
+	}
 	if resolved.Timeout <= 0 {
 		resolved.Timeout = 30 * time.Minute
 		sources["timeout"] = "resolver_default"
@@ -115,6 +126,12 @@ func Resolve(ctx context.Context, requested domain.ExecutionSpec, defaults domai
 		return domain.ResolvedExecutionSpec{}, domain.ErrForbidden("execution budget exceeds policy")
 	}
 	return domain.ResolvedExecutionSpec{Version: 1, Spec: resolved, Sources: sources}, nil
+}
+
+func sameNetworkProfile(left, right domain.NetworkPolicy) bool {
+	return left.Mode == right.Mode && left.ProfileID == right.ProfileID &&
+		left.ProfileVersion == right.ProfileVersion && left.ProxyMode == right.ProxyMode &&
+		left.ConfigFile == right.ConfigFile
 }
 
 func contains(values []string, target string) bool {

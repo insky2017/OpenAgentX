@@ -54,6 +54,7 @@ type ExecutionSpec struct {
 	Timeout        time.Duration   `json:"timeout"`
 	Budget         ExecutionBudget `json:"budget"`
 	BackendOptions json.RawMessage `json:"backend_options"`
+	Network        NetworkPolicy   `json:"network,omitempty"`
 }
 
 func (s ExecutionSpec) ValidateShape() error {
@@ -77,6 +78,9 @@ func (s ExecutionSpec) ValidateShape() error {
 	}
 	if len(s.BackendOptions) != 0 && !json.Valid(s.BackendOptions) {
 		return ErrInvalidInput("backend_options must be valid JSON")
+	}
+	if err := s.Network.Validate(); err != nil {
+		return err
 	}
 	return nil
 }

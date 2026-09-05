@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -287,4 +288,37 @@ func TestPanelHTTPNativeApprovalSuccessTraversesPayloadAndSettlement(t *testing.
 		t.Fatalf("approval settled task=%+v err=%v", task, err)
 	}
 	assertJournalTypes(t, fixture.repository, "mailbox.claimed", "mailbox.accepted", "run_attempt.finished")
+}
+
+func TestPanelHTTPTaskDetailUsesCursorAndSafeProjection(t *testing.T) {
+	fixture := newPanelIntegrationFixture(t, false)
+	server := httptest.NewServer(panelIntegrationHandler(t, fixture))
+	defer server.Close()
+	request, err := http.NewRequest(http.MethodGet, server.URL+"/api/observe/v1/tasks/"+fixture.task.ID+"?limit=10", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.AddCookie(fixture.cookie)
+	response, err := (&http.Client{}).Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("task detail status=%d", response.StatusCode)
+	}
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(body, []byte("panel-task")) || bytes.Contains(body, []byte("requested_execution_json")) || bytes.Contains(body, []byte("fencing_token")) {
+		t.Fatalf("task detail leaked control-plane fields: %s", body)
+	}
+	var detail openapi.TaskReadModel
+	if err := json.Unmarshal(body, &detail); err != nil {
+		t.Fatal(err)
+	}
+	if detail.Task.ID != fixture.task.ID || len(detail.RunAttempts) != 1 || len(detail.Events) < 2 {
+		t.Fatalf("task detail projection=%+v", detail)
+	}
 }

@@ -144,3 +144,17 @@ func TestControlRequestsRequireIdempotencyCASAndStructuredExecution(t *testing.T
 		t.Fatal("message without Task CAS version must be rejected")
 	}
 }
+
+func TestCreateTaskRejectsUnboundNetworkOverride(t *testing.T) {
+	create := api.CreateTaskRequest{
+		Meta: api.CommandMeta{IdempotencyKey: "create-network"}, SenderPrincipalID: "human-1",
+		TargetAgentID: "quote", OrganizationID: "org-1", DispatchMode: domain.DispatchModeDirect,
+		Content: "probe network",
+		Execution: &domain.ExecutionSpec{AdapterID: "agy", BackendID: "local", Model: "model-1",
+			Reasoning: domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault}, Session: domain.SessionSpec{Mode: domain.SessionModeNew}, Timeout: time.Minute,
+			Network: domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: "unbound", ProfileVersion: 1, ConfigFile: "/run/profile.conf"}},
+	}
+	if err := create.Validate(); err == nil {
+		t.Fatal("unbound network override was accepted")
+	}
+}

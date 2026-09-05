@@ -13,6 +13,7 @@ import (
 	"openagentx/internal/auth/web"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 type State interface {
@@ -20,12 +21,30 @@ type State interface {
 	ListWorkers(context.Context, int) ([]domain.WorkerInstance, error)
 	ListTasks(context.Context, string, int) ([]domain.Task, error)
 	ListJournal(context.Context, int64, int) ([]domain.JournalEvent, error)
+	ListTaskJournal(context.Context, string, int64, int) ([]domain.JournalEvent, error)
 	GetTask(context.Context, string) (*domain.Task, error)
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error)
 	GetRunAttempt(context.Context, string) (*domain.RunAttempt, error)
+	ListRunAttemptsForTask(context.Context, string, int) ([]domain.RunAttempt, error)
 	ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error)
 	LatestJournalSequence(context.Context) (int64, error)
+}
+
+// backendOptionsState is optional to keep the observe contract compatible with
+// lightweight fixtures. The SQLite repository implements it; when unavailable
+// the endpoint returns an empty set rather than inventing profile data.
+type backendOptionsState interface {
+	ListWorkerBackends(context.Context, string) ([]openruntime.BackendRegistration, error)
+}
+
+type networkProfileState interface {
+	CreateProxyProfile(context.Context, *domain.ProxyProfile) error
+	GetProxyProfile(context.Context, string, int64) (*domain.ProxyProfile, error)
+	ListProxyProfiles(context.Context, int) ([]domain.ProxyProfile, error)
+	PublishProxyProfile(context.Context, string, int64, string, time.Time) (*domain.ProxyProfile, error)
+	BindNetworkProfile(context.Context, *domain.NetworkBinding, int64) error
+	ListNetworkBindings(context.Context, string) ([]domain.NetworkBinding, error)
 }
 
 type Handler struct {
@@ -47,11 +66,16 @@ func NewHandler(state State, commands *controlplane.CommandService, auth *web.Ma
 	h.mux.HandleFunc("GET /api/observe/v1/tasks/{taskID}", h.task)
 	h.mux.HandleFunc("GET /api/observe/v1/mailboxes", h.mailboxes)
 	h.mux.HandleFunc("GET /api/observe/v1/run-attempts/{runID}", h.run)
+	h.mux.HandleFunc("GET "+openapi.ObserveExecutionOptionsPath, h.executionOptions)
+	h.mux.HandleFunc("GET "+openapi.ObserveNetworkProfilesPath, h.networkProfiles)
 	h.mux.HandleFunc("GET /api/observe/v1/events/stream", h.events)
 	h.mux.HandleFunc("POST /api/control/v1/tasks", h.createTask)
 	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/messages", h.createMessage)
 	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/cancel", h.cancelTask)
 	h.mux.HandleFunc("POST /api/control/v1/approvals/{approvalID}/decisions", h.decideApproval)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfilePath, h.createNetworkProfile)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfilePublishPath, h.publishNetworkProfile)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkBindingPath, h.bindNetworkProfile)
 	return h, nil
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -133,9 +157,106 @@ func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), 404)
 		return
 	}
-	m, _ := h.state.ListMessages(r.Context(), t.ID)
-	writeJSON(w, map[string]any{"task": t, "messages": m})
+	m, err := h.state.ListMessages(r.Context(), t.ID)
+	if err != nil {
+		http.Error(w, "failed to load task messages", http.StatusInternalServerError)
+		return
+	}
+	after, limit, err := observeCursor(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	runs, err := h.state.ListRunAttemptsForTask(r.Context(), t.ID, 100)
+	if err != nil {
+		http.Error(w, "failed to load task runs", http.StatusInternalServerError)
+		return
+	}
+	events, err := h.state.ListTaskJournal(r.Context(), t.ID, after, limit)
+	if err != nil {
+		http.Error(w, "failed to load task events", http.StatusInternalServerError)
+		return
+	}
+	readModel := openapi.TaskReadModel{Task: taskReadModel(*t), Messages: m, Events: projectEvents(events), LastSequence: lastEventSequence(projectEvents(events))}
+	if len(events) == limit {
+		readModel.NextSequence = events[len(events)-1].Sequence
+	}
+	for _, run := range runs {
+		readModel.RunAttempts = append(readModel.RunAttempts, runReadModel(run))
+	}
+	if readModel.RunAttempts == nil {
+		readModel.RunAttempts = []openapi.RunAttemptReadModel{}
+	}
+	if readModel.Events == nil {
+		readModel.Events = []openapi.JournalEventReadModel{}
+	}
+	writeJSON(w, readModel)
 }
+
+func observeCursor(r *http.Request) (int64, int, error) {
+	after := int64(0)
+	if value := r.URL.Query().Get("after_sequence"); value != "" {
+		parsed, err := strconv.ParseInt(value, 10, 64)
+		if err != nil || parsed < 0 {
+			return 0, 0, fmt.Errorf("invalid after_sequence")
+		}
+		after = parsed
+	}
+	limit := 200
+	if value := r.URL.Query().Get("limit"); value != "" {
+		parsed, err := strconv.Atoi(value)
+		if err != nil || parsed < 1 || parsed > 500 {
+			return 0, 0, fmt.Errorf("invalid limit")
+		}
+		limit = parsed
+	}
+	return after, limit, nil
+}
+
+func projectEvents(events []domain.JournalEvent) []openapi.JournalEventReadModel {
+	projected := make([]openapi.JournalEventReadModel, 0, len(events))
+	for _, event := range events {
+		projected = append(projected, openapi.JournalEventReadModel{Sequence: event.Sequence, ID: event.ID, AggregateType: event.AggregateType, AggregateID: event.AggregateID, EventType: event.EventType, CreatedAt: event.CreatedAt})
+	}
+	return projected
+}
+
+func lastEventSequence(events []openapi.JournalEventReadModel) int64 {
+	var sequence int64
+	for _, event := range events {
+		if event.Sequence > sequence {
+			sequence = event.Sequence
+		}
+	}
+	return sequence
+}
+
+func runReadModel(run domain.RunAttempt) openapi.RunAttemptReadModel {
+	return openapi.RunAttemptReadModel{
+		ID: run.ID, TaskID: run.TaskID, AgentID: run.AgentID, Version: run.Version,
+		Status: run.Status, WorkerInstanceID: run.WorkerInstanceID,
+		ExecutionSpecVersion: run.ExecutionSpecVersion, AdapterID: run.AdapterID,
+		BackendID: run.BackendID, Model: run.Model, ReasoningMode: run.ReasoningMode,
+		ReasoningValue: run.ReasoningValue, NetworkMode: networkMode(run), NetworkProfileID: networkProfileID(run), NetworkProfileVersion: networkProfileVersion(run), StartedAt: run.StartedAt,
+		FinishedAt: run.FinishedAt, CreatedAt: run.CreatedAt, UpdatedAt: run.UpdatedAt,
+	}
+}
+
+func taskReadModel(task domain.Task) openapi.TaskReadModelTask {
+	return openapi.TaskReadModelTask{ID: task.ID, Version: task.Version, TargetAgentID: task.TargetAgentID, OrganizationID: task.OrganizationID, DispatchMode: task.DispatchMode, Content: task.Content, Status: task.Status, Result: task.Result, Error: task.Error, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
+}
+
+func resolvedNetwork(run domain.RunAttempt) domain.NetworkPolicy {
+	var resolved domain.ResolvedExecutionSpec
+	if err := json.Unmarshal([]byte(run.ResolvedExecutionJSON), &resolved); err != nil {
+		return domain.NetworkPolicy{}
+	}
+	return resolved.Spec.Network
+}
+
+func networkMode(run domain.RunAttempt) domain.NetworkMode { return resolvedNetwork(run).Mode }
+func networkProfileID(run domain.RunAttempt) string        { return resolvedNetwork(run).ProfileID }
+func networkProfileVersion(run domain.RunAttempt) int64    { return resolvedNetwork(run).ProfileVersion }
 func (h *Handler) mailboxes(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
 		return
@@ -156,7 +277,159 @@ func (h *Handler) run(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), 404)
 		return
 	}
-	writeJSON(w, v)
+	writeJSON(w, runReadModel(*v))
+}
+
+func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {
+	if _, ok := h.session(w, r, false); !ok {
+		return
+	}
+	provider, ok := h.state.(backendOptionsState)
+	if !ok {
+		writeJSON(w, map[string]any{"backends": []any{}})
+		return
+	}
+	workers, err := h.state.ListWorkers(r.Context(), 100)
+	if err != nil {
+		http.Error(w, "failed to load workers", http.StatusInternalServerError)
+		return
+	}
+	type option struct {
+		WorkerID string                          `json:"worker_id"`
+		AgentID  string                          `json:"agent_id"`
+		Backend  openruntime.BackendRegistration `json:"backend"`
+	}
+	options := make([]option, 0)
+	for _, worker := range workers {
+		backends, listErr := provider.ListWorkerBackends(r.Context(), worker.ID)
+		if listErr != nil {
+			continue
+		}
+		for _, backend := range backends {
+			// BackendRegistration only carries a profile reference and health;
+			// it never exposes credentials or config file contents.
+			options = append(options, option{WorkerID: worker.ID, AgentID: worker.AgentID, Backend: backend})
+		}
+	}
+	writeJSON(w, map[string]any{"backends": options})
+}
+
+func (h *Handler) networkProfiles(w http.ResponseWriter, r *http.Request) {
+	if _, ok := h.session(w, r, false); !ok {
+		return
+	}
+	state, ok := h.state.(networkProfileState)
+	if !ok {
+		writeJSON(w, map[string]any{"profiles": []any{}, "bindings": []any{}})
+		return
+	}
+	profiles, err := state.ListProxyProfiles(r.Context(), 200)
+	if err != nil {
+		http.Error(w, "failed to load network profiles", 500)
+		return
+	}
+	bindings, err := state.ListNetworkBindings(r.Context(), r.URL.Query().Get("agent_id"))
+	if err != nil {
+		http.Error(w, "failed to load network bindings", 500)
+		return
+	}
+	// Never expose the secret reference itself to the browser; presence is
+	// enough for operators to distinguish configured from unconfigured.
+	for i := range profiles {
+		profiles[i].SecretRef = ""
+	}
+	writeJSON(w, map[string]any{"profiles": profiles, "bindings": bindings})
+}
+
+func (h *Handler) createNetworkProfile(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok {
+		return
+	}
+	state, ok := h.state.(networkProfileState)
+	if !ok {
+		http.Error(w, "network profiles unavailable", 501)
+		return
+	}
+	var req openapi.CreateNetworkProfileRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", 400)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	p, err := req.Validate(s.User.ID)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	if err := state.CreateProxyProfile(r.Context(), &p); err != nil {
+		http.Error(w, err.Error(), 409)
+		return
+	}
+	p.SecretRef = ""
+	writeJSON(w, p)
+}
+
+func (h *Handler) publishNetworkProfile(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok {
+		return
+	}
+	state, ok := h.state.(networkProfileState)
+	if !ok {
+		http.Error(w, "network profiles unavailable", 501)
+		return
+	}
+	var req openapi.PublishNetworkProfileRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", 400)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	if err := req.Validate(); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	p, err := state.PublishProxyProfile(r.Context(), r.PathValue("profileID"), req.Meta.ExpectedVersion, s.User.ID, time.Now().UTC())
+	if err != nil {
+		http.Error(w, err.Error(), 409)
+		return
+	}
+	p.SecretRef = ""
+	writeJSON(w, p)
+}
+
+func (h *Handler) bindNetworkProfile(w http.ResponseWriter, r *http.Request) {
+	if _, ok := h.session(w, r, true); !ok {
+		return
+	}
+	state, ok := h.state.(networkProfileState)
+	if !ok {
+		http.Error(w, "network profiles unavailable", 501)
+		return
+	}
+	var req openapi.BindNetworkProfileRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", 400)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	b, err := req.Validate(time.Now().UTC())
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	if err := state.BindNetworkProfile(r.Context(), &b, req.Meta.ExpectedVersion); err != nil {
+		http.Error(w, err.Error(), 409)
+		return
+	}
+	writeJSON(w, b)
 }
 func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
@@ -195,7 +468,15 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for _, ev := range events {
-			b, _ := json.Marshal(ev)
+			if !observableAggregate(ev.AggregateType) {
+				after = ev.Sequence
+				continue
+			}
+			// The panel currently runs in a single authenticated organization scope.
+			// Stream only the browser-safe projection; Journal payloads never cross
+			// the SSE boundary and therefore cannot expose runtime diagnostics or
+			// credentials through a reconnecting client.
+			b, _ := json.Marshal(projectEvents([]domain.JournalEvent{ev})[0])
 			fmt.Fprintf(w, "id: %d\ndata: %s\n\n", ev.Sequence, b)
 			after = ev.Sequence
 		}
@@ -208,6 +489,15 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, ": keepalive\n\n")
 			fl.Flush()
 		}
+	}
+}
+
+func observableAggregate(aggregateType string) bool {
+	switch aggregateType {
+	case "", "task", "run_attempt", "message", "approval_request":
+		return true
+	default:
+		return false
 	}
 }
 func (h *Handler) createTask(w http.ResponseWriter, r *http.Request) {

@@ -79,11 +79,14 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 	backends := make([]residentworker.RuntimeBackend, 0, len(processConfig.RuntimeBackendConfig))
 	configDir := filepath.Dir(configPath)
 	for _, backendConfig := range processConfig.RuntimeBackendConfig {
+		if backendConfig.Network.ConfigFile != "" && !filepath.IsAbs(backendConfig.Network.ConfigFile) {
+			backendConfig.Network.ConfigFile = filepath.Join(configDir, backendConfig.Network.ConfigFile)
+		}
 		adapter, err := assembleM1Adapter(backendConfig, configDir)
 		if err != nil {
 			return err
 		}
-		backends = append(backends, residentworker.RuntimeBackend{ID: backendConfig.BackendID, Adapter: adapter})
+		backends = append(backends, residentworker.RuntimeBackend{ID: backendConfig.BackendID, Adapter: adapter, Network: backendConfig.Network})
 	}
 	pool, err := residentworker.NewBackendPool(backends)
 	if err != nil {
@@ -102,6 +105,7 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir str
 		if err != nil {
 			return nil, err
 		}
+		agyConfig.Network = config.Network
 		adapter, err := agy.NewAdapter(agyConfig)
 		if err != nil {
 			return nil, err
@@ -113,6 +117,7 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir str
 		if err != nil {
 			return nil, err
 		}
+		adapterConfig.Network = config.Network
 		return codebuddy.NewAdapter(adapterConfig)
 	}
 	if config.AdapterID != "fake" {

@@ -219,6 +219,36 @@ func (r *Repository) GetRunAttempt(ctx context.Context, runID string) (*domain.R
 		FROM run_attempts WHERE run_id = ?`, runID))
 }
 
+func (r *Repository) ListRunAttemptsForTask(ctx context.Context, taskID string, limit int) ([]domain.RunAttempt, error) {
+	if taskID == "" {
+		return nil, domain.ErrInvalidInput("task id is required")
+	}
+	if limit <= 0 || limit > 100 {
+		return nil, domain.ErrInvalidInput("run attempt limit must be between 1 and 100")
+	}
+	rows, err := r.db.QueryContext(ctx, `SELECT run_id, task_id, agent_id, version,
+		status, worker_instance_id, fencing_token, lease_until, execution_spec_version,
+		requested_execution_json, resolved_execution_json, adapter_id, backend_id, model,
+		reasoning_mode, reasoning_value, started_at, finished_at, result_json, created_at, updated_at
+		FROM run_attempts WHERE task_id = ? ORDER BY started_at DESC, run_id DESC LIMIT ?`, taskID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("list RunAttempts for task: %w", err)
+	}
+	defer rows.Close()
+	result := make([]domain.RunAttempt, 0)
+	for rows.Next() {
+		run, err := scanRunAttempt(rows)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, *run)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate RunAttempts for task: %w", err)
+	}
+	return result, nil
+}
+
 func scanRunAttempt(scanner rowScanner) (*domain.RunAttempt, error) {
 	var run domain.RunAttempt
 	var leaseUntil, startedAt, createdAt, updatedAt string

@@ -13,6 +13,7 @@ import (
 type RuntimeBackend struct {
 	ID      string
 	Adapter openruntime.AgentRuntimeAdapter
+	Network domain.NetworkPolicy
 }
 
 type BackendPool struct {
@@ -89,7 +90,7 @@ func (p *BackendPool) Observe(ctx context.Context) ([]openruntime.BackendRegistr
 		}
 		health[backend.ID] = backendHealth
 		registrations = append(registrations, openruntime.BackendRegistration{
-			BackendID: backend.ID, Descriptor: descriptor, Health: backendHealth,
+			BackendID: backend.ID, Descriptor: descriptor, Health: backendHealth, Network: backend.Network,
 		})
 	}
 	if healthy == 0 {

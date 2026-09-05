@@ -22,6 +22,7 @@ var requiredTables = []string{
 	"worker_instances", "runtime_backend_registrations", "tasks", "messages", "run_attempts", "session_bindings",
 	"workspace_leases", "approval_requests", "approval_decisions", "mailbox_items", "worker_commands", "artifacts",
 	"event_journal", "web_users", "web_sessions",
+	"network_profiles", "network_profile_bindings",
 }
 
 var requiredTriggers = []string{"event_journal_reject_update", "event_journal_reject_delete"}
@@ -49,6 +50,12 @@ func Apply(ctx context.Context, db *sql.DB) error {
 		if version != CurrentVersion {
 			return fmt.Errorf("%w: got %d, want %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
 		}
+		// ADR-002 adds these tables without invalidating existing v1 databases.
+		// Apply them transactionally before validating the current schema so an
+		// upgrade from an already deployed v1 remains usable.
+		if err := ensureNetworkTables(ctx, db); err != nil {
+			return err
+		}
 		return ValidateCurrent(ctx, db)
 	}
 
@@ -73,6 +80,41 @@ func Apply(ctx context.Context, db *sql.DB) error {
 	}
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit target schema v%d: %w", CurrentVersion, err)
+	}
+	return nil
+}
+
+func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin network schema upgrade: %w", err)
+	}
+	defer tx.Rollback()
+	statements := []string{
+		`CREATE TABLE IF NOT EXISTS network_profiles (
+			profile_id TEXT NOT NULL, version INTEGER NOT NULL CHECK (version > 0),
+			status TEXT NOT NULL CHECK (status IN ('draft', 'published')),
+			mode TEXT NOT NULL CHECK (mode IN ('only_http_proxy', 'only_socks5')),
+			host TEXT NOT NULL, port INTEGER NOT NULL CHECK (port BETWEEN 1 AND 65535),
+			config_file TEXT, secret_ref TEXT, created_by TEXT NOT NULL REFERENCES principals(principal_id),
+			created_at TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (profile_id, version)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_network_profiles_latest ON network_profiles(profile_id, version DESC)`,
+		`CREATE TABLE IF NOT EXISTS network_profile_bindings (
+			agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
+			profile_id TEXT NOT NULL, profile_version INTEGER NOT NULL, version INTEGER NOT NULL CHECK (version > 0),
+			desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
+			applied_worker_id TEXT, applied_generation INTEGER, applied_profile_version INTEGER, updated_at TEXT NOT NULL,
+			PRIMARY KEY (agent_id, backend_id), FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version)
+		)`,
+	}
+	for _, statement := range statements {
+		if _, err := tx.ExecContext(ctx, statement); err != nil {
+			return fmt.Errorf("apply network schema upgrade: %w", err)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit network schema upgrade: %w", err)
 	}
 	return nil
 }

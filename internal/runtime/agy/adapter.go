@@ -18,6 +18,7 @@ import (
 
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
+	runtimenetwork "openagentx/internal/runtime/network"
 )
 
 // Keep the escalation window below the externally observable cancellation SLA.
@@ -45,6 +46,7 @@ type Config struct {
 	StderrLimit   int
 	HealthTimeout time.Duration
 	CancelGrace   time.Duration
+	Network       domain.NetworkPolicy
 }
 
 type Adapter struct {
@@ -66,6 +68,9 @@ func NewAdapter(config Config) (*Adapter, error) {
 	}
 	if config.CancelGrace <= 0 {
 		config.CancelGrace = defaultCancelGrace
+	}
+	if err := config.Network.Validate(); err != nil {
+		return nil, err
 	}
 	if _, err := exec.LookPath(config.Binary); err != nil {
 		return nil, fmt.Errorf("AGY binary is unavailable: %w", err)
@@ -97,6 +102,7 @@ func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, er
 		}, SessionModes: []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume},
 		Steer: openruntime.SteerQueued, Approval: openruntime.ApprovalPreflight,
 		Cancel: openruntime.CancelProcessSignal, Streams: true, MaxConcurrency: 1,
+		NetworkModes:       []string{"inherit", "named_profile"},
 		BackendOptionsJSON: []byte(`{"type":"object"}`),
 	}, nil
 }
@@ -142,7 +148,11 @@ func (a *Adapter) Health(ctx context.Context) error {
 	defer cancel()
 	command := exec.CommandContext(healthContext, a.config.Binary, "--version")
 	command.Dir = a.config.WorkingDir
-	command.Env = append(os.Environ(), a.config.Environment...)
+	env, err := a.environment(a.config.Network)
+	if err != nil {
+		return err
+	}
+	command.Env = env
 	if output, err := command.CombinedOutput(); err != nil {
 		return fmt.Errorf("AGY health probe failed: %w (%s)", err, sanitizeOutput(output, a.config.StderrLimit))
 	}
@@ -175,7 +185,12 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	turnContext, cancel := context.WithTimeout(ctx, spec.Timeout)
 	command := exec.CommandContext(turnContext, a.config.Binary, args...)
 	command.Dir = a.config.WorkingDir
-	command.Env = append(os.Environ(), a.config.Environment...)
+	env, err := a.environment(spec.Network)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+	command.Env = env
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.WaitDelay = a.config.CancelGrace
 	cancelController := newProcessCancelController(command, a.config.CancelGrace)
@@ -212,6 +227,15 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 		stderrLimit: a.config.StderrLimit, prompt: prompt, cancel: cancel, done: make(chan struct{}), cancelController: cancelController}
 	go handle.collect()
 	return handle, nil
+}
+
+func (a *Adapter) environment(policy domain.NetworkPolicy) ([]string, error) {
+	if policy.IsZero() {
+		policy = a.config.Network
+	}
+	base := append([]string{}, os.Environ()...)
+	base = append(base, a.config.Environment...)
+	return runtimenetwork.Environment(base, policy, "agy-batch", a.config.Binary)
 }
 
 func encodeStreamInput(prompt string) ([]byte, error) {

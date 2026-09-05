@@ -15,6 +15,7 @@ import (
 
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
+	runtimenetwork "openagentx/internal/runtime/network"
 )
 
 type Config struct {
@@ -24,6 +25,7 @@ type Config struct {
 	WorkingDir    string
 	Environment   []string
 	HealthTimeout time.Duration
+	Network       domain.NetworkPolicy
 }
 
 type Adapter struct{ config Config }
@@ -70,7 +72,11 @@ func (a *Adapter) Health(ctx context.Context) error {
 	healthCtx, cancel := context.WithTimeout(ctx, a.config.HealthTimeout)
 	defer cancel()
 	cmd := exec.CommandContext(healthCtx, a.config.Binary, append([]string{}, a.config.Args...)...)
-	cmd.Dir, cmd.Env = a.config.WorkingDir, append(os.Environ(), a.config.Environment...)
+	env, err := a.environment(a.config.Network)
+	if err != nil {
+		return err
+	}
+	cmd.Dir, cmd.Env = a.config.WorkingDir, env
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("ACP health probe failed: %w", err)
 	}
@@ -82,7 +88,11 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 		return nil, err
 	}
 	cmd := exec.CommandContext(ctx, a.config.Binary, a.config.Args...)
-	cmd.Dir, cmd.Env = a.config.WorkingDir, append(os.Environ(), a.config.Environment...)
+	env, err := a.environment(request.Execution.Spec.Network)
+	if err != nil {
+		return nil, err
+	}
+	cmd.Dir, cmd.Env = a.config.WorkingDir, env
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, err
@@ -104,6 +114,15 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	h := &turnHandle{cmd: cmd, stdout: stdout, sink: sink, done: make(chan struct{})}
 	go h.collect()
 	return h, nil
+}
+
+func (a *Adapter) environment(policy domain.NetworkPolicy) ([]string, error) {
+	if policy.IsZero() {
+		policy = a.config.Network
+	}
+	base := append([]string{}, os.Environ()...)
+	base = append(base, a.config.Environment...)
+	return runtimenetwork.Environment(base, policy, a.config.Descriptor.AdapterID, a.config.Binary)
 }
 
 type turnHandle struct {

@@ -675,7 +675,7 @@ func m1PlanForBackend(task domain.Task, backend openruntime.BackendRegistration,
 		AdapterID: backend.Descriptor.AdapterID, BackendID: backend.BackendID,
 		Model: backend.Descriptor.Models[0], Reasoning: reasoning,
 		Session: domain.SessionSpec{Mode: sessionMode, ContextID: task.ID},
-		Timeout: 30 * time.Minute, BackendOptions: json.RawMessage(`{}`),
+		Timeout: 30 * time.Minute, BackendOptions: json.RawMessage(`{}`), Network: backend.Network,
 	}
 	if err := spec.ValidateShape(); err != nil {
 		return TurnPlan{}, err

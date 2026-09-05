@@ -407,3 +407,36 @@ CREATE TABLE web_sessions (
 
 CREATE INDEX idx_web_sessions_expiry
 ON web_sessions(idle_expires_at, absolute_expires_at);
+
+CREATE TABLE network_profiles (
+    profile_id TEXT NOT NULL,
+    version INTEGER NOT NULL CHECK (version > 0),
+    status TEXT NOT NULL CHECK (status IN ('draft', 'published')),
+    mode TEXT NOT NULL CHECK (mode IN ('only_http_proxy', 'only_socks5')),
+    host TEXT NOT NULL,
+    port INTEGER NOT NULL CHECK (port BETWEEN 1 AND 65535),
+    config_file TEXT,
+    secret_ref TEXT,
+    created_by TEXT NOT NULL REFERENCES principals(principal_id),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (profile_id, version)
+);
+
+CREATE INDEX idx_network_profiles_latest
+ON network_profiles(profile_id, version DESC);
+
+CREATE TABLE network_profile_bindings (
+    agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE,
+    backend_id TEXT NOT NULL,
+    profile_id TEXT NOT NULL,
+    profile_version INTEGER NOT NULL,
+    version INTEGER NOT NULL CHECK (version > 0),
+    desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
+    applied_worker_id TEXT,
+    applied_generation INTEGER,
+    applied_profile_version INTEGER,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (agent_id, backend_id),
+    FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version)
+);

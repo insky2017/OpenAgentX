@@ -2,15 +2,19 @@ package api
 
 import (
 	"strings"
+	"time"
 
 	"openagentx/internal/domain"
 )
 
 const (
-	ControlCreateTaskPath       = "/api/control/v1/tasks"
-	ControlCreateMessagePath    = "/api/control/v1/tasks/{task-id}/messages"
-	ControlCancelTaskPath       = "/api/control/v1/tasks/{task-id}/cancel"
-	ControlApprovalDecisionPath = "/api/control/v1/approvals/{approval-request-id}/decisions"
+	ControlCreateTaskPath            = "/api/control/v1/tasks"
+	ControlCreateMessagePath         = "/api/control/v1/tasks/{task-id}/messages"
+	ControlCancelTaskPath            = "/api/control/v1/tasks/{task-id}/cancel"
+	ControlApprovalDecisionPath      = "/api/control/v1/approvals/{approval-request-id}/decisions"
+	ControlNetworkProfilePath        = "/api/control/v1/network-profiles"
+	ControlNetworkProfilePublishPath = "/api/control/v1/network-profiles/{profileID}/publish"
+	ControlNetworkBindingPath        = "/api/control/v1/network-bindings"
 )
 
 type CreateTaskRequest struct {
@@ -22,6 +26,47 @@ type CreateTaskRequest struct {
 	ParentTaskID      string                `json:"parent_task_id,omitempty"`
 	Content           string                `json:"content"`
 	Execution         *domain.ExecutionSpec `json:"execution,omitempty"`
+}
+
+type CreateNetworkProfileRequest struct {
+	Meta       CommandMeta `json:"meta"`
+	ProfileID  string      `json:"profile_id"`
+	Mode       string      `json:"mode"`
+	Host       string      `json:"host"`
+	Port       int         `json:"port"`
+	ConfigFile string      `json:"config_file,omitempty"`
+	SecretRef  string      `json:"secret_ref,omitempty"`
+}
+
+func (r CreateNetworkProfileRequest) Validate(actor string) (domain.ProxyProfile, error) {
+	if err := r.Meta.Validate(false); err != nil {
+		return domain.ProxyProfile{}, err
+	}
+	now := time.Now().UTC()
+	p := domain.ProxyProfile{ID: r.ProfileID, Version: 1, Status: domain.NetworkProfileDraft, Mode: r.Mode, Host: r.Host, Port: r.Port, ConfigFile: r.ConfigFile, SecretRef: r.SecretRef, CreatedBy: actor, CreatedAt: now, UpdatedAt: now}
+	return p, p.Validate()
+}
+
+type PublishNetworkProfileRequest struct {
+	Meta CommandMeta `json:"meta"`
+}
+
+func (r PublishNetworkProfileRequest) Validate() error { return r.Meta.Validate(true) }
+
+type BindNetworkProfileRequest struct {
+	Meta           CommandMeta `json:"meta"`
+	AgentID        string      `json:"agent_id"`
+	BackendID      string      `json:"backend_id"`
+	ProfileID      string      `json:"profile_id"`
+	ProfileVersion int64       `json:"profile_version"`
+}
+
+func (r BindNetworkProfileRequest) Validate(now time.Time) (domain.NetworkBinding, error) {
+	if err := r.Meta.Validate(false); err != nil {
+		return domain.NetworkBinding{}, err
+	}
+	b := domain.NetworkBinding{AgentID: r.AgentID, BackendID: r.BackendID, ProfileID: r.ProfileID, ProfileVersion: r.ProfileVersion, Version: 1, DesiredStatus: "pending", UpdatedAt: now.UTC()}
+	return b, b.Validate()
 }
 
 func (r CreateTaskRequest) Validate() error {
@@ -49,7 +94,17 @@ func (r CreateTaskRequest) Validate() error {
 		}
 	}
 	if r.Execution != nil {
-		return r.Execution.ValidateShape()
+		if err := r.Execution.ValidateShape(); err != nil {
+			return err
+		}
+		// CreateTask does not yet persist a requested execution override. In
+		// particular, accepting a network policy here would make the API claim
+		// a profile was selected while M1 planning still uses the registered
+		// Backend policy. Reject it fail-closed until a transactional profile
+		// binding is available.
+		if !r.Execution.Network.IsZero() {
+			return domain.ErrForbidden("network policy must be selected from the registered Backend profile")
+		}
 	}
 	return nil
 }
