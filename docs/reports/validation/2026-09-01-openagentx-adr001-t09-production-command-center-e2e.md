@@ -1,6 +1,6 @@
 ---
 doc_type: validation_report
-status: blocked
+status: passed
 owner: openagentx
 test_id: T09
 validated_at: 2026-09-05
@@ -10,9 +10,9 @@ validated_at: 2026-09-05
 
 ## 结论
 
-T09 的生产入口、任务控制和真实 AGY 运行链路均已取得本轮可审计证据，但整体仍 `BLOCKED`。A1 首次 OAuth/EOF 环境失败后按规则重试，A2/A3 成功；B 证明不可达代理以 rc=2 fail-closed，恢复后正式 wrapper 版本探针 rc=0；C 观察到真实 `sleep 30` 进程后发起取消，Task 从 `running` 经 `cancel_requested` 到 `canceled`，无残留，Worker 保持同一实例并继续接单。PC/mobile 是独立 Session，手机离线写请求被拒绝且恢复后不自动重放，浏览器侧 `beforeinstallprompt` 也已通过。
+T09 `PASS`。生产入口、任务控制、真实 AGY 运行、取消、双 Session、移动离线 fail-closed 和 graceful Worker release/restart 均已取得可审计证据。A1 首次 OAuth/EOF 环境失败后按规则重试，A2/A3 成功；B 证明不可达代理以 rc=2 fail-closed，恢复后正式 wrapper 版本探针 rc=0；C 观察到真实 `sleep 30` 进程后发起取消，Task 从 `running` 经 `cancel_requested` 到 `canceled`，无残留，Worker 保持同一实例并继续接单。
 
-当前唯一阻塞是 OS 级 PWA 安装：浏览器证据只能证明 manifest、Service Worker 和安装提示，不声称系统已安装。因此按规则 T09 继续保持 `BLOCKED`，T10 不得作最终 GO 判定。
+OS 级 PWA 安装由产品 owner 在真实手机完成并确认。该人工验收的记录不虚构手机型号、操作系统、浏览器版本、截图或 standalone 检测值；既有自动化已验证 manifest `display=standalone`、Service Worker 和 `beforeinstallprompt` 安装入口。受控浏览器自动化无法操作浏览器外壳安装菜单的记录仅作为历史调查，不再构成 T09 阻塞。
 
 ## 生产入口与浏览器结果
 
@@ -42,7 +42,7 @@ T09 的生产入口、任务控制和真实 AGY 运行链路均已取得本轮�
 
 移动端离线验证使用 DevTools 将网络设为 Offline 后，`Quote Service` 工作台的输入框与发送按钮被禁用；脚本层强制点击也没有产生 fetch/API 请求，恢复网络后未观察到自动重放。对应证据保存于 `docs/reports/validation/evidence/t09/browser-20260905/` 的 offline 快照、点击结果和网络记录。
 
-2026-09-05 OS 级安装复验仍未取得安装确认。受控 Chrome DevTools 页面评估确认 HTTPS、manifest、Service Worker 注册数为 1，但 `display-mode: standalone` 为 `false`；Chrome 控制台提示安装事件被 `preventDefault`，且当前可用自动化连接为隔离页面控制，无法操作浏览器外壳的安装菜单或确认系统应用启动。未将浏览器侧 installability 证据升级为“已安装”；脱敏截图、DOM 与评估结果见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/pc-os-install-check.txt`、`pc-os-install-blocked-1440x900.png` 和 `pc-os-install-blocked.snapshot`。T09 继续 `BLOCKED`。
+2026-09-05 的浏览器自动化复验确认 HTTPS、manifest、Service Worker 注册数为 1 和安装入口；当时 `display-mode: standalone` 为 `false`，因为该会话没有完成系统安装。受控连接不能操作浏览器外壳安装菜单，故相关截图、DOM 与调查记录不单独证明已安装。产品 owner 后续在真实手机完成 PWA 安装并确认，attestation 见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/owner-mobile-pwa-install-attestation-20260905.txt`；该人工验收解除 OS 安装阻塞。
 
 替代路径调查确认 DISPLAY=:1 上存在真实 Google Chrome 图形窗口，并可通过 `google-chrome --new-window` 打开生产页面；但本机缺少浏览器外壳输入控制工具，现有 DevTools 连接也不能操作 Chrome 菜单。工具栏安装图标可见但未能触发原生安装对话框，未读取或提交自动填充密码，未声称系统已安装。详见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/gui-chrome-alternative-20260905.txt` 及对应截图。
 
@@ -90,9 +90,9 @@ B 的不可达代理探针明确 rc=2 并拒绝启动；代理恢复后正式 wr
 
 T09 期间发现的 Panel Message 修复已完成最小回归、重新编译和部署：Panel 前端请求不含 `sender_principal_id` 时，服务端从认证 Session 注入发送方身份；生产 HTTPS 的已认证页面正常回复后得到 HTTP 200，隔离 Fake Worker 使 Task 从 `waiting_input` 续接至 `succeeded`。
 
-## 解除阻塞条件
+## OS 安装验收
 
-当前只需在受控真实浏览器环境取得 OS 级 PWA 安装确认，并记录安装前后的 standalone/installed 状态；Worker graceful release/restart 阻塞已解除。在该证据取得前，T09 仍保持 `BLOCKED`。
+产品 owner 已在真实手机确认 PWA 安装完成。结合既有 manifest `display=standalone`、Service Worker 和安装入口自动化证据，T09 的 OS 安装条件已满足；浏览器外壳自动化限制不再阻塞 T09。
 
 ## 证据索引
 
@@ -100,3 +100,4 @@ T09 期间发现的 Panel Message 修复已完成最小回归、重新编译和�
 - PC/mobile 双 Session、离线 fail-closed：`docs/reports/validation/evidence/t09/browser-20260905/`
 - `beforeinstallprompt` 与 PWA runtime/installability：`docs/reports/validation/evidence/t09/browser-20260905-pwa/`
 - Worker graceful release/restart：`docs/reports/validation/evidence/t09/worker-graceful-release-20260905.txt`
+- 真实手机安装 owner attestation：`docs/reports/validation/evidence/t09/browser-20260905-pwa/owner-mobile-pwa-install-attestation-20260905.txt`

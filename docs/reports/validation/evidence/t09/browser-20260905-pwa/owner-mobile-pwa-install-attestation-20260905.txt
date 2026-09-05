@@ -1,0 +1,5 @@
+T09 OS-level PWA installation owner attestation (2026-09-05)
+
+Product owner confirmed that OpenAgentX PWA installation completed successfully on a real mobile phone.
+
+No device model, operating system, browser version, screenshot, standalone value, account data, or credential was provided or inferred. This attestation supplies the real-device OS-installation evidence; browser automation evidence separately covers the manifest display mode, Service Worker, and installation entry point.

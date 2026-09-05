@@ -1,6 +1,6 @@
 ---
 doc_type: test_task
-status: blocked
+status: passed
 owner: openagentx
 test_id: T09
 updated_at: 2026-09-05
@@ -41,9 +41,6 @@ updated_at: 2026-09-05
 - 真实长运行取消已通过：观察到 `sleep 30` 后发送取消，任务完成 `running → cancel_requested → canceled`，事件包含 control mailbox 接收、`runtime.agy.result` 和 `run_attempt.finished`；Worker 保持同一实例并能继续接单。
 - `t09-final-pc` 与 `t09-final-mobile` 是两个独立生产浏览器 Session，均能创建/跟踪任务并读取持久事实；手机离线时写控件禁用，强制点击无请求，恢复后无自动重放。`beforeinstallprompt` 安装入口通过浏览器侧回归。
 - Worker graceful release 重测通过：受控重启在 2 秒内完成新 generation 接管，日志无 `409 logical Agent already has a valid Active Worker`，旧 Worker 写入 `worker.released`、原子 offline 并推进 fencing；12 秒心跳、active run 和 quote-service mailbox 均正常。
-- 2026-09-05 再次尝试 OS 级 PWA 安装：受控 Chrome 页面确认 manifest/Service Worker/installability，但当前自动化连接无法操作浏览器外壳安装菜单，`display-mode: standalone` 仍为 `false`；证据归档于 `docs/reports/validation/evidence/t09/browser-20260905-pwa/`，不伪造安装 PASS。
-- 替代路径调查确认 DISPLAY=:1 的真实 Google Chrome 可打开生产页面，工具栏安装图标可见；但缺少浏览器外壳输入控制工具，自动化注入未触发安装对话框，仍无 standalone/installed 证据。需人工点击安装或提供等价浏览器外壳自动化能力。
-- 隔离 `/tmp` profile + XTest 最终尝试因 Chrome `inotify_init() failed: Too many open files (24)` 未创建可操作窗口；未接触用户 profile，仍需人工点击或提供稳定 browser-shell 自动化能力。
-- 受控清理匹配的 headless 资源后重试，隔离 Chrome 可创建窗口但代理报 `ERR_NO_SUPPORTED_PROXIES`，生产页面未加载，仍无安装证据；需支持该代理的稳定 GUI profile 或人工完成安装。
-- 显式清除浏览器代理后的隔离 Chrome 可加载生产登录壳体，但 XTest 未获窗口焦点且未触发安装对话框，仍无 standalone/installed 证据；需人工或可用 browser-shell 自动化完成安装确认。
-- T09 暂不标记整体 PASS；当前唯一阻塞是 OS 级 PWA 安装证据，需在真实受控浏览器中记录安装前后的 standalone/installed 状态。
+- 浏览器自动化已确认 manifest、`display=standalone`、Service Worker 和 `beforeinstallprompt` 安装入口；对浏览器外壳安装菜单的受控调查未能形成系统安装证据，相关记录保留在 T09 evidence 作为历史调查。
+- 产品 owner 已确认 PWA 可在真实手机完成安装；未记录或推断手机型号、操作系统、浏览器版本、截图或 standalone 检测值。该人工验收与既有自动化安装形态证据共同满足 OS 级安装验收，见 `docs/reports/validation/evidence/t09/browser-20260905-pwa/owner-mobile-pwa-install-attestation-20260905.txt`。
+- T09 整体 `PASS`；原 OS 级安装自动化受限不再构成阻塞。
