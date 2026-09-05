@@ -183,7 +183,7 @@ type turnHandle struct {
 }
 
 func (h *turnHandle) collect() {
-	result := openruntime.TurnResult{SideEffectsKnown: true}
+	result := openruntime.TurnResult{}
 	scanner := bufio.NewScanner(h.stdout)
 	var parseErr error
 	for scanner.Scan() {
@@ -224,7 +224,6 @@ func (h *turnHandle) collect() {
 	}
 	if result.Status == "" {
 		result.Status = openruntime.TurnResultSucceeded
-		result.SideEffectsKnown = true
 	}
 	h.once.Do(func() { h.result, h.err = result, parseErr; close(h.done) })
 }

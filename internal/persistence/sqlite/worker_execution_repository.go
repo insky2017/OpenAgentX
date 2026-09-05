@@ -610,10 +610,13 @@ func (r *Repository) FinishRun(
 		hasPendingMessage = pending == 1
 	}
 	runStatus, taskStatus := terminalStatuses(turnResult.Status)
-	// Task cancellation is a durable intent. Once it linearizes before finish,
-	// a late successful/failed turn must not overwrite that intent or reopen the
-	// task; the run itself still records the physical turn result.
-	if task.Status == domain.TaskStatusCancelRequested {
+	businessEffectUnverified := turnResult.Status == openruntime.TurnResultSucceeded && !turnResult.SideEffectsKnown
+	if businessEffectUnverified {
+		taskStatus = domain.TaskStatusUncertain
+	}
+	// A cancellation intent must not hide an uncertain physical outcome. Other
+	// determinate finish/cancel ordering semantics remain unchanged.
+	if task.Status == domain.TaskStatusCancelRequested && taskStatus != domain.TaskStatusUncertain {
 		taskStatus = domain.TaskStatusCanceled
 	} else if hasPendingMessage && (taskStatus == domain.TaskStatusSucceeded || taskStatus == domain.TaskStatusFailed) {
 		// A message committed before finish is a durable follow-up. Keep the
@@ -634,6 +637,9 @@ func (r *Repository) FinishRun(
 	}
 	if turnResult.Error != "" {
 		task.Error = &turnResult.Error
+	} else if businessEffectUnverified {
+		reason := "business_effect_unverified"
+		task.Error = &reason
 	}
 	if binding != nil {
 		var resolved domain.ResolvedExecutionSpec

@@ -53,7 +53,10 @@ type fakeWorkerClient struct {
 	networkWorks    []*api.NetworkWorkEnvelope
 	networkAcks     []api.NetworkWorkAckRequest
 	networkAckErr   error
+	beginErr        error
+	retainMailbox   bool
 	runCounter      int
+	beginAttempts   int
 	heartbeatFail   int
 
 	wakeup        chan struct{}
@@ -63,6 +66,7 @@ type fakeWorkerClient struct {
 	acceptHit     chan struct{}
 	ackHit        chan struct{}
 	networkAckHit chan struct{}
+	beginHit      chan struct{}
 }
 
 func newFakeWorkerClient() *fakeWorkerClient {
@@ -70,7 +74,7 @@ func newFakeWorkerClient() *fakeWorkerClient {
 		wakeup: make(chan struct{}, 1), commandWake: make(chan struct{}, 1),
 		heartbeatHit: make(chan struct{}, 64), finishHit: make(chan struct{}, 64),
 		acceptHit: make(chan struct{}, 64), ackHit: make(chan struct{}, 64),
-		networkAckHit: make(chan struct{}, 64),
+		networkAckHit: make(chan struct{}, 64), beginHit: make(chan struct{}, 64),
 	}
 }
 
@@ -134,7 +138,9 @@ func (c *fakeWorkerClient) ClaimMailbox(ctx context.Context, request api.ClaimRe
 	index := c.nextMailboxIndex(request.WorkCapacity)
 	if index >= 0 {
 		item := c.mailbox[index]
-		c.mailbox = append(c.mailbox[:index], c.mailbox[index+1:]...)
+		if !c.retainMailbox {
+			c.mailbox = append(c.mailbox[:index], c.mailbox[index+1:]...)
+		}
 		c.mu.Unlock()
 		return &item, nil
 	}
@@ -170,9 +176,25 @@ func (c *fakeWorkerClient) nextMailboxIndex(workCapacity int) int {
 
 func (c *fakeWorkerClient) BeginAttempt(_ context.Context, itemID string, request api.BeginAttemptRequest) (*api.BeginAttemptResponse, error) {
 	c.mu.Lock()
+	c.beginAttempts++
+	beginErr := c.beginErr
+	if beginErr != nil {
+		c.mu.Unlock()
+		signal(c.beginHit)
+		return nil, beginErr
+	}
 	c.runCounter++
 	runID := fmt.Sprintf("run-%d", c.runCounter)
+	if c.retainMailbox {
+		for index := range c.mailbox {
+			if c.mailbox[index].ID == itemID {
+				c.mailbox = append(c.mailbox[:index], c.mailbox[index+1:]...)
+				break
+			}
+		}
+	}
 	c.mu.Unlock()
+	signal(c.beginHit)
 	now := time.Now().UTC()
 	task := domain.Task{
 		ID: "task-" + itemID, TargetAgentID: request.AgentID, Version: 2,
@@ -430,6 +452,80 @@ func TestResidentWorkerWaitDoesNotBlockHeartbeatOrActiveControlAndContinuesToNex
 	}
 	if !foundZeroCapacity {
 		t.Fatal("Mailbox Pump never advertised zero work capacity during active turn")
+	}
+}
+
+func TestUnsupportedBeginBacksOffAndRecoveryStartsRuntimeOnce(t *testing.T) {
+	runner, client, adapter := newRunnerFixture(t, false)
+	client.beginErr = domain.ErrUnsupportedCapability
+	client.retainMailbox = true
+	ctx, cancel := context.WithCancel(context.Background())
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(ctx) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	drainSignals(client.heartbeatHit)
+	client.enqueueMailbox(workItem("mailbox-unsupported", 1))
+	waitSignal(t, client.beginHit, "unsupported BeginAttempt")
+	waitSignal(t, client.heartbeatHit, "heartbeat after unsupported BeginAttempt")
+	select {
+	case <-client.beginHit:
+		t.Fatal("unsupported BeginAttempt retried without bounded backoff")
+	case <-time.After(250 * time.Millisecond):
+	}
+	client.mu.Lock()
+	client.beginErr = nil
+	beginAttempts, runCount := client.beginAttempts, client.runCounter
+	client.mu.Unlock()
+	if beginAttempts != 1 || runCount != 0 {
+		t.Fatalf("unsupported BeginAttempt attempts=%d runs=%d", beginAttempts, runCount)
+	}
+	handle, err := adapter.NextHandle(testContext(t))
+	if err != nil {
+		t.Fatalf("recovered BeginAttempt did not start Runtime: %v", err)
+	}
+	handle.Complete(openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "recovered", SideEffectsKnown: true})
+	waitSignal(t, client.finishHit, "recovered Runtime finish")
+	client.mu.Lock()
+	beginAttempts, runCount, finishCount := client.beginAttempts, client.runCounter, len(client.finishes)
+	client.mu.Unlock()
+	if beginAttempts != 2 || runCount != 1 || finishCount != 1 {
+		t.Fatalf("recovered BeginAttempt attempts=%d runs=%d finishes=%d", beginAttempts, runCount, finishCount)
+	}
+	cancel()
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("resident Worker exited after unsupported BeginAttempt: %v", err)
+	}
+}
+
+func TestBeginSecurityErrorsTerminateResidentWorker(t *testing.T) {
+	for _, testCase := range []struct {
+		name string
+		err  error
+	}{
+		{name: "unauthorized", err: domain.ErrUnauthorized},
+		{name: "lease", err: domain.ErrLeaseExpired},
+		{name: "fencing", err: domain.ErrFencingRejected},
+		{name: "stale", err: domain.ErrStaleVersion},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			runner, client, adapter := newRunnerFixture(t, false)
+			client.beginErr = testCase.err
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			result := make(chan error, 1)
+			go func() { result <- runner.Run(ctx) }()
+			waitSignal(t, client.heartbeatHit, "initial heartbeat")
+			client.enqueueMailbox(workItem("mailbox-"+testCase.name, 1))
+			waitSignal(t, client.beginHit, testCase.name+" BeginAttempt")
+			if err := waitWorkerExit(t, result); !errors.Is(err, testCase.err) {
+				t.Fatalf("Worker error=%v want=%v", err, testCase.err)
+			}
+			shortContext, shortCancel := context.WithTimeout(context.Background(), 25*time.Millisecond)
+			defer shortCancel()
+			if _, err := adapter.NextHandle(shortContext); !errors.Is(err, context.DeadlineExceeded) {
+				t.Fatalf("failed BeginAttempt started Runtime: %v", err)
+			}
+		})
 	}
 }
 

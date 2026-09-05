@@ -33,6 +33,7 @@ type State interface {
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error)
 	GetRunAttempt(context.Context, string) (*domain.RunAttempt, error)
+	GetWorkerInstance(context.Context, string) (*domain.WorkerInstance, error)
 	ListRunAttemptsForTask(context.Context, string, int) ([]domain.RunAttempt, error)
 	ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error)
 	LatestJournalSequence(context.Context) (int64, error)
@@ -264,7 +265,12 @@ func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	for _, run := range runs {
-		readModel.RunAttempts = append(readModel.RunAttempts, runReadModel(run))
+		worker, workerErr := h.state.GetWorkerInstance(r.Context(), run.WorkerInstanceID)
+		if workerErr != nil && !errors.Is(workerErr, domain.ErrNotFound) {
+			http.Error(w, "failed to load run worker", http.StatusInternalServerError)
+			return
+		}
+		readModel.RunAttempts = append(readModel.RunAttempts, runReadModel(run, worker))
 	}
 	if readModel.RunAttempts == nil {
 		readModel.RunAttempts = []openapi.RunAttemptReadModel{}
@@ -431,15 +437,43 @@ func lastEventSequence(events []openapi.JournalEventReadModel) int64 {
 	return sequence
 }
 
-func runReadModel(run domain.RunAttempt) openapi.RunAttemptReadModel {
-	return openapi.RunAttemptReadModel{
+func runReadModel(run domain.RunAttempt, worker *domain.WorkerInstance) openapi.RunAttemptReadModel {
+	policy := resolvedNetwork(run)
+	readModel := openapi.RunAttemptReadModel{
 		ID: run.ID, TaskID: run.TaskID, AgentID: run.AgentID, Version: run.Version,
 		Status: run.Status, WorkerInstanceID: run.WorkerInstanceID,
 		ExecutionSpecVersion: run.ExecutionSpecVersion, AdapterID: run.AdapterID,
 		BackendID: run.BackendID, Model: run.Model, ReasoningMode: run.ReasoningMode,
-		ReasoningValue: run.ReasoningValue, NetworkMode: networkMode(run), NetworkProfileID: networkProfileID(run), NetworkProfileVersion: networkProfileVersion(run), StartedAt: run.StartedAt,
+		ReasoningValue: run.ReasoningValue, NetworkMode: policy.Mode, NetworkProfileID: policy.ProfileID,
+		NetworkProfileVersion: policy.ProfileVersion, NetworkPolicyVersion: policy.PolicyVersion,
+		NetworkBindingRevision: policy.BindingRevision, StartedAt: run.StartedAt,
 		FinishedAt: run.FinishedAt, CreatedAt: run.CreatedAt, UpdatedAt: run.UpdatedAt,
 	}
+	if worker != nil && worker.ID == run.WorkerInstanceID {
+		generation := worker.Generation
+		readModel.WorkerGeneration = &generation
+	}
+	readModel.TurnResult, readModel.TurnResultState = turnResultReadModel(run.ResultJSON)
+	return readModel
+}
+
+func turnResultReadModel(resultJSON string) (*openapi.TurnResultReadModel, string) {
+	if strings.TrimSpace(resultJSON) == "" {
+		return nil, "not_recorded"
+	}
+	var result openruntime.TurnResult
+	if err := json.Unmarshal([]byte(resultJSON), &result); err != nil || !result.Status.Valid() {
+		return nil, "invalid"
+	}
+	source := "not_recorded"
+	if result.RuntimeSideEffectsKnown != nil {
+		source = "runtime_reported"
+	}
+	return &openapi.TurnResultReadModel{
+		RuntimeStatus: result.Status, Body: result.Result, Error: result.Error,
+		RuntimeSideEffectsKnown: result.RuntimeSideEffectsKnown, SideEffectsSource: source,
+		BusinessVerificationSource: "not_recorded",
+	}, "available"
 }
 
 func taskReadModel(task domain.Task) openapi.TaskReadModelTask {
@@ -477,7 +511,12 @@ func (h *Handler) run(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), 404)
 		return
 	}
-	writeJSON(w, runReadModel(*v))
+	worker, workerErr := h.state.GetWorkerInstance(r.Context(), v.WorkerInstanceID)
+	if workerErr != nil && !errors.Is(workerErr, domain.ErrNotFound) {
+		http.Error(w, "failed to load run worker", http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, runReadModel(*v, worker))
 }
 
 func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {

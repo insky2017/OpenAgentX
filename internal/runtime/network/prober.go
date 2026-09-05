@@ -27,6 +27,9 @@ func ProbeEndpoint(ctx context.Context, content domain.NetworkProfileContent, se
 	defer cancel()
 	conn, err := (&net.Dialer{}).DialContext(probeCtx, "tcp", net.JoinHostPort(content.Host, strconv.Itoa(content.Port)))
 	if err != nil {
+		if probeCtx.Err() != nil {
+			return probeCtx.Err()
+		}
 		return domain.ErrConflict("proxy endpoint is unreachable")
 	}
 	defer conn.Close()

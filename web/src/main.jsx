@@ -56,37 +56,64 @@ const safeUrl = (url) => {
   return ''
 }
 
+class MarkdownBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { failed: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  render() {
+    if (this.state.failed) {
+      return <pre className="markdown-fallback" role="status">{this.props.source}</pre>
+    }
+    return this.props.children
+  }
+}
+
 function MarkdownContent({ value, compact = false }) {
   const [raw, setRaw] = useState(false)
+  const [copyState, setCopyState] = useState('')
   const source = typeof value === 'string' && value ? value : '暂无内容'
-  if (raw) {
-    return (
-      <div className={`markdown-source ${compact ? 'compact' : ''}`}>
-        <button className="text-button markdown-toggle" type="button" onClick={() => setRaw(false)}>返回渲染</button>
-        <pre>{source}</pre>
-      </div>
-    )
+
+  const copySource = async () => {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable')
+      await navigator.clipboard.writeText(source)
+      setCopyState('已复制')
+    } catch {
+      setCopyState('复制失败')
+    }
   }
+
   return (
-    <div className={`markdown-body ${compact ? 'compact' : ''}`}>
+    <div className={`${raw ? 'markdown-source' : 'markdown-body'} ${compact ? 'compact' : ''}`}>
       <div className="markdown-tools">
-        <button className="text-button" type="button" onClick={() => setRaw(true)}>查看原文</button>
-        <button className="text-button" type="button" onClick={() => navigator.clipboard?.writeText(source)}>复制原文</button>
+        <button className="text-button" type="button" onClick={() => setRaw((current) => !current)}>{raw ? '返回渲染' : '查看原文'}</button>
+        <button className="text-button" type="button" onClick={copySource}>复制原文</button>
+        <span className={`copy-status ${copyState === '复制失败' ? 'failed' : ''}`} role="status">{copyState}</span>
       </div>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        urlTransform={safeUrl}
-        components={{
-          a: ({ node, ...props }) => <a {...props} target="_blank" rel="noreferrer noopener" />,
-          img: () => <span className="blocked-media">图片已隐藏</span>,
-          pre: ({ children }) => <pre className="markdown-pre">{children}</pre>,
-          code: ({ inline, children, ...props }) => inline
-            ? <code {...props}>{children}</code>
-            : <code {...props}>{children}</code>,
-        }}
-      >
-        {source}
-      </ReactMarkdown>
+      {raw ? <pre>{source}</pre> : (
+        <MarkdownBoundary key={source} source={source}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            urlTransform={safeUrl}
+            components={{
+              a: ({ node, ...props }) => <a {...props} target="_blank" rel="noreferrer noopener" />,
+              img: () => <span className="blocked-media">图片已隐藏</span>,
+              pre: ({ children }) => <pre className="markdown-pre">{children}</pre>,
+              code: ({ inline, children, ...props }) => inline
+                ? <code {...props}>{children}</code>
+                : <code {...props}>{children}</code>,
+            }}
+          >
+            {source}
+          </ReactMarkdown>
+        </MarkdownBoundary>
+      )}
     </div>
   )
 }
@@ -114,7 +141,7 @@ function RunTimeline({ detail, onLoadMore, loadingMore }) {
   return (
     <div className="run-view">
       <div className="run-summary">
-        {runs.map((run) => <article className="run-card" key={run.run_id}><div><span className={`status-dot ${run.status?.startsWith('succeed') ? 'ready' : run.status?.startsWith('fail') ? 'error-dot' : 'busy'}`} /><strong>{run.adapter_id} / {run.backend_id}</strong></div><p>{run.model} · {run.status}</p><small>Worker {run.worker_instance_id} · spec v{run.execution_spec_version}</small><time>{new Date(run.started_at).toLocaleString()}</time></article>)}
+        {runs.map((run) => <article className="run-card" key={run.run_id}><div><span className={`status-dot ${run.status?.startsWith('succeed') ? 'ready' : run.status?.startsWith('fail') || run.status === 'uncertain' ? 'error-dot' : 'busy'}`} /><strong>{run.adapter_id} / {run.backend_id}</strong></div><p>{run.model} · 阶段 {run.status}</p><small>Worker {run.worker_instance_id} · generation {run.worker_generation ?? '未知'} · spec v{run.execution_spec_version}</small><small>网络 {run.network_mode || '未知'}{run.network_profile_version ? ` · profile v${run.network_profile_version}` : ''}{run.network_policy_version ? ` · policy v${run.network_policy_version}` : ''}{run.network_binding_revision ? ` · binding r${run.network_binding_revision}` : ''}</small>{run.turn_result?.error && <p className="run-error">{run.turn_result.error}</p>}<time>{new Date(run.started_at).toLocaleString()}</time></article>)}
         {!runs.length && <div className="empty-state">尚无可观察的 RunAttempt</div>}
       </div>
       {detail.has_older_events && <button className="load-more history-more" type="button" onClick={onLoadMore} disabled={loadingMore}>{loadingMore ? '加载中...' : '加载更早事件'}</button>}
@@ -122,6 +149,30 @@ function RunTimeline({ detail, onLoadMore, loadingMore }) {
         {events.map((event) => <li key={`${event.sequence}-${event.event_id}`}><span className="timeline-marker" /><div><strong>{eventLabel(event.event_type)}</strong><p>{event.event_type} · {event.aggregate_type}</p><time>{new Date(event.created_at).toLocaleString()} · #{event.sequence}</time></div></li>)}
         {!events.length && <li className="empty-state">暂无运行事件</li>}
       </ol>
+    </div>
+  )
+}
+
+function RunResults({ runs = [] }) {
+  const completed = runs.filter((run) => run.turn_result || run.turn_result_state === 'invalid')
+  if (!completed.length) return null
+  return (
+    <div className="run-results">
+      {completed.map((run) => (
+        <article className="run-result" key={run.run_id}>
+          <div className="run-result-head">
+            <strong>{run.run_id}</strong>
+            <span>Runtime {run.turn_result?.runtime_status || run.status}</span>
+          </div>
+          {run.turn_result_state === 'invalid' ? <div className="diagnostic">Run 结果记录无法安全解析</div> : (
+            <>
+              <p className="result-evidence">副作用来源：{run.turn_result.side_effects_source === 'runtime_reported' ? `Runtime 自报${run.turn_result.runtime_side_effects_known ? '已知' : '未知'}` : '未记录'} · 业务核验：未记录</p>
+              {run.turn_result.body && <MarkdownContent value={run.turn_result.body} />}
+              {run.turn_result.error && <div className="diagnostic"><strong>Runtime 错误</strong><pre>{run.turn_result.error}</pre></div>}
+            </>
+          )}
+        </article>
+      ))}
     </div>
   )
 }
@@ -857,7 +908,8 @@ function App() {
                 <div className="attention" key={approval.approval_request_id}>
                   <div>
                     <b>任务 {approval.task_id}</b>
-                    <p>{approval.mode} · {approval.scope_digest}</p>
+                    <small>{approval.mode}</small>
+                    <MarkdownContent value={approval.description || approval.scope_digest} compact />
                   </div>
                   <div className="attention-actions">
                     <button className="outline" disabled={!canWrite} onClick={() => decideApproval(approval, 'reject')}>拒绝</button>
@@ -978,7 +1030,7 @@ function App() {
                     {taskView === 'content' && <MarkdownContent value={taskDetail.task.content} />}
                     {taskView === 'conversation' && <div className="conversation-list">{(taskDetail.messages || []).map((message) => <article className="message-item" key={message.id}><div><strong>{message.sender_principal_id}</strong><time>{message.created_at}</time></div><MarkdownContent value={message.content} compact /></article>)}{!taskDetail.messages?.length && <div className="empty-state">暂无对话消息</div>}</div>}
                     {taskView === 'run' && <RunTimeline detail={taskDetail} onLoadMore={loadMoreEvents} loadingMore={loadingMoreEvents} />}
-                    {taskView === 'result' && <div className="result-view">{taskDetail.task.result && <MarkdownContent value={taskDetail.task.result} />}{taskDetail.task.error && <div className="diagnostic"><strong>执行诊断</strong><pre>{taskDetail.task.error}</pre></div>}{!taskDetail.task.result && !taskDetail.task.error && <div className="empty-state">任务尚未产生最终结果</div>}</div>}
+                    {taskView === 'result' && <div className="result-view">{taskDetail.task.result && <MarkdownContent value={taskDetail.task.result} />}{taskDetail.task.error && <div className="diagnostic"><strong>执行诊断</strong><pre>{taskDetail.task.error}</pre></div>}<RunResults runs={taskDetail.run_attempts} />{!taskDetail.task.result && !taskDetail.task.error && !(taskDetail.run_attempts || []).some((run) => run.turn_result) && <div className="empty-state">任务尚未产生最终结果</div>}</div>}
                   </div>
                 </>
               )}

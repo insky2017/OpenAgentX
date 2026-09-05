@@ -12,6 +12,8 @@ import (
 	openruntime "openagentx/internal/runtime"
 )
 
+const unsupportedBeginRetryDelay = time.Second
+
 type ControlPayloadResolver interface {
 	ResolveMessage(context.Context, domain.MailboxItem) (domain.Message, error)
 	ResolveApprovalDecision(context.Context, domain.MailboxItem) (domain.ApprovalDecision, error)
@@ -139,6 +141,12 @@ func (m *ActiveRunManager) startWork(ctx context.Context, active *activeTurn, it
 	if err != nil {
 		m.releaseCapacity()
 		if errors.Is(err, domain.ErrUnsupportedCapability) {
+			timer := time.NewTimer(unsupportedBeginRetryDelay)
+			defer timer.Stop()
+			select {
+			case <-ctx.Done():
+			case <-timer.C:
+			}
 			return nil, nil
 		}
 		return nil, fmt.Errorf("begin RunAttempt: %w", err)

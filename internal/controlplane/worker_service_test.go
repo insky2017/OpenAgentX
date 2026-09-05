@@ -557,8 +557,13 @@ func TestWorkerFinishPersistsRuntimeDiagnosticToRunTaskAndEvents(t *testing.T) {
 	}
 	matched := map[string]bool{"run_attempt.finished": false, "task.settled": false}
 	for _, event := range events {
-		if _, ok := matched[event.EventType]; ok && strings.Contains(string(event.Payload), diagnostic) {
-			matched[event.EventType] = true
+		if _, ok := matched[event.EventType]; ok {
+			if strings.Contains(string(event.Payload), diagnostic) || strings.Contains(string(event.Payload), "provider_session_id") || strings.Contains(string(event.Payload), `"result"`) {
+				t.Fatalf("terminal Journal Event leaked full TurnResult: %s", event.Payload)
+			}
+			if strings.Contains(string(event.Payload), `"runtime_status":"uncertain"`) {
+				matched[event.EventType] = true
+			}
 		}
 	}
 	if !matched["run_attempt.finished"] || !matched["task.settled"] {

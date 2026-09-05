@@ -4,6 +4,14 @@
 
 由主代理协调 ADR-002 Runtime 网络配置、应用与诊断，以及 ADR-003 指挥台任务详情、运行观察与安全内容呈现的最终落地。实现、验证和审核必须留下可追溯证据；任何未实测能力不得标记为已完成。
 
+## 最终停止状态（2026-09-06）
+
+- 用户明确要求停止所有任务并复盘；目标为 `paused`，实现、补测、部署及子代理工作均已停止。本节覆盖下文所有继续执行安排。
+- 当前 HEAD 为 `78ab470`；U2 的 16 个源码/测试文件已暂存，最后四文件 Worker 修复未提交，全部保留。最终功能验收仍为 `partial/incomplete`。
+- 停止时收取的既有流程尾部回执确认：observer generation 3 模式测试成功并发布，binding 为 applied/revision 1；原 Task 已进入 waiting_input，Run 数 1。此前 queued 是旧观察时点；此结果未再作独立浏览器验收。
+- r3 隔离 daemon、observer 及相关子进程已停止，剩余受控 PID 为空；未修改生产服务或外部代理，未删除代码和测试数据。外部凭据轮换未确认完成。
+- 时间/token 账目、完成边界与主代理责任分析见[执行复盘](2026-09-06-openagentx-execution-retrospective.md)。本次仅整理文档，没有恢复执行或提交。
+
 ## 当前收口基线（用户最新指令优先）
 
 - 用户明确要求先完成指挥台配置、运行、观察和查看结果的实际闭环；已经完成的改动全部保留，不回退。停止扩展全面加固和极端故障矩阵，未完成的其他要求进入[后续计划](../../plans/2026-09-05-openagentx-follow-up-hardening.md)。本节覆盖下文历史矩阵中超出本轮的排期，不修改冻结 ADR 或历史结论。
@@ -37,13 +45,13 @@
 | 工作项 | 代理 | 模型 | 状态 | 范围边界 |
 |---|---|---|---|---|
 | ADR-002 实现 | `/root/n1_worker_consistency`，前序 `/root/adr002_impl` | `gpt-5.6-sol` high | N1 独立验证/审核 GO，已提交 0839341 | Runtime、Worker、持久化/API；不修改 Panel/Web |
-| ADR-003 实现 | U1 `/root/u1_task_observation`，U2 `/root/u2_functional_closeout` | `gpt-5.6-sol` high | U1 GO，已提交 0839341；U2 最小矩阵已冻结，待 N2 提交后实施 | 指挥台 UI、Observe 投影及必要结果/事件修正 |
-| N2 配置工作流实现 | `/root/n2_network_workflow` | `gpt-5.6-sol` high | 本轮功能验证/审核 GO，准备独立提交 | 网络工作流全栈及局部测试；U2 顺序后置，主代理不并写源码 |
+| ADR-003 实现 | U1 `/root/u1_task_observation`，U2 `/root/u2_functional_closeout` | `gpt-5.6-sol` high | U1 GO，已提交 0839341；U2 冻结源码审核 GO，动态验收不完整、尚未提交 | 指挥台 UI、Observe 投影及必要结果/事件修正 |
+| N2 配置工作流实现 | `/root/n2_network_workflow` | `gpt-5.6-sol` high | 本轮功能验证/审核 GO，已提交 78ab470 | 网络工作流全栈及局部测试；主代理不并写源码 |
 | N2 新配置页组件 | `/root/u1_task_observation` | `gpt-5.6-sol` high | 分层诊断和活动 Run 对照补齐，两文件最终冻结 | 仅 NetworkSettings.jsx/network-settings.css；main.jsx/API 仍归 N2，非 U2 实施 |
 | N2 独立功能验证 | `/root/n2_verification` | `gpt-5.6-terra` high | 本轮功能通过，完整 ADR 为 partial_pass | 三模式正式 API/真实 Worker ACK、当前配置页 Chrome；未覆盖项如实保留 |
-| E1 网络脚本准备 | `/root/n2_verification` | `gpt-5.6-terra` high | 准备完成并正常结束，尚未执行 | 不执行端口/网络/CLI/模型/浏览器，不修改 N2 源码 |
+| U2/E1 最终功能验证 | `/root/n2_verification` | `gpt-5.6-terra` high | 两项 selected native 通过；r3 配置与真实任务链已执行，浏览器验收不完整；当前仅整理记录 | 暂停新增执行；保留失败、已证实范围和证据缺口 |
 | 批量验证 | `/root/n1_u1_verification` | `gpt-5.6-terra` high | N1/U1 GO，已冻结并释放验证服务 | 独占独立全量验证及新验证报告；不修改实现 |
-| 独立审核 | `/root/n1_u1_review` | 指定 Astra 当前不可用，暂用 `gpt-5.6-sol` medium | N1/U1 GO；N2 本轮功能 GO | 已完成源码与最终证据短核；完整 ADR 未验收，历史结论保留 |
+| 独立审核 | `/root/n1_u1_review` | 指定 Astra 当前不可用，暂用 `gpt-5.6-sol` medium | N1/U1 GO；N2 本轮功能 GO；U2 冻结源码 GO | U2/E1 动态证据到齐后仅做一次短核；完整 ADR 未验收，历史结论保留 |
 
 ## 变更记录
 
@@ -516,3 +524,101 @@
 - 当前应用树指纹为 `bd8515ec3583f387a29e52f26d5fb0d1c0dc42f19f2c35bafa906c3b7a793657`，Web 构建资源指纹为 `4d7207cccff7c289640a2eaa6dbceca79ea982eb55d3fffe9048a7b829db2311`；二进制及 schema/Worker 身份见执行报告。三份冻结 ADR 的 SHA-256 仍与初始值一致。
 - 独立 Sol medium 已短核实际证据、截图 SHA/尺寸和边界，结论为 **N2 本轮功能 GO；完整 ADR-002 未验收**。主代理采纳，准备提交本批；九类扩展幂等、回退/导入和极端故障等未覆盖项不阻断本轮，不能被写作已通过。
 - 隔离 r2 daemon/Worker/SOCKS5 保留供 U2/E1 复用；最终实际闭环还须补错误配置失败、关键重试不重复、断线恢复及结果独立核对。U2 按上表最小矩阵继续，不回退既有加固、不修改冻结 ADR。
+
+#### N2 提交与 U2 最小实施启动
+
+- 主代理完成暂存归属、diff-check 与冻结 ADR 校验，提交 `78ab470 feat: complete console network configuration workflow`。本批共 66 文件；既有 `.planning/`、三份 2026-08-31 未跟踪报告及尚待执行的 E1 准备文件均未纳入该提交。
+- 已恢复 U2 唯一实现者，授权最小矩阵源码与必要局部测试；不修改 N2 两个配置组件、冻结 ADR 或独立报告。AGY/ACP/CodeBuddy 未证实的 SideEffectsKnown 默认 true 属于同一直接误报修正，全面协议整治仍后置；fake 确定性 fixture 语义保留。
+- Terra 仅获 U2/E1 短准备授权，复用 r2 与既有 helper，允许只读核对 Runtime 契约与受控私有输入。不得在 U2 未冻结时启动新的模型、网络、浏览器验证或重启服务；最终聚焦批次同时取得观察/Markdown 和实际闭环的必要证据，避免重复浏览器批次。
+
+#### E1 最小输入与证据冻结
+
+- Terra 已完成短准备并正常结束，新增 [U2/E1 收口准备](2026-09-05-openagentx-u2-e1-final-closure-preparation.md)，没有执行新的浏览器/模型/网络测试。native helper 本轮显式选择 `no_blackip` 与 `http_config_host_port`，其余已准备案例保留后置。
+- Task A 必须由真实指挥台明确选择 AGY Backend 创建，仅在 r2 的隔离 workspace 生成唯一 `e1-marker-<公开随机 nonce>.txt`，内容严格为 `oax-e1-<nonce>` 加一个换行；要求调用工具读回，在 Markdown 结果返回文件名与 SHA-256。Task B 通过正式入口让同一常驻 Worker 只读该文件并返回内容与 SHA-256，不修改文件。
+- 验证程序预先固定期望字节并独立读取文件核对 A/B 的内容、哈希、Task/Run/事件与 Worker 身份。Runtime 的自报不构成核验；Task 可为 `uncertain`，外部核对以 `external_e1` 记录在报告。清理仅限已确认唯一且身份/内容仍匹配的该测试文件；不确定时保留私有 fixture。
+- 断线输入使用同一最终启动配置内的 fake Backend（正式支持 `result_status=waiting_input` 与测试 provider session），经正式 API 建立一个 Markdown 观察 Task。Chrome 保持选中并离线，独立认证 API 写入一条唯一消息；恢复后选择不变、缺口消息恰一次。浏览器离线尝试写入及恢复后的 Control POST 计数均应为 0，独立 API 那次单独计数。
+- 最终实测基线为 `78ab470` 加最终应用 diff/源码指纹，U2/E1 GO 后提交并关联同一源码，避免把尚未提交的 commit 当测试前置条件。主代理只读确认本机 `:7897` 有监听，这仅是实际 AGY 代理候选的可用前置事实；N2 的 `:18081` 协议 fixture 不作为模型出网代理。实际出口仍须通过指挥台正式配置、测试、发布及 Worker applied 核对。
+
+#### U2 最终冻结与独立验收启动
+
+- U2 实现者完成并正常结束：RuntimeSideEffectsKnown 只表示 Runtime 自报，权威 SideEffectsKnown 不再由外部 Adapter 默认置 true；成功但未知的 Run 状态/正文保留，Task 为 `uncertain` 并记录 `business_effect_unverified`。新 Runtime 与 Finish Journal 采用固定事件白名单和最小元数据。
+- Observe 补固定 Worker 历史 generation、网络 policy/binding 版本、TurnResult 安全正文/错误与来源；business_verification_source 为 `not_recorded`，无通用核验入口、无 schema 变化。Markdown 已补原文/复制反馈、错误纯文回退、已有入口统一与手机局部滚动；N2 配置组件保持冻结。
+- 未知结果不会悄悄继续消费已有后续消息：实现者局部测试确认 Task uncertain、不可 BeginAttempt；原 Message 可查询，控制消息最终 superseded，不转 work lane，不自动重试。这是本轮保守结果边界，后续核验/继续执行能力仍归后续计划。
+- 实现者报告受影响 Go 六包、Web build、observation 4/4、PWA 和 diff-check 通过。AGY 在当前 shell 含凭据代理环境下按设计拒绝 inherit；测试清除该环境后通过，此环境前提保留，不把不匹配部署输入写作产品已通过证据。
+- 已恢复 Terra 执行一次最终 U2/E1 聚焦批次，授权最终构建、r2 隔离服务重启、真实指挥台与两项真实 AGY Task、selected native 网络案例及最小错误/重试/断线补验。已恢复 Sol medium 做短源码功能审核，独立报告另建，不重跑长测试或扩大范围。当前只有局部通过，最终功能 Gate 尚未判定。
+- 独立 Sol medium 已完成 [U2 源码审核](2026-09-05-openagentx-u2-independent-review.md)，四类直接风险未发现阻断，**U2 冻结源码 GO**；10 个核心文件聚合指纹为 `e4bd16909935a0f77d598d4991d3de09c3e79bc953e9f43b2b4b4471f5ca31df`。其未运行测试/Runtime/浏览器，已正常结束；最终功能结论继续等待 Terra，证据到齐后仅做一次短核。
+
+#### E1 冻结构建进展与夹具路由纠正
+
+- Terra 报告受影响六包与 Web build 通过，r2 已换为最终构建并注册 generation 2。Chrome 已完成实际 HTTP `127.0.0.1:7897` named profile 创建、测试、发布、绑定，页面显示当前 generation 的 applied 与健康事实；尚未创建 Task A，没有真实任务通过结论。
+- 验证者随后发现同 Agent 的 `fixture` 和 `named` 均可用，现有 M1 按 Backend ID 自动选择首个，UI 创建 Task 无显式 Backend 选择，故原夹具会执行 fake。主代理将其判为验收输入与现有调度契约不匹配，不因验证者初始 P1 标签扩张本轮产品功能。
+- 原“明确选择 AGY Backend”验收措辞纠正为“在 UI 选择只注册 AGY 的目标 Agent”。授权仅调整私有 fixture：真实任务 Agent 只保留 AGY Backend，经正式 Worker 生命周期与配置测试/发布重建 applied；观察用独立 fake Agent/Worker 经正式 apply/register 建立。保留原前置失败，最终二进制、Web、通过的 Go 结果与 Chrome 批次复用，不回开源码。
+- 多 Backend 的显式执行选择属于后续易用性能力，本轮不宣称具备；不会通过忽略 Execution 字段或手改数据库冒充路由成功。
+
+#### r2 退役与终端输入工具修正
+
+- 验证者在正式 `agent apply` 的 PTY 自动输入中再次发生临时 owner 口令回显。r2 口令、会话与环境立即视为不再可信，禁止继续用于最终 U2/E1；没有创建 Task A，不能宣称真实 AGY 闭环通过。此事故及首轮失败均保留，不记录任何口令值。
+- 现有隔离验证授权已覆盖撤销和新建可逆 fixture，主代理未再次请求用户确认。Terra 已按精确归属终止 r2 Worker、daemon、SOCKS5、两个专用 Chrome、未完成的 agent-apply 和 wrapper 子进程；确认相关进程不存在，18180/18081/18240/18241 无监听。r2 永久退役。此前已提交 N2 的历史证据与 U2 源码/构建证据保留，不冒充 r3 最终执行证据。
+- 主代理只读确认本机 `script` 为 util-linux 2.39.3，help 明确提供 `--echo never`。仅靠延迟输入或等待提示不足以作为保护，禁止继续 `/dev/tty` 临时注入。
+- 已恢复 Sol 实现者仅编写小型 `run-private-admin.mjs`：PTY 创建时禁止回显，父进程有界捕获子进程输出，外部只见固定分类/退出码/回显布尔；秘密仅从私有文件经 stdin 加载，不进入 argv、工具参数或日志。Sol 使用公开合成输入验证两次读取；Terra 不重复测试该 helper，只准备 r3 非秘密输入和两 Agent 夹具，收到工具后再加载新凭据。应用源码继续冻结，不重跑已通过 Go/Web。
+- Sol 已交付并冻结 [私有 Admin CLI 输入工具](run-private-admin.mjs)，公开合成自检覆盖 init 两次读取、agent apply、含单引号路径、错误权限与故意回显检测，结果为 `self_test_passed`。主代理读取完整实现，确认任何分支均不透传原始子进程输出，捕获上限 64 KiB、超时 120 秒；授权 Terra 用它完成 r3 正式初始化，其他输入方式不再使用。
+- 等待输入工具期间，Terra 已在独立新 fixture 完成两个 selected native E1 案例：SOCKS5 `no_blackip` 与 HTTP `http_config_host_port` 均为 marker_match=true、proxy_connections=1，并已完成有界清理。这是独立网络效果证据，不含 r2/r3 认证输入、不外推为 AGY 模型 Task。
+
+#### r3 接续与验收夹具启动纠正
+
+- 主代理接续后确认 HEAD 仍为 `78ab470`，U2 改动完整保留；三份冻结 ADR 哈希与初始基线一致，工作树 `git diff --check` 通过。最终 U2/E1 动态证据尚未到齐，不将源码审核 GO 升格为功能验收通过。
+- Terra 回报 r3 已进入服务启动：AGY Worker 首次因相对 `working_dir=workspace` 不存在而退出，已仅创建私有目录；随后前台实例稳定超过 50 秒，后台退出定位为启动 session 生命周期，正在使用 `setsid` 修正。此处是验收夹具调整，未改应用源码，Task A 尚未提交。
+- 已要求验证者记录最终 AGY cwd 的绝对路径，使外部文件核验与实际运行目录一致；尽快从真实指挥台提交 Task A，并在模型运行期间完成同一 Chrome 批次的观察、Markdown 和断线验证。不重跑已通过的 native、Go 或 Web 批次。
+- 验证准备稿保留历史步骤，但最终需在顶部链接执行报告并明确 r2 已退役，禁止继续给出旧凭据/会话的复用指引。最终只在最小动态证据到齐后短核与提交，不回开完整 ADR 验收。
+
+#### r3 进度回报纠正与环境诊断事故
+
+- Terra 最初回报 HTTP profile 已创建并提交测试，随后纠正为浏览器导航定位超时，实际没有执行写入；当时正式 UI 为 0 个方案、0 个绑定，Task A 尚未创建。原“等待异步探测”判断无事实支持，不能作为验收证据。
+- r3 AGY Worker 已独立会话常驻并持续心跳，但 Backend 为 `unavailable`。主代理只读源码确认 `mgraftcp --version` 属于 Runtime identity 检查；AGY Health 实际调用 `agy-graft --version`，此前先执行网络环境过滤，`inherit` 模式遇到含凭据代理值会直接拒绝。默认 shell 命令成功不能替代正式 Worker 环境的健康证据。
+- Terra 尝试读取进程环境并重现 Health 时，将未拆分的 NUL 环境字符串传给 Node 子进程接口，默认异常输出包含外部代理与 API 凭据片段；未启动 Health 子进程。本次诊断证据废弃，不记录原始输出或任何秘密值。主代理已明确告知用户相关外部凭据需要轮换。
+- 已停止完整进程环境读取和该诊断路径；后续仅根据既有启动代码确认 r3 身份是否曾进入环境，使用显式最小环境重启同一冻结 AGY Worker，不继承 proxy/API 环境，不借用交互 shell 结果替代。未确认受影响的身份不得继续使用；没有证据时不得仅凭截断输出声称排除影响。
+- 新增但未执行的配置摘要工具不作为验证证据。已要求停止扩展验证工具，继续当前最小 UI/Task/浏览器批次，任何 JS 顶层错误只输出固定分类，禁止默认异常回显输入。
+- Terra 根据启动代码确认 owner 为 stdin-only、浏览器 session 在私有 state、Worker token 在配置/注册链，未被启动命令注入环境；据此继续 r3。AGY Worker 已用最小环境重启为 generation 4，仍报 `unavailable`；外部等价 wrapper 版本命令成功只构成前置事实，不能据此确定内部故障位置或宣称根因已修复。
+- 验证者因 `unavailable` 再次停在未创建 profile 的状态。主代理只读确认 `ProcessNetworkWork` 不依赖 Backend 普通 Task 的可用标记，前端“测试当前内容”也不以 Health 为前置，已纠正为直接使用正式 UI 创建/测试/发布/绑定以验证配置修复流程。只有实际 Test 的分层失败才能作为本步失败证据；普通 Task 仍须等待真实 applied 与可领取状态。
+
+#### r3 正式配置修复与 Task A 启动
+
+- Terra 已从真实 UI 创建 `e1-http-g4`，目标为 `e1-agy-agent / named / worker-93b6c5ba-cab0-476d-b44f-ed5b34c7f7d0 / generation 4`；这次有实际方案条目和后续正式 Test 回执，不再使用前述失败自动化作为证据。
+- 正式 Test 已完成：content v1，总耗时 886ms，无诊断；configuration、endpoint、runtime_health 通过，secret/direct 为不适用，network_effect/model_call 保持 `not_verified`。发布完成，binding r1 已由同一 Worker generation 应用。
+- Task A 已由真实指挥台创建，ID 为 `task-450a7f16-2554-441d-bc93-cafeb7dcdde2`，当前进入 `running`。尚待终态、workspace 内容与摘要、RunAttempt/Journal 和同一 Worker 接取 Task B 的核验；此时不能宣称业务闭环通过。
+
+#### Task A 外部核验失败与一次明确纠正
+
+- Task A 在 UI 终态为 `uncertain`。独立检查发现唯一 marker 文件已创建，但为 31 bytes，缺少原要求的末尾 LF；实际 SHA-256 为 `5e52eea3b68246156cc6544b51e29da2c65016d7ed5c0f9a086c403b8b2e1446`，原期望为 `efaca48d9c60940b6dd83d7af0c23a1bc0ca7d1b5773933cee0287d1cb260eae`。A 的外部业务核验失败保留，不因 Runtime 返回内容或文件存在而标作通过。
+- 主代理授权一次新的明确纠正任务 A2：仅当已确认唯一文件的 SHA 仍匹配上述实际值时追加一个 LF，再读回并输出 SHA；前置不匹配立即停止。不回开应用源码，不改变 A 的原状态，也不自动重新执行副作用未知任务。
+- 调度消息交错期间，Terra 已按既定矩阵创建只读 Task B `task-3b578134-5cd1-4a4b-b31c-f1715c5149c9`，发生在 A2 之前。实际顺序保留为 A → B → A2；B 只能按当时 31-byte 文件核对其只读结果与同一常驻 Worker 身份，不能宣称满足原 32-byte 断言。
+- 为快速收口，不再追加 B2 或制造无失败的 A/B 历史。A2 后由独立程序核对 32 bytes 和原期望 SHA；真实模型批次以原失败、只读常驻证据及一次明确纠正的实际结果结束。A2 若再次失败则停止重试，继续完成独立观察/Markdown 项并如实报告部分验收。
+
+#### 已执行结果与用户要求交付方案
+
+- A2 `task-1da1fff7-a03d-4301-b2f5-0b90ca5b46a7` 的结果页显示 32 bytes 和原预期 SHA，独立 `cmp` 与 SHA 核对也通过。已回报其 Run 为 `succeeded`，Task 仍为 `uncertain / business_effect_unverified`；Worker 为 generation 4、named profile v1、binding r1。外部纠正证据只写入报告，不提升产品内核验状态。
+- observer Task `task-5f9abc00-e2f3-4143-9ba2-48fbf79c6e44` 在约 55 秒观察窗口后仍为 `queued`，未进入预期 `waiting_input`，原因未确认。其输入中的 code fence 被验证 shell 误解析，实际 Task 不含预期代码块；该输入不能证明代码块渲染。已观察到的 DOM 仅为链接存在、图片未加载、表格和原文/复制入口可见，不外推为复制成功或完整安全/移动端验收。
+- 断线恢复、浏览器 Control POST 计数、关键幂等重放、坏配置正式失败和剩余浏览器交互尚未完成。最小验收矩阵仍不完整；既有测试和源码审核 GO 不能替代这些证据。
+- 用户随后明确询问为何长期未收敛，并要求提供收敛与交付方案。主代理提出冻结现有代码和证据、汇总已验证/未验证/失败、一次交付短核、独立提交及外部凭据事故单独善后的阶段性交付方案；其中延期剩余最小验收属于提案，尚未获得用户确认，不能据此改变当前 Gate 或宣称目标完成。
+- 当前源码保持原冻结指纹，16 个源码/测试文件已在此前整理时暂存，U2 尚未提交。全部执行代理已结束；本次只恢复验证者整理三份既有报告和已有非秘密证据，禁止新测试、浏览器/API、服务或源码修改。主代理仅更新协调记录，继续保留未完成目标。
+- Terra 已完成三份报告事实校正并结束，执行报告现为 `partial_incomplete`；两个准备稿标明历史性质并撤销 r2 复用指引。独立审核者随后完成一次交付材料短核：核心源码与三份 ADR 指纹未变，源码 GO 保持，动态验收 `partial/incomplete`，阶段交付提案不能自行改变原最小验收矩阵。
+- 用户进一步询问具体未通过项。当前应分开说明：隔离 observer 最近观察仍 queued、原因未定；断线/消息/离线写保护及其余浏览器、坏配置、幂等与完整 B 证据未完成；A 的历史缺 LF 失败已由独立 A2 精确纠正；外部凭据事故的轮换仍待处理。本次没有新增测试、源码修改或提交。
+
+#### observer 调度前提的只读定位
+
+- 目标接续后，主代理仅通过既有私有 browser state 加载认证，对正式 Observe API 作白名单只读检查：observer Task 为 `queued`、Run 数为 0；observer 的 binding 数为 0、mode test 数为 0；generation 1 的 fixture Backend 为 `unavailable`，模式为 inherit，但没有 policy version 和 binding revision。未读取进程环境、未输出任何 Cookie/Token/原始异常。
+- 源码边界与上述事实对应：`ListWorkerBackends` 在 Backend 没有正式 binding 时直接标记 unavailable，`M1TurnPlanner` 不选择 unavailable Backend。因此已定位一个足以阻断 observer 的明确原因：夹具漏做模式测试、发布和 applied 前置。无需以重建环境或修改调度源码处理。
+- 已恢复 Terra，仅通过既有指挥台为 observer 的 inherit 模式完成正式测试/发布/applied，再核对原 Task 是否进入 waiting_input；继续原最小矩阵缺失的浏览器交互、断线、错误配置和幂等，不扩张新范围，不重跑模型/native/Go/Web。此为原授权验收的继续，不采用尚未确认的延期提案。
+- 验证脚本只允许结构化参数或由 apply_patch 创建的脚本数据，禁止将含反引号的代码或 Markdown 内插进 shell 命令；所有顶层错误必须输出固定分类。源码继续冻结，后续结论只随真实新证据更新。
+- Terra 已通过真实 UI 为 observer generation 1 提交 inherit/policy v1 测试，20 秒观察仍等待 Worker。其脚本曾误读页面中 AGY 的完成文案，已纠正；这个短观察窗口不构成正式失败或进程已停止的证据。
+- 主代理随后核对正式 mode test 对象仍为 `pending`、generation 1、无探测结果；并按既有 PID 文件对 observer PID `1177481` 作存活检查，确认进程及 `/proc/<pid>/exe` 均不存在。此为真实停止证据，与观察超时不同。已授权仅恢复这个停止的 observer Worker，采用已验证的独立 session/最小环境；新 generation 必须重新测试/发布，旧 generation 测试保留历史，不复用过期回执。
+
+#### 2026-09-06 HTTP 能力错误映射的最小回开
+
+- 恢复 observer 后取得正式失败：Worker 注册后领取已有 queued Task，BeginAttempt 返回 HTTP `422 UNSUPPORTED_CAPABILITY`，Worker 随即退出，无法继续处理模式测试。该现象已从“前置未配置”推进为四类直接风险中的可复现主流程阻断，不再只按夹具状态不明处理。
+- 主代理定位 `RunManager.startWork` 已处理 `errors.Is(err, domain.ErrUnsupportedCapability)`，但 `WorkerClient.APIError.Is` 缺少该 HTTP 错误码映射；领域内测试无法证明跨 HTTP 行为。这是前置客户端边界的缺陷，N2 历史 GO 保留，并明确此前没有覆盖“任务先于绑定且真实 HTTP 拒绝”这一组合。
+- 已授权唯一 Sol 实现者最小回开客户端错误映射和必要回归。另读 `TryClaimMailbox` 确认已有未过期 claimed item 会立即重返；仅映射错误会产生快速重试，因此允许在同一未开始 Run 的能力不足分支补最小可取消等待，禁止扩展通用重试框架、数据库或 UI 改造。
+- 本次验收矩阵限定为：实际 HTTP422 经正式 client 能识别领域错误；等待时 Worker/控制连接存活且请求次数有界；配置恢复后只开始一次；认证、generation、lease、fencing 错误仍按原安全规则失败；不伪造 Run 或成功终态。只运行 client/worker 与受影响 worker 包，后续以原 r3 的 queued Task 和正式模式测试补动态证据。
+- Terra 暂停重启旧二进制，等待修复冻结后仅构建一次并恢复 observer。已完成 AGY/native/Go 六包/Web 证据保留，不重跑；新旧二进制及实际证据身份必须分别记录，不把旧 AGY 执行伪称新产物的实测。
+- Sol 已完成最小修复并冻结：`internal/client/worker/client.go`、新增 `client_test.go`、`internal/worker/run_manager.go`、`runner_test.go` 四文件。实际 HTTP 测试覆盖能力/认证/租约/fencing/stale 错误映射与互不混淆；同 claimed item 重返用例覆盖一秒可取消退避、期间 heartbeat 推进和恢复后一次 Run/Finish。作者 `go test ./internal/client/worker ./internal/worker` 与定向 diff-check 通过。
+- 已分别恢复独立审核者只审这四文件，以及 Terra 只跑两包、构建一次并恢复原 observer；其余源码仍冻结。最终需从原 queued Task 证明 Worker 等待存活、模式测试/发布/applied 可继续、只启动一次，再完成原剩余浏览器与关键失败/幂等证据。

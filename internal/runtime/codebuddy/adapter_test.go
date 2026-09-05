@@ -42,7 +42,7 @@ printf 'verified by CodeBuddy fixture\n'
 		t.Fatal(err)
 	}
 	result, err := handle.Wait(context.Background())
-	if err != nil || result.Status != openruntime.TurnResultSucceeded || result.Result != "verified by CodeBuddy fixture" {
+	if err != nil || result.Status != openruntime.TurnResultSucceeded || result.Result != "verified by CodeBuddy fixture" || result.SideEffectsKnown {
 		t.Fatalf("result=%+v err=%v", result, err)
 	}
 	args, err := os.ReadFile(argsPath)

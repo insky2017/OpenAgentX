@@ -227,12 +227,13 @@ func (s TurnResultStatus) Valid() bool {
 }
 
 type TurnResult struct {
-	Status            TurnResultStatus `json:"status"`
-	ProviderSessionID string           `json:"provider_session_id,omitempty"`
-	Result            string           `json:"result,omitempty"`
-	Error             string           `json:"error,omitempty"`
-	UsageJSON         json.RawMessage  `json:"usage,omitempty"`
-	SideEffectsKnown  bool             `json:"side_effects_known"`
+	Status                  TurnResultStatus `json:"status"`
+	ProviderSessionID       string           `json:"provider_session_id,omitempty"`
+	Result                  string           `json:"result,omitempty"`
+	Error                   string           `json:"error,omitempty"`
+	UsageJSON               json.RawMessage  `json:"usage,omitempty"`
+	SideEffectsKnown        bool             `json:"side_effects_known"`
+	RuntimeSideEffectsKnown *bool            `json:"runtime_side_effects_known,omitempty"`
 }
 
 func (r TurnResult) Validate() error {

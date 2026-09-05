@@ -38,6 +38,8 @@ func (e *APIError) Is(target error) bool {
 		return target == domain.ErrLeaseExpired
 	case openapi.ErrorFencingRejected:
 		return target == domain.ErrFencingRejected
+	case openapi.ErrorUnsupportedCapability:
+		return target == domain.ErrUnsupportedCapability
 	default:
 		return false
 	}

@@ -23,6 +23,7 @@ type testPanelState struct {
 	agents            []domain.AgentIdentity
 	workers           []domain.WorkerInstance
 	tasks             []domain.Task
+	runs              []domain.RunAttempt
 	journal           []domain.JournalEvent
 	approvals         []domain.ApprovalRequest
 	afterHistoryQuery func()
@@ -43,6 +44,16 @@ func (s *testPanelState) ListAgents(context.Context, int) ([]domain.AgentIdentit
 
 func (s *testPanelState) ListWorkers(context.Context, int) ([]domain.WorkerInstance, error) {
 	return s.workers, nil
+}
+
+func (s *testPanelState) GetWorkerInstance(_ context.Context, workerID string) (*domain.WorkerInstance, error) {
+	for index := range s.workers {
+		if s.workers[index].ID == workerID {
+			worker := s.workers[index]
+			return &worker, nil
+		}
+	}
+	return nil, domain.ErrNotFound
 }
 
 func (s *testPanelState) ListTasks(context.Context, string, int) ([]domain.Task, error) {
@@ -151,12 +162,28 @@ func (s *testPanelState) ListMailbox(context.Context, string, int64, int) ([]dom
 	return nil, nil
 }
 
-func (s *testPanelState) GetRunAttempt(context.Context, string) (*domain.RunAttempt, error) {
+func (s *testPanelState) GetRunAttempt(_ context.Context, runID string) (*domain.RunAttempt, error) {
+	for index := range s.runs {
+		if s.runs[index].ID == runID {
+			run := s.runs[index]
+			return &run, nil
+		}
+	}
 	return nil, domain.ErrNotFound
 }
 
-func (s *testPanelState) ListRunAttemptsForTask(context.Context, string, int) ([]domain.RunAttempt, error) {
-	return []domain.RunAttempt{}, nil
+func (s *testPanelState) ListRunAttemptsForTask(_ context.Context, taskID string, limit int) ([]domain.RunAttempt, error) {
+	runs := make([]domain.RunAttempt, 0, limit)
+	for _, run := range s.runs {
+		if run.TaskID != taskID {
+			continue
+		}
+		runs = append(runs, run)
+		if len(runs) == limit {
+			break
+		}
+	}
+	return runs, nil
 }
 
 func (s *testPanelState) ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error) {
@@ -399,6 +426,66 @@ func TestTaskDetailRejectsLiveCursorAheadOfSnapshot(t *testing.T) {
 	panel.handler.ServeHTTP(response, request)
 	if response.Code != http.StatusConflict {
 		t.Fatalf("ahead cursor status=%d body=%s", response.Code, response.Body.String())
+	}
+}
+
+func TestTaskDetailProjectsSafeRunEvidence(t *testing.T) {
+	known := false
+	resolved, err := json.Marshal(domain.ResolvedExecutionSpec{Spec: domain.ExecutionSpec{Network: domain.NetworkPolicy{
+		Mode: domain.NetworkNamedProfile, ProfileID: "proxy-main", ProfileVersion: 4,
+		PolicyVersion: 7, BindingRevision: 9,
+	}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := json.Marshal(openruntime.TurnResult{
+		Status: openruntime.TurnResultSucceeded, ProviderSessionID: "provider-session-secret",
+		Result: "runtime body", SideEffectsKnown: true, RuntimeSideEffectsKnown: &known,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := &testPanelState{
+		tasks:   []domain.Task{{ID: "task-evidence", TargetAgentID: "quote", Status: domain.TaskStatusUncertain}},
+		workers: []domain.WorkerInstance{{ID: "worker-historical", Generation: 12}},
+		runs: []domain.RunAttempt{
+			{ID: "run-valid", TaskID: "task-evidence", AgentID: "quote", Status: domain.RunAttemptSucceeded,
+				WorkerInstanceID: "worker-historical", ResolvedExecutionJSON: string(resolved), ResultJSON: string(result)},
+			{ID: "run-invalid", TaskID: "task-evidence", AgentID: "quote", Status: domain.RunAttemptSucceeded,
+				WorkerInstanceID: "worker-missing", ResolvedExecutionJSON: `{}`, ResultJSON: `{"status":`},
+		},
+	}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	request := httptest.NewRequest(http.MethodGet, "/api/observe/v1/tasks/task-evidence", nil)
+	request.AddCookie(panel.cookie)
+	response := httptest.NewRecorder()
+	panel.handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("task detail status=%d body=%s", response.Code, response.Body.String())
+	}
+	var detail openapi.TaskReadModel
+	if err := json.Unmarshal(response.Body.Bytes(), &detail); err != nil {
+		t.Fatal(err)
+	}
+	if len(detail.RunAttempts) != 2 {
+		t.Fatalf("run projections=%+v", detail.RunAttempts)
+	}
+	valid := detail.RunAttempts[0]
+	if valid.WorkerGeneration == nil || *valid.WorkerGeneration != 12 || valid.NetworkMode != domain.NetworkNamedProfile ||
+		valid.NetworkProfileID != "proxy-main" || valid.NetworkProfileVersion != 4 || valid.NetworkPolicyVersion != 7 || valid.NetworkBindingRevision != 9 {
+		t.Fatalf("run identity/network projection=%+v", valid)
+	}
+	if valid.TurnResultState != "available" || valid.TurnResult == nil || valid.TurnResult.Body != "runtime body" ||
+		valid.TurnResult.RuntimeSideEffectsKnown == nil || *valid.TurnResult.RuntimeSideEffectsKnown ||
+		valid.TurnResult.SideEffectsSource != "runtime_reported" || valid.TurnResult.BusinessVerificationSource != "not_recorded" {
+		t.Fatalf("turn result projection=%+v", valid)
+	}
+	invalid := detail.RunAttempts[1]
+	if invalid.WorkerGeneration != nil || invalid.TurnResult != nil || invalid.TurnResultState != "invalid" {
+		t.Fatalf("invalid run projection=%+v", invalid)
+	}
+	if strings.Contains(response.Body.String(), "provider-session-secret") || strings.Contains(response.Body.String(), "side_effects_known\":true") {
+		t.Fatalf("task detail leaked non-observation result fields: %s", response.Body.String())
 	}
 }
 

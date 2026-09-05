@@ -514,22 +514,43 @@ func (s *WorkerService) AppendEvents(ctx context.Context, principalID string, to
 	}
 	events := make([]*domain.JournalEvent, 0, len(batch.Events))
 	for _, runtimeEvent := range batch.Events {
-		if runtimeEvent.Type == "approval.requested" {
-			if _, err := decodeNativeApprovalPayload(runtimeEvent.Payload, guard.CheckedAt); err != nil {
-				return err
-			}
-		}
-		payload, err := json.Marshal(map[string]any{
-			"runtime_event_type": runtimeEvent.Type, "payload": runtimeEvent.Payload,
-			"occurred_at": runtimeEvent.OccurredAt,
-		})
+		publicType, payload, err := publicRuntimeEvent(runtimeEvent, guard.CheckedAt)
 		if err != nil {
 			return err
 		}
-		events = append(events, s.event("runtime", "runtime."+runtimeEvent.Type, principalID,
+		events = append(events, s.event("runtime", "runtime."+publicType, principalID,
 			"", runID, json.RawMessage(payload)))
 	}
 	return s.state.AppendRunEvents(ctx, guard, runID, batch.ExpectedRunVersion, events)
+}
+
+type publicRuntimeEventEnvelope struct {
+	RuntimeEventType string          `json:"runtime_event_type"`
+	Payload          json.RawMessage `json:"payload,omitempty"`
+	OccurredAt       time.Time       `json:"occurred_at"`
+}
+
+func publicRuntimeEvent(event openruntime.RuntimeEvent, now time.Time) (string, []byte, error) {
+	publicType := "event"
+	var publicPayload json.RawMessage
+	if event.Type == "approval.requested" {
+		approval, err := decodeNativeApprovalPayload(event.Payload, now)
+		if err != nil {
+			return "", nil, err
+		}
+		publicType = event.Type
+		publicPayload, _ = json.Marshal(approval)
+	} else {
+		switch event.Type {
+		case "agy.init", "agy.step_update", "agy.result", "agy.error", "agy.event",
+			"turn.output", "turn.heartbeat":
+			publicType = event.Type
+		}
+	}
+	payload, err := json.Marshal(publicRuntimeEventEnvelope{
+		RuntimeEventType: publicType, Payload: publicPayload, OccurredAt: event.OccurredAt,
+	})
+	return publicType, payload, err
 }
 
 // nativeApprovalPayload is the only RuntimeEvent payload that has control
@@ -579,7 +600,17 @@ func (s *WorkerService) Finish(ctx context.Context, principalID string, token st
 	if err != nil {
 		return err
 	}
-	payload, err := json.Marshal(request.Result)
+	payload, err := json.Marshal(struct {
+		RuntimeStatus              openruntime.TurnResultStatus `json:"runtime_status"`
+		HasResult                  bool                         `json:"has_result"`
+		HasError                   bool                         `json:"has_error"`
+		RuntimeSideEffectsKnown    *bool                        `json:"runtime_side_effects_known,omitempty"`
+		BusinessVerificationSource string                       `json:"business_verification_source"`
+	}{
+		RuntimeStatus: request.Result.Status, HasResult: request.Result.Result != "",
+		HasError: request.Result.Error != "", RuntimeSideEffectsKnown: request.Result.RuntimeSideEffectsKnown,
+		BusinessVerificationSource: "not_recorded",
+	})
 	if err != nil {
 		return err
 	}

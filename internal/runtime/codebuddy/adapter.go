@@ -262,7 +262,7 @@ type turnHandle struct {
 
 func (h *turnHandle) collect() {
 	waitErr := h.command.Wait()
-	result := openruntime.TurnResult{SideEffectsKnown: true}
+	result := openruntime.TurnResult{}
 	var resultErr error
 	switch {
 	case h.cancelRequested.Load():

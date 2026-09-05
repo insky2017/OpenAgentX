@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -257,6 +258,92 @@ func TestCancelAndFinishLinearizeInBothOrders100Times(t *testing.T) {
 		if !errors.Is(err, domain.ErrTerminalState) || item != nil {
 			t.Fatalf("iteration %d cancel after finish item=%+v err=%v", iteration, item, err)
 		}
+	}
+}
+
+func TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent(t *testing.T) {
+	for _, cancelFirst := range []bool{false, true} {
+		name := "finish"
+		if cancelFirst {
+			name = "cancel-before-finish"
+		}
+		t.Run(name, func(t *testing.T) {
+			repository, _ := openTestRepository(t, nil)
+			fixture := seedRepository(t, repository)
+			descriptor := messageDescriptor(openruntime.SteerNative)
+			worker, guard := registerMessageWorker(t, repository, fixture, descriptor)
+			created, run := beginMessageRun(t, repository, fixture, worker, descriptor, name)
+			expectedTaskVersion := int64(2)
+			if cancelFirst {
+				if _, _, err := repository.RequestTaskCancel(context.Background(), created.Task.ID, expectedTaskVersion, fixture.ownerPrincipal,
+					&domain.MailboxItem{ID: "control-unknown-" + name},
+					journalEvent("event-cancel-unknown-"+name, "task.cancel_requested", fixture.ownerPrincipal, fixture.organizationID),
+					journalEvent("event-cancel-mailbox-unknown-"+name, "mailbox.cancel_created", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := repository.FinishRun(context.Background(), guard, run.ID, expectedTaskVersion, run.Version,
+				openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "runtime body"}, nil, 0, nil,
+				journalEvent("event-task-unknown-"+name, "task.uncertain", fixture.ownerPrincipal, fixture.organizationID),
+				journalEvent("event-run-unknown-"+name, "run_attempt.finished", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+				t.Fatal(err)
+			}
+			task, err := repository.GetTask(context.Background(), created.Task.ID)
+			if err != nil || task.Status != domain.TaskStatusUncertain || task.Result == nil || *task.Result != "runtime body" || task.Error == nil || *task.Error != "business_effect_unverified" {
+				t.Fatalf("task=%+v err=%v", task, err)
+			}
+			settledRun, err := repository.GetRunAttempt(context.Background(), run.ID)
+			if err != nil || settledRun.Status != domain.RunAttemptSucceeded || !strings.Contains(settledRun.ResultJSON, "runtime body") {
+				t.Fatalf("run=%+v err=%v", settledRun, err)
+			}
+		})
+	}
+}
+
+func TestUnknownSuccessfulEffectsSupersedePendingMessageWithoutReplay(t *testing.T) {
+	repository, _ := openTestRepository(t, nil)
+	fixture := seedRepository(t, repository)
+	descriptor := messageDescriptor(openruntime.SteerNative)
+	worker, guard := registerMessageWorker(t, repository, fixture, descriptor)
+	created, run := beginMessageRun(t, repository, fixture, worker, descriptor, "unknown-pending-message")
+	if _, err := repository.db.Exec(`UPDATE mailbox_items SET state='accepted' WHERE mailbox_item_id=?`, created.MailboxItem.ID); err != nil {
+		t.Fatal(err)
+	}
+	message, err := createRoutedMessage(t, repository, fixture, created.Task.ID, 2, "unknown-pending-message")
+	if err != nil || message.MailboxItem.State != domain.MailboxStatePending || message.MailboxItem.Lane != domain.MailboxLaneControl {
+		t.Fatalf("pending Message=%+v err=%v", message, err)
+	}
+	if err := repository.FinishRun(context.Background(), guard, run.ID, 2, run.Version,
+		openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "runtime body"}, nil, 0, nil,
+		journalEvent("event-task-unknown-pending", "task.uncertain", fixture.ownerPrincipal, fixture.organizationID),
+		journalEvent("event-run-unknown-pending", "run_attempt.finished", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+		t.Fatal(err)
+	}
+	task, err := repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil || task.Status != domain.TaskStatusUncertain || task.CanBeginAttempt() {
+		t.Fatalf("unknown Task can replay: task=%+v err=%v", task, err)
+	}
+	pending, err := repository.GetMailboxItem(context.Background(), message.MailboxItem.ID)
+	if err != nil || pending.State != domain.MailboxStatePending {
+		t.Fatalf("pending Message lost at Finish: item=%+v err=%v", pending, err)
+	}
+	claimed, err := repository.TryClaimMailbox(context.Background(), guard, 1, repositoryTestTime.Add(10*time.Minute),
+		journalEvent("event-claim-unknown-pending", "mailbox.claimed", fixture.ownerPrincipal, fixture.organizationID))
+	if err != nil || claimed == nil || claimed.ID != pending.ID {
+		t.Fatalf("trace pending Message claim=%+v err=%v", claimed, err)
+	}
+	if err := repository.AcceptMailboxItem(context.Background(), guard, claimed.ID, domain.MailboxStateClaimed, domain.MailboxStateSuperseded,
+		journalEvent("event-supersede-unknown-pending", "mailbox.superseded", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+		t.Fatal(err)
+	}
+	settled, err := repository.GetMailboxItem(context.Background(), claimed.ID)
+	if err != nil || settled.State != domain.MailboxStateSuperseded || settled.Lane != domain.MailboxLaneControl {
+		t.Fatalf("terminal Message was replayed: item=%+v err=%v", settled, err)
+	}
+	next, err := repository.TryClaimMailbox(context.Background(), guard, 1, repositoryTestTime.Add(20*time.Minute),
+		journalEvent("event-no-replay-unknown-pending", "mailbox.claimed", fixture.ownerPrincipal, fixture.organizationID))
+	if err != nil || next != nil {
+		t.Fatalf("unknown Task scheduled an automatic retry: next=%+v err=%v", next, err)
 	}
 }
 

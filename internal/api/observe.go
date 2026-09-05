@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 const (
@@ -78,25 +79,39 @@ type TaskReadModelTask struct {
 // RunAttemptReadModel deliberately omits execution JSON and fencing material.
 // Those fields are control-plane evidence, not browser-facing observation data.
 type RunAttemptReadModel struct {
-	ID                    string                  `json:"run_id"`
-	TaskID                string                  `json:"task_id"`
-	AgentID               string                  `json:"agent_id"`
-	Version               int64                   `json:"version"`
-	Status                domain.RunAttemptStatus `json:"status"`
-	WorkerInstanceID      string                  `json:"worker_instance_id"`
-	ExecutionSpecVersion  int64                   `json:"execution_spec_version"`
-	AdapterID             string                  `json:"adapter_id"`
-	BackendID             string                  `json:"backend_id"`
-	Model                 string                  `json:"model"`
-	ReasoningMode         domain.ReasoningMode    `json:"reasoning_mode"`
-	ReasoningValue        string                  `json:"reasoning_value,omitempty"`
-	NetworkMode           domain.NetworkMode      `json:"network_mode,omitempty"`
-	NetworkProfileID      string                  `json:"network_profile_id,omitempty"`
-	NetworkProfileVersion int64                   `json:"network_profile_version,omitempty"`
-	StartedAt             time.Time               `json:"started_at"`
-	FinishedAt            *time.Time              `json:"finished_at,omitempty"`
-	CreatedAt             time.Time               `json:"created_at"`
-	UpdatedAt             time.Time               `json:"updated_at"`
+	ID                     string                  `json:"run_id"`
+	TaskID                 string                  `json:"task_id"`
+	AgentID                string                  `json:"agent_id"`
+	Version                int64                   `json:"version"`
+	Status                 domain.RunAttemptStatus `json:"status"`
+	WorkerInstanceID       string                  `json:"worker_instance_id"`
+	WorkerGeneration       *int64                  `json:"worker_generation,omitempty"`
+	ExecutionSpecVersion   int64                   `json:"execution_spec_version"`
+	AdapterID              string                  `json:"adapter_id"`
+	BackendID              string                  `json:"backend_id"`
+	Model                  string                  `json:"model"`
+	ReasoningMode          domain.ReasoningMode    `json:"reasoning_mode"`
+	ReasoningValue         string                  `json:"reasoning_value,omitempty"`
+	NetworkMode            domain.NetworkMode      `json:"network_mode,omitempty"`
+	NetworkProfileID       string                  `json:"network_profile_id,omitempty"`
+	NetworkProfileVersion  int64                   `json:"network_profile_version,omitempty"`
+	NetworkPolicyVersion   int64                   `json:"network_policy_version,omitempty"`
+	NetworkBindingRevision int64                   `json:"network_binding_revision,omitempty"`
+	TurnResult             *TurnResultReadModel    `json:"turn_result,omitempty"`
+	TurnResultState        string                  `json:"turn_result_state"`
+	StartedAt              time.Time               `json:"started_at"`
+	FinishedAt             *time.Time              `json:"finished_at,omitempty"`
+	CreatedAt              time.Time               `json:"created_at"`
+	UpdatedAt              time.Time               `json:"updated_at"`
+}
+
+type TurnResultReadModel struct {
+	RuntimeStatus              openruntime.TurnResultStatus `json:"runtime_status"`
+	Body                       string                       `json:"body,omitempty"`
+	Error                      string                       `json:"error,omitempty"`
+	RuntimeSideEffectsKnown    *bool                        `json:"runtime_side_effects_known,omitempty"`
+	SideEffectsSource          string                       `json:"side_effects_source"`
+	BusinessVerificationSource string                       `json:"business_verification_source"`
 }
 
 type JournalEventReadModel struct {

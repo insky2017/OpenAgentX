@@ -34,7 +34,6 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 	var output bytes.Buffer
 	seen := false
 	terminal := false
-	sideEffectsReported := false
 	for scanner.Scan() {
 		line := bytes.TrimSpace(scanner.Bytes())
 		if len(line) == 0 {
@@ -55,8 +54,8 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 			result.UsageJSON = append([]byte(nil), record.Usage...)
 		}
 		if record.SideEffectsKnown != nil {
-			result.SideEffectsKnown = *record.SideEffectsKnown
-			sideEffectsReported = true
+			known := *record.SideEffectsKnown
+			result.RuntimeSideEffectsKnown = &known
 		}
 		text := record.Result
 		if text == "" {
@@ -94,9 +93,9 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 			terminal = true
 		}
 		if sink != nil {
-			payload, _ := json.Marshal(raw)
+			eventType, payload := publicStreamEvent(record)
 			if err := sink.Emit(nilContext(), openruntime.RuntimeEvent{
-				Type: normalizeEventType(record.Type), Payload: payload, OccurredAt: time.Now().UTC(),
+				Type: eventType, Payload: payload, OccurredAt: time.Now().UTC(),
 			}); err != nil {
 				return openruntime.TurnResult{}, fmt.Errorf("emit AGY Runtime Event: %w", err)
 			}
@@ -111,10 +110,6 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 	result.Result = strings.TrimSpace(output.String())
 	if !terminal {
 		return result, fmt.Errorf("AGY stream-json ended without a terminal event")
-	}
-	if result.Status == openruntime.TurnResultSucceeded && !sideEffectsReported {
-		known := true
-		result.SideEffectsKnown = known
 	}
 	if result.Result == "" && result.Error == "" && result.Status == openruntime.TurnResultFailed {
 		result.Error = "AGY reported a failed turn"
@@ -171,6 +166,47 @@ func firstString(values map[string]any, keys ...string) string {
 		}
 	}
 	return ""
+}
+
+type publicEventPayload struct {
+	Stage     string                       `json:"stage"`
+	Status    openruntime.TurnResultStatus `json:"status,omitempty"`
+	HasOutput bool                         `json:"has_output,omitempty"`
+	HasError  bool                         `json:"has_error,omitempty"`
+}
+
+func publicStreamEvent(record streamRecord) (string, json.RawMessage) {
+	stage := "event"
+	switch strings.ToLower(strings.TrimSpace(record.Type)) {
+	case "init":
+		stage = "init"
+	case "step_update":
+		stage = "step_update"
+	case "result":
+		stage = "result"
+	default:
+		if record.Error != "" || strings.Contains(strings.ToLower(record.Type), "error") {
+			stage = "error"
+		}
+	}
+	payload, _ := json.Marshal(publicEventPayload{
+		Stage: stage, Status: publicStatus(record.Status),
+		HasOutput: record.Result != "" || record.Text != "", HasError: record.Error != "",
+	})
+	return "agy." + stage, payload
+}
+
+func publicStatus(value string) openruntime.TurnResultStatus {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "success", "succeeded", "completed", "done":
+		return openruntime.TurnResultSucceeded
+	case "cancelled", "canceled":
+		return openruntime.TurnResultCanceled
+	case "error", "failed", "failure":
+		return openruntime.TurnResultFailed
+	default:
+		return ""
+	}
 }
 
 func normalizeEventType(value string) string {

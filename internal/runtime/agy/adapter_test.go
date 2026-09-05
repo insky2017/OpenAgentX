@@ -31,7 +31,7 @@ func TestParseStreamJSONNormalizesEventsAndResult(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Status != openruntime.TurnResultSucceeded || result.ProviderSessionID != "conv-1" || result.Result != "hellodone" || !result.SideEffectsKnown {
+	if result.Status != openruntime.TurnResultSucceeded || result.ProviderSessionID != "conv-1" || result.Result != "hellodone" || result.SideEffectsKnown || result.RuntimeSideEffectsKnown != nil {
 		t.Fatalf("unexpected result: %+v", result)
 	}
 	if len(events) != 3 || events[0].Type != "agy.init" || events[1].Type != "agy.step_update" || events[2].Type != "agy.result" {
@@ -39,6 +39,11 @@ func TestParseStreamJSONNormalizesEventsAndResult(t *testing.T) {
 	}
 	if !json.Valid(events[0].Payload) {
 		t.Fatal("normalized event payload is not JSON")
+	}
+	for _, event := range events {
+		if strings.Contains(string(event.Payload), "conv-1") || strings.Contains(string(event.Payload), "hello") || strings.Contains(string(event.Payload), "done") {
+			t.Fatalf("public Runtime Event leaked raw AGY fields: %s", event.Payload)
+		}
 	}
 }
 
@@ -59,8 +64,24 @@ func TestParseStreamJSONCapturesNestedAgyError(t *testing.T) {
 
 func TestParseStreamJSONPreservesExplicitUnknownSideEffects(t *testing.T) {
 	result, err := parseStreamJSON(strings.NewReader(`{"event":"result","result":{"status":"SUCCESS","response":"done","side_effects_known":false}}`), nil)
-	if err != nil || result.Status != openruntime.TurnResultSucceeded || result.SideEffectsKnown {
+	if err != nil || result.Status != openruntime.TurnResultSucceeded || result.SideEffectsKnown || result.RuntimeSideEffectsKnown == nil || *result.RuntimeSideEffectsKnown {
 		t.Fatalf("result=%+v err=%v", result, err)
+	}
+}
+
+func TestParseStreamJSONDegradesUnknownEventType(t *testing.T) {
+	var events []openruntime.RuntimeEvent
+	sink := openruntime.EventSinkFunc(func(_ context.Context, event openruntime.RuntimeEvent) error {
+		events = append(events, event)
+		return nil
+	})
+	input := `{"event":"secret_session_dump","secret_session_dump":{"status":"running-token","text":"secret-value"}}
+{"event":"result","result":{"status":"SUCCESS","response":"done"}}`
+	if _, err := parseStreamJSON(strings.NewReader(input), sink); err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 2 || events[0].Type != "agy.event" || strings.Contains(string(events[0].Payload), "secret") || strings.Contains(string(events[0].Payload), "running-token") {
+		t.Fatalf("unknown event was not safely degraded: %+v", events)
 	}
 }
 
