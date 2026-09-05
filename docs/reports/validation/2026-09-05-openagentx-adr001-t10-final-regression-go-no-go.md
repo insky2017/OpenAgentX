@@ -10,15 +10,15 @@ validated_at: 2026-09-05
 
 ## 结论
 
-`GO`。首轮生产二进制来源阻塞已由 Sol high 从 clean `fa4d35b` 构建并原子部署；terra high 独立复验确认磁盘目标、daemon/Worker `/proc` 产物 SHA 一致，VCS revision exact 为 `fa4d35b` 且 `vcs.modified=false`。此前 clean worktree 全量/race/vet/build/legacy、Runtime contract、T05/T06、数据一致性和生产入口证据仍有效，本轮最小 B/E/F 复验全部通过。
+`GO`。首轮生产二进制来源阻塞已由 Sol high 从 clean `fa4d35b` 构建并原子部署；健康探针修复后又从 exact clean `11b4b70461550be8f8e0ea0a029363a86f84e3c6` 构建并部署。terra high 独立复验确认磁盘目标、daemon/Worker `/proc` 产物 SHA 一致，VCS revision exact 为 `11b4b70461550be8f8e0ea0a029363a86f84e3c6` 且 `vcs.modified=false`。此前 clean worktree 全量/race/vet/build/legacy、Runtime contract、T05/T06、数据一致性和生产入口证据仍有效，本轮 health/B/E/F 最小复验全部通过。
 
 ## A. 基线与边界
 
 | 检查 | 结果 |
 | --- | --- |
-| 候选源码 | `fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25` (`fa4d35b`) |
+| 候选源码 | `11b4b70461550be8f8e0ea0a029363a86f84e3c6` (`fix(T10): expose daemon health probe`)；全量回归基线为父提交 `fa4d35b` |
 | ADR-001 SHA-256 | `587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403`，无修改 |
-| clean release worktree | `/tmp/openagentx-t10-clean-WuQP9F`，detached HEAD，工作树干净 |
+| clean release worktree | 首轮 `/tmp/openagentx-t10-clean-WuQP9F` 与本轮 Sol 的 exact clean `11b4b704...` 构建源均为干净 detached 状态 |
 | T01-T09 | 计划和对应报告均为 `passed`；T09 手机 PWA 安装引用 owner attestation，不重复安装 |
 | 主 checkout 预存用户文件 | `docs/decisions/README.md`、`.planning/`、`docs/decisions/ADR-002-agent-cli-proxy-environment.md`、3 个 2026-08-31 T04 文档；未修改、未暂存 |
 
@@ -54,10 +54,10 @@ validated_at: 2026-09-05
 
 | 项目 | 实际结果 |
 | --- | --- |
-| `openagentx.service` | active/running，MainPID `2158238`，NRestarts `0` |
-| `openagentx-quote-service-worker.service` | active/running，MainPID `2159442`，NRestarts `0` |
+| `openagentx.service` | active/running，MainPID `2227934`，NRestarts `0` |
+| `openagentx-quote-service-worker.service` | active/running，MainPID `2227956`，NRestarts `0` |
 | UDS | `run/openagentx.sock`，socket，owner `sky:sky`，mode `0600` |
-| 在线 Worker | 1 个 `quote-service`，generation `27`，lease future，heartbeat 约 9s |
+| 在线 Worker | 1 个 `quote-service`，generation `28`，lease future，heartbeat 30s 窗口内持续推进 |
 | active RunAttempt | 0 |
 | idle 采样 | daemon 约 0.1% CPU、Worker 0.0%，15s 内无 busy loop 迹象 |
 | schema | `schema_meta.version=1` |
@@ -68,18 +68,19 @@ validated_at: 2026-09-05
 
 ### P0 修复/重新部署证据
 
-- 从 clean detached `fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25` 构建；由于 submodule worktree 的 `.git` 为文件，Go 1.22.4 不会注入 VCS 信息，故使用同一对象库的临时 VCS-aware clean clone 构建，源工作树状态为空。
+- 首轮 P0 修复从 clean detached `fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25` 构建；由于 submodule worktree 的 `.git` 为文件，Go 1.22.4 不会注入 VCS 信息，故使用同一对象库的临时 VCS-aware clean clone 构建，源工作树状态为空。
 - 构建命令类别：`go build -buildvcs=true -o <temporary-artifact> ./cmd/openagentx`；临时产物通过 `--help` smoke。
-- 临时产物 SHA-256：`05b4c46deaad2cdb4a7fb39c95f360f33b58006e5b833a110e155c3261bc0234`。
-- 临时产物和已部署目标的 `go version -m` 均为 `vcs.revision=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25`、`vcs.modified=false`；磁盘目标、daemon `/proc` 和 Worker `/proc` SHA 三者一致。
+- 首轮临时产物 SHA-256：`05b4c46deaad2cdb4a7fb39c95f360f33b58006e5b833a110e155c3261bc0234`。
+- 首轮临时产物和已部署目标的 `go version -m` 均为 `vcs.revision=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25`、`vcs.modified=false`；磁盘目标、daemon `/proc` 和 Worker `/proc` SHA 三者一致。
 - 旧产物已备份至 `/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/bin/openagentx.pre-t10-p0-20260905T083731+0800`，未执行回滚。
-- 已按 daemon → Worker 顺序受控重启；两服务 active/running、`NRestarts=0`，Worker 在线、generation 27、`primary=healthy`，active run 为 0，未观察到 panic/409/restart storm。
-- terra high 独立复验：磁盘目标及 daemon/Worker `/proc` SHA 均为 `05b4c46deaad2cdb4a7fb39c95f360f33b58006e5b833a110e155c3261bc0234`；`go version -m` 为 exact `vcs.revision=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25`、`vcs.modified=false`；30 秒低频窗口心跳从 `00:47:05Z` 推进至 `00:47:35Z`，服务保持 active、NRestarts 0、backend `primary=healthy`、active run 0。
-- terra high 独立复验同时通过 daemon `schema verify`、health/HTTPS、ADR hash、旧产物备份存在性和日志中的无 panic/409/restart storm 检查。
+- 首轮部署已按 daemon → Worker 顺序受控重启；两服务 active/running、`NRestarts=0`，Worker 在线、generation 27、`primary=healthy`，active run 为 0，未观察到 panic/409/restart storm。
+- 首轮 terra high 独立复验的历史产物为 `05b4c46d...c0234`；健康探针修复后的磁盘目标及 daemon/Worker `/proc` SHA 均为 `468f3fbeaa5f18fd8572b8a12a1f60ea935b1a9a452eac9320156d5d601795ba`，`go version -m` 为 exact `vcs.revision=11b4b70461550be8f8e0ea0a029363a86f84e3c6`、`vcs.modified=false`。
+- 本轮低频窗口（30 秒）Worker generation `28` 的 heartbeat 从 `01:13:46Z` 推进至 `01:14:16Z`，服务保持 active、NRestarts 0、backend `primary=healthy`、active run 0；公开 health probe 两端 GET 均 `200 application/json`、`{"status":"ok"}`、`no-store`，POST 均 `405`，未认证 overview 均 `401`。
+- terra high 独立复验同时通过 daemon `schema verify`、HTTPS、ADR hash、旧产物备份存在性、磁盘/进程 SHA 一致性和日志中的无 panic/409/restart storm 检查；健康探针已补齐并复验。
 
 ## F. 数据与恢复
 
-- 正式 SQLite 以 `sqlite3 -readonly` 查询：`PRAGMA integrity_check=ok`，schema version `1`，event journal `58737` 条；在线 Worker 1 个、active run 0。
+- 正式 SQLite 以 `sqlite3 -readonly` 查询：`PRAGMA integrity_check=ok`，schema version `1`，event journal 当前 `59090` 条；在线 Worker 1 个、active run 0。
 - 通过 SQLite `.backup` 只读入口建立临时副本；副本 `integrity_check=ok`、schema version `1`、event journal `58742`，临时副本及 WAL/SHM 文件均已清理。
 - 当前库存在 1 个历史 `test-fake-multiturn` 目标 pending work mailbox，未发现对应在线 Worker；作为 P2 残留观察，不直接改正式库。
 
@@ -96,6 +97,6 @@ T10 核心门槛均通过，判定 `GO`。本报告与证据将与 T10 子计划
 
 ## 本批次文件边界
 
-- 新增：本报告及 `docs/reports/validation/evidence/t10/20260905/summary.txt`。
+- 新增：本报告及 `docs/reports/validation/evidence/t10/20260905/summary.txt`、`terra-revalidation.txt`。
 - 未修改：生产代码、配置、ADR-001、T01-T09 报告、主 checkout 其他预存用户文件。
 - 提交边界：仅本报告、T10 证据、T10 子计划和总测试计划；主 checkout 其他用户文件保持原样。

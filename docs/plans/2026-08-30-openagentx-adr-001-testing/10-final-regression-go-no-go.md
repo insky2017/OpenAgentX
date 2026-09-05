@@ -10,7 +10,7 @@ updated_at: 2026-09-05
 
 ## 结论
 
-`GO`（2026-09-05）。全量自动化与 T04/T05/T06 强制矩阵、生产 HTTPS/PWA/安全边界、SQLite 只读一致性和部署运行态均通过。首轮生产二进制 VCS 追溯 P0 已由 clean `fa4d35b` 产物重建部署并经 terra high 独立复验：磁盘、daemon/Worker `/proc` SHA 一致，`vcs.modified=false`，服务 active、Worker heartbeat 推进、backend healthy、active run=0。剩余仅为离线 `test-fake-multiturn` fixture 的 stale pending mailbox，记录为不影响生产调度的 P2 residual。
+`GO`（2026-09-05）。全量自动化与 T04/T05/T06 强制矩阵、生产 HTTPS/PWA/安全边界、SQLite 只读一致性和部署运行态均通过。首轮生产二进制 VCS 追溯 P0 已由 clean `fa4d35b` 产物重建部署；健康探针修复后又由 exact clean `11b4b70461550be8f8e0ea0a029363a86f84e3c6` 构建并经 terra high 独立复验：磁盘、daemon/Worker `/proc` SHA 均为 `468f3fbe...1795ba`，`vcs.modified=false`，公开 health GET 返回 `200 application/json {"status":"ok"}` 且 `no-store`，POST `405`，未认证 overview `401`，服务 active、Worker heartbeat 推进、backend healthy、active run=0。剩余仅为离线 `test-fake-multiturn` fixture 的 stale pending mailbox，记录为不影响生产调度的 P2 residual。
 
 ## 目标
 

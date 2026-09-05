@@ -1,6 +1,7 @@
 T10 2026-09-05 脱敏证据摘要
 
-candidate_commit=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
+candidate_commit=11b4b70461550be8f8e0ea0a029363a86f84e3c6
+full_regression_base_commit=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
 adr001_sha256=587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403
 go_test=PASS 10.79s; go_test_race=PASS 17.22s; go_vet=PASS 0.93s
 npm_ci=PASS 2.34s; web_build=PASS 0.95s; legacy_release=PASS 0.13s; diff_check=PASS
@@ -21,10 +22,13 @@ p0_backup=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/bin/openagentx.pre-t
 daemon=active mainpid=2158238 nrestarts=0; quote_worker=active mainpid=2159442 nrestarts=0
 worker_generation=27; worker_backend_health=primary:healthy; active_runs=0
 revalidation_binary_sha_match=disk-daemon-proc PASS
-revalidation_vcs_revision=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
+revalidation_vcs_revision=11b4b70461550be8f8e0ea0a029363a86f84e3c6
 revalidation_vcs_modified=false
+revalidation_binary_sha256=468f3fbeaa5f18fd8572b8a12a1f60ea935b1a9a452eac9320156d5d601795ba
+revalidation_pids=daemon2227934 worker2227956
 revalidation_services=active active nrestarts=0/0
-revalidation_worker=generation27 online heartbeat_progressing backend_primary_healthy active_runs=0
+revalidation_worker=generation28 online heartbeat_progressing backend_primary_healthy active_runs=0
+revalidation_health_probe=local_get200_json_ok_no_store prod_get200_json_ok_no_store local_post405 prod_post405 overview401_both
 revalidation_schema_verify=PASS; https=PASS; adr_hash_unchanged=PASS
 stale_fixture_mailbox=test-fake-multiturn offline-only no-production-impact P2
 result=GO

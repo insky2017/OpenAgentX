@@ -1,16 +1,17 @@
 T10 terra high 最小独立复验（2026-09-05）
 
-source_commit=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
-target_sha256=05b4c46deaad2cdb4a7fb39c95f360f33b58006e5b833a110e155c3261bc0234
+source_commit=11b4b70461550be8f8e0ea0a029363a86f84e3c6
+target_sha256=468f3fbeaa5f18fd8572b8a12a1f60ea935b1a9a452eac9320156d5d601795ba
 disk_daemon_proc_sha_match=PASS
-go_vcs_revision=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
+go_vcs_revision=11b4b70461550be8f8e0ea0a029363a86f84e3c6
 go_vcs_modified=false
 backup_exists=true backup_sha256=03ea07333ffa8e59b4649387f4114c8e0ba62321cb85952c7a9675f15665457a
-daemon=active mainpid=2158238 nrestarts=0
-quote_worker=active mainpid=2159442 nrestarts=0
-worker=quote-service online generation=27 lease=future
+daemon=active mainpid=2227934 nrestarts=0
+quote_worker=active mainpid=2227956 nrestarts=0
+worker=quote-service online generation=28 lease=future
 backend=primary healthy active_runs=0
 low_frequency_window=30s heartbeat_progressed services_remained_active
+health_probe=local_GET_200_json_ok_no-store prod_GET_200_json_ok_no-store both_POST_405 both_overview_401
 schema_verify=PASS; health=PASS; https=PASS; adr_hash=587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403
 logs=no panic no 409 logical-agent conflicts no restart storm
 stale_fixture=test-fake-multiturn offline-only no production scheduling impact P2
