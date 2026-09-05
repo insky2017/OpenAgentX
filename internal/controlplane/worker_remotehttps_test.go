@@ -87,6 +87,7 @@ func TestRemoteHTTPSWorkerAPIEndToEnd(t *testing.T) {
 	if err := client.Heartbeat(context.Background(), api.HeartbeatRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken, Status: domain.WorkerStatusOnline, BackendHealth: map[string]openruntime.BackendHealth{"local": openruntime.BackendHealthy}}); err != nil {
 		t.Fatal(err)
 	}
+	environment.bootstrapInherit(t, session)
 	created := environment.createTask(t, "remote")
 	item, err := client.ClaimMailbox(context.Background(), claimRequest(session, 1))
 	if err != nil || item == nil || item.ID != created.MailboxItem.ID {

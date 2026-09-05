@@ -11,9 +11,61 @@ import (
 	openruntime "openagentx/internal/runtime"
 )
 
-// TestN1ValidationRebindAfterPlanRejectsClaimedBegin proves that a network
-// snapshot produced before a binding rebind cannot commit a RunAttempt.
-func TestN1ValidationRebindAfterPlanRejectsClaimedBegin(t *testing.T) {
+func TestSelfReportedNetworkMetadataWithoutControlBindingIsNotTrusted(t *testing.T) {
+	ctx := context.Background()
+	repository, _ := openTestRepository(t, nil)
+	fixture := seedRepository(t, repository)
+	descriptor := messageDescriptor(openruntime.SteerQueued)
+	modePolicy := domain.NetworkModePolicy{
+		AgentID: fixture.agentID, BackendID: "local", PolicyVersion: 1, Mode: domain.NetworkInherit,
+	}
+	selfReported := domain.NetworkPolicy{
+		Mode: domain.NetworkInherit, PolicyVersion: 1, BindingRevision: 1,
+		ManifestDigest: modePolicy.ComputeManifestDigest(), RuntimeIdentity: descriptor.RuntimeIdentity,
+	}
+	registration := domain.WorkerRegistration{
+		WorkerInstanceID: "worker-self-reported-network", AgentID: fixture.agentID, Transport: domain.WorkerTransportUnix,
+		PrincipalID: fixture.agentPrincipal, Capabilities: []string{"coding"}, SessionTokenDigest: "self-reported-token-digest",
+		TokenExpiresAt: repositoryTestTime.Add(time.Hour), LeaseUntil: repositoryTestTime.Add(time.Hour),
+	}
+	worker, _, err := repository.RegisterWorker(ctx, registration, []openruntime.BackendRegistration{{
+		BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy, Network: selfReported,
+	}}, journalEvent("event-self-reported-network", "worker.registered", fixture.ownerPrincipal, fixture.organizationID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	backends, err := repository.ListWorkerBackends(ctx, worker.ID)
+	if err != nil || len(backends) != 1 || backends[0].Health != openruntime.BackendUnavailable {
+		t.Fatalf("self-reported Backend became schedulable: backends=%+v err=%v", backends, err)
+	}
+	resolved, err := json.Marshal(domain.ResolvedExecutionSpec{Version: 1, Spec: domain.ExecutionSpec{
+		AdapterID: descriptor.AdapterID, BackendID: "local", Model: descriptor.Models[0],
+		Reasoning: domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault},
+		Session:   domain.SessionSpec{Mode: domain.SessionModeNew, ContextID: "task-self-reported-network"},
+		Timeout:   time.Minute, Network: selfReported,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tx, err := repository.begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	guard := domain.WorkerWriteGuard{
+		WorkerInstanceID: worker.ID, AgentID: fixture.agentID, PrincipalID: fixture.agentPrincipal,
+		SessionTokenDigest: registration.SessionTokenDigest, Generation: worker.Generation,
+		FencingToken: worker.FencingToken, CheckedAt: repositoryTestTime,
+	}
+	run := &domain.RunAttempt{BackendID: "local", AdapterID: descriptor.AdapterID, ResolvedExecutionJSON: string(resolved)}
+	if err := validateRunNetworkSnapshot(ctx, tx, guard, run); !errors.Is(err, domain.ErrUnsupportedCapability) {
+		t.Fatalf("self-reported network snapshot validation error=%v", err)
+	}
+}
+
+// TestLegacyNetworkRegistrationRejectsClaimedBegin proves that a path-based
+// pre-N2 acknowledgement cannot make a Backend schedulable or start a new Run.
+func TestLegacyNetworkRegistrationRejectsClaimedBegin(t *testing.T) {
 	repository, _ := openTestRepository(t, nil)
 	fixture := seedRepository(t, repository)
 	createPublishedNetworkBinding(t, repository, fixture)
@@ -26,38 +78,31 @@ func TestN1ValidationRebindAfterPlanRejectsClaimedBegin(t *testing.T) {
 		t.Fatal(err)
 	}
 	backends, err := repository.ListWorkerBackends(context.Background(), worker.ID)
-	if err != nil || len(backends) != 1 || backends[0].Health != openruntime.BackendHealthy {
-		t.Fatalf("planned Backend=%+v err=%v", backends, err)
+	if err != nil || len(backends) != 1 || backends[0].Health != openruntime.BackendUnavailable {
+		t.Fatalf("legacy Backend scheduling state=%+v err=%v", backends, err)
 	}
-	created := createTask(t, repository, fixture, "n1-validation-rebind")
-	claimed, err := repository.TryClaimMailbox(context.Background(), guard, 1, guard.CheckedAt.Add(time.Hour),
-		journalEvent("event-n1-validation-claim", "mailbox.claimed", fixture.agentPrincipal, fixture.organizationID))
-	if err != nil || claimed == nil {
-		t.Fatalf("claim work item=%+v err=%v", claimed, err)
+	created := createTask(t, repository, fixture, "legacy-network-begin")
+	leaseUntil := guard.CheckedAt.Add(time.Hour)
+	if _, err := repository.db.Exec(`UPDATE mailbox_items SET state='claimed',worker_instance_id=?,fencing_token=?,lease_until=? WHERE mailbox_item_id=?`, worker.ID, worker.FencingToken, formatTime(leaseUntil), created.MailboxItem.ID); err != nil {
+		t.Fatal(err)
 	}
 	resolvedJSON, err := json.Marshal(domain.ResolvedExecutionSpec{Version: 1, Spec: domain.ExecutionSpec{
 		AdapterID: backends[0].Descriptor.AdapterID, BackendID: backends[0].BackendID, Model: backends[0].Descriptor.Models[0],
 		Reasoning: domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault},
-		Session: domain.SessionSpec{Mode: domain.SessionModeNew, ContextID: created.Task.ID}, Timeout: time.Minute,
+		Session:   domain.SessionSpec{Mode: domain.SessionModeNew, ContextID: created.Task.ID}, Timeout: time.Minute,
 		Network: backends[0].Network,
 	}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := repository.BindNetworkProfile(context.Background(), &domain.NetworkBinding{
-		AgentID: fixture.agentID, BackendID: "local", ProfileID: bindings[0].ProfileID,
-		ProfileVersion: bindings[0].ProfileVersion, Version: 1, DesiredStatus: "pending", UpdatedAt: guard.CheckedAt.Add(time.Minute),
-	}, bindings[0].Version); err != nil {
-		t.Fatal(err)
-	}
 	run := &domain.RunAttempt{
-		ID: "run-n1-validation-rebind", TaskID: created.Task.ID, AgentID: fixture.agentID, Version: 1,
+		ID: "run-legacy-network", TaskID: created.Task.ID, AgentID: fixture.agentID, Version: 1,
 		Status: domain.RunAttemptStarting, WorkerInstanceID: worker.ID, FencingToken: worker.FencingToken,
 		LeaseUntil: guard.CheckedAt.Add(time.Hour), ExecutionSpecVersion: 1, RequestedExecutionJSON: `{}`,
 		ResolvedExecutionJSON: string(resolvedJSON), AdapterID: backends[0].Descriptor.AdapterID, BackendID: "local",
 		Model: backends[0].Descriptor.Models[0], ReasoningMode: domain.ReasoningBackendDefault,
 	}
-	_, _, err = repository.BeginClaimedRunAttempt(context.Background(), guard, claimed.ID, created.Task.Version, run, "", nil,
+	_, _, err = repository.BeginClaimedRunAttempt(context.Background(), guard, created.MailboxItem.ID, created.Task.Version, run, "", nil,
 		journalEvent("event-n1-validation-task", "task.running", fixture.agentPrincipal, fixture.organizationID),
 		journalEvent("event-n1-validation-run", "run_attempt.started", fixture.agentPrincipal, fixture.organizationID),
 		journalEvent("event-n1-validation-mailbox", "mailbox.accepted", fixture.agentPrincipal, fixture.organizationID))
@@ -65,7 +110,7 @@ func TestN1ValidationRebindAfterPlanRejectsClaimedBegin(t *testing.T) {
 		t.Fatalf("old network snapshot Begin error=%v", err)
 	}
 	persistedTask, taskErr := repository.GetTask(context.Background(), created.Task.ID)
-	persistedMailbox, mailboxErr := repository.GetMailboxItem(context.Background(), claimed.ID)
+	persistedMailbox, mailboxErr := repository.GetMailboxItem(context.Background(), created.MailboxItem.ID)
 	if taskErr != nil || persistedTask.Status != domain.TaskStatusQueued || persistedTask.Version != created.Task.Version {
 		t.Fatalf("rejected Begin changed Task=%+v err=%v", persistedTask, taskErr)
 	}

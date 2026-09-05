@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -8,6 +8,7 @@ import {
   mergeLiveTaskDetail,
   sseResumeAfter,
 } from './task-observation-state.js'
+import NetworkSettings from './NetworkSettings.jsx'
 import './styles.css'
 
 class APIError extends Error {
@@ -216,10 +217,28 @@ function App() {
   const [now, setNow] = useState(Date.now())
   const deferredInstallPrompt = useRef(null)
   const [installState, setInstallState] = useState('hidden')
-  const [networkState, setNetworkState] = useState({ profiles: [], bindings: [] })
+  const [networkState, setNetworkState] = useState({ profiles: [], versions: [], tests: [], mode_tests: [], bindings: [], active_runs: [] })
   const [runtimeOptions, setRuntimeOptions] = useState([])
-  const [profileForm, setProfileForm] = useState({ profile_id: '', mode: 'only_http_proxy', host: '', port: '8080', config_file: '', secret_ref: '' })
   const [networkLoading, setNetworkLoading] = useState(false)
+
+  const refreshNetwork = useCallback(async (showLoading = true) => {
+    if (!session || !browserOnline) return
+    if (showLoading) setNetworkLoading(true)
+    try {
+      const [network, options] = await Promise.all([
+        api('/api/observe/v1/network-profiles'),
+        api('/api/observe/v1/execution-options'),
+      ])
+      setNetworkState(network || { profiles: [], versions: [], tests: [], mode_tests: [], bindings: [], active_runs: [] })
+      setRuntimeOptions(options?.backends || [])
+    } catch (requestError) {
+      if (requestError.status === 401) setSession(false)
+      else setError(requestError.message)
+      throw requestError
+    } finally {
+      if (showLoading) setNetworkLoading(false)
+    }
+  }, [session, browserOnline])
 
   useEffect(() => {
     api('/api/auth/v1/session').then(setSession).catch(() => setSession(false))
@@ -312,19 +331,28 @@ function App() {
   useEffect(() => {
     if (!session || !browserOnline || tab !== 'runtime') return
     let disposed = false
-    setNetworkLoading(true)
-    Promise.all([
-      api('/api/observe/v1/network-profiles'),
-      api('/api/observe/v1/execution-options'),
-    ]).then(([profiles, options]) => {
-      if (!disposed) {
-        setNetworkState(profiles || { profiles: [], bindings: [] })
-        setRuntimeOptions(options?.backends || [])
-      }
-    }).catch((requestError) => { if (!disposed) setError(requestError.message) })
-      .finally(() => { if (!disposed) setNetworkLoading(false) })
+    refreshNetwork().catch(() => {})
     return () => { disposed = true }
-  }, [session, browserOnline, tab])
+  }, [session, browserOnline, tab, refreshNetwork])
+
+  useEffect(() => {
+    if (!session || !browserOnline || tab !== 'runtime') return
+    const hasPendingNetworkWork = (networkState.profiles || []).some((profile) => profile.state === 'testing')
+      || [...(networkState.tests || []), ...(networkState.mode_tests || [])].some((test) => ['pending', 'claimed'].includes(test.state))
+      || (networkState.bindings || []).some((binding) => binding.desired_status === 'pending')
+    if (!hasPendingNetworkWork) return
+    let disposed = false
+    let timer
+    const poll = async () => {
+      await refreshNetwork(false).catch(() => {})
+      if (!disposed) timer = setTimeout(poll, 2_000)
+    }
+    timer = setTimeout(poll, 2_000)
+    return () => {
+      disposed = true
+      clearTimeout(timer)
+    }
+  }, [session, browserOnline, tab, networkState, refreshNetwork])
 
   const agents = data.agents || []
   const overviewTasks = data.tasks || []
@@ -672,42 +700,20 @@ function App() {
     }
   }
 
-  const networkWrite = async (path, body) => {
-    if (!canWrite) return
+  const networkCommand = async (path, body) => {
+    if (!canWrite) throw new APIError(403, 'network writes are unavailable')
     setWriting(true)
     setError('')
-    const key = newCommandKey('network')
     try {
-      await api(path, {
+      return await api(path, {
         method: 'POST',
-        headers: { 'X-CSRF-Token': session.csrf_token, 'Idempotency-Key': key },
-        body: JSON.stringify({ ...body, meta: { idempotency_key: key, ...(body.meta || {}) } }),
+        headers: { 'X-CSRF-Token': session.csrf_token, 'Idempotency-Key': body.meta.idempotency_key },
+        body: JSON.stringify(body),
       })
-      const [profiles, options] = await Promise.all([api('/api/observe/v1/network-profiles'), api('/api/observe/v1/execution-options')])
-      setNetworkState(profiles || { profiles: [], bindings: [] })
-      setRuntimeOptions(options?.backends || [])
-    } catch (requestError) {
-      setError(requestError.message)
     } finally {
       setWriting(false)
     }
   }
-
-  const createProfile = async (event) => {
-    event.preventDefault()
-    const form = profileForm
-    if (!form.profile_id.trim() || !form.host.trim() || !form.port) return
-    await networkWrite('/api/control/v1/network-profiles', {
-      profile_id: form.profile_id.trim(), mode: form.mode, host: form.host.trim(), port: Number(form.port), config_file: form.config_file.trim() || undefined, secret_ref: form.secret_ref.trim() || undefined,
-    })
-    setProfileForm({ profile_id: '', mode: 'only_http_proxy', host: '', port: '8080', config_file: '', secret_ref: '' })
-  }
-
-  const publishProfile = (profile) => networkWrite(`/api/control/v1/network-profiles/${encodeURIComponent(profile.profile_id)}/publish`, { meta: { expected_version: profile.version } })
-  const bindProfile = (option, profile) => networkWrite('/api/control/v1/network-bindings', {
-    agent_id: option.agent_id, backend_id: option.backend.backend_id, profile_id: profile.profile_id, profile_version: profile.version,
-    meta: { expected_version: 0 },
-  })
 
   const sendInstruction = async () => {
     const content = draft.trim()
@@ -1008,27 +1014,18 @@ function App() {
               <div><p className="eyebrow">Runtime</p><h2>网络配置</h2></div>
               <span className="connection-note">{networkLoading ? '同步中' : `${networkState.profiles?.length || 0} 个方案`}</span>
             </div>
-            <form className="profile-form" onSubmit={createProfile}>
-              <h3>创建代理方案草稿</h3>
-              <div className="profile-grid">
-                <input aria-label="方案 ID" placeholder="方案 ID" value={profileForm.profile_id} onChange={(e) => setProfileForm({ ...profileForm, profile_id: e.target.value })} />
-                <select aria-label="代理模式" value={profileForm.mode} onChange={(e) => setProfileForm({ ...profileForm, mode: e.target.value })}><option value="only_http_proxy">HTTP 代理</option><option value="only_socks5">SOCKS5 代理</option></select>
-                <input aria-label="代理主机" placeholder="代理主机" value={profileForm.host} onChange={(e) => setProfileForm({ ...profileForm, host: e.target.value })} />
-                <input aria-label="代理端口" type="number" min="1" max="65535" placeholder="端口" value={profileForm.port} onChange={(e) => setProfileForm({ ...profileForm, port: e.target.value })} />
-                <input aria-label="Worker 配置文件" placeholder="Worker 配置文件绝对路径" value={profileForm.config_file} onChange={(e) => setProfileForm({ ...profileForm, config_file: e.target.value })} />
-                <input aria-label="Secret 引用" placeholder="Secret 引用（可选）" value={profileForm.secret_ref} onChange={(e) => setProfileForm({ ...profileForm, secret_ref: e.target.value })} />
-                <button className="primary" type="submit" disabled={!canWrite}>保存草稿</button>
-              </div>
-            </form>
-            <div className="profile-list">
-              {(networkState.profiles || []).map((profile) => <article className="profile-card" key={`${profile.profile_id}-${profile.version}`}>
-                <div><strong>{profile.profile_id}</strong><span className={`pill ${profile.status === 'published' ? 'status-succeeded' : 'status-queued'}`}>{profile.status} · v{profile.version}</span></div>
-                <p>{profile.mode} · {profile.host}:{profile.port}{profile.secret_ref ? ` · Secret ${profile.secret_ref}` : ''}</p>
-                <div className="profile-actions">{profile.status === 'draft' && <button className="outline" disabled={!canWrite} onClick={() => publishProfile(profile)}>发布</button>}{profile.status === 'published' && runtimeOptions.filter((option) => option.backend?.descriptor?.network_modes?.includes('named_profile')).map((option) => <button className="outline" key={`${profile.profile_id}-${option.agent_id}-${option.backend.backend_id}`} disabled={!canWrite} onClick={() => bindProfile(option, profile)}>绑定 {option.agent_id}/{option.backend.backend_id}</button>)}</div>
-              </article>)}
-              {!networkState.profiles?.length && <div className="empty-state">暂无网络方案</div>}
-            </div>
-            {(networkState.bindings || []).length > 0 && <div className="binding-list"><h3>绑定状态</h3>{networkState.bindings.map((binding) => <p key={`${binding.agent_id}-${binding.backend_id}`}>{binding.agent_id}/{binding.backend_id} · {binding.profile_id} v{binding.profile_version} · {binding.desired_status}{binding.applied_worker_id ? ` · Worker ${binding.applied_worker_id}` : ''}</p>)}</div>}
+            <NetworkSettings
+              networkState={networkState}
+              runtimeOptions={runtimeOptions}
+              canWrite={writable}
+              canManageSecrets={roles.includes('owner')}
+              offline={!browserOnline}
+              loading={networkLoading}
+              busy={writing}
+              onCommand={networkCommand}
+              onReload={() => refreshNetwork(false)}
+              onOpenTask={(id) => { selectTask(id); setTab('tasks') }}
+            />
           </section>
         )}
       </main>

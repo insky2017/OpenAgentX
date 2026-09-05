@@ -418,6 +418,8 @@ CREATE TABLE network_profiles (
     port INTEGER NOT NULL CHECK (port BETWEEN 1 AND 65535),
     config_file TEXT,
     secret_ref TEXT,
+	direct_ips_json TEXT NOT NULL DEFAULT '[]',
+	manifest_digest TEXT,
     created_by TEXT NOT NULL REFERENCES principals(principal_id),
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
@@ -430,16 +432,157 @@ ON network_profiles(profile_id, version DESC);
 CREATE TABLE network_profile_bindings (
     agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE,
     backend_id TEXT NOT NULL,
-    profile_id TEXT NOT NULL,
-    profile_version INTEGER NOT NULL,
+    mode TEXT NOT NULL CHECK (mode IN ('inherit', 'direct', 'named_profile')),
+    profile_id TEXT,
+    profile_version INTEGER,
+    policy_version INTEGER,
+    test_id TEXT,
     version INTEGER NOT NULL CHECK (version > 0),
     desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
     applied_worker_id TEXT,
     applied_generation INTEGER,
+    applied_mode TEXT CHECK (applied_mode IS NULL OR applied_mode IN ('inherit', 'direct', 'named_profile')),
+    applied_profile_id TEXT,
     applied_profile_version INTEGER,
+    applied_policy_version INTEGER,
     applied_binding_revision INTEGER,
     diagnostic TEXT,
+	manifest_digest TEXT,
+	secret_version TEXT,
+	runtime_identity_json TEXT,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (agent_id, backend_id),
-    FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version)
+    FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version),
+    CHECK (
+        (mode = 'named_profile' AND profile_id IS NOT NULL AND profile_version IS NOT NULL AND policy_version IS NULL)
+        OR (mode IN ('inherit', 'direct') AND profile_id IS NULL AND profile_version IS NULL AND policy_version IS NOT NULL)
+    )
 );
+
+CREATE TABLE network_mode_policies (
+    agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE,
+    backend_id TEXT NOT NULL,
+    policy_version INTEGER NOT NULL CHECK (policy_version > 0),
+    mode TEXT NOT NULL CHECK (mode IN ('inherit', 'direct')),
+    manifest_digest TEXT NOT NULL,
+    created_by TEXT NOT NULL REFERENCES principals(principal_id),
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (agent_id, backend_id, policy_version)
+);
+
+CREATE TABLE network_mode_tests (
+    test_id TEXT PRIMARY KEY,
+    agent_id TEXT NOT NULL,
+    backend_id TEXT NOT NULL,
+    policy_version INTEGER NOT NULL,
+    mode TEXT NOT NULL CHECK (mode IN ('inherit', 'direct')),
+    manifest_digest TEXT NOT NULL,
+    worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id),
+    generation INTEGER NOT NULL CHECK (generation > 0),
+    runtime_identity_json TEXT NOT NULL,
+    binding_revision INTEGER NOT NULL CHECK (binding_revision >= 0),
+    state TEXT NOT NULL CHECK (state IN ('pending','claimed','succeeded','failed','stale')),
+    diagnostic_code TEXT,
+    duration_ms INTEGER,
+    probe_results_json TEXT NOT NULL DEFAULT '[]',
+    created_by TEXT NOT NULL REFERENCES principals(principal_id),
+    created_at TEXT NOT NULL,
+    finished_at TEXT,
+    FOREIGN KEY (agent_id, backend_id, policy_version) REFERENCES network_mode_policies(agent_id, backend_id, policy_version)
+);
+
+CREATE TABLE network_profile_heads (
+    profile_id TEXT PRIMARY KEY,
+    current_content_version INTEGER NOT NULL CHECK (current_content_version > 0),
+    state TEXT NOT NULL CHECK (state IN ('draft','testing','ready','published','stale')),
+    state_revision INTEGER NOT NULL CHECK (state_revision > 0),
+    ready_test_id TEXT,
+    published_content_version INTEGER,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (profile_id, current_content_version) REFERENCES network_profiles(profile_id, version)
+);
+
+CREATE TABLE network_tests (
+    test_id TEXT PRIMARY KEY,
+    profile_id TEXT NOT NULL,
+    content_version INTEGER NOT NULL,
+    secret_version TEXT,
+    worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id),
+    generation INTEGER NOT NULL CHECK (generation > 0),
+    backend_id TEXT NOT NULL,
+    runtime_identity_json TEXT NOT NULL,
+    state TEXT NOT NULL CHECK (state IN ('pending','claimed','succeeded','failed','stale')),
+    diagnostic_code TEXT,
+    duration_ms INTEGER,
+    probe_results_json TEXT NOT NULL DEFAULT '[]',
+    created_by TEXT NOT NULL REFERENCES principals(principal_id),
+    created_at TEXT NOT NULL,
+    finished_at TEXT,
+    FOREIGN KEY (profile_id, content_version) REFERENCES network_profiles(profile_id, version)
+);
+
+CREATE TABLE network_work_items (
+    work_id TEXT PRIMARY KEY,
+    kind TEXT NOT NULL CHECK (kind IN ('test','apply','import')),
+    profile_id TEXT,
+    content_version INTEGER,
+    secret_version TEXT,
+    agent_id TEXT NOT NULL REFERENCES agents(agent_id),
+    backend_id TEXT NOT NULL,
+    worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id),
+    generation INTEGER NOT NULL CHECK (generation > 0),
+    binding_revision INTEGER,
+    network_mode TEXT CHECK (network_mode IS NULL OR network_mode IN ('inherit','direct','named_profile')),
+    policy_version INTEGER,
+    manifest_digest TEXT,
+    runtime_identity_json TEXT NOT NULL,
+    state TEXT NOT NULL CHECK (state IN ('pending','claimed','succeeded','failed','stale')),
+    diagnostic_code TEXT,
+    created_at TEXT NOT NULL,
+    finished_at TEXT
+);
+CREATE INDEX idx_network_work_claim ON network_work_items(worker_instance_id,generation,state,created_at);
+
+CREATE TABLE network_workflow_commands (
+    actor_principal_id TEXT NOT NULL REFERENCES principals(principal_id),
+    operation TEXT NOT NULL,
+    idempotency_key TEXT NOT NULL,
+    request_digest TEXT NOT NULL,
+    result_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY(actor_principal_id,operation,idempotency_key)
+);
+
+CREATE TABLE network_imports (
+    worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id),
+    generation INTEGER NOT NULL,
+    backend_id TEXT NOT NULL,
+    source_identity TEXT NOT NULL,
+    work_id TEXT NOT NULL UNIQUE REFERENCES network_work_items(work_id),
+    profile_id TEXT,
+    content_version INTEGER,
+    state TEXT NOT NULL CHECK (state IN ('pending','succeeded','failed')),
+    created_at TEXT NOT NULL,
+    finished_at TEXT,
+    PRIMARY KEY(worker_instance_id,generation,backend_id,source_identity)
+);
+
+CREATE TABLE network_profile_publications (
+    profile_id TEXT NOT NULL,
+    content_version INTEGER NOT NULL,
+    test_id TEXT NOT NULL REFERENCES network_tests(test_id),
+    runtime_identity_json TEXT NOT NULL,
+    published_by TEXT NOT NULL REFERENCES principals(principal_id),
+    published_at TEXT NOT NULL,
+    PRIMARY KEY (profile_id, content_version),
+    FOREIGN KEY (profile_id, content_version) REFERENCES network_profiles(profile_id, version)
+);
+
+CREATE TRIGGER network_profiles_reject_update
+BEFORE UPDATE ON network_profiles BEGIN SELECT RAISE(ABORT, 'network profile content is immutable'); END;
+CREATE TRIGGER network_profiles_reject_delete
+BEFORE DELETE ON network_profiles BEGIN SELECT RAISE(ABORT, 'network profile content is immutable'); END;
+CREATE TRIGGER network_mode_policies_reject_update
+BEFORE UPDATE ON network_mode_policies BEGIN SELECT RAISE(ABORT, 'network mode policy is immutable'); END;
+CREATE TRIGGER network_mode_policies_reject_delete
+BEFORE DELETE ON network_mode_policies BEGIN SELECT RAISE(ABORT, 'network mode policy is immutable'); END;

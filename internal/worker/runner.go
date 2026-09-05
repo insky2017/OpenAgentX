@@ -16,6 +16,8 @@ import (
 
 var errControlledStop = errors.New("controlled Worker stop")
 
+const networkWorkTimeout = 30 * time.Second
+
 type Runner struct {
 	config   Config
 	client   api.WorkerControlClient
@@ -57,10 +59,6 @@ func (r *Runner) Run(ctx context.Context) error {
 		return fmt.Errorf("register Worker: %w", err)
 	}
 	networkAcks := r.applyNetworkBindings(session.NetworkBindings)
-	if _, observedHealth, observeErr := r.backends.Observe(ctx); observeErr == nil {
-		health = observedHealth
-		r.setHealth(health)
-	}
 	initialStatus := workerStatusForHealth(health)
 	if err := r.heartbeat(ctx, session, initialStatus, networkAcks); err != nil {
 		return fmt.Errorf("initial Worker heartbeat: %w", err)
@@ -80,6 +78,8 @@ func (r *Runner) Run(ctx context.Context) error {
 	group, groupContext := errgroup.WithContext(runContext)
 	stopCommands := make(chan domain.WorkerCommand, 1)
 	group.Go(func() error { return r.heartbeatLoop(groupContext, session, networkAcks) })
+	group.Go(func() error { return r.healthLoop(groupContext) })
+	group.Go(func() error { return r.networkWorkLoop(groupContext, session) })
 	group.Go(func() error { return r.mailboxPump(groupContext, session, manager) })
 	group.Go(func() error { return manager.Run(groupContext) })
 	group.Go(func() error { return r.workerControlLoop(groupContext, session, stopCommands) })
@@ -158,14 +158,7 @@ func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession, 
 					networkAcks = nil
 				}
 			}
-			_, health, observeErr := r.backends.Observe(ctx)
-			status := workerStatusForHealth(health)
-			if observeErr != nil {
-				status = domain.WorkerStatusDegraded
-			}
-			if len(health) != 0 {
-				r.setHealth(health)
-			}
+			status := workerStatusForHealth(r.getHealth())
 			if r.draining.Load() {
 				status = domain.WorkerStatusDraining
 			}
@@ -175,6 +168,66 @@ func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession, 
 				}
 				return fmt.Errorf("Worker heartbeat: %w", err)
 			}
+		}
+	}
+}
+
+func (r *Runner) healthLoop(ctx context.Context) error {
+	ticker := time.NewTicker(r.config.HeartbeatInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+		}
+		_, health, err := r.backends.Observe(ctx)
+		if ctx.Err() != nil {
+			return nil
+		}
+		if err != nil {
+			continue
+		}
+		r.setHealth(health)
+	}
+}
+
+func (r *Runner) networkWorkLoop(ctx context.Context, session *api.WorkerSession) error {
+	ticker := time.NewTicker(r.config.HeartbeatInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+		}
+		work, err := r.client.PullNetworkWork(ctx, api.NetworkWorkPullRequest{
+			WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+			FencingToken: session.Worker.FencingToken,
+		})
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			return fmt.Errorf("pull Worker network work: %w", err)
+		}
+		if work == nil {
+			continue
+		}
+		workContext, cancel := context.WithTimeout(ctx, networkWorkTimeout)
+		ack := r.backends.ProcessNetworkWork(workContext, work)
+		cancel()
+		ack.WorkerInstanceID = session.Worker.ID
+		ack.Generation = session.Worker.Generation
+		ack.FencingToken = session.Worker.FencingToken
+		if err := r.client.AcknowledgeNetworkWork(ctx, work.Work.ID, ack); err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			if errors.Is(err, domain.ErrStaleVersion) {
+				continue
+			}
+			return fmt.Errorf("acknowledge Worker network work: %w", err)
 		}
 	}
 }

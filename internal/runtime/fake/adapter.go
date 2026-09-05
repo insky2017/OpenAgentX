@@ -90,6 +90,39 @@ func (a *Adapter) SetHealthError(err error) {
 	a.healthErr = err
 }
 
+func (a *Adapter) CloneForNetworkProbe(policy domain.NetworkPolicy) (openruntime.AgentRuntimeAdapter, error) {
+	if err := a.validateNetworkPolicy(policy); err != nil {
+		return nil, err
+	}
+	clone, err := NewAdapter(a.descriptor)
+	if err != nil {
+		return nil, err
+	}
+	a.mu.RLock()
+	clone.healthErr = a.healthErr
+	a.mu.RUnlock()
+	return clone, nil
+}
+
+func (a *Adapter) ApplyNetworkPolicy(policy domain.NetworkPolicy) error {
+	return a.validateNetworkPolicy(policy)
+}
+
+func (a *Adapter) validateNetworkPolicy(policy domain.NetworkPolicy) error {
+	if err := policy.Validate(); err != nil {
+		return err
+	}
+	if policy.RuntimeIdentity != a.descriptor.RuntimeIdentity {
+		return domain.ErrUnsupportedCapability
+	}
+	for _, mode := range a.descriptor.NetworkModes {
+		if mode == string(policy.Mode) {
+			return nil
+		}
+	}
+	return domain.ErrUnsupportedCapability
+}
+
 func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, sink openruntime.EventSink) (openruntime.TurnHandle, error) {
 	result, scripted, err := a.nextScriptedResult()
 	if err != nil {

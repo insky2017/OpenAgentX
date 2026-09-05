@@ -158,6 +158,9 @@ func (r *Repository) BindNetworkProfile(ctx context.Context, binding *domain.Net
 			binding.DesiredStatus = "pending"
 		}
 	}
+	if binding.Mode == "" {
+		binding.Mode = domain.NetworkNamedProfile
+	}
 	if err := binding.Validate(); err != nil {
 		return err
 	}
@@ -177,10 +180,10 @@ func (r *Repository) BindNetworkProfile(ctx context.Context, binding *domain.Net
 	}
 	if expectedVersion == 0 {
 		binding.Version = 1
-		_, err = tx.ExecContext(ctx, `INSERT INTO network_profile_bindings(agent_id, backend_id, profile_id, profile_version, version, desired_status, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?)`, binding.AgentID, binding.BackendID, binding.ProfileID, binding.ProfileVersion, binding.Version, "pending", formatTime(binding.UpdatedAt))
+		_, err = tx.ExecContext(ctx, `INSERT INTO network_profile_bindings(agent_id, backend_id, mode, profile_id, profile_version, version, desired_status, updated_at) VALUES(?, ?, 'named_profile', ?, ?, ?, ?, ?)`, binding.AgentID, binding.BackendID, binding.ProfileID, binding.ProfileVersion, binding.Version, "pending", formatTime(binding.UpdatedAt))
 	} else {
 		binding.Version = expectedVersion + 1
-		result, execErr := tx.ExecContext(ctx, `UPDATE network_profile_bindings SET profile_id=?, profile_version=?, version=?, desired_status='pending', applied_worker_id=NULL, applied_generation=NULL, applied_profile_version=NULL, applied_binding_revision=NULL, diagnostic=NULL, updated_at=? WHERE agent_id=? AND backend_id=? AND version=?`, binding.ProfileID, binding.ProfileVersion, binding.Version, formatTime(binding.UpdatedAt), binding.AgentID, binding.BackendID, expectedVersion)
+		result, execErr := tx.ExecContext(ctx, `UPDATE network_profile_bindings SET mode='named_profile',profile_id=?,profile_version=?,policy_version=NULL,test_id=NULL,version=?,desired_status='pending',diagnostic=NULL,updated_at=? WHERE agent_id=? AND backend_id=? AND version=?`, binding.ProfileID, binding.ProfileVersion, binding.Version, formatTime(binding.UpdatedAt), binding.AgentID, binding.BackendID, expectedVersion)
 		if execErr == nil {
 			var count int64
 			count, execErr = result.RowsAffected()
@@ -198,6 +201,19 @@ func (r *Repository) BindNetworkProfile(ctx context.Context, binding *domain.Net
 
 func (r *Repository) ListNetworkBindings(ctx context.Context, agentID string) ([]domain.NetworkBinding, error) {
 	return listNetworkBindings(ctx, r.db, agentID)
+}
+
+func getNetworkBindingWithQueryer(ctx context.Context, queryer networkBindingQueryer, agentID, backendID string) (*domain.NetworkBinding, error) {
+	bindings, err := listNetworkBindings(ctx, queryer, agentID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range bindings {
+		if bindings[i].BackendID == backendID {
+			return &bindings[i], nil
+		}
+	}
+	return nil, domain.ErrNotFound
 }
 
 func (r *Repository) ListWorkerNetworkBindings(ctx context.Context, guard domain.WorkerWriteGuard) ([]domain.NetworkBinding, error) {
@@ -244,7 +260,10 @@ func (r *Repository) ListWorkerNetworkBindings(ctx context.Context, guard domain
 	}
 	result := make([]domain.NetworkBinding, 0, len(bindings))
 	for _, binding := range bindings {
-		if capable[binding.BackendID] {
+		// Manifest-backed bindings are delivered through immutable network
+		// work items together with their transient secret payload. The legacy
+		// heartbeat path cannot safely materialize them.
+		if capable[binding.BackendID] && binding.Profile != nil && binding.Profile.ManifestDigest == "" {
 			result = append(result, binding)
 		}
 	}
@@ -256,7 +275,12 @@ type networkBindingQueryer interface {
 }
 
 func listNetworkBindings(ctx context.Context, queryer networkBindingQueryer, agentID string) ([]domain.NetworkBinding, error) {
-	rows, err := queryer.QueryContext(ctx, `SELECT b.agent_id, b.backend_id, b.profile_id, b.profile_version, b.version, b.desired_status, COALESCE(b.applied_worker_id,''), COALESCE(b.applied_generation,0), COALESCE(b.applied_profile_version,0), COALESCE(b.applied_binding_revision,0), COALESCE(b.diagnostic,''), b.updated_at, p.status, p.mode, p.host, p.port, COALESCE(p.config_file,''), COALESCE(p.secret_ref,''), p.created_by, p.created_at, p.updated_at FROM network_profile_bindings b JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version WHERE (?='' OR b.agent_id=?) ORDER BY b.agent_id, b.backend_id`, agentID, agentID)
+	rows, err := queryer.QueryContext(ctx, `SELECT b.agent_id,b.backend_id,b.mode,COALESCE(b.profile_id,''),COALESCE(b.profile_version,0),COALESCE(b.policy_version,0),COALESCE(b.test_id,''),b.version,b.desired_status,
+		COALESCE(b.applied_worker_id,''),COALESCE(b.applied_generation,0),COALESCE(b.applied_mode,''),COALESCE(b.applied_profile_id,''),COALESCE(b.applied_profile_version,0),COALESCE(b.applied_policy_version,0),COALESCE(b.applied_binding_revision,0),
+		COALESCE(b.diagnostic,''),COALESCE(b.manifest_digest,''),COALESCE(b.runtime_identity_json,''),b.updated_at,
+		p.status,p.mode,p.host,p.port,COALESCE(p.config_file,''),COALESCE(b.secret_version,p.secret_ref,''),COALESCE(p.direct_ips_json,'[]'),p.created_by,p.created_at,p.updated_at
+		FROM network_profile_bindings b LEFT JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
+		WHERE (?='' OR b.agent_id=?) ORDER BY b.agent_id,b.backend_id`, agentID, agentID)
 	if err != nil {
 		return nil, err
 	}
@@ -264,10 +288,12 @@ func listNetworkBindings(ctx context.Context, queryer networkBindingQueryer, age
 	result := make([]domain.NetworkBinding, 0)
 	for rows.Next() {
 		var b domain.NetworkBinding
-		var updated, profileStatus, profileCreated, profileUpdated, diagnostic string
-		var profileMode, profileHost, profileConfig, profileSecret, profileCreatedBy string
-		var profilePort int
-		if err := rows.Scan(&b.AgentID, &b.BackendID, &b.ProfileID, &b.ProfileVersion, &b.Version, &b.DesiredStatus, &b.AppliedWorkerID, &b.AppliedGeneration, &b.AppliedProfileVersion, &b.AppliedBindingRevision, &diagnostic, &updated, &profileStatus, &profileMode, &profileHost, &profilePort, &profileConfig, &profileSecret, &profileCreatedBy, &profileCreated, &profileUpdated); err != nil {
+		var updated, diagnostic, identityJSON string
+		var profileStatus, profileMode, profileHost, profileConfig, profileSecret, profileCreatedBy, directJSON, profileCreated, profileUpdated sql.NullString
+		var profilePort sql.NullInt64
+		if err := rows.Scan(&b.AgentID, &b.BackendID, &b.Mode, &b.ProfileID, &b.ProfileVersion, &b.PolicyVersion, &b.TestID, &b.Version, &b.DesiredStatus,
+			&b.AppliedWorkerID, &b.AppliedGeneration, &b.AppliedMode, &b.AppliedProfileID, &b.AppliedProfileVersion, &b.AppliedPolicyVersion, &b.AppliedBindingRevision,
+			&diagnostic, &b.ManifestDigest, &identityJSON, &updated, &profileStatus, &profileMode, &profileHost, &profilePort, &profileConfig, &profileSecret, &directJSON, &profileCreatedBy, &profileCreated, &profileUpdated); err != nil {
 			return nil, err
 		}
 		b.UpdatedAt, err = parseTime(updated)
@@ -277,18 +303,32 @@ func listNetworkBindings(ctx context.Context, queryer networkBindingQueryer, age
 		if err := b.Validate(); err != nil {
 			return nil, err
 		}
-		createdAt, parseErr := parseTime(profileCreated)
-		if parseErr != nil {
-			return nil, parseErr
+		if identityJSON != "" && json.Unmarshal([]byte(identityJSON), &b.RuntimeIdentity) != nil {
+			return nil, domain.ErrInvalidManifest
 		}
-		profileUpdatedAt, parseErr := parseTime(profileUpdated)
-		if parseErr != nil {
-			return nil, parseErr
+		if b.Mode == domain.NetworkNamedProfile {
+			if !profileStatus.Valid || !profileCreated.Valid || !profileUpdated.Valid {
+				return nil, domain.ErrInvalidManifest
+			}
+			createdAt, parseErr := parseTime(profileCreated.String)
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			profileUpdatedAt, parseErr := parseTime(profileUpdated.String)
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			var direct []string
+			if err := json.Unmarshal([]byte(directJSON.String), &direct); err != nil {
+				return nil, domain.ErrInvalidManifest
+			}
+			b.Profile = &domain.ProxyProfile{ID: b.ProfileID, Version: b.ProfileVersion, Status: domain.NetworkProfileStatus(profileStatus.String), Mode: profileMode.String, Host: profileHost.String, Port: int(profilePort.Int64), ConfigFile: profileConfig.String, SecretRef: profileSecret.String, DirectIPs: direct, ManifestDigest: b.ManifestDigest, RuntimeIdentity: b.RuntimeIdentity, CreatedBy: profileCreatedBy.String, CreatedAt: createdAt, UpdatedAt: profileUpdatedAt}
 		}
-		b.Profile = &domain.ProxyProfile{ID: b.ProfileID, Version: b.ProfileVersion, Status: domain.NetworkProfileStatus(profileStatus), Mode: profileMode, Host: profileHost, Port: profilePort, ConfigFile: profileConfig, SecretRef: profileSecret, CreatedBy: profileCreatedBy, CreatedAt: createdAt, UpdatedAt: profileUpdatedAt}
 		b.Diagnostic = diagnostic
-		if err := b.Profile.Validate(); err != nil {
-			return nil, err
+		if b.Profile != nil {
+			if err := b.Profile.Validate(); err != nil {
+				return nil, err
+			}
 		}
 		result = append(result, b)
 	}

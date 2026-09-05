@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -92,6 +93,61 @@ func TestApplyUpgradesN1WorkerNetworkColumns(t *testing.T) {
 		if count != 1 {
 			t.Fatalf("%s.%s column count=%d", table, column, count)
 		}
+	}
+}
+
+func TestApplyRebuildsLegacyNetworkBindingsWithoutGuessingStaleAppliedProfile(t *testing.T) {
+	ctx := context.Background()
+	db := openDB(t)
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	for _, statement := range []string{
+		fmt.Sprintf("INSERT INTO principals VALUES ('owner','human','Owner','active','%s','%s')", now, now),
+		fmt.Sprintf("INSERT INTO principals VALUES ('agent-principal','agent','Agent','active','%s','%s')", now, now),
+		fmt.Sprintf("INSERT INTO organizations VALUES ('org','Org','active','%s','%s')", now, now),
+		fmt.Sprintf("INSERT INTO agents VALUES ('agent','agent-principal','org','Agent','active',1,'%s','%s')", now, now),
+		fmt.Sprintf("INSERT INTO network_profiles(profile_id,version,status,mode,host,port,config_file,created_by,created_at,updated_at) VALUES('proxy',1,'published','only_http_proxy','proxy.internal',8080,'/tmp/proxy','owner','%s','%s')", now, now),
+		"DROP TABLE network_profile_bindings",
+		`CREATE TABLE network_profile_bindings (
+			agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
+			profile_id TEXT NOT NULL, profile_version INTEGER NOT NULL, version INTEGER NOT NULL,
+			desired_status TEXT NOT NULL, applied_worker_id TEXT, applied_generation INTEGER,
+			applied_profile_version INTEGER, applied_binding_revision INTEGER, diagnostic TEXT, updated_at TEXT NOT NULL,
+			PRIMARY KEY(agent_id,backend_id), FOREIGN KEY(profile_id,profile_version) REFERENCES network_profiles(profile_id,version)
+		)`,
+		fmt.Sprintf("INSERT INTO network_profile_bindings VALUES('agent','current','proxy',1,1,'applied','worker',3,1,1,NULL,'%s')", now),
+		fmt.Sprintf("INSERT INTO network_profile_bindings VALUES('agent','stale','proxy',1,2,'pending','worker',3,1,1,NULL,'%s')", now),
+	} {
+		if _, err := db.ExecContext(ctx, statement); err != nil {
+			t.Fatalf("legacy fixture failed: %v\n%s", err, statement)
+		}
+	}
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	var mode, appliedMode, appliedProfileID string
+	var appliedProfileVersion int64
+	if err := db.QueryRowContext(ctx, `SELECT mode,COALESCE(applied_mode,''),COALESCE(applied_profile_id,''),COALESCE(applied_profile_version,0) FROM network_profile_bindings WHERE backend_id='current'`).
+		Scan(&mode, &appliedMode, &appliedProfileID, &appliedProfileVersion); err != nil {
+		t.Fatal(err)
+	}
+	if mode != "named_profile" || appliedMode != "named_profile" || appliedProfileID != "proxy" || appliedProfileVersion != 1 {
+		t.Fatalf("current legacy applied fact mode=%q applied_mode=%q profile=%q version=%d", mode, appliedMode, appliedProfileID, appliedProfileVersion)
+	}
+	if err := db.QueryRowContext(ctx, `SELECT COALESCE(applied_mode,''),COALESCE(applied_profile_id,''),COALESCE(applied_profile_version,0) FROM network_profile_bindings WHERE backend_id='stale'`).
+		Scan(&appliedMode, &appliedProfileID, &appliedProfileVersion); err != nil {
+		t.Fatal(err)
+	}
+	if appliedMode != "" || appliedProfileID != "" || appliedProfileVersion != 0 {
+		t.Fatalf("stale legacy applied target was guessed: mode=%q profile=%q version=%d", appliedMode, appliedProfileID, appliedProfileVersion)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO network_mode_policies(agent_id,backend_id,policy_version,mode,manifest_digest,created_by,created_at) VALUES('agent','direct',1,'direct',?, 'owner', ?)`, strings.Repeat("a", 64), now); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO network_profile_bindings(agent_id,backend_id,mode,policy_version,version,desired_status,manifest_digest,updated_at) VALUES('agent','direct','direct',1,1,'pending',?,?)`, strings.Repeat("a", 64), now); err != nil {
+		t.Fatalf("rebuilt binding still requires a proxy profile: %v", err)
 	}
 }
 

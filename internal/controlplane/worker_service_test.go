@@ -14,6 +14,7 @@ import (
 
 	"openagentx/internal/api"
 	"openagentx/internal/domain"
+	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/testkit"
@@ -22,6 +23,7 @@ import (
 type workerTestEnvironment struct {
 	repository *openagentsqlite.Repository
 	service    *WorkerService
+	workflow   *NetworkWorkflowService
 	broker     *MemoryWakeupBroker
 	clock      *testkit.FakeClock
 	ownerID    string
@@ -64,8 +66,21 @@ func newWorkerTestEnvironment(t *testing.T, customize func(*WorkerServiceOptions
 		SessionModes: []domain.SessionMode{domain.SessionModeNew}, Steer: openruntime.SteerQueued,
 		Approval: openruntime.ApprovalPreflight, Cancel: openruntime.CancelProcessSignal,
 		BackendOptionsJSON: json.RawMessage(`{"type":"object"}`), MaxConcurrency: 1,
+		NetworkModes:    []string{string(domain.NetworkInherit), string(domain.NetworkDirect)},
+		RuntimeIdentity: domain.RuntimeIdentity{AdapterID: "fake", AdapterVersion: "1"},
 	}
-	environment.backend = openruntime.BackendRegistration{BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy}
+	environment.backend = openruntime.BackendRegistration{
+		BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy,
+		Network: domain.NetworkPolicy{Mode: domain.NetworkInherit},
+	}
+	secrets, err := secretstore.Open(filepath.Join(t.TempDir(), "network-secrets"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment.workflow, err = NewNetworkWorkflowService(repository, secrets, environment.broker, clock.Now)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var idCounter atomic.Int64
 	var tokenCounter atomic.Int64
 	options := WorkerServiceOptions{
@@ -76,6 +91,7 @@ func newWorkerTestEnvironment(t *testing.T, customize func(*WorkerServiceOptions
 		},
 		WorkerLease: time.Minute, TokenLifetime: 10 * time.Minute,
 		MailboxLease: 10 * time.Second, RunLease: 2 * time.Minute,
+		NetworkWorkflow: environment.workflow,
 	}
 	if customize != nil {
 		customize(&options)
@@ -135,7 +151,80 @@ func (environment *workerTestEnvironment) register(t *testing.T, workerInstanceI
 	if err != nil {
 		t.Fatalf("register Worker: %v", err)
 	}
+	environment.bootstrapInherit(t, session)
 	return session
+}
+
+func (environment *workerTestEnvironment) bootstrapInherit(t *testing.T, session *api.WorkerSession) {
+	t.Helper()
+	ctx := context.Background()
+	expectedRevision := int64(0)
+	if binding, err := environment.repository.GetNetworkBinding(ctx, environment.agentID, "local"); err == nil {
+		expectedRevision = binding.Version
+	} else if !errors.Is(err, domain.ErrNotFound) {
+		t.Fatal(err)
+	}
+	result, err := environment.workflow.StartModeTest(ctx, environment.ownerID, api.TestNetworkModeRequest{
+		Meta:    api.CommandMeta{IdempotencyKey: "test-inherit-" + session.Worker.ID, ExpectedVersion: expectedRevision},
+		AgentID: environment.agentID, BackendID: "local", Mode: domain.NetworkInherit,
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+	})
+	if err != nil {
+		t.Fatalf("start inherit mode test: %v", err)
+	}
+	var receipt struct {
+		TestID string `json:"test_id"`
+	}
+	if err := json.Unmarshal(result, &receipt); err != nil || receipt.TestID == "" {
+		t.Fatalf("decode inherit mode test receipt=%s err=%v", result, err)
+	}
+	guard := domain.WorkerWriteGuard{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, PrincipalID: environment.workerID,
+		SessionTokenDigest: workerTokenDigest(session.SessionToken), Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, CheckedAt: environment.clock.Now(),
+	}
+	work, err := environment.workflow.PullWork(ctx, guard)
+	if err != nil || work == nil || work.Work.ID != receipt.TestID {
+		t.Fatalf("pull inherit mode test=%+v err=%v", work, err)
+	}
+	ack := api.NetworkWorkAckRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken,
+		State: "succeeded", ProbeResults: successfulWorkerTestInheritProbes(),
+	}
+	if err := environment.workflow.AcknowledgeWork(ctx, guard, work.Work.ID, ack); err != nil {
+		t.Fatalf("ack inherit mode test: %v", err)
+	}
+	if _, err := environment.workflow.PublishMode(ctx, environment.ownerID, api.PublishNetworkModeRequest{
+		Meta:   api.CommandMeta{IdempotencyKey: "publish-inherit-" + session.Worker.ID, ExpectedVersion: expectedRevision},
+		TestID: receipt.TestID, WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+	}); err != nil {
+		t.Fatalf("publish inherit mode: %v", err)
+	}
+	work, err = environment.workflow.PullWork(ctx, guard)
+	if err != nil || work == nil || work.Work.Kind != domain.NetworkWorkApply {
+		t.Fatalf("pull inherit mode apply=%+v err=%v", work, err)
+	}
+	policy := domain.NetworkPolicy{
+		Mode: work.Work.Mode, PolicyVersion: work.Work.PolicyVersion, BindingRevision: work.Work.BindingRevision,
+		ManifestDigest: work.Work.ManifestDigest, RuntimeIdentity: work.Work.RuntimeIdentity,
+	}
+	ack.ProbeResults = nil
+	ack.Policy = &policy
+	if err := environment.workflow.AcknowledgeWork(ctx, guard, work.Work.ID, ack); err != nil {
+		t.Fatalf("ack inherit mode apply: %v", err)
+	}
+}
+
+func successfulWorkerTestInheritProbes() []domain.NetworkProbeResult {
+	return []domain.NetworkProbeResult{
+		{Layer: domain.NetworkProbeConfiguration, State: domain.NetworkProbePassed},
+		{Layer: domain.NetworkProbeSecret, State: domain.NetworkProbeNotVerified, DiagnosticCode: domain.NetworkDiagnosticInheritUnknown},
+		{Layer: domain.NetworkProbeEndpoint, State: domain.NetworkProbeNotVerified, DiagnosticCode: domain.NetworkDiagnosticInheritUnknown},
+		{Layer: domain.NetworkProbeDirectRules, State: domain.NetworkProbeNotApplicable},
+		{Layer: domain.NetworkProbeRuntimeHealth, State: domain.NetworkProbePassed},
+		{Layer: domain.NetworkProbeNetworkEffect, State: domain.NetworkProbeNotVerified, DiagnosticCode: domain.NetworkDiagnosticNotVerified},
+		{Layer: domain.NetworkProbeModelCall, State: domain.NetworkProbeNotVerified, DiagnosticCode: domain.NetworkDiagnosticNotVerified},
+	}
 }
 
 func TestRegisterWorkerRejectsUnknownLogicalAgent(t *testing.T) {

@@ -23,6 +23,7 @@ import (
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
+	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	"openagentx/internal/transport/remotehttps"
 	"openagentx/internal/transport/unixhttp"
@@ -65,6 +66,7 @@ func execute(args []string) int {
 func runDaemon(args []string) int {
 	flags := flag.NewFlagSet("serve", flag.ContinueOnError)
 	dbPath := flags.String("db", "", "Target SQLite database path")
+	networkSecretDir := flags.String("network-secret-dir", "", "Network secret directory (default: <absolute-db-path>.network-secrets)")
 	socketPath := flags.String("socket", "", "Unix Socket path")
 	httpAddr := flags.String("http-addr", ":18100", "Private HTTP listen address for Web Panel")
 	webDir := flags.String("web-dir", "web/dist", "Built Web Panel directory")
@@ -84,14 +86,33 @@ func runDaemon(args []string) int {
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
-	repository, err := openagentsqlite.Open(ctx, *dbPath, openagentsqlite.Options{})
+	absoluteDBPath, err := filepath.Abs(*dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "resolve database path: %v\n", err)
+		return 1
+	}
+	repository, err := openagentsqlite.Open(ctx, absoluteDBPath, openagentsqlite.Options{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "open database: %v\n", err)
 		return 1
 	}
 	defer repository.Close()
 	broker := controlplane.NewMemoryWakeupBroker()
-	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{})
+	secretDirectory := strings.TrimSpace(*networkSecretDir)
+	if secretDirectory == "" {
+		secretDirectory = absoluteDBPath + ".network-secrets"
+	}
+	secrets, err := secretstore.Open(secretDirectory)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "open network secret store: %v\n", err)
+		return 1
+	}
+	networkWorkflow, err := controlplane.NewNetworkWorkflowService(repository, secrets, broker, time.Now)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create network workflow service: %v\n", err)
+		return 1
+	}
+	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{NetworkWorkflow: networkWorkflow})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Worker service: %v\n", err)
 		return 1
@@ -152,7 +173,7 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create command service: %v\n", err)
 		return 1
 	}
-	panelHandler, err := panel.NewHandler(repository, commands, authManager)
+	panelHandler, err := panel.NewHandler(repository, commands, authManager, networkWorkflow)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create panel handler: %v\n", err)
 		return 1

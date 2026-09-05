@@ -77,6 +77,8 @@ func (h *Handler) registerRoutes() {
 	h.mux.HandleFunc("POST /api/v1/workers/register", h.register)
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/heartbeat", h.heartbeat)
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/network-bindings/pull", h.pullNetworkBindings)
+	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/network-work/pull", h.pullNetworkWork)
+	h.mux.HandleFunc("POST /api/v1/network-work/{workID}/ack", h.ackNetworkWork)
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/mailbox/claim", h.claimMailbox)
 	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/accept", h.acceptMailbox)
 	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/begin-attempt", h.beginAttempt)
@@ -87,6 +89,62 @@ func (h *Handler) registerRoutes() {
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/release", h.release)
 	h.mux.HandleFunc("POST /api/v1/worker-commands/{commandID}/ack", h.ackCommand)
 	h.mux.HandleFunc("POST /api/v1/worker-commands/{commandID}/released-ack", h.releasedAckCommand)
+}
+
+func (h *Handler) pullNetworkWork(w http.ResponseWriter, r *http.Request) {
+	service, ok := h.service.(interface {
+		PullNetworkWork(context.Context, string, string, openapi.NetworkWorkPullRequest) (*openapi.NetworkWorkEnvelope, error)
+	})
+	if !ok {
+		h.writeError(w, domain.ErrUnsupportedCapability)
+		return
+	}
+	principal, token, ok := h.authenticate(w, r)
+	if !ok {
+		return
+	}
+	var body openapi.NetworkWorkPullRequest
+	if err := openapi.DecodeStrictJSON(r.Body, &body); err != nil {
+		h.writeError(w, domain.ErrInvalidInput("invalid JSON request body"))
+		return
+	}
+	if !matchPathID(r.PathValue("workerID"), body.WorkerInstanceID) {
+		h.writeError(w, domain.ErrInvalidInput("path Worker ID does not match request body"))
+		return
+	}
+	work, err := service.PullNetworkWork(r.Context(), principal, token, body)
+	if errors.Is(err, domain.ErrNotFound) {
+		h.writeJSON(w, http.StatusOK, openapi.NetworkWorkPullResponse{})
+		return
+	}
+	if err != nil {
+		h.writeError(w, err)
+		return
+	}
+	h.writeJSON(w, http.StatusOK, openapi.NetworkWorkPullResponse{Work: work})
+}
+func (h *Handler) ackNetworkWork(w http.ResponseWriter, r *http.Request) {
+	service, ok := h.service.(interface {
+		AcknowledgeNetworkWork(context.Context, string, string, string, openapi.NetworkWorkAckRequest) error
+	})
+	if !ok {
+		h.writeError(w, domain.ErrUnsupportedCapability)
+		return
+	}
+	principal, token, ok := h.authenticate(w, r)
+	if !ok {
+		return
+	}
+	var body openapi.NetworkWorkAckRequest
+	if err := openapi.DecodeStrictJSON(r.Body, &body); err != nil {
+		h.writeError(w, domain.ErrInvalidInput("invalid JSON request body"))
+		return
+	}
+	if err := service.AcknowledgeNetworkWork(r.Context(), principal, token, r.PathValue("workID"), body); err != nil {
+		h.writeError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) pullNetworkBindings(response http.ResponseWriter, request *http.Request) {

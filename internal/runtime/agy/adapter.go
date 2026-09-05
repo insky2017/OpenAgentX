@@ -39,14 +39,24 @@ const cancellationPollInterval = 20 * time.Millisecond
 const cancellationStableScans = 3
 
 type Config struct {
-	Binary        string
-	Models        []string
-	WorkingDir    string
-	Environment   []string
-	StderrLimit   int
-	HealthTimeout time.Duration
-	CancelGrace   time.Duration
-	Network       domain.NetworkPolicy
+	Binary          string
+	Models          []string
+	WorkingDir      string
+	Environment     []string
+	StderrLimit     int
+	HealthTimeout   time.Duration
+	CancelGrace     time.Duration
+	Network         domain.NetworkPolicy
+	RuntimeIdentity domain.RuntimeIdentity
+	RealBinary      string
+	HelperBinary    string
+}
+
+func (a *Adapter) VerifyRuntimeIdentity(ctx context.Context, expected domain.RuntimeIdentity) error {
+	if expected.IsZero() && a.config.RuntimeIdentity.IsZero() {
+		return nil
+	}
+	return runtimenetwork.VerifyRuntimeIdentity(ctx, expected, a.config.Binary, a.config.HelperBinary, a.config.RealBinary)
 }
 
 type Adapter struct {
@@ -124,7 +134,16 @@ func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, er
 		Cancel: openruntime.CancelProcessSignal, Streams: true, MaxConcurrency: 1,
 		NetworkModes:       []string{"inherit", "named_profile"},
 		BackendOptionsJSON: []byte(`{"type":"object"}`),
+		RuntimeIdentity:    a.config.RuntimeIdentity,
 	}, nil
+}
+
+func (a *Adapter) CloneForNetworkProbe(policy domain.NetworkPolicy) (openruntime.AgentRuntimeAdapter, error) {
+	a.networkMu.RLock()
+	config := a.config
+	a.networkMu.RUnlock()
+	config.Network = policy
+	return NewAdapter(config)
 }
 
 func (a *Adapter) Validate(_ context.Context, spec domain.ExecutionSpec) error {
@@ -180,6 +199,13 @@ func (a *Adapter) Health(ctx context.Context) error {
 }
 
 func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, sink openruntime.EventSink) (openruntime.TurnHandle, error) {
+	expectedIdentity := request.Execution.Spec.Network.RuntimeIdentity
+	if expectedIdentity.IsZero() {
+		expectedIdentity = a.config.RuntimeIdentity
+	}
+	if err := a.VerifyRuntimeIdentity(ctx, expectedIdentity); err != nil {
+		return nil, err
+	}
 	if err := a.Validate(ctx, request.Execution.Spec); err != nil {
 		return nil, err
 	}

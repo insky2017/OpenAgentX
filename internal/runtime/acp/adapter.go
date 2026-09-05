@@ -19,18 +19,26 @@ import (
 )
 
 type Config struct {
-	Binary        string
-	Args          []string
-	Descriptor    openruntime.AdapterDescriptor
-	WorkingDir    string
-	Environment   []string
-	HealthTimeout time.Duration
-	Network       domain.NetworkPolicy
+	Binary          string
+	Args            []string
+	Descriptor      openruntime.AdapterDescriptor
+	WorkingDir      string
+	Environment     []string
+	HealthTimeout   time.Duration
+	Network         domain.NetworkPolicy
+	RuntimeIdentity domain.RuntimeIdentity
 }
 
 type Adapter struct {
 	config    Config
 	networkMu sync.RWMutex
+}
+
+func (a *Adapter) VerifyRuntimeIdentity(ctx context.Context, expected domain.RuntimeIdentity) error {
+	if expected.IsZero() && a.config.RuntimeIdentity.IsZero() {
+		return nil
+	}
+	return runtimenetwork.VerifyRuntimeIdentity(ctx, expected, a.config.Binary, "")
 }
 
 func (a *Adapter) ApplyNetworkPolicy(policy domain.NetworkPolicy) error {
@@ -79,7 +87,17 @@ func NewAdapterForTest(config Config) (*Adapter, error) {
 }
 
 func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, error) {
-	return a.config.Descriptor, nil
+	descriptor := a.config.Descriptor
+	descriptor.RuntimeIdentity = a.config.RuntimeIdentity
+	return descriptor, nil
+}
+
+func (a *Adapter) CloneForNetworkProbe(policy domain.NetworkPolicy) (openruntime.AgentRuntimeAdapter, error) {
+	a.networkMu.RLock()
+	config := a.config
+	a.networkMu.RUnlock()
+	config.Network = policy
+	return NewAdapter(config)
 }
 func (a *Adapter) Validate(_ context.Context, spec domain.ExecutionSpec) error {
 	if err := spec.ValidateShape(); err != nil {
@@ -106,6 +124,13 @@ func (a *Adapter) Health(ctx context.Context) error {
 }
 
 func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, sink openruntime.EventSink) (openruntime.TurnHandle, error) {
+	expectedIdentity := request.Execution.Spec.Network.RuntimeIdentity
+	if expectedIdentity.IsZero() {
+		expectedIdentity = a.config.RuntimeIdentity
+	}
+	if err := a.VerifyRuntimeIdentity(ctx, expectedIdentity); err != nil {
+		return nil, err
+	}
 	if err := a.Validate(ctx, request.Execution.Spec); err != nil {
 		return nil, err
 	}

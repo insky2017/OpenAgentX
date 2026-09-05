@@ -9,9 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"openagentx/internal/api"
 	"openagentx/internal/api/workerapi"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
+	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/transport/unixhttp"
@@ -26,7 +28,8 @@ func TestRunWorkerProcessCompletesConsecutiveTasksWithoutTerminalInput(t *testin
 	t.Cleanup(func() { _ = repository.Close() })
 	seedWorkerProcessIdentity(t, repository)
 	broker := controlplane.NewMemoryWakeupBroker()
-	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{})
+	workflow := newWorkerProcessNetworkWorkflow(t, repository, broker)
+	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{NetworkWorkflow: workflow})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,6 +71,7 @@ runtime_backends:
 	workerContext, cancelWorker := context.WithCancel(ctx)
 	workerResult := make(chan error, 1)
 	go func() { workerResult <- RunWorkerProcess(workerContext, configPath) }()
+	bootstrapWorkerProcessInherit(t, repository, workflow, workerResult, "consecutive")
 
 	for _, suffix := range []string{"a", "b"} {
 		created := createWorkerProcessTask(t, repository, suffix)
@@ -105,7 +109,8 @@ func TestRunWorkerProcessCompletesMultiTurnTaskWithSessionResume(t *testing.T) {
 	t.Cleanup(func() { _ = repository.Close() })
 	seedWorkerProcessIdentity(t, repository)
 	broker := controlplane.NewMemoryWakeupBroker()
-	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{})
+	workflow := newWorkerProcessNetworkWorkflow(t, repository, broker)
+	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{NetworkWorkflow: workflow})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,6 +168,7 @@ runtime_backends:
 		case <-time.After(3 * time.Second):
 		}
 	})
+	bootstrapWorkerProcessInherit(t, repository, workflow, workerResult, "multiturn")
 
 	created := createWorkerProcessTask(t, repository, "multiturn")
 	broker.Publish(controlplane.AgentMailboxTopic("quote"))
@@ -307,6 +313,98 @@ func seedWorkerProcessIdentity(t *testing.T, repository *openagentsqlite.Reposit
 	}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func newWorkerProcessNetworkWorkflow(t *testing.T, repository *openagentsqlite.Repository, broker *controlplane.MemoryWakeupBroker) *controlplane.NetworkWorkflowService {
+	t.Helper()
+	secrets, err := secretstore.Open(filepath.Join(t.TempDir(), "network-secrets"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow, err := controlplane.NewNetworkWorkflowService(repository, secrets, broker, time.Now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return workflow
+}
+
+func bootstrapWorkerProcessInherit(t *testing.T, repository *openagentsqlite.Repository, workflow *controlplane.NetworkWorkflowService, workerResult <-chan error, suffix string) {
+	t.Helper()
+	var worker domain.WorkerInstance
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		select {
+		case err := <-workerResult:
+			t.Fatalf("Worker exited before inherit bootstrap: %v", err)
+		default:
+		}
+		workers, err := repository.ListWorkers(context.Background(), 10)
+		if err == nil && len(workers) == 1 && workers[0].Status != domain.WorkerStatusOffline {
+			worker = workers[0]
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if worker.ID == "" {
+		t.Fatal("Worker did not register before inherit bootstrap")
+	}
+	result, err := workflow.StartModeTest(context.Background(), "human-owner", api.TestNetworkModeRequest{
+		Meta:    api.CommandMeta{IdempotencyKey: "process-inherit-test-" + suffix, ExpectedVersion: 0},
+		AgentID: "quote", BackendID: "local", Mode: domain.NetworkInherit,
+		WorkerInstanceID: worker.ID, Generation: worker.Generation,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var receipt struct {
+		TestID string `json:"test_id"`
+	}
+	if err := json.Unmarshal(result, &receipt); err != nil || receipt.TestID == "" {
+		t.Fatalf("inherit test receipt=%s err=%v", result, err)
+	}
+	waitForNetworkModeTestState(t, repository, receipt.TestID, "succeeded", workerResult)
+	if _, err := workflow.PublishMode(context.Background(), "human-owner", api.PublishNetworkModeRequest{
+		Meta:   api.CommandMeta{IdempotencyKey: "process-inherit-publish-" + suffix, ExpectedVersion: 0},
+		TestID: receipt.TestID, WorkerInstanceID: worker.ID, Generation: worker.Generation,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	deadline = time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		select {
+		case err := <-workerResult:
+			t.Fatalf("Worker exited during inherit apply: %v", err)
+		default:
+		}
+		binding, err := repository.GetNetworkBinding(context.Background(), "quote", "local")
+		if err == nil && binding.DesiredStatus == "applied" && binding.AppliedBindingRevision == binding.Version {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatal("inherit binding was not applied")
+}
+
+func waitForNetworkModeTestState(t *testing.T, repository *openagentsqlite.Repository, testID, state string, workerResult <-chan error) {
+	t.Helper()
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		select {
+		case err := <-workerResult:
+			t.Fatalf("Worker exited during network mode test: %v", err)
+		default:
+		}
+		result, err := repository.GetNetworkModeTest(context.Background(), testID)
+		if err == nil && result.State == state {
+			return
+		}
+		if err == nil && result.State == "failed" {
+			t.Fatalf("network mode test %s failed: diagnostic=%s probes=%+v", testID, result.DiagnosticCode, result.ProbeResults)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	result, err := repository.GetNetworkModeTest(context.Background(), testID)
+	t.Fatalf("network mode test %s did not reach %s: result=%+v err=%v", testID, state, result, err)
 }
 
 func createWorkerProcessTask(t *testing.T, repository *openagentsqlite.Repository, suffix string) *domain.CreateTaskResult {

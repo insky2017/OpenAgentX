@@ -19,22 +19,23 @@ type RuntimeBackendConfig struct {
 }
 
 type ProcessConfig struct {
-	Version              int                    `yaml:"version"`
-	AgentID              string                 `yaml:"agent_id"`
-	Transport            domain.WorkerTransport `yaml:"transport"`
-	UnixSocket           string                 `yaml:"unix_socket"`
-	Endpoint             string                 `yaml:"endpoint"`
-	CAFile               string                 `yaml:"ca_file"`
-	ClientCertFile       string                 `yaml:"client_cert_file"`
-	ClientKeyFile        string                 `yaml:"client_key_file"`
-	ServerName           string                 `yaml:"server_name"`
-	Capabilities         []string               `yaml:"capabilities"`
-	HeartbeatInterval    time.Duration          `yaml:"heartbeat_interval"`
-	MailboxWait          time.Duration          `yaml:"mailbox_wait"`
-	ControlWait          time.Duration          `yaml:"control_wait"`
-	ShutdownTimeout      time.Duration          `yaml:"shutdown_timeout"`
-	EnableWorkerControl  *bool                  `yaml:"enable_worker_control,omitempty"`
-	RuntimeBackendConfig []RuntimeBackendConfig `yaml:"runtime_backends"`
+	Version                   int                    `yaml:"version"`
+	AgentID                   string                 `yaml:"agent_id"`
+	Transport                 domain.WorkerTransport `yaml:"transport"`
+	UnixSocket                string                 `yaml:"unix_socket"`
+	Endpoint                  string                 `yaml:"endpoint"`
+	CAFile                    string                 `yaml:"ca_file"`
+	ClientCertFile            string                 `yaml:"client_cert_file"`
+	ClientKeyFile             string                 `yaml:"client_key_file"`
+	ServerName                string                 `yaml:"server_name"`
+	Capabilities              []string               `yaml:"capabilities"`
+	HeartbeatInterval         time.Duration          `yaml:"heartbeat_interval"`
+	MailboxWait               time.Duration          `yaml:"mailbox_wait"`
+	ControlWait               time.Duration          `yaml:"control_wait"`
+	ShutdownTimeout           time.Duration          `yaml:"shutdown_timeout"`
+	EnableWorkerControl       *bool                  `yaml:"enable_worker_control,omitempty"`
+	NetworkMaterializationDir string                 `yaml:"network_materialization_dir,omitempty"`
+	RuntimeBackendConfig      []RuntimeBackendConfig `yaml:"runtime_backends"`
 }
 
 func LoadProcessConfig(path string) (*ProcessConfig, error) {
@@ -101,6 +102,9 @@ func (c *ProcessConfig) Validate() error {
 		if err := backend.Network.Validate(); err != nil {
 			return fmt.Errorf("Worker Backend %s network: %w", backend.BackendID, err)
 		}
+	}
+	if c.NetworkMaterializationDir != "" && strings.ContainsAny(c.NetworkMaterializationDir, "\r\n") {
+		return domain.ErrInvalidInput("network_materialization_dir is invalid")
 	}
 	return nil
 }

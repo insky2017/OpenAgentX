@@ -1,0 +1,5 @@
+# N2 Chrome evidence manifest (2026-09-05)
+# Source: isolated r2 fixture Chrome batch; no credential material is present.
+080aac91fbafeccb02ae769b28ce505448f2a028b5b5004d11a4c152b01d43ee  n2-runtime-1440x900.png  1440x900 PNG RGB
+e49c71bd9678ae5695b12a11a73a00bbd6914e6a752d901a98141bc95cb3c426  n2-runtime-390x844.png   390x844 PNG RGB
+a90b6f7f535f70f6eb523d20fa9346fb62619105097bc95940ac835e210e5e83  n2-runtime-412x915.png   412x915 PNG RGB

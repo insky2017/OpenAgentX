@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"encoding/hex"
+	"strings"
 	"time"
 
 	"openagentx/internal/domain"
@@ -12,6 +14,8 @@ const (
 	WorkerRegisterPath            = "/api/v1/workers/register"
 	WorkerHeartbeatPath           = "/api/v1/workers/{worker-id}/heartbeat"
 	WorkerNetworkBindingsPullPath = "/api/v1/workers/{worker-id}/network-bindings/pull"
+	WorkerNetworkWorkPullPath     = "/api/v1/workers/{worker-id}/network-work/pull"
+	WorkerNetworkWorkAckPath      = "/api/v1/network-work/{work-id}/ack"
 	WorkerMailboxClaimPath        = "/api/v1/workers/{worker-id}/mailbox/claim"
 	WorkerControlClaimPath        = "/api/v1/workers/{worker-id}/control/claim"
 	WorkerReleasePath             = "/api/v1/workers/{worker-id}/release"
@@ -96,6 +100,106 @@ func (r NetworkBindingPullRequest) Validate() error {
 
 type NetworkBindingPullResponse struct {
 	Bindings []domain.NetworkBinding `json:"bindings"`
+}
+
+type NetworkWorkPullRequest struct {
+	WorkerInstanceID string `json:"worker_instance_id"`
+	Generation       int64  `json:"generation"`
+	FencingToken     int64  `json:"fencing_token"`
+}
+
+func (r NetworkWorkPullRequest) Validate() error {
+	return (NetworkBindingPullRequest{WorkerInstanceID: r.WorkerInstanceID, Generation: r.Generation, FencingToken: r.FencingToken}).Validate()
+}
+
+// NetworkSecretPayload is deliberately confined to the authenticated Worker
+// response. It must never be embedded in domain profiles, receipts or events.
+type NetworkSecretPayload struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+}
+type NetworkWorkEnvelope struct {
+	Work   domain.NetworkWork    `json:"work"`
+	Secret *NetworkSecretPayload `json:"secret,omitempty"`
+}
+type NetworkWorkPullResponse struct {
+	Work *NetworkWorkEnvelope `json:"work,omitempty"`
+}
+type ImportedNetworkProfile struct {
+	Mode           string                `json:"mode"`
+	Host           string                `json:"host"`
+	Port           int                   `json:"port"`
+	DirectIPs      []string              `json:"direct_ips,omitempty"`
+	Secret         *NetworkSecretPayload `json:"secret,omitempty"`
+	SourceIdentity string                `json:"source_identity"`
+}
+
+func (p ImportedNetworkProfile) Validate() error {
+	content := domain.NetworkProfileContent{
+		ProfileID: "import-validation", ContentVersion: 1, Mode: p.Mode,
+		Host: p.Host, Port: p.Port, DirectIPs: p.DirectIPs,
+		CreatedBy: "import-validator", CreatedAt: time.Unix(1, 0).UTC(),
+	}
+	content.ManifestDigest = content.ComputeManifestDigest()
+	if err := content.Validate(); err != nil {
+		return err
+	}
+	if len(p.SourceIdentity) != 64 {
+		return domain.ErrInvalidInput("import source_identity must be sha256")
+	}
+	if _, err := hex.DecodeString(p.SourceIdentity); err != nil || strings.ToLower(p.SourceIdentity) != p.SourceIdentity {
+		return domain.ErrInvalidInput("import source_identity must be sha256")
+	}
+	if p.Secret != nil {
+		if p.Mode == "only_http_proxy" && (p.Secret.Username != "" || p.Secret.Password != "") {
+			return domain.ErrUnsupportedCapability
+		}
+		if strings.ContainsAny(p.Secret.Username, "\r\n") || strings.ContainsAny(p.Secret.Password, "\r\n") {
+			return domain.ErrInvalidInput("imported secret contains control characters")
+		}
+	}
+	return nil
+}
+
+type NetworkWorkAckRequest struct {
+	WorkerInstanceID string                      `json:"worker_instance_id"`
+	Generation       int64                       `json:"generation"`
+	FencingToken     int64                       `json:"fencing_token"`
+	State            string                      `json:"state"`
+	DiagnosticCode   string                      `json:"diagnostic_code,omitempty"`
+	DurationMS       int64                       `json:"duration_ms,omitempty"`
+	Imported         *ImportedNetworkProfile     `json:"imported,omitempty"`
+	Policy           *domain.NetworkPolicy       `json:"policy,omitempty"`
+	ProbeResults     []domain.NetworkProbeResult `json:"probe_results,omitempty"`
+}
+
+func (r NetworkWorkAckRequest) Validate() error {
+	if err := (NetworkBindingPullRequest{WorkerInstanceID: r.WorkerInstanceID, Generation: r.Generation, FencingToken: r.FencingToken}).Validate(); err != nil {
+		return err
+	}
+	if r.State != "succeeded" && r.State != "failed" {
+		return domain.ErrInvalidInput("network work state must be succeeded or failed")
+	}
+	if !domain.ValidNetworkDiagnostic(r.DiagnosticCode) || (r.State == "succeeded" && r.DiagnosticCode != "") {
+		return domain.ErrInvalidInput("invalid network work diagnostic")
+	}
+	if r.DurationMS < 0 {
+		return domain.ErrInvalidInput("network work duration cannot be negative")
+	}
+	if len(r.ProbeResults) != 0 {
+		if err := domain.ValidateNetworkProbeResults(r.State, r.ProbeResults); err != nil {
+			return err
+		}
+	}
+	if r.Imported != nil {
+		if r.State != "succeeded" {
+			return domain.ErrInvalidInput("failed network work cannot include imported profile")
+		}
+		if err := r.Imported.Validate(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type HeartbeatRequest struct {
@@ -399,6 +503,8 @@ func (r FinishRunRequest) Validate() error {
 type WorkerControlClient interface {
 	RegisterWorker(context.Context, RegisterRequest) (*WorkerSession, error)
 	Heartbeat(context.Context, HeartbeatRequest) error
+	PullNetworkWork(context.Context, NetworkWorkPullRequest) (*NetworkWorkEnvelope, error)
+	AcknowledgeNetworkWork(context.Context, string, NetworkWorkAckRequest) error
 	ClaimMailbox(context.Context, ClaimRequest) (*domain.MailboxItem, error)
 	BeginAttempt(context.Context, string, BeginAttemptRequest) (*BeginAttemptResponse, error)
 	ResolveMailboxPayload(context.Context, string, MailboxPayloadRequest) (*MailboxPayloadResponse, error)

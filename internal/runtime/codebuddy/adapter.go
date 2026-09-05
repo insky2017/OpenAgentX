@@ -37,13 +37,21 @@ type Config struct {
 	// CancelGrace bounds the time between a process-group SIGTERM and the
 	// SIGKILL escalation, and is also used as the exec WaitDelay so a CLI
 	// exit cannot leave Wait blocked on pipes held open by grandchildren.
-	CancelGrace time.Duration
-	Network     domain.NetworkPolicy
+	CancelGrace     time.Duration
+	Network         domain.NetworkPolicy
+	RuntimeIdentity domain.RuntimeIdentity
 }
 
 type Adapter struct {
 	config    Config
 	networkMu sync.RWMutex
+}
+
+func (a *Adapter) VerifyRuntimeIdentity(ctx context.Context, expected domain.RuntimeIdentity) error {
+	if expected.IsZero() && a.config.RuntimeIdentity.IsZero() {
+		return nil
+	}
+	return runtimenetwork.VerifyRuntimeIdentity(ctx, expected, a.config.Binary, "")
 }
 
 func (a *Adapter) ApplyNetworkPolicy(policy domain.NetworkPolicy) error {
@@ -115,8 +123,16 @@ func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, er
 		},
 		SessionModes: []domain.SessionMode{domain.SessionModeNew}, Steer: openruntime.SteerQueued,
 		Approval: openruntime.ApprovalPreflight, Cancel: openruntime.CancelProcessSignal,
-		Streams: false, MaxConcurrency: 1, NetworkModes: []string{"inherit", "direct"}, BackendOptionsJSON: []byte(`{"type":"object"}`),
+		Streams: false, MaxConcurrency: 1, NetworkModes: []string{"inherit", "direct"}, BackendOptionsJSON: []byte(`{"type":"object"}`), RuntimeIdentity: a.config.RuntimeIdentity,
 	}, nil
+}
+
+func (a *Adapter) CloneForNetworkProbe(policy domain.NetworkPolicy) (openruntime.AgentRuntimeAdapter, error) {
+	a.networkMu.RLock()
+	config := a.config
+	a.networkMu.RUnlock()
+	config.Network = policy
+	return NewAdapter(config)
 }
 
 func (a *Adapter) Validate(_ context.Context, spec domain.ExecutionSpec) error {
@@ -155,6 +171,13 @@ func (a *Adapter) Health(ctx context.Context) error {
 }
 
 func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, _ openruntime.EventSink) (openruntime.TurnHandle, error) {
+	expectedIdentity := request.Execution.Spec.Network.RuntimeIdentity
+	if expectedIdentity.IsZero() {
+		expectedIdentity = a.config.RuntimeIdentity
+	}
+	if err := a.VerifyRuntimeIdentity(ctx, expectedIdentity); err != nil {
+		return nil, err
+	}
 	if err := a.Validate(ctx, request.Execution.Spec); err != nil {
 		return nil, err
 	}

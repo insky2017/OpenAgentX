@@ -301,21 +301,21 @@ func (r *Repository) HeartbeatWorker(
 		if !supportsNamedProfile {
 			return nil, domain.ErrUnsupportedCapability
 		}
-		var profileID, desiredStatus, appliedWorkerID, diagnostic string
+		var bindingMode, profileID, desiredStatus, appliedWorkerID, appliedProfileID, diagnostic string
 		var profileVersion, revision, appliedGeneration, appliedProfileVersion, appliedRevision int64
-		err := tx.QueryRowContext(ctx, `SELECT profile_id, profile_version, version, desired_status,
+		err := tx.QueryRowContext(ctx, `SELECT mode,COALESCE(profile_id,''),COALESCE(profile_version,0),version,desired_status,
 			COALESCE(applied_worker_id,''), COALESCE(applied_generation,0),
-			COALESCE(applied_profile_version,0), COALESCE(applied_binding_revision,0), COALESCE(diagnostic,'')
+			COALESCE(applied_profile_id,''), COALESCE(applied_profile_version,0), COALESCE(applied_binding_revision,0), COALESCE(diagnostic,'')
 			FROM network_profile_bindings WHERE agent_id=? AND backend_id=?`, guard.AgentID, application.BackendID).
-			Scan(&profileID, &profileVersion, &revision, &desiredStatus, &appliedWorkerID,
-				&appliedGeneration, &appliedProfileVersion, &appliedRevision, &diagnostic)
+			Scan(&bindingMode, &profileID, &profileVersion, &revision, &desiredStatus, &appliedWorkerID,
+				&appliedGeneration, &appliedProfileID, &appliedProfileVersion, &appliedRevision, &diagnostic)
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrInvalidInput("heartbeat references an unbound network Backend")
 		}
 		if err != nil {
 			return nil, fmt.Errorf("load network binding acknowledgement target: %w", err)
 		}
-		if profileID != application.ProfileID || profileVersion != application.ProfileVersion || revision != application.BindingRevision {
+		if bindingMode != string(domain.NetworkNamedProfile) || profileID != application.ProfileID || profileVersion != application.ProfileVersion || revision != application.BindingRevision {
 			// A legitimate Worker may race a rebind. Its old acknowledgement is
 			// rejected without rolling back the heartbeat or stopping the control loop.
 			continue
@@ -325,6 +325,7 @@ func (r *Repository) HeartbeatWorker(
 		}
 		if application.State == "applied" && desiredStatus == "applied" &&
 			appliedWorkerID == guard.WorkerInstanceID && appliedGeneration == guard.Generation &&
+			appliedProfileID == application.ProfileID &&
 			appliedProfileVersion == application.ProfileVersion && appliedRevision == application.BindingRevision &&
 			diagnostic == application.Diagnostic {
 			continue
@@ -335,9 +336,9 @@ func (r *Repository) HeartbeatWorker(
 		var result sql.Result
 		if application.State == "applied" {
 			result, err = tx.ExecContext(ctx, `UPDATE network_profile_bindings SET desired_status='applied',
-				applied_worker_id=?, applied_generation=?, applied_profile_version=?, applied_binding_revision=?,
+				applied_worker_id=?, applied_generation=?, applied_mode='named_profile',applied_profile_id=?, applied_profile_version=?, applied_policy_version=NULL,applied_binding_revision=?,
 				diagnostic=NULL, updated_at=? WHERE agent_id=? AND backend_id=? AND profile_id=? AND profile_version=? AND version=?`,
-				guard.WorkerInstanceID, guard.Generation, application.ProfileVersion, application.BindingRevision,
+				guard.WorkerInstanceID, guard.Generation, application.ProfileID, application.ProfileVersion, application.BindingRevision,
 				formatTime(guard.CheckedAt), guard.AgentID, application.BackendID, application.ProfileID,
 				application.ProfileVersion, application.BindingRevision)
 		} else {

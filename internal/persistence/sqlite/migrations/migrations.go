@@ -23,9 +23,11 @@ var requiredTables = []string{
 	"workspace_leases", "approval_requests", "approval_decisions", "mailbox_items", "worker_commands", "artifacts",
 	"event_journal", "web_users", "web_sessions",
 	"network_profiles", "network_profile_bindings",
+	"network_profile_heads", "network_tests", "network_work_items", "network_workflow_commands", "network_imports",
+	"network_profile_publications", "network_mode_policies", "network_mode_tests",
 }
 
-var requiredTriggers = []string{"event_journal_reject_update", "event_journal_reject_delete"}
+var requiredTriggers = []string{"event_journal_reject_update", "event_journal_reject_delete", "network_profiles_reject_update", "network_profiles_reject_delete", "network_mode_policies_reject_update", "network_mode_policies_reject_delete"}
 
 //go:embed 001_target_schema.sql
 var targetSchema string
@@ -102,11 +104,26 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 		`CREATE INDEX IF NOT EXISTS idx_network_profiles_latest ON network_profiles(profile_id, version DESC)`,
 		`CREATE TABLE IF NOT EXISTS network_profile_bindings (
 			agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
-			profile_id TEXT NOT NULL, profile_version INTEGER NOT NULL, version INTEGER NOT NULL CHECK (version > 0),
-			desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
-			applied_worker_id TEXT, applied_generation INTEGER, applied_profile_version INTEGER, applied_binding_revision INTEGER, diagnostic TEXT, updated_at TEXT NOT NULL,
-			PRIMARY KEY (agent_id, backend_id), FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version)
+			mode TEXT NOT NULL CHECK(mode IN ('inherit','direct','named_profile')), profile_id TEXT, profile_version INTEGER, policy_version INTEGER, test_id TEXT,
+			version INTEGER NOT NULL CHECK (version > 0), desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
+			applied_worker_id TEXT, applied_generation INTEGER, applied_mode TEXT, applied_profile_id TEXT, applied_profile_version INTEGER, applied_policy_version INTEGER,
+			applied_binding_revision INTEGER, diagnostic TEXT, manifest_digest TEXT, secret_version TEXT, runtime_identity_json TEXT, updated_at TEXT NOT NULL,
+			PRIMARY KEY (agent_id, backend_id), FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version),
+			CHECK((mode='named_profile' AND profile_id IS NOT NULL AND profile_version IS NOT NULL AND policy_version IS NULL) OR (mode IN ('inherit','direct') AND profile_id IS NULL AND profile_version IS NULL AND policy_version IS NOT NULL))
 		)`,
+		`CREATE TABLE IF NOT EXISTS network_profile_heads (profile_id TEXT PRIMARY KEY, current_content_version INTEGER NOT NULL CHECK(current_content_version>0), state TEXT NOT NULL CHECK(state IN ('draft','testing','ready','published','stale')), state_revision INTEGER NOT NULL CHECK(state_revision>0), ready_test_id TEXT, published_content_version INTEGER, updated_at TEXT NOT NULL, FOREIGN KEY(profile_id,current_content_version) REFERENCES network_profiles(profile_id,version))`,
+		`CREATE TABLE IF NOT EXISTS network_tests (test_id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, content_version INTEGER NOT NULL, secret_version TEXT, worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL CHECK(generation>0), backend_id TEXT NOT NULL, runtime_identity_json TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('pending','claimed','succeeded','failed','stale')), diagnostic_code TEXT, duration_ms INTEGER, probe_results_json TEXT NOT NULL DEFAULT '[]', created_by TEXT NOT NULL REFERENCES principals(principal_id), created_at TEXT NOT NULL, finished_at TEXT, FOREIGN KEY(profile_id,content_version) REFERENCES network_profiles(profile_id,version))`,
+		`CREATE TABLE IF NOT EXISTS network_work_items (work_id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('test','apply','import')), profile_id TEXT, content_version INTEGER, secret_version TEXT, agent_id TEXT NOT NULL REFERENCES agents(agent_id), backend_id TEXT NOT NULL, worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL CHECK(generation>0), binding_revision INTEGER, network_mode TEXT, policy_version INTEGER, manifest_digest TEXT, runtime_identity_json TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('pending','claimed','succeeded','failed','stale')), diagnostic_code TEXT, created_at TEXT NOT NULL, finished_at TEXT)`,
+		`CREATE INDEX IF NOT EXISTS idx_network_work_claim ON network_work_items(worker_instance_id,generation,state,created_at)`,
+		`CREATE TABLE IF NOT EXISTS network_workflow_commands (actor_principal_id TEXT NOT NULL REFERENCES principals(principal_id), operation TEXT NOT NULL, idempotency_key TEXT NOT NULL, request_digest TEXT NOT NULL, result_json TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(actor_principal_id,operation,idempotency_key))`,
+		`CREATE TABLE IF NOT EXISTS network_imports (worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL, backend_id TEXT NOT NULL, source_identity TEXT NOT NULL, work_id TEXT NOT NULL UNIQUE REFERENCES network_work_items(work_id), profile_id TEXT, content_version INTEGER, state TEXT NOT NULL CHECK(state IN ('pending','succeeded','failed')), created_at TEXT NOT NULL, finished_at TEXT, PRIMARY KEY(worker_instance_id,generation,backend_id,source_identity))`,
+		`CREATE TABLE IF NOT EXISTS network_profile_publications (profile_id TEXT NOT NULL, content_version INTEGER NOT NULL, test_id TEXT NOT NULL REFERENCES network_tests(test_id), runtime_identity_json TEXT NOT NULL, published_by TEXT NOT NULL REFERENCES principals(principal_id), published_at TEXT NOT NULL, PRIMARY KEY(profile_id,content_version), FOREIGN KEY(profile_id,content_version) REFERENCES network_profiles(profile_id,version))`,
+		`CREATE TABLE IF NOT EXISTS network_mode_policies (agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL, policy_version INTEGER NOT NULL CHECK(policy_version>0), mode TEXT NOT NULL CHECK(mode IN ('inherit','direct')), manifest_digest TEXT NOT NULL, created_by TEXT NOT NULL REFERENCES principals(principal_id), created_at TEXT NOT NULL, PRIMARY KEY(agent_id,backend_id,policy_version))`,
+		`CREATE TABLE IF NOT EXISTS network_mode_tests (test_id TEXT PRIMARY KEY, agent_id TEXT NOT NULL, backend_id TEXT NOT NULL, policy_version INTEGER NOT NULL, mode TEXT NOT NULL CHECK(mode IN ('inherit','direct')), manifest_digest TEXT NOT NULL, worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL CHECK(generation>0), runtime_identity_json TEXT NOT NULL, binding_revision INTEGER NOT NULL CHECK(binding_revision>=0), state TEXT NOT NULL CHECK(state IN ('pending','claimed','succeeded','failed','stale')), diagnostic_code TEXT, duration_ms INTEGER, probe_results_json TEXT NOT NULL DEFAULT '[]', created_by TEXT NOT NULL REFERENCES principals(principal_id), created_at TEXT NOT NULL, finished_at TEXT, FOREIGN KEY(agent_id,backend_id,policy_version) REFERENCES network_mode_policies(agent_id,backend_id,policy_version))`,
+		`CREATE TRIGGER IF NOT EXISTS network_profiles_reject_update BEFORE UPDATE ON network_profiles BEGIN SELECT RAISE(ABORT, 'network profile content is immutable'); END`,
+		`CREATE TRIGGER IF NOT EXISTS network_profiles_reject_delete BEFORE DELETE ON network_profiles BEGIN SELECT RAISE(ABORT, 'network profile content is immutable'); END`,
+		`CREATE TRIGGER IF NOT EXISTS network_mode_policies_reject_update BEFORE UPDATE ON network_mode_policies BEGIN SELECT RAISE(ABORT, 'network mode policy is immutable'); END`,
+		`CREATE TRIGGER IF NOT EXISTS network_mode_policies_reject_delete BEFORE DELETE ON network_mode_policies BEGIN SELECT RAISE(ABORT, 'network mode policy is immutable'); END`,
 	}
 	for _, statement := range statements {
 		if _, err := tx.ExecContext(ctx, statement); err != nil {
@@ -117,6 +134,7 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 	// the diagnostic field was introduced. CREATE TABLE IF NOT EXISTS does not
 	// alter that table, so add the nullable column explicitly when absent.
 	columns := map[string]bool{}
+	columnNotNull := map[string]bool{}
 	rows, err := tx.QueryContext(ctx, `PRAGMA table_info(network_profile_bindings)`)
 	if err != nil {
 		return fmt.Errorf("inspect network binding schema: %w", err)
@@ -131,21 +149,76 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 			return fmt.Errorf("scan network binding schema: %w", err)
 		}
 		columns[name] = true
+		columnNotNull[name] = notNull != 0
 	}
 	if err := rows.Err(); err != nil {
 		rows.Close()
 		return fmt.Errorf("read network binding schema: %w", err)
 	}
 	rows.Close()
-	if !columns["diagnostic"] {
-		if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profile_bindings ADD COLUMN diagnostic TEXT`); err != nil {
-			return fmt.Errorf("add network binding diagnostic column: %w", err)
+	requiredBindingColumns := []string{"mode", "policy_version", "test_id", "applied_mode", "applied_profile_id", "applied_policy_version", "manifest_digest", "secret_version", "runtime_identity_json", "diagnostic", "applied_binding_revision"}
+	needsBindingRebuild := columnNotNull["profile_id"] || columnNotNull["profile_version"]
+	for _, name := range requiredBindingColumns {
+		needsBindingRebuild = needsBindingRebuild || !columns[name]
+	}
+	if needsBindingRebuild {
+		if err := rebuildNetworkBindings(ctx, tx, columns); err != nil {
+			return err
 		}
 	}
-	if !columns["applied_binding_revision"] {
-		if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profile_bindings ADD COLUMN applied_binding_revision INTEGER`); err != nil {
-			return fmt.Errorf("add applied binding revision column: %w", err)
+	workColumns, err := tableColumns(ctx, tx, "network_work_items")
+	if err != nil {
+		return err
+	}
+	for name, definition := range map[string]string{"network_mode": "TEXT", "policy_version": "INTEGER", "manifest_digest": "TEXT"} {
+		if !workColumns[name] {
+			if _, err := tx.ExecContext(ctx, `ALTER TABLE network_work_items ADD COLUMN `+name+` `+definition); err != nil {
+				return fmt.Errorf("add network work %s column: %w", name, err)
+			}
 		}
+	}
+	for _, table := range []string{"network_tests", "network_mode_tests"} {
+		testColumns, err := tableColumns(ctx, tx, table)
+		if err != nil {
+			return err
+		}
+		if !testColumns["probe_results_json"] {
+			if _, err := tx.ExecContext(ctx, `ALTER TABLE `+table+` ADD COLUMN probe_results_json TEXT NOT NULL DEFAULT '[]'`); err != nil {
+				return fmt.Errorf("add %s probe results column: %w", table, err)
+			}
+		}
+	}
+	profileColumns := map[string]bool{}
+	profileRows, err := tx.QueryContext(ctx, `PRAGMA table_info(network_profiles)`)
+	if err != nil {
+		return fmt.Errorf("inspect network profile schema: %w", err)
+	}
+	for profileRows.Next() {
+		var cid int
+		var name, columnType string
+		var notNull, primaryKey int
+		var defaultValue any
+		if err := profileRows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			profileRows.Close()
+			return err
+		}
+		profileColumns[name] = true
+	}
+	if err := profileRows.Close(); err != nil {
+		return err
+	}
+	for name, definition := range map[string]string{"direct_ips_json": "TEXT NOT NULL DEFAULT '[]'", "manifest_digest": "TEXT"} {
+		if !profileColumns[name] {
+			if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profiles ADD COLUMN `+name+` `+definition); err != nil {
+				return fmt.Errorf("add network profile %s column: %w", name, err)
+			}
+		}
+	}
+	// Existing path-based rows are visible only as stale migration candidates.
+	if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO network_profile_heads(profile_id,current_content_version,state,state_revision,published_content_version,updated_at)
+		SELECT p.profile_id,p.version,'stale',1,CASE WHEN p.status='published' THEN p.version END,p.updated_at FROM network_profiles p
+		JOIN (SELECT profile_id,MAX(version) version FROM network_profiles GROUP BY profile_id) latest ON latest.profile_id=p.profile_id AND latest.version=p.version`); err != nil {
+		return fmt.Errorf("mark legacy network profiles stale: %w", err)
 	}
 	var hasBackendTable, hasBackendNetwork bool
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='runtime_backend_registrations'`).Scan(&hasBackendTable); err != nil {
@@ -180,6 +253,81 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 	}
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit network schema upgrade: %w", err)
+	}
+	return nil
+}
+
+func tableColumns(ctx context.Context, tx *sql.Tx, table string) (map[string]bool, error) {
+	rows, err := tx.QueryContext(ctx, `PRAGMA table_info(`+table+`)`)
+	if err != nil {
+		return nil, fmt.Errorf("inspect %s schema: %w", table, err)
+	}
+	defer rows.Close()
+	columns := map[string]bool{}
+	for rows.Next() {
+		var cid, notNull, primaryKey int
+		var name, columnType string
+		var defaultValue any
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			return nil, err
+		}
+		columns[name] = true
+	}
+	return columns, rows.Err()
+}
+
+func rebuildNetworkBindings(ctx context.Context, tx *sql.Tx, columns map[string]bool) error {
+	column := func(name, fallback string) string {
+		if columns[name] {
+			return name
+		}
+		return fallback
+	}
+	legacy := !columns["mode"]
+	mode := column("mode", "'named_profile'")
+	appliedMode := column("applied_mode", "NULL")
+	appliedProfileID := column("applied_profile_id", "NULL")
+	appliedProfileVersion := column("applied_profile_version", "NULL")
+	if legacy {
+		match := "applied_binding_revision=version AND applied_profile_version IS NOT NULL"
+		if !columns["applied_binding_revision"] {
+			match = "0"
+		}
+		appliedMode = "CASE WHEN " + match + " THEN 'named_profile' END"
+		appliedProfileID = "CASE WHEN " + match + " THEN profile_id END"
+		appliedProfileVersion = "CASE WHEN " + match + " THEN applied_profile_version END"
+	}
+	if _, err := tx.ExecContext(ctx, `CREATE TABLE network_profile_bindings_next (
+		agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
+		mode TEXT NOT NULL CHECK(mode IN ('inherit','direct','named_profile')), profile_id TEXT, profile_version INTEGER, policy_version INTEGER, test_id TEXT,
+		version INTEGER NOT NULL CHECK(version>0), desired_status TEXT NOT NULL CHECK(desired_status IN ('pending','applied','failed')),
+		applied_worker_id TEXT, applied_generation INTEGER, applied_mode TEXT CHECK(applied_mode IS NULL OR applied_mode IN ('inherit','direct','named_profile')),
+		applied_profile_id TEXT, applied_profile_version INTEGER, applied_policy_version INTEGER, applied_binding_revision INTEGER,
+		diagnostic TEXT, manifest_digest TEXT, secret_version TEXT, runtime_identity_json TEXT, updated_at TEXT NOT NULL,
+		PRIMARY KEY(agent_id,backend_id), FOREIGN KEY(profile_id,profile_version) REFERENCES network_profiles(profile_id,version),
+		CHECK((mode='named_profile' AND profile_id IS NOT NULL AND profile_version IS NOT NULL AND policy_version IS NULL) OR
+			(mode IN ('inherit','direct') AND profile_id IS NULL AND profile_version IS NULL AND policy_version IS NOT NULL))
+	)`); err != nil {
+		return fmt.Errorf("create upgraded network bindings: %w", err)
+	}
+	query := fmt.Sprintf(`INSERT INTO network_profile_bindings_next(
+		agent_id,backend_id,mode,profile_id,profile_version,policy_version,test_id,version,desired_status,
+		applied_worker_id,applied_generation,applied_mode,applied_profile_id,applied_profile_version,applied_policy_version,
+		applied_binding_revision,diagnostic,manifest_digest,secret_version,runtime_identity_json,updated_at)
+		SELECT agent_id,backend_id,%s,profile_id,profile_version,%s,%s,version,desired_status,
+		%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,updated_at FROM network_profile_bindings`,
+		mode, column("policy_version", "NULL"), column("test_id", "NULL"),
+		column("applied_worker_id", "NULL"), column("applied_generation", "NULL"), appliedMode, appliedProfileID,
+		appliedProfileVersion, column("applied_policy_version", "NULL"), column("applied_binding_revision", "NULL"),
+		column("diagnostic", "NULL"), column("manifest_digest", "NULL"), column("secret_version", "NULL"), column("runtime_identity_json", "NULL"))
+	if _, err := tx.ExecContext(ctx, query); err != nil {
+		return fmt.Errorf("copy upgraded network bindings: %w", err)
+	}
+	if _, err := tx.ExecContext(ctx, `DROP TABLE network_profile_bindings`); err != nil {
+		return fmt.Errorf("drop legacy network bindings: %w", err)
+	}
+	if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profile_bindings_next RENAME TO network_profile_bindings`); err != nil {
+		return fmt.Errorf("install upgraded network bindings: %w", err)
 	}
 	return nil
 }

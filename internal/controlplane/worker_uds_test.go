@@ -89,6 +89,7 @@ func TestUnixHTTPWorkerAPIEndToEnd(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	environment.bootstrapInherit(t, session)
 	created := environment.createTask(t, "uds")
 	item, err := client.ClaimMailbox(context.Background(), claimRequest(session, 1))
 	if err != nil || item == nil || item.ID != created.MailboxItem.ID {

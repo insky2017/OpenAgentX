@@ -57,15 +57,20 @@ type networkProfileState interface {
 type Handler struct {
 	state    State
 	commands *controlplane.CommandService
+	network  *controlplane.NetworkWorkflowService
 	auth     *web.Manager
 	mux      *http.ServeMux
 }
 
-func NewHandler(state State, commands *controlplane.CommandService, auth *web.Manager) (*Handler, error) {
+func NewHandler(state State, commands *controlplane.CommandService, auth *web.Manager, network ...*controlplane.NetworkWorkflowService) (*Handler, error) {
 	if state == nil || commands == nil || auth == nil {
 		return nil, fmt.Errorf("panel state, commands and auth are required")
 	}
-	h := &Handler{state: state, commands: commands, auth: auth, mux: http.NewServeMux()}
+	var networkService *controlplane.NetworkWorkflowService
+	if len(network) > 0 {
+		networkService = network[0]
+	}
+	h := &Handler{state: state, commands: commands, network: networkService, auth: auth, mux: http.NewServeMux()}
 	h.mux.HandleFunc("GET "+openapi.ObserveHealthPath, h.health)
 	h.mux.HandleFunc("GET /api/observe/v1/overview", h.overview)
 	h.mux.HandleFunc("GET /api/observe/v1/agents", h.agents)
@@ -81,8 +86,15 @@ func NewHandler(state State, commands *controlplane.CommandService, auth *web.Ma
 	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/cancel", h.cancelTask)
 	h.mux.HandleFunc("POST /api/control/v1/approvals/{approvalID}/decisions", h.decideApproval)
 	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfilePath, h.createNetworkProfile)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfileDraftPath, h.editNetworkProfile)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfileSecretPath, h.replaceNetworkSecret)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfileTestPath, h.testNetworkProfile)
 	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfilePublishPath, h.publishNetworkProfile)
 	h.mux.HandleFunc("POST "+openapi.ControlNetworkBindingPath, h.bindNetworkProfile)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkRollbackPath, h.rollbackNetworkBinding)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkModeTestPath, h.testNetworkMode)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkModePublishPath, h.publishNetworkMode)
+	h.mux.HandleFunc("POST "+openapi.ControlNetworkImportPath, h.importNetworkProfile)
 	return h, nil
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -483,9 +495,10 @@ func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	type option struct {
-		WorkerID string                          `json:"worker_id"`
-		AgentID  string                          `json:"agent_id"`
-		Backend  openruntime.BackendRegistration `json:"backend"`
+		WorkerID   string                          `json:"worker_id"`
+		Generation int64                           `json:"generation"`
+		AgentID    string                          `json:"agent_id"`
+		Backend    openruntime.BackendRegistration `json:"backend"`
 	}
 	options := make([]option, 0)
 	for _, worker := range workers {
@@ -497,7 +510,7 @@ func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {
 			// BackendRegistration only carries a profile reference and health;
 			// it never exposes credentials or config file contents.
 			backend.Network.ConfigFile = ""
-			options = append(options, option{WorkerID: worker.ID, AgentID: worker.AgentID, Backend: backend})
+			options = append(options, option{WorkerID: worker.ID, Generation: worker.Generation, AgentID: worker.AgentID, Backend: backend})
 		}
 	}
 	writeJSON(w, map[string]any{"backends": options})
@@ -505,6 +518,15 @@ func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) networkProfiles(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
+		return
+	}
+	if h.network != nil {
+		response, err := h.network.Observe(r.Context(), r.URL.Query().Get("agent_id"))
+		if err != nil {
+			http.Error(w, "failed to load network profiles", http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, response)
 		return
 	}
 	state, ok := h.state.(networkProfileState)
@@ -542,6 +564,19 @@ func (h *Handler) createNetworkProfile(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if h.network != nil {
+		var req openapi.CreateNetworkProfileRequest
+		if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
+		if !requireIdempotencyHeader(w, r, req.Meta) {
+			return
+		}
+		result, err := h.network.CreateDraft(r.Context(), s.User.ID, req)
+		writeNetworkCommandResult(w, result, err)
+		return
+	}
 	state, ok := h.state.(networkProfileState)
 	if !ok {
 		http.Error(w, "network profiles unavailable", 501)
@@ -573,6 +608,19 @@ func (h *Handler) publishNetworkProfile(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		return
 	}
+	if h.network != nil {
+		var req openapi.PublishNetworkProfileRequest
+		if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
+		if !requireIdempotencyHeader(w, r, req.Meta) {
+			return
+		}
+		result, err := h.network.Publish(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+		writeNetworkCommandResult(w, result, err)
+		return
+	}
 	state, ok := h.state.(networkProfileState)
 	if !ok {
 		http.Error(w, "network profiles unavailable", 501)
@@ -600,7 +648,21 @@ func (h *Handler) publishNetworkProfile(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) bindNetworkProfile(w http.ResponseWriter, r *http.Request) {
-	if _, ok := h.session(w, r, true); !ok {
+	s, ok := h.session(w, r, true)
+	if !ok {
+		return
+	}
+	if h.network != nil {
+		var req openapi.BindNetworkProfileRequest
+		if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
+		if !requireIdempotencyHeader(w, r, req.Meta) {
+			return
+		}
+		result, err := h.network.Bind(r.Context(), s.User.ID, req)
+		writeNetworkCommandResult(w, result, err)
 		return
 	}
 	state, ok := h.state.(networkProfileState)
@@ -653,6 +715,178 @@ func (h *Handler) bindNetworkProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, b)
+}
+
+func (h *Handler) editNetworkProfile(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok || h.network == nil {
+		if ok {
+			http.Error(w, "network workflow unavailable", http.StatusNotImplemented)
+		}
+		return
+	}
+	var req openapi.EditNetworkProfileRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	result, err := h.network.EditDraft(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+	writeNetworkCommandResult(w, result, err)
+}
+
+func (h *Handler) replaceNetworkSecret(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok {
+		return
+	}
+	if err := web.RequireRole(s, web.RoleOwner); err != nil {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	if h.network == nil {
+		http.Error(w, "network workflow unavailable", http.StatusNotImplemented)
+		return
+	}
+	var req openapi.ReplaceNetworkSecretRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	result, err := h.network.ReplaceSecret(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+	writeNetworkCommandResult(w, result, err)
+}
+
+func (h *Handler) testNetworkProfile(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok || h.network == nil {
+		if ok {
+			http.Error(w, "network workflow unavailable", http.StatusNotImplemented)
+		}
+		return
+	}
+	var req openapi.TestNetworkProfileRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	result, err := h.network.StartTest(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+	writeNetworkCommandResult(w, result, err)
+}
+
+func (h *Handler) rollbackNetworkBinding(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok || h.network == nil {
+		if ok {
+			http.Error(w, "network workflow unavailable", http.StatusNotImplemented)
+		}
+		return
+	}
+	var req openapi.RollbackNetworkBindingRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	result, err := h.network.Rollback(r.Context(), s.User.ID, req)
+	writeNetworkCommandResult(w, result, err)
+}
+
+func (h *Handler) testNetworkMode(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok || h.network == nil {
+		if ok {
+			http.Error(w, "network workflow unavailable", http.StatusNotImplemented)
+		}
+		return
+	}
+	var req openapi.TestNetworkModeRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	result, err := h.network.StartModeTest(r.Context(), s.User.ID, req)
+	writeNetworkCommandResult(w, result, err)
+}
+
+func (h *Handler) publishNetworkMode(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok || h.network == nil {
+		if ok {
+			http.Error(w, "network workflow unavailable", http.StatusNotImplemented)
+		}
+		return
+	}
+	var req openapi.PublishNetworkModeRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	result, err := h.network.PublishMode(r.Context(), s.User.ID, req)
+	writeNetworkCommandResult(w, result, err)
+}
+
+func (h *Handler) importNetworkProfile(w http.ResponseWriter, r *http.Request) {
+	s, ok := h.session(w, r, true)
+	if !ok {
+		return
+	}
+	if err := web.RequireRole(s, web.RoleOwner); err != nil {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	if h.network == nil {
+		http.Error(w, "network workflow unavailable", http.StatusNotImplemented)
+		return
+	}
+	var req openapi.ImportNetworkProfileRequest
+	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(w, r, req.Meta) {
+		return
+	}
+	result, err := h.network.StartImport(r.Context(), s.User.ID, req)
+	writeNetworkCommandResult(w, result, err)
+}
+
+func writeNetworkCommandResult(w http.ResponseWriter, result json.RawMessage, err error) {
+	if err == nil {
+		writeJSON(w, openapi.NetworkCommandResponse{Receipt: result})
+		return
+	}
+	status := http.StatusInternalServerError
+	var domainError *domain.DomainError
+	switch {
+	case errors.As(err, &domainError) && domainError.Code == "INVALID_INPUT":
+		status = http.StatusBadRequest
+	case errors.As(err, &domainError) && domainError.Code == "FORBIDDEN", errors.Is(err, domain.ErrUnauthorized), errors.Is(err, domain.ErrFencingRejected):
+		status = http.StatusForbidden
+	case errors.Is(err, domain.ErrNotFound):
+		status = http.StatusNotFound
+	case errors.As(err, &domainError) && domainError.Code == "CONFLICT", errors.Is(err, domain.ErrStaleVersion), errors.Is(err, domain.ErrIdempotencyConflict), errors.Is(err, domain.ErrInvalidState):
+		status = http.StatusConflict
+	case errors.Is(err, domain.ErrUnsupportedCapability):
+		status = http.StatusUnprocessableEntity
+	}
+	http.Error(w, err.Error(), status)
 }
 
 func containsString(values []string, wanted string) bool {

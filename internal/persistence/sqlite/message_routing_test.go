@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"openagentx/internal/api"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
+	"openagentx/internal/network/secretstore"
 	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/runtime/descriptors"
 )
@@ -18,7 +20,16 @@ import (
 func messageDescriptor(steer openruntime.SteerMode) openruntime.AdapterDescriptor {
 	descriptor := descriptors.CodexACP()
 	descriptor.Steer = steer
+	descriptor.RuntimeIdentity = domain.RuntimeIdentity{AdapterID: descriptor.AdapterID, AdapterVersion: descriptor.Version}
 	return descriptor
+}
+
+func trustedMessageNetwork(descriptor openruntime.AdapterDescriptor) domain.NetworkPolicy {
+	mode := domain.NetworkModePolicy{AgentID: "quote", BackendID: "local", PolicyVersion: 1, Mode: domain.NetworkInherit}
+	return domain.NetworkPolicy{
+		Mode: domain.NetworkInherit, PolicyVersion: 1, BindingRevision: 1,
+		ManifestDigest: mode.ComputeManifestDigest(), RuntimeIdentity: descriptor.RuntimeIdentity,
+	}
 }
 
 func registerMessageWorker(t *testing.T, repository *Repository, fixture repositoryFixture, descriptor openruntime.AdapterDescriptor) (*domain.WorkerInstance, domain.WorkerWriteGuard) {
@@ -30,7 +41,7 @@ func registerMessageWorker(t *testing.T, repository *Repository, fixture reposit
 		TokenExpiresAt: repositoryTestTime.Add(time.Hour), LeaseUntil: repositoryTestTime.Add(time.Hour),
 	}
 	worker, _, err := repository.RegisterWorker(ctx, registration, []openruntime.BackendRegistration{{
-		BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy,
+		BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy, Network: domain.NetworkPolicy{Mode: domain.NetworkInherit},
 	}}, journalEvent("event-worker-message-route", "worker.registered", fixture.ownerPrincipal, fixture.organizationID))
 	if err != nil {
 		t.Fatalf("register Message worker: %v", err)
@@ -46,7 +57,51 @@ func registerMessageWorker(t *testing.T, repository *Repository, fixture reposit
 		journalEvent("event-worker-message-route-online", "worker.heartbeat", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
 		t.Fatalf("activate Message worker: %v", err)
 	}
+	secrets, err := secretstore.Open(filepath.Join(t.TempDir(), "network-secrets"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow, err := controlplane.NewNetworkWorkflowService(repository, secrets, nil, func() time.Time { return repositoryTestTime })
+	if err != nil {
+		t.Fatal(err)
+	}
+	testResult, err := workflow.StartModeTest(ctx, fixture.ownerPrincipal, api.TestNetworkModeRequest{
+		Meta:    api.CommandMeta{IdempotencyKey: "message-bootstrap-inherit", ExpectedVersion: 0},
+		AgentID: fixture.agentID, BackendID: "local", Mode: domain.NetworkInherit,
+		WorkerInstanceID: worker.ID, Generation: worker.Generation,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var receipt struct {
+		TestID string `json:"test_id"`
+	}
+	if err := json.Unmarshal(testResult, &receipt); err != nil || receipt.TestID == "" {
+		t.Fatalf("decode inherit mode test receipt=%s err=%v", testResult, err)
+	}
+	testWork := pullNetworkWork(t, workflow, guard)
+	ackNetworkWork(t, workflow, guard, testWork.Work.ID, api.NetworkWorkAckRequest{State: "succeeded", ProbeResults: successfulInheritProbeResults()})
+	if _, err := workflow.PublishMode(ctx, fixture.ownerPrincipal, api.PublishNetworkModeRequest{
+		Meta: api.CommandMeta{IdempotencyKey: "message-publish-inherit", ExpectedVersion: 0}, TestID: receipt.TestID,
+		WorkerInstanceID: worker.ID, Generation: worker.Generation,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	applyWork := pullNetworkWork(t, workflow, guard)
+	policy := policyForWork(applyWork.Work)
+	ackNetworkWork(t, workflow, guard, applyWork.Work.ID, api.NetworkWorkAckRequest{State: "succeeded", Policy: &policy})
 	return worker, guard
+}
+
+func successfulInheritProbeResults() []domain.NetworkProbeResult {
+	results := successfulProbeResults()
+	for index := range results {
+		if results[index].Layer == domain.NetworkProbeSecret || results[index].Layer == domain.NetworkProbeEndpoint {
+			results[index].State = domain.NetworkProbeNotVerified
+			results[index].DiagnosticCode = domain.NetworkDiagnosticInheritUnknown
+		}
+	}
+	return results
 }
 
 func beginMessageRun(t *testing.T, repository *Repository, fixture repositoryFixture, worker *domain.WorkerInstance, descriptor openruntime.AdapterDescriptor, suffix string) (*CreateTaskResult, *domain.RunAttempt) {

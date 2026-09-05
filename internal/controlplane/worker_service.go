@@ -64,6 +64,7 @@ type WorkerServiceOptions struct {
 	MailboxLease    time.Duration
 	RunLease        time.Duration
 	Planner         TurnPlanner
+	NetworkWorkflow *NetworkWorkflowService
 }
 
 type WorkerService struct {
@@ -77,6 +78,7 @@ type WorkerService struct {
 	mailboxLease    time.Duration
 	runLease        time.Duration
 	planner         TurnPlanner
+	networkWorkflow *NetworkWorkflowService
 }
 
 // Reconcile runs daemon-start recovery before Workers are allowed to claim
@@ -121,8 +123,36 @@ func NewWorkerService(state WorkerState, broker WakeupBroker, options WorkerServ
 		state: state, broker: broker, now: options.Now, newID: options.NewID,
 		newSessionToken: options.NewSessionToken, workerLease: options.WorkerLease,
 		tokenLifetime: options.TokenLifetime, mailboxLease: options.MailboxLease,
-		runLease: options.RunLease, planner: options.Planner,
+		runLease: options.RunLease, planner: options.Planner, networkWorkflow: options.NetworkWorkflow,
 	}, nil
+}
+
+func (s *WorkerService) PullNetworkWork(ctx context.Context, principalID, token string, request api.NetworkWorkPullRequest) (*api.NetworkWorkEnvelope, error) {
+	if err := request.Validate(); err != nil {
+		return nil, err
+	}
+	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
+	if err != nil {
+		return nil, err
+	}
+	if s.networkWorkflow == nil {
+		return nil, nil
+	}
+	return s.networkWorkflow.PullWork(ctx, guard)
+}
+
+func (s *WorkerService) AcknowledgeNetworkWork(ctx context.Context, principalID, token, workID string, request api.NetworkWorkAckRequest) error {
+	if err := request.Validate(); err != nil {
+		return err
+	}
+	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
+	if err != nil {
+		return err
+	}
+	if s.networkWorkflow == nil {
+		return domain.ErrUnsupportedCapability
+	}
+	return s.networkWorkflow.AcknowledgeWork(ctx, guard, workID, request)
 }
 
 func secureWorkerToken() (string, error) {

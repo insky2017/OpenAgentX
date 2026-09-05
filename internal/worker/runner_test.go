@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -48,15 +50,19 @@ type fakeWorkerClient struct {
 	releases        []releaseRecord
 	eventLog        []string
 	runtimeEvents   []openruntime.RuntimeEvent
+	networkWorks    []*api.NetworkWorkEnvelope
+	networkAcks     []api.NetworkWorkAckRequest
+	networkAckErr   error
 	runCounter      int
 	heartbeatFail   int
 
-	wakeup       chan struct{}
-	commandWake  chan struct{}
-	heartbeatHit chan struct{}
-	finishHit    chan struct{}
-	acceptHit    chan struct{}
-	ackHit       chan struct{}
+	wakeup        chan struct{}
+	commandWake   chan struct{}
+	heartbeatHit  chan struct{}
+	finishHit     chan struct{}
+	acceptHit     chan struct{}
+	ackHit        chan struct{}
+	networkAckHit chan struct{}
 }
 
 func newFakeWorkerClient() *fakeWorkerClient {
@@ -64,6 +70,7 @@ func newFakeWorkerClient() *fakeWorkerClient {
 		wakeup: make(chan struct{}, 1), commandWake: make(chan struct{}, 1),
 		heartbeatHit: make(chan struct{}, 64), finishHit: make(chan struct{}, 64),
 		acceptHit: make(chan struct{}, 64), ackHit: make(chan struct{}, 64),
+		networkAckHit: make(chan struct{}, 64),
 	}
 }
 
@@ -96,6 +103,26 @@ func (c *fakeWorkerClient) Heartbeat(_ context.Context, request api.HeartbeatReq
 		return domain.ErrLeaseExpired
 	}
 	return nil
+}
+
+func (c *fakeWorkerClient) PullNetworkWork(context.Context, api.NetworkWorkPullRequest) (*api.NetworkWorkEnvelope, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if len(c.networkWorks) == 0 {
+		return nil, nil
+	}
+	work := c.networkWorks[0]
+	c.networkWorks = c.networkWorks[1:]
+	return work, nil
+}
+
+func (c *fakeWorkerClient) AcknowledgeNetworkWork(_ context.Context, _ string, ack api.NetworkWorkAckRequest) error {
+	c.mu.Lock()
+	c.networkAcks = append(c.networkAcks, ack)
+	err := c.networkAckErr
+	c.mu.Unlock()
+	signal(c.networkAckHit)
+	return err
 }
 
 func (c *fakeWorkerClient) ClaimMailbox(ctx context.Context, request api.ClaimRequest) (*domain.MailboxItem, error) {
@@ -404,6 +431,188 @@ func TestResidentWorkerWaitDoesNotBlockHeartbeatOrActiveControlAndContinuesToNex
 	if !foundZeroCapacity {
 		t.Fatal("Mailbox Pump never advertised zero work capacity during active turn")
 	}
+}
+
+func TestSlowBackendHealthDoesNotBlockHeartbeatOrControl(t *testing.T) {
+	descriptor := runnerTestDescriptor([]string{"inherit"})
+	base, err := fake.NewAdapter(descriptor)
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapter := &slowHealthAdapter{AgentRuntimeAdapter: base, blocked: make(chan struct{})}
+	pool, err := NewBackendPool([]RuntimeBackend{{ID: "local", Adapter: adapter}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := newFakeWorkerClient()
+	runner := newTestRunner(t, client, pool, true)
+	ctx, cancel := context.WithCancel(context.Background())
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(ctx) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	waitSignal(t, adapter.blocked, "slow periodic Health")
+	drainSignals(client.heartbeatHit)
+	client.enqueueCommand(domain.WorkerCommand{
+		ID: "command-health", WorkerInstanceID: "worker-1", Generation: 1,
+		Kind: domain.WorkerCommandHealthCheck, State: domain.WorkerCommandClaimed,
+		RequestedBy: "human-owner", IdempotencyKey: "health-idem", Attempts: 1, CreatedAt: time.Now(),
+	})
+	waitSignal(t, client.ackHit, "control acknowledgement during slow Health")
+	waitSignal(t, client.heartbeatHit, "heartbeat during slow Health")
+	cancel()
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("Worker stopped after slow Health: %v", err)
+	}
+}
+
+func TestSlowNetworkProbeDoesNotBlockHeartbeatOrControl(t *testing.T) {
+	descriptor := runnerTestDescriptor([]string{"inherit", "direct"})
+	adapter := &probeBlockingAdapter{descriptor: descriptor, blocked: make(chan struct{}), release: make(chan struct{})}
+	pool, err := NewBackendPool([]RuntimeBackend{{ID: "local", Adapter: adapter}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := newFakeWorkerClient()
+	client.networkWorks = []*api.NetworkWorkEnvelope{{Work: domain.NetworkWork{
+		ID: "network-test", Kind: domain.NetworkWorkTest, AgentID: "quote", BackendID: "local",
+		WorkerInstanceID: "worker-1", Generation: 1, Mode: domain.NetworkDirect,
+		PolicyVersion: 1, ManifestDigest: strings.Repeat("a", 64), RuntimeIdentity: descriptor.RuntimeIdentity, State: "claimed",
+	}}}
+	runner := newTestRunner(t, client, pool, true)
+	ctx, cancel := context.WithCancel(context.Background())
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(ctx) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	waitSignal(t, adapter.blocked, "slow network probe")
+	drainSignals(client.heartbeatHit)
+	client.enqueueCommand(domain.WorkerCommand{
+		ID: "command-health", WorkerInstanceID: "worker-1", Generation: 1,
+		Kind: domain.WorkerCommandHealthCheck, State: domain.WorkerCommandClaimed,
+		RequestedBy: "human-owner", IdempotencyKey: "health-idem", Attempts: 1, CreatedAt: time.Now(),
+	})
+	waitSignal(t, client.ackHit, "control acknowledgement during slow network probe")
+	waitSignal(t, client.heartbeatHit, "heartbeat during slow network probe")
+	close(adapter.release)
+	waitSignal(t, client.networkAckHit, "network probe acknowledgement")
+	cancel()
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("Worker stopped after slow network probe: %v", err)
+	}
+}
+
+func TestStaleNetworkWorkAckKeepsValidWorkerControlSession(t *testing.T) {
+	runner, client, _ := newRunnerFixture(t, true)
+	client.networkAckErr = domain.ErrStaleVersion
+	client.networkWorks = []*api.NetworkWorkEnvelope{{Work: domain.NetworkWork{
+		ID: "stale-work", Kind: domain.NetworkWorkTest, AgentID: "quote", BackendID: "missing",
+		WorkerInstanceID: "worker-1", Generation: 1, Mode: domain.NetworkInherit, State: "claimed",
+	}}}
+	ctx, cancel := context.WithCancel(context.Background())
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(ctx) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	waitSignal(t, client.networkAckHit, "stale network work acknowledgement")
+	drainSignals(client.heartbeatHit)
+	client.enqueueCommand(domain.WorkerCommand{
+		ID: "command-health", WorkerInstanceID: "worker-1", Generation: 1,
+		Kind: domain.WorkerCommandHealthCheck, State: domain.WorkerCommandClaimed,
+		RequestedBy: "human-owner", IdempotencyKey: "health-idem", Attempts: 1, CreatedAt: time.Now(),
+	})
+	waitSignal(t, client.ackHit, "control after stale network work")
+	waitSignal(t, client.heartbeatHit, "heartbeat after stale network work")
+	cancel()
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("stale work terminated valid Worker session: %v", err)
+	}
+}
+
+func TestFencedNetworkWorkAckTerminatesWorkerSession(t *testing.T) {
+	runner, client, _ := newRunnerFixture(t, false)
+	client.networkAckErr = domain.ErrFencingRejected
+	client.networkWorks = []*api.NetworkWorkEnvelope{{Work: domain.NetworkWork{
+		ID: "fenced-work", Kind: domain.NetworkWorkTest, AgentID: "quote", BackendID: "missing",
+		WorkerInstanceID: "worker-1", Generation: 1, Mode: domain.NetworkInherit, State: "claimed",
+	}}}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if err := runner.Run(ctx); !errors.Is(err, domain.ErrFencingRejected) {
+		t.Fatalf("fencing loss error=%v", err)
+	}
+}
+
+type slowHealthAdapter struct {
+	openruntime.AgentRuntimeAdapter
+	calls   atomic.Int32
+	blocked chan struct{}
+	once    sync.Once
+}
+
+func (a *slowHealthAdapter) Health(ctx context.Context) error {
+	if a.calls.Add(1) == 1 {
+		return nil
+	}
+	a.once.Do(func() { close(a.blocked) })
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+type probeBlockingAdapter struct {
+	descriptor  openruntime.AdapterDescriptor
+	blocked     chan struct{}
+	release     chan struct{}
+	blockHealth bool
+	once        sync.Once
+}
+
+func (a *probeBlockingAdapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, error) {
+	return a.descriptor, nil
+}
+func (a *probeBlockingAdapter) Validate(context.Context, domain.ExecutionSpec) error { return nil }
+func (a *probeBlockingAdapter) Health(ctx context.Context) error {
+	if !a.blockHealth {
+		return nil
+	}
+	a.once.Do(func() { close(a.blocked) })
+	select {
+	case <-a.release:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+func (a *probeBlockingAdapter) StartTurn(context.Context, openruntime.TurnRequest, openruntime.EventSink) (openruntime.TurnHandle, error) {
+	return nil, errors.New("unused")
+}
+func (a *probeBlockingAdapter) CloneForNetworkProbe(policy domain.NetworkPolicy) (openruntime.AgentRuntimeAdapter, error) {
+	clone := *a
+	clone.blockHealth = true
+	return &clone, nil
+}
+func (a *probeBlockingAdapter) ApplyNetworkPolicy(domain.NetworkPolicy) error { return nil }
+
+func runnerTestDescriptor(networkModes []string) openruntime.AdapterDescriptor {
+	return openruntime.AdapterDescriptor{
+		AdapterID: "fake", BackendType: "fake", Version: "1", LaunchProtocol: "inproc",
+		Models: []string{"model-1"}, ReasoningModes: []domain.ReasoningMode{domain.ReasoningBackendDefault},
+		SessionModes: []domain.SessionMode{domain.SessionModeNew}, Steer: openruntime.SteerNative,
+		Approval: openruntime.ApprovalNative, Cancel: openruntime.CancelNative,
+		BackendOptionsJSON: json.RawMessage(`{"type":"object"}`), MaxConcurrency: 1,
+		NetworkModes: networkModes, RuntimeIdentity: domain.RuntimeIdentity{AdapterID: "fake", AdapterVersion: "1"},
+	}
+}
+
+func newTestRunner(t *testing.T, client *fakeWorkerClient, pool *BackendPool, enableControl bool) *Runner {
+	t.Helper()
+	runner, err := NewRunner(Config{
+		AgentID: "quote", WorkerInstanceID: "worker-1", Transport: domain.WorkerTransportUnix,
+		Capabilities: []string{"coding"}, HeartbeatInterval: 10 * time.Millisecond,
+		MailboxWait: time.Second, ControlWait: time.Second, ShutdownTimeout: time.Second,
+		EnableControlLoop: enableControl,
+	}, client, pool, fakePayloadResolver{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return runner
 }
 
 func TestTurnCompletionRacesAllControlOperationsWithoutDeadlockOrDuplicateFinish(t *testing.T) {

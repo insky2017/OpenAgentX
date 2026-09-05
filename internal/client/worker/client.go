@@ -28,6 +28,21 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("Worker API error (%d %s): %s", e.StatusCode, e.Code, e.Message)
 }
 
+func (e *APIError) Is(target error) bool {
+	switch e.Code {
+	case openapi.ErrorUnauthorized:
+		return target == domain.ErrUnauthorized
+	case openapi.ErrorStaleVersion:
+		return target == domain.ErrStaleVersion || target == domain.ErrSessionGenerationConflict
+	case openapi.ErrorLeaseExpired:
+		return target == domain.ErrLeaseExpired
+	case openapi.ErrorFencingRejected:
+		return target == domain.ErrFencingRejected
+	default:
+		return false
+	}
+}
+
 type UnixHTTPWorkerClient struct {
 	httpClient *http.Client
 	transport  *http.Transport
@@ -93,6 +108,19 @@ func (c *UnixHTTPWorkerClient) PullNetworkBindings(ctx context.Context, request 
 		return nil, err
 	}
 	return response.Bindings, nil
+}
+
+func (c *UnixHTTPWorkerClient) PullNetworkWork(ctx context.Context, request openapi.NetworkWorkPullRequest) (*openapi.NetworkWorkEnvelope, error) {
+	path := replacePath(openapi.WorkerNetworkWorkPullPath, "{worker-id}", request.WorkerInstanceID)
+	var response openapi.NetworkWorkPullResponse
+	if err := c.do(ctx, http.MethodPost, path, nil, request, &response, true); err != nil {
+		return nil, err
+	}
+	return response.Work, nil
+}
+func (c *UnixHTTPWorkerClient) AcknowledgeNetworkWork(ctx context.Context, workID string, request openapi.NetworkWorkAckRequest) error {
+	path := replacePath(openapi.WorkerNetworkWorkAckPath, "{work-id}", workID)
+	return c.do(ctx, http.MethodPost, path, nil, request, nil, true)
 }
 
 func (c *UnixHTTPWorkerClient) ReleaseWorker(ctx context.Context, request openapi.WorkerReleaseRequest) error {

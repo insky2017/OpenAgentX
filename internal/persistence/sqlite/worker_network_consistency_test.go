@@ -79,7 +79,7 @@ func TestRegisterWorkerRollsBackWhenInitialBindingLoadFails(t *testing.T) {
 	repository, _ := openTestRepository(t, nil)
 	fixture := seedRepository(t, repository)
 	createPublishedNetworkBinding(t, repository, fixture)
-	if _, err := repository.db.Exec(`UPDATE network_profiles SET updated_at='not-a-time' WHERE profile_id='proxy-worker'`); err != nil {
+	if _, err := repository.db.Exec(`UPDATE network_profile_bindings SET updated_at='not-a-time' WHERE profile_id='proxy-worker'`); err != nil {
 		t.Fatal(err)
 	}
 
@@ -197,7 +197,9 @@ func TestHeartbeatNetworkAckIsAtomicRevisionedAndJournaledOnce(t *testing.T) {
 		t.Fatalf("stale binding acknowledgement stopped heartbeat: %v", err)
 	}
 	bindings, err = repository.ListNetworkBindings(context.Background(), fixture.agentID)
-	if err != nil || bindings[0].Version != 2 || bindings[0].DesiredStatus != "pending" || bindings[0].AppliedBindingRevision != 0 {
+	if err != nil || bindings[0].Version != 2 || bindings[0].DesiredStatus != "pending" ||
+		bindings[0].AppliedProfileID != initial[0].ProfileID || bindings[0].AppliedProfileVersion != initial[0].ProfileVersion ||
+		bindings[0].AppliedBindingRevision != 1 {
 		t.Fatalf("stale acknowledgement changed rebound binding=%+v err=%v", bindings, err)
 	}
 }
@@ -219,13 +221,12 @@ func TestListWorkerBackendsRequiresCurrentGenerationAckAndPersistsExplicitPolicy
 		t.Fatal(err)
 	}
 	listed, err = repository.ListWorkerBackends(context.Background(), worker.ID)
-	if err != nil || listed[0].Health != openruntime.BackendHealthy || listed[0].Network.BindingRevision != 1 ||
-		listed[0].Network.ProfileID != bindings[0].ProfileID {
-		t.Fatalf("acknowledged Backend=%+v err=%v", listed, err)
+	if err != nil || listed[0].Health != openruntime.BackendUnavailable || listed[0].Network.Mode != domain.NetworkInherit {
+		t.Fatalf("legacy path-based Backend became schedulable=%+v err=%v", listed, err)
 	}
 	encoded, _ := json.Marshal(listed[0].Network)
 	if string(encoded) == `{}` {
-		t.Fatal("Worker Backend policy fell back to unknown zero value")
+		t.Fatal("Worker Backend policy lost its explicit legacy sentinel")
 	}
 	if _, err := repository.db.Exec(`UPDATE runtime_backend_registrations SET network_json='{}' WHERE worker_instance_id=?`, worker.ID); err != nil {
 		t.Fatal(err)

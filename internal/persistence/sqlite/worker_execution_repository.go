@@ -44,7 +44,7 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 		if err := json.Unmarshal([]byte(networkJSON), &registration.Network); err != nil {
 			return nil, fmt.Errorf("decode Worker Backend network policy: %w", err)
 		}
-		if registration.Network.IsZero() {
+		if registration.Network.IsZero() || !trustedNetworkPolicy(registration.Network) {
 			// '{}' is the migration sentinel for a pre-N1 registration whose
 			// actual YAML policy is unknown. It must re-register before scheduling.
 			registration.Health = openruntime.BackendUnavailable
@@ -60,34 +60,47 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 	if err := rows.Close(); err != nil {
 		return nil, fmt.Errorf("close Worker Backend rows: %w", err)
 	}
+	bindings, err := listNetworkBindings(ctx, tx, agentID)
+	if err != nil {
+		return nil, fmt.Errorf("list Worker Backend network bindings: %w", err)
+	}
+	bound := make(map[string]domain.NetworkBinding, len(bindings))
+	for _, binding := range bindings {
+		bound[binding.BackendID] = binding
+	}
 	for i := range registrations {
 		registration := &registrations[i]
-		var profileID, mode, configFile, desiredStatus, appliedWorkerID string
-		var profileVersion, revision, appliedGeneration, appliedProfileVersion, appliedRevision int64
-		err := tx.QueryRowContext(ctx, `SELECT b.profile_id, b.profile_version, b.version, b.desired_status,
-			COALESCE(b.applied_worker_id,''), COALESCE(b.applied_generation,0), COALESCE(b.applied_profile_version,0),
-			COALESCE(b.applied_binding_revision,0),
-			p.mode, COALESCE(p.config_file,'') FROM network_profile_bindings b
-			JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
-			WHERE b.agent_id=? AND b.backend_id=?`, agentID, registration.BackendID).
-			Scan(&profileID, &profileVersion, &revision, &desiredStatus, &appliedWorkerID,
-				&appliedGeneration, &appliedProfileVersion, &appliedRevision, &mode, &configFile)
-		if errors.Is(err, sql.ErrNoRows) {
-			continue
-		}
-		if err != nil {
-			return nil, fmt.Errorf("load Worker Backend network binding: %w", err)
-		}
-		if desiredStatus != "applied" || appliedWorkerID != workerID || appliedGeneration != generation ||
-			appliedProfileVersion != profileVersion || appliedRevision != revision {
+		binding, exists := bound[registration.BackendID]
+		if !exists {
 			registration.Health = openruntime.BackendUnavailable
 			continue
 		}
-		policy := domain.NetworkPolicy{
-			Mode: domain.NetworkNamedProfile, ProfileID: profileID, ProfileVersion: profileVersion,
-			ProxyMode: mode, ConfigFile: configFile, BindingRevision: revision,
+		if binding.DesiredStatus != "applied" || binding.AppliedWorkerID != workerID || binding.AppliedGeneration != generation ||
+			binding.AppliedMode != binding.Mode || binding.AppliedBindingRevision != binding.Version {
+			registration.Health = openruntime.BackendUnavailable
+			continue
 		}
-		if err := policy.Validate(); err != nil {
+		var policy domain.NetworkPolicy
+		if binding.Mode == domain.NetworkNamedProfile {
+			if binding.Profile == nil || binding.AppliedProfileID != binding.ProfileID || binding.AppliedProfileVersion != binding.ProfileVersion {
+				registration.Health = openruntime.BackendUnavailable
+				continue
+			}
+			policy = domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: binding.ProfileID, ProfileVersion: binding.ProfileVersion,
+				ProxyMode: binding.Profile.Mode, DirectDestinations: append([]string(nil), binding.Profile.DirectIPs...), BindingRevision: binding.Version,
+				ManifestDigest: binding.ManifestDigest, SecretVersion: binding.Profile.SecretRef, RuntimeIdentity: binding.RuntimeIdentity}
+			if binding.ManifestDigest != "" {
+				policy.MaterializationDigest = registration.Network.MaterializationDigest
+			}
+		} else {
+			if binding.AppliedPolicyVersion != binding.PolicyVersion {
+				registration.Health = openruntime.BackendUnavailable
+				continue
+			}
+			policy = domain.NetworkPolicy{Mode: binding.Mode, PolicyVersion: binding.PolicyVersion, BindingRevision: binding.Version,
+				ManifestDigest: binding.ManifestDigest, RuntimeIdentity: binding.RuntimeIdentity}
+		}
+		if err := policy.Validate(); err != nil || !trustedNetworkPolicy(policy) || !sameNetworkPolicy(policy, registration.Network) {
 			registration.Health = openruntime.BackendUnavailable
 			continue
 		}
@@ -340,26 +353,25 @@ func validateRunNetworkSnapshot(ctx context.Context, tx *sql.Tx, guard domain.Wo
 	if expected.IsZero() {
 		return domain.ErrUnsupportedCapability
 	}
-	var profileID, mode, configFile, desiredStatus, appliedWorkerID string
-	var profileVersion, revision, appliedGeneration, appliedProfileVersion, appliedRevision int64
-	err := tx.QueryRowContext(ctx, `SELECT b.profile_id, b.profile_version, b.version, b.desired_status,
-		COALESCE(b.applied_worker_id,''), COALESCE(b.applied_generation,0), COALESCE(b.applied_profile_version,0),
-		COALESCE(b.applied_binding_revision,0),
-		p.mode, COALESCE(p.config_file,'') FROM network_profile_bindings b
-		JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
-		WHERE b.agent_id=? AND b.backend_id=?`, guard.AgentID, run.BackendID).
-		Scan(&profileID, &profileVersion, &revision, &desiredStatus, &appliedWorkerID,
-			&appliedGeneration, &appliedProfileVersion, &appliedRevision, &mode, &configFile)
+	if !trustedNetworkPolicy(expected) || !trustedNetworkPolicy(resolved.Spec.Network) {
+		return domain.ErrUnsupportedCapability
+	}
+	binding, err := getNetworkBindingWithQueryer(ctx, tx, guard.AgentID, run.BackendID)
 	if err == nil {
-		if desiredStatus != "applied" || appliedWorkerID != guard.WorkerInstanceID ||
-			appliedGeneration != guard.Generation || appliedProfileVersion != profileVersion || appliedRevision != revision {
+		if binding.AppliedWorkerID != guard.WorkerInstanceID || binding.AppliedGeneration != guard.Generation ||
+			binding.AppliedMode != expected.Mode || binding.AppliedBindingRevision != expected.BindingRevision {
 			return domain.ErrUnsupportedCapability
 		}
-		expected = domain.NetworkPolicy{
-			Mode: domain.NetworkNamedProfile, ProfileID: profileID, ProfileVersion: profileVersion,
-			ProxyMode: mode, ConfigFile: configFile, BindingRevision: revision,
+		if expected.Mode == domain.NetworkNamedProfile {
+			if binding.AppliedProfileID != expected.ProfileID || binding.AppliedProfileVersion != expected.ProfileVersion {
+				return domain.ErrUnsupportedCapability
+			}
+		} else if binding.AppliedPolicyVersion != expected.PolicyVersion {
+			return domain.ErrUnsupportedCapability
 		}
-	} else if !errors.Is(err, sql.ErrNoRows) {
+	} else if errors.Is(err, domain.ErrNotFound) {
+		return domain.ErrUnsupportedCapability
+	} else {
 		return fmt.Errorf("load current network binding for RunAttempt: %w", err)
 	}
 	if err := expected.Validate(); err != nil || !sameNetworkPolicy(expected, resolved.Spec.Network) {
@@ -368,9 +380,21 @@ func validateRunNetworkSnapshot(ctx context.Context, tx *sql.Tx, guard domain.Wo
 	return nil
 }
 
+func trustedNetworkPolicy(policy domain.NetworkPolicy) bool {
+	if policy.RuntimeIdentity.IsZero() || policy.ManifestDigest == "" {
+		return false
+	}
+	if policy.Mode == domain.NetworkNamedProfile {
+		return policy.ProfileID != "" && policy.ProfileVersion > 0 && policy.MaterializationDigest != "" && policy.ConfigFile == ""
+	}
+	return (policy.Mode == domain.NetworkInherit || policy.Mode == domain.NetworkDirect) && policy.PolicyVersion > 0
+}
+
 func sameNetworkPolicy(left, right domain.NetworkPolicy) bool {
-	if left.Mode != right.Mode || left.ProfileID != right.ProfileID || left.ProfileVersion != right.ProfileVersion ||
+	if left.Mode != right.Mode || left.PolicyVersion != right.PolicyVersion || left.ProfileID != right.ProfileID || left.ProfileVersion != right.ProfileVersion ||
 		left.ProxyMode != right.ProxyMode || left.ConfigFile != right.ConfigFile || left.BindingRevision != right.BindingRevision ||
+		left.ManifestDigest != right.ManifestDigest || left.SecretVersion != right.SecretVersion || left.RuntimeIdentity != right.RuntimeIdentity ||
+		left.MaterializationDigest != right.MaterializationDigest || left.BlackIPFile != right.BlackIPFile ||
 		len(left.DirectDestinations) != len(right.DirectDestinations) {
 		return false
 	}

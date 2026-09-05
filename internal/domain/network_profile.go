@@ -2,7 +2,7 @@ package domain
 
 import (
 	"fmt"
-	"net"
+	"net/netip"
 	"path/filepath"
 	"strings"
 	"time"
@@ -16,17 +16,20 @@ const (
 )
 
 type ProxyProfile struct {
-	ID         string               `json:"profile_id"`
-	Version    int64                `json:"version"`
-	Status     NetworkProfileStatus `json:"status"`
-	Mode       string               `json:"mode"`
-	Host       string               `json:"host"`
-	Port       int                  `json:"port"`
-	ConfigFile string               `json:"config_file,omitempty"`
-	SecretRef  string               `json:"secret_ref,omitempty"`
-	CreatedBy  string               `json:"created_by"`
-	CreatedAt  time.Time            `json:"created_at"`
-	UpdatedAt  time.Time            `json:"updated_at"`
+	ID              string               `json:"profile_id"`
+	Version         int64                `json:"version"`
+	Status          NetworkProfileStatus `json:"status"`
+	Mode            string               `json:"mode"`
+	Host            string               `json:"host"`
+	Port            int                  `json:"port"`
+	ConfigFile      string               `json:"config_file,omitempty"`
+	SecretRef       string               `json:"secret_ref,omitempty"`
+	DirectIPs       []string             `json:"direct_ips,omitempty"`
+	ManifestDigest  string               `json:"manifest_digest,omitempty"`
+	RuntimeIdentity RuntimeIdentity      `json:"runtime_identity,omitempty"`
+	CreatedBy       string               `json:"created_by"`
+	CreatedAt       time.Time            `json:"created_at"`
+	UpdatedAt       time.Time            `json:"updated_at"`
 }
 
 func (p ProxyProfile) Validate() error {
@@ -45,7 +48,7 @@ func (p ProxyProfile) Validate() error {
 	if strings.TrimSpace(p.Host) == "" || strings.ContainsAny(p.Host, "\r\n/@") {
 		return ErrInvalidInput("network profile host is invalid")
 	}
-	if net.ParseIP(p.Host) == nil {
+	if _, err := netip.ParseAddr(p.Host); err != nil {
 		if strings.ContainsAny(p.Host, " :") {
 			return ErrInvalidInput("network profile host is invalid")
 		}
@@ -61,6 +64,20 @@ func (p ProxyProfile) Validate() error {
 			return err
 		}
 	}
+	for _, ip := range p.DirectIPs {
+		address, err := netip.ParseAddr(ip)
+		if err != nil || address.Zone() != "" || address.Is4In6() {
+			return ErrInvalidInput("network profile direct rules must be non-mapped IP addresses")
+		}
+	}
+	if p.ManifestDigest != "" && !validSHA256Digest(p.ManifestDigest) {
+		return ErrInvalidInput("network profile manifest_digest must be sha256")
+	}
+	if !p.RuntimeIdentity.IsZero() {
+		if err := p.RuntimeIdentity.Validate(); err != nil {
+			return err
+		}
+	}
 	if err := ValidateOpaqueID("network profile created_by", p.CreatedBy); err != nil {
 		return fmt.Errorf("%w: created_by", err)
 	}
@@ -71,19 +88,27 @@ func (p ProxyProfile) Validate() error {
 }
 
 type NetworkBinding struct {
-	AgentID                string        `json:"agent_id"`
-	BackendID              string        `json:"backend_id"`
-	ProfileID              string        `json:"profile_id"`
-	ProfileVersion         int64         `json:"profile_version"`
-	Version                int64         `json:"version"`
-	DesiredStatus          string        `json:"desired_status"`
-	AppliedWorkerID        string        `json:"applied_worker_id,omitempty"`
-	AppliedGeneration      int64         `json:"applied_generation,omitempty"`
-	AppliedProfileVersion  int64         `json:"applied_profile_version,omitempty"`
-	AppliedBindingRevision int64         `json:"applied_binding_revision,omitempty"`
-	UpdatedAt              time.Time     `json:"updated_at"`
-	Profile                *ProxyProfile `json:"profile,omitempty"`
-	Diagnostic             string        `json:"diagnostic,omitempty"`
+	AgentID                string          `json:"agent_id"`
+	BackendID              string          `json:"backend_id"`
+	Mode                   NetworkMode     `json:"mode"`
+	ProfileID              string          `json:"profile_id,omitempty"`
+	ProfileVersion         int64           `json:"profile_version,omitempty"`
+	PolicyVersion          int64           `json:"policy_version,omitempty"`
+	TestID                 string          `json:"test_id,omitempty"`
+	ManifestDigest         string          `json:"manifest_digest,omitempty"`
+	RuntimeIdentity        RuntimeIdentity `json:"runtime_identity,omitempty"`
+	Version                int64           `json:"version"`
+	DesiredStatus          string          `json:"desired_status"`
+	AppliedWorkerID        string          `json:"applied_worker_id,omitempty"`
+	AppliedGeneration      int64           `json:"applied_generation,omitempty"`
+	AppliedMode            NetworkMode     `json:"applied_mode,omitempty"`
+	AppliedProfileID       string          `json:"applied_profile_id,omitempty"`
+	AppliedProfileVersion  int64           `json:"applied_profile_version,omitempty"`
+	AppliedPolicyVersion   int64           `json:"applied_policy_version,omitempty"`
+	AppliedBindingRevision int64           `json:"applied_binding_revision,omitempty"`
+	UpdatedAt              time.Time       `json:"updated_at"`
+	Profile                *ProxyProfile   `json:"profile,omitempty"`
+	Diagnostic             string          `json:"diagnostic,omitempty"`
 }
 
 type NetworkBindingApplication struct {
@@ -133,11 +158,29 @@ func (b NetworkBinding) Validate() error {
 	if err := ValidateIdentifier("network binding backend_id", b.BackendID); err != nil {
 		return err
 	}
-	if err := ValidateIdentifier("network binding profile_id", b.ProfileID); err != nil {
-		return err
+	if !b.Mode.Valid() {
+		return ErrInvalidInput("unsupported network binding mode")
 	}
-	if err := ValidatePositiveVersion("network binding profile_version", b.ProfileVersion); err != nil {
-		return err
+	if b.Mode == NetworkNamedProfile {
+		if err := ValidateIdentifier("network binding profile_id", b.ProfileID); err != nil {
+			return err
+		}
+		if err := ValidatePositiveVersion("network binding profile_version", b.ProfileVersion); err != nil {
+			return err
+		}
+		if b.PolicyVersion != 0 {
+			return ErrInvalidInput("named profile binding cannot reference a mode policy version")
+		}
+	} else {
+		if b.ProfileID != "" || b.ProfileVersion != 0 {
+			return ErrInvalidInput("mode binding cannot reference a proxy profile")
+		}
+		if err := ValidatePositiveVersion("network binding policy_version", b.PolicyVersion); err != nil {
+			return err
+		}
+		if !validSHA256Digest(b.ManifestDigest) {
+			return ErrInvalidInput("mode binding manifest_digest must be sha256")
+		}
 	}
 	if err := ValidatePositiveVersion("network binding version", b.Version); err != nil {
 		return err

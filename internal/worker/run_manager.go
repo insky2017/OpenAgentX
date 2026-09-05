@@ -146,10 +146,11 @@ func (m *ActiveRunManager) startWork(ctx context.Context, active *activeTurn, it
 	if begin.Turn.Execution.Spec.Network.IsZero() {
 		return m.failStartedRun(ctx, begin.Turn, domain.ErrUnsupportedCapability)
 	}
-	adapter, err := m.backends.Resolve(ctx, begin.Turn.Execution.Spec.AdapterID, begin.Turn.Execution.Spec.BackendID)
+	prepared, adapter, err := m.backends.PrepareRunNetwork(ctx, begin.Turn)
 	if err != nil {
 		return m.failStartedRun(ctx, begin.Turn, err)
 	}
+	begin.Turn = prepared
 	if err := adapter.Validate(ctx, begin.Turn.Execution.Spec); err != nil {
 		return m.failStartedRun(ctx, begin.Turn, err)
 	}

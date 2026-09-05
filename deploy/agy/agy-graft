@@ -8,6 +8,7 @@ GOMAXPROCS_VALUE="${AGY_GRAFT_GOMAXPROCS:-1}"
 IPV4_ONLY_MODE="${AGY_GRAFT_IPV4_ONLY:-auto}"
 IPV4_ONLY_FILE="${AGY_GRAFT_IPV4_ONLY_FILE:-/home/sky/.config/graftcp/agy-graft-ipv4-only.txt}"
 CONFIG_FILE="${AGY_GRAFT_CONFIG:-}"
+BLACKIP_FILE="${AGY_GRAFT_BLACKIP_FILE:-}"
 
 first_set() {
   local name
@@ -107,6 +108,20 @@ if [[ -n "$CONFIG_FILE" ]]; then
     echo "agy-graft: AGY_GRAFT_CONFIG is not readable: $CONFIG_FILE" >&2
     exit 2
   fi
+fi
+
+blackip_flag=()
+if [[ -n "$BLACKIP_FILE" ]]; then
+  if [[ -L "$BLACKIP_FILE" || ! -f "$BLACKIP_FILE" ]]; then
+    echo "agy-graft: AGY_GRAFT_BLACKIP_FILE must be a regular file" >&2
+    exit 2
+  fi
+  blackip_mode="$(stat -Lc '%a' "$BLACKIP_FILE" 2>/dev/null || true)"
+  if [[ "$blackip_mode" != "600" || ! -r "$BLACKIP_FILE" ]]; then
+    echo "agy-graft: AGY_GRAFT_BLACKIP_FILE must be a readable 0600 file" >&2
+    exit 2
+  fi
+  blackip_flag=( --blackip-file "$BLACKIP_FILE" )
 fi
 
 proxy_scheme_of() {
@@ -305,6 +320,7 @@ unset HTTPS_PROXY
 unset ALL_PROXY
 
 mgraft_args=(
+	"${blackip_flag[@]}"
   "${proxy_flag[@]}"
   --select_proxy_mode "$SELECT_PROXY_MODE"
 )

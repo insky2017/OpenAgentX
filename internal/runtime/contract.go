@@ -70,6 +70,7 @@ type AdapterDescriptor struct {
 	Streams            bool                   `json:"streams"`
 	BackendOptionsJSON json.RawMessage        `json:"backend_options_schema"`
 	MaxConcurrency     int                    `json:"max_concurrency"`
+	RuntimeIdentity    domain.RuntimeIdentity `json:"runtime_identity,omitempty"`
 }
 
 type BackendHealth string
@@ -149,8 +150,27 @@ func (d AdapterDescriptor) Validate() error {
 	if len(d.BackendOptionsJSON) != 0 && !json.Valid(d.BackendOptionsJSON) {
 		return domain.ErrInvalidInput("backend options schema must be valid JSON")
 	}
+	seenNetworkModes := make(map[string]struct{}, len(d.NetworkModes))
+	for _, value := range d.NetworkModes {
+		mode := domain.NetworkMode(value)
+		if !mode.Valid() {
+			return domain.ErrInvalidInput("adapter has unsupported network mode")
+		}
+		if _, exists := seenNetworkModes[value]; exists {
+			return domain.ErrInvalidInput("adapter network modes must be unique")
+		}
+		seenNetworkModes[value] = struct{}{}
+	}
 	if d.MaxConcurrency <= 0 {
 		return domain.ErrInvalidInput("max_concurrency must be positive")
+	}
+	if !d.RuntimeIdentity.IsZero() {
+		if err := d.RuntimeIdentity.Validate(); err != nil {
+			return err
+		}
+		if d.RuntimeIdentity.AdapterID != d.AdapterID || d.RuntimeIdentity.AdapterVersion != d.Version {
+			return domain.ErrInvalidInput("runtime identity does not match Adapter descriptor")
+		}
 	}
 	return nil
 }
@@ -237,6 +257,15 @@ type AgentRuntimeAdapter interface {
 // running process; the next StartTurn observes the new policy.
 type NetworkPolicyApplier interface {
 	ApplyNetworkPolicy(domain.NetworkPolicy) error
+}
+
+type RuntimeIdentityVerifier interface {
+	VerifyRuntimeIdentity(context.Context, domain.RuntimeIdentity) error
+}
+
+// NetworkProbeCloner creates an isolated Adapter for candidate diagnostics.
+type NetworkProbeCloner interface {
+	CloneForNetworkProbe(domain.NetworkPolicy) (AgentRuntimeAdapter, error)
 }
 
 type TurnHandle interface {

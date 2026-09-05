@@ -27,7 +27,7 @@ func TestBeginClaimedRunConsumesPreflightApprovalInSameTransaction(t *testing.T)
 		AdapterID: descriptor.AdapterID, BackendID: "local", Model: descriptor.Models[0],
 		Reasoning: domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault},
 		Session:   domain.SessionSpec{Mode: domain.SessionModeNew, ContextID: "task-preflight-begin-atomic"},
-		Timeout:   time.Minute, Network: domain.NetworkPolicy{Mode: domain.NetworkInherit},
+		Timeout:   time.Minute, Network: trustedMessageNetwork(descriptor),
 	}})
 	if err != nil {
 		t.Fatal(err)

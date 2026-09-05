@@ -12,6 +12,8 @@ ARGV_LOG="$TEST_DIR/argv.log"
 REAL_ENV_LOG="$TEST_DIR/real-env.log"
 CONFIG_FILE="$TEST_DIR/agy-graft.conf"
 MISSING_ENDPOINT_CONFIG="$TEST_DIR/missing-endpoint.conf"
+BLACKIP_FILE="$TEST_DIR/direct.blackip"
+WHITEIP_FILE="$TEST_DIR/proxy.whiteip"
 
 printf '#!/usr/bin/env bash\nenv | grep "^AGY_GRAFT_" >"$AGY_TEST_REAL_ENV_LOG" || true\nexit 0\n' >"$REAL_AGY"
 printf '#!/usr/bin/env bash\nprintf "%%s\\0" "$@" >"$AGY_TEST_ARGV_LOG"\nreal="${@: -2:1}"\n"$real" "${@: -1}"\n' >"$MGRAFTCP"
@@ -20,7 +22,7 @@ chmod 0700 "$REAL_AGY" "$MGRAFTCP"
 printf '%s\n' \
   'select_proxy_mode = only_socks5' \
   'socks5 = config-socks.example.invalid:28080' \
-  'http_proxy = http://config-http.example.invalid:28081' \
+  'http_proxy = config-http.example.invalid:28081' \
   'socks5_username = fixture-user' \
   'socks5_password = fixture-password' >"$CONFIG_FILE"
 chmod 0600 "$CONFIG_FILE"
@@ -30,6 +32,9 @@ printf '%s\n' \
   'socks5_username = fixture-user' \
   'socks5_password = fixture-password' >"$MISSING_ENDPOINT_CONFIG"
 chmod 0600 "$MISSING_ENDPOINT_CONFIG"
+printf '%s\n' '203.0.113.8' >"$BLACKIP_FILE"
+printf '%s\n' '198.51.100.7' >"$WHITEIP_FILE"
+chmod 0600 "$BLACKIP_FILE" "$WHITEIP_FILE"
 
 run_wrapper() {
   env -i \
@@ -114,6 +119,13 @@ assert_argv --socks5 env-socks.example.invalid:28080 --select_proxy_mode only_so
 run_case 'no env + config => config' AGY_GRAFT_CONFIG="$CONFIG_FILE"
 assert_argv --select_proxy_mode only_socks5 --config "$CONFIG_FILE" "$REAL_AGY" --version
 
+run_case 'blacklist precedes IPv4 whitelist' \
+  AGY_GRAFT_CONFIG="$CONFIG_FILE" \
+  AGY_GRAFT_BLACKIP_FILE="$BLACKIP_FILE" \
+  AGY_GRAFT_IPV4_ONLY=1 \
+  AGY_GRAFT_IPV4_ONLY_FILE="$WHITEIP_FILE"
+assert_argv --blackip-file "$BLACKIP_FILE" --whiteip-file "$WHITEIP_FILE" --select_proxy_mode only_socks5 --config "$CONFIG_FILE" "$REAL_AGY" --version
+
 # The default path is accepted only with a controlled local listener.
 python3 -c 'import socket, time; s=socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1); s.bind(("127.0.0.1", 7897)); s.listen(); time.sleep(3)' 2>/dev/null &
 candidate_listener_pid=$!
@@ -143,5 +155,7 @@ expect_rc2 AGY_GRAFT_CONFIG="$TEST_DIR" "$WRAPPER" --version
 expect_rc2 AGY_GRAFT_CONFIG="$TEST_DIR/missing.conf" "$WRAPPER" --version
 ln -s "$CONFIG_FILE" "$TEST_DIR/symlink.conf"
 expect_rc2 AGY_GRAFT_CONFIG="$TEST_DIR/symlink.conf" "$WRAPPER" --version
+chmod 0644 "$BLACKIP_FILE"
+expect_rc2 AGY_GRAFT_CONFIG="$CONFIG_FILE" AGY_GRAFT_BLACKIP_FILE="$BLACKIP_FILE" "$WRAPPER" --version
 
 echo "agy-graft fixture passed: $WRAPPER"

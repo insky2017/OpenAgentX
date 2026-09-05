@@ -18,6 +18,7 @@ import (
 	"openagentx/internal/runtime/agy"
 	"openagentx/internal/runtime/codebuddy"
 	"openagentx/internal/runtime/fake"
+	runtimenetwork "openagentx/internal/runtime/network"
 	"openagentx/internal/transport/remotehttps"
 	residentworker "openagentx/internal/worker"
 )
@@ -92,6 +93,21 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 	if err != nil {
 		return err
 	}
+	materializationDir := processConfig.NetworkMaterializationDir
+	if materializationDir == "" {
+		cacheDir, cacheErr := os.UserCacheDir()
+		if cacheErr != nil {
+			return fmt.Errorf("resolve Worker cache directory: %w", cacheErr)
+		}
+		materializationDir = filepath.Join(cacheDir, "openagentx", processConfig.AgentID, "network")
+	} else if !filepath.IsAbs(materializationDir) {
+		materializationDir = filepath.Join(configDir, materializationDir)
+	}
+	materializer, err := runtimenetwork.NewMaterializer(materializationDir)
+	if err != nil {
+		return err
+	}
+	pool.SetNetworkMaterializer(materializer)
 	runner, err := residentworker.NewRunner(processConfig.RunnerConfig("worker-"+uuid.NewString()), client, pool, client)
 	if err != nil {
 		return err
@@ -106,6 +122,19 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir str
 			return nil, err
 		}
 		agyConfig.Network = config.Network
+		binary := agyConfig.Binary
+		if binary == "" {
+			binary = "agy-graft"
+		}
+		helper := os.Getenv("AGY_GRAFT_MGRAFTCP_BIN")
+		realBinary := os.Getenv("AGY_GRAFT_REAL_BIN")
+		identity, identityErr := runtimenetwork.InspectRuntimeIdentity(context.Background(), "agy-batch", "1", binary, helper, realBinary)
+		if identityErr != nil {
+			return nil, identityErr
+		}
+		agyConfig.RuntimeIdentity = identity
+		agyConfig.HelperBinary = helper
+		agyConfig.RealBinary = realBinary
 		adapter, err := agy.NewAdapter(agyConfig)
 		if err != nil {
 			return nil, err
@@ -118,6 +147,15 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir str
 			return nil, err
 		}
 		adapterConfig.Network = config.Network
+		binary := adapterConfig.Binary
+		if binary == "" {
+			binary = "codebuddy"
+		}
+		identity, identityErr := runtimenetwork.InspectRuntimeIdentity(context.Background(), "codebuddy-cli", "1", binary, "")
+		if identityErr != nil {
+			return nil, identityErr
+		}
+		adapterConfig.RuntimeIdentity = identity
 		return codebuddy.NewAdapter(adapterConfig)
 	}
 	if config.AdapterID != "fake" {
@@ -133,6 +171,8 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir str
 		SessionModes: []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume}, Steer: openruntime.SteerQueued,
 		Approval: openruntime.ApprovalPreflight, Cancel: openruntime.CancelNative,
 		Streams: true, BackendOptionsJSON: json.RawMessage(`{"type":"object"}`), MaxConcurrency: 1,
+		RuntimeIdentity: domain.RuntimeIdentity{AdapterID: "fake", AdapterVersion: "1"},
+		NetworkModes:    []string{string(domain.NetworkInherit), string(domain.NetworkDirect)},
 	}
 	if len(fakeConfig.statusSequence) != 0 {
 		results := make([]openruntime.TurnResult, 0, len(fakeConfig.statusSequence))

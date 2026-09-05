@@ -4,6 +4,15 @@
 
 由主代理协调 ADR-002 Runtime 网络配置、应用与诊断，以及 ADR-003 指挥台任务详情、运行观察与安全内容呈现的最终落地。实现、验证和审核必须留下可追溯证据；任何未实测能力不得标记为已完成。
 
+## 当前收口基线（用户最新指令优先）
+
+- 用户明确要求先完成指挥台配置、运行、观察和查看结果的实际闭环；已经完成的改动全部保留，不回退。停止扩展全面加固和极端故障矩阵，未完成的其他要求进入[后续计划](../../plans/2026-09-05-openagentx-follow-up-hardening.md)。本节覆盖下文历史矩阵中超出本轮的排期，不修改冻结 ADR 或历史结论。
+- N2 必须完成创建/修改、目标测试、显式发布、真实 Worker 应用回执，以及期望/实际版本对照；支持已声明模式，运行中 Task 固定旧配置，关键重试不重复生效。
+- 观察与 Markdown 必须让用户看清 Task/Run/Worker、当前阶段、失败原因、结果及核验来源，保持选择和断线恢复；统一安全 Markdown、原文/复制，以及手机代码块和表格局部滚动。复杂产物展示、完整历史检索和极端长内容优化不阻塞本轮。
+- 只由直接风险阻断交付：主流程不能完成；秘密泄露/权限绕过；覆盖他人、重复执行、误删有效引用；把未应用或未核验事实显示为成功。旧 P1 标签不能自动扩大当前任务，需重新核对实际影响。
+- 已完成的目录 fd、原子 key、孤立扫描等保留；剩余极端加固不继续扩展。孤立文件受控且正式 API 不可读、无误删风险时允许暂存，恢复完善进入后续计划。
+- 先收口提交 N2，再完成观察/Markdown；复用已有证据，只补当前变更必要验证。以一次最终实际闭环验收结束本轮，报告称为“本轮功能验收”，不宣称完整 ADR-002/003 已全部满足。
+
 ## 协调规则
 
 - 实现代理负责限定范围内的代码和局部测试，不绕过正式 API、事务、lease、fencing 或认证边界。
@@ -27,11 +36,14 @@
 
 | 工作项 | 代理 | 模型 | 状态 | 范围边界 |
 |---|---|---|---|---|
-| ADR-002 实现 | `/root/n1_worker_consistency`，前序 `/root/adr002_impl` | `gpt-5.6-sol` high | N1 已冻结，独立源码与已覆盖验证 GO | Runtime、Worker、持久化/API；不修改 Panel/Web |
-| ADR-003 实现 | `/root/u1_task_observation`，前序 `/root/adr003_impl` | `gpt-5.6-sol` high | U1 已冻结，独立源码和浏览器验证 GO | 指挥台 UI、Observe 投影、查询；不修改 Runtime/Worker/migrations |
-| N2 配置工作流准备 | `/root/n2_network_workflow` | `gpt-5.6-sol` high | 只读准备，尚未授权代码修改 | N1/U1 提交前不得改变冻结源码；准备网络工作流全栈的接口与文件边界 |
+| ADR-002 实现 | `/root/n1_worker_consistency`，前序 `/root/adr002_impl` | `gpt-5.6-sol` high | N1 独立验证/审核 GO，已提交 0839341 | Runtime、Worker、持久化/API；不修改 Panel/Web |
+| ADR-003 实现 | U1 `/root/u1_task_observation`，U2 `/root/u2_functional_closeout` | `gpt-5.6-sol` high | U1 GO，已提交 0839341；U2 最小矩阵已冻结，待 N2 提交后实施 | 指挥台 UI、Observe 投影及必要结果/事件修正 |
+| N2 配置工作流实现 | `/root/n2_network_workflow` | `gpt-5.6-sol` high | 本轮功能验证/审核 GO，准备独立提交 | 网络工作流全栈及局部测试；U2 顺序后置，主代理不并写源码 |
+| N2 新配置页组件 | `/root/u1_task_observation` | `gpt-5.6-sol` high | 分层诊断和活动 Run 对照补齐，两文件最终冻结 | 仅 NetworkSettings.jsx/network-settings.css；main.jsx/API 仍归 N2，非 U2 实施 |
+| N2 独立功能验证 | `/root/n2_verification` | `gpt-5.6-terra` high | 本轮功能通过，完整 ADR 为 partial_pass | 三模式正式 API/真实 Worker ACK、当前配置页 Chrome；未覆盖项如实保留 |
+| E1 网络脚本准备 | `/root/n2_verification` | `gpt-5.6-terra` high | 准备完成并正常结束，尚未执行 | 不执行端口/网络/CLI/模型/浏览器，不修改 N2 源码 |
 | 批量验证 | `/root/n1_u1_verification` | `gpt-5.6-terra` high | N1/U1 GO，已冻结并释放验证服务 | 独占独立全量验证及新验证报告；不修改实现 |
-| 独立审核 | `/root/n1_u1_review` | 指定 Astra 当前不可用，暂用 `gpt-5.6-sol` medium | N1/U1 源码及 Terra 证据交叉核对 GO | 独立审核代码及 Terra 证据，替代模型如实记录 |
+| 独立审核 | `/root/n1_u1_review` | 指定 Astra 当前不可用，暂用 `gpt-5.6-sol` medium | N1/U1 GO；N2 本轮功能 GO | 已完成源码与最终证据短核；完整 ADR 未验收，历史结论保留 |
 
 ## 变更记录
 
@@ -225,3 +237,282 @@
 - 已启动 `/root/n2_network_workflow`（实际 Sol high）执行限定的只读准备；明确禁止代码、测试、生产 Runtime 或服务变更。N1/U1 Gate 提交后主代理才会下发实施授权。U1 原实现者完成 U2 只读方案后已停止执行，避免争抢共享文件。
 - N2 只读方案返回后，主代理冻结常规部署选择：daemon 提供可选 `--network-secret-dir`，默认绝对数据库路径旁的 `<db>.network-secrets`；Worker 提供可选 `network_materialization_dir`，默认 `os.UserCacheDir()/openagentx/<agentID>/network`。目录要求 `0700`、秘密文件 `0600`，拒绝不符合权限或链接约束的路径；无网络配置的用户不必为此先改 YAML。
 - AGY 直连规则在 N2 本批实现受控 `blackip-file` 接线，地址语法以 native 实际支持为准；浏览器不能提交文件路径。wrapper 合同测试须覆盖与现有 IPv4 whitelist 的优先级，E1 再用隔离目标确认真实网络效果；单有 argv 不能证明规则生效。AGY `direct` 模式和 HTTP 认证仍按实际能力限制，不以 native 选项替代 wrapper 证据。
+
+#### N2 正式开工
+
+- N1/U1 已形成独立 commit `0839341`（`fix: verify worker network consistency and task observation`），包含 44 个本批文件；此前明确排除的四组无关未跟踪内容未纳入提交。
+- 主代理在此 commit 之后明确授权 `/root/n2_network_workflow`（Sol high）作为 N2 全栈唯一实现者开始一个主要实现批次，覆盖已冻结验收矩阵。先明确接口与断言，再写代码和局部测试；实现完成 freeze 后交独立 Terra 验证与独立审核。
+- N2 拥有网络 domain、受控秘密存储、配置工作流事务/API、Worker/client/materializer/prober、Runtime 网络环境、AGY wrapper、CLI 装配和 NetworkSettings 前端及必要接线。主代理仅修改协调记录，U2 不并行改共享文件。N1/U1 历史报告与冻结 ADR 均保持不动。
+- 秘密写请求的幂等摘要不得使用裸密码 SHA；采用受控服务端 HMAC 或完整授权后对原秘密版本安全比较。秘密文件写入后元数据事务失败的孤立文件需有明确的不可读及清理/重试策略，不引入不必要的分布式事务。
+- 旧版本 Run 的本地配置路径只注入 Worker 的瞬时执行副本，持久化策略使用内容/秘密版本和受控摘要；开始 turn 时复核固定版本和 wrapper，不能使用池中当前最新策略代替旧 Run。实现阶段不调用真实模型、不修改生产服务。
+
+#### U2 实施前验收细化
+
+| 类别 | 必须可证明的断言 | 证据边界 |
+|---|---|---|
+| 运行详情 | 按 Task 分页读取历史 Run；详情使用 Run 固定的 Worker instance 对应 generation、执行字段和网络版本；结果显示正文、错误、规范化 usage 和副作用证据来源 | 正式 Observe 响应与历史 Worker 重注册后的对照；禁止用当前 Worker 或绑定覆盖历史事实 |
+| 对话与控制 | Message、ApprovalRequest、Decision、Mailbox 归属当前 Task/Run；审批描述持久保存并安全渲染；回复、批准、拒绝、取消使用现有权限、CSRF、CAS 和幂等命令 | 正式 Control/Worker API 准备输入；重复命令及终态交错不能制造额外 Decision、Mailbox 或结果 |
+| 输出不变量 | 进入 Journal 前仅允许标准公开事件字段；隐藏推理、Session Token、完整环境、原始 stderr 不落库；公开文本经 Worker 已知秘密过滤和服务端字段检查 | 包含秘密 sentinel、未知字段、隐藏内容和编码边界的隔离输入；检查 DB/WAL、Journal、Observe、SSE、日志和浏览器缓存 |
+| 输出预算与事务 | 每块、每 Run 的字节和事件数量都有明确限制；超限仅产生一次可见截断事实；状态、错误、取消、审批和最终结果保留；预算与事件写入故障可回滚 | 多批输出、并发追加、故障回滚和重开后的持续预算断言；不能只在浏览器截断而无持久化上限 |
+| 受控产物 | 复用既有 artifacts 表；限定类型、大小、存储目录、摘要与过期时间；读取经父 Task 的实际权限检查，路径不能由浏览器指定；返回 no-store、nosniff | 无认证、越权关联、过期、篡改、链接路径、超大文件及孤立写入的失败证据；产物也经过脱敏，不作为保存原始秘密的例外 |
+| Markdown | Task content/result、Message、Approval 描述使用同一组件；CommonMark/GFM、渲染/原文、复制反馈、错误边界和纯文本降级可用 | 真实浏览器测试安全协议、外部图片占位、长代码/表格、解析/渲染失败及剪贴板拒绝；长内容按语法块保留引用和围栏语义 |
+| 阅读与实时 | 三视口无整体横向溢出；触控、返回焦点、选中态与滚动保持；有新输出可主动跳到最新；Streams=false 不显示虚构流式进度 | 认证浏览器在流式更新、分页、断流补齐、权限失败、关闭/重开详情和离线写禁用中的 DOM/请求证据 |
+
+- U2 顺序接在 N2 独立提交后；实现者先确认公开事件、结果证据、产物写入和读取接口，再进行一个主要实现批次。主代理独占协调记录，不与实现者并写源码。
+- 当前已核对的前置问题：`agy/stream.go` 把成功但缺少副作用字段的结果推定为已知；`acp/adapter.go` 初始化已知且缺终态时默认为成功；`codebuddy/adapter.go` 同样默认已知。`WorkerService.AppendEvents` 目前将任意 Runtime payload 写入 Journal，`Finish` 的事件包含整个结果对象。这些会直接影响 U2 的可信观察与秘密边界，列为本批 P1 修复范围，不能仅在前端隐藏字段。
+- 上述结论来自当前源码只读核对，不是新的外部协议实测。原 ADR-001 历史 Gate 证据保持原样；U2 必须记录具体受影响的 Adapter/终态结论及修复范围，独立审核后判定是否需要重开其相应验收项。
+- 副作用字段必须区分 Runtime 报告、Worker/业务核验和缺少来源；模型文本自称成功不能成为核验依据。终态如何 reconcile 由正式协议和 Worker 边界决定，不为使页面显示成功而放宽；不因展示字段新增通用工作区扫描或任意命令验证功能。
+- 产物的权限沿用当前单部署组织的真实 Task 可见性，不能宣称已经具备多组织隔离。短期产物首批可限定为脱敏文本/Markdown；图片使用安全占位即满足首版决策，不引入外部资源加载或弱化 CSP。
+
+#### E1 最终验收细化（尚未执行）
+
+| 类别 | 必须可证明的断言 | 证据边界 |
+|---|---|---|
+| 构建与部署 | 最终源码 commit、应用与静态资源指纹、二进制 SHA-256、schema、配置版本、Runtime/wrapper 身份与隔离运行进程一致 | 生产服务不作测试 fixture；不得用较早的 N1/U1 构建或截图代替最终变更证据 |
+| 配置到实际执行 | 从认证指挥台创建或导入方案，经目标 Worker 测试、发布和 applied 回执，再创建普通 Task；Run 固定的 profile/version 与实际物化配置相符 | 真实已注册 wrapper/CLI 路径；按其实际能力选测试输入；连接测试通过不能代替真实模型和业务结果 |
+| 网络规则 | 隔离代理记录受控目的地连接；直连目标绕过该代理；活动 Run 与发布/回退交错仍使用原配置；失败时不暴露秘密且控制连接保留 | native 黑白名单优先级在可确认源码或隔离实验前仍属未知；loopback 不能单独证明规则生效 |
+| 可见结果与副作用 | UI 可追到 Task、Mailbox、Run、配置、公开输出、结果和产物；真实任务只写隔离 workspace 中明确可回收的标记文件，内容和数量独立核对 | 模型文本、零退出码、状态进入终态均不能单独证明业务成功；无法核对的副作用保持 uncertain/未核验并禁止自动重试 |
+| 故障与生命周期 | 错误配置期间 Worker 仍在线；修复后能领下一任务；执行结束后继续等待且无 busy-loop；关闭/重开浏览器不取消 Runtime | 分钟级检查点和进程/正式 API 事实；无 tmux/pane/人工注入，测试结束释放隔离进程、端口及敏感 fixture |
+| 浏览器与安全 | 最终构建在 390x844、412x915、1440x900 的配置、详情、结果、复制、产物及恢复流程有真实证据；离线与恢复后无排队写请求 | 截图只证明可见布局，SSE 去重/缺口、CSP 执行、缓存和请求计数需要各自的 DOM/网络断言 |
+
+- E1 在 N2、U2 各自独立验证、审核和提交之后执行。只在最终组合变化影响既有结论时补验对应边界，不重复多个代理的相同全量或真实浏览器测试。
+- 主代理已调度独立 Sol medium 只读核对 mgraftcp 规则契约，并调度 U1 原实现者只读设计副作用来源与 fail-closed 修复；二者均禁止提前执行应用测试、模型调用或修改 N2 共享源码。返回结果及未确认项另行追加，不把准备工作计作验收通过。
+
+#### N2 native 规则契约补充
+
+- 独立 Sol medium 找到 `/home/sky/work/graftcp`，安装版本对应 revision `6b8e7e659fa39b9396a54f8bf94e9c51c2f58564`；`graftcp.c`、`cidr-trie.c`、`local/local.go`、`local/cmd/mgraftcp/main.go` 相对此 revision 无本地差异。主代理复核关键规则分支和 diff；未运行网络实验，安装二进制 SHA 仍以此前 preflight 记录为准。
+- `graftcp.c:97` 先匹配 blacklist，命中即原地直连；再匹配 whitelist，未命中也直连。因此 black/white 重叠时 blacklist 优先。默认隐式 blacklist 精确加入 `127.0.0.1`、`0.0.0.0`、`::1`，并非整个 loopback/私网；E1 只访问这些地址不能证明用户规则有效。
+- `graftcp.c:60` 的文件读取忽略长度小于 7 的行，导致 `::1`、`::/0` 这样的合法缩写无法按文件规则生效；`cidr-trie.c:69` 的非法 IPv4/CIDR 解析也不 fail closed。文件不支持域名或注释，IPv4-mapped IPv6 连接按 IPv4 规则匹配。原生 direct 模式发生于名单决定转入 relay 之后，并不绕过主机路由。
+- 已向 N2 唯一实现者传递上述契约：使用 Go `netip` 等结构化解析严格校验 IP/CIDR，拒绝非法前缀、域名/注释和含糊映射形式；支持 IPv6 时物化为足够长的展开地址，否则明确拒绝该能力。不得把未经处理的浏览器规则原样交给宽松 native 解析器；合同测试和 E1 实网验证仍各自必需。
+
+#### N2 首个实施检查点
+
+- 实现者回报已落盘 workflow domain、NetworkPolicy manifest/秘密/runtime identity 字段、受控 secretstore、workflow schema/不可变 triggers、元数据事务/receipt/head/test/work repository、create/edit/replace-secret/test/publish/bind/rollback/import 服务和 Control/Worker DTO 初稿。
+- 剩余为编译与迁移兼容、materializer/prober/runtime identity、Worker handler/client/runner/ACK 与 StartTurn 固定版本复核、环境与 wrapper 规则、daemon 装配、Panel/NetworkSettings 和局部测试；明确阻断为零。该检查点不表示上述初稿已通过编译或独立验证。
+- 实现者已接受 native 规则约束，拟严格 netip 解析、拒绝 IPv4-mapped IPv6、展开 IPv6 并验证黑名单优先级。主代理另明确 UI 不要求用户填写 Worker 路径或 secret_ref，秘密只写成功后清空，CAS 冲突保留草稿，测试/发布目标和配置有效/已应用/Runtime 健康分开显示。
+- N2 仅提供后续 U2 所需的 Worker 瞬时秘密过滤交接，不扩张实现输出观察子系统。独立全量/浏览器验证仍等待完整 N2 冻结；主代理未运行动态源码测试。
+
+#### U2 副作用与终态设计纠偏（待冻结）
+
+- U1 原实现者的只读设计确认 ACP 缺终态合成成功、stderr 未消费及 sink 错误被忽略；CodeBuddy 的取消标记先于信号成功且零退出默认成功；Worker 的 finish/shutdown 主要依赖 Adapter 结果。以上直接影响结果可信性，纳入 U2 前置 P1 边界，不授权并行修改 N2。
+- 实现者提出副作用 classification/source/verified/固定 reason code，并让旧记录投影为 legacy_unverified，禁止历史自动升级。这一方向可保留，但其“合法 Runtime 终态通常未核验仍保持 succeeded”的建议尚未接受：主代理指出它与 AGENTS.md 第 9 条“无法确认副作用时保持 uncertain”冲突，要求明确保留 Runtime 报告状态和业务结算的区别。
+- 主代理进一步只读确认 `worker_execution_repository.go` 的 FinishRun 在 Task 为 cancel_requested 时不看实际 TurnResult，一律写 Task canceled。这与 ADR-001 要求 Cancel 先提交后按 Wait/reconcile 结算为 canceled/succeeded/failed/uncertain 的文字不一致，可能掩盖真实不确定性；已交独立 Sol medium 作限定边界审核。
+- 目前只确认待审风险和实现方案，未改业务状态机、未重写历史数据或历史 Gate。U2 冻结前须决定最小核验输入和旧测试的修复范围，不能由 Runtime 原始 JSON 自报 worker_reconciled/business_verified，也不能通过任务文字猜测其没有写副作用。
+
+#### U2 终态边界审核结论
+
+- 独立 Sol medium 确认上述两项判断均为 U2 前置 P1。主代理采纳最小纠偏：结果保留独立 Runtime 报告状态及正文；新业务 Task/Run 缺可信副作用核验时为 uncertain，固定原因可为 business_effect_unverified，不自动重跑。Runtime 输入无权声明 Worker/业务已核验，历史布尔字段也不被自动升级。
+- Cancel 先提交只保留取消意图，最终 Task/Run 按真实 reconcile 结果结算；可信已核验的 succeeded/failed/canceled 各自保留，无可信来源或不确定中断则 uncertain。必须集中改正 Repository/Panel 中把晚到 succeeded 固定断言为 canceled 的旧测试，并补 uncertain、失败、信号失败和双向交错的事务/Journal/幂等证据。
+- 局部回开的是 [ADR-001 测试 T06](2026-09-01-openagentx-adr001-t06-cancel-approval-races.md) 的 Cancel/finish 状态映射及关联的 [实施 task08](2026-08-30-openagentx-task08-message-cancel-approval-races.md) 范围；独立审核最初称其 T08，主代理核实文件后纠正。正式测试 T08 的 mTLS 范围不受影响。N1/U1 明确未覆盖 U2 结果语义，合并 Gate 不整体回开。
+- T04 连续接单、T09 进程终止/无残留与 Worker 保活的历史证据保留，不能外推为当前产品已具备通用自动副作用核验。旧报告不静默改写，本记录及后续 U2 报告说明新结论、对应修复 commit 和实际补验范围。
+- U2 不新增通用文件系统验证框架或任意 shell hook。E1 可以外部独立核对隔离 marker 的路径、内容、数量、摘要来证明实际结果，同时明确记录 runtime_status=succeeded、task_status=uncertain、verification_source=external_e1；这不向产品回写 succeeded，也不宣称自动业务核验已实现。
+- 实践影响明确：在没有可信副作用核验接口的真实 Adapter 上，Runtime 正常完成后用户仍能阅读结果，但业务状态会保守显示待核验。此为恢复既有执行基线的约束，不通过假造核验来源换取绿色成功状态。后续若要求产品内自动 succeeded，需独立设计预声明、窄类型、带 CAS/审计的核验输入。
+
+#### N2 inherit 凭据兼容边界
+
+- 当前 `deploy/agy/README.md` 明确环境形式的认证 SOCKS5 在既有 wrapper 中会转换成下游 username/password argv，只有受控配置文件形式避免该暴露。ADR-002 禁止凭据进入 argv，不能沿用旧文档的兼容例外作为新网络工作流的通过依据。
+- 已要求 N2 对 AGY inherit 的认证 URL 执行受控导入/物化，或给固定诊断拒绝并保留导入修复入口；无认证 inherit 按原契约保留。局部测试使用隔离 sentinel 核对下游真实 argv，不记录真实秘密；部署文档应随最终实现更新，不能保留与产品新约束冲突的说明。
+
+#### N2 第二个实施检查点
+
+- 实现者补齐 fakeWorkerClient 接口后，报告 domain、secretstore、runtime/network、AGY、CodeBuddy、ACP、controlplane、API、Worker 的局部编译通过；Worker/materializer 主链已接入 runner，尚未完成完整正式 API 闭环。
+- 两项开发失败如实保留：SQLite 旧 fixture 更新 network_profiles 命中新 immutable trigger；旧 Worker 缺少 runtime identity 时 PullNetworkWork 返回 422，导致 CLI 进程测试失败。主代理要求分别校正内容/状态字段与迁移入口、缺身份时的不可调度和控制保活语义，不通过移除不可变保护或伪造身份修绿测试。
+- 仍待 import ACK 与秘密元数据提交、N1 Run snapshot 迁移、环境白名单/blackip wrapper、daemon/Panel 路由、前端和聚焦测试。本条属于开发局部检查点，不是独立验证批次或 N2 Gate 结论。
+- 主代理提出可将尚未开始的 NetworkSettings 新组件和专用样式拆为独立文件所有权，以便与后端收口同时进行；只有 N2 先确认稳定 API/props 且明确未写这些文件后才派发。确认前仍由 N2 唯一实现，main.jsx、共享 API 和后端不并写，U2 继续顺序后置。
+
+#### E1 隔离网络输入预案
+
+- 根据已确认的 native 默认精确 loopback 排除规则，可使用 `127.0.0.2` 上的隔离 HTTP 目标和 `127.0.0.1` 上受控 CONNECT 代理，先证明未配置用户直连规则时连接抵达代理，再证明加入对应 blacklist 后直接取得目标标记且代理计数不增加。验证前记录本机监听/路由前置，若该地址不可用则换可确认的隔离地址，不改系统网络配置。
+- 该实验使用最终 wrapper/native 配合受控 HTTP 客户端，只判定网络规则与黑白名单优先级，明确不是 AGY 模型执行。真实 AGY Task 另行走其登记的真实二进制、部署变量、model、workspace 和最终配置版本；两类证据不能互相替代。
+- E1 普通 Task 使用隔离 workspace 和明确标记内容，独立核对实际文件并连续执行下一任务验证 Worker 常驻。配置测试失败、外部运行不确定和真实业务核验分别记录，不以重试消除原始失败。
+
+#### N2 配置页独立文件交接
+
+- N2 确认尚未创建前端新文件，主代理授权 `/root/u1_task_observation`（Sol high）在同一 N2 主要批次内唯一新建 `web/src/NetworkSettings.jsx` 与 `web/src/network-settings.css`。主代理不写源码，N2 保留 main.jsx、依赖、API、所有后端和接线；U2 仍未开始。
+- 组件 props 冻结为 `NetworkSettings({networkState,runtimeOptions,canWrite,canManageSecrets,offline,loading,busy,onCommand,onReload})`。Observe 响应为 `{profiles,versions,tests,bindings}`，仅安全元数据；runtime option 提供目标 worker_id/generation，浏览器不填写路径和 secret_ref。`onCommand` 保留组件持有的同内容重试幂等键，错误含 HTTP status；秘密提交即清空且不持久化，409 保留非秘密草稿。
+- 两代理直接对接字段与 main.jsx 接线。主代理指出 versions 的 published 不能只根据 head 当前指针代表历史发布：旧已发布版本仍需由实际发布记录证明，不能从测试状态猜测；若只表达当前发布必须明确命名，不能误导回退选择。
+- 前端实现者已确认验收：真实 DTO 的创建/编辑/替密/测试/发布/绑定/回退/导入、内容版本与状态 revision/Worker generation 分开、权限与离线门禁、三视口布局/可访问性、无凭据/路径暴露。仅在协调后做组件局部构建，不提前运行独立全量、浏览器或真实 Runtime。
+
+#### N2 验证准备调度限制
+
+- 主代理尝试创建 Terra high 的 `/root/n2_verification`，限定为只写待执行报告/验证 helper，不启动应用测试；调度返回 `agent thread limit reached`。随后尝试恢复原 Terra `/root/n1_u1_verification`，同样被线程上限拒绝。
+- 两次均未形成新的验证执行或文件，不把已发任务描述写成准备完成。N2 后端和独立前端继续当前工作；等待实现者正常结束释放槽后，再恢复 Terra 并进行准备/冻结后的独立批次。主代理不通过自行重复全量测试替代角色隔离。
+
+#### N2 第三个实施检查点
+
+- 实现者报告旧 fixture/immutable trigger 和缺 runtime identity 的 422 已消除，SQLite、CLI Worker 回归包通过；环境白名单去重、保留声明的 PATH/REAL_BIN/MGRAFTCP_BIN、危险键过滤及 wrapper 受控 blackip 文件接线已完成局部验证。argv 合同只证明接线，真实黑白名单网络效果仍属 E1。
+- 导入已形成独立 Adapter 解析、完整 guard 下读取 claimed work、确定性不可变 secret 写入、第二次完整 guard 下 profile/head/import/work/Journal 原子提交骨架；仍待聚焦事务/重放/孤立秘密文件验证。Run snapshot 的 manifest/秘密/runtime/materialization 元数据已接入，相关局部包通过。
+- 正式闭环仍缺 daemon/Panel 装配、安全版本历史 DTO、main.jsx 接线、异步 network work loop、部署 README/inherit 凭据约束及集中聚焦测试，尚未 freeze。
+- 主代理要求慢 prober/Health 不占用唯一 heartbeat 或控制循环，必须在超时期间仍可保活/接控制；网络测试不覆盖当前 Backend 配置/健康。前端异步刷新由 main.jsx 单一持有，组件保留本地草稿，不另建重复轮询器。
+- 主代理要求明确 legacy 分支的升级边界：历史观察与已有运行可保留，升级后新 Run 不得通过旧 ConfigFile 绕过固定内容、测试/发布和 runtime identity；缺可信元数据时导入重测或不可调度但控制在线。此要求需旧库/旧注册的新 Begin 反例证明，不能只测全新 workflow。
+
+#### N2 表单并发边界纠偏
+
+- 主代理在新组件接线检查中发现：editDirty 会保留旧草稿，但 submitEdit 使用 props 中最新 state_revision，后台刷新可让旧草稿绕过预期 CAS 冲突覆盖他人新内容。已交前端唯一实现者在本批中把编辑基线 revision 与草稿绑定，刷新不得自动重基；冲突后保留非秘密输入并要求明确重新确认基线或放弃。
+- 替密输入随方案切换必须清空，避免旧方案凭据误写新方案；传输失败/5xx 不能显示“命令未提交”的确定判断，应显示无法确认结果并先刷新核对。非秘密同内容重试复用幂等键，秘密不为重试而缓存原文。
+- Worker 已应用的文案必须标明实际绑定的 profile/version/generation，不能只根据另一个已绑定方案的 desired_status=applied，暗示当前选中但未绑定的新方案已生效。上述为实现中的边界纠偏，独立浏览器/并发验收尚未开始。
+
+#### N2 配置页阶段冻结与模式闭环补齐
+
+- 前端实现者只新增两份授权文件并报告阶段冻结，已补草稿固定基线、显式重新确认/放弃、失败后的保守提示、实际应用身份校验和全部 named profile 命令。局部 Oxc JSX transform、Vite CSS preprocess、SSR import/空态 render、diff-check 通过；没有完整 build、认证浏览器或模式切换的通过证据，N2 总批次仍未冻结。
+- 主代理发现已绑定代理后缺少从指挥台切回 inherit/direct 的正式 Control 入口；N2 实现者确认当前仅完成 named profile，不能宣称 ADR-002 全模式闭环。此为原决策中每 Backend NetworkPolicy 的日常配置范围，本批必须补齐。
+- 主代理采用独立 Backend 模式候选/测试/发布路径，不将 inherit/direct 伪造为 ProxyProfile。模式候选和不可变 policy 快照与当前 binding 分离；测试仅使用独立 Adapter，不改当前配置/健康/可用性。ready 后由明确发布命令核对测试、Worker generation、runtime identity 与 binding CAS，再创建 apply work，Worker ACK 才标 applied。只有发布改变 desired，活动 Run 始终固定原快照。
+- 计划接口为 `/api/control/v1/network-bindings/mode/tests` 与 `/mode/publish` 或等价明确 DTO，最终契约由 N2 先锁定。AGY 未声明的 direct 不开放；其他 Adapter 只开放声明和实测支持的模式。模式与直连规则也需可追溯版本/manifest，不能只保存一个 mode 字符串。
+- schema/domain/work/Panel 修改仍由 N2 唯一负责，模式接口稳定后恢复同一前端作者在本批追加接线。此期间不启动独立验收，避免对未完成目标提前给 GO。
+- 新组件同时发现跨 profile 重绑缺 applied_profile_id。主代理要求集中保存实际 mode/profile/version/worker/generation/revision，与 desired 分开；pending 时保留最近成功事实，旧库仅在 applied revision 确实匹配当前 binding 时安全回填，其余保持未知，不能猜测来源或删除可确认事实。
+- 前端作者正常结束后，主代理再次创建 `/root/n2_verification`（Terra high）成功。本次仅授权新待执行报告与正式 API helper 准备，不启动 daemon/Worker/浏览器/全量测试，模式 API 未锁定前不编造请求。早先线程上限失败保留为历史，本次未因此改变任何 Gate。
+
+#### 范围内缺陷与后续台账
+
+| 编号 | 级别 | 问题与处置 | 归属 |
+|---|---|---|---|
+| N2-MODE-01 | P1 | 指挥台缺 inherit/direct 切换，阻断 ADR-002 明确模式闭环；本批集中补候选、测试、发布、回执与旧 Run 不变量 | N2 当前批次 |
+| N2-UX-01 | P2 | 原方案不能直接移除凭据；当前可新建无认证方案并测试/发布/重绑完成业务，不阻断既定矩阵。后续可增加 owner 专用显式 clear 命令生成新内容版本，旧秘密保留给旧 Run | 后续凭据管理易用性任务 |
+
+- 主代理曾询问移除凭据的最小方案，随后按任务范围规则明确为 P2，仅记录、不授权为此扩大当前源码。不得将该项与明确要求的模式切换混为同一阻断。
+
+#### N2 验证准备回报与工具纠偏
+
+- Terra 已新增 `2026-09-05-openagentx-n2-validation.md` 和 `verify-n2.mjs`，报告状态 pending_freeze；仅 Node 语法/diff 检查通过。没有启动应用、daemon、Worker、浏览器、模型或 Go/Web 构建，准备成果不等价于测试通过。
+- 主代理发现 helper 在状态检查前强制解析 JSON，现有未认证响应为 text/plain，会把预期 401/403 误记失败；已交同一验证者集中修正。另要求私有文件使用 lstat 拒绝链接、准确 0600/父目录 0700、验证 base URL 限隔离 loopback，避免误用环境连接生产或外部服务。
+- 待测矩阵不假定幂等键有过期机制，采用实际契约的同键异请求冲突。新模式 API 尚未锁定，脚本只准备确定的 named profile 路径，等待最终契约后补齐；正式独立批次仍未授权。
+- Terra 已完成上述 helper 纠偏，Node 语法与新文件 diff 检查通过并正常结束；没有执行 fixture bootstrap 或任何应用/浏览器/模型。后续等待完整实现冻结，再以最终构建开始独立验证。
+
+#### N2 模式接口冻结与前端补接
+
+- N2 已冻结并落盘 `/api/control/v1/network-bindings/mode/tests`：请求含 agent_id/backend_id、inherit 或 direct、目标 worker_instance_id/generation 和当前 binding revision（无绑定为 0）；receipt/Observe mode_tests 保存 test_id、policy_version、manifest_digest、binding_revision 和目标身份。
+- `/api/control/v1/network-bindings/mode/publish` 使用 test_id、相同 Worker/generation 与测试时 binding_revision，显式发布后才进入 pending。Observe 新增 mode_tests；binding 增 mode/policy_version/test_id/manifest_digest，以及 applied_mode/applied_profile_id/applied_profile_version/applied_policy_version。main.jsx 的异步刷新需涵盖 mode_tests pending/claimed。
+- 主代理已恢复同一前端作者，只在原两文件补接；作者确认目标列表包含所有声明 inherit/direct/named_profile 的 Backend，故障健康不移除修复入口。模式测试 succeeded 且目标/mode/Worker/generation/revision 匹配后才允许用户显式发布，测试不自动发布，未声明能力不开放。
+- 此时 N2 仍在改 schema/repository/Worker，未到完整可测状态；“命名方案局部闭环全绿”为实现者回报，不等价于独立认证浏览器或总 Gate。前端补接后仍需全批冻结。
+- 主代理尝试恢复 Terra 只补 mode helper 时再次遇到 thread limit，未启动该任务、未增加应用验证。待前端正常结束释放槽后再调度；现有 helper 只覆盖已准备的 named 路径，mode 验证不被提前记为已准备或通过。
+- 主代理在补接检查发现跨方案回退对象不一致：版本表来自 selectedProfile，但回退 API 从当前 binding 推导 profile，仅提交 target_content_version；若目标绑定 A、界面选 B，则 B 的版本按钮可能回退 A 的同号版本。已交同一前端作者在按钮和 handler 两层校验 version.profile_id、selectedProfile.profile_id、selectedBinding.profile_id 相等且目标/mode 匹配，继续使用 binding CAS。此反例必须进入后续浏览器验收，尚未有独立通过证据。
+
+#### N2 配置组件最终交接与验证准备恢复
+
+- 主代理恢复上下文后核对 HEAD 为 `0839341`，N2 工作树仍未提交，完整 ADR-002/003 goal 保持 active；冻结 ADR、既有未跟踪文件和源码所有权边界不变。
+- 前端作者已正常结束，明确冻结 `NetworkSettings.jsx` 与 `network-settings.css`：包含 named profile、inherit/direct 测试与显式发布、模式历史诊断、严格目标身份/CAS，以及跨方案回退反例修复；实际应用统一读取 `applied_*`。局部 Oxc JSX、CSS 预处理、SSR 空态及 diff 检查通过，没有完整 build 或浏览器通过证据。
+- 已通知 N2 唯一后端及 main.jsx 实现者完成 `mode_tests` 初始化、pending/claimed 刷新和离线/卸载停止，并继续收口异步 work loop、legacy 新 Run 边界、部署说明与局部测试；尚未收到全批 freeze。
+- 前端正常结束后恢复 `/root/n2_verification` 成功，仅授权扩充 mode-workflow helper 和待执行矩阵，不启动应用/daemon/Worker/Go/Web/浏览器/模型。模式测试不得改变 binding 或健康，显式发布才 pending，实际 ACK 必须匹配目标身份；failed/stale 立即结束等待。准备完成后正常结束，正式验收另待完整冻结。
+
+#### N2 物化摘要与测试证据边界复核
+
+- 主代理只读发现 `Materialize` 用包含代理秘密的配置文件与 blackip 内容计算裸 SHA-256，并经去路径后的 ACK、注册和 Run 快照持久保存；`ImportConfig.SourceIdentity` 同样直接哈希原始含秘密文件。已知配置模板和端点时，这些值可被用于离线验证密码猜测，违反本批已锁定的秘密摘要约束，列为当前 P1。
+- 已交唯一 N2 实现者在同批集中改为受控 Worker 密钥认证摘要或等价不可猜测方案，保留旧 Run 文件篡改校验；导入来源可使用不含秘密的规范化内容与 opaque 秘密身份。不能仅删除摘要而放弃固定内容核验。尚未收到修复或独立测试证据。
+- 当前 network work 已有独立循环，但 heartbeatLoop 仍同步调用 BackendPool.Observe/Adapter.Health；慢当前 Backend 检查可能阻塞保活。已要求实现者补独立健康检查与慢 Health 的生命周期用例，不能只用慢候选测试证明所有健康检查均不阻塞。
+- 当前候选测试仅 clone Adapter 后调用 Health，AGY 的 Health 实际为正式 wrapper `--version`。此证据只能支持本地启动检查，不能证明代理端点或认证可用；坏端点不能据此 ready。已要求最小有界分层诊断，分别记录配置、秘密、端点、直连规则和 Runtime 本地健康；未执行的直连网络效果与模型调用保持未核验。最终 DTO 稳定后再由原 UI 作者补接，不以“分层测试”标题替代实际证据。
+
+#### N2 分层诊断契约与运行身份收口
+
+- N2 与主代理锁定 `probe_results=[{layer,state,diagnostic_code,duration_ms}]`，持久化在两类 test 并由安全 Observe 返回。layer 只允许 configuration、secret、endpoint、direct_rules、runtime_health、network_effect、model_call；state 只允许 passed、failed、not_applicable、not_verified。适用的配置/秘密/端点/规则/本地健康层失败不得整体 succeeded，网络效果和模型调用本批不推断通过。
+- 端点计划采用有界 SOCKS5 协商及可选 RFC1929 认证、HTTP 结构化协议响应；HTTP 响应不代表 CONNECT 或模型出网成功。direct_rules 只证明语法、物化和 Adapter 装配，不声称实际绕流。inherit 存在有效代理或 wrapper 默认端点时不得无条件写 endpoint/secret 不适用；无法确定的内容要显式未核验。
+- 主代理只读发现 `VerifyRuntimeIdentity` 尚无调用，PrepareRunNetwork 仅比较启动时缓存 Descriptor；AGY 的 executable 与 wrapper 摘要当前指向同一 wrapper，遗漏真实 REAL_BIN。已交 N2 在正式 probe/apply/StartTurn 前核对部署声明的实际绝对 wrapper/native/REAL_BIN，限制 helper 版本输出；本条为待修 P1，不是通过证据。
+- 原 UI 作者已恢复，仅在两文件追加分层事实展示；未知诊断使用固定降级文案，不裸显示任意服务端字符串。当前“活动任务配置”恒为未知，已要求两作者对接最小安全活动 Run 快照及期望版本对照，无活动执行时明确为空，不由 UI 猜测。API/main 仍归 N2，U2 深度运行观察仍后置。
+- inherit 白名单不能静默丢弃现有 AGY_GRAFT 配置后切回 wrapper 默认端点；已要求受控兼容或固定不可调度/导入诊断。这与已锁定的 legacy 新 Run 边界一起集中核对。
+- Terra 已完成 mode helper 并正常结束：准备断言 test 前后 binding/健康不变、显式 publish 才 pending、真实 ACK 身份与 revision 匹配，failed/stale 立即停止。只有 Node 语法/diff 检查，无应用或浏览器执行，N2 仍待完整冻结。
+- 主代理尝试在等待期恢复 Terra，只准备 E1 隔离 native 黑白名单实验脚本及待执行报告，调度返回 `agent thread limit reached`；该准备任务没有开始，没有新增 E1 文件或执行网络实验。保留现有 E1 矩阵，待实现者正常结束后再调度，不重复轮询线程上限。
+
+#### N2 第四个实施检查点
+
+- 实现者报告 HMAC 物化与导入身份已经完成，重启稳定、文件篡改和裸 SHA oracle 反例的局部测试通过；7 层/4 状态 DTO、唯一性/白名单/整体状态一致性校验，以及两类 test 的 SQLite JSON 已落盘。
+- SOCKS5 协商、RFC1929 认证及有界 HTTP OPTIONS 协议探测已实现，坏端点先于 Runtime Health 失败，相关聚焦测试通过。这些均为实现者局部证据，尚未独立审核、正式 API/浏览器或真实 E1。
+- active_runs 的安全字段及 `onOpenTask(taskID)` 纯导航回调已交原 UI 作者；后端 active_runs/main/README/Panel 测试仍待收口。其余剩余项为旧 workflow fixture 的分层 ACK、实际 wrapper/native/REAL_BIN 逐次复核、health 与 heartbeat 解耦、inherit 默认端点处理及 legacy Begin 反例；实现者报告明确阻断为无，尚未 freeze。
+- 主代理补充既有生命周期竞态边界：仅配置工作因同 generation 内新 revision 变 stale，不应终止仍有效的 Worker 控制连接；Session/lease/generation/fencing 失效仍按安全规则停止。要求分别提供确定性交错证据，不能把任意 ACK 错误一律当 Worker 身份失效。
+
+#### N2 配置组件分层与活动 Run 最终冻结
+
+- 原 UI 作者确认两文件再次最终冻结：已接入 `probe_results` 白名单和固定诊断，旧记录显示无分层记录，未知 layer/state/diagnostic 不回显原文；整体测试 succeeded 只表示流程完成，不外推真实网络效果或模型调用已经通过。
+- `active_runs` 最终字段为 run_id/task_id/agent_id/status/backend_id/worker_instance_id/worker_generation/network_mode/network_profile_id/network_profile_version/network_policy_version/network_binding_revision。组件按 Agent/Backend 显示 Run 固定快照与当前 desired 的同版/旧版/未记录对照；缺字段不推算，Task 跳转只调用 `onOpenTask(taskID)`。作者报告 main 已由 N2 接线，后端完整性仍待 N2 收口及独立验证。
+- 局部 Oxc JSX、Vite CSS、SSR import/空态、两文件 diff-check 通过；没有全量 build、真实浏览器或 Runtime 通过证据。主代理要求作者正常结束，N2 全批未冻结前不启动独立验收。
+- UI 作者随后正常结束。主代理再次恢复 Terra 成功，仅授权 E1 native 规则实验脚本与待执行报告的准备及 Node 语法/diff 自检；没有启动端口、网络、CLI、应用或浏览器。这是先前线程上限后的新成功调度，不覆盖原失败记录，N2 仍由原唯一实现者收口。
+- 主代理在分层接线复核发现 domain 已允许 named_profile 携带直连目标，但 Environment 仍只允许 direct 模式，导致物化成功后正式 AGY Health/StartTurn 拒绝非空 blackip 规则。已交 N2 修正，并补命名方案/IPv4/展开 IPv6 到 Environment 与 wrapper argv 的联动用例；真实绕流仍由 E1 证明。
+- 同次只读复核指出导入端口使用 `fmt.Sscanf` 会接受带尾部垃圾的数字，重复配置键会静默覆盖。已要求严格端口解析及重复键拒绝，保留最小已支持 native 配置子集；这属于既定 fail-closed 导入边界，尚无修复通过证据。
+
+#### E1 隔离 native 验证脚本准备完成
+
+- Terra 新增 `verify-e1-network.mjs` 与 `2026-09-05-openagentx-e1-validation.md` 并正常结束；仅 Node 语法及新文件 diff-check 通过，没有监听端口、发起网络、运行 CLI/应用/Worker/浏览器或模型。
+- 脚本须显式执行开关及最终 wrapper/helper/client 绝对路径，准备使用 127.0.0.2 marker 目标和 127.0.0.1 固定目标 allowlist 的 CONNECT/SOCKS5 代理，覆盖五项无 blackip、目标 blackip、黑白重叠及两种不重叠反例。按连接计数和相同目标结果判定，失败不重试，退出清理子进程/连接/监听。
+- 该准备仅用于 wrapper/native 规则效果，不是 AGY 模型 E2E；真实 Task marker、工作区副作用独立核对、Worker 常驻及连续接单仍按 E1 顺序后置。主代理已向 N2 请求对完成的秘密存储/物化/prober 子集给出稳定边界，确认后才安排独立静态预审，总批次仍不提前 GO。
+- N2 随后明确冻结 `internal/network/secretstore/**`、materializer.go/test 和 prober.go/test；报告严格 `strconv.Atoi`、重复键拒绝、HMAC 来源归一化及该子集聚焦测试通过。environment 的 named+direct_ips 已补 IPv4/展开 IPv6 局部链路测试，但仍可能被 identity/inherit 收口修改，故不纳入此次稳定子集。
+- 主代理已恢复独立 Sol medium 只读预审，仅可新写 `2026-09-05-openagentx-n2-independent-review.md` 并记录子集源指纹；不运行全量、应用、网络、浏览器或模型。其余 domain/Runner/API/identity/environment/main 不提前给结论；后续全批审查只对新增范围和发生变化的子集补审，避免重复消耗。当前没有新的 N2 Gate 结论。
+
+#### N2 独立子集预审 NO-GO 与集中修复
+
+- 独立 Sol medium 返回五项 P1，无 P0：HTTP 物化把 `http://host:port` 写入 native 要求的 `host:port` 字段；秘密/物化文件 Lstat 后按路径 ReadFile 有替换竞态；HMAC 最终文件先创建后写入可暴露空/部分 key；metadata/blackip 失败后的孤立敏感文件尚无完整并发安全处置；Dial 后 stalled read 不响应父 context 即时取消。
+- 主代理接受其作为本批集中失败证据，要求 fd-based O_NOFOLLOW/fstat/有界读取、完整 key 原子发布及坏 key 拒绝、引用感知孤立文件清理、HTTP 正式契约和 accept 后 cancel/SOCKS 认证帧断言。0700/0600 不被解释为同 uid 恶意 Runtime 的完整 OS 隔离，不因此扩张新增 sandbox。
+- 孤立文件结论限定当前源码未见满足既定清理/重试策略，相关 metadata service 仍未冻结，不冒充已完成全服务审查。HTTP 407 只能证明收到协议响应，不能声称认证或出网可用，必须使用明确诊断/未核验语义。
+- N2 已确认暂缓剩余 API/Binding 收口，转入同一批次集中修复；拟采用目录级锁串行、引用感知清理和原子发布。修复子集暂时回开，局部验证后重新冻结；仍不提交、不启动独立全量或浏览器，总目标保持 active。
+
+#### E1 准备脚本只读纠偏待办
+
+- 主代理只读发现当前 E1 helper 只终止 wrapper/native 的直接 PID，未证明清理 client 子孙；目标 HTTP socket 未跟踪，finally 的 server.close 可能无界等待；CONNECT 握手完成后未切换 phase，后续数据可能重建上游。已向 Terra 发送下次恢复时的集中修复清单，本次没有启动新的执行任务或网络。
+- 下次修复要求独立进程组、有界终止和等待、目标连接跟踪/有界关闭、握手缓冲限量及转 relay 后处理剩余数据。受控 client 需固定契约和禁用用户配置/外部代理，不能隐式读取 curlrc。
+- 当前五案例均走 SOCKS，需在最终 E1 增 HTTP 实际路径以确认本次 native 配置格式修复；该项仍为待准备/未执行，不能用 SOCKS 结果外推 HTTP 能力。
+
+#### N2 子集修复回报与幂等服务边界
+
+- N2 回报五项已修复并重新冻结：HTTP host:port、fd-based 有界读取、两个 key 原子 no-replace 发布、blackip-first/config-last 避免后置失败留下敏感 config、每秘密版本 flock 包住写文件/metadata/引用核对/失败清理、accept 后取消及 SOCKS 精确帧/HTTP407 固定诊断。局部并发、SQLite fault retry 与 prober 测试通过，独立结论仍待复审。
+- N2 的受影响包回归发现 legacy 零 inherit fixture 被 trustedNetworkPolicy 拒绝，controlplane/sqlite/cli 有开发测试失败；实现者选择补完整受信 fixture，不放宽生产校验。这不是已通过回归的证据，原失败保留，完整 N2 尚未 freeze。
+- 主代理对未冻结服务只读发现 EditDraft/ReplaceSecret/StartTest/Publish 等先检查当前 head 的 expected revision，再进入 execute 查幂等回执；首次成功推进 revision 后，原请求原键重试会提前 409，违反返回原回执的约定。已要求当前授权及结构验证后先核对 actor/operation/目标和完整 body 摘要限定的既有回执，不存在再做可变状态/CAS；事务内仍保留最终并发检查，秘密仍用 HMAC，不缓存原文。
+- 新幂等问题归属尚未冻结服务，不改写原六文件子集审核历史。主代理已恢复同一独立 Sol medium 对五项做定向只读复审，记录新指纹，仅必要读取 CommitImmutable/引用检查调用背景，不给其余模块总 GO。
+- Terra 已集中修复 E1 helper 并正常结束：独立进程组有界 TERM/KILL/等待、target/proxy 连接跟踪、有界监听关闭、4 KiB/3 秒握手及 relay 剩余数据；curl 固定 argv 禁用用户配置/外部代理并设超时；新增 HTTP host:port 案例。仅 Node 语法/diff 通过，没有网络/CLI/应用执行。
+- 已给 Terra 留下 N2 后续补验清单：named failed/stale 立即停止、完整 applied 身份、probe_results、全命令幂等、active_runs；mode 发布的 pending 提交事实从正式 receipt 验证，随后 Observe 可已 applied，不强求竞态瞬态。不把 loopback URL 本身当作已证明隔离进程。
+
+#### N2 子集第二轮结果与清理设计判定
+
+- 独立定向静态复审清除 S01 HTTP 格式、S03 原子 key、S05 probe 取消；六文件指纹为 `388ea84385f178dd3446e0561db5ba4b04f3bbe7b0a683d50422303ecc6262a5`。S02/S04 仍 NO-GO，未执行测试/网络/浏览器，完整 N2 仍未审核。
+- S02 剩余为 trim 后空 root 未被明确拒绝，以及根目录未用 directory fd 锚定。主代理要求内部叶文件通过已验证目录 fd 的 openat/renameat 等操作；不扩张 OS sandbox 或任意外部路径权限系统。
+- S04 中 per-version 锁和引用检查已解决协作入口并发误删，blackip-first/config-last 也已消除该后置敏感 config 孤立路径；仍须处理崩溃/引用查询失败后的恢复。主代理将“孤立不可读”明确限定为正式授权 API 不得读取未提交版本，不能将 0600 对同 uid owner 的可读性误称对外泄露。
+- 主代理提出最小可重建清理策略：在 per-version 锁下扫描私有目录并核对已提交 DB 引用，有任一历史/活动引用则保留，无引用可清理，查询失败保留并持久可重试；不强制额外大型两阶段提交。已请独立审核者判断正式入口现有引用保护及该策略是否充分，原报告保留，澄清另行追加，尚未把 S04 标为清除。
+- N2 同时报告十类命令 pre-CAS 回执处理已修复，profile path 纳入摘要，替密使用 HMAC，事务内查重仍保留；十类成功原键重放及同键异请求冲突优先于 stale 的聚焦测试通过。此为未冻结服务的局部证据，独立总审与正式 API 验证仍待后续。
+- 独立审核随后确认正式路径仅为认证 Worker pull -> Guarded ClaimNetworkWork -> 已提交 work.SecretVersion -> secrets.Get，不能由请求提交任意 version，所以未提交孤立文件无正式读取路径。其确认目录枚举+完整 DB 引用+同 per-version 锁+失败保留重核足够，额外持久 orphan 标记没有独立必要性；S04 仅因扫描/重试未实现继续阻塞。
+- 设计澄清期间六文件指纹已变为 `51d099ca1a18123748e810c503623c583dae11021d44a0a3b12b17983d18a9f1`，属于 N2 获准修复 S02/S04 的修改；本次澄清不是对新指纹的代码复审，前轮指纹与结论保留。主代理将已确认最小策略交回 N2，待下次明确 freeze 再复审。
+- 审核者正常结束后，主代理恢复 Terra，仅修改 N2 helper 和待执行报告，补分层结果、named failed/stale、完整 ACK 身份、十类幂等、active_runs，以及发布 receipt 与后续实际状态的正确断言。仅准 Node 语法/diff 检查，没有启动 fixture、应用、网络、Worker 或浏览器。
+
+#### N2 恢复扫描进度与验证准备条件纠偏
+
+- N2 回报 directory fd 锚定与空白 root 拒绝已实现，内部 key/config/blackip/secret 使用 openat/renameat/unlinkat；初始化后替换根路径仍作用于原目录的局部测试通过。孤立扫描、查询失败保留并下次清理、引用保留和未提交版本读取拒绝已有局部证据，仍需 SQLite 历史/活动引用和 Runner 生命周期核对，尚未再次完整 freeze。
+- 主代理要求 GC/配置工作错误不能导致有效 Worker 的 networkWorkLoop 直接退出；目标秘密引用不能确认时该工作 fail closed，清理失败保留并重试。控制身份/租约/generation/fencing 错误仍按原安全规则停止。
+- 主代理另要求审清 inherit bootstrap：不能仅通过 YAML 手填正版本、非空 manifest/identity 标记就绕过控制面事实；合法初始 inherit 需明确来源与快照语义，不能冒充已测试发布。隔离单元 fixture 与正式 CLI/API 前置证据分开，后者不得用任意摘要修绿。该边界尚待 N2 明确实现方案。
+- Terra 本次准备误把“未核验不能标作该层通过”写成 network_effect/model_call 必须 passed 才能通过 N2。主代理在任何动态执行前发现并交原作者纠正；该错误不归应用缺陷，不要求连接测试新增模型调用。
+- Terra 已修正并正常结束：前五层按模式检查；inherit 的 secret/endpoint 按当前 DTO 显示 not_verified/INHERITED_CONFIGURATION_UNVERIFIED；后两层强制 not_verified/NOT_VERIFIED，整体配置 test succeeded 可与此并存。报告保留准备错误历史，只有 Node 语法/diff 通过。
+- named SOCKS5 fixture 现约定公开合成用户名 `n2-fixture-socks-user` 与私有文件密码，并需核对精确认证帧。十类幂等仍只是完整矩阵，当前可执行 helper 仅实现 create 同键重放；其余九类 helper 尚待补，不能记作准备完成或已验收。
+
+#### 用户收口指令与立即调度
+
+- 用户明确表示“已经做的，暂时不会退，快速收口”，要求先交付可用功能，其余发现后续计划。主代理已立即通知 N2 实现、独立验证及审核：保留现有改动，停止新增全面加固、极端矩阵和通用 bootstrap/恢复框架；只按本文件顶部四类直接风险阻断。
+- N2 已接受，最短剩余为：真实 CLI 初次 inherit 的 test/probe/publish/apply/Run 链路（mode test 当前未到终态，正在定位）；现有 main/API/Worker 编译及 Go 回归失败收口；已有分层/active_run 必要断言；main 缩进与 Web build；diff-check 后明确全批 freeze。已做 S02/S04 保留，不继续扩展。
+- 未完成十类独立 helper 不再作为独立准备任务阻塞；在正式聚焦批次检查关键重试和状态不变量，其他扩展矩阵如实列未覆盖。尚未通过的功能与证据仍不能标绿，goal 保持 active。
+
+#### N2 最终冻结与聚焦验收启动
+
+- 实现者确认全批 freeze 并正常结束。首次 inherit mode test 停滞定位为内置 fake Runtime 缺少 NetworkProbeCloner/NetworkPolicyApplier，补标准接口后，三条 CLI 真实进程用例完成正式 test、七层 probe ACK、publish、apply ACK 及普通/多轮 Run。此证据使用 fake Runtime，不冒充外部模型或业务副作用验收。
+- 实现者报告 Go 回归、未绑定 metadata 不可调度反例、S02/S04 定向测试、Web build（266 modules）及 diff-check 通过。主代理尚未将局部结果等同独立验收，N2 源码保持冻结。
+- 已恢复 Terra 执行一次聚焦独立功能验证，授权隔离正式 API、真实 Worker 和 Chrome 配置页检查；不补其余九类幂等 helper、不扩张网络实验。验证报告需记录最终源码/构建及证据边界。
+- 已恢复独立 Sol medium 对最终冻结批次做短功能风险审核，按顶部四类直接风险判定；已有 fd、原子 key、扫描和取消修复全部保留。剩余事项进入后续计划，审核不再自动沿用旧 P1 标签扩大范围。
+- 独立源码短审核已返回 **GO**，S01-S05 在本轮功能边界内清除；最终功能验收仍等 Terra 动态证据。六文件聚合指纹为 `eb72cd80572b2a5f23b644a5542c53741b96584bb6fcf6f15068d944856f254e`，功能审阅集合指纹为 `326c4cf85febb50b6d1c568a4a19a557363bf96cec394e79bb192bffcc5298fa`，具体边界见独立报告。审核者已正常结束，证据到齐后只做一次短核。
+- Terra 报告冻结二进制 SHA-256 为 `552e5891074356b196a90e377fa4af2379166b464c0130b8c90132ec9a6ff765`，关键 Go 包与 Web build 通过。首套尚未启动的隔离 fixture 在终端回显关闭前暴露了临时凭据，已废弃，不能用作证据；重建必须使用新凭据并预先关闭 TTY ECHO，禁止复用或抄录秘密。此为验证脚本事故，不改产品认证实现。
+- 创建 `/root/u2_functional_closeout`（Sol high）仅做收窄后的只读准备，不编辑源码、不跑测试。主代理要求优先按 Run 固定 instance 精确读取历史 Worker generation、复用现有投影和 Markdown；不得为准备任务扩张 schema 或新增可自报为已核验的通用接口。N2 提交前不启动 U2 实施。
+
+#### U2 本轮最小验收矩阵（实施前冻结）
+
+- 只读准备已确认历史 Worker instance 与 generation 可精确关联，不新增 schema。保留 N2 两个配置组件；源码范围限于 Runtime 结果/事件必要修正、Finish 映射、Observe/Panel 安全投影及 main/styles 的展示补齐，相关局部测试随修正更新。
+- 不新增通用业务核验入口或可由 Runtime 自报为已核验的字段。缺少可信副作用事实时 Task 保持 `uncertain`，Run 的 Runtime 状态和结果正文仍保留；外部 E1 的独立核验只写入验收报告，不伪造成产品内已核验事实。
+- 复杂产物、审批描述新增持久化、ACP/CodeBuddy 的全面协议整治及通用核验框架后置；本轮仅修直接误报或泄露路径。U2 尚未获源码实施授权，先完成 N2 提交。
+
+| 类别 | 本轮断言 | 证据 |
+|---|---|---|
+| 正向流程 | Run 显示固定 Worker/generation、网络版本、运行阶段、Runtime 结果与错误及核验来源 | 安全 Observe DTO 与浏览器 DOM |
+| 状态不变量 | 当前 Worker/绑定变化不改写历史 Run；Runtime 自报不提升为业务已核验 | 历史身份对照与投影测试 |
+| CAS/幂等 | 保留 Begin/Finish 的身份、版本和同结果重复提交规则 | 受影响服务/事务测试 |
+| 失败路径 | 历史身份缺失显示未知；未知副作用不报成功；Markdown 错误回退纯文，复制失败有反馈 | 结果/投影用例及浏览器 |
+| 竞态 | 未知结果与取消交错不虚报已取消；保留 Runtime 结果及取消意图 | 定向事务用例 |
+| 安全 | 新 Runtime Journal 不持久化 raw map、provider session、隐藏字段或完整 TurnResult | 写入前白名单及 Journal payload 断言 |
+| 前端 | Task/Message/现有 Approval 文本/result 共用 Markdown，手机表格和代码局部滚动，选择及重连保持 | 三视口、原文/复制、SSE 与离线写保护 |
+
+#### N2 本轮功能验收收口
+
+- Terra 完成 named profile、inherit、direct 的正式 Control API -> 真实 Worker work/ACK -> Observe applied；named SOCKS5 精确认证成功 1、失败 0，七层诊断及完整 applied 身份匹配。Chrome 实际登录、凭据提交清空、配置观察、active_runs 空态及三视口已执行。离线仅验证控件禁用，不冒充写请求计数或 SSE 断线证据。
+- 执行报告为 [N2 功能验收报告](2026-09-05-openagentx-n2-validation-executed.md)，准备稿已链接该报告并把扩展 helper 后置；三张安全截图及 manifest 已归档到 `evidence/n2/`。报告保留旧 fixture 回显事故，结论只绑定新凭据的 r2 环境。
+- 当前应用树指纹为 `bd8515ec3583f387a29e52f26d5fb0d1c0dc42f19f2c35bafa906c3b7a793657`，Web 构建资源指纹为 `4d7207cccff7c289640a2eaa6dbceca79ea982eb55d3fffe9048a7b829db2311`；二进制及 schema/Worker 身份见执行报告。三份冻结 ADR 的 SHA-256 仍与初始值一致。
+- 独立 Sol medium 已短核实际证据、截图 SHA/尺寸和边界，结论为 **N2 本轮功能 GO；完整 ADR-002 未验收**。主代理采纳，准备提交本批；九类扩展幂等、回退/导入和极端故障等未覆盖项不阻断本轮，不能被写作已通过。
+- 隔离 r2 daemon/Worker/SOCKS5 保留供 U2/E1 复用；最终实际闭环还须补错误配置失败、关键重试不重复、断线恢复及结果独立核对。U2 按上表最小矩阵继续，不回退既有加固、不修改冻结 ADR。

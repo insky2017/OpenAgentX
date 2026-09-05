@@ -21,6 +21,7 @@ import (
 	"openagentx/internal/api/workerapi"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
+	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	"openagentx/internal/transport/remotehttps"
 )
@@ -39,7 +40,15 @@ func TestRunWorkerProcessCompletesConsecutiveTasksOverRemoteHTTPSAndStops(t *tes
 	t.Cleanup(func() { _ = repository.Close() })
 	seedWorkerProcessIdentity(t, repository)
 	broker := controlplane.NewMemoryWakeupBroker()
-	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{})
+	secrets, err := secretstore.Open(filepath.Join(t.TempDir(), "network-secrets"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow, err := controlplane.NewNetworkWorkflowService(repository, secrets, broker, time.Now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := controlplane.NewWorkerService(repository, broker, controlplane.WorkerServiceOptions{NetworkWorkflow: workflow})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,6 +125,7 @@ runtime_backends:
 	t.Cleanup(cancelWorker)
 	workerResult := make(chan error, 1)
 	go func() { workerResult <- RunWorkerProcess(workerContext, configPath) }()
+	bootstrapWorkerProcessInherit(t, repository, workflow, workerResult, "remote")
 	for _, suffix := range []string{"a", "b"} {
 		created := createWorkerProcessTask(t, repository, "remote-"+suffix)
 		broker.Publish(controlplane.AgentMailboxTopic("quote"))
