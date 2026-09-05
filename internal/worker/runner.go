@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -58,7 +57,12 @@ func (r *Runner) Run(ctx context.Context) error {
 		return fmt.Errorf("register Worker: %w", err)
 	}
 	networkAcks := r.applyNetworkBindings(session.NetworkBindings)
-	if err := r.heartbeat(ctx, session, domain.WorkerStatusOnline, networkAcks); err != nil {
+	if _, observedHealth, observeErr := r.backends.Observe(ctx); observeErr == nil {
+		health = observedHealth
+		r.setHealth(health)
+	}
+	initialStatus := workerStatusForHealth(health)
+	if err := r.heartbeat(ctx, session, initialStatus, networkAcks); err != nil {
 		return fmt.Errorf("initial Worker heartbeat: %w", err)
 	}
 	// The acknowledgement is a one-shot state transition. Subsequent
@@ -155,7 +159,7 @@ func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession, 
 				}
 			}
 			_, health, observeErr := r.backends.Observe(ctx)
-			status := domain.WorkerStatusOnline
+			status := workerStatusForHealth(health)
 			if observeErr != nil {
 				status = domain.WorkerStatusDegraded
 			}
@@ -185,23 +189,23 @@ func (r *Runner) heartbeat(ctx context.Context, session *api.WorkerSession, stat
 func (r *Runner) applyNetworkBindings(bindings []domain.NetworkBinding) map[string]api.NetworkBindingAck {
 	acks := make(map[string]api.NetworkBindingAck, len(bindings))
 	for _, binding := range bindings {
-		ack := api.NetworkBindingAck{BackendID: binding.BackendID, ProfileID: binding.ProfileID, ProfileVersion: binding.ProfileVersion, State: "applied"}
+		ack := api.NetworkBindingAck{BackendID: binding.BackendID, ProfileID: binding.ProfileID, ProfileVersion: binding.ProfileVersion, BindingRevision: binding.Version, State: "applied"}
 		if err := r.backends.ApplyNetworkBinding(binding); err != nil {
 			ack.State = "failed"
-			ack.Diagnostic = sanitizeNetworkDiagnostic(err.Error())
+			ack.Diagnostic = domain.NetworkApplyFailedDiagnostic
 		}
 		acks[binding.BackendID] = ack
 	}
 	return acks
 }
 
-func sanitizeNetworkDiagnostic(value string) string {
-	value = strings.ReplaceAll(value, "\r", " ")
-	value = strings.ReplaceAll(value, "\n", " ")
-	if len(value) > 4096 {
-		value = value[:4096]
+func workerStatusForHealth(health map[string]openruntime.BackendHealth) domain.WorkerStatus {
+	for _, backendHealth := range health {
+		if backendHealth == openruntime.BackendHealthy || backendHealth == openruntime.BackendDegraded {
+			return domain.WorkerStatusOnline
+		}
 	}
-	return value
+	return domain.WorkerStatusDegraded
 }
 
 func (r *Runner) mailboxPump(ctx context.Context, session *api.WorkerSession, manager *ActiveRunManager) error {

@@ -29,7 +29,7 @@ func registerMessageWorker(t *testing.T, repository *Repository, fixture reposit
 		PrincipalID: fixture.agentPrincipal, Capabilities: []string{"coding"}, SessionTokenDigest: "message-route-token-digest",
 		TokenExpiresAt: repositoryTestTime.Add(time.Hour), LeaseUntil: repositoryTestTime.Add(time.Hour),
 	}
-	worker, err := repository.RegisterWorker(ctx, registration, []openruntime.BackendRegistration{{
+	worker, _, err := repository.RegisterWorker(ctx, registration, []openruntime.BackendRegistration{{
 		BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy,
 	}}, journalEvent("event-worker-message-route", "worker.registered", fixture.ownerPrincipal, fixture.organizationID))
 	if err != nil {
@@ -42,6 +42,7 @@ func registerMessageWorker(t *testing.T, repository *Repository, fixture reposit
 	}
 	if _, err := repository.HeartbeatWorker(ctx, guard, domain.WorkerStatusOnline, nil,
 		repositoryTestTime.Add(time.Hour), repositoryTestTime.Add(time.Hour),
+		nil,
 		journalEvent("event-worker-message-route-online", "worker.heartbeat", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
 		t.Fatalf("activate Message worker: %v", err)
 	}

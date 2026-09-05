@@ -71,18 +71,59 @@ func (p ProxyProfile) Validate() error {
 }
 
 type NetworkBinding struct {
-	AgentID               string        `json:"agent_id"`
-	BackendID             string        `json:"backend_id"`
-	ProfileID             string        `json:"profile_id"`
-	ProfileVersion        int64         `json:"profile_version"`
-	Version               int64         `json:"version"`
-	DesiredStatus         string        `json:"desired_status"`
-	AppliedWorkerID       string        `json:"applied_worker_id,omitempty"`
-	AppliedGeneration     int64         `json:"applied_generation,omitempty"`
-	AppliedProfileVersion int64         `json:"applied_profile_version,omitempty"`
-	UpdatedAt             time.Time     `json:"updated_at"`
-	Profile               *ProxyProfile `json:"profile,omitempty"`
-	Diagnostic            string        `json:"diagnostic,omitempty"`
+	AgentID                string        `json:"agent_id"`
+	BackendID              string        `json:"backend_id"`
+	ProfileID              string        `json:"profile_id"`
+	ProfileVersion         int64         `json:"profile_version"`
+	Version                int64         `json:"version"`
+	DesiredStatus          string        `json:"desired_status"`
+	AppliedWorkerID        string        `json:"applied_worker_id,omitempty"`
+	AppliedGeneration      int64         `json:"applied_generation,omitempty"`
+	AppliedProfileVersion  int64         `json:"applied_profile_version,omitempty"`
+	AppliedBindingRevision int64         `json:"applied_binding_revision,omitempty"`
+	UpdatedAt              time.Time     `json:"updated_at"`
+	Profile                *ProxyProfile `json:"profile,omitempty"`
+	Diagnostic             string        `json:"diagnostic,omitempty"`
+}
+
+type NetworkBindingApplication struct {
+	BackendID       string
+	ProfileID       string
+	ProfileVersion  int64
+	BindingRevision int64
+	State           string
+	Diagnostic      string
+	Event           *JournalEvent
+}
+
+const NetworkApplyFailedDiagnostic = "network configuration could not be applied"
+
+func (a NetworkBindingApplication) Validate() error {
+	if err := ValidateIdentifier("network binding backend_id", a.BackendID); err != nil {
+		return err
+	}
+	if err := ValidateIdentifier("network binding profile_id", a.ProfileID); err != nil {
+		return err
+	}
+	if err := ValidatePositiveVersion("network binding profile_version", a.ProfileVersion); err != nil {
+		return err
+	}
+	if err := ValidatePositiveVersion("network binding revision", a.BindingRevision); err != nil {
+		return err
+	}
+	if a.State != "applied" && a.State != "failed" {
+		return ErrInvalidInput("unsupported network binding acknowledgement state")
+	}
+	if a.State == "applied" && a.Diagnostic != "" {
+		return ErrInvalidInput("applied network binding diagnostic must be empty")
+	}
+	if a.State == "failed" && a.Diagnostic != NetworkApplyFailedDiagnostic {
+		return ErrInvalidInput("failed network binding diagnostic is unsupported")
+	}
+	if a.Event == nil {
+		return ErrInvalidInput("network binding acknowledgement event is required")
+	}
+	return nil
 }
 
 func (b NetworkBinding) Validate() error {

@@ -2,12 +2,16 @@ package panel
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	openapi "openagentx/internal/api"
 	"openagentx/internal/auth/web"
@@ -20,8 +24,11 @@ type State interface {
 	ListAgents(context.Context, int) ([]domain.AgentIdentity, error)
 	ListWorkers(context.Context, int) ([]domain.WorkerInstance, error)
 	ListTasks(context.Context, string, int) ([]domain.Task, error)
+	QueryTasks(context.Context, string, domain.TaskStatus, time.Time, time.Time, string, string, string, int) ([]domain.Task, error)
 	ListJournal(context.Context, int64, int) ([]domain.JournalEvent, error)
 	ListTaskJournal(context.Context, string, int64, int) ([]domain.JournalEvent, error)
+	ListTaskJournalBefore(context.Context, string, int64, int) ([]domain.JournalEvent, error)
+	ListTaskJournalRange(context.Context, string, int64, int64, int) ([]domain.JournalEvent, error)
 	GetTask(context.Context, string) (*domain.Task, error)
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error)
@@ -140,21 +147,75 @@ func (h *Handler) tasks(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
 		return
 	}
-	agent := r.URL.Query().Get("agent_id")
-	t, e := h.state.ListTasks(r.Context(), agent, 100)
-	if e != nil {
-		http.Error(w, e.Error(), 500)
+	query, err := parseTaskQuery(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	writeJSON(w, t)
+	tasks, err := h.state.QueryTasks(r.Context(), query.AgentID, query.Status, query.UpdatedAfter, query.UpdatedBefore, query.Text, query.CursorUpdatedAt, query.CursorTaskID, query.Limit+1)
+	if err != nil {
+		http.Error(w, "failed to load tasks", http.StatusInternalServerError)
+		return
+	}
+	hasMore := len(tasks) > query.Limit
+	if hasMore {
+		tasks = tasks[:query.Limit]
+	}
+	page := openapi.TaskListPage{Tasks: make([]openapi.TaskListItem, 0, len(tasks)), HasMore: hasMore}
+	for _, task := range tasks {
+		page.Tasks = append(page.Tasks, taskListItem(task))
+	}
+	if hasMore && len(tasks) > 0 {
+		last := tasks[len(tasks)-1]
+		page.NextCursor = encodeTaskCursor(taskCursor{UpdatedAt: last.UpdatedAt, TaskID: last.ID, Filter: query.Filter})
+	}
+	writeJSON(w, page)
 }
 func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
 		return
 	}
-	t, e := h.state.GetTask(r.Context(), r.PathValue("taskID"))
-	if e != nil {
-		http.Error(w, e.Error(), 404)
+	cursor, err := observeCursor(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	snapshotSequence, err := h.state.LatestJournalSequence(r.Context())
+	if err != nil {
+		http.Error(w, "failed to read observation snapshot", http.StatusInternalServerError)
+		return
+	}
+	if cursor.Mode == observeAfter && cursor.Sequence > snapshotSequence {
+		http.Error(w, "observation cursor is ahead of the current snapshot", http.StatusConflict)
+		return
+	}
+	taskID := r.PathValue("taskID")
+	var events []domain.JournalEvent
+	if cursor.Mode == observeAfter {
+		events, err = h.state.ListTaskJournalRange(r.Context(), taskID, cursor.Sequence, snapshotSequence, cursor.Limit+1)
+	} else {
+		before := cursor.Sequence
+		if before == 0 || before > snapshotSequence+1 {
+			before = snapshotSequence + 1
+		}
+		events, err = h.state.ListTaskJournalBefore(r.Context(), taskID, before, cursor.Limit+1)
+	}
+	if err != nil {
+		http.Error(w, "failed to load task events", http.StatusInternalServerError)
+		return
+	}
+	// Read projections after the event watermark is fixed. A concurrent commit
+	// is either visible in these projections and remains after the live cursor,
+	// or is picked up by the next range request; it can never be skipped.
+	t, err := h.state.GetTask(r.Context(), taskID)
+	if err != nil {
+		if errors.Is(err, domain.ErrTaskNotFound) || errors.Is(err, domain.ErrNotFound) {
+			http.Error(w, "task not found", http.StatusNotFound)
+		} else if isForbidden(err) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, "failed to load task", http.StatusInternalServerError)
+		}
 		return
 	}
 	m, err := h.state.ListMessages(r.Context(), t.ID)
@@ -162,24 +223,33 @@ func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to load task messages", http.StatusInternalServerError)
 		return
 	}
-	after, limit, err := observeCursor(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 	runs, err := h.state.ListRunAttemptsForTask(r.Context(), t.ID, 100)
 	if err != nil {
 		http.Error(w, "failed to load task runs", http.StatusInternalServerError)
 		return
 	}
-	events, err := h.state.ListTaskJournal(r.Context(), t.ID, after, limit)
-	if err != nil {
-		http.Error(w, "failed to load task events", http.StatusInternalServerError)
-		return
+	hasMore := len(events) > cursor.Limit
+	if hasMore {
+		if cursor.Mode == observeAfter {
+			events = events[:cursor.Limit]
+		} else {
+			events = events[1:]
+		}
 	}
-	readModel := openapi.TaskReadModel{Task: taskReadModel(*t), Messages: m, Events: projectEvents(events), LastSequence: lastEventSequence(projectEvents(events))}
-	if len(events) == limit {
-		readModel.NextSequence = events[len(events)-1].Sequence
+	projected := projectEvents(events)
+	readModel := openapi.TaskReadModel{Task: taskReadModel(*t), Messages: m, Events: projected, SnapshotSequence: snapshotSequence}
+	if cursor.Mode == observeAfter {
+		readModel.HasMoreLiveEvents = hasMore
+		readModel.LiveAfterSequence = snapshotSequence
+		if hasMore {
+			readModel.LiveAfterSequence = lastEventSequence(projected)
+		}
+	} else {
+		readModel.HasOlderEvents = hasMore
+		readModel.LiveAfterSequence = snapshotSequence
+		if hasMore && len(projected) > 0 {
+			readModel.HistoryBeforeSequence = projected[0].Sequence
+		}
 	}
 	for _, run := range runs {
 		readModel.RunAttempts = append(readModel.RunAttempts, runReadModel(run))
@@ -193,24 +263,142 @@ func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, readModel)
 }
 
-func observeCursor(r *http.Request) (int64, int, error) {
-	after := int64(0)
-	if value := r.URL.Query().Get("after_sequence"); value != "" {
+func isForbidden(err error) bool {
+	var domainErr *domain.DomainError
+	return errors.As(err, &domainErr) && domainErr.Code == "FORBIDDEN"
+}
+
+type observeCursorMode uint8
+
+const (
+	observeHistory observeCursorMode = iota
+	observeAfter
+)
+
+type observationCursor struct {
+	Mode     observeCursorMode
+	Sequence int64
+	Limit    int
+}
+
+func observeCursor(r *http.Request) (observationCursor, error) {
+	afterValue := r.URL.Query().Get("after_sequence")
+	beforeValue := r.URL.Query().Get("before_sequence")
+	if afterValue != "" && beforeValue != "" {
+		return observationCursor{}, fmt.Errorf("after_sequence and before_sequence are mutually exclusive")
+	}
+	cursor := observationCursor{Mode: observeHistory, Limit: 200}
+	value := beforeValue
+	if afterValue != "" {
+		cursor.Mode = observeAfter
+		value = afterValue
+	}
+	if value != "" {
 		parsed, err := strconv.ParseInt(value, 10, 64)
 		if err != nil || parsed < 0 {
-			return 0, 0, fmt.Errorf("invalid after_sequence")
+			return observationCursor{}, fmt.Errorf("invalid observation sequence")
 		}
-		after = parsed
+		cursor.Sequence = parsed
 	}
-	limit := 200
 	if value := r.URL.Query().Get("limit"); value != "" {
 		parsed, err := strconv.Atoi(value)
-		if err != nil || parsed < 1 || parsed > 500 {
-			return 0, 0, fmt.Errorf("invalid limit")
+		if err != nil || parsed < 1 || parsed > 499 {
+			return observationCursor{}, fmt.Errorf("invalid limit")
 		}
-		limit = parsed
+		cursor.Limit = parsed
 	}
-	return after, limit, nil
+	return cursor, nil
+}
+
+type taskQuery struct {
+	AgentID, Text, CursorUpdatedAt, CursorTaskID, Filter string
+	Status                                               domain.TaskStatus
+	UpdatedAfter, UpdatedBefore                          time.Time
+	Limit                                                int
+}
+
+type taskCursor struct {
+	UpdatedAt string `json:"updated_at"`
+	TaskID    string `json:"task_id"`
+	Filter    string `json:"filter"`
+}
+
+func parseTaskQuery(r *http.Request) (taskQuery, error) {
+	values := r.URL.Query()
+	query := taskQuery{AgentID: strings.TrimSpace(values.Get("agent_id")), Text: strings.TrimSpace(values.Get("query")), Limit: 50}
+	if utf8.RuneCountInString(query.Text) > 200 {
+		return taskQuery{}, fmt.Errorf("query is too long")
+	}
+	if value := strings.TrimSpace(values.Get("status")); value != "" {
+		query.Status = domain.TaskStatus(value)
+		if !query.Status.Valid() {
+			return taskQuery{}, fmt.Errorf("invalid task status")
+		}
+	}
+	var err error
+	if value := values.Get("updated_after"); value != "" {
+		query.UpdatedAfter, err = time.Parse(time.RFC3339, value)
+		if err != nil {
+			return taskQuery{}, fmt.Errorf("invalid updated_after")
+		}
+	}
+	if value := values.Get("updated_before"); value != "" {
+		query.UpdatedBefore, err = time.Parse(time.RFC3339, value)
+		if err != nil {
+			return taskQuery{}, fmt.Errorf("invalid updated_before")
+		}
+	}
+	if !query.UpdatedAfter.IsZero() && !query.UpdatedBefore.IsZero() && !query.UpdatedAfter.Before(query.UpdatedBefore) {
+		return taskQuery{}, fmt.Errorf("updated_after must be before updated_before")
+	}
+	if value := values.Get("limit"); value != "" {
+		query.Limit, err = strconv.Atoi(value)
+		if err != nil || query.Limit < 1 || query.Limit > 100 {
+			return taskQuery{}, fmt.Errorf("invalid limit")
+		}
+	}
+	filterBytes := sha256.Sum256([]byte(strings.Join([]string{query.AgentID, string(query.Status), query.UpdatedAfter.UTC().Format(time.RFC3339Nano), query.UpdatedBefore.UTC().Format(time.RFC3339Nano), query.Text}, "\x00")))
+	query.Filter = base64.RawURLEncoding.EncodeToString(filterBytes[:])
+	if value := values.Get("cursor"); value != "" {
+		cursor, decodeErr := decodeTaskCursor(value)
+		if decodeErr != nil || cursor.Filter != query.Filter || strings.TrimSpace(cursor.UpdatedAt) == "" || strings.TrimSpace(cursor.TaskID) == "" {
+			return taskQuery{}, fmt.Errorf("invalid task cursor")
+		}
+		if _, parseErr := time.Parse(time.RFC3339Nano, cursor.UpdatedAt); parseErr != nil {
+			return taskQuery{}, fmt.Errorf("invalid task cursor")
+		}
+		query.CursorUpdatedAt, query.CursorTaskID = cursor.UpdatedAt, cursor.TaskID
+	}
+	return query, nil
+}
+
+func encodeTaskCursor(cursor taskCursor) string {
+	encoded, _ := json.Marshal(cursor)
+	return base64.RawURLEncoding.EncodeToString(encoded)
+}
+
+func decodeTaskCursor(value string) (taskCursor, error) {
+	var cursor taskCursor
+	decoded, err := base64.RawURLEncoding.DecodeString(value)
+	if err != nil {
+		return cursor, err
+	}
+	if err := json.Unmarshal(decoded, &cursor); err != nil {
+		return cursor, err
+	}
+	return cursor, nil
+}
+
+func taskListItem(task domain.Task) openapi.TaskListItem {
+	summary := strings.TrimSpace(strings.SplitN(task.Content, "\n", 2)[0])
+	if summary == "" {
+		summary = task.ID
+	}
+	runes := []rune(summary)
+	if len(runes) > 160 {
+		summary = string(runes[:159]) + "…"
+	}
+	return openapi.TaskListItem{ID: task.ID, TargetAgentID: task.TargetAgentID, Status: task.Status, Summary: summary, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
 }
 
 func projectEvents(events []domain.JournalEvent) []openapi.JournalEventReadModel {
@@ -308,6 +496,7 @@ func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {
 		for _, backend := range backends {
 			// BackendRegistration only carries a profile reference and health;
 			// it never exposes credentials or config file contents.
+			backend.Network.ConfigFile = ""
 			options = append(options, option{WorkerID: worker.ID, AgentID: worker.AgentID, Backend: backend})
 		}
 	}

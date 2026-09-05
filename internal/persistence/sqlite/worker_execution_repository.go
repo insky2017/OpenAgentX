@@ -15,11 +15,17 @@ import (
 )
 
 func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([]openruntime.BackendRegistration, error) {
+	tx, err := r.begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 	var agentID string
-	if err := r.db.QueryRowContext(ctx, `SELECT agent_id FROM worker_instances WHERE worker_instance_id=?`, workerID).Scan(&agentID); err != nil {
+	var generation int64
+	if err := tx.QueryRowContext(ctx, `SELECT agent_id, generation FROM worker_instances WHERE worker_instance_id=?`, workerID).Scan(&agentID, &generation); err != nil {
 		return nil, fmt.Errorf("resolve Worker Agent: %w", err)
 	}
-	rows, err := r.db.QueryContext(ctx, `SELECT backend_id, descriptor_json, health
+	rows, err := tx.QueryContext(ctx, `SELECT backend_id, descriptor_json, network_json, health
 		FROM runtime_backend_registrations WHERE worker_instance_id=? ORDER BY backend_id ASC`, workerID)
 	if err != nil {
 		return nil, fmt.Errorf("list Worker Backends: %w", err)
@@ -28,32 +34,64 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 	registrations := make([]openruntime.BackendRegistration, 0)
 	for rows.Next() {
 		var registration openruntime.BackendRegistration
-		var descriptorJSON string
-		if err := rows.Scan(&registration.BackendID, &descriptorJSON, &registration.Health); err != nil {
+		var descriptorJSON, networkJSON string
+		if err := rows.Scan(&registration.BackendID, &descriptorJSON, &networkJSON, &registration.Health); err != nil {
 			return nil, fmt.Errorf("scan Worker Backend: %w", err)
 		}
 		if err := json.Unmarshal([]byte(descriptorJSON), &registration.Descriptor); err != nil {
 			return nil, fmt.Errorf("decode Worker Backend descriptor: %w", err)
 		}
+		if err := json.Unmarshal([]byte(networkJSON), &registration.Network); err != nil {
+			return nil, fmt.Errorf("decode Worker Backend network policy: %w", err)
+		}
+		if registration.Network.IsZero() {
+			// '{}' is the migration sentinel for a pre-N1 registration whose
+			// actual YAML policy is unknown. It must re-register before scheduling.
+			registration.Health = openruntime.BackendUnavailable
+		}
 		if err := registration.Validate(); err != nil {
 			return nil, fmt.Errorf("invalid persisted Worker Backend registration: %w", err)
-		}
-		// A published control-plane binding is the authoritative default for
-		// new turns. The Worker still validates the worker-owned file when the
-		// adapter starts, so an invalid or missing file remains fail-closed.
-		var mode, profileID, configFile, proxyMode string
-		var profileVersion int64
-		err = r.db.QueryRowContext(ctx, `SELECT p.mode, p.profile_id, p.version, COALESCE(p.config_file,''), p.mode
-			FROM network_profile_bindings b JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
-			WHERE b.agent_id=? AND b.backend_id=? AND p.status='published' AND b.desired_status='applied'`, agentID, registration.BackendID).
-			Scan(&mode, &profileID, &profileVersion, &configFile, &proxyMode)
-		if err == nil && configFile != "" {
-			registration.Network = domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: profileID, ProfileVersion: profileVersion, ProxyMode: mode, ConfigFile: configFile}
 		}
 		registrations = append(registrations, registration)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("iterate Worker Backends: %w", err)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, fmt.Errorf("close Worker Backend rows: %w", err)
+	}
+	for i := range registrations {
+		registration := &registrations[i]
+		var profileID, mode, configFile, desiredStatus, appliedWorkerID string
+		var profileVersion, revision, appliedGeneration, appliedProfileVersion, appliedRevision int64
+		err := tx.QueryRowContext(ctx, `SELECT b.profile_id, b.profile_version, b.version, b.desired_status,
+			COALESCE(b.applied_worker_id,''), COALESCE(b.applied_generation,0), COALESCE(b.applied_profile_version,0),
+			COALESCE(b.applied_binding_revision,0),
+			p.mode, COALESCE(p.config_file,'') FROM network_profile_bindings b
+			JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
+			WHERE b.agent_id=? AND b.backend_id=?`, agentID, registration.BackendID).
+			Scan(&profileID, &profileVersion, &revision, &desiredStatus, &appliedWorkerID,
+				&appliedGeneration, &appliedProfileVersion, &appliedRevision, &mode, &configFile)
+		if errors.Is(err, sql.ErrNoRows) {
+			continue
+		}
+		if err != nil {
+			return nil, fmt.Errorf("load Worker Backend network binding: %w", err)
+		}
+		if desiredStatus != "applied" || appliedWorkerID != workerID || appliedGeneration != generation ||
+			appliedProfileVersion != profileVersion || appliedRevision != revision {
+			registration.Health = openruntime.BackendUnavailable
+			continue
+		}
+		policy := domain.NetworkPolicy{
+			Mode: domain.NetworkNamedProfile, ProfileID: profileID, ProfileVersion: profileVersion,
+			ProxyMode: mode, ConfigFile: configFile, BindingRevision: revision,
+		}
+		if err := policy.Validate(); err != nil {
+			registration.Health = openruntime.BackendUnavailable
+			continue
+		}
+		registration.Network = policy
 	}
 	return registrations, nil
 }
@@ -138,6 +176,9 @@ func (r *Repository) BeginClaimedRunAttempt(
 	defer tx.Rollback()
 	credential, err := loadGuardedWorker(ctx, tx, guard)
 	if err != nil {
+		return nil, nil, err
+	}
+	if err := validateRunNetworkSnapshot(ctx, tx, guard, run); err != nil {
 		return nil, nil, err
 	}
 	item, err := scanMailbox(tx.QueryRowContext(ctx, `SELECT `+mailboxColumns+`
@@ -277,6 +318,68 @@ func (r *Repository) BeginClaimedRunAttempt(
 		return nil, nil, err
 	}
 	return task, item, nil
+}
+
+func validateRunNetworkSnapshot(ctx context.Context, tx *sql.Tx, guard domain.WorkerWriteGuard, run *domain.RunAttempt) error {
+	var resolved domain.ResolvedExecutionSpec
+	if err := json.Unmarshal([]byte(run.ResolvedExecutionJSON), &resolved); err != nil {
+		return domain.ErrInvalidInput("RunAttempt resolved execution is invalid")
+	}
+	var persistedJSON string
+	if err := tx.QueryRowContext(ctx, `SELECT network_json FROM runtime_backend_registrations
+		WHERE worker_instance_id=? AND backend_id=? AND adapter_id=?`, guard.WorkerInstanceID,
+		run.BackendID, run.AdapterID).Scan(&persistedJSON); errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrUnsupportedCapability
+	} else if err != nil {
+		return fmt.Errorf("load persisted Worker Backend network policy: %w", err)
+	}
+	var expected domain.NetworkPolicy
+	if err := json.Unmarshal([]byte(persistedJSON), &expected); err != nil {
+		return fmt.Errorf("decode persisted Worker Backend network policy: %w", err)
+	}
+	if expected.IsZero() {
+		return domain.ErrUnsupportedCapability
+	}
+	var profileID, mode, configFile, desiredStatus, appliedWorkerID string
+	var profileVersion, revision, appliedGeneration, appliedProfileVersion, appliedRevision int64
+	err := tx.QueryRowContext(ctx, `SELECT b.profile_id, b.profile_version, b.version, b.desired_status,
+		COALESCE(b.applied_worker_id,''), COALESCE(b.applied_generation,0), COALESCE(b.applied_profile_version,0),
+		COALESCE(b.applied_binding_revision,0),
+		p.mode, COALESCE(p.config_file,'') FROM network_profile_bindings b
+		JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
+		WHERE b.agent_id=? AND b.backend_id=?`, guard.AgentID, run.BackendID).
+		Scan(&profileID, &profileVersion, &revision, &desiredStatus, &appliedWorkerID,
+			&appliedGeneration, &appliedProfileVersion, &appliedRevision, &mode, &configFile)
+	if err == nil {
+		if desiredStatus != "applied" || appliedWorkerID != guard.WorkerInstanceID ||
+			appliedGeneration != guard.Generation || appliedProfileVersion != profileVersion || appliedRevision != revision {
+			return domain.ErrUnsupportedCapability
+		}
+		expected = domain.NetworkPolicy{
+			Mode: domain.NetworkNamedProfile, ProfileID: profileID, ProfileVersion: profileVersion,
+			ProxyMode: mode, ConfigFile: configFile, BindingRevision: revision,
+		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("load current network binding for RunAttempt: %w", err)
+	}
+	if err := expected.Validate(); err != nil || !sameNetworkPolicy(expected, resolved.Spec.Network) {
+		return domain.ErrUnsupportedCapability
+	}
+	return nil
+}
+
+func sameNetworkPolicy(left, right domain.NetworkPolicy) bool {
+	if left.Mode != right.Mode || left.ProfileID != right.ProfileID || left.ProfileVersion != right.ProfileVersion ||
+		left.ProxyMode != right.ProxyMode || left.ConfigFile != right.ConfigFile || left.BindingRevision != right.BindingRevision ||
+		len(left.DirectDestinations) != len(right.DirectDestinations) {
+		return false
+	}
+	for i := range left.DirectDestinations {
+		if left.DirectDestinations[i] != right.DirectDestinations[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func (r *Repository) AppendRunEvents(

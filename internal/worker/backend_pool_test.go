@@ -33,4 +33,31 @@ func TestBackendPoolAppliesPublishedNetworkBinding(t *testing.T) {
 	}
 }
 
+func TestBackendPoolBlocksWorkAfterNetworkApplyFailureUntilRepair(t *testing.T) {
+	adapter := agy.NewAdapterForTest(agy.Config{Binary: "agy-graft", Models: []string{"model"}})
+	pool, err := NewBackendPool([]RuntimeBackend{{ID: "backend", Adapter: adapter}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := nowForTest()
+	binding := domain.NetworkBinding{
+		AgentID: "agent", BackendID: "backend", ProfileID: "proxy", ProfileVersion: 2,
+		Version: 1, DesiredStatus: "pending", UpdatedAt: now,
+		Profile: &domain.ProxyProfile{
+			ID: "proxy", Version: 2, Status: domain.NetworkProfilePublished, Mode: "only_socks5",
+			Host: "proxy.internal", Port: 28080, ConfigFile: filepath.Join(t.TempDir(), "missing.conf"),
+			CreatedBy: "owner", CreatedAt: now, UpdatedAt: now,
+		},
+	}
+	if err := pool.ApplyNetworkBinding(binding); err == nil || pool.HasAvailableBackend() {
+		t.Fatalf("failed network apply did not block work: err=%v available=%v", err, pool.HasAvailableBackend())
+	}
+	if err := os.WriteFile(binding.Profile.ConfigFile, []byte("proxy\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := pool.ApplyNetworkBinding(binding); err != nil || !pool.HasAvailableBackend() {
+		t.Fatalf("repaired network apply did not restore work: err=%v available=%v", err, pool.HasAvailableBackend())
+	}
+}
+
 func nowForTest() time.Time { return time.Now().UTC() }

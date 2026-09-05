@@ -104,7 +104,7 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 			agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
 			profile_id TEXT NOT NULL, profile_version INTEGER NOT NULL, version INTEGER NOT NULL CHECK (version > 0),
 			desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
-			applied_worker_id TEXT, applied_generation INTEGER, applied_profile_version INTEGER, diagnostic TEXT, updated_at TEXT NOT NULL,
+			applied_worker_id TEXT, applied_generation INTEGER, applied_profile_version INTEGER, applied_binding_revision INTEGER, diagnostic TEXT, updated_at TEXT NOT NULL,
 			PRIMARY KEY (agent_id, backend_id), FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version)
 		)`,
 	}
@@ -116,7 +116,7 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 	// v1 databases may already contain network_profile_bindings created before
 	// the diagnostic field was introduced. CREATE TABLE IF NOT EXISTS does not
 	// alter that table, so add the nullable column explicitly when absent.
-	var hasDiagnostic bool
+	columns := map[string]bool{}
 	rows, err := tx.QueryContext(ctx, `PRAGMA table_info(network_profile_bindings)`)
 	if err != nil {
 		return fmt.Errorf("inspect network binding schema: %w", err)
@@ -130,18 +130,52 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 			rows.Close()
 			return fmt.Errorf("scan network binding schema: %w", err)
 		}
-		if name == "diagnostic" {
-			hasDiagnostic = true
-		}
+		columns[name] = true
 	}
 	if err := rows.Err(); err != nil {
 		rows.Close()
 		return fmt.Errorf("read network binding schema: %w", err)
 	}
 	rows.Close()
-	if !hasDiagnostic {
+	if !columns["diagnostic"] {
 		if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profile_bindings ADD COLUMN diagnostic TEXT`); err != nil {
 			return fmt.Errorf("add network binding diagnostic column: %w", err)
+		}
+	}
+	if !columns["applied_binding_revision"] {
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profile_bindings ADD COLUMN applied_binding_revision INTEGER`); err != nil {
+			return fmt.Errorf("add applied binding revision column: %w", err)
+		}
+	}
+	var hasBackendTable, hasBackendNetwork bool
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='runtime_backend_registrations'`).Scan(&hasBackendTable); err != nil {
+		return fmt.Errorf("inspect Backend registration table: %w", err)
+	}
+	backendRows, err := tx.QueryContext(ctx, `PRAGMA table_info(runtime_backend_registrations)`)
+	if err != nil {
+		return fmt.Errorf("inspect Backend registration schema: %w", err)
+	}
+	for backendRows.Next() {
+		var cid int
+		var name, columnType string
+		var notNull, primaryKey int
+		var defaultValue any
+		if err := backendRows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			backendRows.Close()
+			return fmt.Errorf("scan Backend registration schema: %w", err)
+		}
+		if name == "network_json" {
+			hasBackendNetwork = true
+		}
+	}
+	if err := backendRows.Err(); err != nil {
+		backendRows.Close()
+		return fmt.Errorf("read Backend registration schema: %w", err)
+	}
+	backendRows.Close()
+	if hasBackendTable && !hasBackendNetwork {
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE runtime_backend_registrations ADD COLUMN network_json TEXT NOT NULL DEFAULT '{}'`); err != nil {
+			return fmt.Errorf("add Backend network policy column: %w", err)
 		}
 	}
 	if err := tx.Commit(); err != nil {

@@ -131,7 +131,20 @@ func Resolve(ctx context.Context, requested domain.ExecutionSpec, defaults domai
 func sameNetworkProfile(left, right domain.NetworkPolicy) bool {
 	return left.Mode == right.Mode && left.ProfileID == right.ProfileID &&
 		left.ProfileVersion == right.ProfileVersion && left.ProxyMode == right.ProxyMode &&
-		left.ConfigFile == right.ConfigFile
+		left.ConfigFile == right.ConfigFile && left.BindingRevision == right.BindingRevision &&
+		sameDestinations(left.DirectDestinations, right.DirectDestinations)
+}
+
+func sameDestinations(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for i := range left {
+		if left[i] != right[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func contains(values []string, target string) bool {

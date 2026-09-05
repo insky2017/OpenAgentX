@@ -31,12 +31,32 @@ type AgentReadModel struct {
 }
 
 type TaskReadModel struct {
-	Task         TaskReadModelTask       `json:"task"`
-	Messages     []domain.Message        `json:"messages"`
-	RunAttempts  []RunAttemptReadModel   `json:"run_attempts"`
-	Events       []JournalEventReadModel `json:"events"`
-	LastSequence int64                   `json:"last_sequence"`
-	NextSequence int64                   `json:"next_sequence,omitempty"`
+	Task                  TaskReadModelTask       `json:"task"`
+	Messages              []domain.Message        `json:"messages"`
+	RunAttempts           []RunAttemptReadModel   `json:"run_attempts"`
+	Events                []JournalEventReadModel `json:"events"`
+	SnapshotSequence      int64                   `json:"snapshot_sequence"`
+	LiveAfterSequence     int64                   `json:"live_after_sequence"`
+	HistoryBeforeSequence int64                   `json:"history_before_sequence,omitempty"`
+	HasOlderEvents        bool                    `json:"has_older_events"`
+	HasMoreLiveEvents     bool                    `json:"has_more_live_events"`
+}
+
+// TaskListItem contains only the fields needed to browse and select a Task.
+// Full content and result data remain on the authenticated detail endpoint.
+type TaskListItem struct {
+	ID            string            `json:"id"`
+	TargetAgentID string            `json:"target_agent_id"`
+	Status        domain.TaskStatus `json:"status"`
+	Summary       string            `json:"summary"`
+	CreatedAt     string            `json:"created_at"`
+	UpdatedAt     string            `json:"updated_at"`
+}
+
+type TaskListPage struct {
+	Tasks      []TaskListItem `json:"tasks"`
+	NextCursor string         `json:"next_cursor,omitempty"`
+	HasMore    bool           `json:"has_more"`
 }
 
 // TaskReadModelTask is the browser-safe subset of a Task. Idempotency keys,

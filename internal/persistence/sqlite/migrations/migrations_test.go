@@ -57,13 +57,19 @@ func TestApplyCreatesTargetSchemaAndIsRepeatable(t *testing.T) {
 	}
 }
 
-func TestApplyUpgradesNetworkBindingDiagnosticColumn(t *testing.T) {
+func TestApplyUpgradesN1WorkerNetworkColumns(t *testing.T) {
 	ctx := context.Background()
 	db := openDB(t)
 	if err := migrations.Apply(ctx, db); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := db.ExecContext(ctx, "ALTER TABLE network_profile_bindings DROP COLUMN diagnostic"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, "ALTER TABLE network_profile_bindings DROP COLUMN applied_binding_revision"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, "ALTER TABLE runtime_backend_registrations DROP COLUMN network_json"); err != nil {
 		t.Fatal(err)
 	}
 	if err := migrations.Apply(ctx, db); err != nil {
@@ -75,6 +81,17 @@ func TestApplyUpgradesNetworkBindingDiagnosticColumn(t *testing.T) {
 	}
 	if count != 1 {
 		t.Fatalf("diagnostic column count=%d", count)
+	}
+	for table, column := range map[string]string{
+		"network_profile_bindings":      "applied_binding_revision",
+		"runtime_backend_registrations": "network_json",
+	} {
+		if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM pragma_table_info(?) WHERE name=?", table, column).Scan(&count); err != nil {
+			t.Fatal(err)
+		}
+		if count != 1 {
+			t.Fatalf("%s.%s column count=%d", table, column, count)
+		}
 	}
 }
 

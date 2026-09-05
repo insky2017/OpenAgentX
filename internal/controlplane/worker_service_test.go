@@ -162,6 +162,72 @@ func (environment *workerTestEnvironment) heartbeat(t *testing.T, session *api.W
 	}
 }
 
+func TestHeartbeatSecurityErrorsPrecedeAckOwnershipAndRollbackUnknownBackend(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	session := environment.register(t, "worker-heartbeat-priority")
+	request := api.HeartbeatRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: 0, FencingToken: 0,
+		Status:        domain.WorkerStatusOnline,
+		BackendHealth: map[string]openruntime.BackendHealth{"local": openruntime.BackendHealthy},
+		NetworkBindings: map[string]api.NetworkBindingAck{"other": {
+			BackendID: "other", ProfileID: "proxy", ProfileVersion: 1, BindingRevision: 1, State: "applied",
+		}},
+	}
+	if err := environment.service.Heartbeat(context.Background(), "wrong-principal", "wrong-token", request); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("wrong identity did not win combined error priority: %v", err)
+	}
+	if err := environment.service.Heartbeat(context.Background(), environment.workerID, session.SessionToken, request); err == nil {
+		t.Fatal("invalid generation unexpectedly accepted")
+	}
+	request.Generation = session.Worker.Generation
+	request.FencingToken = session.Worker.FencingToken + 1
+	if err := environment.service.Heartbeat(context.Background(), environment.workerID, session.SessionToken, request); !errors.Is(err, domain.ErrFencingRejected) {
+		t.Fatalf("fencing error did not precede Backend ownership: %v", err)
+	}
+	request.FencingToken = session.Worker.FencingToken
+	if err := environment.service.Heartbeat(context.Background(), environment.workerID, session.SessionToken, request); err == nil {
+		t.Fatal("unknown network Backend acknowledgement unexpectedly accepted")
+	}
+	credential, err := environment.repository.GetWorkerCredential(context.Background(), session.Worker.ID)
+	if err != nil || credential.Worker.Status != domain.WorkerStatusBootstrapping {
+		t.Fatalf("unknown Backend acknowledgement committed heartbeat: Worker=%+v err=%v", credential, err)
+	}
+}
+
+func TestRegisterAndPullIgnoreBindingForBackendRemovedFromWorkerYAML(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	environment.backend.Descriptor.NetworkModes = []string{"inherit", "named_profile"}
+	now := environment.clock.Now()
+	profile := &domain.ProxyProfile{
+		ID: "proxy-removed-backend", Version: 1, Status: domain.NetworkProfileDraft,
+		Mode: "only_socks5", Host: "proxy.internal", Port: 28080,
+		ConfigFile: "/etc/openagentx/proxy.conf", CreatedBy: environment.ownerID,
+		CreatedAt: now, UpdatedAt: now,
+	}
+	if err := environment.repository.CreateProxyProfile(context.Background(), profile); err != nil {
+		t.Fatal(err)
+	}
+	published, err := environment.repository.PublishProxyProfile(context.Background(), profile.ID, 1, environment.ownerID, now.Add(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := environment.repository.BindNetworkProfile(context.Background(), &domain.NetworkBinding{
+		AgentID: environment.agentID, BackendID: "removed", ProfileID: published.ID,
+		ProfileVersion: published.Version, Version: 1, DesiredStatus: "pending", UpdatedAt: now.Add(2 * time.Second),
+	}, 0); err != nil {
+		t.Fatal(err)
+	}
+	session := environment.register(t, "worker-without-removed-backend")
+	if len(session.NetworkBindings) != 0 {
+		t.Fatalf("registration returned removed Backend binding: %+v", session.NetworkBindings)
+	}
+	bindings, err := environment.service.PullNetworkBindings(context.Background(), environment.workerID, session.SessionToken,
+		api.NetworkBindingPullRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken})
+	if err != nil || len(bindings) != 0 {
+		t.Fatalf("pull returned removed Backend binding=%+v err=%v", bindings, err)
+	}
+}
+
 func (environment *workerTestEnvironment) createTask(t *testing.T, suffix string) *domain.CreateTaskResult {
 	t.Helper()
 	task := &domain.Task{

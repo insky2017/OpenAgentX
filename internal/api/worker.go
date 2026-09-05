@@ -70,11 +70,12 @@ type WorkerSession struct {
 }
 
 type NetworkBindingAck struct {
-	BackendID      string `json:"backend_id"`
-	ProfileID      string `json:"profile_id"`
-	ProfileVersion int64  `json:"profile_version"`
-	State          string `json:"state"`
-	Diagnostic     string `json:"diagnostic,omitempty"`
+	BackendID       string `json:"backend_id"`
+	ProfileID       string `json:"profile_id"`
+	ProfileVersion  int64  `json:"profile_version"`
+	BindingRevision int64  `json:"binding_revision"`
+	State           string `json:"state"`
+	Diagnostic      string `json:"diagnostic,omitempty"`
 }
 
 type NetworkBindingPullRequest struct {
@@ -154,6 +155,9 @@ func (r HeartbeatRequest) Validate() error {
 			return err
 		}
 		if err := domain.ValidatePositiveVersion("network binding profile_version", binding.ProfileVersion); err != nil {
+			return err
+		}
+		if err := domain.ValidatePositiveVersion("network binding revision", binding.BindingRevision); err != nil {
 			return err
 		}
 		if binding.State != "applied" && binding.State != "failed" {

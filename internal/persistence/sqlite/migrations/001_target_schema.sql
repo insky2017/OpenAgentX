@@ -161,6 +161,7 @@ CREATE TABLE runtime_backend_registrations (
     adapter_id TEXT NOT NULL,
     backend_id TEXT NOT NULL,
     descriptor_json TEXT NOT NULL,
+    network_json TEXT NOT NULL DEFAULT '{}',
     health TEXT NOT NULL CHECK (health IN ('healthy', 'degraded', 'unavailable')),
     observed_at TEXT NOT NULL,
     UNIQUE (worker_instance_id, adapter_id, backend_id)
@@ -436,6 +437,7 @@ CREATE TABLE network_profile_bindings (
     applied_worker_id TEXT,
     applied_generation INTEGER,
     applied_profile_version INTEGER,
+    applied_binding_revision INTEGER,
     diagnostic TEXT,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (agent_id, backend_id),

@@ -27,11 +27,12 @@ type NetworkPolicy struct {
 	ProxyMode          string      `json:"proxy_mode,omitempty" yaml:"proxy_mode,omitempty"`
 	ConfigFile         string      `json:"config_file,omitempty" yaml:"config_file,omitempty"`
 	DirectDestinations []string    `json:"direct_destinations,omitempty" yaml:"direct_destinations,omitempty"`
+	BindingRevision    int64       `json:"binding_revision,omitempty" yaml:"binding_revision,omitempty"`
 }
 
 func (p NetworkPolicy) IsZero() bool {
 	return p.Mode == "" && p.ProfileID == "" && p.ProfileVersion == 0 &&
-		p.ProxyMode == "" && p.ConfigFile == "" && len(p.DirectDestinations) == 0
+		p.ProxyMode == "" && p.ConfigFile == "" && len(p.DirectDestinations) == 0 && p.BindingRevision == 0
 }
 
 func (p NetworkPolicy) Validate() error {
@@ -64,6 +65,12 @@ func (p NetworkPolicy) Validate() error {
 		if strings.TrimSpace(destination) == "" || strings.ContainsAny(destination, "\r\n") {
 			return ErrInvalidInput("network direct_destinations must contain non-empty values")
 		}
+	}
+	if p.BindingRevision < 0 {
+		return ErrInvalidInput("network binding_revision cannot be negative")
+	}
+	if p.BindingRevision > 0 && p.Mode != NetworkNamedProfile {
+		return ErrInvalidInput("network binding_revision requires named_profile mode")
 	}
 	return nil
 }

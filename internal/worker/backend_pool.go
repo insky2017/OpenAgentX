@@ -17,15 +17,20 @@ type RuntimeBackend struct {
 }
 
 type BackendPool struct {
-	mu       sync.RWMutex
-	backends map[string]RuntimeBackend
+	mu        sync.RWMutex
+	backends  map[string]RuntimeBackend
+	available map[string]bool
+	blocked   map[string]bool
 }
 
 func NewBackendPool(backends []RuntimeBackend) (*BackendPool, error) {
 	if len(backends) == 0 {
 		return nil, domain.ErrInvalidInput("Worker requires at least one Runtime Backend")
 	}
-	pool := &BackendPool{backends: make(map[string]RuntimeBackend, len(backends))}
+	pool := &BackendPool{
+		backends: make(map[string]RuntimeBackend, len(backends)), available: make(map[string]bool, len(backends)),
+		blocked: make(map[string]bool, len(backends)),
+	}
 	for _, backend := range backends {
 		if err := domain.ValidateIdentifier("backend_id", backend.ID); err != nil {
 			return nil, err
@@ -36,7 +41,11 @@ func NewBackendPool(backends []RuntimeBackend) (*BackendPool, error) {
 		if _, exists := pool.backends[backend.ID]; exists {
 			return nil, domain.ErrInvalidInput("Runtime Backend IDs must be unique")
 		}
+		if backend.Network.IsZero() {
+			backend.Network.Mode = domain.NetworkInherit
+		}
 		pool.backends[backend.ID] = backend
+		pool.available[backend.ID] = true
 	}
 	return pool, nil
 }
@@ -62,7 +71,17 @@ func (p *BackendPool) ApplyNetworkBinding(binding domain.NetworkBinding) error {
 	if binding.Profile == nil {
 		return domain.ErrInvalidInput("network binding profile payload is required")
 	}
-	policy := domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: binding.Profile.ID, ProfileVersion: binding.Profile.Version, ProxyMode: binding.Profile.Mode, ConfigFile: binding.Profile.ConfigFile}
+	if err := binding.Validate(); err != nil {
+		return err
+	}
+	if err := binding.Profile.Validate(); err != nil || binding.Profile.Status != domain.NetworkProfilePublished ||
+		binding.Profile.ID != binding.ProfileID || binding.Profile.Version != binding.ProfileVersion {
+		return domain.ErrInvalidInput("network binding profile payload does not match binding")
+	}
+	policy := domain.NetworkPolicy{
+		Mode: domain.NetworkNamedProfile, ProfileID: binding.Profile.ID, ProfileVersion: binding.Profile.Version,
+		ProxyMode: binding.Profile.Mode, ConfigFile: binding.Profile.ConfigFile, BindingRevision: binding.Version,
+	}
 	if err := policy.Validate(); err != nil {
 		return err
 	}
@@ -77,11 +96,17 @@ func (p *BackendPool) ApplyNetworkBinding(binding domain.NetworkBinding) error {
 		return domain.ErrUnsupportedCapability
 	}
 	if err := applier.ApplyNetworkPolicy(policy); err != nil {
+		p.mu.Lock()
+		p.blocked[binding.BackendID] = true
+		p.available[binding.BackendID] = false
+		p.mu.Unlock()
 		return err
 	}
 	p.mu.Lock()
 	backend.Network = policy
 	p.backends[binding.BackendID] = backend
+	p.blocked[binding.BackendID] = false
+	p.available[binding.BackendID] = true
 	p.mu.Unlock()
 	return nil
 }
@@ -94,14 +119,16 @@ func (p *BackendPool) Observe(ctx context.Context) ([]openruntime.BackendRegistr
 	}
 	sort.Strings(ids)
 	backends := make([]RuntimeBackend, 0, len(ids))
+	blocked := make(map[string]bool, len(ids))
 	for _, id := range ids {
 		backends = append(backends, p.backends[id])
+		blocked[id] = p.blocked[id]
 	}
 	p.mu.RUnlock()
 
 	registrations := make([]openruntime.BackendRegistration, 0, len(backends))
 	health := make(map[string]openruntime.BackendHealth, len(backends))
-	healthy := 0
+	available := make(map[string]bool, len(backends))
 	for _, backend := range backends {
 		descriptor, err := backend.Adapter.Descriptor(ctx)
 		if err != nil {
@@ -113,16 +140,32 @@ func (p *BackendPool) Observe(ctx context.Context) ([]openruntime.BackendRegistr
 		backendHealth := openruntime.BackendHealthy
 		if err := backend.Adapter.Health(ctx); err != nil {
 			backendHealth = openruntime.BackendUnavailable
-		} else {
-			healthy++
 		}
+		if blocked[backend.ID] {
+			backendHealth = openruntime.BackendUnavailable
+		}
+		available[backend.ID] = !blocked[backend.ID] &&
+			(backendHealth == openruntime.BackendHealthy || backendHealth == openruntime.BackendDegraded)
 		health[backend.ID] = backendHealth
 		registrations = append(registrations, openruntime.BackendRegistration{
 			BackendID: backend.ID, Descriptor: descriptor, Health: backendHealth, Network: backend.Network,
 		})
 	}
-	if healthy == 0 {
-		return registrations, health, domain.ErrUnsupportedCapability
+	p.mu.Lock()
+	for backendID, isAvailable := range available {
+		p.available[backendID] = isAvailable
 	}
+	p.mu.Unlock()
 	return registrations, health, nil
+}
+
+func (p *BackendPool) HasAvailableBackend() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	for _, available := range p.available {
+		if available {
+			return true
+		}
+	}
+	return false
 }

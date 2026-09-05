@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
 	"openagentx/internal/domain"
 	"openagentx/internal/persistence/sqlite/migrations"
 )
@@ -55,7 +54,7 @@ func Open(ctx context.Context, databasePath string, options Options) (*Repositor
 	query.Set("_foreign_keys", "ON")
 	query.Set("_txlock", "immediate")
 	dsn := (&url.URL{Scheme: "file", Path: absPath, RawQuery: query.Encode()}).String()
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open(openAgentXSQLiteDriver, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite: %w", err)
 	}

@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sync/atomic"
 	"testing"
@@ -22,6 +23,15 @@ func TestBeginClaimedRunConsumesPreflightApprovalInSameTransaction(t *testing.T)
 	fixture := seedRepository(t, repository)
 	descriptor := messageDescriptor(openruntime.SteerQueued)
 	worker, guard := registerMessageWorker(t, repository, fixture, descriptor)
+	resolvedJSON, err := json.Marshal(domain.ResolvedExecutionSpec{Version: 1, Spec: domain.ExecutionSpec{
+		AdapterID: descriptor.AdapterID, BackendID: "local", Model: descriptor.Models[0],
+		Reasoning: domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault},
+		Session:   domain.SessionSpec{Mode: domain.SessionModeNew, ContextID: "task-preflight-begin-atomic"},
+		Timeout:   time.Minute, Network: domain.NetworkPolicy{Mode: domain.NetworkInherit},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
 	created := createTask(t, repository, fixture, "preflight-begin-atomic")
 	claimed, err := repository.TryClaimMailbox(context.Background(), guard, 1, repositoryTestTime.Add(30*time.Minute),
 		journalEvent("event-claim-preflight-begin-atomic", "mailbox.claimed", fixture.ownerPrincipal, fixture.organizationID))
@@ -48,7 +58,7 @@ func TestBeginClaimedRunConsumesPreflightApprovalInSameTransaction(t *testing.T)
 		ID: "run-preflight-begin-atomic", TaskID: created.Task.ID, AgentID: fixture.agentID, Version: 1,
 		Status: domain.RunAttemptStarting, WorkerInstanceID: worker.ID, FencingToken: worker.FencingToken,
 		LeaseUntil: repositoryTestTime.Add(time.Hour), ExecutionSpecVersion: 1,
-		RequestedExecutionJSON: `{}`, ResolvedExecutionJSON: `{}`, AdapterID: descriptor.AdapterID,
+		RequestedExecutionJSON: `{}`, ResolvedExecutionJSON: string(resolvedJSON), AdapterID: descriptor.AdapterID,
 		BackendID: "local", Model: descriptor.Models[0], ReasoningMode: domain.ReasoningBackendDefault,
 	}
 	begin := func(prefix string) error {

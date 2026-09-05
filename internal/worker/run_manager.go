@@ -72,7 +72,7 @@ func NewActiveRunManager(
 func (m *ActiveRunManager) CapacityAvailable() <-chan struct{} { return m.capacity }
 
 func (m *ActiveRunManager) WorkCapacity() int {
-	if m.draining.Load() || m.active.Load() {
+	if m.draining.Load() || m.active.Load() || !m.backends.HasAvailableBackend() {
 		return 0
 	}
 	return 1
@@ -138,7 +138,13 @@ func (m *ActiveRunManager) startWork(ctx context.Context, active *activeTurn, it
 	begin, err := m.client.BeginAttempt(ctx, item.ID, request)
 	if err != nil {
 		m.releaseCapacity()
+		if errors.Is(err, domain.ErrUnsupportedCapability) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("begin RunAttempt: %w", err)
+	}
+	if begin.Turn.Execution.Spec.Network.IsZero() {
+		return m.failStartedRun(ctx, begin.Turn, domain.ErrUnsupportedCapability)
 	}
 	adapter, err := m.backends.Resolve(ctx, begin.Turn.Execution.Spec.AdapterID, begin.Turn.Execution.Spec.BackendID)
 	if err != nil {

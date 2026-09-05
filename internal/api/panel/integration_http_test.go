@@ -69,12 +69,12 @@ func newPanelIntegrationFixture(t *testing.T, withApproval bool) panelIntegratio
 	workerToken := "panel-worker-token-012345678901234567890123"
 	workerDigest := sha256.Sum256([]byte(workerToken))
 	registration := domain.WorkerRegistration{WorkerInstanceID: "worker-panel", AgentID: "quote", Transport: domain.WorkerTransportUnix, PrincipalID: "agent-principal", Capabilities: []string{"coding"}, SessionTokenDigest: hex.EncodeToString(workerDigest[:]), TokenExpiresAt: now.Add(time.Hour), LeaseUntil: now.Add(time.Hour)}
-	worker, err := repository.RegisterWorker(context.Background(), registration, []openruntime.BackendRegistration{{BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy}}, journal("worker", "worker.registered", "worker_instance", registration.WorkerInstanceID))
+	worker, _, err := repository.RegisterWorker(context.Background(), registration, []openruntime.BackendRegistration{{BackendID: "local", Descriptor: descriptor, Health: openruntime.BackendHealthy}}, journal("worker", "worker.registered", "worker_instance", registration.WorkerInstanceID))
 	if err != nil {
 		t.Fatal(err)
 	}
 	guard := domain.WorkerWriteGuard{WorkerInstanceID: worker.ID, AgentID: worker.AgentID, PrincipalID: worker.AuthenticatedPrincipal, SessionTokenDigest: registration.SessionTokenDigest, Generation: worker.Generation, FencingToken: worker.FencingToken, CheckedAt: now}
-	if _, err := repository.HeartbeatWorker(context.Background(), guard, domain.WorkerStatusOnline, nil, now.Add(time.Hour), now.Add(time.Hour), journal("worker-online", "worker.heartbeat", "worker_instance", worker.ID)); err != nil {
+	if _, err := repository.HeartbeatWorker(context.Background(), guard, domain.WorkerStatusOnline, nil, now.Add(time.Hour), now.Add(time.Hour), nil, journal("worker-online", "worker.heartbeat", "worker_instance", worker.ID)); err != nil {
 		t.Fatal(err)
 	}
 	task := &domain.Task{ID: "task-panel", SenderPrincipalID: "human-owner", TargetAgentID: "quote", OrganizationID: "org-main", DispatchMode: domain.DispatchModeDirect, IdempotencyKey: "panel-task", Content: "panel integration"}

@@ -3,10 +3,12 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func (r *Repository) CreateProxyProfile(ctx context.Context, profile *domain.ProxyProfile) error {
@@ -178,7 +180,7 @@ func (r *Repository) BindNetworkProfile(ctx context.Context, binding *domain.Net
 		_, err = tx.ExecContext(ctx, `INSERT INTO network_profile_bindings(agent_id, backend_id, profile_id, profile_version, version, desired_status, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?)`, binding.AgentID, binding.BackendID, binding.ProfileID, binding.ProfileVersion, binding.Version, "pending", formatTime(binding.UpdatedAt))
 	} else {
 		binding.Version = expectedVersion + 1
-		result, execErr := tx.ExecContext(ctx, `UPDATE network_profile_bindings SET profile_id=?, profile_version=?, version=?, desired_status='pending', applied_worker_id=NULL, applied_generation=NULL, applied_profile_version=NULL, diagnostic=NULL, updated_at=? WHERE agent_id=? AND backend_id=? AND version=?`, binding.ProfileID, binding.ProfileVersion, binding.Version, formatTime(binding.UpdatedAt), binding.AgentID, binding.BackendID, expectedVersion)
+		result, execErr := tx.ExecContext(ctx, `UPDATE network_profile_bindings SET profile_id=?, profile_version=?, version=?, desired_status='pending', applied_worker_id=NULL, applied_generation=NULL, applied_profile_version=NULL, applied_binding_revision=NULL, diagnostic=NULL, updated_at=? WHERE agent_id=? AND backend_id=? AND version=?`, binding.ProfileID, binding.ProfileVersion, binding.Version, formatTime(binding.UpdatedAt), binding.AgentID, binding.BackendID, expectedVersion)
 		if execErr == nil {
 			var count int64
 			count, execErr = result.RowsAffected()
@@ -195,7 +197,66 @@ func (r *Repository) BindNetworkProfile(ctx context.Context, binding *domain.Net
 }
 
 func (r *Repository) ListNetworkBindings(ctx context.Context, agentID string) ([]domain.NetworkBinding, error) {
-	rows, err := r.db.QueryContext(ctx, `SELECT b.agent_id, b.backend_id, b.profile_id, b.profile_version, b.version, b.desired_status, COALESCE(b.applied_worker_id,''), COALESCE(b.applied_generation,0), COALESCE(b.applied_profile_version,0), COALESCE(b.diagnostic,''), b.updated_at, p.status, p.mode, p.host, p.port, COALESCE(p.config_file,''), COALESCE(p.secret_ref,''), p.created_by, p.created_at, p.updated_at FROM network_profile_bindings b JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version WHERE (?='' OR b.agent_id=?) ORDER BY b.agent_id, b.backend_id`, agentID, agentID)
+	return listNetworkBindings(ctx, r.db, agentID)
+}
+
+func (r *Repository) ListWorkerNetworkBindings(ctx context.Context, guard domain.WorkerWriteGuard) ([]domain.NetworkBinding, error) {
+	tx, err := r.begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	if _, err := loadGuardedWorker(ctx, tx, guard); err != nil {
+		return nil, err
+	}
+	bindings, err := listNetworkBindings(ctx, tx, guard.AgentID)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := tx.QueryContext(ctx, `SELECT backend_id, descriptor_json FROM runtime_backend_registrations WHERE worker_instance_id=?`, guard.WorkerInstanceID)
+	if err != nil {
+		return nil, fmt.Errorf("list Worker network-capable Backends: %w", err)
+	}
+	capable := make(map[string]bool)
+	for rows.Next() {
+		var backendID, descriptorJSON string
+		if err := rows.Scan(&backendID, &descriptorJSON); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		var descriptor openruntime.AdapterDescriptor
+		if err := json.Unmarshal([]byte(descriptorJSON), &descriptor); err != nil {
+			rows.Close()
+			return nil, fmt.Errorf("decode Worker network-capable Backend: %w", err)
+		}
+		for _, mode := range descriptor.NetworkModes {
+			if mode == string(domain.NetworkNamedProfile) {
+				capable[backendID] = true
+			}
+		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return nil, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	result := make([]domain.NetworkBinding, 0, len(bindings))
+	for _, binding := range bindings {
+		if capable[binding.BackendID] {
+			result = append(result, binding)
+		}
+	}
+	return result, nil
+}
+
+type networkBindingQueryer interface {
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+}
+
+func listNetworkBindings(ctx context.Context, queryer networkBindingQueryer, agentID string) ([]domain.NetworkBinding, error) {
+	rows, err := queryer.QueryContext(ctx, `SELECT b.agent_id, b.backend_id, b.profile_id, b.profile_version, b.version, b.desired_status, COALESCE(b.applied_worker_id,''), COALESCE(b.applied_generation,0), COALESCE(b.applied_profile_version,0), COALESCE(b.applied_binding_revision,0), COALESCE(b.diagnostic,''), b.updated_at, p.status, p.mode, p.host, p.port, COALESCE(p.config_file,''), COALESCE(p.secret_ref,''), p.created_by, p.created_at, p.updated_at FROM network_profile_bindings b JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version WHERE (?='' OR b.agent_id=?) ORDER BY b.agent_id, b.backend_id`, agentID, agentID)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +267,7 @@ func (r *Repository) ListNetworkBindings(ctx context.Context, agentID string) ([
 		var updated, profileStatus, profileCreated, profileUpdated, diagnostic string
 		var profileMode, profileHost, profileConfig, profileSecret, profileCreatedBy string
 		var profilePort int
-		if err := rows.Scan(&b.AgentID, &b.BackendID, &b.ProfileID, &b.ProfileVersion, &b.Version, &b.DesiredStatus, &b.AppliedWorkerID, &b.AppliedGeneration, &b.AppliedProfileVersion, &diagnostic, &updated, &profileStatus, &profileMode, &profileHost, &profilePort, &profileConfig, &profileSecret, &profileCreatedBy, &profileCreated, &profileUpdated); err != nil {
+		if err := rows.Scan(&b.AgentID, &b.BackendID, &b.ProfileID, &b.ProfileVersion, &b.Version, &b.DesiredStatus, &b.AppliedWorkerID, &b.AppliedGeneration, &b.AppliedProfileVersion, &b.AppliedBindingRevision, &diagnostic, &updated, &profileStatus, &profileMode, &profileHost, &profilePort, &profileConfig, &profileSecret, &profileCreatedBy, &profileCreated, &profileUpdated); err != nil {
 			return nil, err
 		}
 		b.UpdatedAt, err = parseTime(updated)
@@ -232,32 +293,6 @@ func (r *Repository) ListNetworkBindings(ctx context.Context, agentID string) ([
 		result = append(result, b)
 	}
 	return result, rows.Err()
-}
-
-func (r *Repository) AcknowledgeNetworkBinding(ctx context.Context, agentID, backendID, profileID string, profileVersion, generation int64, workerID, state, diagnostic string, now time.Time) error {
-	if state != "applied" && state != "failed" {
-		return domain.ErrInvalidInput("unsupported network binding acknowledgement state")
-	}
-	if len(diagnostic) > 4096 {
-		return domain.ErrInvalidInput("network binding diagnostic is too long")
-	}
-	tx, err := r.begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	result, err := tx.ExecContext(ctx, `UPDATE network_profile_bindings SET desired_status=?, applied_worker_id=?, applied_generation=?, applied_profile_version=?, diagnostic=?, updated_at=? WHERE agent_id=? AND backend_id=? AND profile_id=? AND profile_version=? AND (applied_generation IS NULL OR applied_generation<=?)`, state, workerID, generation, profileVersion, diagnostic, formatTime(now), agentID, backendID, profileID, profileVersion, generation)
-	if err != nil {
-		return err
-	}
-	count, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count != 1 {
-		return domain.ErrConflict("network binding is stale or does not belong to Worker")
-	}
-	return commit(tx)
 }
 
 func valueOrNil(value string) *string {

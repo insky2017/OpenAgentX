@@ -2,6 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import {
+  isCurrentObservation,
+  mergeHistoryTaskDetail,
+  mergeLiveTaskDetail,
+  sseResumeAfter,
+} from './task-observation-state.js'
 import './styles.css'
 
 class APIError extends Error {
@@ -110,11 +116,11 @@ function RunTimeline({ detail, onLoadMore, loadingMore }) {
         {runs.map((run) => <article className="run-card" key={run.run_id}><div><span className={`status-dot ${run.status?.startsWith('succeed') ? 'ready' : run.status?.startsWith('fail') ? 'error-dot' : 'busy'}`} /><strong>{run.adapter_id} / {run.backend_id}</strong></div><p>{run.model} · {run.status}</p><small>Worker {run.worker_instance_id} · spec v{run.execution_spec_version}</small><time>{new Date(run.started_at).toLocaleString()}</time></article>)}
         {!runs.length && <div className="empty-state">尚无可观察的 RunAttempt</div>}
       </div>
+      {detail.has_older_events && <button className="load-more history-more" type="button" onClick={onLoadMore} disabled={loadingMore}>{loadingMore ? '加载中...' : '加载更早事件'}</button>}
       <ol className="timeline" aria-label="运行时间线">
         {events.map((event) => <li key={`${event.sequence}-${event.event_id}`}><span className="timeline-marker" /><div><strong>{eventLabel(event.event_type)}</strong><p>{event.event_type} · {event.aggregate_type}</p><time>{new Date(event.created_at).toLocaleString()} · #{event.sequence}</time></div></li>)}
         {!events.length && <li className="empty-state">暂无运行事件</li>}
       </ol>
-      {detail.next_sequence > 0 && <button className="load-more" type="button" onClick={onLoadMore} disabled={loadingMore}>{loadingMore ? '加载中...' : '加载更多事件'}</button>}
     </div>
   )
 }
@@ -163,7 +169,10 @@ function Login({ onLogin }) {
 function App() {
   const [session, setSession] = useState(null)
   const [data, setData] = useState({ agents: [], workers: [], tasks: [], approvals: [], latest_sequence: 0 })
-  const [tab, setTab] = useState('command')
+  const [tab, setTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('view') === 'tasks' || params.has('task') ? 'tasks' : 'command'
+  })
   const [browserOnline, setBrowserOnline] = useState(navigator.onLine)
   const [streamState, setStreamState] = useState('connecting')
   const [draft, setDraft] = useState('')
@@ -177,13 +186,33 @@ function App() {
   const [taskQuery, setTaskQuery] = useState('')
   const [taskStatusFilter, setTaskStatusFilter] = useState('')
   const [taskAgentFilter, setTaskAgentFilter] = useState('')
+  const [taskTimeFilter, setTaskTimeFilter] = useState('')
+  const [taskTimeAnchor, setTaskTimeAnchor] = useState(Date.now())
+  const [taskPage, setTaskPage] = useState({ tasks: [], next_cursor: '', has_more: false })
+  const [taskListState, setTaskListState] = useState('idle')
+  const [taskListError, setTaskListError] = useState('')
+  const [loadingMoreTasks, setLoadingMoreTasks] = useState(false)
+  const [taskRefreshTick, setTaskRefreshTick] = useState(0)
   const [taskView, setTaskView] = useState('content')
   const [newOutput, setNewOutput] = useState(false)
   const [loadingMoreEvents, setLoadingMoreEvents] = useState(false)
   const lastSequenceRef = useRef(0)
   const selectedTaskRef = useRef('')
   const taskDetailRef = useRef(null)
-  const detailRequestRef = useRef(0)
+  const detailSelectionRef = useRef(0)
+  const detailInitialRequestRef = useRef(0)
+  const detailHistoryRequestRef = useRef(0)
+  const detailLiveRequestRef = useRef(0)
+  const detailCatchUpRunningRef = useRef(false)
+  const detailCatchUpPendingRef = useRef(false)
+  const taskListRequestRef = useRef(0)
+  const taskListRefreshRef = useRef(() => {})
+  const detailCatchUpRef = useRef(() => {})
+  const replayRetryRef = useRef(() => {})
+  const detailScrollRef = useRef(null)
+  const readingLatestRef = useRef(true)
+  const taskViewRef = useRef('content')
+  const returnFocusRef = useRef(null)
   const [now, setNow] = useState(Date.now())
   const deferredInstallPrompt = useRef(null)
   const [installState, setInstallState] = useState('hidden')
@@ -239,7 +268,6 @@ function App() {
         const overview = await api('/api/observe/v1/overview')
         if (!disposed) {
           setData(overview)
-          lastSequenceRef.current = Math.max(lastSequenceRef.current, Number(overview.latest_sequence) || 0)
         }
         return overview
       } catch (requestError) {
@@ -253,29 +281,22 @@ function App() {
     refresh()
       .then((overview) => {
         if (disposed) return
-        const after = Math.max(0, Number(overview.latest_sequence) || 0)
-        lastSequenceRef.current = after
+        const after = sseResumeAfter(lastSequenceRef.current, overview.latest_sequence)
         source = new EventSource(`/api/observe/v1/events/stream?after_sequence=${after}`)
         source.onmessage = (event) => {
           const sequence = Number(event.lastEventId) || 0
           if (sequence && sequence <= lastSequenceRef.current) return
           if (sequence) lastSequenceRef.current = sequence
-          if (selectedTaskRef.current) setNewOutput(true)
           clearTimeout(refreshTimer)
           refreshTimer = setTimeout(async () => {
             await refresh().catch(() => {})
-            if (selectedTaskRef.current) {
-              const current = taskDetailRef.current
-              await loadTaskDetail(selectedTaskRef.current, true, current?.last_sequence || 0, true)
-            }
+            taskListRefreshRef.current()
+            detailCatchUpRef.current()
           }, 150)
         }
         source.onopen = () => {
           setStreamState('online')
-          const current = taskDetailRef.current
-          if (selectedTaskRef.current && current) {
-            loadTaskDetail(selectedTaskRef.current, true, current.last_sequence || 0, true)
-          }
+          detailCatchUpRef.current()
         }
         source.onerror = () => setStreamState('connecting')
       })
@@ -306,7 +327,7 @@ function App() {
   }, [session, browserOnline, tab])
 
   const agents = data.agents || []
-  const tasks = data.tasks || []
+  const overviewTasks = data.tasks || []
   const workers = data.workers || []
   const approvals = data.approvals || []
   const roles = session?.principal?.roles || []
@@ -326,65 +347,180 @@ function App() {
 
   const targetAgent = selectedAgent || agentID(agents[0])
   const organizationID = agents.find((agent) => agentID(agent) === targetAgent)?.organization_id || agents[0]?.organization_id || ''
-  const attentionTasks = tasks.filter((task) => ['waiting_input', 'waiting_approval'].includes(task.status))
+  const attentionTasks = overviewTasks.filter((task) => ['waiting_input', 'waiting_approval'].includes(task.status))
   const onlineAgents = agents.filter((agent) => activeWorkers.get(agentID(agent))?.status === 'online').length
-  const visibleTasks = tasks.filter((task) => {
-    if (taskAgentFilter && task.target_agent_id !== taskAgentFilter) return false
-    if (taskStatusFilter && task.status !== taskStatusFilter) return false
-    if (taskQuery.trim()) {
-      const query = taskQuery.trim().toLowerCase()
-      return `${taskID(task)} ${task.target_agent_id} ${task.content}`.toLowerCase().includes(query)
-    }
-    return true
-  })
+  const tasks = taskPage.tasks || []
   const selectedTask = taskDetail?.task || tasks.find((task) => taskID(task) === selectedTaskID)
-  const selectTask = (task) => {
+  const selectTask = (task, trigger) => {
     const id = typeof task === 'string' ? task : taskID(task)
+    if (id === selectedTaskRef.current) return
+    detailSelectionRef.current += 1
+    selectedTaskRef.current = id
+    taskDetailRef.current = null
+    if (trigger) returnFocusRef.current = trigger
     setSelectedTaskID(id)
+    setTaskDetail(null)
     setReplyTask(null)
     setTaskView('content')
     setNewOutput(false)
   }
 
+  const closeTaskDetail = () => {
+    detailSelectionRef.current += 1
+    const selection = detailSelectionRef.current
+    selectedTaskRef.current = ''
+    detailCatchUpPendingRef.current = false
+    setSelectedTaskID('')
+    setTaskDetail(null)
+    setTaskDetailState('idle')
+    requestAnimationFrame(() => {
+      if (!isCurrentObservation(
+        { taskID: '', selection },
+        { taskID: selectedTaskRef.current, selection: detailSelectionRef.current },
+      )) return
+      const target = returnFocusRef.current?.isConnected ? returnFocusRef.current : document.querySelector('.task-list')
+      target?.focus?.()
+    })
+  }
+
   const refreshOverview = async () => {
     const overview = await api('/api/observe/v1/overview')
     setData(overview)
-    lastSequenceRef.current = Math.max(lastSequenceRef.current, Number(overview.latest_sequence) || 0)
   }
 
-  const mergeTaskDetail = (current, incoming, append) => {
-    if (!append || !current || current.task?.id !== incoming.task?.id) return incoming
-    const events = [...(current.events || []), ...(incoming.events || [])]
-    const uniqueEvents = Array.from(new Map(events.map((event) => [event.sequence, event])).values()).sort((left, right) => left.sequence - right.sequence)
-    return {
-      ...incoming,
-      events: uniqueEvents,
-      last_sequence: Math.max(Number(current.last_sequence) || 0, Number(incoming.last_sequence) || 0),
+  const taskListURL = (cursor = '') => {
+    const params = new URLSearchParams({ limit: '50' })
+    if (taskAgentFilter) params.set('agent_id', taskAgentFilter)
+    if (taskStatusFilter) params.set('status', taskStatusFilter)
+    if (taskQuery.trim()) params.set('query', taskQuery.trim())
+    if (taskTimeFilter) {
+      const milliseconds = { '1h': 3_600_000, '24h': 86_400_000, '7d': 604_800_000 }[taskTimeFilter]
+      params.set('updated_after', new Date(taskTimeAnchor - milliseconds).toISOString())
+    }
+    if (cursor) params.set('cursor', cursor)
+    return `/api/observe/v1/tasks?${params}`
+  }
+
+  const loadTaskPage = async (cursor = '', append = false) => {
+    const requestID = ++taskListRequestRef.current
+    if (append) setLoadingMoreTasks(true)
+    else {
+      setTaskListState('loading')
+      setTaskListError('')
+    }
+    try {
+      const page = await api(taskListURL(cursor))
+      if (requestID !== taskListRequestRef.current) return
+      setTaskPage((current) => ({
+        ...page,
+        tasks: append ? Array.from(new Map([...(current.tasks || []), ...(page.tasks || [])].map((task) => [task.id, task])).values()) : (page.tasks || []),
+      }))
+      setTaskListState('ready')
+    } catch (requestError) {
+      if (requestID !== taskListRequestRef.current) return
+      if (requestError.status === 401) setSession(false)
+      else {
+        setTaskListState(requestError.status === 403 ? 'forbidden' : 'error')
+        setTaskListError(requestError.message)
+      }
+    } finally {
+      if (requestID === taskListRequestRef.current) setLoadingMoreTasks(false)
     }
   }
 
-  const loadTaskDetail = async (id, quiet = false, afterSequence = null, append = false) => {
+  const loadTaskDetail = async (id) => {
     if (!id) {
       setTaskDetail(null)
       setTaskDetailState('idle')
       return
     }
-    if (!quiet) setTaskDetailState('loading')
-    const requestID = ++detailRequestRef.current
+    const selection = detailSelectionRef.current
+    const requestID = ++detailInitialRequestRef.current
+    setTaskDetailState('loading')
     try {
-      const query = afterSequence === null ? '' : `?after_sequence=${Math.max(0, Number(afterSequence) || 0)}`
-      const detail = await api(`/api/observe/v1/tasks/${encodeURIComponent(id)}${query}`)
-      if (requestID !== detailRequestRef.current) return detail
-      setTaskDetail((current) => mergeTaskDetail(current, detail, append))
+      const detail = await api(`/api/observe/v1/tasks/${encodeURIComponent(id)}?limit=100`)
+      if (requestID !== detailInitialRequestRef.current || selection !== detailSelectionRef.current || selectedTaskRef.current !== id) return
+      taskDetailRef.current = detail
+      setTaskDetail(detail)
       setTaskDetailState('ready')
-      if (!append) setNewOutput(false)
+      setNewOutput(false)
+      if (lastSequenceRef.current > Number(detail.snapshot_sequence || 0)) {
+        requestAnimationFrame(() => {
+          if (isCurrentObservation(
+            { taskID: id, selection, request: requestID },
+            { taskID: selectedTaskRef.current, selection: detailSelectionRef.current, request: detailInitialRequestRef.current },
+          )) detailCatchUpRef.current()
+        })
+      }
       return detail
     } catch (requestError) {
-      setTaskDetailState(requestError.status === 404 ? 'missing' : 'error')
-      if (requestError.status === 404) setSelectedTaskID('')
-      else if (!quiet) setError(requestError.message)
+	  if (requestID !== detailInitialRequestRef.current || selection !== detailSelectionRef.current || selectedTaskRef.current !== id) return
+      if (requestError.status === 401) setSession(false)
+      else setTaskDetailState(requestError.status === 404 ? 'missing' : requestError.status === 403 ? 'forbidden' : 'error')
     }
   }
+
+  const catchUpTaskDetail = async () => {
+    const id = selectedTaskRef.current
+    const current = taskDetailRef.current
+    if (!id || !current) return
+    if (detailCatchUpRunningRef.current) {
+      detailCatchUpPendingRef.current = true
+      return
+    }
+    const selection = detailSelectionRef.current
+    const requestID = ++detailLiveRequestRef.current
+    detailCatchUpRunningRef.current = true
+    let cursor = Number(current.live_after_sequence) || 0
+    try {
+      for (;;) {
+        const incoming = await api(`/api/observe/v1/tasks/${encodeURIComponent(id)}?after_sequence=${cursor}&limit=499`)
+        if (requestID !== detailLiveRequestRef.current || selection !== detailSelectionRef.current || selectedTaskRef.current !== id) return
+        const nextCursor = Number(incoming.live_after_sequence) || 0
+        if (nextCursor < cursor || (incoming.has_more_live_events && nextCursor === cursor)) throw new Error('事件回放游标未前进')
+        const latest = taskDetailRef.current
+        if (!latest || latest.task?.id !== id) return
+        const previousEventCount = latest.events?.length || 0
+        const merged = mergeLiveTaskDetail(latest, incoming)
+        cursor = nextCursor
+        taskDetailRef.current = merged
+        setTaskDetail(merged)
+        if ((merged.events?.length || 0) > previousEventCount) {
+          if (taskViewRef.current === 'run' && readingLatestRef.current) {
+            requestAnimationFrame(() => {
+              if (!isCurrentObservation(
+                { taskID: id, selection, request: requestID, view: 'run' },
+                { taskID: selectedTaskRef.current, selection: detailSelectionRef.current, request: detailLiveRequestRef.current, view: taskViewRef.current },
+              )) return
+              detailScrollRef.current?.scrollTo({ top: detailScrollRef.current.scrollHeight })
+            })
+          } else setNewOutput(true)
+        }
+        if (!incoming.has_more_live_events) break
+      }
+      setTaskDetailState('ready')
+    } catch (requestError) {
+      if (requestID !== detailLiveRequestRef.current || selection !== detailSelectionRef.current || selectedTaskRef.current !== id) return
+      if (requestError.status === 401) setSession(false)
+      else if (requestError.status === 403) setTaskDetailState('forbidden')
+      else if (requestError.status === 404) setTaskDetailState('missing')
+      else if (requestError.status === 409) await loadTaskDetail(id)
+      else {
+        replayRetryRef.current = () => detailCatchUpRef.current()
+        setTaskDetailState('replay_error')
+      }
+    } finally {
+      detailCatchUpRunningRef.current = false
+      if (detailCatchUpPendingRef.current) {
+        detailCatchUpPendingRef.current = false
+        requestAnimationFrame(() => detailCatchUpRef.current())
+      }
+    }
+  }
+
+  taskListRefreshRef.current = () => setTaskRefreshTick((value) => value + 1)
+  detailCatchUpRef.current = catchUpTaskDetail
+  taskViewRef.current = taskView
 
   useEffect(() => {
     selectedTaskRef.current = selectedTaskID
@@ -406,14 +542,94 @@ function App() {
     else setTaskDetail(null)
   }, [selectedTaskID])
 
+  useEffect(() => {
+    if (!session || !browserOnline || tab !== 'tasks') return undefined
+    const timer = setTimeout(() => loadTaskPage(), taskQuery ? 250 : 0)
+    return () => clearTimeout(timer)
+  }, [session, browserOnline, tab, taskAgentFilter, taskStatusFilter, taskTimeFilter, taskTimeAnchor, taskQuery, taskRefreshTick])
+
+  useEffect(() => {
+    if (taskView !== 'run') return
+    const taskID = selectedTaskRef.current
+    const selection = detailSelectionRef.current
+    requestAnimationFrame(() => {
+      if (!isCurrentObservation(
+        { taskID, selection, view: 'run' },
+        { taskID: selectedTaskRef.current, selection: detailSelectionRef.current, view: taskViewRef.current },
+      )) return
+      const scroll = detailScrollRef.current
+      if (scroll) scroll.scrollTop = scroll.scrollHeight
+      readingLatestRef.current = true
+      setNewOutput(false)
+    })
+  }, [taskView, selectedTaskID])
+
+  useEffect(() => {
+    if (!selectedTaskID || !taskDetail?.task || !['ready', 'filtered'].includes(taskDetailState)) return
+    const task = taskDetail.task
+    const threshold = taskTimeFilter ? taskTimeAnchor - ({ '1h': 3_600_000, '24h': 86_400_000, '7d': 604_800_000 }[taskTimeFilter]) : 0
+    const text = taskQuery.trim().toLowerCase()
+    const matches = (!taskAgentFilter || task.target_agent_id === taskAgentFilter) &&
+      (!taskStatusFilter || task.status === taskStatusFilter) &&
+      (!threshold || Date.parse(task.updated_at) >= threshold) &&
+      (!text || `${task.id} ${task.target_agent_id} ${task.content}`.toLowerCase().includes(text))
+    setTaskDetailState(matches ? 'ready' : 'filtered')
+  }, [selectedTaskID, taskDetail?.task?.version, taskAgentFilter, taskStatusFilter, taskTimeFilter, taskTimeAnchor, taskQuery])
+
   const loadMoreEvents = async () => {
-    if (!selectedTaskID || !taskDetail?.next_sequence || loadingMoreEvents) return
+    const id = selectedTaskRef.current
+    const before = Number(taskDetailRef.current?.history_before_sequence) || 0
+    if (!id || !before || loadingMoreEvents) return
+    const selection = detailSelectionRef.current
+    const requestID = ++detailHistoryRequestRef.current
+    const scroll = detailScrollRef.current
+    const previousHeight = scroll?.scrollHeight || 0
+    const previousTop = scroll?.scrollTop || 0
     setLoadingMoreEvents(true)
     try {
-      await loadTaskDetail(selectedTaskID, true, taskDetail.next_sequence, true)
+      const incoming = await api(`/api/observe/v1/tasks/${encodeURIComponent(id)}?before_sequence=${before}&limit=100`)
+      if (requestID !== detailHistoryRequestRef.current || selection !== detailSelectionRef.current || selectedTaskRef.current !== id) return
+      const current = taskDetailRef.current
+      if (!current || current.task?.id !== id) return
+      const merged = mergeHistoryTaskDetail(current, incoming)
+      taskDetailRef.current = merged
+      setTaskDetail(merged)
+      setTaskDetailState('ready')
+      requestAnimationFrame(() => {
+        if (!isCurrentObservation(
+          { taskID: id, selection, request: requestID, view: 'run' },
+          { taskID: selectedTaskRef.current, selection: detailSelectionRef.current, request: detailHistoryRequestRef.current, view: taskViewRef.current },
+        )) return
+        const currentScroll = detailScrollRef.current
+        if (currentScroll) currentScroll.scrollTop = previousTop + currentScroll.scrollHeight - previousHeight
+      })
+    } catch (requestError) {
+      if (requestID !== detailHistoryRequestRef.current || selection !== detailSelectionRef.current || selectedTaskRef.current !== id) return
+      if (requestError.status === 401) setSession(false)
+      else if (requestError.status === 403) setTaskDetailState('forbidden')
+      else if (requestError.status === 404) setTaskDetailState('missing')
+      else {
+        replayRetryRef.current = () => loadMoreEvents()
+        setTaskDetailState('replay_error')
+      }
     } finally {
-      setLoadingMoreEvents(false)
+      if (requestID === detailHistoryRequestRef.current) setLoadingMoreEvents(false)
     }
+  }
+
+  const jumpToLatest = () => {
+    const id = selectedTaskRef.current
+    const selection = detailSelectionRef.current
+    setNewOutput(false)
+    setTaskView('run')
+    requestAnimationFrame(() => {
+      if (!isCurrentObservation(
+        { taskID: id, selection, view: 'run' },
+        { taskID: selectedTaskRef.current, selection: detailSelectionRef.current, view: taskViewRef.current },
+      )) return
+      readingLatestRef.current = true
+      detailScrollRef.current?.scrollTo({ top: detailScrollRef.current.scrollHeight, behavior: 'smooth' })
+    })
   }
 
   const installPWA = async () => {
@@ -445,7 +661,8 @@ function App() {
         body: JSON.stringify(body),
       })
       await refreshOverview()
-      if (selectedTaskID) await loadTaskDetail(selectedTaskID, true)
+      taskListRefreshRef.current()
+      if (selectedTaskRef.current) await catchUpTaskDetail()
       return true
     } catch (requestError) {
       setError(requestError.message)
@@ -670,7 +887,7 @@ function App() {
                   <p className="eyebrow">观察窗口</p>
                   <h2>任务</h2>
                 </div>
-                <span className="connection-note">{visibleTasks.length} 项</span>
+                <span className="connection-note">{taskListState === 'loading' ? '加载中' : `${tasks.length}${taskPage.has_more ? '+' : ''} 项`}</span>
               </div>
               <div className="task-filters">
                 <label className="search-field">
@@ -683,16 +900,22 @@ function App() {
                 </select>
                 <select aria-label="按状态筛选" value={taskStatusFilter} onChange={(event) => setTaskStatusFilter(event.target.value)}>
                   <option value="">全部状态</option>
-                  {['queued', 'running', 'waiting_input', 'waiting_approval', 'succeeded', 'failed', 'canceled', 'uncertain'].map((status) => <option value={status} key={status}>{status}</option>)}
+                  {['queued', 'dispatching', 'running', 'waiting_input', 'waiting_approval', 'cancel_requested', 'succeeded', 'failed', 'canceled', 'uncertain'].map((status) => <option value={status} key={status}>{status}</option>)}
+                </select>
+                <select aria-label="按更新时间筛选" value={taskTimeFilter} onChange={(event) => { setTaskTimeFilter(event.target.value); setTaskTimeAnchor(Date.now()) }}>
+                  <option value="">全部时间</option>
+                  <option value="1h">最近 1 小时</option>
+                  <option value="24h">最近 24 小时</option>
+                  <option value="7d">最近 7 天</option>
                 </select>
               </div>
-              <div className="task-list" role="list" aria-label="任务列表">
-                {visibleTasks.map((task) => {
+              <div className="task-list" role="list" aria-label="任务列表" tabIndex={-1} aria-busy={taskListState === 'loading'}>
+                {tasks.map((task) => {
                   const id = taskID(task)
                   return (
-                    <button className={`task-row ${id === selectedTaskID ? 'selected' : ''}`} key={id} role="listitem" aria-selected={id === selectedTaskID} onClick={() => selectTask(task)}>
+                    <button className={`task-row ${id === selectedTaskID ? 'selected' : ''}`} key={id} role="listitem" aria-selected={id === selectedTaskID} onClick={(event) => selectTask(task, event.currentTarget)}>
                       <span className="task-row-main">
-                        <strong>{task.content?.split('\n')[0] || id}</strong>
+                        <strong>{task.summary || id}</strong>
                         <small>{id} · {task.target_agent_id}</small>
                       </span>
                       <span className={`pill status-${task.status}`}>{task.status}</span>
@@ -700,8 +923,13 @@ function App() {
                     </button>
                   )
                 })}
-                {!visibleTasks.length && <div className="empty-state">没有符合筛选条件的任务</div>}
+                {taskListState === 'loading' && !tasks.length && <div className="empty-state" role="status">正在加载任务...</div>}
+                {taskListState === 'forbidden' && <div className="empty-state error-state" role="alert">当前账号无权浏览任务</div>}
+                {taskListState === 'error' && <div className="empty-state error-state" role="alert"><p>任务列表加载失败</p>{taskListError && <small>{taskListError}</small>}<button className="outline" type="button" onClick={() => loadTaskPage()}>重试</button></div>}
+                {taskListState === 'ready' && !tasks.length && <div className="empty-state">{taskAgentFilter || taskStatusFilter || taskTimeFilter || taskQuery.trim() ? '没有符合筛选条件的任务' : '暂无任务'}</div>}
+                {taskListState === 'loading' && tasks.length > 0 && <div className="inline-loading" role="status">正在更新任务列表...</div>}
               </div>
+              {taskPage.has_more && <button className="load-more" type="button" disabled={loadingMoreTasks} onClick={() => loadTaskPage(taskPage.next_cursor, true)}>{loadingMoreTasks ? '加载中...' : '加载更多任务'}</button>}
               <div className="composer">
                 <div className="composer-label">
                   <label htmlFor="command">{replyTask ? `回复任务 ${taskID(replyTask)}` : `向 ${targetAgent || 'Agent'} 发送业务指令`}</label>
@@ -715,12 +943,15 @@ function App() {
             </div>
             <div className={`detail-pane ${selectedTaskID ? 'open' : ''}`} aria-live="polite">
               {!selectedTaskID && <div className="detail-empty"><span className="detail-icon">◎</span><h3>选择一个任务</h3><p>从左侧列表打开详情，查看运行事实与结果。</p></div>}
-              {selectedTaskID && taskDetailState === 'loading' && <div className="detail-empty"><p>正在加载任务详情...</p></div>}
-              {selectedTaskID && taskDetailState === 'missing' && <div className="detail-empty"><h3>任务不可用</h3><p>任务已删除或当前账号无权查看。</p><button className="outline" type="button" onClick={() => setSelectedTaskID('')}>返回列表</button></div>}
-              {selectedTaskID && taskDetail && (
+              {selectedTaskID && taskDetailState === 'loading' && <div className="detail-empty" role="status"><p>正在加载任务详情...</p></div>}
+              {selectedTaskID && taskDetailState === 'missing' && <div className="detail-empty"><h3>任务不存在</h3><p>任务已删除或该链接已失效。</p><button className="outline" type="button" onClick={closeTaskDetail}>返回列表</button></div>}
+              {selectedTaskID && taskDetailState === 'forbidden' && <div className="detail-empty"><h3>权限不足</h3><p>当前账号无权查看这个任务。</p><button className="outline" type="button" onClick={closeTaskDetail}>返回列表</button></div>}
+              {selectedTaskID && taskDetailState === 'error' && <div className="detail-empty"><h3>详情加载失败</h3><p>无法读取任务快照，请稍后重试。</p><button className="outline" type="button" onClick={() => loadTaskDetail(selectedTaskID)}>重试</button></div>}
+              {selectedTaskID && taskDetailState === 'filtered' && <div className="detail-empty"><h3>任务不再匹配</h3><p>任务状态或更新时间已超出当前筛选范围。</p><button className="outline" type="button" onClick={closeTaskDetail}>返回筛选结果</button></div>}
+              {selectedTaskID && taskDetail && ['ready', 'replay_error'].includes(taskDetailState) && (
                 <>
                   <div className="detail-head">
-                    <button className="mobile-back" type="button" onClick={() => setSelectedTaskID('')} aria-label="返回任务列表">←</button>
+                    <button className="mobile-back" type="button" onClick={closeTaskDetail} aria-label="返回任务列表">←</button>
                     <div className="detail-title">
                       <span className="eyebrow">{taskDetail.task.target_agent_id}</span>
                       <h2>{taskDetail.task.content?.split('\n')[0] || taskDetail.task.id}</h2>
@@ -731,12 +962,13 @@ function App() {
                   <div className="detail-actions">
                     {taskDetail.task.status === 'waiting_input' && <button className="outline" type="button" disabled={!canWrite} onClick={() => { setReplyTask(taskDetail.task); setDraft(''); document.getElementById('command')?.focus() }}>回复</button>}
                     {!terminalTask(taskDetail.task.status) && taskDetail.task.status !== 'cancel_requested' && <button className="outline danger" type="button" disabled={!canWrite} onClick={() => cancelTask(taskDetail.task)}>取消任务</button>}
-                    {newOutput && <button className="new-output" type="button" onClick={() => { setNewOutput(false); document.querySelector('.detail-scroll')?.scrollTo({ top: 0, behavior: 'smooth' }) }}>有新事件</button>}
+                    {newOutput && <button className="new-output" type="button" onClick={jumpToLatest}>跳到最新</button>}
                   </div>
+                  {taskDetailState === 'replay_error' && <div className="replay-error" role="alert"><span>事件回放失败，当前内容可能不是最新。</span><button className="outline" type="button" onClick={() => replayRetryRef.current()}>重试</button></div>}
                   <div className="detail-tabs" role="tablist" aria-label="任务详情视图">
                     {['content', 'conversation', 'run', 'result'].map((view) => <button type="button" role="tab" aria-selected={taskView === view} className={taskView === view ? 'active' : ''} onClick={() => setTaskView(view)} key={view}>{({ content: '内容', conversation: '对话', run: '运行', result: '结果' })[view]}</button>)}
                   </div>
-                  <div className="detail-scroll">
+                  <div className="detail-scroll" ref={detailScrollRef} onScroll={(event) => { const node = event.currentTarget; readingLatestRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 48; if (readingLatestRef.current) setNewOutput(false) }}>
                     {taskView === 'content' && <MarkdownContent value={taskDetail.task.content} />}
                     {taskView === 'conversation' && <div className="conversation-list">{(taskDetail.messages || []).map((message) => <article className="message-item" key={message.id}><div><strong>{message.sender_principal_id}</strong><time>{message.created_at}</time></div><MarkdownContent value={message.content} compact /></article>)}{!taskDetail.messages?.length && <div className="empty-state">暂无对话消息</div>}</div>}
                     {taskView === 'run' && <RunTimeline detail={taskDetail} onLoadMore={loadMoreEvents} loadingMore={loadingMoreEvents} />}

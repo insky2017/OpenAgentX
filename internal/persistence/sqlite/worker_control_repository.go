@@ -18,72 +18,72 @@ func (r *Repository) RegisterWorker(
 	registration domain.WorkerRegistration,
 	backends []openruntime.BackendRegistration,
 	event *domain.JournalEvent,
-) (*domain.WorkerInstance, error) {
+) (*domain.WorkerInstance, []domain.NetworkBinding, error) {
 	if err := registration.Validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(backends) == 0 {
-		return nil, domain.ErrInvalidInput("worker must register at least one Backend")
+		return nil, nil, domain.ErrInvalidInput("worker must register at least one Backend")
 	}
 	seenBackends := make(map[string]struct{}, len(backends))
 	for _, backend := range backends {
 		if err := backend.Validate(); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if _, exists := seenBackends[backend.BackendID]; exists {
-			return nil, domain.ErrInvalidInput("worker Backend IDs must be unique")
+			return nil, nil, domain.ErrInvalidInput("worker Backend IDs must be unique")
 		}
 		seenBackends[backend.BackendID] = struct{}{}
 	}
 	now := r.now().UTC()
 	if !registration.TokenExpiresAt.After(now) || !registration.LeaseUntil.After(now) {
-		return nil, domain.ErrInvalidInput("worker token and lease must expire in the future")
+		return nil, nil, domain.ErrInvalidInput("worker token and lease must expire in the future")
 	}
 	if err := validateJournalForAggregate(event, "worker_instance", registration.WorkerInstanceID, now); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	capabilities := append([]string(nil), registration.Capabilities...)
 	sort.Strings(capabilities)
 	capabilitiesJSON, err := json.Marshal(capabilities)
 	if err != nil {
-		return nil, fmt.Errorf("encode Worker capabilities: %w", err)
+		return nil, nil, fmt.Errorf("encode Worker capabilities: %w", err)
 	}
 	tx, err := r.begin(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer tx.Rollback()
 	var agentStatus domain.AgentIdentityStatus
 	if err := tx.QueryRowContext(ctx, `SELECT status FROM agents WHERE agent_id=?`, registration.AgentID).Scan(&agentStatus); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domain.ErrAgentNotFound
+			return nil, nil, domain.ErrAgentNotFound
 		}
-		return nil, fmt.Errorf("load Worker Agent identity: %w", err)
+		return nil, nil, fmt.Errorf("load Worker Agent identity: %w", err)
 	}
 	if agentStatus != domain.AgentIdentityActive {
-		return nil, domain.ErrAgentNotReady
+		return nil, nil, domain.ErrAgentNotReady
 	}
 	var validActive int
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM worker_instances
 		WHERE agent_id = ? AND status IN ('bootstrapping','online','degraded','draining')
 		AND lease_until > ?`, registration.AgentID, formatTime(now)).Scan(&validActive); err != nil {
-		return nil, fmt.Errorf("inspect Active Worker: %w", err)
+		return nil, nil, fmt.Errorf("inspect Active Worker: %w", err)
 	}
 	if validActive != 0 {
-		return nil, domain.ErrConflict("logical Agent already has a valid Active Worker")
+		return nil, nil, domain.ErrConflict("logical Agent already has a valid Active Worker")
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE worker_instances
 		SET status='offline', fencing_token=fencing_token+1, updated_at=?
 		WHERE agent_id=? AND status IN ('bootstrapping','online','degraded','draining')
 		AND lease_until <= ?`, formatTime(now), registration.AgentID, formatTime(now)); err != nil {
-		return nil, fmt.Errorf("expire previous Worker: %w", err)
+		return nil, nil, fmt.Errorf("expire previous Worker: %w", err)
 	}
 	var generation, fencingToken int64
 	if err := tx.QueryRowContext(ctx, `SELECT COALESCE(MAX(generation),0)+1,
 		COALESCE(MAX(fencing_token),0)+1 FROM worker_instances WHERE agent_id=?`, registration.AgentID).Scan(
 		&generation, &fencingToken); err != nil {
-		return nil, fmt.Errorf("allocate Worker generation/fencing: %w", err)
+		return nil, nil, fmt.Errorf("allocate Worker generation/fencing: %w", err)
 	}
 	worker := &domain.WorkerInstance{
 		ID: registration.WorkerInstanceID, AgentID: registration.AgentID, Generation: generation,
@@ -101,35 +101,47 @@ func (r *Repository) RegisterWorker(
 		worker.Status, registration.SessionTokenDigest, formatTime(registration.TokenExpiresAt),
 		formatTime(worker.LastHeartbeatAt), formatTime(worker.LeaseUntil), worker.FencingToken,
 		formatTime(worker.StartedAt), formatTime(worker.UpdatedAt)); err != nil {
-		return nil, fmt.Errorf("register Worker: %w", err)
+		return nil, nil, fmt.Errorf("register Worker: %w", err)
 	}
 	for _, backend := range backends {
 		descriptorJSON, err := json.Marshal(backend.Descriptor)
 		if err != nil {
-			return nil, fmt.Errorf("encode Backend descriptor: %w", err)
+			return nil, nil, fmt.Errorf("encode Backend descriptor: %w", err)
+		}
+		network := backend.Network
+		if network.IsZero() {
+			network.Mode = domain.NetworkInherit
+		}
+		networkJSON, err := json.Marshal(network)
+		if err != nil {
+			return nil, nil, fmt.Errorf("encode Backend network policy: %w", err)
 		}
 		registrationID := worker.ID + ":" + backend.BackendID
 		if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_backend_registrations (
 			runtime_backend_registration_id, worker_instance_id, adapter_id, backend_id,
-			descriptor_json, health, observed_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?)`, registrationID, worker.ID, backend.Descriptor.AdapterID,
-			backend.BackendID, string(descriptorJSON), backend.Health, formatTime(now)); err != nil {
-			return nil, fmt.Errorf("register Backend %s: %w", backend.BackendID, err)
+			descriptor_json, network_json, health, observed_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, registrationID, worker.ID, backend.Descriptor.AdapterID,
+			backend.BackendID, string(descriptorJSON), string(networkJSON), backend.Health, formatTime(now)); err != nil {
+			return nil, nil, fmt.Errorf("register Backend %s: %w", backend.BackendID, err)
 		}
 	}
 	if err := r.inject(FaultAfterStateWrite); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := insertJournal(ctx, tx, event); err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+	bindings, err := listNetworkBindings(ctx, tx, registration.AgentID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("load initial Worker network bindings: %w", err)
 	}
 	if err := r.inject(FaultBeforeCommit); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := commit(tx); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return worker, nil
+	return worker, bindings, nil
 }
 
 func (r *Repository) GetWorkerCredential(ctx context.Context, workerID string) (*domain.WorkerCredential, error) {
@@ -205,6 +217,7 @@ func (r *Repository) HeartbeatWorker(
 	backendHealth map[string]openruntime.BackendHealth,
 	leaseUntil time.Time,
 	tokenExpiresAt time.Time,
+	applications []domain.NetworkBindingApplication,
 	event *domain.JournalEvent,
 ) (*domain.WorkerInstance, error) {
 	if status != domain.WorkerStatusOnline && status != domain.WorkerStatusDegraded && status != domain.WorkerStatusDraining {
@@ -219,6 +232,11 @@ func (r *Repository) HeartbeatWorker(
 	tx, err := r.begin(ctx)
 	if err != nil {
 		return nil, err
+	}
+	for i := range applications {
+		if err := applications[i].Validate(); err != nil {
+			return nil, err
+		}
 	}
 	defer tx.Rollback()
 	credential, err := loadGuardedWorker(ctx, tx, guard)
@@ -258,6 +276,85 @@ func (r *Repository) HeartbeatWorker(
 		count, err := result.RowsAffected()
 		if err != nil || count != 1 {
 			return nil, domain.ErrInvalidInput("heartbeat references an unregistered Backend")
+		}
+	}
+	for _, application := range applications {
+		var descriptorJSON string
+		if err := tx.QueryRowContext(ctx, `SELECT descriptor_json FROM runtime_backend_registrations
+			WHERE worker_instance_id=? AND backend_id=?`, guard.WorkerInstanceID, application.BackendID).
+			Scan(&descriptorJSON); errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrInvalidInput("heartbeat references an unregistered network Backend")
+		} else if err != nil {
+			return nil, fmt.Errorf("load network Backend registration: %w", err)
+		}
+		var descriptor openruntime.AdapterDescriptor
+		if err := json.Unmarshal([]byte(descriptorJSON), &descriptor); err != nil {
+			return nil, fmt.Errorf("decode network Backend descriptor: %w", err)
+		}
+		supportsNamedProfile := false
+		for _, mode := range descriptor.NetworkModes {
+			if mode == string(domain.NetworkNamedProfile) {
+				supportsNamedProfile = true
+				break
+			}
+		}
+		if !supportsNamedProfile {
+			return nil, domain.ErrUnsupportedCapability
+		}
+		var profileID, desiredStatus, appliedWorkerID, diagnostic string
+		var profileVersion, revision, appliedGeneration, appliedProfileVersion, appliedRevision int64
+		err := tx.QueryRowContext(ctx, `SELECT profile_id, profile_version, version, desired_status,
+			COALESCE(applied_worker_id,''), COALESCE(applied_generation,0),
+			COALESCE(applied_profile_version,0), COALESCE(applied_binding_revision,0), COALESCE(diagnostic,'')
+			FROM network_profile_bindings WHERE agent_id=? AND backend_id=?`, guard.AgentID, application.BackendID).
+			Scan(&profileID, &profileVersion, &revision, &desiredStatus, &appliedWorkerID,
+				&appliedGeneration, &appliedProfileVersion, &appliedRevision, &diagnostic)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrInvalidInput("heartbeat references an unbound network Backend")
+		}
+		if err != nil {
+			return nil, fmt.Errorf("load network binding acknowledgement target: %w", err)
+		}
+		if profileID != application.ProfileID || profileVersion != application.ProfileVersion || revision != application.BindingRevision {
+			// A legitimate Worker may race a rebind. Its old acknowledgement is
+			// rejected without rolling back the heartbeat or stopping the control loop.
+			continue
+		}
+		if application.State == "failed" && desiredStatus == "failed" && diagnostic == application.Diagnostic {
+			continue
+		}
+		if application.State == "applied" && desiredStatus == "applied" &&
+			appliedWorkerID == guard.WorkerInstanceID && appliedGeneration == guard.Generation &&
+			appliedProfileVersion == application.ProfileVersion && appliedRevision == application.BindingRevision &&
+			diagnostic == application.Diagnostic {
+			continue
+		}
+		if err := validateJournalForAggregate(application.Event, "network_binding", guard.AgentID+":"+application.BackendID, guard.CheckedAt); err != nil {
+			return nil, err
+		}
+		var result sql.Result
+		if application.State == "applied" {
+			result, err = tx.ExecContext(ctx, `UPDATE network_profile_bindings SET desired_status='applied',
+				applied_worker_id=?, applied_generation=?, applied_profile_version=?, applied_binding_revision=?,
+				diagnostic=NULL, updated_at=? WHERE agent_id=? AND backend_id=? AND profile_id=? AND profile_version=? AND version=?`,
+				guard.WorkerInstanceID, guard.Generation, application.ProfileVersion, application.BindingRevision,
+				formatTime(guard.CheckedAt), guard.AgentID, application.BackendID, application.ProfileID,
+				application.ProfileVersion, application.BindingRevision)
+		} else {
+			result, err = tx.ExecContext(ctx, `UPDATE network_profile_bindings SET desired_status='failed',
+				diagnostic=?, updated_at=? WHERE agent_id=? AND backend_id=? AND profile_id=? AND profile_version=? AND version=?`,
+				application.Diagnostic, formatTime(guard.CheckedAt), guard.AgentID, application.BackendID,
+				application.ProfileID, application.ProfileVersion, application.BindingRevision)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("acknowledge network binding: %w", err)
+		}
+		affected, err := result.RowsAffected()
+		if err != nil || affected != 1 {
+			return nil, domain.ErrConflict("network binding acknowledgement CAS lost")
+		}
+		if err := insertJournal(ctx, tx, application.Event); err != nil {
+			return nil, err
 		}
 	}
 	if err := insertJournal(ctx, tx, event); err != nil {

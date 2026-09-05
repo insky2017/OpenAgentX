@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -22,9 +23,9 @@ import (
 
 type WorkerState interface {
 	ReconcileExpired(context.Context) error
-	RegisterWorker(context.Context, domain.WorkerRegistration, []openruntime.BackendRegistration, *domain.JournalEvent) (*domain.WorkerInstance, error)
+	RegisterWorker(context.Context, domain.WorkerRegistration, []openruntime.BackendRegistration, *domain.JournalEvent) (*domain.WorkerInstance, []domain.NetworkBinding, error)
 	GetWorkerCredential(context.Context, string) (*domain.WorkerCredential, error)
-	HeartbeatWorker(context.Context, domain.WorkerWriteGuard, domain.WorkerStatus, map[string]openruntime.BackendHealth, time.Time, time.Time, *domain.JournalEvent) (*domain.WorkerInstance, error)
+	HeartbeatWorker(context.Context, domain.WorkerWriteGuard, domain.WorkerStatus, map[string]openruntime.BackendHealth, time.Time, time.Time, []domain.NetworkBindingApplication, *domain.JournalEvent) (*domain.WorkerInstance, error)
 	TryClaimMailbox(context.Context, domain.WorkerWriteGuard, int, time.Time, *domain.JournalEvent) (*domain.MailboxItem, error)
 	AcceptMailboxItem(context.Context, domain.WorkerWriteGuard, string, domain.MailboxState, domain.MailboxState, *domain.JournalEvent) error
 	ResolveMailboxPayload(context.Context, domain.WorkerWriteGuard, string) (*domain.MailboxPayload, error)
@@ -34,6 +35,7 @@ type WorkerState interface {
 	GetSessionBinding(context.Context, string, string, string) (*domain.SessionBinding, error)
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	ListWorkerBackends(context.Context, string) ([]openruntime.BackendRegistration, error)
+	ListWorkerNetworkBindings(context.Context, domain.WorkerWriteGuard) ([]domain.NetworkBinding, error)
 	BeginClaimedRunAttempt(context.Context, domain.WorkerWriteGuard, string, int64, *domain.RunAttempt, string, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error)
 	AppendRunEvents(context.Context, domain.WorkerWriteGuard, string, int64, []*domain.JournalEvent) error
 	FinishRun(context.Context, domain.WorkerWriteGuard, string, int64, int64, openruntime.TurnResult, *domain.SessionBinding, int64, *domain.JournalEvent, *domain.JournalEvent, *domain.JournalEvent) error
@@ -41,11 +43,6 @@ type WorkerState interface {
 	AcknowledgeWorkerCommand(context.Context, domain.WorkerWriteGuard, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
 	ReleaseWorkerLease(context.Context, domain.WorkerWriteGuard, *domain.JournalEvent) (*domain.WorkerInstance, error)
 	AcknowledgeReleasedWorkerCommand(context.Context, domain.WorkerWriteGuard, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
-}
-
-type networkBindingState interface {
-	ListNetworkBindings(context.Context, string) ([]domain.NetworkBinding, error)
-	AcknowledgeNetworkBinding(context.Context, string, string, string, int64, int64, string, string, string, time.Time) error
 }
 
 type TurnPlan struct {
@@ -165,49 +162,78 @@ func (s *WorkerService) Register(ctx context.Context, principalID string, reques
 	event := s.event("worker", "worker.registered", principalID, "", request.WorkerInstanceID, map[string]any{
 		"agent_id": request.AgentID, "transport": request.Transport,
 	})
-	worker, err := s.state.RegisterWorker(ctx, registration, request.Backends, event)
+	worker, bindings, err := s.state.RegisterWorker(ctx, registration, request.Backends, event)
 	if err != nil {
 		return nil, err
 	}
 	session := &api.WorkerSession{Worker: *worker, SessionToken: token, TokenExpiresAt: registration.TokenExpiresAt}
-	if networkState, ok := s.state.(networkBindingState); ok {
-		bindings, listErr := networkState.ListNetworkBindings(ctx, request.AgentID)
-		if listErr != nil {
-			return nil, listErr
-		}
-		for i := range bindings {
-			if networkBindingNeedsApply(bindings[i], session.Worker.ID, session.Worker.Generation) {
-				session.NetworkBindings = append(session.NetworkBindings, bindings[i])
-			}
+	for i := range bindings {
+		if registeredBackendSupportsNetwork(request.Backends, bindings[i].BackendID) &&
+			networkBindingNeedsApply(bindings[i], session.Worker.ID, session.Worker.Generation) {
+			session.NetworkBindings = append(session.NetworkBindings, bindings[i])
 		}
 	}
 	return session, nil
 }
 
 func (s *WorkerService) Heartbeat(ctx context.Context, principalID string, token string, request api.HeartbeatRequest) error {
-	if err := request.Validate(); err != nil {
+	guard, err := s.heartbeatGuard(ctx, principalID, token, request)
+	if err != nil {
 		return err
 	}
-	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
-	if err != nil {
+	if err := request.Validate(); err != nil {
 		return err
 	}
 	event := s.event("heartbeat", "worker.heartbeat", principalID, "", request.WorkerInstanceID, map[string]any{
 		"status": request.Status, "backend_health": request.BackendHealth,
 	})
-	_, err = s.state.HeartbeatWorker(ctx, guard, request.Status, request.BackendHealth,
-		guard.CheckedAt.Add(s.workerLease), guard.CheckedAt.Add(s.tokenLifetime), event)
-	if err != nil {
-		return err
-	}
-	if networkState, ok := s.state.(networkBindingState); ok {
-		for backendID, ack := range request.NetworkBindings {
-			if err := networkState.AcknowledgeNetworkBinding(ctx, guard.AgentID, backendID, ack.ProfileID, ack.ProfileVersion, guard.Generation, guard.WorkerInstanceID, ack.State, ack.Diagnostic, guard.CheckedAt); err != nil {
-				return err
-			}
+	applications := make([]domain.NetworkBindingApplication, 0, len(request.NetworkBindings))
+	for backendID, ack := range request.NetworkBindings {
+		diagnostic := ""
+		if ack.State == "applied" {
+			diagnostic = ""
+		} else {
+			diagnostic = domain.NetworkApplyFailedDiagnostic
 		}
+		application := domain.NetworkBindingApplication{
+			BackendID: backendID, ProfileID: ack.ProfileID, ProfileVersion: ack.ProfileVersion,
+			BindingRevision: ack.BindingRevision, State: ack.State, Diagnostic: diagnostic,
+		}
+		application.Event = s.event("network-binding", "network_binding."+ack.State, principalID, "", guard.AgentID+":"+backendID, map[string]any{
+			"agent_id": guard.AgentID, "backend_id": backendID, "profile_id": ack.ProfileID,
+			"profile_version": ack.ProfileVersion, "binding_revision": ack.BindingRevision,
+			"worker_instance_id": guard.WorkerInstanceID, "worker_generation": guard.Generation,
+			"state": ack.State, "diagnostic": diagnostic,
+		})
+		applications = append(applications, application)
 	}
-	return nil
+	_, err = s.state.HeartbeatWorker(ctx, guard, request.Status, request.BackendHealth,
+		guard.CheckedAt.Add(s.workerLease), guard.CheckedAt.Add(s.tokenLifetime), applications, event)
+	return err
+}
+
+func (s *WorkerService) heartbeatGuard(ctx context.Context, principalID, token string, request api.HeartbeatRequest) (domain.WorkerWriteGuard, error) {
+	if strings.TrimSpace(token) == "" {
+		return domain.WorkerWriteGuard{}, domain.ErrUnauthorized
+	}
+	credential, err := s.state.GetWorkerCredential(ctx, request.WorkerInstanceID)
+	if err != nil {
+		return domain.WorkerWriteGuard{}, domain.ErrUnauthorized
+	}
+	tokenDigest := workerTokenDigest(token)
+	if credential.Worker.AuthenticatedPrincipal != principalID ||
+		subtle.ConstantTimeCompare([]byte(credential.SessionTokenDigest), []byte(tokenDigest)) != 1 {
+		return domain.WorkerWriteGuard{}, domain.ErrUnauthorized
+	}
+	guard := domain.WorkerWriteGuard{
+		WorkerInstanceID: request.WorkerInstanceID, AgentID: credential.Worker.AgentID,
+		PrincipalID: principalID, SessionTokenDigest: tokenDigest, Generation: request.Generation,
+		FencingToken: request.FencingToken, CheckedAt: s.now().UTC(),
+	}
+	if err := credential.Authorize(guard); err != nil {
+		return domain.WorkerWriteGuard{}, err
+	}
+	return guard, nil
 }
 
 func (s *WorkerService) PullNetworkBindings(ctx context.Context, principalID, token string, request api.NetworkBindingPullRequest) ([]domain.NetworkBinding, error) {
@@ -218,11 +244,7 @@ func (s *WorkerService) PullNetworkBindings(ctx context.Context, principalID, to
 	if err != nil {
 		return nil, err
 	}
-	state, ok := s.state.(networkBindingState)
-	if !ok {
-		return []domain.NetworkBinding{}, nil
-	}
-	bindings, err := state.ListNetworkBindings(ctx, guard.AgentID)
+	bindings, err := s.state.ListWorkerNetworkBindings(ctx, guard)
 	if err != nil {
 		return nil, err
 	}
@@ -235,12 +257,27 @@ func (s *WorkerService) PullNetworkBindings(ctx context.Context, principalID, to
 	return result, nil
 }
 
+func registeredBackendSupportsNetwork(backends []openruntime.BackendRegistration, backendID string) bool {
+	for _, backend := range backends {
+		if backend.BackendID != backendID {
+			continue
+		}
+		for _, mode := range backend.Descriptor.NetworkModes {
+			if mode == string(domain.NetworkNamedProfile) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func networkBindingNeedsApply(binding domain.NetworkBinding, workerID string, generation int64) bool {
 	if binding.DesiredStatus == "pending" || binding.DesiredStatus == "failed" {
 		return true
 	}
 	return binding.DesiredStatus == "applied" &&
-		(binding.AppliedWorkerID != workerID || binding.AppliedGeneration != generation)
+		(binding.AppliedWorkerID != workerID || binding.AppliedGeneration != generation ||
+			binding.AppliedBindingRevision != binding.Version)
 }
 
 func (s *WorkerService) Release(ctx context.Context, principalID string, token string, request api.WorkerReleaseRequest) error {

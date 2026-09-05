@@ -36,19 +36,20 @@ type releaseRecord struct{ request api.WorkerReleaseRequest }
 type fakeWorkerClient struct {
 	mu sync.Mutex
 
-	session       api.WorkerSession
-	mailbox       []domain.MailboxItem
-	commands      []domain.WorkerCommand
-	claims        []api.ClaimRequest
-	heartbeats    []api.HeartbeatRequest
-	finishes      []finishRecord
-	accepts       []acceptRecord
-	commandAcks   []commandAckRecord
-	releases      []releaseRecord
-	eventLog      []string
-	runtimeEvents []openruntime.RuntimeEvent
-	runCounter    int
-	heartbeatFail int
+	session         api.WorkerSession
+	registerRequest api.RegisterRequest
+	mailbox         []domain.MailboxItem
+	commands        []domain.WorkerCommand
+	claims          []api.ClaimRequest
+	heartbeats      []api.HeartbeatRequest
+	finishes        []finishRecord
+	accepts         []acceptRecord
+	commandAcks     []commandAckRecord
+	releases        []releaseRecord
+	eventLog        []string
+	runtimeEvents   []openruntime.RuntimeEvent
+	runCounter      int
+	heartbeatFail   int
 
 	wakeup       chan struct{}
 	commandWake  chan struct{}
@@ -72,6 +73,7 @@ func (c *fakeWorkerClient) RegisterWorker(_ context.Context, request api.Registe
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	c.registerRequest = request
 	c.session = api.WorkerSession{Worker: domain.WorkerInstance{
 		ID: request.WorkerInstanceID, AgentID: request.AgentID, Generation: 1,
 		Transport: request.Transport, AuthenticatedPrincipal: "worker-principal",
@@ -163,6 +165,7 @@ func (c *fakeWorkerClient) BeginAttempt(_ context.Context, itemID string, reques
 		Reasoning: domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault},
 		Session:   domain.SessionSpec{Mode: domain.SessionModeNew, ContextID: task.ID},
 		Timeout:   time.Minute, BackendOptions: json.RawMessage(`{}`),
+		Network: domain.NetworkPolicy{Mode: domain.NetworkInherit},
 	}
 	return &api.BeginAttemptResponse{
 		MailboxItem: domain.MailboxItem{ID: itemID, State: domain.MailboxStateAccepted},
@@ -563,6 +566,43 @@ func TestLeaseLossIsFatalAndReturnsNonZeroSemantics(t *testing.T) {
 	err := runner.Run(ctx)
 	if !errors.Is(err, domain.ErrLeaseExpired) {
 		t.Fatalf("Worker lease loss error=%v", err)
+	}
+}
+
+func TestUnavailableBackendStillRegistersAndKeepsControlConnection(t *testing.T) {
+	runner, client, adapter := newRunnerFixture(t, false)
+	adapter.SetHealthError(errors.New("proxy credential unavailable: token=must-not-leak"))
+	client.enqueueMailbox(workItem("queued-while-unavailable", 1))
+	ctx, cancel := context.WithCancel(context.Background())
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(ctx) }()
+	waitSignal(t, client.heartbeatHit, "degraded initial heartbeat")
+	client.mu.Lock()
+	registered := client.registerRequest
+	heartbeats := append([]api.HeartbeatRequest(nil), client.heartbeats...)
+	client.mu.Unlock()
+	if len(registered.Backends) != 1 || registered.Backends[0].Health != openruntime.BackendUnavailable {
+		t.Fatalf("unavailable Backend was not registered: %+v", registered.Backends)
+	}
+	if len(heartbeats) == 0 || heartbeats[0].Status != domain.WorkerStatusDegraded {
+		t.Fatalf("unavailable Backend heartbeat=%+v", heartbeats)
+	}
+	shortContext, shortCancel := context.WithTimeout(context.Background(), 75*time.Millisecond)
+	if _, err := adapter.NextHandle(shortContext); !errors.Is(err, context.DeadlineExceeded) {
+		shortCancel()
+		t.Fatalf("unavailable Backend claimed queued Task: %v", err)
+	}
+	shortCancel()
+	adapter.SetHealthError(nil)
+	handle, err := adapter.NextHandle(testContext(t))
+	if err != nil {
+		t.Fatalf("recovered Backend did not claim queued Task: %v", err)
+	}
+	handle.Complete(openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "recovered", SideEffectsKnown: true})
+	waitSignal(t, client.finishHit, "recovered Backend turn finish")
+	cancel()
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("degraded Worker did not keep a controllable lifecycle: %v", err)
 	}
 }
 
