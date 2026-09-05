@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	openapi "openagentx/internal/api"
 	"openagentx/internal/auth/web"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
@@ -162,6 +163,54 @@ func TestOverviewRequiresSessionAndExposesLatestSequence(t *testing.T) {
 	}
 	if response.Header().Get("Cache-Control") != "no-store" {
 		t.Fatalf("overview cache policy=%q", response.Header().Get("Cache-Control"))
+	}
+}
+
+func TestHealthIsPublicMinimalJSONProbe(t *testing.T) {
+	panel := newAuthenticatedPanel(t, web.RoleOwner, &testPanelState{})
+
+	response := httptest.NewRecorder()
+	panel.handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, openapi.ObserveHealthPath, nil))
+	if response.Code != http.StatusOK {
+		t.Fatalf("health status=%d body=%s", response.Code, response.Body.String())
+	}
+	if got := response.Header().Get("Content-Type"); got != "application/json" {
+		t.Fatalf("health content type=%q", got)
+	}
+	if got := response.Header().Get("Cache-Control"); got != "no-store" {
+		t.Fatalf("health cache policy=%q", got)
+	}
+	if got := response.Header().Get("X-Content-Type-Options"); got != "nosniff" {
+		t.Fatalf("health content type options=%q", got)
+	}
+	var body map[string]any
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatalf("health body=%s err=%v", response.Body.String(), err)
+	}
+	if len(body) != 1 || body["status"] != "ok" {
+		t.Fatalf("health body=%s", response.Body.String())
+	}
+	for _, sensitive := range []string{"database", "worker", "version", "path", "credential", "internal", "error"} {
+		if strings.Contains(strings.ToLower(response.Body.String()), sensitive) {
+			t.Fatalf("health body contains sensitive term %q: %s", sensitive, response.Body.String())
+		}
+	}
+
+	for _, method := range []string{http.MethodPost, http.MethodPut} {
+		t.Run(method, func(t *testing.T) {
+			request := httptest.NewRequest(method, openapi.ObserveHealthPath, strings.NewReader(`{"status":"bad"}`))
+			methodResponse := httptest.NewRecorder()
+			panel.handler.ServeHTTP(methodResponse, request)
+			if methodResponse.Code != http.StatusMethodNotAllowed {
+				t.Fatalf("health %s status=%d body=%s", method, methodResponse.Code, methodResponse.Body.String())
+			}
+		})
+	}
+
+	unauthenticatedOverview := httptest.NewRecorder()
+	panel.handler.ServeHTTP(unauthenticatedOverview, httptest.NewRequest(http.MethodGet, openapi.ObserveOverviewPath, nil))
+	if unauthenticatedOverview.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated overview status=%d body=%s", unauthenticatedOverview.Code, unauthenticatedOverview.Body.String())
 	}
 }
 

@@ -40,6 +40,7 @@ func NewHandler(state State, commands *controlplane.CommandService, auth *web.Ma
 		return nil, fmt.Errorf("panel state, commands and auth are required")
 	}
 	h := &Handler{state: state, commands: commands, auth: auth, mux: http.NewServeMux()}
+	h.mux.HandleFunc("GET "+openapi.ObserveHealthPath, h.health)
 	h.mux.HandleFunc("GET /api/observe/v1/overview", h.overview)
 	h.mux.HandleFunc("GET /api/observe/v1/agents", h.agents)
 	h.mux.HandleFunc("GET /api/observe/v1/tasks", h.tasks)
@@ -83,6 +84,11 @@ func (h *Handler) session(w http.ResponseWriter, r *http.Request, write bool) (*
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(v)
+}
+func (h *Handler) health(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, struct {
+		Status string `json:"status"`
+	}{Status: "ok"})
 }
 func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
