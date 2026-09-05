@@ -1,0 +1,30 @@
+T10 2026-09-05 脱敏证据摘要
+
+candidate_commit=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
+adr001_sha256=587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403
+go_test=PASS 10.79s; go_test_race=PASS 17.22s; go_vet=PASS 0.93s
+npm_ci=PASS 2.34s; web_build=PASS 0.95s; legacy_release=PASS 0.13s; diff_check=PASS
+agy_graft_version=1.1.26; runtime_contract=PASS; t05_focus=PASS; t06_focus=PASS
+http_redirect=https_to_https PASS; tls_verify_result=0; manifest=200 display=standalone; service_worker=/sw.js 200; unauth_sse=401
+prior_daemon=active mainpid=1365792 nrestarts=0; prior_quote_worker=active mainpid=1382938 nrestarts=0; uds=socket owner=sky:sky mode=0600
+schema_version=1 integrity_check=ok; active_runs=0; online_workers=1
+prior_running_binary_sha256=03ea07333ffa8e59b4649387f4114c8e0ba62321cb85952c7a9675f15665457a
+prior_running_binary_vcs_revision=f5c4f26252f5f3c7... (not present in current git object database)
+prior_running_binary_vcs_modified=true
+p0_source_commit=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
+p0_build_command=go build -buildvcs=true -o <temporary-artifact> ./cmd/openagentx
+p0_artifact_sha256=05b4c46deaad2cdb4a7fb39c95f360f33b58006e5b833a110e155c3261bc0234
+p0_deployed_sha256=05b4c46deaad2cdb4a7fb39c95f360f33b58006e5b833a110e155c3261bc0234
+p0_deployed_vcs_revision=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
+p0_deployed_vcs_modified=false
+p0_backup=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/bin/openagentx.pre-t10-p0-20260905T083731+0800
+daemon=active mainpid=2158238 nrestarts=0; quote_worker=active mainpid=2159442 nrestarts=0
+worker_generation=27; worker_backend_health=primary:healthy; active_runs=0
+revalidation_binary_sha_match=disk-daemon-proc PASS
+revalidation_vcs_revision=fa4d35bea0dccdc0adeccbc5e404bc590c0a1c25
+revalidation_vcs_modified=false
+revalidation_services=active active nrestarts=0/0
+revalidation_worker=generation27 online heartbeat_progressing backend_primary_healthy active_runs=0
+revalidation_schema_verify=PASS; https=PASS; adr_hash_unchanged=PASS
+stale_fixture_mailbox=test-fake-multiturn offline-only no-production-impact P2
+result=GO

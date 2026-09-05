@@ -1,12 +1,16 @@
 ---
 doc_type: test_task
-status: pending
+status: passed
 owner: openagentx
 test_id: T10
-updated_at: 2026-09-01
+updated_at: 2026-09-05
 ---
 
 # T10：全量回归、证据归档与 Go/No-Go
+
+## 结论
+
+`GO`（2026-09-05）。全量自动化与 T04/T05/T06 强制矩阵、生产 HTTPS/PWA/安全边界、SQLite 只读一致性和部署运行态均通过。首轮生产二进制 VCS 追溯 P0 已由 clean `fa4d35b` 产物重建部署并经 terra high 独立复验：磁盘、daemon/Worker `/proc` SHA 一致，`vcs.modified=false`，服务 active、Worker heartbeat 推进、backend healthy、active run=0。剩余仅为离线 `test-fake-multiturn` fixture 的 stale pending mailbox，记录为不影响生产调度的 P2 residual。
 
 ## 目标
 
