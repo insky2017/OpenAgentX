@@ -436,6 +436,7 @@ CREATE TABLE network_profile_bindings (
     applied_worker_id TEXT,
     applied_generation INTEGER,
     applied_profile_version INTEGER,
+    diagnostic TEXT,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (agent_id, backend_id),
     FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version)

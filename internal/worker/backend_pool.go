@@ -58,6 +58,34 @@ func (p *BackendPool) Resolve(ctx context.Context, adapterID string, backendID s
 	return backend.Adapter, nil
 }
 
+func (p *BackendPool) ApplyNetworkBinding(binding domain.NetworkBinding) error {
+	if binding.Profile == nil {
+		return domain.ErrInvalidInput("network binding profile payload is required")
+	}
+	policy := domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: binding.Profile.ID, ProfileVersion: binding.Profile.Version, ProxyMode: binding.Profile.Mode, ConfigFile: binding.Profile.ConfigFile}
+	if err := policy.Validate(); err != nil {
+		return err
+	}
+	p.mu.RLock()
+	backend, exists := p.backends[binding.BackendID]
+	p.mu.RUnlock()
+	if !exists {
+		return domain.ErrNotFound
+	}
+	applier, ok := backend.Adapter.(openruntime.NetworkPolicyApplier)
+	if !ok {
+		return domain.ErrUnsupportedCapability
+	}
+	if err := applier.ApplyNetworkPolicy(policy); err != nil {
+		return err
+	}
+	p.mu.Lock()
+	backend.Network = policy
+	p.backends[binding.BackendID] = backend
+	p.mu.Unlock()
+	return nil
+}
+
 func (p *BackendPool) Observe(ctx context.Context) ([]openruntime.BackendRegistration, map[string]openruntime.BackendHealth, error) {
 	p.mu.RLock()
 	ids := make([]string, 0, len(p.backends))

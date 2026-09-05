@@ -76,6 +76,7 @@ func NewHandler(service Service, principal PrincipalResolver) (*Handler, error) 
 func (h *Handler) registerRoutes() {
 	h.mux.HandleFunc("POST /api/v1/workers/register", h.register)
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/heartbeat", h.heartbeat)
+	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/network-bindings/pull", h.pullNetworkBindings)
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/mailbox/claim", h.claimMailbox)
 	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/accept", h.acceptMailbox)
 	h.mux.HandleFunc("POST /api/v1/mailbox/{itemID}/begin-attempt", h.beginAttempt)
@@ -86,6 +87,35 @@ func (h *Handler) registerRoutes() {
 	h.mux.HandleFunc("POST /api/v1/workers/{workerID}/release", h.release)
 	h.mux.HandleFunc("POST /api/v1/worker-commands/{commandID}/ack", h.ackCommand)
 	h.mux.HandleFunc("POST /api/v1/worker-commands/{commandID}/released-ack", h.releasedAckCommand)
+}
+
+func (h *Handler) pullNetworkBindings(response http.ResponseWriter, request *http.Request) {
+	service, ok := h.service.(interface {
+		PullNetworkBindings(context.Context, string, string, openapi.NetworkBindingPullRequest) ([]domain.NetworkBinding, error)
+	})
+	if !ok {
+		h.writeError(response, domain.ErrUnsupportedCapability)
+		return
+	}
+	principal, token, ok := h.authenticate(response, request)
+	if !ok {
+		return
+	}
+	var body openapi.NetworkBindingPullRequest
+	if err := openapi.DecodeStrictJSON(request.Body, &body); err != nil {
+		h.writeError(response, domain.ErrInvalidInput("invalid JSON request body"))
+		return
+	}
+	if !matchPathID(request.PathValue("workerID"), body.WorkerInstanceID) {
+		h.writeError(response, domain.ErrInvalidInput("path Worker ID does not match request body"))
+		return
+	}
+	bindings, err := service.PullNetworkBindings(request.Context(), principal, token, body)
+	if err != nil {
+		h.writeError(response, err)
+		return
+	}
+	h.writeJSON(response, http.StatusOK, openapi.NetworkBindingPullResponse{Bindings: bindings})
 }
 
 func (h *Handler) release(w http.ResponseWriter, r *http.Request) {

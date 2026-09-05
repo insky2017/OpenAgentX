@@ -104,13 +104,44 @@ func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
 			agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
 			profile_id TEXT NOT NULL, profile_version INTEGER NOT NULL, version INTEGER NOT NULL CHECK (version > 0),
 			desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
-			applied_worker_id TEXT, applied_generation INTEGER, applied_profile_version INTEGER, updated_at TEXT NOT NULL,
+			applied_worker_id TEXT, applied_generation INTEGER, applied_profile_version INTEGER, diagnostic TEXT, updated_at TEXT NOT NULL,
 			PRIMARY KEY (agent_id, backend_id), FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version)
 		)`,
 	}
 	for _, statement := range statements {
 		if _, err := tx.ExecContext(ctx, statement); err != nil {
 			return fmt.Errorf("apply network schema upgrade: %w", err)
+		}
+	}
+	// v1 databases may already contain network_profile_bindings created before
+	// the diagnostic field was introduced. CREATE TABLE IF NOT EXISTS does not
+	// alter that table, so add the nullable column explicitly when absent.
+	var hasDiagnostic bool
+	rows, err := tx.QueryContext(ctx, `PRAGMA table_info(network_profile_bindings)`)
+	if err != nil {
+		return fmt.Errorf("inspect network binding schema: %w", err)
+	}
+	for rows.Next() {
+		var cid int
+		var name, columnType string
+		var notNull, primaryKey int
+		var defaultValue any
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			rows.Close()
+			return fmt.Errorf("scan network binding schema: %w", err)
+		}
+		if name == "diagnostic" {
+			hasDiagnostic = true
+		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return fmt.Errorf("read network binding schema: %w", err)
+	}
+	rows.Close()
+	if !hasDiagnostic {
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profile_bindings ADD COLUMN diagnostic TEXT`); err != nil {
+			return fmt.Errorf("add network binding diagnostic column: %w", err)
 		}
 	}
 	if err := tx.Commit(); err != nil {

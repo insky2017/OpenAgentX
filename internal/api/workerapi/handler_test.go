@@ -111,3 +111,29 @@ func TestControlClaimHandlerAppliesQueryWaitBeforeService(t *testing.T) {
 		t.Fatalf("invalid status=%d request=%+v body=%s", invalidResponse.Code, service.request, invalidResponse.Body.String())
 	}
 }
+
+type networkPullService struct {
+	Service
+	called *openapi.NetworkBindingPullRequest
+}
+
+func (s *networkPullService) PullNetworkBindings(_ context.Context, _ string, _ string, request openapi.NetworkBindingPullRequest) ([]domain.NetworkBinding, error) {
+	s.called = &request
+	return []domain.NetworkBinding{}, nil
+}
+
+func TestNetworkBindingPullUsesWorkerPathAndFencingRequest(t *testing.T) {
+	service := &networkPullService{}
+	handler, err := NewHandler(service, StaticPrincipal("worker-principal"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := json.Marshal(openapi.NetworkBindingPullRequest{WorkerInstanceID: "worker-1", Generation: 2, FencingToken: 3})
+	request := httptest.NewRequest(http.MethodPost, "/api/v1/workers/worker-1/network-bindings/pull", strings.NewReader(string(body)))
+	request.Header.Set("Authorization", "Bearer worker-session-token")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK || service.called == nil || service.called.Generation != 2 || service.called.FencingToken != 3 {
+		t.Fatalf("status=%d request=%+v body=%s", response.Code, service.called, response.Body.String())
+	}
+}

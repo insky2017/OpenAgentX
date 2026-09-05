@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -25,6 +26,10 @@ type Runner struct {
 	draining atomic.Bool
 	statusMu sync.RWMutex
 	health   map[string]openruntime.BackendHealth
+}
+
+type networkBindingPullClient interface {
+	PullNetworkBindings(context.Context, api.NetworkBindingPullRequest) ([]domain.NetworkBinding, error)
 }
 
 func NewRunner(config Config, client api.WorkerControlClient, backends *BackendPool, resolver ControlPayloadResolver) (*Runner, error) {
@@ -52,9 +57,14 @@ func (r *Runner) Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("register Worker: %w", err)
 	}
-	if err := r.heartbeat(ctx, session, domain.WorkerStatusOnline); err != nil {
+	networkAcks := r.applyNetworkBindings(session.NetworkBindings)
+	if err := r.heartbeat(ctx, session, domain.WorkerStatusOnline, networkAcks); err != nil {
 		return fmt.Errorf("initial Worker heartbeat: %w", err)
 	}
+	// The acknowledgement is a one-shot state transition. Subsequent
+	// heartbeats omit it; a still-pending binding will be returned by pull and
+	// retried explicitly.
+	networkAcks = nil
 	manager, err := NewActiveRunManager(r.client, r.backends, r.resolver, *session,
 		&r.draining, r.config.ShutdownTimeout)
 	if err != nil {
@@ -65,7 +75,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	defer cancelRun()
 	group, groupContext := errgroup.WithContext(runContext)
 	stopCommands := make(chan domain.WorkerCommand, 1)
-	group.Go(func() error { return r.heartbeatLoop(groupContext, session) })
+	group.Go(func() error { return r.heartbeatLoop(groupContext, session, networkAcks) })
 	group.Go(func() error { return r.mailboxPump(groupContext, session, manager) })
 	group.Go(func() error { return manager.Run(groupContext) })
 	group.Go(func() error { return r.workerControlLoop(groupContext, session, stopCommands) })
@@ -117,7 +127,7 @@ func (r *Runner) releaseWorker(ctx context.Context, session *api.WorkerSession) 
 	return nil
 }
 
-func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession) error {
+func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession, networkAcks map[string]api.NetworkBindingAck) error {
 	ticker := time.NewTicker(r.config.HeartbeatInterval)
 	defer ticker.Stop()
 	for {
@@ -125,6 +135,25 @@ func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession) 
 		case <-ctx.Done():
 			return nil
 		case <-ticker.C:
+			if puller, ok := r.client.(networkBindingPullClient); ok {
+				bindings, pullErr := puller.PullNetworkBindings(ctx, api.NetworkBindingPullRequest{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken})
+				if pullErr != nil {
+					if ctx.Err() != nil {
+						return nil
+					}
+					return fmt.Errorf("pull Worker network bindings: %w", pullErr)
+				}
+				if len(bindings) > 0 {
+					networkAcks = r.applyNetworkBindings(bindings)
+					if err := r.heartbeat(ctx, session, domain.WorkerStatusOnline, networkAcks); err != nil {
+						if ctx.Err() != nil {
+							return nil
+						}
+						return fmt.Errorf("acknowledge Worker network bindings: %w", err)
+					}
+					networkAcks = nil
+				}
+			}
 			_, health, observeErr := r.backends.Observe(ctx)
 			status := domain.WorkerStatusOnline
 			if observeErr != nil {
@@ -136,7 +165,7 @@ func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession) 
 			if r.draining.Load() {
 				status = domain.WorkerStatusDraining
 			}
-			if err := r.heartbeat(ctx, session, status); err != nil {
+			if err := r.heartbeat(ctx, session, status, networkAcks); err != nil {
 				if ctx.Err() != nil {
 					return nil
 				}
@@ -146,11 +175,33 @@ func (r *Runner) heartbeatLoop(ctx context.Context, session *api.WorkerSession) 
 	}
 }
 
-func (r *Runner) heartbeat(ctx context.Context, session *api.WorkerSession, status domain.WorkerStatus) error {
+func (r *Runner) heartbeat(ctx context.Context, session *api.WorkerSession, status domain.WorkerStatus, networkAcks map[string]api.NetworkBindingAck) error {
 	return r.client.Heartbeat(ctx, api.HeartbeatRequest{
 		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
-		FencingToken: session.Worker.FencingToken, Status: status, BackendHealth: r.getHealth(),
+		FencingToken: session.Worker.FencingToken, Status: status, BackendHealth: r.getHealth(), NetworkBindings: networkAcks,
 	})
+}
+
+func (r *Runner) applyNetworkBindings(bindings []domain.NetworkBinding) map[string]api.NetworkBindingAck {
+	acks := make(map[string]api.NetworkBindingAck, len(bindings))
+	for _, binding := range bindings {
+		ack := api.NetworkBindingAck{BackendID: binding.BackendID, ProfileID: binding.ProfileID, ProfileVersion: binding.ProfileVersion, State: "applied"}
+		if err := r.backends.ApplyNetworkBinding(binding); err != nil {
+			ack.State = "failed"
+			ack.Diagnostic = sanitizeNetworkDiagnostic(err.Error())
+		}
+		acks[binding.BackendID] = ack
+	}
+	return acks
+}
+
+func sanitizeNetworkDiagnostic(value string) string {
+	value = strings.ReplaceAll(value, "\r", " ")
+	value = strings.ReplaceAll(value, "\n", " ")
+	if len(value) > 4096 {
+		value = value[:4096]
+	}
+	return value
 }
 
 func (r *Runner) mailboxPump(ctx context.Context, session *api.WorkerSession, manager *ActiveRunManager) error {
@@ -243,7 +294,7 @@ func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSessi
 		switch command.Kind {
 		case domain.WorkerCommandDrain:
 			r.draining.Store(true)
-			if err := r.heartbeat(ctx, session, domain.WorkerStatusDraining); err != nil {
+			if err := r.heartbeat(ctx, session, domain.WorkerStatusDraining, nil); err != nil {
 				return fmt.Errorf("enter Worker draining state: %w", err)
 			}
 			if err := r.client.AcknowledgeWorkerCommand(ctx, command.ID, api.ControlAckRequest{

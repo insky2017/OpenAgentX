@@ -43,6 +43,11 @@ type WorkerState interface {
 	AcknowledgeReleasedWorkerCommand(context.Context, domain.WorkerWriteGuard, string, domain.WorkerCommandState, string, *domain.JournalEvent) error
 }
 
+type networkBindingState interface {
+	ListNetworkBindings(context.Context, string) ([]domain.NetworkBinding, error)
+	AcknowledgeNetworkBinding(context.Context, string, string, string, int64, int64, string, string, string, time.Time) error
+}
+
 type TurnPlan struct {
 	Execution            domain.ResolvedExecutionSpec
 	SessionBinding       *domain.SessionBinding
@@ -164,7 +169,19 @@ func (s *WorkerService) Register(ctx context.Context, principalID string, reques
 	if err != nil {
 		return nil, err
 	}
-	return &api.WorkerSession{Worker: *worker, SessionToken: token, TokenExpiresAt: registration.TokenExpiresAt}, nil
+	session := &api.WorkerSession{Worker: *worker, SessionToken: token, TokenExpiresAt: registration.TokenExpiresAt}
+	if networkState, ok := s.state.(networkBindingState); ok {
+		bindings, listErr := networkState.ListNetworkBindings(ctx, request.AgentID)
+		if listErr != nil {
+			return nil, listErr
+		}
+		for i := range bindings {
+			if networkBindingNeedsApply(bindings[i], session.Worker.ID, session.Worker.Generation) {
+				session.NetworkBindings = append(session.NetworkBindings, bindings[i])
+			}
+		}
+	}
+	return session, nil
 }
 
 func (s *WorkerService) Heartbeat(ctx context.Context, principalID string, token string, request api.HeartbeatRequest) error {
@@ -180,7 +197,50 @@ func (s *WorkerService) Heartbeat(ctx context.Context, principalID string, token
 	})
 	_, err = s.state.HeartbeatWorker(ctx, guard, request.Status, request.BackendHealth,
 		guard.CheckedAt.Add(s.workerLease), guard.CheckedAt.Add(s.tokenLifetime), event)
-	return err
+	if err != nil {
+		return err
+	}
+	if networkState, ok := s.state.(networkBindingState); ok {
+		for backendID, ack := range request.NetworkBindings {
+			if err := networkState.AcknowledgeNetworkBinding(ctx, guard.AgentID, backendID, ack.ProfileID, ack.ProfileVersion, guard.Generation, guard.WorkerInstanceID, ack.State, ack.Diagnostic, guard.CheckedAt); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (s *WorkerService) PullNetworkBindings(ctx context.Context, principalID, token string, request api.NetworkBindingPullRequest) ([]domain.NetworkBinding, error) {
+	if err := request.Validate(); err != nil {
+		return nil, err
+	}
+	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)
+	if err != nil {
+		return nil, err
+	}
+	state, ok := s.state.(networkBindingState)
+	if !ok {
+		return []domain.NetworkBinding{}, nil
+	}
+	bindings, err := state.ListNetworkBindings(ctx, guard.AgentID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]domain.NetworkBinding, 0, len(bindings))
+	for _, binding := range bindings {
+		if networkBindingNeedsApply(binding, guard.WorkerInstanceID, guard.Generation) {
+			result = append(result, binding)
+		}
+	}
+	return result, nil
+}
+
+func networkBindingNeedsApply(binding domain.NetworkBinding, workerID string, generation int64) bool {
+	if binding.DesiredStatus == "pending" || binding.DesiredStatus == "failed" {
+		return true
+	}
+	return binding.DesiredStatus == "applied" &&
+		(binding.AppliedWorkerID != workerID || binding.AppliedGeneration != generation)
 }
 
 func (s *WorkerService) Release(ctx context.Context, principalID string, token string, request api.WorkerReleaseRequest) error {

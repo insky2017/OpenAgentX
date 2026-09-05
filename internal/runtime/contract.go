@@ -232,6 +232,13 @@ type AgentRuntimeAdapter interface {
 	StartTurn(context.Context, TurnRequest, EventSink) (TurnHandle, error)
 }
 
+// NetworkPolicyApplier is implemented by process adapters whose child
+// environment can be changed between turns. Applying a policy never mutates a
+// running process; the next StartTurn observes the new policy.
+type NetworkPolicyApplier interface {
+	ApplyNetworkPolicy(domain.NetworkPolicy) error
+}
+
 type TurnHandle interface {
 	Wait(context.Context) (TurnResult, error)
 	Steer(context.Context, domain.Message) error

@@ -86,6 +86,15 @@ func (c *UnixHTTPWorkerClient) Heartbeat(ctx context.Context, request openapi.He
 	return c.do(ctx, http.MethodPost, path, nil, request, nil, true)
 }
 
+func (c *UnixHTTPWorkerClient) PullNetworkBindings(ctx context.Context, request openapi.NetworkBindingPullRequest) ([]domain.NetworkBinding, error) {
+	path := replacePath(openapi.WorkerNetworkBindingsPullPath, "{worker-id}", request.WorkerInstanceID)
+	var response openapi.NetworkBindingPullResponse
+	if err := c.do(ctx, http.MethodPost, path, nil, request, &response, true); err != nil {
+		return nil, err
+	}
+	return response.Bindings, nil
+}
+
 func (c *UnixHTTPWorkerClient) ReleaseWorker(ctx context.Context, request openapi.WorkerReleaseRequest) error {
 	path := replacePath(openapi.WorkerReleasePath, "{worker-id}", request.WorkerInstanceID)
 	return c.do(ctx, http.MethodPost, path, nil, request, nil, true)

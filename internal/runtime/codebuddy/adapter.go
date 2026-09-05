@@ -41,7 +41,29 @@ type Config struct {
 	Network     domain.NetworkPolicy
 }
 
-type Adapter struct{ config Config }
+type Adapter struct {
+	config    Config
+	networkMu sync.RWMutex
+}
+
+func (a *Adapter) ApplyNetworkPolicy(policy domain.NetworkPolicy) error {
+	if err := policy.Validate(); err != nil {
+		return err
+	}
+	if _, err := runtimenetwork.Environment(nil, policy, "codebuddy-cli", a.config.Binary); err != nil {
+		return err
+	}
+	a.networkMu.Lock()
+	a.config.Network = policy
+	a.networkMu.Unlock()
+	return nil
+}
+
+func (a *Adapter) configuredNetwork() domain.NetworkPolicy {
+	a.networkMu.RLock()
+	defer a.networkMu.RUnlock()
+	return a.config.Network
+}
 
 func NewAdapter(config Config) (*Adapter, error) {
 	if strings.TrimSpace(config.Binary) == "" {
@@ -121,7 +143,7 @@ func (a *Adapter) Health(ctx context.Context) error {
 	defer cancel()
 	command := exec.CommandContext(healthContext, a.config.Binary, "--version")
 	command.Dir = a.config.WorkingDir
-	env, err := a.environment(a.config.Network)
+	env, err := a.environment(a.configuredNetwork())
 	if err != nil {
 		return err
 	}
@@ -180,7 +202,7 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 
 func (a *Adapter) environment(policy domain.NetworkPolicy) ([]string, error) {
 	if policy.IsZero() {
-		policy = a.config.Network
+		policy = a.configuredNetwork()
 	}
 	base := append([]string{}, os.Environ()...)
 	base = append(base, a.config.Environment...)

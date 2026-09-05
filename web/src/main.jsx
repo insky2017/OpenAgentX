@@ -101,7 +101,7 @@ const eventLabel = (type) => ({
   'worker.heartbeat': 'Worker 心跳',
 }[type] || type)
 
-function RunTimeline({ detail }) {
+function RunTimeline({ detail, onLoadMore, loadingMore }) {
   const events = [...(detail.events || [])].sort((left, right) => left.sequence - right.sequence)
   const runs = detail.run_attempts || []
   return (
@@ -114,6 +114,7 @@ function RunTimeline({ detail }) {
         {events.map((event) => <li key={`${event.sequence}-${event.event_id}`}><span className="timeline-marker" /><div><strong>{eventLabel(event.event_type)}</strong><p>{event.event_type} · {event.aggregate_type}</p><time>{new Date(event.created_at).toLocaleString()} · #{event.sequence}</time></div></li>)}
         {!events.length && <li className="empty-state">暂无运行事件</li>}
       </ol>
+      {detail.next_sequence > 0 && <button className="load-more" type="button" onClick={onLoadMore} disabled={loadingMore}>{loadingMore ? '加载中...' : '加载更多事件'}</button>}
     </div>
   )
 }
@@ -178,7 +179,11 @@ function App() {
   const [taskAgentFilter, setTaskAgentFilter] = useState('')
   const [taskView, setTaskView] = useState('content')
   const [newOutput, setNewOutput] = useState(false)
+  const [loadingMoreEvents, setLoadingMoreEvents] = useState(false)
   const lastSequenceRef = useRef(0)
+  const selectedTaskRef = useRef('')
+  const taskDetailRef = useRef(null)
+  const detailRequestRef = useRef(0)
   const [now, setNow] = useState(Date.now())
   const deferredInstallPrompt = useRef(null)
   const [installState, setInstallState] = useState('hidden')
@@ -251,17 +256,26 @@ function App() {
         const after = Math.max(0, Number(overview.latest_sequence) || 0)
         lastSequenceRef.current = after
         source = new EventSource(`/api/observe/v1/events/stream?after_sequence=${after}`)
-        source.onopen = () => setStreamState('online')
         source.onmessage = (event) => {
           const sequence = Number(event.lastEventId) || 0
           if (sequence && sequence <= lastSequenceRef.current) return
           if (sequence) lastSequenceRef.current = sequence
-          if (selectedTaskID) setNewOutput(true)
+          if (selectedTaskRef.current) setNewOutput(true)
           clearTimeout(refreshTimer)
           refreshTimer = setTimeout(async () => {
             await refresh().catch(() => {})
-            if (selectedTaskID) loadTaskDetail(selectedTaskID, true)
+            if (selectedTaskRef.current) {
+              const current = taskDetailRef.current
+              await loadTaskDetail(selectedTaskRef.current, true, current?.last_sequence || 0, true)
+            }
           }, 150)
+        }
+        source.onopen = () => {
+          setStreamState('online')
+          const current = taskDetailRef.current
+          if (selectedTaskRef.current && current) {
+            loadTaskDetail(selectedTaskRef.current, true, current.last_sequence || 0, true)
+          }
         }
         source.onerror = () => setStreamState('connecting')
       })
@@ -272,7 +286,7 @@ function App() {
       clearTimeout(refreshTimer)
       source?.close()
     }
-  }, [session, browserOnline, selectedTaskID])
+  }, [session, browserOnline])
 
   useEffect(() => {
     if (!session || !browserOnline || tab !== 'runtime') return
@@ -338,24 +352,44 @@ function App() {
     lastSequenceRef.current = Math.max(lastSequenceRef.current, Number(overview.latest_sequence) || 0)
   }
 
-  const loadTaskDetail = async (id, quiet = false) => {
+  const mergeTaskDetail = (current, incoming, append) => {
+    if (!append || !current || current.task?.id !== incoming.task?.id) return incoming
+    const events = [...(current.events || []), ...(incoming.events || [])]
+    const uniqueEvents = Array.from(new Map(events.map((event) => [event.sequence, event])).values()).sort((left, right) => left.sequence - right.sequence)
+    return {
+      ...incoming,
+      events: uniqueEvents,
+      last_sequence: Math.max(Number(current.last_sequence) || 0, Number(incoming.last_sequence) || 0),
+    }
+  }
+
+  const loadTaskDetail = async (id, quiet = false, afterSequence = null, append = false) => {
     if (!id) {
       setTaskDetail(null)
       setTaskDetailState('idle')
       return
     }
     if (!quiet) setTaskDetailState('loading')
+    const requestID = ++detailRequestRef.current
     try {
-      const detail = await api(`/api/observe/v1/tasks/${encodeURIComponent(id)}`)
-      setTaskDetail(detail)
+      const query = afterSequence === null ? '' : `?after_sequence=${Math.max(0, Number(afterSequence) || 0)}`
+      const detail = await api(`/api/observe/v1/tasks/${encodeURIComponent(id)}${query}`)
+      if (requestID !== detailRequestRef.current) return detail
+      setTaskDetail((current) => mergeTaskDetail(current, detail, append))
       setTaskDetailState('ready')
-      setNewOutput(false)
+      if (!append) setNewOutput(false)
+      return detail
     } catch (requestError) {
       setTaskDetailState(requestError.status === 404 ? 'missing' : 'error')
       if (requestError.status === 404) setSelectedTaskID('')
       else if (!quiet) setError(requestError.message)
     }
   }
+
+  useEffect(() => {
+    selectedTaskRef.current = selectedTaskID
+    taskDetailRef.current = taskDetail
+  }, [selectedTaskID, taskDetail])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -371,6 +405,16 @@ function App() {
     if (selectedTaskID) loadTaskDetail(selectedTaskID)
     else setTaskDetail(null)
   }, [selectedTaskID])
+
+  const loadMoreEvents = async () => {
+    if (!selectedTaskID || !taskDetail?.next_sequence || loadingMoreEvents) return
+    setLoadingMoreEvents(true)
+    try {
+      await loadTaskDetail(selectedTaskID, true, taskDetail.next_sequence, true)
+    } finally {
+      setLoadingMoreEvents(false)
+    }
+  }
 
   const installPWA = async () => {
     const prompt = deferredInstallPrompt.current
@@ -695,7 +739,7 @@ function App() {
                   <div className="detail-scroll">
                     {taskView === 'content' && <MarkdownContent value={taskDetail.task.content} />}
                     {taskView === 'conversation' && <div className="conversation-list">{(taskDetail.messages || []).map((message) => <article className="message-item" key={message.id}><div><strong>{message.sender_principal_id}</strong><time>{message.created_at}</time></div><MarkdownContent value={message.content} compact /></article>)}{!taskDetail.messages?.length && <div className="empty-state">暂无对话消息</div>}</div>}
-                    {taskView === 'run' && <RunTimeline detail={taskDetail} />}
+                    {taskView === 'run' && <RunTimeline detail={taskDetail} onLoadMore={loadMoreEvents} loadingMore={loadingMoreEvents} />}
                     {taskView === 'result' && <div className="result-view">{taskDetail.task.result && <MarkdownContent value={taskDetail.task.result} />}{taskDetail.task.error && <div className="diagnostic"><strong>执行诊断</strong><pre>{taskDetail.task.error}</pre></div>}{!taskDetail.task.result && !taskDetail.task.error && <div className="empty-state">任务尚未产生最终结果</div>}</div>}
                   </div>
                 </>
@@ -748,7 +792,7 @@ function App() {
               {(networkState.profiles || []).map((profile) => <article className="profile-card" key={`${profile.profile_id}-${profile.version}`}>
                 <div><strong>{profile.profile_id}</strong><span className={`pill ${profile.status === 'published' ? 'status-succeeded' : 'status-queued'}`}>{profile.status} · v{profile.version}</span></div>
                 <p>{profile.mode} · {profile.host}:{profile.port}{profile.secret_ref ? ` · Secret ${profile.secret_ref}` : ''}</p>
-                <div className="profile-actions">{profile.status === 'draft' && <button className="outline" disabled={!canWrite} onClick={() => publishProfile(profile)}>发布</button>}{profile.status === 'published' && runtimeOptions.map((option) => <button className="outline" key={`${profile.profile_id}-${option.agent_id}-${option.backend.backend_id}`} disabled={!canWrite} onClick={() => bindProfile(option, profile)}>绑定 {option.agent_id}/{option.backend.backend_id}</button>)}</div>
+                <div className="profile-actions">{profile.status === 'draft' && <button className="outline" disabled={!canWrite} onClick={() => publishProfile(profile)}>发布</button>}{profile.status === 'published' && runtimeOptions.filter((option) => option.backend?.descriptor?.network_modes?.includes('named_profile')).map((option) => <button className="outline" key={`${profile.profile_id}-${option.agent_id}-${option.backend.backend_id}`} disabled={!canWrite} onClick={() => bindProfile(option, profile)}>绑定 {option.agent_id}/{option.backend.backend_id}</button>)}</div>
               </article>)}
               {!networkState.profiles?.length && <div className="empty-state">暂无网络方案</div>}
             </div>

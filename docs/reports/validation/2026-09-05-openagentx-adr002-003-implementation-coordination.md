@@ -91,3 +91,15 @@
 - ADR-003 详情改为按 Task 的 cursor 分页事件、独立 SQL RunAttempt 查询、最小 Task 投影；SSE 仅发送 task/run/message/approval 事件的元数据投影，不发送 payload/actor。
 - 验证证据：`go test ./...`、`go vet ./...`、关键包 `go test -race`、`cd web && npm run build && npm run test:pwa`、`git diff --check` 均通过。
 - 未覆盖边界：当前 Web 身份模型没有 OrganizationID/成员映射，因此 SSE/Panel 采用单组织部署范围；`applied` Worker generation/fencing 回执仍由后续 Control Channel 任务完成，当前不会把 `pending` 推断为已应用；真实认证浏览器三视口证据尚未形成。
+
+### 2026-09-05 最终收口复核
+
+- Worker 在线闭环已补齐：注册响应携带待处理 binding；后续 heartbeat 周期通过受 session、generation、fencing 校验的 pull 接口获取 `pending/failed` binding。Worker 应用策略后只在当前 heartbeat 回传一次 `applied/failed`，失败诊断经过换行清理和长度限制并持续重试；旧 generation 回执由 SQLite CAS 拒绝，同一 generation 的成功回执保持幂等。
+- Worker 重启恢复已覆盖：即使 binding 已由旧 Worker 标记为 `applied`，只要当前 Worker instance/generation 不匹配，注册或 pull 仍会重新下发；调度器只把 `desired_status='applied'` 的 binding 注入后续 Run。
+- Runtime 策略只更新后续 turn 使用的 adapter 配置，不热修改正在运行的子进程。AGY、CodeBuddy、ACP 均执行配置文件存在、普通文件和 `0600` 权限检查；Panel/Observe 投影清空 `secret_ref`。
+- ADR-003 观察窗口已支持任务详情事件 cursor/`next_sequence` 增量加载、sequence 去重、SSE 重连后的增量补取，以及内容/对话/运行/结果四个视图。SSE 仅发送元数据投影，不发送 payload/actor；Markdown 采用安全渲染路径。
+- 独立批量验证通过：`go test -count=1 ./...`、`go vet ./...`、关键包 `go test -race -count=1 ./internal/api/panel ./internal/api/workerapi ./internal/controlplane ./internal/persistence/sqlite ./internal/runtime/network ./internal/runtime/spec ./internal/worker`、`cd web && npm run build`、`npm run test:pwa`、`git diff --check`。
+- 真实认证浏览器验证使用隔离 daemon/TLS fixture 完成：`1440x900`、`390x844`、`412x915` 均无横向溢出；可创建任务并打开详情，四视图和 Markdown 可见；Runtime 可创建 `profile-browser` 草稿并从 `draft v1` 发布为 `published v2`；页面不显示 `secret_ref`；响应包含 `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`。
+- Panel Observe 投影同时清空 `secret_ref` 和 Worker 本机 `config_file`；绑定 API/Runtime UI 仅允许声明 `named_profile` 能力的 Backend。旧 v1 数据库缺失 `diagnostic` 列时由事务化 `ALTER TABLE` 补齐，并有升级测试。
+- 浏览器证据对应本轮隔离 daemon/TLS fixture；随后新增的 Backend 能力过滤和路径脱敏已通过构建/PWA 回归，但未重新执行完整浏览器 E2E，因此不把这两个小改动宣称为新的浏览器实测证据。
+- 剩余边界：当前 Web 身份模型没有 OrganizationID/成员映射，Panel/SSE 仍是单部署组织范围；认证后的离线写保护已实现前端状态提示，但未完成完整浏览器断网/恢复 E2E；ProxyProfile 配置变更尚未写入 Event Journal，注册/heartbeat 与 binding ack 仍跨事务。无关 `.planning/` 和 ADR-001 验证报告未纳入提交。

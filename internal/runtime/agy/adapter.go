@@ -50,7 +50,8 @@ type Config struct {
 }
 
 type Adapter struct {
-	config Config
+	config    Config
+	networkMu sync.RWMutex
 }
 
 func NewAdapter(config Config) (*Adapter, error) {
@@ -92,6 +93,25 @@ func NewAdapterForTest(config Config) *Adapter {
 		config.CancelGrace = defaultCancelGrace
 	}
 	return &Adapter{config: config}
+}
+
+func (a *Adapter) ApplyNetworkPolicy(policy domain.NetworkPolicy) error {
+	if err := policy.Validate(); err != nil {
+		return err
+	}
+	if _, err := runtimenetwork.Environment(nil, policy, "agy-batch", a.config.Binary); err != nil {
+		return err
+	}
+	a.networkMu.Lock()
+	a.config.Network = policy
+	a.networkMu.Unlock()
+	return nil
+}
+
+func (a *Adapter) configuredNetwork() domain.NetworkPolicy {
+	a.networkMu.RLock()
+	defer a.networkMu.RUnlock()
+	return a.config.Network
 }
 
 func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, error) {
@@ -148,7 +168,7 @@ func (a *Adapter) Health(ctx context.Context) error {
 	defer cancel()
 	command := exec.CommandContext(healthContext, a.config.Binary, "--version")
 	command.Dir = a.config.WorkingDir
-	env, err := a.environment(a.config.Network)
+	env, err := a.environment(a.configuredNetwork())
 	if err != nil {
 		return err
 	}
@@ -231,7 +251,7 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 
 func (a *Adapter) environment(policy domain.NetworkPolicy) ([]string, error) {
 	if policy.IsZero() {
-		policy = a.config.Network
+		policy = a.configuredNetwork()
 	}
 	base := append([]string{}, os.Environ()...)
 	base = append(base, a.config.Environment...)

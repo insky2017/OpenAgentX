@@ -57,6 +57,27 @@ func TestApplyCreatesTargetSchemaAndIsRepeatable(t *testing.T) {
 	}
 }
 
+func TestApplyUpgradesNetworkBindingDiagnosticColumn(t *testing.T) {
+	ctx := context.Background()
+	db := openDB(t)
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, "ALTER TABLE network_profile_bindings DROP COLUMN diagnostic"); err != nil {
+		t.Fatal(err)
+	}
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	var count int
+	if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM pragma_table_info('network_profile_bindings') WHERE name='diagnostic'").Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 1 {
+		t.Fatalf("diagnostic column count=%d", count)
+	}
+}
+
 func TestApplyRejectsLegacyAndUnsupportedSchemas(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()

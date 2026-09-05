@@ -337,6 +337,13 @@ func (h *Handler) networkProfiles(w http.ResponseWriter, r *http.Request) {
 	// enough for operators to distinguish configured from unconfigured.
 	for i := range profiles {
 		profiles[i].SecretRef = ""
+		profiles[i].ConfigFile = ""
+	}
+	for i := range bindings {
+		if bindings[i].Profile != nil {
+			bindings[i].Profile.SecretRef = ""
+			bindings[i].Profile.ConfigFile = ""
+		}
 	}
 	writeJSON(w, map[string]any{"profiles": profiles, "bindings": bindings})
 }
@@ -425,11 +432,47 @@ func (h *Handler) bindNetworkProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
+	if provider, ok := h.state.(backendOptionsState); ok {
+		workers, listErr := h.state.ListWorkers(r.Context(), 100)
+		if listErr != nil {
+			http.Error(w, "failed to load workers", http.StatusInternalServerError)
+			return
+		}
+		supported := false
+		for _, worker := range workers {
+			if worker.AgentID != b.AgentID {
+				continue
+			}
+			backends, backendErr := provider.ListWorkerBackends(r.Context(), worker.ID)
+			if backendErr != nil {
+				continue
+			}
+			for _, backend := range backends {
+				if backend.BackendID == b.BackendID && containsString(backend.Descriptor.NetworkModes, "named_profile") {
+					supported = true
+					break
+				}
+			}
+		}
+		if !supported {
+			http.Error(w, "backend does not support named_profile network bindings", http.StatusConflict)
+			return
+		}
+	}
 	if err := state.BindNetworkProfile(r.Context(), &b, req.Meta.ExpectedVersion); err != nil {
 		http.Error(w, err.Error(), 409)
 		return
 	}
 	writeJSON(w, b)
+}
+
+func containsString(values []string, wanted string) bool {
+	for _, value := range values {
+		if value == wanted {
+			return true
+		}
+	}
+	return false
 }
 func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {

@@ -45,7 +45,7 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 		var profileVersion int64
 		err = r.db.QueryRowContext(ctx, `SELECT p.mode, p.profile_id, p.version, COALESCE(p.config_file,''), p.mode
 			FROM network_profile_bindings b JOIN network_profiles p ON p.profile_id=b.profile_id AND p.version=b.profile_version
-			WHERE b.agent_id=? AND b.backend_id=? AND p.status='published'`, agentID, registration.BackendID).
+			WHERE b.agent_id=? AND b.backend_id=? AND p.status='published' AND b.desired_status='applied'`, agentID, registration.BackendID).
 			Scan(&mode, &profileID, &profileVersion, &configFile, &proxyMode)
 		if err == nil && configFile != "" {
 			registration.Network = domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: profileID, ProfileVersion: profileVersion, ProxyMode: mode, ConfigFile: configFile}

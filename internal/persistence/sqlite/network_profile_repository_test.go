@@ -43,6 +43,19 @@ func TestNetworkProfileDraftPublishAndBindingCAS(t *testing.T) {
 	if err := r.BindNetworkProfile(context.Background(), &domain.NetworkBinding{AgentID: fixture.agentID, BackendID: "agy", ProfileID: p.ID, ProfileVersion: published.Version, Version: 1, DesiredStatus: "pending", UpdatedAt: now.Add(5 * time.Minute)}, 1); err == nil {
 		t.Fatal("stale binding CAS unexpectedly succeeded")
 	}
+	if err := r.AcknowledgeNetworkBinding(context.Background(), fixture.agentID, "agy", p.ID, published.Version, 3, "worker-1", "applied", "", now.Add(6*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	bindings, err = r.ListNetworkBindings(context.Background(), fixture.agentID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bindings[0].DesiredStatus != "applied" || bindings[0].AppliedWorkerID != "worker-1" || bindings[0].AppliedGeneration != 3 {
+		t.Fatalf("applied binding=%+v", bindings[0])
+	}
+	if err := r.AcknowledgeNetworkBinding(context.Background(), fixture.agentID, "agy", p.ID, published.Version, 2, "old-worker", "failed", "stale", now.Add(7*time.Minute)); err == nil {
+		t.Fatal("stale worker acknowledgement unexpectedly succeeded")
+	}
 }
 
 func TestNetworkProfileRejectsCredentialsInHost(t *testing.T) {

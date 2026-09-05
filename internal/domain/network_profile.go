@@ -71,16 +71,18 @@ func (p ProxyProfile) Validate() error {
 }
 
 type NetworkBinding struct {
-	AgentID               string    `json:"agent_id"`
-	BackendID             string    `json:"backend_id"`
-	ProfileID             string    `json:"profile_id"`
-	ProfileVersion        int64     `json:"profile_version"`
-	Version               int64     `json:"version"`
-	DesiredStatus         string    `json:"desired_status"`
-	AppliedWorkerID       string    `json:"applied_worker_id,omitempty"`
-	AppliedGeneration     int64     `json:"applied_generation,omitempty"`
-	AppliedProfileVersion int64     `json:"applied_profile_version,omitempty"`
-	UpdatedAt             time.Time `json:"updated_at"`
+	AgentID               string        `json:"agent_id"`
+	BackendID             string        `json:"backend_id"`
+	ProfileID             string        `json:"profile_id"`
+	ProfileVersion        int64         `json:"profile_version"`
+	Version               int64         `json:"version"`
+	DesiredStatus         string        `json:"desired_status"`
+	AppliedWorkerID       string        `json:"applied_worker_id,omitempty"`
+	AppliedGeneration     int64         `json:"applied_generation,omitempty"`
+	AppliedProfileVersion int64         `json:"applied_profile_version,omitempty"`
+	UpdatedAt             time.Time     `json:"updated_at"`
+	Profile               *ProxyProfile `json:"profile,omitempty"`
+	Diagnostic            string        `json:"diagnostic,omitempty"`
 }
 
 func (b NetworkBinding) Validate() error {
@@ -104,6 +106,9 @@ func (b NetworkBinding) Validate() error {
 	}
 	if b.UpdatedAt.IsZero() {
 		return ErrInvalidInput("network binding updated_at is required")
+	}
+	if len(b.Diagnostic) > 4096 {
+		return ErrInvalidInput("network binding diagnostic is too long")
 	}
 	return nil
 }
