@@ -271,6 +271,45 @@ func TestStoredCredentialIsNotSentAfterSocketInstallationReplacement(t *testing.
 	}
 }
 
+func TestSessionValidatesStoredBearerAndReturnsStructuredUnauthenticated(t *testing.T) {
+	const token = "stored-secret-token"
+	sessionCalls := 0
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case openapi.CLIInstallationProbePath:
+			_ = json.NewEncoder(w).Encode(openapi.CLIInstallationResponse{InstallationID: "installation-test"})
+		case openapi.CLIAuthSessionPath:
+			sessionCalls++
+			if r.Header.Get("Authorization") != "Bearer "+token {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				_ = json.NewEncoder(w).Encode(openapi.ErrorResponse{Code: openapi.ErrorCLIUnauthenticated, Message: "CLI authentication required"})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(openapi.CLISessionResponse{Principal: openapi.CLIPrincipal{TokenID: "token-id", Username: "owner"},
+				InstallationID: "installation-test", AbsoluteExpiresAt: time.Now().Add(time.Hour)})
+		default:
+			http.NotFound(w, r)
+		}
+	})
+	client := newUnixTestClient(t, handler)
+	if err := client.UseCredential(context.Background(), "installation-test", token); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := client.Session(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	client.bearerToken = "rejected-token"
+	_, err := client.Session(context.Background())
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) || apiErr.StatusCode != http.StatusUnauthorized || apiErr.Code != openapi.ErrorCLIUnauthenticated {
+		t.Fatalf("structured Session error=%v", err)
+	}
+	if sessionCalls != 2 {
+		t.Fatalf("Session calls=%d", sessionCalls)
+	}
+}
+
 func TestLegacyDirectPasswordLoginFailsBeforeNetwork(t *testing.T) {
 	requests := 0
 	client := newUnixTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

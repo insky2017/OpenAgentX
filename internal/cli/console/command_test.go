@@ -3,6 +3,7 @@ package console
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
+	consoleclient "openagentx/internal/client/console"
 	"openagentx/internal/credentialstore"
 	"openagentx/internal/domain"
 	"openagentx/internal/localprofile"
@@ -38,6 +40,10 @@ type testClient struct {
 	installationID    string
 	tokenSent         bool
 	logoutCount       int
+	sessionCount      int
+	session           openapi.CLISessionResponse
+	sessionErr        error
+	issuedExpiry      time.Time
 }
 
 func (c *testClient) ProbeInstallation(context.Context) (openapi.CLIInstallationResponse, error) {
@@ -49,9 +55,27 @@ func (c *testClient) ProbeInstallation(context.Context) (openapi.CLIInstallation
 
 func (c *testClient) LoginCredential(context.Context, string, string) (openapi.CLILoginResponse, error) {
 	c.loginCount++
+	if c.installationID == "" {
+		c.installationID = "installation-test"
+	}
+	if c.issuedExpiry.IsZero() {
+		c.issuedExpiry = time.Now().Add(time.Hour)
+	}
 	return openapi.CLILoginResponse{CLISessionResponse: openapi.CLISessionResponse{
 		Principal: openapi.CLIPrincipal{TokenID: "token-id", Username: "owner"}, InstallationID: c.installationID,
-		AbsoluteExpiresAt: time.Now().Add(time.Hour)}, Token: "opaque-token"}, nil
+		AbsoluteExpiresAt: c.issuedExpiry}, Token: "opaque-token"}, nil
+}
+
+func (c *testClient) Session(context.Context) (openapi.CLISessionResponse, error) {
+	c.sessionCount++
+	if c.sessionErr != nil {
+		return openapi.CLISessionResponse{}, c.sessionErr
+	}
+	if !c.session.AbsoluteExpiresAt.IsZero() {
+		return c.session, nil
+	}
+	return openapi.CLISessionResponse{Principal: openapi.CLIPrincipal{TokenID: "token-id", Username: "owner"},
+		InstallationID: c.installationID, AbsoluteExpiresAt: c.issuedExpiry}, nil
 }
 
 func (c *testClient) UseCredential(_ context.Context, installationID, token string) error {
@@ -156,6 +180,13 @@ func (s *testCredentialStore) Save(value credentialstore.Credential) error {
 	s.saved = true
 	return nil
 }
+func (s *testCredentialStore) Replace(issue func() (credentialstore.Credential, error)) (credentialstore.Credential, error) {
+	credential, err := issue()
+	if err != nil {
+		return credential, err
+	}
+	return credential, s.Save(credential)
+}
 func (s *testCredentialStore) Load(_, installationID, username string) (credentialstore.Credential, error) {
 	if s.missing || (username != "" && username != s.credential.Username) || installationID != s.credential.InstallationID {
 		return credentialstore.Credential{}, credentialstore.ErrNotFound
@@ -190,10 +221,20 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 func consoleDeps(client Client, input string, interactive bool) (Dependencies, *bytes.Buffer, *bytes.Buffer) {
 	out := &bytes.Buffer{}
 	errOut := &bytes.Buffer{}
+	expires := time.Now().Add(time.Hour)
 	store := &testCredentialStore{credential: credentialstore.Credential{SocketPath: "/run/openagentx.sock",
-		InstallationID: "installation-test", Username: "owner", TokenID: "token-id", Token: "opaque-token", AbsoluteExpires: time.Now().Add(time.Hour)}}
+		InstallationID: "installation-test", Username: "owner", TokenID: "token-id", Token: "opaque-token", AbsoluteExpires: expires}}
+	if test, ok := client.(*testClient); ok {
+		if test.installationID == "" {
+			test.installationID = "installation-test"
+		}
+		if test.session.AbsoluteExpiresAt.IsZero() {
+			test.issuedExpiry = expires
+		}
+	}
 	return Dependencies{
 		Out: out, Err: errOut, In: strings.NewReader(input), IsInteractive: func() bool { return interactive },
+		Now:                time.Now,
 		ReadPassword:       func(string) (string, error) { return "password", nil },
 		NewClient:          func(string) (Client, error) { return client, nil },
 		NewCredentialStore: func(string) (CredentialStore, error) { return store, nil },
@@ -392,7 +433,10 @@ func TestConsoleTTYCredentialAndHelpContracts(t *testing.T) {
 
 func TestLoginReadsPasswordOnlyFromTTYAndStoresInstallationCredential(t *testing.T) {
 	root := t.TempDir()
-	client := &testClient{installationID: "installation-login"}
+	expires := time.Now().Add(time.Hour)
+	client := &testClient{installationID: "installation-login", issuedExpiry: expires,
+		session: openapi.CLISessionResponse{Principal: openapi.CLIPrincipal{TokenID: "token-id", Username: "owner"},
+			InstallationID: "installation-login", AbsoluteExpiresAt: expires}}
 	store := &testCredentialStore{missing: true}
 	deps, out, stderr := consoleDeps(client, "", true)
 	deps.ReadPassword = func(prompt string) (string, error) {
@@ -411,6 +455,84 @@ func TestLoginReadsPasswordOnlyFromTTYAndStoresInstallationCredential(t *testing
 	combined := out.String() + stderr.String()
 	if strings.Contains(combined, "private-password") || strings.Contains(combined, "opaque-token") {
 		t.Fatalf("login output leaked secret material: %s", combined)
+	}
+}
+
+func TestAuthenticatedCommandValidatesSessionAndDeletesOnlyUnauthenticatedCredential(t *testing.T) {
+	now := time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)
+	tests := map[string]struct {
+		configure   func(*testClient, *testCredentialStore, *Dependencies)
+		wantDeleted bool
+		wantToken   bool
+		wantText    string
+	}{
+		"local expiry": {
+			configure: func(_ *testClient, store *testCredentialStore, deps *Dependencies) {
+				store.credential.AbsoluteExpires = now
+				deps.Now = func() time.Time { return now }
+			},
+			wantDeleted: true, wantText: "run openagentx console login",
+		},
+		"server unauthenticated": {
+			configure: func(client *testClient, _ *testCredentialStore, deps *Dependencies) {
+				deps.Now = func() time.Time { return now }
+				client.sessionErr = &consoleclient.APIError{StatusCode: 401, Code: openapi.ErrorCLIUnauthenticated, Message: "CLI authentication required"}
+			},
+			wantDeleted: true, wantToken: true, wantText: "run openagentx console login",
+		},
+		"temporary session failure": {
+			configure: func(client *testClient, _ *testCredentialStore, deps *Dependencies) {
+				deps.Now = func() time.Time { return now }
+				client.sessionErr = errors.New("temporary transport failure")
+			},
+			wantToken: true, wantText: "validate Console CLI session",
+		},
+	}
+	for name, testCase := range tests {
+		t.Run(name, func(t *testing.T) {
+			expires := now.Add(time.Hour)
+			client := &testClient{installationID: "installation-test", issuedExpiry: expires}
+			store := &testCredentialStore{credential: credentialstore.Credential{SocketPath: "/run/openagentx.sock",
+				InstallationID: "installation-test", Username: "owner", TokenID: "token-id", Token: "stored-secret", AbsoluteExpires: expires}}
+			deps, _, stderr := consoleDeps(client, "", false)
+			deps.NewCredentialStore = func(string) (CredentialStore, error) { return store, nil }
+			testCase.configure(client, store, &deps)
+			if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "quote", "--once"}, deps); code != 1 {
+				t.Fatalf("command code=%d stderr=%s", code, stderr.String())
+			}
+			if store.deleted != testCase.wantDeleted || client.tokenSent != testCase.wantToken || client.attachCount != 0 {
+				t.Fatalf("deleted=%v tokenSent=%v attach=%d", store.deleted, client.tokenSent, client.attachCount)
+			}
+			if !strings.Contains(stderr.String(), testCase.wantText) || strings.Contains(stderr.String(), store.credential.Token) {
+				t.Fatalf("unexpected safe error: %s", stderr.String())
+			}
+		})
+	}
+}
+
+func TestAuthenticatedCommandRejectsMismatchedSessionProjection(t *testing.T) {
+	expires := time.Now().Add(time.Hour)
+	valid := openapi.CLISessionResponse{Principal: openapi.CLIPrincipal{TokenID: "token-id", Username: "owner"},
+		InstallationID: "installation-test", AbsoluteExpiresAt: expires}
+	tests := map[string]func(*openapi.CLISessionResponse){
+		"installation": func(session *openapi.CLISessionResponse) { session.InstallationID = "other-installation" },
+		"token id":     func(session *openapi.CLISessionResponse) { session.Principal.TokenID = "different-token" },
+		"username":     func(session *openapi.CLISessionResponse) { session.Principal.Username = "operator" },
+		"expiry":       func(session *openapi.CLISessionResponse) { session.AbsoluteExpiresAt = expires.Add(time.Minute) },
+	}
+	for name, mutate := range tests {
+		t.Run(name, func(t *testing.T) {
+			session := valid
+			mutate(&session)
+			client := &testClient{installationID: "installation-test", issuedExpiry: expires, session: session}
+			deps, _, stderr := consoleDeps(client, "", false)
+			if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "quote", "--once"}, deps); code != 1 {
+				t.Fatalf("mismatched session code=%d stderr=%s", code, stderr.String())
+			}
+			if client.attachCount != 0 || !strings.Contains(stderr.String(), "does not match") {
+				t.Fatalf("mismatched session reached business API: attach=%d stderr=%s", client.attachCount, stderr.String())
+			}
+		})
 	}
 }
 

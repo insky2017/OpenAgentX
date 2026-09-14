@@ -558,6 +558,46 @@ M  deploy/systemd/openagentx-user.service
 - 未 push feature、未安装 binary、未重启服务，未访问真实 DB/socket/default tmux；未修改
   `steadyflow` 父仓或主工作树。所有 DB、HOME、credential 和 UDS 测试均使用临时路径。
 
+### Task 04 监督 NO-GO 与 session boundary review-fix
+
+- `2026-09-14T18:16:09Z` 监督门禁暂定 `NO-GO`：主实现
+  `c240aa4dbd47565181d22f602ea3203e5fbfe4dc` 的核心模型、schema 与 UDS/Web mux
+  分离通过，但发现三组提交前阻断。Task 04 状态继续 `active/WAIT`，主计划和 Task 04
+  front matter 继续 `pending`，未开始 Task 05；`T04-01` 原样保留给 Task 07。
+- scope 根因是 `panelRequirement` 为所有 Observe GET 默认分配 `console.read`。修复改为 CLI
+  白名单：仅 Agent list 和安全 events stream 使用 `console.read`，health 仍无需认证；冻结的
+  task/approval mutation 保持 `console.control`。其余 Observe 与全部 Network route 的 CLI
+  scope 为空并稳定 fail closed 为 `403 CLI_FORBIDDEN`；Web authorizer 仍忽略 CLI scope，
+  继续执行原角色与 CSRF 校验。表驱动测试以真实 CLI service 签发的 viewer/owner bearer
+  逐一覆盖所有未冻结 Observe/Network read/write route。
+- credential 生命周期根因是本地 Save 只替换完整三元 key，installation 替换会残留同
+  socket/user 的旧 secret；普通命令只做无认证 installation probe，没有验证 Token session；
+  JSON 读取也缺少大小、条目、重复 key、current selection 和 metadata 上限。修复后 Save
+  清除同 socket/user 的全部旧 installation credential 并保留其他用户；业务 API 前先检查
+  本地 absolute expiry，再调用 authenticated `/api/auth/v1/cli/session`，精确比较
+  installation ID、token ID、username 与 absolute expiry。结构化
+  `401 CLI_UNAUTHENTICATED` 删除本地 credential 并提示重新 login，临时传输错误不删除；
+  installation mismatch 仍在发送 Token 前终止。credential reader 限制为 1 MiB/128 entries，
+  拒绝重复 key、悬空 current、非 canonical socket、非法 ID/Token/time，错误不包含 secret。
+- 并发根因是无跨进程锁的 read-modify-rename 会丢失其他用户，并可能让较慢的旧登录在服务端
+  已撤销后覆盖新 Token。修复使用同目录固定 lock file、`O_NOFOLLOW`、当前 owner、精确
+  `0600` 和 Linux `flock(LOCK_EX)`；Save/Load/Delete 的完整文件事务均受锁保护。Replace
+  Login 将远端签发、session 验证和本地替换置于同一锁内，因而同 socket 的并发 login
+  按签发顺序串行；临时文件或 lock 校验失败时清理临时文件并保留旧 credential。
+
+| 时间 UTC | 命令/检查 | 退出码 | 脱敏结果/纠正 |
+|---|---|---:|---|
+| 2026-09-14T18:02Z | 首轮 `go test ./internal/credentialstore ./internal/cli/console ./internal/api/panel` | 1 | 新 `Session`/`Replace` 接口的 test doubles 尚未同步，旧 store fixture 使用短 token，被新增 256-bit token 校验正确拒绝；同步替身并改为合法 opaque fixture，未放宽产品校验 |
+| 2026-09-14T18:05Z | 同一组定向测试重跑 | 1 | 重用 test client 时 mock session expiry 与新临时 credential expiry 不一致，被精确 session 比对正确拒绝；让 fixture 每次绑定同一 expiry 后重跑通过 |
+| 2026-09-14T18:09Z | `go test ./internal/credentialstore ./internal/cli/console ./internal/api/panel` 与对应 `-race` | 0 | scope、credential validation、旧 installation 清理、跨 Store `flock`、并发 Save/Replace、local expiry、401 删除与临时错误保留均通过 |
+| 2026-09-14T18:11Z | Task 04 全部定向 `go test` | 0 | auth、API auth/Console/Admin/Panel、Console client/CLI、credential store、SQLite migrations/reopen 全部通过 |
+| 2026-09-14T18:12Z | Task 04 全部定向 `go test -race` | 0 | 同上受影响安全 packages race 通过 |
+| 2026-09-14T18:13Z | `go test ./...` | 0 | 全部 Go packages 通过 |
+| 2026-09-14T18:13Z | 受影响 `go vet`、`go build ./...`、release scanner、`git diff --check` | 0 | vet/build 通过，legacy control-path release check 全部 CLEAN，diff 无 whitespace 错误 |
+| 2026-09-14T18:14Z | `npm run test:observation && npm run test:pwa && npm run build` | 0 | observation 4/4、PWA assertions 与 Vite production build 通过；未修改 Web 产品代码 |
+| 2026-09-14T18:15Z | 新增真实 UDS client session header/结构化 401 测试后的定向测试、race 与 diff check | 0 | Bearer session 请求及 `CLI_UNAUTHENTICATED` 解析证据通过 |
+| 2026-09-14T18:19Z | 最终无缓存定向测试、race 与 `go test -count=1 ./...` | 0 | Task 04 受影响 packages、SQLite、全量 Go packages 均实际重跑通过；定向 11.8s、race 19.8s、全量 13.1s |
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
@@ -576,6 +616,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T15:54:57Z | 监督最终复核 Task 02 主实现与 review-fix | 首次 Termux UDS 长路径失败已由 `c0e8d4a` 修复；最终默认 `TMPDIR` 和其余定向测试/vet 均通过 | 核验主实现 13-file、fix 2-file 范围及无产品语义偏移；同步 docs-only gate record | Task 02 GO；Task 03 保持 WAIT |
 | 2026-09-14T17:07:08Z | 三个 Task 03 实现/review-fix 提交及独立验证均通过 | 两轮 NO-GO 缺口已分别由 `9e18246`、`2f97727` 修复；无剩余 Task 03 阻断 | 记录三个精确 SHA、实际 clean/ahead 与最终结论；仅同步 docs gate 状态 | Task 03 GO；Task 04 保持 `pending/WAIT` |
 | 2026-09-14T17:45:58Z | Task 04 实现与隔离验证完成，等待阶段提交 | CLI Token、v1 ensure、UDS/Web auth 隔离、credential store 和 Console bearer 路径已形成最小闭环；Fleet 集成未越界 | 保留两次代码测试失败和两次 Web 环境/命令失败及纠正；最终 Go/race/Web/release/diff 通过 | Task 04 保持 active/WAIT，提交后停止等待 gate |
+| 2026-09-14T18:16:09Z | 监督对 `c240aa4` 给出 Task 04 临时 NO-GO | 发现 Observe CLI scope 过宽、credential 生命周期校验/清理不完整、跨进程并发原子性缺口；核心模型/schema/mux 分离结论不变 | 仅在 Task 04 范围实现 scope 白名单、authenticated session validation、严格 bounded credential document 与安全 `flock`，追加测试和日志；未触碰真实状态 | Task 04 保持 `active/WAIT`；等待 review-fix 提交后的再次 gate |
 
 ## 9. 最终产物（Task 08 填写）
 

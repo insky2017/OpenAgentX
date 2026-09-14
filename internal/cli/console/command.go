@@ -28,6 +28,7 @@ type Dependencies struct {
 	In                 io.Reader
 	ReadPassword       func(string) (string, error)
 	IsInteractive      func() bool
+	Now                func() time.Time
 	NewClient          func(string) (Client, error)
 	NewCredentialStore func(string) (CredentialStore, error)
 	Tmux               fleetmodel.CommandRunner
@@ -38,6 +39,7 @@ type Client interface {
 	ProbeInstallation(context.Context) (openapi.CLIInstallationResponse, error)
 	LoginCredential(context.Context, string, string) (openapi.CLILoginResponse, error)
 	UseCredential(context.Context, string, string) error
+	Session(context.Context) (openapi.CLISessionResponse, error)
 	Logout(context.Context) error
 	Attach(context.Context, string, string) (consoleapi.AttachResponse, error)
 	Follow(context.Context, string, string, func(consoleapi.AttachResponse) error, func(openapi.JournalEventReadModel) error) error
@@ -50,6 +52,7 @@ type Client interface {
 
 type CredentialStore interface {
 	Save(credentialstore.Credential) error
+	Replace(func() (credentialstore.Credential, error)) (credentialstore.Credential, error)
 	Load(string, string, string) (credentialstore.Credential, error)
 	LoadCurrentForSocket(string) (credentialstore.Credential, error)
 	Delete(credentialstore.Credential) (bool, error)
@@ -58,6 +61,7 @@ type CredentialStore interface {
 func DefaultDependencies() Dependencies {
 	return Dependencies{Out: os.Stdout, Err: os.Stderr, In: os.Stdin, Tmux: fleetmodel.ExecRunner{},
 		IsInteractive: func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
+		Now:           time.Now,
 		NewClient:     func(socketPath string) (Client, error) { return consoleclient.NewUnixClient(socketPath) },
 		NewCredentialStore: func(path string) (CredentialStore, error) {
 			return credentialstore.New(path, credentialstore.Options{})
@@ -89,6 +93,9 @@ func Execute(args []string, deps Dependencies) int {
 	}
 	if deps.IsInteractive == nil {
 		deps.IsInteractive = defaults.IsInteractive
+	}
+	if deps.Now == nil {
+		deps.Now = defaults.Now
 	}
 	if deps.NewClient == nil {
 		deps.NewClient = defaults.NewClient
@@ -214,17 +221,28 @@ func Execute(args []string, deps Dependencies) int {
 			fmt.Fprintf(deps.Err, "read Console password: %v\n", passwordErr)
 			return 1
 		}
-		issued, loginErr := client.LoginCredential(ctx, strings.TrimSpace(username), password)
-		if loginErr != nil {
-			fmt.Fprintf(deps.Err, "Console login failed: %v\n", loginErr)
-			return 1
-		}
-		credential := credentialstore.Credential{SocketPath: socket.Path, InstallationID: issued.InstallationID,
-			Username: issued.Principal.Username, TokenID: issued.Principal.TokenID, Token: issued.Token,
-			AbsoluteExpires: issued.AbsoluteExpiresAt}
-		if err := store.Save(credential); err != nil {
-			_ = client.Logout(ctx)
-			fmt.Fprintf(deps.Err, "store Console credential: %v\n", err)
+		credential, replaceErr := store.Replace(func() (credentialstore.Credential, error) {
+			issued, loginErr := client.LoginCredential(ctx, strings.TrimSpace(username), password)
+			if loginErr != nil {
+				return credentialstore.Credential{}, loginErr
+			}
+			credential := credentialstore.Credential{SocketPath: socket.Path, InstallationID: issued.InstallationID,
+				Username: issued.Principal.Username, TokenID: issued.Principal.TokenID, Token: issued.Token,
+				AbsoluteExpires: issued.AbsoluteExpiresAt}
+			session, sessionErr := client.Session(ctx)
+			if sessionErr != nil {
+				return credential, sessionErr
+			}
+			if err := validateCredentialSession(credential, session, deps.Now()); err != nil {
+				return credential, err
+			}
+			return credential, nil
+		})
+		if replaceErr != nil {
+			if credential.Token != "" {
+				_ = client.Logout(ctx)
+			}
+			fmt.Fprintf(deps.Err, "Console login failed: %v\n", replaceErr)
 			return 1
 		}
 		fmt.Fprintf(deps.Out, "CLI session established for %s; expires %s\n", credential.Username, credential.AbsoluteExpires.UTC().Format(time.RFC3339))
@@ -262,8 +280,34 @@ func Execute(args []string, deps Dependencies) int {
 		fmt.Fprintln(deps.Err, "Console credential is unavailable; run openagentx console login")
 		return 1
 	}
+	if !deps.Now().UTC().Before(credential.AbsoluteExpires.UTC()) {
+		if _, deleteErr := store.Delete(credential); deleteErr != nil {
+			fmt.Fprintf(deps.Err, "Console credential expired and could not be removed: %v; run openagentx console login\n", deleteErr)
+		} else {
+			fmt.Fprintln(deps.Err, "Console credential expired and was removed; run openagentx console login")
+		}
+		return 1
+	}
 	if err := client.UseCredential(ctx, credential.InstallationID, credential.Token); err != nil {
 		fmt.Fprintf(deps.Err, "validate Console credential audience: %v\n", err)
+		return 1
+	}
+	session, err := client.Session(ctx)
+	if err != nil {
+		var apiErr *consoleclient.APIError
+		if errors.As(err, &apiErr) && apiErr.StatusCode == 401 && apiErr.Code == openapi.ErrorCLIUnauthenticated {
+			if _, deleteErr := store.Delete(credential); deleteErr != nil {
+				fmt.Fprintf(deps.Err, "Console credential is no longer authenticated and could not be removed: %v; run openagentx console login\n", deleteErr)
+			} else {
+				fmt.Fprintln(deps.Err, "Console credential is no longer authenticated and was removed; run openagentx console login")
+			}
+			return 1
+		}
+		fmt.Fprintf(deps.Err, "validate Console CLI session: %v\n", err)
+		return 1
+	}
+	if err := validateCredentialSession(credential, session, deps.Now()); err != nil {
+		fmt.Fprintf(deps.Err, "validate Console CLI session: %v\n", err)
 		return 1
 	}
 	idem := consoleclient.IdempotencyKey("console-" + command)
@@ -353,6 +397,17 @@ func Execute(args []string, deps Dependencies) int {
 		}
 	}
 	return 0
+}
+
+func validateCredentialSession(credential credentialstore.Credential, session openapi.CLISessionResponse, now time.Time) error {
+	if session.InstallationID != credential.InstallationID || session.Principal.TokenID != credential.TokenID ||
+		session.Principal.Username != credential.Username || !session.AbsoluteExpiresAt.Equal(credential.AbsoluteExpires) {
+		return fmt.Errorf("server session does not match the stored credential")
+	}
+	if !now.UTC().Before(session.AbsoluteExpiresAt.UTC()) {
+		return fmt.Errorf("server session is expired")
+	}
+	return nil
 }
 
 func executeLogout(ctx context.Context, socketPath string, store CredentialStore, deps Dependencies) int {

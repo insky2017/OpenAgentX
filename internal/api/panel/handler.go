@@ -140,7 +140,7 @@ func (h *Handler) session(w http.ResponseWriter, r *http.Request, write bool) (*
 }
 
 func panelRequirement(r *http.Request, write bool) requestauth.Requirement {
-	requirement := requestauth.Requirement{Role: domain.WebRoleViewer, Scope: domain.CLIScopeConsoleRead, Write: write}
+	requirement := requestauth.Requirement{Role: domain.WebRoleViewer, Write: write}
 	if write {
 		switch {
 		case r.URL.Path == "/api/control/v1/tasks",
@@ -152,6 +152,11 @@ func panelRequirement(r *http.Request, write bool) requestauth.Requirement {
 			requirement.Role = domain.WebRoleOwner
 			requirement.Scope = ""
 		}
+		return requirement
+	}
+	switch r.URL.Path {
+	case "/api/observe/v1/agents", openapi.ObserveEventsStreamPath:
+		requirement.Scope = domain.CLIScopeConsoleRead
 	}
 	return requirement
 }

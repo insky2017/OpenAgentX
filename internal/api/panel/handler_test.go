@@ -13,6 +13,7 @@ import (
 	"time"
 
 	openapi "openagentx/internal/api"
+	cliauth "openagentx/internal/auth/cli"
 	"openagentx/internal/auth/web"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
@@ -34,6 +35,56 @@ type backendPanelState struct {
 	*testPanelState
 	backends   map[string][]openruntime.BackendRegistration
 	backendErr error
+}
+
+type panelCLIRepository struct {
+	installationID string
+	user           domain.WebUserRecord
+	tokens         map[string]domain.CLITokenRecord
+}
+
+func (r *panelCLIRepository) InstallationID(context.Context) (string, error) {
+	return r.installationID, nil
+}
+func (r *panelCLIRepository) GetWebUserByUsername(_ context.Context, username string) (*domain.WebUserRecord, error) {
+	if username != r.user.Username {
+		return nil, domain.ErrNotFound
+	}
+	user := r.user
+	return &user, nil
+}
+func (r *panelCLIRepository) GetWebUserByID(_ context.Context, id string) (*domain.WebUserRecord, error) {
+	if id != r.user.ID {
+		return nil, domain.ErrNotFound
+	}
+	user := r.user
+	return &user, nil
+}
+func (r *panelCLIRepository) ReplaceCLIToken(_ context.Context, record *domain.CLITokenRecord) error {
+	r.tokens[record.TokenDigest] = *record
+	return nil
+}
+func (r *panelCLIRepository) GetCLITokenByDigest(_ context.Context, digest string) (*domain.CLITokenRecord, error) {
+	record, ok := r.tokens[digest]
+	if !ok {
+		return nil, domain.ErrNotFound
+	}
+	return &record, nil
+}
+func (r *panelCLIRepository) TouchCLIToken(_ context.Context, digest string, usedAt time.Time) error {
+	record, ok := r.tokens[digest]
+	if !ok {
+		return domain.ErrNotFound
+	}
+	record.LastUsedAt = usedAt
+	r.tokens[digest] = record
+	return nil
+}
+func (r *panelCLIRepository) RevokeCLIToken(context.Context, string, string, time.Time) error {
+	return nil
+}
+func (r *panelCLIRepository) RevokeCLITokensByWebUser(context.Context, string, time.Time) error {
+	return nil
 }
 
 func (s *backendPanelState) ListWorkerBackends(_ context.Context, workerID string) ([]openruntime.BackendRegistration, error) {
@@ -300,6 +351,35 @@ func newAuthenticatedPanel(t *testing.T, role web.Role, state State) authenticat
 		t.Fatal(err)
 	}
 	return authenticatedPanel{handler: handler, session: session, cookie: cookieResponse.Result().Cookies()[0]}
+}
+
+func newCLIAuthenticatedPanel(t *testing.T, role domain.WebRole) (*Handler, string) {
+	t.Helper()
+	digest, err := web.HashPassword("correct horse battery staple")
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)
+	repository := &panelCLIRepository{installationID: "installation-test", tokens: make(map[string]domain.CLITokenRecord),
+		user: domain.WebUserRecord{ID: "web-user", PrincipalID: "human-user", Username: "user", PasswordDigest: digest,
+			Roles: []domain.WebRole{role}, Status: domain.IdentityActive, PasswordSetAt: now, CreatedAt: now, UpdatedAt: now}}
+	service, err := cliauth.NewService(repository, cliauth.Config{Now: func() time.Time { return now }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	issued, err := service.Login(context.Background(), "user", "correct horse battery staple")
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands, err := controlplane.NewCommandService(rejectingCommandState{}, nil, func() time.Time { return now })
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := NewCLIHandler(&testPanelState{}, commands, service)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return handler, issued.Token
 }
 
 func TestOverviewRequiresSessionAndExposesLatestSequence(t *testing.T) {
@@ -855,6 +935,13 @@ func TestCLIRouteScopeRequirementsFailClosed(t *testing.T) {
 	}{
 		"agent list":               {method: http.MethodGet, path: "/api/observe/v1/agents", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
 		"event stream":             {method: http.MethodGet, path: "/api/observe/v1/events/stream", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
+		"overview":                 {method: http.MethodGet, path: "/api/observe/v1/overview", role: domain.WebRoleViewer, scope: ""},
+		"tasks":                    {method: http.MethodGet, path: "/api/observe/v1/tasks", role: domain.WebRoleViewer, scope: ""},
+		"task":                     {method: http.MethodGet, path: "/api/observe/v1/tasks/task-1", role: domain.WebRoleViewer, scope: ""},
+		"mailboxes":                {method: http.MethodGet, path: "/api/observe/v1/mailboxes", role: domain.WebRoleViewer, scope: ""},
+		"run":                      {method: http.MethodGet, path: "/api/observe/v1/run-attempts/run-1", role: domain.WebRoleViewer, scope: ""},
+		"execution options":        {method: http.MethodGet, path: openapi.ObserveExecutionOptionsPath, role: domain.WebRoleViewer, scope: ""},
+		"network profiles":         {method: http.MethodGet, path: openapi.ObserveNetworkProfilesPath, role: domain.WebRoleViewer, scope: ""},
 		"dispatch":                 {method: http.MethodPost, path: "/api/control/v1/tasks", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
 		"steer":                    {method: http.MethodPost, path: "/api/control/v1/tasks/task-1/messages", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
 		"cancel":                   {method: http.MethodPost, path: "/api/control/v1/tasks/task-1/cancel", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
@@ -867,5 +954,62 @@ func TestCLIRouteScopeRequirementsFailClosed(t *testing.T) {
 				t.Fatalf("requirement=%+v", requirement)
 			}
 		})
+	}
+}
+
+func TestCLIBearerCannotReadUnfrozenObserveOrNetworkRoutes(t *testing.T) {
+	viewerHandler, viewerToken := newCLIAuthenticatedPanel(t, domain.WebRoleViewer)
+	ownerHandler, ownerToken := newCLIAuthenticatedPanel(t, domain.WebRoleOwner)
+	tests := map[string]struct {
+		handler *Handler
+		token   string
+		method  string
+		path    string
+	}{
+		"overview":          {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/overview"},
+		"tasks":             {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/tasks"},
+		"task":              {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/tasks/task-1"},
+		"mailboxes":         {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/mailboxes"},
+		"run":               {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/run-attempts/run-1"},
+		"execution options": {viewerHandler, viewerToken, http.MethodGet, openapi.ObserveExecutionOptionsPath},
+		"network profiles":  {viewerHandler, viewerToken, http.MethodGet, openapi.ObserveNetworkProfilesPath},
+		"network create":    {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfilePath},
+		"network edit":      {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfileDraftPath},
+		"network secret":    {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfileSecretPath},
+		"network test":      {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfileTestPath},
+		"network publish":   {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfilePublishPath},
+		"network bind":      {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkBindingPath},
+		"network rollback":  {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkRollbackPath},
+		"network mode test": {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkModeTestPath},
+		"network mode set":  {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkModePublishPath},
+		"network import":    {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkImportPath},
+	}
+	for name, testCase := range tests {
+		t.Run(name, func(t *testing.T) {
+			request := httptest.NewRequest(testCase.method, testCase.path, nil)
+			request.Header.Set("Authorization", "Bearer "+testCase.token)
+			response := httptest.NewRecorder()
+			testCase.handler.ServeHTTP(response, request)
+			if response.Code != http.StatusForbidden {
+				t.Fatalf("route status=%d body=%s", response.Code, response.Body.String())
+			}
+			var failure openapi.ErrorResponse
+			if err := json.Unmarshal(response.Body.Bytes(), &failure); err != nil || failure.Code != openapi.ErrorCLIForbidden {
+				t.Fatalf("route error=%+v decode=%v body=%s", failure, err, response.Body.String())
+			}
+		})
+	}
+
+	agentRequest := httptest.NewRequest(http.MethodGet, "/api/observe/v1/agents", nil)
+	agentRequest.Header.Set("Authorization", "Bearer "+viewerToken)
+	agentResponse := httptest.NewRecorder()
+	viewerHandler.ServeHTTP(agentResponse, agentRequest)
+	if agentResponse.Code != http.StatusOK {
+		t.Fatalf("frozen Agent list status=%d body=%s", agentResponse.Code, agentResponse.Body.String())
+	}
+	healthResponse := httptest.NewRecorder()
+	viewerHandler.ServeHTTP(healthResponse, httptest.NewRequest(http.MethodGet, openapi.ObserveHealthPath, nil))
+	if healthResponse.Code != http.StatusOK {
+		t.Fatalf("health unexpectedly required CLI auth: %d", healthResponse.Code)
 	}
 }

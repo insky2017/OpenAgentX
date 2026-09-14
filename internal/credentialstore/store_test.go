@@ -1,16 +1,23 @@
 package credentialstore
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 )
 
 func testCredential(socket, installation, username, token string) Credential {
+	digest := sha256.Sum256([]byte(token))
 	return Credential{SocketPath: socket, InstallationID: installation, Username: username,
-		TokenID: "token-" + username, Token: token, AbsoluteExpires: time.Now().Add(time.Hour)}
+		TokenID: "token-" + username, Token: base64.RawURLEncoding.EncodeToString(digest[:]), AbsoluteExpires: time.Now().Add(time.Hour)}
 }
 
 func TestStoreIsPrivateAtomicAndSupportsInstallationScopedUsers(t *testing.T) {
@@ -136,18 +143,222 @@ func TestFailedAtomicReplacementKeepsPreviousCredentialAndCleansTemporaryFile(t 
 	injected := errors.New("simulated crash before rename")
 	failing, _ := New(path, Options{BeforeRename: func() error { return injected }})
 	newCredential := oldCredential
-	newCredential.Token = "new-token"
+	newCredential.Token = testCredential(newCredential.SocketPath, newCredential.InstallationID, newCredential.Username, "new-token").Token
 	if err := failing.Save(newCredential); !errors.Is(err, injected) {
 		t.Fatalf("atomic write error=%v", err)
 	}
 	loaded, err := store.Load(oldCredential.SocketPath, oldCredential.InstallationID, oldCredential.Username)
-	if err != nil || loaded.Token != "old-token" {
+	if err != nil || loaded.Token != oldCredential.Token {
 		t.Fatalf("previous credential not preserved: %+v err=%v", loaded, err)
 	}
 	temporary, err := filepath.Glob(filepath.Join(filepath.Dir(path), ".credentials-*"))
 	if err != nil || len(temporary) != 0 {
 		t.Fatalf("temporary credential files=%v err=%v", temporary, err)
 	}
+}
+
+func TestSaveReplacesPriorInstallationForSameSocketUserAndPreservesOtherUsers(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "profile", "credentials.json")
+	store, _ := New(path, Options{})
+	oldOwner := testCredential("/run/openagentx.sock", "installation-old", "owner", "old-owner")
+	operator := testCredential("/run/openagentx.sock", "installation-old", "operator", "operator")
+	newOwner := testCredential("/run/openagentx.sock", "installation-new", "owner", "new-owner")
+	for _, credential := range []Credential{oldOwner, operator, newOwner} {
+		if err := store.Save(credential); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := store.Load(oldOwner.SocketPath, oldOwner.InstallationID, oldOwner.Username); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("old installation credential remains: %v", err)
+	}
+	if _, err := store.Load(operator.SocketPath, operator.InstallationID, operator.Username); err != nil {
+		t.Fatalf("other user was removed: %v", err)
+	}
+	current, err := store.LoadCurrentForSocket(newOwner.SocketPath)
+	if err != nil || current.InstallationID != newOwner.InstallationID || current.Username != newOwner.Username {
+		t.Fatalf("current replacement=%+v err=%v", current, err)
+	}
+}
+
+func TestStoreRejectsOversizedDuplicateDanglingAndInvalidDocumentsWithoutLeakingToken(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Chmod(root, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(root, "credentials.json")
+	credential := testCredential("/run/openagentx.sock", "installation-a", "owner", "private-token-material")
+	tests := map[string][]byte{}
+	duplicate := document{Version: 1, Credentials: []Credential{credential, credential}, Current: map[string]selection{}}
+	tests["duplicate"] = mustJSON(t, duplicate)
+	dangling := document{Version: 1, Credentials: []Credential{credential}, Current: map[string]selection{
+		credential.SocketPath: {InstallationID: "installation-missing", Username: credential.Username},
+	}}
+	tests["dangling current"] = mustJSON(t, dangling)
+	invalidToken := credential
+	invalidToken.Token = "not-a-valid-token"
+	tests["invalid token"] = mustJSON(t, document{Version: 1, Credentials: []Credential{invalidToken}, Current: map[string]selection{}})
+	invalidTime := credential
+	invalidTime.AbsoluteExpires = time.Time{}
+	tests["invalid time"] = mustJSON(t, document{Version: 1, Credentials: []Credential{invalidTime}, Current: map[string]selection{}})
+	invalidID := credential
+	invalidID.TokenID = "token\nidentifier"
+	tests["invalid id"] = mustJSON(t, document{Version: 1, Credentials: []Credential{invalidID}, Current: map[string]selection{}})
+	invalidSocket := credential
+	invalidSocket.SocketPath = "/run/../run/openagentx.sock"
+	tests["noncanonical socket"] = mustJSON(t, document{Version: 1, Credentials: []Credential{invalidSocket}, Current: map[string]selection{}})
+	tooMany := document{Version: 1, Current: map[string]selection{}}
+	for index := 0; index <= maxCredentialEntries; index++ {
+		tooMany.Credentials = append(tooMany.Credentials,
+			testCredential("/run/openagentx.sock", "installation-a", fmt.Sprintf("user-%d", index), fmt.Sprintf("token-%d", index)))
+	}
+	tests["too many entries"] = mustJSON(t, tooMany)
+	tests["oversized"] = []byte(`{"version":1,"credentials":[],"current":{},"padding":"` + strings.Repeat("x", maxCredentialDocumentBytes) + `"}`)
+
+	for name, encoded := range tests {
+		t.Run(name, func(t *testing.T) {
+			if err := os.WriteFile(path, encoded, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			store, _ := New(path, Options{})
+			_, err := store.LoadCurrentForSocket(credential.SocketPath)
+			if !errors.Is(err, ErrUnsafeCredential) {
+				t.Fatalf("unsafe document accepted: %v", err)
+			}
+			if strings.Contains(fmt.Sprint(err), credential.Token) {
+				t.Fatalf("credential error leaked token")
+			}
+		})
+	}
+}
+
+func TestCredentialLockSerializesConcurrentReplaceAndSave(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "profile", "credentials.json")
+	first, _ := New(path, Options{})
+	second, _ := New(path, Options{})
+	entered := make(chan struct{})
+	release := make(chan struct{})
+	firstDone := make(chan error, 1)
+	go func() {
+		_, err := first.Replace(func() (Credential, error) {
+			close(entered)
+			<-release
+			return testCredential("/run/openagentx.sock", "installation-a", "owner", "owner"), nil
+		})
+		firstDone <- err
+	}()
+	<-entered
+	secondDone := make(chan error, 1)
+	go func() {
+		secondDone <- second.Save(testCredential("/run/openagentx.sock", "installation-a", "operator", "operator"))
+	}()
+	select {
+	case err := <-secondDone:
+		t.Fatalf("concurrent Save bypassed process lock: %v", err)
+	case <-time.After(50 * time.Millisecond):
+	}
+	close(release)
+	if err := <-firstDone; err != nil {
+		t.Fatal(err)
+	}
+	if err := <-secondDone; err != nil {
+		t.Fatal(err)
+	}
+	for _, username := range []string{"owner", "operator"} {
+		if _, err := first.Load("/run/openagentx.sock", "installation-a", username); err != nil {
+			t.Fatalf("concurrent user %q was lost: %v", username, err)
+		}
+	}
+}
+
+func TestConcurrentSameUserReplaceCannotRestoreOlderCredential(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "profile", "credentials.json")
+	first, _ := New(path, Options{})
+	second, _ := New(path, Options{})
+	entered := make(chan struct{})
+	release := make(chan struct{})
+	var orderMu sync.Mutex
+	var order []string
+	replace := func(store *Store, label string, gate bool) <-chan error {
+		done := make(chan error, 1)
+		go func() {
+			_, err := store.Replace(func() (Credential, error) {
+				if gate {
+					close(entered)
+					<-release
+				}
+				orderMu.Lock()
+				order = append(order, label)
+				orderMu.Unlock()
+				return testCredential("/run/openagentx.sock", "installation-a", "owner", label), nil
+			})
+			done <- err
+		}()
+		return done
+	}
+	oldDone := replace(first, "old", true)
+	<-entered
+	newDone := replace(second, "new", false)
+	select {
+	case err := <-newDone:
+		t.Fatalf("new login bypassed process lock: %v", err)
+	case <-time.After(50 * time.Millisecond):
+	}
+	close(release)
+	if err := <-oldDone; err != nil {
+		t.Fatal(err)
+	}
+	if err := <-newDone; err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := first.Load("/run/openagentx.sock", "installation-a", "owner")
+	if err != nil || loaded.Token != testCredential("/run/openagentx.sock", "installation-a", "owner", "new").Token {
+		t.Fatalf("stale same-user credential won: %+v err=%v order=%v", loaded, err, order)
+	}
+}
+
+func TestUnsafeLockFileBlocksMutationAndPreservesCredential(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "profile", "credentials.json")
+	store, _ := New(path, Options{})
+	oldCredential := testCredential("/run/openagentx.sock", "installation-a", "owner", "old")
+	if err := store.Save(oldCredential); err != nil {
+		t.Fatal(err)
+	}
+	lockPath := path + ".lock"
+	if err := os.Chmod(lockPath, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Save(testCredential(oldCredential.SocketPath, oldCredential.InstallationID, oldCredential.Username, "new")); !errors.Is(err, ErrUnsafeCredential) {
+		t.Fatalf("unsafe lock accepted: %v", err)
+	}
+	if err := os.Chmod(lockPath, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := store.Load(oldCredential.SocketPath, oldCredential.InstallationID, oldCredential.Username)
+	if err != nil || loaded.Token != oldCredential.Token {
+		t.Fatalf("lock failure changed old credential: %+v err=%v", loaded, err)
+	}
+	if err := os.Remove(lockPath); err != nil {
+		t.Fatal(err)
+	}
+	lockTarget := filepath.Join(filepath.Dir(path), "lock-target")
+	if err := os.WriteFile(lockTarget, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(lockTarget, lockPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Save(testCredential(oldCredential.SocketPath, oldCredential.InstallationID, oldCredential.Username, "newer")); !errors.Is(err, ErrUnsafeCredential) {
+		t.Fatalf("symlink lock accepted: %v", err)
+	}
+}
+
+func mustJSON(t *testing.T, value any) []byte {
+	t.Helper()
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return encoded
 }
 
 func mustMode(t *testing.T, path string) os.FileMode {
