@@ -61,7 +61,7 @@ M  deploy/systemd/openagentx-user.service
 | 04 | G3 | [可撤销 CLI Token 会话](2026-09-14-openagentx-adr-008-implementation/04-revocable-cli-token-session.md) | 03 | completed |
 | 05 | G4 | [`OAX` workspace 与非破坏绑定](2026-09-14-openagentx-adr-008-implementation/05-oax-workspace-and-window-binding.md) | 04 | completed |
 | 06 | G5 | [Console 主菜单、Agent selector 与全屏 TUI](2026-09-14-openagentx-adr-008-implementation/06-console-menu-selector-and-fullscreen-tui.md) | 05 | completed |
-| 07 | G6 | [Fleet、user-systemd 与默认 profile 集成](2026-09-14-openagentx-adr-008-implementation/07-fleet-user-systemd-and-profile-integration.md) | 06 | pending |
+| 07 | G6 | [Fleet、user-systemd 与默认 profile 集成](2026-09-14-openagentx-adr-008-implementation/07-fleet-user-systemd-and-profile-integration.md) | 06 | completed |
 | 08 | GR | [集成审查、实机候选与发布门禁](2026-09-14-openagentx-adr-008-implementation/08-integration-review-and-release-gate.md) | 07 | pending |
 
 ## 5. 依赖流

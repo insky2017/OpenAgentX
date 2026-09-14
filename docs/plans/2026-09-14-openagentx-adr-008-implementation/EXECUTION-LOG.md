@@ -825,7 +825,7 @@ M  deploy/systemd/openagentx-user.service
 
 ### 开始信息
 
-- 状态：active
+- 状态：completed
 - 执行者：Codex
 - 开始时间（UTC）：`2026-09-14T19:52:54Z`
 - feature 基线：`daf1fb0db4697d04539a108ff90f3cde57ef5a79`
@@ -1017,7 +1017,7 @@ M  deploy/systemd/openagentx-user.service
 
 ### 开始信息
 
-- 状态：active
+- 状态：completed
 - 执行者：Codex
 - 开始时间（UTC）：`2026-09-14T21:37:57Z`
 - feature 基线：`a2ea14650a9deb668c4ab6af861dc03445329d61`
@@ -1163,12 +1163,31 @@ M  deploy/systemd/openagentx-user.service
   `f5c0d0d`，feature 不 push。Task 07 继续 `active/WAIT`，主计划/front matter 继续 `pending`，
   `T04-01`、`T05-01` 继续 `reopened/pending`，Task 08 未开始。
 
+### Task 07 监督门禁完成记录
+
+- `2026-09-14T23:02:54Z`：监督最终复核确认 Task 07 `GO`。主实现
+  `40fe06e813dcce5c327cf159c66fff630d3bc236`、host consistency hardening
+  `f5c0d0d549931e4104bc7248c5e5714305a242d9` 和 preflight ordering
+  `e13db7b7e505cb77c1359c776b9c3c473322062f` 的范围与证据均通过。
+- 第一轮 `NO-GO` 的 30 秒 tmux fixture、captured-bytes/TOCTOU、user-systemd residency、实际 unit
+  属性和 canonical binary 缺口由 `f5c0d0d` 修复；第二轮 `NO-GO` 的 Termux umask fixture 与
+  init 文件副作用早于 binary preflight 问题由 `e13db7b` 修复。既有失败和纠正记录全部保留。
+- 监督端 Termux 最终确认完整 Fleet/CLI/Console/Worker package 通过，`internal/fleet` 约 104 秒；
+  Ubuntu 侧已确认 Task 07 定向/race、全仓 Go、隔离 tmux、systemd static/analyze、vet/build、Web、
+  release scanner 和 diff check。T04-01 的 CLI Token lifecycle 与 T05-01 的 compatible dead pane 0
+  安全 respawn 证据完整，本 gate 关闭两项。
+- `e13db7b` 提交后实际核验：feature 工作树 clean，相对 `origin/main` ahead 23；主工作树为 clean 的
+  `main@c3fc1bba8ddbae3eedace0c7a32537e2f47db307`。feature 未 push，未操作真实 service、DB/socket、
+  default tmux、installed binary 或 `steadyflow` 父仓。
+- 主计划和 Task 07 front matter 已在本 docs-only gate record 同步为 `completed`；Task 08 保持
+  `pending/WAIT`，未开始实现或发布。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
 |---|---|---|---|---|---|---|
-| T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | reopened/pending；主实现已删除 Fleet password/username/直接 DB apply 并统一使用 installation-bound credential+session，等待 Task 07 review-fix 最终独立证据后由 gate record 关闭 |
-| T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | reopened/pending；主实现已有二次 preflight 的 `--respawn-dead` 与隔离证据，等待长寿命 tmux fixture 的最终独立重验后由 gate record 关闭 |
+| T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | closed；[Fleet credential/lifecycle 测试](../../../internal/cli/fleet/command_test.go)证明 installation-bound session、owner+lifecycle scope、无密码路径和 graceful/force 分离，监督双平台复核通过 |
+| T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | closed；[真实隔离 tmux 测试](../../../internal/fleet/workspace_integration_test.go)与 [workspace 状态机测试](../../../internal/fleet/workspace_test.go)证明二次 preflight 只 respawn compatible dead pane 0，并保留 live/pane 1+/unmanaged 现场 |
 
 ## 8. 安全与范围事件
 
@@ -1188,6 +1207,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T21:30:38Z | 监督最终复核 Task 06 三个提交 | 两轮 NO-GO 分别由 `5aa6c97`、`c42414b` 修复；独立 Termux 真实 PTY/tmux smoke 最终通过，TUI 状态流和 SSE 安全/兼容边界成立 | 记录三个精确 SHA、实际 clean/ahead 与最终验证；仅同步三份 docs gate 状态，保留 `T04-01`、`T05-01` | Task 06 GO；Task 07 保持 `pending/WAIT` |
 | 2026-09-14T22:36:00Z | 监督对 Task 07 主实现 `40fe06e` 给出 host consistency `NO-GO` | Termux 完整 Fleet 包暴露 30 秒 fixture 竞态；配置存在重复打开/TOCTOU；user Worker `Requires=` 与 unit 属性/canonical binary 证明不足 | 仅修 Task 07：长寿命隔离 sentinel、captured-bytes 安全读取、Wants+After、三项实际 unit 属性和固定 binary；恢复 T04-01/T05-01 pending 并完整重验 | Task 07 保持 `active/WAIT`；等待 review-fix 提交后的再次 gate |
 | 2026-09-14T22:50:57Z | 监督确认 `f5c0d0d` hardening 与 Termux 完整 Fleet 通过，给出最终两项 `NO-GO` | umask 使 0722 fixture 实际权限收窄；init 在 binary preflight 前已写入 config/manifest | 显式 chmod 并断言 fixture mode；把 init/workspace/up builder preflight 提升到所有 Fleet 文件/tmux/systemd mutation 之前，补零副作用和 status/down 回归 | Task 07 保持 `active/WAIT`；等待最终 gate，Task 08 未开始 |
+| 2026-09-14T23:02:54Z | 监督最终复核 Task 07 三个提交 | 两轮 `NO-GO` 缺口已由 `f5c0d0d`、`e13db7b` 修复；Termux 完整 Fleet/CLI/Console/Worker 和 Ubuntu systemd/tmux 证据通过 | 记录三个精确 SHA、实际 clean/ahead、双平台证据并关闭 T04-01/T05-01；仅同步三份 docs gate 状态 | Task 07 GO；Task 08 保持 `pending/WAIT` |
 
 ## 9. 最终产物（Task 08 填写）
 

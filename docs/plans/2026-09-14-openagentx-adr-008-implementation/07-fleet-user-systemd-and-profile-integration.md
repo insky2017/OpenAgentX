@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-14
 ---
@@ -58,3 +58,19 @@ systemd 行为优先用 fake runner 和临时 user manager 环境；未获批准
 - workspace reconcile 在多 pane 和冲突现场非破坏；
 - 文档与最终 CLI 一致且不含凭据；
 - 阶段提交和 execution log 完成后暂停。
+
+## 完成记录
+
+- 主实现：`40fe06e813dcce5c327cf159c66fff630d3bc236`；host consistency hardening：
+  `f5c0d0d549931e4104bc7248c5e5714305a242d9`；preflight ordering：
+  `e13db7b7e505cb77c1359c776b9c3c473322062f`。
+- Fleet 已统一 local profile 默认路径和 installation-bound CLI Token，不读取或传递 Owner 密码；
+  user-systemd 使用 canonical `%h/.local/bin/openagentx`、Worker config 和 EnvironmentFile，所有
+  `systemctl` 调用使用 `--user`，daemon 与 resident Worker 不使用 stop 级联依赖。
+- Worker config/manifest 使用同一捕获内容严格校验、`O_NOFOLLOW`/权限/owner 检查和非覆盖原子安装；
+  `init/workspace/up` 在任何 config、manifest、tmux 或 systemd mutation 前验证 canonical binary。
+- graceful down 只持久化 stop intent 并等待 busy RunAttempt 自然完成；force-stop 保持独立双确认。
+  compatible managed dead pane 0 可显式安全恢复，live pane、pane 1+、unmanaged/orphaned 现场不受影响。
+- Ubuntu 24.04/tmux 3.4 的 Go/race、隔离 tmux、systemd static/analyze、Web、release/build 检查通过；
+  监督端 Termux 的完整 Fleet/CLI/Console/Worker 最终通过，其中 `internal/fleet` 约 104 秒。
+- 未开始 Task 08、发布、安装或真实 service/DB/socket/default tmux 操作。
