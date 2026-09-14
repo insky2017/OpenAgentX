@@ -1092,12 +1092,55 @@ M  deploy/systemd/openagentx-user.service
 - 当前 Task 07 仍为 `active/WAIT`；主计划和 Task 07 front matter 按 gate-record 协议保持 `pending`，
   等待阶段实现提交后的监督复核。Task 08 未开始。
 
+### Task 07 host consistency 监督 review-fix（append-only）
+
+- `2026-09-14T22:36:00Z`：监督对 Task 07 主实现
+  `40fe06e813dcce5c327cf159c66fff630d3bc236` 给出临时 `NO-GO`；Fleet/credential/graceful/dead-pane
+  主线保留，只修 tmux fixture 稳定性、配置捕获原子性和 user-systemd host consistency，不开始
+  Task 08。
+- 监督端完整 `go test ./internal/fleet` 超过 30 秒时，辅助 pane 的 `sleep 30` 自然结束并让 pane 2
+  消失，造成“未确认 binding 发生 mutation”的误报。全部隔离 tmux Console、辅助 pane、unmanaged
+  window 和独立 Worker fixture 已统一改为 `sleep 86400` sentinel，仅由各测试唯一 `tmux -L`
+  server 的 `kill-server` 或显式 process cleanup 结束；Ubuntu 24.04/tmux 3.4 完整包和 race 均通过，
+  不再依赖测试套件在固定秒数内完成。Termux 由监督端在本提交后独立重验。
+- Worker config 新增严格 `io.Reader` decode 入口，拒绝 unknown field、尾随 YAML document 和无效领域
+  配置；文件入口复用该 decoder，并以 `O_NOFOLLOW` 打开和对已打开 fd 做 regular/size 检查。Fleet
+  对 source、canonical Worker config、manifest 和可选 env 使用 `O_NOFOLLOW + fstat + owner/mode +
+  size` 单句柄捕获；显式 source 可为当前用户持有的较宽 mode，但不能是 symlink/非普通文件。
+  初始化只校验将安装的捕获 bytes，导入时拒绝会因复制改变语义的已知相对文件路径；原子写继续使用
+  0600 临时文件、fsync、`RENAME_NOREPLACE` 和 directory fsync，不覆盖冲突目标。
+- 故障测试证明：初始 source symlink 拒绝；source 在捕获后变化时安装内容仍精确等于已验证 bytes；
+  canonical 在 rename 前被 symlink 占位时 fail closed、外部 target 和 manifest 均不改变；manifest
+  symlink/0644 拒绝；相对导入路径拒绝；原子失败继续清理临时文件并保留旧有效文件。
+- user Worker unit 从 `Requires=openagentx.service` 改为 `Wants=` 加 `After=`，避免 daemon stop/restart
+  通过依赖关系强停 resident Worker。`fleet up` 在任何 tmux/start mutation 前验证固定 canonical
+  `%h/.local/bin/openagentx` 是当前用户持有、非 symlink、非 group/other writable 且 owner-executable
+  的普通文件；实际 user manager 的 `ExecStart`、`WorkingDirectory` 和 `EnvironmentFiles` 必须分别
+  精确匹配 canonical binary/config、用户 home 和 `%h/.openagentx/workers/%i.env`，否则 fail closed。
+  workspace pane command 与 user unit 使用同一 binary，不再使用 `os.Executable()` 临时路径。
+- Web 回归首次从仓库根运行 `npm run test:observation`、`npm run test:pwa` 和 `npm run build`，均因
+  根目录没有 `package.json` 退出 `254`；纠正到 `web/` 后三项均退出 `0`，分别通过 4 项 observation、
+  PWA assertions 和 Vite 266 modules build。该失败是验证命令工作目录错误，未修改产品或外部状态。
+- 本轮通过：四包定向测试（含完整隔离 tmux）`10.9s`；三包 race `12.6s`；`go test ./...`
+  `15.0s`；受影响包 vet、Go build、shell syntax、Worker unit 静态断言、临时目录中按实际安装名执行的
+  `systemd-analyze --user verify`、Web 三项、release scanner 和 `git diff --check`。所有文件、HOME、
+  UDS、tmux server 和 unit 验证均为临时/隔离输入；未操作真实 service、DB/socket、default tmux、
+  installed binary 或父仓。
+- 最终串行重验中的第一次 `go test ./... -count=1` 在既有 Task 06 PTY smoke 失败：TUI 已绑定并处理
+  `/quit`，tmux 输出为 `0:1:`，证明 pane 0 已 dead，但当次 `pane_dead_status` 为空而测试要求
+  `0:1:0`，因此约 11.5 秒后退出 1。未改 Task 06 产品或测试；立即单独重跑
+  `TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes` 在 1.16 秒退出 0，随后再次
+  `go test ./... -count=1` 在 14.1 秒退出 0。
+- `T04-01`、`T05-01` 从主实现中的提前 closed 恢复为 `reopened/pending`；既有实现证据保留，只有本
+  review-fix 提交与最终独立重验通过后才可在 Task 07 gate record 中关闭。Task 07 继续
+  `active/WAIT`，主计划/front matter 继续 `pending`，Task 08 未开始。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
 |---|---|---|---|---|---|---|
-| T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | closed；Task 07 删除 Fleet password/username/直接 DB apply，统一使用 installation-bound credential+session 验证和 owner+lifecycle scope；隔离测试与 secret/argv 扫描通过 |
-| T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | closed；`fleet workspace --respawn-dead` 经二次 preflight 仅 respawn compatible managed dead pane 0；fake/TOCTOU/真实隔离 tmux 证明 live、pane 1+ 与 unmanaged 不受影响 |
+| T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | reopened/pending；主实现已删除 Fleet password/username/直接 DB apply 并统一使用 installation-bound credential+session，等待 Task 07 review-fix 最终独立证据后由 gate record 关闭 |
+| T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | reopened/pending；主实现已有二次 preflight 的 `--respawn-dead` 与隔离证据，等待长寿命 tmux fixture 的最终独立重验后由 gate record 关闭 |
 
 ## 8. 安全与范围事件
 
@@ -1115,6 +1158,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T18:26:41Z | 监督最终复核 Task 04 主实现与 hardening fix | 独立审查确认 schema/auth/mux/store/session/scope/并发安全边界全部成立；`T04-01` 明确留给 Task 07 | 记录两个精确 SHA、实际 clean/ahead、首次 NO-GO 修复和最终结论；仅同步三份 docs gate 状态 | Task 04 GO；Task 05 保持 `pending/WAIT` |
 | 2026-09-14T19:46:50Z | 监督最终复核 Task 05 三个提交 | 独立 Termux tmux 3.4 七组真实集成最终通过；主实现、hardening 和真实 binding 补证范围均通过；`T04-01`、`T05-01` 保留给 Task 07 | 记录三个精确 SHA、实际 clean/ahead、首次 NO-GO 三项修复和最终真实 binding 证据；仅同步三份 docs gate 状态 | Task 05 GO；Task 06 保持 `pending/WAIT` |
 | 2026-09-14T21:30:38Z | 监督最终复核 Task 06 三个提交 | 两轮 NO-GO 分别由 `5aa6c97`、`c42414b` 修复；独立 Termux 真实 PTY/tmux smoke 最终通过，TUI 状态流和 SSE 安全/兼容边界成立 | 记录三个精确 SHA、实际 clean/ahead 与最终验证；仅同步三份 docs gate 状态，保留 `T04-01`、`T05-01` | Task 06 GO；Task 07 保持 `pending/WAIT` |
+| 2026-09-14T22:36:00Z | 监督对 Task 07 主实现 `40fe06e` 给出 host consistency `NO-GO` | Termux 完整 Fleet 包暴露 30 秒 fixture 竞态；配置存在重复打开/TOCTOU；user Worker `Requires=` 与 unit 属性/canonical binary 证明不足 | 仅修 Task 07：长寿命隔离 sentinel、captured-bytes 安全读取、Wants+After、三项实际 unit 属性和固定 binary；恢复 T04-01/T05-01 pending 并完整重验 | Task 07 保持 `active/WAIT`；等待 review-fix 提交后的再次 gate |
 
 ## 9. 最终产物（Task 08 填写）
 

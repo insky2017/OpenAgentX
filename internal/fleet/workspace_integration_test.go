@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const integrationSentinelSeconds = "86400"
+
 func isolatedTmux(t *testing.T) (context.Context, ExecRunner) {
 	t.Helper()
 	if _, err := exec.LookPath("tmux"); err != nil {
@@ -34,7 +36,7 @@ func createManagedIntegrationWindow(t *testing.T, ctx context.Context, runner Ex
 	if session == SessionName && name == OverviewWindow {
 		output, err = runner.Run(ctx, "new-session", "-d", "-P", "-F", "#{window_id}", "-s", session, "-n", name)
 	} else {
-		output, err = runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+session, "-n", name, "sleep", "30")
+		output, err = runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+session, "-n", name, "sleep", integrationSentinelSeconds)
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -72,7 +74,7 @@ func TestIsolatedTmuxReconcilePreservesPaneZeroOneTwoAndIgnoresOldAgentx(t *test
 	}
 
 	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "quote.identity.yaml", WorkerConfig: "quote.worker.yaml"}}}
-	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
 	report, err := workspace.Reconcile(ctx, manifest)
 	if err != nil {
 		t.Fatal(err)
@@ -109,7 +111,7 @@ func TestIsolatedTmuxCreatesOAXWithoutMigratingExistingAgentx(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
-	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
 	report, err := workspace.Reconcile(ctx, manifest)
 	if err != nil {
 		t.Fatal(err)
@@ -181,7 +183,7 @@ func TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified(t *testing.
 func TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxiliaryPanes(t *testing.T) {
 	ctx, runner := isolatedTmux(t)
 	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", WorkerConfig: "/tmp/quote.yaml", Enabled: true}}}
-	initial := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	initial := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
 	if _, err := initial.Reconcile(ctx, manifest); err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +196,7 @@ func TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxilia
 		t.Fatalf("quote window missing: %+v", windows)
 	}
 	for range 2 {
-		if _, err := runner.Run(ctx, "split-window", "-d", "-t", quote.ID, "sleep", "30"); err != nil {
+		if _, err := runner.Run(ctx, "split-window", "-d", "-t", quote.ID, "sleep", integrationSentinelSeconds); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -216,7 +218,7 @@ func TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxilia
 		t.Fatalf("pane 0 did not become dead: %+v err=%v", quote, err)
 	}
 
-	recovering := Workspace{Runner: runner, RespawnDead: true, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	recovering := Workspace{Runner: runner, RespawnDead: true, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
 	report, err := recovering.Reconcile(ctx, manifest)
 	if err != nil {
 		t.Fatal(err)
@@ -239,7 +241,7 @@ func TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxilia
 }
 
 func TestIsolatedTmuxConsoleSessionExitDoesNotTerminateIndependentWorker(t *testing.T) {
-	worker := exec.Command("sleep", "30")
+	worker := exec.Command("sleep", integrationSentinelSeconds)
 	if err := worker.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -266,7 +268,7 @@ func TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t
 	ctx, runner := isolatedTmux(t)
 	createManagedIntegrationWindow(t, ctx, runner, SessionName, OverviewWindow, "")
 	for range 2 {
-		output, err := runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+SessionName, "-n", "scratch", "sleep", "30")
+		output, err := runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+SessionName, "-n", "scratch", "sleep", integrationSentinelSeconds)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -277,7 +279,7 @@ func TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t
 	}
 
 	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
-	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
 	report, err := workspace.Reconcile(ctx, manifest)
 	if err != nil {
 		t.Fatal(err)
@@ -304,7 +306,7 @@ func TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t
 func TestIsolatedTmuxBindCurrentPreservesPanesAndRequiresConfirmation(t *testing.T) {
 	ctx, runner := isolatedTmux(t)
 	createManagedIntegrationWindow(t, ctx, runner, SessionName, OverviewWindow, "")
-	output, err := runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+SessionName, "-n", "scratch", "sleep", "30")
+	output, err := runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+SessionName, "-n", "scratch", "sleep", integrationSentinelSeconds)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -396,7 +398,7 @@ func TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero(t *testing.T) {
 			t.Fatal(err)
 		}
 		manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
-		workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+		workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
 		if err := workspace.Preflight(ctx, manifest); err == nil || !strings.Contains(err.Error(), "pane 0") {
 			t.Fatalf("missing pane zero was not rejected: %v", err)
 		}
@@ -407,7 +409,7 @@ func TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation(t *tes
 	for name, configure := range map[string]func(t *testing.T, ctx context.Context, runner ExecRunner){
 		"duplicate name": func(t *testing.T, ctx context.Context, runner ExecRunner) {
 			createManagedIntegrationWindow(t, ctx, runner, SessionName, "quote", "quote")
-			if _, err := runner.Run(ctx, "new-window", "-d", "-n", "quote", "-t", "="+SessionName, "sleep", "30"); err != nil {
+			if _, err := runner.Run(ctx, "new-window", "-d", "-n", "quote", "-t", "="+SessionName, "sleep", integrationSentinelSeconds); err != nil {
 				t.Fatal(err)
 			}
 		},
@@ -421,7 +423,7 @@ func TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation(t *tes
 			createManagedIntegrationWindow(t, ctx, runner, SessionName, OverviewWindow, "")
 			configure(t, ctx, runner)
 			manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
-			workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+			workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
 			if _, err := workspace.Reconcile(ctx, manifest); err == nil {
 				t.Fatal("expected isolated tmux conflict")
 			}

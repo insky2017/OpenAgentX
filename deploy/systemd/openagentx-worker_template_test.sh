@@ -18,6 +18,12 @@ fi
 
 grep -Fq 'EnvironmentFile=-%h/.openagentx/workers/%i.env' "$USER_UNIT_FILE"
 grep -Fq 'ExecStart=%h/.local/bin/openagentx worker run --config %h/.openagentx/workers/%i.yaml' "$USER_UNIT_FILE"
+grep -Fq 'WorkingDirectory=%h' "$USER_UNIT_FILE"
+grep -Fq 'Wants=openagentx.service' "$USER_UNIT_FILE"
+if grep -Eq '^(Requires|BindsTo|PartOf)=openagentx.service$' "$USER_UNIT_FILE"; then
+  echo 'user worker template must not stop resident Workers with the daemon unit' >&2
+  exit 1
+fi
 grep -Fq 'ProtectHome=false' "$USER_UNIT_FILE"
 grep -Fq 'ProtectSystem=false' "$USER_UNIT_FILE"
 if grep -Eq '(--username|password|token)' "$USER_UNIT_FILE"; then

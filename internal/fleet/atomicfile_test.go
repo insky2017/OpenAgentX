@@ -72,3 +72,32 @@ func TestWriteExactFileAtomicRejectsSymlinkAndBroadPermissions(t *testing.T) {
 		t.Fatal("broad permissions accepted")
 	}
 }
+
+func TestReadSecureFileUsesOpenedRegularFileAndRejectsUnsafeInputs(t *testing.T) {
+	directory := t.TempDir()
+	private := filepath.Join(directory, "private")
+	if err := os.WriteFile(private, []byte("captured"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	content, err := ReadSecureFile(private, SecureFileOptions{MaximumBytes: 32, RequirePrivate: true})
+	if err != nil || string(content) != "captured" {
+		t.Fatalf("content=%q err=%v", content, err)
+	}
+	link := filepath.Join(directory, "link")
+	if err := os.Symlink(private, link); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ReadSecureFile(link, SecureFileOptions{MaximumBytes: 32}); err == nil {
+		t.Fatal("symlink input accepted")
+	}
+	broad := filepath.Join(directory, "broad")
+	if err := os.WriteFile(broad, []byte("source"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ReadSecureFile(broad, SecureFileOptions{MaximumBytes: 32, RequirePrivate: true}); err == nil {
+		t.Fatal("broad private file accepted")
+	}
+	if content, err := ReadSecureFile(broad, SecureFileOptions{MaximumBytes: 32}); err != nil || string(content) != "source" {
+		t.Fatalf("explicit broad source content=%q err=%v", content, err)
+	}
+}

@@ -204,11 +204,12 @@ window marker；未绑定 window 会显示经认证控制面的 Agent selector�
 Console 仅提供全屏交互模式，不提供 `--once` 或连续 JSON fallback。非 TTY 自动化应调用
 Observe API；退出 TUI 只 detach Console，不会停止或 drain Worker。
 
-`fleet up` 会先验证已加载用户 unit 的实际 `ExecStart` 精确读取
-`~/.openagentx/workers/<agent-id>.yaml`，然后才协调 workspace 并执行
-`systemctl --user start`。它只读取 Linger 状态并提示，不会自动 enable unit、daemon 或
-linger。Worker 环境文件若存在，路径为 `~/.openagentx/workers/<agent-id>.env`，必须由当前
-用户持有且权限不宽于 `0600`。
+`fleet up` 会先验证 canonical `~/.local/bin/openagentx` 可执行，并核对已加载用户 unit 的实际
+`ExecStart`、`WorkingDirectory` 和 `EnvironmentFiles` 精确指向用户 home、
+`~/.openagentx/workers/<agent-id>.yaml` 与对应 `.env`，然后才协调 workspace 并执行
+`systemctl --user start`。Worker unit 只 `Wants` daemon 并自行重连，daemon stop/restart 不会
+通过 systemd 依赖关系强停 Worker。Fleet 只读取 Linger 状态并提示，不会自动 enable unit、daemon
+或 linger。Worker 环境文件若存在，必须由当前用户持有且权限不宽于 `0600`。
 
 Console pane 退出后，pane `0` 会以 remain-on-exit 保留为 dead。确认 window 名、两个 marker
 和 pane `0` 均 compatible 后，可显式恢复；该命令不会碰 live pane 或 pane `1+`：

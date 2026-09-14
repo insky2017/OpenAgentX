@@ -217,9 +217,16 @@ func newFleetFixture(t *testing.T) fleetFixture {
 		t.Fatal(err)
 	}
 	profile := filepath.Join(home, ".openagentx")
-	return fleetFixture{home: home, manifest: filepath.Join(profile, "fleet.yaml"), database: filepath.Join(profile, "data", "openagentx.db"),
+	fixture := fleetFixture{home: home, manifest: filepath.Join(profile, "fleet.yaml"), database: filepath.Join(profile, "data", "openagentx.db"),
 		socket: filepath.Join(profile, "run", "openagentx.sock"), workerDir: filepath.Join(profile, "workers"),
 		credentials: filepath.Join(profile, "credentials.json"), binary: filepath.Join(home, ".local", "bin", "openagentx")}
+	if err := os.MkdirAll(filepath.Dir(fixture.binary), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(fixture.binary, []byte("#!/bin/sh\nexit 0\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	return fixture
 }
 
 func (f fleetFixture) args(command string) []string {
@@ -241,7 +248,7 @@ func fixtureDeps(f fleetFixture, now time.Time, console *testConsole) (Dependenc
 	out, stderr := &bytes.Buffer{}, &bytes.Buffer{}
 	deps := Dependencies{Out: out, Err: stderr, In: strings.NewReader(""), IsInteractive: func() bool { return false }, Now: func() time.Time { return now },
 		NewConsole: func(string) (consoleClient, error) { return console, nil }, NewCredentialStore: func(string) (credentialStore, error) { return store, nil },
-		Tmux: &testTmux{}, Executable: func() (string, error) { return f.binary, nil }, UserHomeDir: func() (string, error) { return f.home, nil },
+		Tmux: &testTmux{}, UserHomeDir: func() (string, error) { return f.home, nil },
 		RunSystemctl: func(context.Context, ...string) (string, error) { return "inactive", nil }, RunLoginctl: func(context.Context, ...string) (string, error) { return "yes", nil }}
 	return deps, store, out, stderr
 }
@@ -425,6 +432,135 @@ func TestFleetInitConflictAndAtomicFailureAreNonDestructive(t *testing.T) {
 	}
 }
 
+func TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes(t *testing.T) {
+	now := time.Now().UTC()
+	f := newFleetFixture(t)
+	source := filepath.Join(t.TempDir(), "quote.yaml")
+	original := writeWorker(t, source, "quote", f.socket)
+	if err := os.Chmod(source, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+	canonical := filepath.Join(f.workerDir, "quote.yaml")
+	deps.BeforeAtomicRename = func(path string) error {
+		if path != canonical {
+			return nil
+		}
+		return os.WriteFile(source, []byte("version: invalid\n"), 0o600)
+	}
+	args := append(f.args("init"), "--agent", "quote", "--worker-config", "quote="+source)
+	if code := Execute(args, deps); code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	installed, err := os.ReadFile(canonical)
+	if err != nil || !bytes.Equal(installed, original) {
+		t.Fatalf("installed bytes differ from validated capture: content=%q err=%v", installed, err)
+	}
+}
+
+func TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap(t *testing.T) {
+	now := time.Now().UTC()
+	t.Run("source symlink", func(t *testing.T) {
+		f := newFleetFixture(t)
+		target := filepath.Join(t.TempDir(), "target.yaml")
+		writeWorker(t, target, "quote", f.socket)
+		source := filepath.Join(t.TempDir(), "source.yaml")
+		if err := os.Symlink(target, source); err != nil {
+			t.Fatal(err)
+		}
+		deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+		args := append(f.args("init"), "--agent", "quote", "--worker-config", "quote="+source)
+		if code := Execute(args, deps); code != 1 {
+			t.Fatalf("code=%d stderr=%s", code, stderr.String())
+		}
+		if _, err := os.Stat(f.manifest); !os.IsNotExist(err) {
+			t.Fatalf("unsafe source installed manifest: %v", err)
+		}
+	})
+
+	t.Run("canonical replaced before rename", func(t *testing.T) {
+		f := newFleetFixture(t)
+		source := filepath.Join(t.TempDir(), "source.yaml")
+		writeWorker(t, source, "quote", f.socket)
+		canonical := filepath.Join(f.workerDir, "quote.yaml")
+		target := filepath.Join(t.TempDir(), "target.yaml")
+		if err := os.WriteFile(target, []byte("do not replace\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+		deps.BeforeAtomicRename = func(path string) error {
+			if path != canonical {
+				return nil
+			}
+			return os.Symlink(target, canonical)
+		}
+		args := append(f.args("init"), "--agent", "quote", "--worker-config", "quote="+source)
+		if code := Execute(args, deps); code != 1 {
+			t.Fatalf("code=%d stderr=%s", code, stderr.String())
+		}
+		content, err := os.ReadFile(target)
+		if err != nil || string(content) != "do not replace\n" {
+			t.Fatalf("swap target changed: content=%q err=%v", content, err)
+		}
+		if _, err := os.Stat(f.manifest); !os.IsNotExist(err) {
+			t.Fatalf("canonical swap installed manifest: %v", err)
+		}
+	})
+}
+
+func TestFleetPrepareRejectsUnsafeManifestFile(t *testing.T) {
+	now := time.Now().UTC()
+	for name, install := range map[string]func(t *testing.T, f fleetFixture){
+		"broad permissions": func(t *testing.T, f fleetFixture) {
+			writeManifest(t, f, "quote")
+			if err := os.Chmod(f.manifest, 0o644); err != nil {
+				t.Fatal(err)
+			}
+		},
+		"symlink": func(t *testing.T, f fleetFixture) {
+			writeManifest(t, f, "quote")
+			target := filepath.Join(t.TempDir(), "fleet.yaml")
+			content, err := os.ReadFile(f.manifest)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(target, content, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Remove(f.manifest); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink(target, f.manifest); err != nil {
+				t.Fatal(err)
+			}
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			f := newFleetFixture(t)
+			install(t, f)
+			deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+			if code := Execute(f.args("status"), deps); code != 1 {
+				t.Fatalf("code=%d stderr=%s", code, stderr.String())
+			}
+		})
+	}
+}
+
+func TestFleetInitRejectsRelativeImportedWorkerPathSemantics(t *testing.T) {
+	now := time.Now().UTC()
+	f := newFleetFixture(t)
+	source := filepath.Join(t.TempDir(), "quote.yaml")
+	content := fmt.Sprintf("version: 1\nagent_id: quote\ntransport: unix\nunix_socket: %s\nnetwork_materialization_dir: relative/network\nruntime_backends:\n  - backend_id: local\n    adapter_id: fake\n", f.socket)
+	if err := os.WriteFile(source, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+	args := append(f.args("init"), "--agent", "quote", "--worker-config", "quote="+source)
+	if code := Execute(args, deps); code != 1 || !strings.Contains(stderr.String(), "must be absolute before importing") {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+}
+
 func TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts(t *testing.T) {
 	now := time.Now().UTC()
 	f := newFleetFixture(t)
@@ -490,6 +626,12 @@ func TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager(t *te
 		if strings.Contains(call, "ExecStart") {
 			return fmt.Sprintf("{ path=%s ; argv[]=%s worker run --config %s ; ignore_errors=no ; }", f.binary, f.binary, filepath.Join(f.workerDir, "quote.yaml")), nil
 		}
+		if strings.Contains(call, "WorkingDirectory") {
+			return f.home, nil
+		}
+		if strings.Contains(call, "EnvironmentFiles") {
+			return filepath.Join(f.workerDir, "quote.env") + " (ignore_errors=yes)", nil
+		}
 		return "", nil
 	}
 	if code := Execute(f.args("up"), deps); code != 0 {
@@ -525,6 +667,27 @@ func TestFleetUpRejectsUnitMismatchBeforeAnyMutation(t *testing.T) {
 		if strings.HasPrefix(call, "new-") || strings.HasPrefix(call, "set-option") {
 			t.Fatalf("unit mismatch mutated tmux: %v", tmux.calls)
 		}
+	}
+}
+
+func TestFleetWorkspaceRejectsMissingCanonicalBinaryBeforeTmuxMutation(t *testing.T) {
+	now := time.Now().UTC()
+	f := newFleetFixture(t)
+	writeManifest(t, f, "quote")
+	if err := os.Remove(f.binary); err != nil {
+		t.Fatal(err)
+	}
+	tmux := &testTmux{}
+	console := ownerConsole(now)
+	console.session.Principal.Roles = []string{"viewer"}
+	console.session.Principal.Scopes = []string{"console.read"}
+	deps, _, _, stderr := fixtureDeps(f, now, console)
+	deps.Tmux = tmux
+	if code := Execute(f.args("workspace"), deps); code != 1 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	if len(tmux.calls) != 0 {
+		t.Fatalf("missing canonical binary mutated tmux: %v", tmux.calls)
 	}
 }
 

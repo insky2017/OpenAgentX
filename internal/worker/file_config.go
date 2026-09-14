@@ -2,11 +2,13 @@ package worker
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"strings"
 	"time"
 
+	"golang.org/x/sys/unix"
 	"gopkg.in/yaml.v3"
 	"openagentx/internal/domain"
 )
@@ -42,16 +44,35 @@ func LoadProcessConfig(path string) (*ProcessConfig, error) {
 	if strings.TrimSpace(path) == "" {
 		return nil, domain.ErrInvalidInput("Worker config path is required")
 	}
-	file, err := os.Open(path)
+	fd, err := unix.Open(path, unix.O_RDONLY|unix.O_CLOEXEC|unix.O_NOFOLLOW, 0)
 	if err != nil {
 		return nil, fmt.Errorf("open Worker config: %w", err)
 	}
+	file := os.NewFile(uintptr(fd), path)
 	defer file.Close()
-	decoder := yaml.NewDecoder(file)
+	info, err := file.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("inspect Worker config: %w", err)
+	}
+	if !info.Mode().IsRegular() || info.Size() > 1<<20 {
+		return nil, domain.ErrInvalidInput("Worker config must be a regular file within the safe size limit")
+	}
+	return DecodeProcessConfig(file)
+}
+
+func DecodeProcessConfig(reader io.Reader) (*ProcessConfig, error) {
+	if reader == nil {
+		return nil, domain.ErrInvalidInput("Worker config input is required")
+	}
+	decoder := yaml.NewDecoder(reader)
 	decoder.KnownFields(true)
 	var config ProcessConfig
 	if err := decoder.Decode(&config); err != nil {
 		return nil, fmt.Errorf("decode Worker config: %w", err)
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		return nil, domain.ErrInvalidInput("Worker config must contain exactly one YAML document")
 	}
 	if err := config.Validate(); err != nil {
 		return nil, err

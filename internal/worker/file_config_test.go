@@ -3,6 +3,7 @@ package worker
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -48,6 +49,44 @@ runtime_backends:
 `)
 	if _, err := LoadProcessConfig(unknown); err == nil {
 		t.Fatal("strict Worker config accepted a legacy/unknown field")
+	}
+}
+
+func TestDecodeProcessConfigUsesCapturedStrictDocument(t *testing.T) {
+	content := `version: 1
+agent_id: quote
+transport: unix
+unix_socket: /run/openagentx/openagentx.sock
+runtime_backends:
+  - backend_id: local
+    adapter_id: fake
+`
+	config, err := DecodeProcessConfig(strings.NewReader(content))
+	if err != nil || config.AgentID != "quote" {
+		t.Fatalf("config=%+v err=%v", config, err)
+	}
+	if _, err := DecodeProcessConfig(strings.NewReader(content + "---\nversion: 1\n")); err == nil {
+		t.Fatal("multiple Worker config documents accepted")
+	}
+}
+
+func TestLoadProcessConfigRejectsSymlink(t *testing.T) {
+	directory := t.TempDir()
+	target := filepath.Join(directory, "target.yaml")
+	writeTestConfig(t, target, `version: 1
+agent_id: quote
+transport: unix
+unix_socket: /run/openagentx/openagentx.sock
+runtime_backends:
+  - backend_id: local
+    adapter_id: fake
+`)
+	link := filepath.Join(directory, "link.yaml")
+	if err := os.Symlink(target, link); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadProcessConfig(link); err == nil {
+		t.Fatal("Worker config symlink accepted")
 	}
 }
 

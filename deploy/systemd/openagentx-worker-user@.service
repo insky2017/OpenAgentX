@@ -1,7 +1,7 @@
 [Unit]
 Description=OpenAgentX user Worker (%i)
 After=openagentx.service
-Requires=openagentx.service
+Wants=openagentx.service
 
 [Service]
 Type=simple

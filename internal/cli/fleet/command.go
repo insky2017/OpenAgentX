@@ -2,6 +2,7 @@ package fleet
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -46,7 +47,6 @@ type Dependencies struct {
 	Now                func() time.Time
 	Context            context.Context
 	Wait               func(context.Context, time.Duration) error
-	Executable         func() (string, error)
 	UserHomeDir        func() (string, error)
 	BeforeAtomicRename func(string) error
 }
@@ -94,7 +94,7 @@ func DefaultDependencies() Dependencies {
 	return Dependencies{
 		Out: os.Stdout, Err: os.Stderr, In: os.Stdin,
 		IsInteractive: func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
-		Tmux:          fleetmodel.ExecRunner{}, Now: time.Now, Executable: os.Executable, UserHomeDir: os.UserHomeDir,
+		Tmux:          fleetmodel.ExecRunner{}, Now: time.Now, UserHomeDir: os.UserHomeDir,
 		RunSystemctl: func(ctx context.Context, args ...string) (string, error) { return run(ctx, "systemctl", args...) },
 		RunLoginctl:  func(ctx context.Context, args ...string) (string, error) { return run(ctx, "loginctl", args...) },
 		NewConsole:   func(socketPath string) (consoleClient, error) { return consoleclient.NewUnixClient(socketPath) },
@@ -222,20 +222,13 @@ func Execute(args []string, deps Dependencies) int {
 		fmt.Fprintf(deps.Err, "Fleet preflight failed: %v\n", err)
 		return 1
 	}
-	binary, err := deps.Executable()
-	if err != nil || !filepath.IsAbs(binary) {
-		fmt.Fprintf(deps.Err, "resolve OpenAgentX executable: %v\n", err)
-		return 1
-	}
-	workspace := fleetmodel.Workspace{
-		Runner: deps.Tmux, RespawnDead: *respawnDead,
-		ConsoleCommand: func(agentID string) []string {
-			return []string{binary, "console", "attach", "--socket", paths.socket, "--credentials", paths.credentials, "--agent", agentID}
-		},
-	}
-
 	switch command {
 	case "init", "workspace":
+		workspace, err := newWorkspace(paths, *respawnDead, deps)
+		if err != nil {
+			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
+			return 1
+		}
 		if err := workspace.Preflight(ctx, manifest); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
 			return 1
@@ -247,6 +240,11 @@ func Execute(args []string, deps Dependencies) int {
 		}
 		return printJSON(deps, map[string]any{"cli_username": session.Principal.Username, "workspace": report})
 	case "up":
+		workspace, err := newWorkspace(paths, *respawnDead, deps)
+		if err != nil {
+			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
+			return 1
+		}
 		if err := workspace.Preflight(ctx, manifest); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
 			return 1
@@ -332,13 +330,23 @@ func withDefaults(deps Dependencies) Dependencies {
 	if deps.Wait == nil {
 		deps.Wait = defaults.Wait
 	}
-	if deps.Executable == nil {
-		deps.Executable = defaults.Executable
-	}
 	if deps.UserHomeDir == nil {
 		deps.UserHomeDir = defaults.UserHomeDir
 	}
 	return deps
+}
+
+func newWorkspace(paths fleetPaths, respawnDead bool, deps Dependencies) (fleetmodel.Workspace, error) {
+	binary, err := canonicalUserBinary(deps)
+	if err != nil {
+		return fleetmodel.Workspace{}, err
+	}
+	return fleetmodel.Workspace{
+		Runner: deps.Tmux, RespawnDead: respawnDead,
+		ConsoleCommand: func(agentID string) []string {
+			return []string{binary, "console", "attach", "--socket", paths.socket, "--credentials", paths.credentials, "--agent", agentID}
+		},
+	}, nil
 }
 
 func resolveFleetPaths(manifest, database, socket, workerDir, credentials localprofile.PathFlag) (fleetPaths, error) {
@@ -503,8 +511,14 @@ func initializeManifest(paths fleetPaths, requested, sourceFlags []string, optio
 		if err != nil {
 			return fleetmodel.Manifest{}, fmt.Errorf("Agent %q worker config: %w", agentID, err)
 		}
-		if err := validateWorkerConfig(source, agentID, paths.socket); err != nil {
+		config, err := validateWorkerConfig(content, agentID, paths.socket)
+		if err != nil {
 			return fleetmodel.Manifest{}, err
+		}
+		if source != canonical.Path {
+			if err := validateRelocatableWorkerConfig(config); err != nil {
+				return fleetmodel.Manifest{}, fmt.Errorf("Agent %q imported worker config: %w", agentID, err)
+			}
 		}
 		if _, err := fleetmodel.CheckExactFile(canonical.Path, content); err != nil {
 			return fleetmodel.Manifest{}, err
@@ -586,38 +600,47 @@ func parseWorkerSources(values []string) (map[string]string, error) {
 }
 
 func readWorkerSource(path string) ([]byte, error) {
-	if !filepath.IsAbs(path) {
-		return nil, fmt.Errorf("worker config path must be absolute")
-	}
-	info, err := os.Lstat(path)
-	if err != nil {
-		return nil, err
-	}
-	if !info.Mode().IsRegular() || info.Size() > maxWorkerConfigBytes {
-		return nil, fmt.Errorf("worker config must be a regular file within the safe size limit")
-	}
-	return os.ReadFile(path)
+	return fleetmodel.ReadSecureFile(path, fleetmodel.SecureFileOptions{MaximumBytes: maxWorkerConfigBytes})
 }
 
-func validateWorkerConfig(path, agentID, socketPath string) error {
-	config, err := workerconfig.LoadProcessConfig(path)
+func validateWorkerConfig(content []byte, agentID, socketPath string) (*workerconfig.ProcessConfig, error) {
+	config, err := workerconfig.DecodeProcessConfig(bytes.NewReader(content))
 	if err != nil {
-		return fmt.Errorf("load Agent %q worker config: %w", agentID, err)
+		return nil, fmt.Errorf("load Agent %q worker config: %w", agentID, err)
 	}
 	if config.AgentID != agentID {
-		return fmt.Errorf("Agent %q worker config declares %q", agentID, config.AgentID)
+		return nil, fmt.Errorf("Agent %q worker config declares %q", agentID, config.AgentID)
 	}
 	if config.Transport == domain.WorkerTransportUnix && filepath.Clean(config.UnixSocket) != socketPath {
-		return fmt.Errorf("Agent %q worker config socket %q does not match canonical Fleet socket %q", agentID, config.UnixSocket, socketPath)
+		return nil, fmt.Errorf("Agent %q worker config socket %q does not match canonical Fleet socket %q", agentID, config.UnixSocket, socketPath)
+	}
+	return config, nil
+}
+
+func validateRelocatableWorkerConfig(config *workerconfig.ProcessConfig) error {
+	paths := map[string]string{
+		"ca_file": config.CAFile, "client_cert_file": config.ClientCertFile,
+		"client_key_file": config.ClientKeyFile, "network_materialization_dir": config.NetworkMaterializationDir,
+	}
+	for name, value := range paths {
+		if value != "" && !filepath.IsAbs(value) {
+			return fmt.Errorf("%s must be absolute before importing to the canonical worker directory", name)
+		}
+	}
+	for _, backend := range config.RuntimeBackendConfig {
+		if value := backend.Network.ConfigFile; value != "" && !filepath.IsAbs(value) {
+			return fmt.Errorf("runtime backend %q network config_file must be absolute before importing to the canonical worker directory", backend.BackendID)
+		}
 	}
 	return nil
 }
 
 func prepare(manifestPath, workerDir, socketPath string, options map[string]domain.ConsoleAgentOption) (fleetmodel.Manifest, []preparedAgent, error) {
-	if err := validatePrivateRegularFile(manifestPath, "Fleet manifest"); err != nil {
-		return fleetmodel.Manifest{}, nil, err
+	manifestContent, err := fleetmodel.ReadSecureFile(manifestPath, fleetmodel.SecureFileOptions{MaximumBytes: maxWorkerConfigBytes, RequirePrivate: true})
+	if err != nil {
+		return fleetmodel.Manifest{}, nil, fmt.Errorf("read Fleet manifest: %w", err)
 	}
-	manifest, err := fleetmodel.LoadFile(manifestPath)
+	manifest, err := fleetmodel.Decode(bytes.NewReader(manifestContent))
 	if err != nil {
 		return fleetmodel.Manifest{}, nil, err
 	}
@@ -636,18 +659,15 @@ func prepare(manifestPath, workerDir, socketPath string, options map[string]doma
 		if !filepath.IsAbs(entry.WorkerConfig) || filepath.Clean(entry.WorkerConfig) != canonical.Path {
 			return fleetmodel.Manifest{}, nil, fmt.Errorf("Agent %q worker_config must be canonical path %q", entry.AgentID, canonical.Path)
 		}
-		if err := validatePrivateRegularFile(canonical.Path, "Worker config"); err != nil {
-			return fleetmodel.Manifest{}, nil, err
+		workerContent, err := fleetmodel.ReadSecureFile(canonical.Path, fleetmodel.SecureFileOptions{MaximumBytes: maxWorkerConfigBytes, RequirePrivate: true})
+		if err != nil {
+			return fleetmodel.Manifest{}, nil, fmt.Errorf("read Worker config %q: %w", canonical.Path, err)
 		}
 		environmentPath := strings.TrimSuffix(canonical.Path, filepath.Ext(canonical.Path)) + ".env"
-		if _, err := os.Lstat(environmentPath); err == nil {
-			if err := validatePrivateRegularFile(environmentPath, "Worker environment file"); err != nil {
-				return fleetmodel.Manifest{}, nil, err
-			}
-		} else if !os.IsNotExist(err) {
-			return fleetmodel.Manifest{}, nil, fmt.Errorf("inspect Worker environment file: %w", err)
+		if _, err := fleetmodel.ReadSecureFile(environmentPath, fleetmodel.SecureFileOptions{MaximumBytes: maxWorkerConfigBytes, RequirePrivate: true}); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fleetmodel.Manifest{}, nil, fmt.Errorf("read Worker environment file: %w", err)
 		}
-		if err := validateWorkerConfig(canonical.Path, entry.AgentID, socketPath); err != nil {
+		if _, err := validateWorkerConfig(workerContent, entry.AgentID, socketPath); err != nil {
 			return fleetmodel.Manifest{}, nil, err
 		}
 		if entry.IdentityFile != "" {
@@ -658,21 +678,6 @@ func prepare(manifestPath, workerDir, socketPath string, options map[string]doma
 		prepared = append(prepared, preparedAgent{entry: entry, workerPath: canonical.Path})
 	}
 	return manifest, prepared, nil
-}
-
-func validatePrivateRegularFile(path, label string) error {
-	info, err := os.Lstat(path)
-	if err != nil {
-		return fmt.Errorf("inspect %s %q: %w", label, path, err)
-	}
-	if !info.Mode().IsRegular() || info.Mode().Perm()&0o077 != 0 {
-		return fmt.Errorf("%s %q must be a regular file with permissions no wider than 0600", label, path)
-	}
-	stat, ok := info.Sys().(*syscall.Stat_t)
-	if !ok || int(stat.Uid) != os.Geteuid() {
-		return fmt.Errorf("%s %q must be owned by the current user", label, path)
-	}
-	return nil
 }
 
 func validateIdentityCompatibility(manifestPath, value string, option domain.ConsoleAgentOption) error {

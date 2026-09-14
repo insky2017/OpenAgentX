@@ -101,7 +101,7 @@ openagentx fleet up
 openagentx fleet status
 ```
 
-默认 Worker 宿主是用户级 systemd。将 `deploy/systemd/openagentx-worker-user@.service` 安装为 `~/.config/systemd/user/openagentx-worker@.service`；它实际执行 `%h/.local/bin/openagentx worker run --config %h/.openagentx/workers/%i.yaml`。`fleet up` 在任何 tmux 或 start 副作用前读取已加载 unit 的实际 `ExecStart`，并要求它与已验证的 canonical 配置路径精确一致；所有 systemctl 调用都使用 `--user`。系统级 `deploy/systemd/openagentx-worker@.service` 仍保留给明确的系统部署，不是 Fleet 默认值。
+默认 Worker 宿主是用户级 systemd。将 `deploy/systemd/openagentx-worker-user@.service` 安装为 `~/.config/systemd/user/openagentx-worker@.service`；它实际执行 `%h/.local/bin/openagentx worker run --config %h/.openagentx/workers/%i.yaml`。Worker unit 只 `Wants` daemon 并自行重连，daemon stop/restart 不会通过 systemd 依赖关系强停 Worker。`fleet up` 在任何 tmux 或 start 副作用前验证 canonical 二进制，并读取已加载 unit 的实际 `ExecStart`、`WorkingDirectory` 和 `EnvironmentFiles`，要求它们精确指向用户 home 与已验证的 canonical 配置；所有 systemctl 调用都使用 `--user`。系统级 `deploy/systemd/openagentx-worker@.service` 仍保留给明确的系统部署，不是 Fleet 默认值。
 
 ```bash
 install -m 0644 deploy/systemd/openagentx-worker-user@.service \
