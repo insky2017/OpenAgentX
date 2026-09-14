@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-14
 ---
@@ -60,3 +60,15 @@ git diff --check
 - baseline 定向测试通过；
 - 未修改产品运行行为；
 - 创建本任务提交，更新 execution log 后暂停等待复核。
+
+## 完成记录
+
+- P0 前置提交：`c3fc1bba8ddbae3eedace0c7a32537e2f47db307`，已推送并核验为
+  `origin/main`。
+- Task 01 实现提交：`35bd44564773882cfedefb31fad0afd64c0514e4`。
+- 契约与测试地图：[Task 01 契约冻结与测试地图](TASK-01-CONTRACT-FREEZE.md)。
+- 已通过
+  `go test ./internal/cli/console ./internal/client/console ./internal/api/console ./internal/fleet ./internal/cli/fleet`、
+  `go test ./internal/auth/... ./internal/persistence/sqlite/...` 和 `git diff --check`。
+- 本任务仅修改计划/记录文档，没有修改产品运行行为；监督复核结论为 `GO`，Task 02 仍为
+  `pending/WAIT`。

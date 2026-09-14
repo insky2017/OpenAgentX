@@ -15,9 +15,12 @@ updated_at: 2026-09-14
 2. 每次修改后记录文件范围；每次验证后记录完整命令、退出码和关键摘要。不得只写“tests passed”。
 3. 命令输出含 token、password、Secret、用户隐私或未脱敏 runtime 数据时不得粘贴；只记录脱敏摘要和证据文件 hash。
 4. 失败记录只能追加后续“已纠正”条目，不能删除原失败；未解决问题进入 Open Issues。
-5. 任务实现、测试和本文件更新必须进入同一阶段提交。提交后填写 SHA 和 `git status --short`，停止等待监督者。
-6. 未经监督者明确 `GO`，下一任务不得标记为 active。
-7. 外部状态变化（service、socket、DB、tmux、installed binary、remote branch）必须单列；按计划不应发生的变化一经发现立即停止。
+5. 每个 Task 保持一个实现提交，包含该阶段实现、测试和提交前执行记录；Git 提交无法自包含
+   自身 SHA，因此阶段提交后只读核验精确 SHA/status 并停止，不 amend 已提交阶段。
+6. 监督者复核后，以独立 docs-only gate record 提交记录实现提交精确 SHA、实际 post-commit
+   status 和 `GO`/`NO-GO`，并同步计划状态；gate record 不得修改产品行为或启动下一任务。
+7. 未经监督者对下一任务明确 `GO`，下一任务不得标记为 active。
+8. 外部状态变化（service、socket、DB、tmux、installed binary、remote branch）必须单列；按计划不应发生的变化一经发现立即停止。
 
 ## 1. 计划发布基线
 
@@ -48,7 +51,7 @@ M  deploy/systemd/openagentx-user.service
 | Task | 名称 | 状态 | 实现提交 | 监督门禁 |
 |---|---|---|---|---|
 | P0 | 受保护现场独立收口 | completed | `c3fc1bba8ddbae3eedace0c7a32537e2f47db307` | GO |
-| 01 | 基线隔离、契约冻结与测试地图 | completed | 本文件所属 Task 01 提交（见 feature branch tip） | WAIT |
+| 01 | 基线隔离、契约冻结与测试地图 | completed | `35bd44564773882cfedefb31fad0afd64c0514e4` | GO |
 | 02 | 默认路径与 CLI 表面 | pending | — | WAIT |
 | 03 | 一致 Attach cursor 与代际 reducer | pending | — | WAIT |
 | 04 | 可撤销 CLI Token 会话 | pending | — | WAIT |
@@ -205,17 +208,29 @@ M  deploy/systemd/openagentx-user.service
 #### 完成安全点
 
 - 完成时间（UTC）：`2026-09-14T14:47:33Z`
-- 任务提交 SHA：本文件位于该提交内，Git 提交无法自包含自身 SHA；精确 SHA 由提交后的
-  feature branch tip 提供，并在最终报告及下一阶段 append-only 记录中引用
-- `git status --short --branch`：提交后应为
-  `## codex/adr008-implementation...origin/main [ahead 1]` 且无 path 条目；提交后必须复核
+- 任务提交 SHA：`35bd44564773882cfedefb31fad0afd64c0514e4`
+- `git status --short --branch`：提交后已核验为
+  `## codex/adr008-implementation...origin/main [ahead 1]`，无 path 条目
 - 退出条件逐项：P0 已独立推送；sibling worktree 基于最新远端；七类契约、TUI 决策、五个
   设计问题和 Task 02-08 测试地图已记录；计划内定向测试通过；产品行为未修改
 - 剩余问题：Task 01 无阻断问题；Charmbracelet 最新版本与 Go 1.22.4 不兼容，已通过固定
   兼容版本解决，不允许后续无审查升级
 - 执行者建议：GO
-- 监督者复核：WAIT
-- 下一步：停止，等待监督者明确指令
+- 监督者复核：GO（`2026-09-14T14:57:22Z` 收到复核结论）
+- 下一步：停止，等待监督者对 Task 02 的明确 `GO`
+
+#### Task 01 监督 Gate correction
+
+- 监督复核确认 P0 `c3fc1bba8ddbae3eedace0c7a32537e2f47db307` 的范围与远端状态通过，
+  Task 01 `35bd44564773882cfedefb31fad0afd64c0514e4` 为 docs-only 且契约/测试证据通过。
+- 本次只读核验：feature HEAD 为 `35bd445`、相对 `origin/main` ahead 1 且工作树干净；主工作树
+  为干净的 `main@c3fc1bb`；远端只有 `main@c3fc1bb`，feature branch 未 push。
+- `steadyflow` 父仓库存在用户既有修改，本次未修改或提交；父仓显示的 `M OpenAgentX` 仅反映
+  submodule 当前 main HEAD 相对父仓索引的差异，不是本次 gate correction 修改父仓。
+- runtime 只读检查显示 `openagentx.service` 为 active/running、enabled、`NRestarts=0`；未操作
+  service、真实 DB/socket/default tmux server 或 installed binary。
+- 唯一 `NO-GO` 原因为主计划/任务 front matter/执行日志未同步已复核事实；本 docs-only gate
+  correction 将 Task 01 同步为 `completed/GO` 并记录精确 SHA，Task 02 保持 `pending/WAIT`。
 
 ## 7. Open Issues
 
@@ -231,6 +246,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T14:16:32Z | 计划创建与发布仅改变 `docs/plans/` | 无实现或运行状态变化 | `git diff --check`、链接/语义覆盖和 staged-path 边界检查通过 | 待远端同步复核 |
 | 2026-09-14T14:30:35Z | P0 四项受保护修改独立提交并推送 `main` | 远端 main 前进到 `c3fc1bb`；无 ADR-008 文件或运行状态修改 | `ls-remote` 验证 SHA，确认主工作树干净 | P0 GO |
 | 2026-09-14T14:31:31Z | 从最新 `origin/main` 创建 sibling worktree 和 `codex/adr008-implementation` | ADR-008 文档工作与 main/父仓隔离 | 核对 branch、HEAD、tracking 和 clean status | Task 01 执行中，门禁 WAIT |
+| 2026-09-14T14:57:22Z | 监督复核通过 P0 与 Task 01；发现计划状态和提交证据不一致 | 仅文档 gate 状态不一致；产品、runtime 和远端 feature 未变化 | 独立 docs-only gate correction 记录 `35bd445`、实际 status 与 `GO`；Task 02 保持 `pending/WAIT` | Task 01 GO；等待 Task 02 单独授权 |
 
 ## 9. 最终产物（Task 08 填写）
 

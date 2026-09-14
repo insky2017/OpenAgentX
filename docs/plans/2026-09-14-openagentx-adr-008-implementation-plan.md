@@ -55,7 +55,7 @@ M  deploy/systemd/openagentx-user.service
 
 | ID | 阶段 | 任务 | 依赖 | 状态 |
 |---|---|---|---|---|
-| 01 | G0 | [基线隔离、契约冻结与测试地图](2026-09-14-openagentx-adr-008-implementation/01-baseline-isolation-and-contract-freeze.md) | ADR-008、受保护现场收口 | pending |
+| 01 | G0 | [基线隔离、契约冻结与测试地图](2026-09-14-openagentx-adr-008-implementation/01-baseline-isolation-and-contract-freeze.md) | ADR-008、受保护现场收口 | completed |
 | 02 | G1 | [默认路径与 CLI 表面](2026-09-14-openagentx-adr-008-implementation/02-default-paths-and-cli-surface.md) | 01 | pending |
 | 03 | G2 | [一致 Attach cursor 与代际 reducer](2026-09-14-openagentx-adr-008-implementation/03-consistent-attach-cursor-and-reducer.md) | 02 | pending |
 | 04 | G3 | [可撤销 CLI Token 会话](2026-09-14-openagentx-adr-008-implementation/04-revocable-cli-token-session.md) | 03 | pending |
@@ -121,7 +121,11 @@ TUI 最后组合稳定的 path、cursor、auth 和 workspace 服务，避免以 
 - 分支建议：`codex/adr008-implementation`；worktree 必须位于主工作树之外。
 - 每个任务一个可审查提交，建议提交主题：`feat(adr008): ...`、`test(adr008): ...` 或 `docs(adr008): ...`；不允许 amend 已被监督者验收的阶段提交。
 - 每个阶段提交前必须执行 `git diff --check`、该任务定向测试和 execution log 自检。
-- 提交后记录 `git status --short`、提交 SHA、测试命令与退出码，然后暂停；监督者明确放行后才能进入下一任务。
+- 阶段提交无法自包含自身 SHA；提交后先以只读命令核验精确 SHA 和
+  `git status --short --branch`，然后暂停，不 amend 该阶段提交。
+- 监督者复核后使用独立 docs-only gate record 提交记录阶段提交的精确 SHA、实际 post-commit
+  status 和 `GO`/`NO-GO`，并同步主计划、任务 front matter 和 execution log。gate record
+  不计作第二个实现提交，不得包含产品代码或提前启动下一任务。
 - 禁止直接 push `main`、force-push、rebase 已验收提交或修改父仓库。最终是否合并、推送、安装和重启由监督者另行批准。
 
 ## 8. 失败处理
@@ -146,8 +150,10 @@ TUI 最后组合稳定的 path、cursor、auth 和 workspace 服务，避免以 
 
 ## 10. 计划状态维护
 
-- 任务开始时，仅将执行记录对应任务标记为 `active`；完成并经监督者确认后标记为 `completed`；
-- 主计划状态仅在阶段提交中同步，不预写成功结果；
+- 任务开始时，仅将执行记录对应任务标记为 `active`；阶段提交完成后停止，监督者确认后才在
+  独立 docs-only gate record 中把执行记录、任务 front matter 和主计划同步为 `completed`；
+- 每个 Task 保持一个实现提交；其精确 SHA 和监督门禁结论由后续 gate record 提交记录，
+  不要求实现提交自包含自身 SHA，也不 amend 已复核实现提交；
 - 执行记录必须保留失败尝试、纠正过程和未决问题，不得只保留最终绿色结果；
 - 最终验证另建 validation report，并链接每个任务提交及 execution log；
 - ADR-008 在所有验收和人工体验完成前保持“已接受，尚未完成实施”。
