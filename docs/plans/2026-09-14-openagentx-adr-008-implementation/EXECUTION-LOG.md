@@ -53,7 +53,7 @@ M  deploy/systemd/openagentx-user.service
 | P0 | 受保护现场独立收口 | completed | `c3fc1bba8ddbae3eedace0c7a32537e2f47db307` | GO |
 | 01 | 基线隔离、契约冻结与测试地图 | completed | `35bd44564773882cfedefb31fad0afd64c0514e4` | GO |
 | 02 | 默认路径与 CLI 表面 | completed | `e690bbbd11046e63841a4a869a90f6aeb42c5575` + fix `c0e8d4aeae2516c005cedbce6c5b35d1b8b07553` | GO |
-| 03 | 一致 Attach cursor 与代际 reducer | active | — | WAIT |
+| 03 | 一致 Attach cursor 与代际 reducer | completed | `4aea5a6291b47792b1c69256ae0ae6422a890cb4` + fix `9e18246dc4f61ee8ccc044509229b13b0e191f9d` + fix `2f9772753b3a75e6304abd76c4eb6a259c9e0c6f` | GO |
 | 04 | 可撤销 CLI Token 会话 | pending | — | WAIT |
 | 05 | `OAX` workspace 与非破坏绑定 | pending | — | WAIT |
 | 06 | Console 主菜单、Agent selector 与全屏 TUI | pending | — | WAIT |
@@ -461,6 +461,23 @@ M  deploy/systemd/openagentx-user.service
 - 未 push feature、未操作 service、真实 DB/socket/default tmux、installed binary 或
   `steadyflow` 父仓；未开始 Task 04。
 
+### Task 03 完成安全点与最终监督 Gate
+
+- 实现提交：主实现 `4aea5a6291b47792b1c69256ae0ae6422a890cb4`、identity/reducer review fix
+  `9e18246dc4f61ee8ccc044509229b13b0e191f9d`、Backend health review fix
+  `2f9772753b3a75e6304abd76c4eb6a259c9e0c6f`。
+- 第一轮监督 `NO-GO` 的 public sequence-0 Follow 参数、Run Worker identity fencing 和
+  replacement/offline 旧状态清理缺口由 `9e18246` 修复；第二轮监督 `NO-GO` 的同代 Backend
+  health 实时状态缺口由 `2f97727` 修复。两轮失败、根因、纠正和重验记录均保留在上文。
+- 监督者独立复核确认：无 public sequence-0 Follow 参数；generation 48 后 generation 42 的
+  heartbeat/Run 不回退；replacement/offline 清理旧状态；同 generation Backend health 通过
+  结构化安全投影实时更新；定向测试、vet 与 diff check 通过。最终结论为 Task 03 `GO`。
+- `2f97727` 提交后实际核验：feature 工作树 clean，相对 `origin/main` ahead 8；主工作树为
+  clean 的 `main@c3fc1bba8ddbae3eedace0c7a32537e2f47db307`。feature 未 push，未操作
+  service、真实 DB/socket/default tmux、installed binary 或父仓。
+- 主计划和 Task 03 front matter 已在本 docs-only gate record 同步为 `completed`；Task 04
+  继续保持 `pending/WAIT`，未开始实现。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
@@ -477,6 +494,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T14:31:31Z | 从最新 `origin/main` 创建 sibling worktree 和 `codex/adr008-implementation` | ADR-008 文档工作与 main/父仓隔离 | 核对 branch、HEAD、tracking 和 clean status | Task 01 执行中，门禁 WAIT |
 | 2026-09-14T14:57:22Z | 监督复核通过 P0 与 Task 01；发现计划状态和提交证据不一致 | 仅文档 gate 状态不一致；产品、runtime 和远端 feature 未变化 | 独立 docs-only gate correction 记录 `35bd445`、实际 status 与 `GO`；Task 02 保持 `pending/WAIT` | Task 01 GO；等待 Task 02 单独授权 |
 | 2026-09-14T15:54:57Z | 监督最终复核 Task 02 主实现与 review-fix | 首次 Termux UDS 长路径失败已由 `c0e8d4a` 修复；最终默认 `TMPDIR` 和其余定向测试/vet 均通过 | 核验主实现 13-file、fix 2-file 范围及无产品语义偏移；同步 docs-only gate record | Task 02 GO；Task 03 保持 WAIT |
+| 2026-09-14T17:07:08Z | 三个 Task 03 实现/review-fix 提交及独立验证均通过 | 两轮 NO-GO 缺口已分别由 `9e18246`、`2f97727` 修复；无剩余 Task 03 阻断 | 记录三个精确 SHA、实际 clean/ahead 与最终结论；仅同步 docs gate 状态 | Task 03 GO；Task 04 保持 `pending/WAIT` |
 
 ## 9. 最终产物（Task 08 填写）
 

@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-14
 ---
@@ -55,3 +55,21 @@ git diff --check
 - reducer 对代际、乱序、重复和 heartbeat 有表驱动测试；
 - 不改变正式控制命令路径；
 - 阶段提交和 execution log 完成后暂停。
+
+## 完成记录
+
+- 主实现：`4aea5a6291b47792b1c69256ae0ae6422a890cb4`；一致 SQLite Attach 事务同时读取
+  Agent、确定性当前 Worker、Backend health、active RunAttempt 与 Journal high-water，唯一
+  cursor 为 `snapshot_sequence`。
+- identity/reducer 修复：`9e18246dc4f61ee8ccc044509229b13b0e191f9d`；删除 public
+  sequence-0 Follow 参数，按 Worker instance/generation fence Run 与 Worker 投影，并在
+  replacement/offline 时清理旧 Worker scoped 状态。
+- Backend health 修复：`2f9772753b3a75e6304abd76c4eb6a259c9e0c6f`；Worker SSE 仅流式
+  投影合法 `backend_id -> BackendHealth enum`，查询失败不发送或跨过事件，同代 health 转换
+  实时更新 reducer。
+- 验证覆盖事务 N/N+1 竞态、retention gap、reconnect、重复/倒退 cursor、generation 48/42、
+  同代冲突 Worker、replacement/offline、heartbeat 合并、Backend health 转换及 safe-output
+  脱敏边界；Task 03 定向测试与 race、全仓 Go 测试、受影响 vet/build、release scanner 和
+  diff check 均通过。
+- 监督者最终结论：Task 03 `GO`；未开始 Task 04，未修改 Auth、Token/schema、workspace、
+  tmux 或 TUI 行为。
