@@ -29,6 +29,10 @@ go build -o bin/openagentx ./cmd/openagentx
 cd web && npm install --no-audit --no-fund && npm run build
 ```
 
+将二进制安装到 `~/.local/bin/openagentx`、运行配置和状态放到
+`~/.openagentx`，并通过用户级 systemd 启动的步骤见
+[用户级安装与启动指南](docs/operations/openagentx-user-install-guide.md)。
+
 ## 首次初始化
 
 daemon 启动前，必须通过本机交互式 CLI 创建首个 owner 和默认 Organization。密码使用隐藏输入，不支持默认密码、命令行密码参数或 Web 自助注册：

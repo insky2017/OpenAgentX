@@ -685,9 +685,12 @@ func (a *probeBlockingAdapter) StartTurn(context.Context, openruntime.TurnReques
 	return nil, errors.New("unused")
 }
 func (a *probeBlockingAdapter) CloneForNetworkProbe(policy domain.NetworkPolicy) (openruntime.AgentRuntimeAdapter, error) {
-	clone := *a
-	clone.blockHealth = true
-	return &clone, nil
+	return &probeBlockingAdapter{
+		descriptor:  a.descriptor,
+		blocked:     a.blocked,
+		release:     a.release,
+		blockHealth: true,
+	}, nil
 }
 func (a *probeBlockingAdapter) ApplyNetworkPolicy(domain.NetworkPolicy) error { return nil }
 

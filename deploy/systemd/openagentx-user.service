@@ -5,8 +5,10 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX
-ExecStart=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/bin/openagentx serve --db /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/data/openagentx.db --socket /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/run/openagentx.sock --http-addr 0.0.0.0:18100 --web-dir /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/web/dist
+Environment=OPENAGENTX_HTTP_ADDR=0.0.0.0:18100
+EnvironmentFile=-%h/.openagentx/openagentx.env
+WorkingDirectory=%h/.openagentx
+ExecStart=%h/.local/bin/openagentx serve --db %h/.openagentx/data/openagentx.db --socket %h/.openagentx/run/openagentx.sock --http-addr ${OPENAGENTX_HTTP_ADDR} --web-dir %h/.openagentx/web
 Restart=on-failure
 RestartSec=3s
 UMask=0077
@@ -14,7 +16,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/data /home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/run
+ReadWritePaths=%h/.openagentx
 
 [Install]
 WantedBy=default.target
