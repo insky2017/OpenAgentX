@@ -57,8 +57,8 @@ M  deploy/systemd/openagentx-user.service
 | 04 | 可撤销 CLI Token 会话 | completed | `c240aa4dbd47565181d22f602ea3203e5fbfe4dc` + fix `0a5e85987f0c9bd29275ece138200083be13171e` | GO |
 | 05 | `OAX` workspace 与非破坏绑定 | completed | `c9339bb8c8cfa35a0a2bbd74608d273eb00bd2f6` + fix `e40e28bed11abc9789c143977363e601f067e4d3` + test `5468ffeb634ee5a4aed5577fbea5c1201a591cce` | GO |
 | 06 | Console 主菜单、Agent selector 与全屏 TUI | completed | `4b5d2c0675a9b00f6d48e52395710b2639b8acac` + fix `5aa6c973abd864a3c7e80b41f4bdc422600d002c` + fix `c42414b7a21b98bd35ab0de3949778d591705709` | GO |
-| 07 | Fleet、user-systemd 与默认 profile 集成 | active | — | WAIT |
-| 08 | 集成审查、实机候选与发布门禁 | pending | — | WAIT |
+| 07 | Fleet、user-systemd 与默认 profile 集成 | completed | `40fe06e813dcce5c327cf159c66fff630d3bc236` + fix `f5c0d0d549931e4104bc7248c5e5714305a242d9` + fix `e13db7b7e505cb77c1359c776b9c3c473322062f` | GO |
+| 08 | 集成审查、实机候选与发布门禁 | active | — | WAIT |
 
 允许状态：`pending`、`active`、`blocked`、`completed`。监督门禁只允许：`WAIT`、`GO`、`NO-GO`。
 
@@ -1182,12 +1182,48 @@ M  deploy/systemd/openagentx-user.service
 - 主计划和 Task 07 front matter 已在本 docs-only gate record 同步为 `completed`；Task 08 保持
   `pending/WAIT`，未开始实现或发布。
 
+### Task 08 — 集成审查、实机候选与发布门禁
+
+### 开始信息
+
+- 状态：active
+- 监督门禁：WAIT
+- 执行者：Codex
+- 开始时间（UTC）：`2026-09-14T23:11:53Z`
+- feature 基线：`f16496c9da33c2ee8013b6b61f719ddc358e3b41`
+- branch/worktree：`codex/adr008-implementation` /
+  `/home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree`
+- 开始状态：工作树 clean，相对 `origin/main` ahead 24；监督者已明确 `GO Task 08`。
+- 边界：只执行最终集成审查、隔离候选验证、独立 cache 构建和目标主机只读核验；不部署、
+  不 merge/push、不安装候选、不重启服务，不修改真实 DB/socket/default tmux 或父仓。
+- 主计划和 Task 08 front matter 按 gate-record 协议保持 `pending`；ADR-008 继续为已接受、尚未完成
+  实施且未部署。Task 07 总体状态表的遗留 `active/WAIT` 同步为已通过 gate 的 `completed/GO` 事实。
+
+### Task 08 首轮集成审查 NO-GO（append-only）
+
+- `2026-09-14T23:18:02Z`：完成 `origin/main..f16496c` 的 24 提交/87 文件范围盘点、逐提交与完整
+  diff whitespace 检查、ADR/生成物/禁用 tmux 控制边界审查，并建立 ADR-008 条款到代码、测试、
+  文档的 traceability matrix。未发现 ADR-006/007 决策正文、父仓文件、生成物或 Secret 混入。
+- 最终 SSE 语义审查发现 `T08-01`：`internal/api/panel/handler.go` 的 Agent filter 把关联状态查询
+  错误折叠为不匹配并推进 `after`；Run 安全投影在 Run/Worker 查询错误或投影无效时返回 `nil`，
+  调用方仍发送事件并推进 `after`。普通重连会从已跨过的 sequence 之后开始，无法恢复未应用状态。
+- 现有 Worker Backend projection 故障测试正确证明查询失败时不发送/不跨过，但没有覆盖 Agent
+  filter 和 Run projection 的同类失败注入。该产品缺陷归属 Task 03，必须独立 review-fix 并经过
+  监督 gate；Task 08 文档提交不得夹带代码。
+- 按“任一审查/验证失败即 `no-go` 并停止”规则，本轮没有继续全量/race、Web/systemd/release、
+  隔离运行场景、独立候选构建或 `rtx4090` 只读核验；未执行项全部保留，不能冒充候选证据。
+- validation report：
+  [2026-09-14-openagentx-adr008-release-candidate.md](../../reports/validation/2026-09-14-openagentx-adr008-release-candidate.md)，
+  结论 `no-go`。Task 08 保持 `active/WAIT`，主计划与 Task 08 front matter 保持 `pending`；未部署、
+  未 merge/push、未安装/重启，未操作真实 DB/socket/default tmux/systemd 或父仓。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
 |---|---|---|---|---|---|---|
 | T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | closed；[Fleet credential/lifecycle 测试](../../../internal/cli/fleet/command_test.go)证明 installation-bound session、owner+lifecycle scope、无密码路径和 graceful/force 分离，监督双平台复核通过 |
 | T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | closed；[真实隔离 tmux 测试](../../../internal/fleet/workspace_integration_test.go)与 [workspace 状态机测试](../../../internal/fleet/workspace_test.go)证明二次 preflight 只 respawn compatible dead pane 0，并保留 live/pane 1+/unmanaged 现场 |
+| T08-01 | 2026-09-14T23:18:02Z | 03 | P0 | Observe SSE Agent filter/Run projection 查询或校验失败时会推进 event cursor，可能永久跳过未应用状态 | Task 03 | open；需要独立 review-fix，使查询/投影失败结束 stream 且不发送、不跨过 sequence，并补失败注入测试 |
 
 ## 8. 安全与范围事件
 
@@ -1208,15 +1244,16 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T22:36:00Z | 监督对 Task 07 主实现 `40fe06e` 给出 host consistency `NO-GO` | Termux 完整 Fleet 包暴露 30 秒 fixture 竞态；配置存在重复打开/TOCTOU；user Worker `Requires=` 与 unit 属性/canonical binary 证明不足 | 仅修 Task 07：长寿命隔离 sentinel、captured-bytes 安全读取、Wants+After、三项实际 unit 属性和固定 binary；恢复 T04-01/T05-01 pending 并完整重验 | Task 07 保持 `active/WAIT`；等待 review-fix 提交后的再次 gate |
 | 2026-09-14T22:50:57Z | 监督确认 `f5c0d0d` hardening 与 Termux 完整 Fleet 通过，给出最终两项 `NO-GO` | umask 使 0722 fixture 实际权限收窄；init 在 binary preflight 前已写入 config/manifest | 显式 chmod 并断言 fixture mode；把 init/workspace/up builder preflight 提升到所有 Fleet 文件/tmux/systemd mutation 之前，补零副作用和 status/down 回归 | Task 07 保持 `active/WAIT`；等待最终 gate，Task 08 未开始 |
 | 2026-09-14T23:02:54Z | 监督最终复核 Task 07 三个提交 | 两轮 `NO-GO` 缺口已由 `f5c0d0d`、`e13db7b` 修复；Termux 完整 Fleet/CLI/Console/Worker 和 Ubuntu systemd/tmux 证据通过 | 记录三个精确 SHA、实际 clean/ahead、双平台证据并关闭 T04-01/T05-01；仅同步三份 docs gate 状态 | Task 07 GO；Task 08 保持 `pending/WAIT` |
+| 2026-09-14T23:18:02Z | Task 08 最终语义审查发现 SSE cursor fail-closed 缺口 | Agent filter/Run projection 查询错误可能被当作已处理并跨过 sequence；候选不能证明不丢状态 | 登记 `T08-01` 归属 Task 03，生成 `no-go` validation report；停止后续全量/隔离/候选/现场检查，不夹带代码修复 | Task 08 保持 `active/WAIT`；等待监督授权 Task 03 review-fix |
 
 ## 9. 最终产物（Task 08 填写）
 
-- validation report：待填
-- traceability matrix：待填
-- release-candidate binary：待填
-- binary SHA-256：待填
-- implementation HEAD：待填
-- 全量验证结论：待填
-- 只读目标主机检查：待填
+- validation report：[2026-09-14-openagentx-adr008-release-candidate.md](../../reports/validation/2026-09-14-openagentx-adr008-release-candidate.md)，结论 `no-go`
+- traceability matrix：已写入 validation report；ADR-008 §9 因 `T08-01` 阻断
+- release-candidate binary：未构建；语义审查失败后按停止规则退出
+- binary SHA-256：无
+- implementation HEAD：`f16496c9da33c2ee8013b6b61f719ddc358e3b41`
+- 全量验证结论：未执行；不得在 `T08-01` 修复前声称候选通过
+- 只读目标主机检查：未执行；审查失败后未继续接触外部状态
 - 未执行的人工步骤：备份、安装、服务重启/升级、真实 `OAX` workspace 操作、正式 graceful drain
 - 最终监督结论：WAIT
