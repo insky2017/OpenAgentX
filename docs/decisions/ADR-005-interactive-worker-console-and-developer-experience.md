@@ -10,7 +10,9 @@ updated_at: 2026-09-14
 
 ## 状态
 
-已接受 (Accepted)，尚未实施。
+已接受 (Accepted)，已完成首轮实施。
+
+本 ADR 关于正式控制路径、Worker lifecycle、安全输出和 tmux 非权威性的原则继续有效。首轮真实体验后，固定 session 名、pane 布局、window 绑定、Console TUI、默认路径和 CLI 登录会话的目标设计已由 [ADR-008](ADR-008-oax-workspace-console-tui-and-cli-session.md) 修订；ADR-008 尚未实施，不能把其目标体验误报为当前能力。
 
 ## 日期与决策者
 
