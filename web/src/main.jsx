@@ -329,7 +329,7 @@ function App() {
       .then((overview) => {
         if (disposed) return
         const after = sseResumeAfter(lastSequenceRef.current, overview.latest_sequence)
-        source = new EventSource(`/api/observe/v1/events/stream?after_sequence=${after}`)
+        source = new EventSource(`/api/observe/v1/events/stream?mode=normal&after_sequence=${after}`)
         source.onmessage = (event) => {
           const sequence = Number(event.lastEventId) || 0
           if (sequence && sequence <= lastSequenceRef.current) return

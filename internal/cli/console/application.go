@@ -333,9 +333,25 @@ func (a *consoleApplication) startFollowCmd(preparationID uint64, agentID string
 			}
 		}
 		go func() {
+			sendAndWait := func(message func(chan<- error) tea.Msg) error {
+				ack := make(chan error, 1)
+				if err := send(message(ack)); err != nil {
+					return err
+				}
+				select {
+				case err := <-ack:
+					return err
+				case <-a.ctx.Done():
+					return a.ctx.Err()
+				}
+			}
 			err := prepared.client.Follow(a.ctx, agentID, prepared.mode,
-				func(snapshot consoleapi.AttachResponse) error { return send(followSnapshotMsg{Snapshot: snapshot}) },
-				func(event openapi.JournalEventReadModel) error { return send(followEventMsg{Event: event}) },
+				func(snapshot consoleapi.AttachResponse) error {
+					return sendAndWait(func(ack chan<- error) tea.Msg { return followSnapshotMsg{Snapshot: snapshot, Ack: ack} })
+				},
+				func(event openapi.JournalEventReadModel) error {
+					return sendAndWait(func(ack chan<- error) tea.Msg { return followEventMsg{Event: event, Ack: ack} })
+				},
 				func(state consoleclient.FollowState) error { return send(followConnectionMsg{State: state}) })
 			_ = send(followDoneMsg{Err: err})
 			close(updates)
@@ -355,29 +371,86 @@ func (a *consoleApplication) controlCmd(preparationID uint64, request controlReq
 			return controlResultMsg{Kind: request.Kind, Err: fmt.Errorf("Console Agent authorization expired")}
 		}
 		meta := openapi.CommandMeta{IdempotencyKey: consoleclient.IdempotencyKey("console-" + string(request.Kind)), ExpectedVersion: request.ExpectedVersion}
+		var outcome controlOutcome
 		var err error
 		switch request.Kind {
 		case controlDispatch:
-			_, err = prepared.client.Dispatch(a.ctx, openapi.CreateTaskRequest{Meta: meta,
+			var response openapi.CreateTaskResponse
+			response, err = prepared.client.Dispatch(a.ctx, openapi.CreateTaskRequest{Meta: meta,
 				TargetAgentID: request.AgentID, OrganizationID: option.OrganizationID,
 				DispatchMode: domain.DispatchModeDirect, Content: request.Content})
+			if err == nil {
+				outcome, err = dispatchOutcome(response)
+			}
 		case controlSteer:
-			_, err = prepared.client.Steer(a.ctx, request.TargetID,
+			var response openapi.CreateMessageResponse
+			response, err = prepared.client.Steer(a.ctx, request.TargetID,
 				openapi.CreateMessageRequest{Meta: meta, Content: request.Content})
+			if err == nil {
+				outcome, err = steerOutcome(response)
+			}
 		case controlCancel:
-			_, err = prepared.client.Cancel(a.ctx, request.TargetID, openapi.CancelTaskRequest{Meta: meta})
+			var response openapi.CancelTaskResponse
+			response, err = prepared.client.Cancel(a.ctx, request.TargetID, openapi.CancelTaskRequest{Meta: meta})
+			if err == nil {
+				outcome, err = cancelOutcome(response)
+			}
 		case controlApprove, controlReject:
 			decision := domain.ApprovalDecisionApprove
 			if request.Kind == controlReject {
 				decision = domain.ApprovalDecisionReject
 			}
-			_, err = prepared.client.DecideApproval(a.ctx, request.TargetID,
+			var response openapi.DecideApprovalResponse
+			response, err = prepared.client.DecideApproval(a.ctx, request.TargetID,
 				openapi.DecideApprovalRequest{Meta: meta, Decision: decision})
+			if err == nil {
+				outcome, err = approvalOutcome(response)
+			}
 		default:
 			err = fmt.Errorf("unsupported Console control command")
 		}
-		return controlResultMsg{Kind: request.Kind, Err: err}
+		return controlResultMsg{Kind: request.Kind, Outcome: outcome, Err: err}
 	}
+}
+
+func dispatchOutcome(response openapi.CreateTaskResponse) (controlOutcome, error) {
+	if domain.ValidateOpaqueID("task_id", response.TaskID) != nil || response.TaskVersion <= 0 ||
+		!response.TaskStatus.Valid() || response.Sequence <= 0 {
+		return controlOutcome{}, fmt.Errorf("control plane returned an invalid dispatch outcome")
+	}
+	return controlOutcome{TaskID: response.TaskID, TaskVersion: response.TaskVersion,
+		TaskStatus: response.TaskStatus, Sequence: response.Sequence}, nil
+}
+
+func steerOutcome(response openapi.CreateMessageResponse) (controlOutcome, error) {
+	if domain.ValidateOpaqueID("message_id", response.MessageID) != nil || response.MessageVersion <= 0 ||
+		domain.ValidateOpaqueID("task_id", response.TaskID) != nil || response.TaskVersion <= 0 ||
+		!response.TaskStatus.Valid() || response.Sequence <= 0 {
+		return controlOutcome{}, fmt.Errorf("control plane returned an invalid steer outcome")
+	}
+	return controlOutcome{TaskID: response.TaskID, TaskVersion: response.TaskVersion,
+		TaskStatus: response.TaskStatus, MessageID: response.MessageID,
+		MessageVersion: response.MessageVersion, Sequence: response.Sequence}, nil
+}
+
+func cancelOutcome(response openapi.CancelTaskResponse) (controlOutcome, error) {
+	if domain.ValidateOpaqueID("task_id", response.Task.ID) != nil || response.Task.Version <= 0 ||
+		!response.Task.Status.Valid() || response.Sequence < 0 {
+		return controlOutcome{}, fmt.Errorf("control plane returned an invalid cancel outcome")
+	}
+	return controlOutcome{TaskID: response.Task.ID, TaskVersion: response.Task.Version,
+		TaskStatus: response.Task.Status, Sequence: response.Sequence}, nil
+}
+
+func approvalOutcome(response openapi.DecideApprovalResponse) (controlOutcome, error) {
+	decision := response.Decision
+	if domain.ValidateOpaqueID("approval_request_id", decision.ApprovalRequestID) != nil ||
+		domain.ValidateOpaqueID("approval_decision_id", decision.ID) != nil || !decision.Decision.Valid() ||
+		!decision.State.Valid() || response.Sequence < 0 {
+		return controlOutcome{}, fmt.Errorf("control plane returned an invalid approval outcome")
+	}
+	return controlOutcome{ApprovalID: decision.ApprovalRequestID, DecisionID: decision.ID,
+		Decision: decision.Decision, DecisionState: decision.State, Sequence: response.Sequence}, nil
 }
 
 type tuiActions interface {

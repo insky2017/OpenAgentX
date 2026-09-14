@@ -59,7 +59,20 @@ func (a *fakeTUIActions) startFollowCmd(_ uint64, _ string) tea.Cmd {
 }
 func (a *fakeTUIActions) controlCmd(_ uint64, request controlRequest) tea.Cmd {
 	a.controls = append(a.controls, request)
-	return func() tea.Msg { return controlResultMsg{Kind: request.Kind} }
+	return func() tea.Msg { return controlResultMsg{Kind: request.Kind, Outcome: testControlOutcome(request.Kind)} }
+}
+
+func testControlOutcome(kind controlKind) controlOutcome {
+	switch kind {
+	case controlDispatch, controlCancel:
+		return controlOutcome{TaskID: "task-1", TaskVersion: 11, TaskStatus: domain.TaskStatusCancelRequested, Sequence: 41}
+	case controlSteer:
+		return controlOutcome{TaskID: "task-1", TaskVersion: 8, TaskStatus: domain.TaskStatusRunning,
+			MessageID: "message-1", MessageVersion: 1, Sequence: 42}
+	default:
+		return controlOutcome{ApprovalID: "approval-1", DecisionID: "decision-1",
+			Decision: domain.ApprovalDecisionApprove, DecisionState: domain.ApprovalDecisionPersisted, Sequence: 43}
+	}
 }
 
 func fixedNow() time.Time { return time.Date(2026, 9, 15, 8, 0, 0, 0, time.UTC) }
@@ -266,7 +279,7 @@ func TestControlCommandsAreExactlyOnceCASAndDisabledWhenDisconnected(t *testing.
 		if request.Kind != testCase.kind || request.AgentID != "quote" || request.TargetID != testCase.target || request.ExpectedVersion != testCase.version {
 			t.Fatalf("%s request=%+v", testCase.line, request)
 		}
-		m, _ = updateModel(t, m, controlResultMsg{Kind: testCase.kind})
+		m, _ = updateModel(t, m, controlResultMsg{Kind: testCase.kind, Outcome: testControlOutcome(testCase.kind)})
 	}
 	m.connection = consoleclient.ConnectionDisconnected
 	before := len(actions.controls)
@@ -281,12 +294,73 @@ func TestControlCommandsAreExactlyOnceCASAndDisabledWhenDisconnected(t *testing.
 
 func executeLine(t *testing.T, model tuiModel, line string) (tuiModel, tea.Cmd) {
 	t.Helper()
+	model.input.SetValue(line)
 	updated, cmd := model.executeInput(line)
 	result, ok := updated.(tuiModel)
 	if !ok {
 		t.Fatalf("executeInput returned %T", updated)
 	}
 	return result, cmd
+}
+
+func TestConsumedOverlayCommandsClearDraftButRejectedCommandsRemainEditable(t *testing.T) {
+	for _, line := range []string{"/status", "/help", "/diagnostic"} {
+		m := attachedModel(t, &fakeTUIActions{})
+		m, _ = executeLine(t, m, line)
+		if m.overlay == overlayNone || m.input.Value() != "" {
+			t.Fatalf("%s overlay=%v draft=%q", line, m.overlay, m.input.Value())
+		}
+		m, _ = updateModel(t, m, key("enter"))
+		if m.overlay != overlayNone {
+			t.Fatalf("%s repeated after closing overlay", line)
+		}
+	}
+
+	m := attachedModel(t, &fakeTUIActions{})
+	m.connection = consoleclient.ConnectionDisconnected
+	m, _ = executeLine(t, m, "/cancel task-1 7")
+	if m.input.Value() != "/cancel task-1 7" {
+		t.Fatalf("disconnected command draft=%q", m.input.Value())
+	}
+	m.connection = consoleclient.ConnectionConnected
+	m, _ = executeLine(t, m, "/cancel task-1 invalid")
+	if m.input.Value() != "/cancel task-1 invalid" {
+		t.Fatalf("invalid command draft=%q", m.input.Value())
+	}
+}
+
+func TestSessionExpiryDisconnectsAndDisablesWritesWithoutChangingDraft(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	m.input.SetValue("/dispatch unfinished")
+	m.input.SetCursor(8)
+	wantCursor := m.input.LineInfo().CharOffset
+	m, _ = updateModel(t, m, tickMsg{Now: m.session.ExpiresAt})
+	if m.session.Authenticated || m.connection != consoleclient.ConnectionDisconnected ||
+		m.input.Value() != "/dispatch unfinished" || m.input.LineInfo().CharOffset != wantCursor ||
+		!strings.Contains(m.timeline.String(), "console login") {
+		t.Fatalf("expired session auth=%v connection=%s draft=%q cursor=%d timeline=%q",
+			m.session.Authenticated, m.connection, m.input.Value(), m.input.LineInfo().CharOffset, m.timeline.String())
+	}
+	m, _ = updateModel(t, m, followConnectionMsg{State: consoleclient.FollowState{State: consoleclient.ConnectionConnected}})
+	if m.connection != consoleclient.ConnectionDisconnected || m.input.Value() != "/dispatch unfinished" {
+		t.Fatalf("expired session was restored by connection message: connection=%s draft=%q", m.connection, m.input.Value())
+	}
+	before := len(actions.controls)
+	m, cmd := executeLine(t, m, "/dispatch retry after login")
+	if cmd != nil || len(actions.controls) != before || m.input.Value() != "/dispatch retry after login" {
+		t.Fatalf("expired write cmd=%v calls=%d draft=%q", cmd, len(actions.controls)-before, m.input.Value())
+	}
+}
+
+func TestTimelineRendersDiagnosticOnlyInDiagnosticMode(t *testing.T) {
+	event := openapi.JournalEventReadModel{Sequence: 12, EventType: "runtime.turn.output",
+		Output: &openapi.SafeOutputReadModel{Text: "safe", Diagnostic: "stderr=[REDACTED]"}}
+	normal := eventSummary(event, consoleapi.ModeNormal)
+	diagnostic := eventSummary(event, consoleapi.ModeDiagnostic)
+	if strings.Contains(normal, "stderr") || !strings.Contains(diagnostic, "stderr=[REDACTED]") {
+		t.Fatalf("mode projection normal=%q diagnostic=%q", normal, diagnostic)
+	}
 }
 
 func TestStatusOverlayAndSafeBoundedTimeline(t *testing.T) {
@@ -355,7 +429,17 @@ func TestTimelineScrollAndHeartbeatBurstPreserveDraft(t *testing.T) {
 		t.Fatalf("scroll offset=%d bottom=%d input=%q cursor=%d", m.viewport.YOffset, bottom, m.input.Value(), m.input.LineInfo().CharOffset)
 	}
 	beforeTimeline := m.timeline.Len()
-	for sequence := int64(1205); sequence < 1225; sequence++ {
+	wantOffset := m.viewport.YOffset
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1205,
+		ID: "event-task", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated"}})
+	m, _ = updateModel(t, m, followConnectionMsg{State: consoleclient.FollowState{
+		State: consoleclient.ConnectionRetentionReattach, Cursor: 1205}})
+	m, _ = updateModel(t, m, controlResultMsg{Kind: controlDispatch, Outcome: testControlOutcome(controlDispatch)})
+	if m.viewport.YOffset != wantOffset {
+		t.Fatalf("background updates moved scroll offset=%d want=%d", m.viewport.YOffset, wantOffset)
+	}
+	beforeTimeline = m.timeline.Len()
+	for sequence := int64(1206); sequence < 1226; sequence++ {
 		event := openapi.JournalEventReadModel{Sequence: sequence, ID: fmt.Sprintf("event-%d", sequence),
 			AggregateType: "worker_instance", AggregateID: "worker-current", EventType: "worker.heartbeat",
 			Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-current", AgentID: "quote", Generation: 48,
@@ -363,7 +447,7 @@ func TestTimelineScrollAndHeartbeatBurstPreserveDraft(t *testing.T) {
 				LeaseUntil: fixedNow().Add(time.Hour)}}
 		m, _ = updateModel(t, m, followEventMsg{Event: event})
 	}
-	if m.timeline.Len() != beforeTimeline || m.reducer.Cursor() != 1224 || m.input.Value() != "unfinished input" || m.input.LineInfo().CharOffset != 4 {
+	if m.timeline.Len() != beforeTimeline || m.reducer.Cursor() != 1225 || m.input.Value() != "unfinished input" || m.input.LineInfo().CharOffset != 4 {
 		t.Fatalf("heartbeat burst timeline=%d/%d cursor=%d input=%q", m.timeline.Len(), beforeTimeline, m.reducer.Cursor(), m.input.Value())
 	}
 }

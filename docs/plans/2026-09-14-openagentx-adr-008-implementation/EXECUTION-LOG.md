@@ -905,6 +905,65 @@ M  deploy/systemd/openagentx-user.service
 - `T04-01`、`T05-01` 原样保留给 Task 07；未 push、安装、重启或操作真实 service/DB/socket/
   default tmux/installed binary/父仓。
 
+### Task 06 监督 NO-GO 与 Console 状态流 hardening
+
+- `2026-09-14T21:06:53Z`：监督对主实现
+  `4b5d2c0675a9b00f6d48e52395710b2639b8acac` 给出 Task 06 `NO-GO`。全屏框架、菜单、selector
+  和 smoke 主线保留；仅修复 reducer ack、Diagnostic SSE、绝对到期、正式控制结果和异步交互五组
+  阻断，不开始 Task 07。
+- 监督端独立 Termux PTY/tmux smoke 已实际进入 alt-screen、完成真实绑定并 `/quit`，但原测试在
+  原始终端字节中匹配连续 `> /help`；tmux 3.4/Termux 会在文本中间插入 ANSI 控制序列，导致
+  证据断言失败。测试改为状态机剥离 CSI、OSC/DCS 等终端控制序列后检查可见文本，并继续以
+  正式 UDS endpoint、pane 0 正常退出、精确 window/marker 及 pane `0/1/2` 保留作为独立证据；
+  未使用 default tmux、send-keys、paste-buffer 或 capture-pane。
+- Follow 的 snapshot/event typed message 新增一次性 ack。callback 将消息交给 Bubble Tea 后等待
+  `Update` 完成 reducer Apply；只有 ack=nil 才允许 client 推进 cursor。无效 snapshot/event 将
+  reducer 错误回传 Follow，TUI 继续消费 `followDone`，context cancel 可解除等待，测试证明
+  sequence 5 已入 channel 但拒绝后 reducer/client cursor 均停在 4 且 goroutine/channel 正常结束。
+- Event SSE 要求唯一、大小写敏感的 `mode=normal|diagnostic`；缺失、重复或未知 mode 在 headers
+  前 400。Normal 使用 viewer+`console.read` 并在发送前二次清除 Diagnostic；Diagnostic 使用
+  owner+`console.diagnostic`。CLI/Web viewer/operator 均不能请求 Diagnostic；owner 只能看到既有
+  限长、脱敏 safe projection。Console client、Follow 与 Web EventSource 都显式发送 mode，TUI
+  Normal 视图也不会渲染 Diagnostic。
+- request principal 现在携带有效截止时间：CLI 使用 Token absolute expiry，Web 使用本次认证后
+  的 effective idle/absolute deadline。SSE 为截止时间建立可注入、可停止 timer，并以独立
+  stream context 取消 repository 查询和循环；到期后不再发送事件。TUI tick 在本地 expiry
+  立即清除认证态、置 disconnected、禁用写并提示重新 login，保留输入 draft/cursor/focus；
+  后续连接状态消息不能恢复已到期会话。
+- 正式 dispatch/steer API 响应补充安全的 Task/Message version 与 Task status；应用只抽取
+  Task/Message/Approval/Decision ID、version、status/decision 和 mailbox sequence 到 typed
+  outcome。空或非法服务端 outcome fail closed，Timeline 不保存 content/result/error/raw JSON；
+  每个命令仍只调用一次正式 authenticated API。
+- 异步 event/connection/control/snapshot/done 更新仅在用户原本位于 Timeline 底部时自动跟随；
+  用户上翻后 offset 保持。`/status`、`/help`、`/diagnostic` 打开 overlay 前清空已消费输入，
+  无效、断线或到期禁用的命令保留 draft 供修正。
+
+| 时间 UTC | 现象 | 根因 | 安全影响 | 纠正/结果 |
+|---|---|---|---|---|
+| 2026-09-14T20:50Z | 首轮定向测试中 Panel SSE 用例均返回 400，应用 control 用例拒绝空 outcome | 既有 fixture 尚未携带新必需 mode，fake client 仍返回旧空响应 | 测试契约失败；无真实网络、状态或敏感数据影响 | fixture 改为显式 normal/diagnostic 与有效安全 outcome，并新增负向测试；定向测试通过 |
+| 2026-09-14T20:58Z | 复核到 `time.After` 会让正常断开的长 TTL stream 保留不可停止 timer | 首版到期注入只暴露 channel，没有 cleanup ownership | 潜在本地 timer 资源滞留，不涉及授权放宽 | 改为返回 channel+stop 的 timer factory，并用 stream context 传播到 repository；cleanup 测试通过 |
+
+### Task 06 review-fix 最终验证
+
+| 时间 UTC | 命令 | 退出码 | 耗时 | 脱敏结果/证据 |
+|---|---|---:|---:|---|
+| 2026-09-14T21:03Z | `go test -race ./internal/auth ./internal/api/console ./internal/api/panel ./internal/client/console ./internal/cli/console ./internal/consolemodel ./internal/persistence/sqlite ./internal/safeoutput ./internal/controlplane -count=1` | 0 | 27.5s | Task 06 状态流、auth/SSE、client、reducer、SQLite/safeoutput 与控制服务 race 全部通过 |
+| 2026-09-14T21:04Z | `go test ./... -count=1` | 0 | 15.3s wall | 全仓 Go 测试通过；包含隔离 PTY/tmux smoke |
+| 2026-09-14T21:04Z | `go vet` 受影响 10 个 package 与 `cmd/openagentx` | 0 | 15.3s 并行批次 | 无 vet 诊断 |
+| 2026-09-14T21:04Z | `go build -o /tmp/openagentx-adr008-task06-review ./cmd/openagentx` | 0 | 15.3s 并行批次 | 构建通过，未安装二进制 |
+| 2026-09-14T21:04Z | `npm run test:observation`、`npm run test:pwa`、`npm run build` | 0 | 15.3s 并行批次 | 4 个 observation tests、PWA assertions 与 Vite 266 modules build 通过 |
+| 2026-09-14T21:05Z | `go test -v ./internal/cli/console -run '^Test(IsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes\|StripTerminalControlsPreservesRenderedTextAcrossANSI)$' -count=1` | 0 | 1.17s | Ubuntu tmux 3.4 唯一 `tmux -L`、短 UDS/HOME、真实 alt-screen/bind/quit 与 pane `0/1/2` 保留通过 |
+| 2026-09-14T21:05Z | `bash scripts/check-legacy-control-paths.sh --release` | 0 | 2.3s 并行批次 | release scanner 全部类别 CLEAN |
+| 2026-09-14T21:05Z | 产品文件禁用控制/旧 CLI `rg` | 1（预期零命中） | <0.1s | 无 send/paste/capture/TurnHandle、Scanner REPL、`--once` 或旧直接控制子命令产品路径 |
+| 2026-09-14T21:05Z | `/tmp/openagentx-adr008-task06-review console --help`、旧 `console status`、非 TTY Attach smoke | 0/2/2（预期） | <0.1s | 最终 grammar 正确；旧 status 与非 TTY Attach fail closed 且未访问 workspace/credential/network |
+| 2026-09-14T21:05Z | `git diff --check` | 0 | <0.1s | 无 whitespace error |
+
+- 本轮只使用临时 UDS/HOME 和唯一隔离 `tmux -L` server；未操作真实 service、DB/socket、default
+  tmux、installed binary 或 `steadyflow` 父仓。Task 06 继续 `active/WAIT`，主计划与 front matter
+  继续 `pending`；Task 07 未开始，`T04-01`、`T05-01` 原样保留。
+- review-fix 提交精确 SHA 由提交后只读核验并在下一次监督 gate record 中记录；不 amend
+  `4b5d2c0`，feature 不 push。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |

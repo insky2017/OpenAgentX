@@ -235,9 +235,13 @@ func (c *Client) WorkerCommand(ctx context.Context, workerID string, generation 
 	return result, err
 }
 
-func (c *Client) Events(ctx context.Context, agentID string, afterSequence int64) (io.ReadCloser, error) {
+func (c *Client) Events(ctx context.Context, agentID, mode string, afterSequence int64) (io.ReadCloser, error) {
+	if mode != consoleapi.ModeNormal && mode != consoleapi.ModeDiagnostic {
+		return nil, fmt.Errorf("invalid Console event mode")
+	}
 	query := url.Values{"after_sequence": []string{strconv.FormatInt(afterSequence, 10)}}
 	query.Set("agent_id", agentID)
+	query.Set("mode", mode)
 	response, err := c.do(ctx, http.MethodGet, openapi.ObserveEventsStreamPath, query, nil, nil, true, "", false)
 	if err != nil {
 		return nil, err
@@ -258,6 +262,9 @@ func (c *Client) Follow(
 ) error {
 	if onAttach == nil || onEvent == nil || onState == nil {
 		return fmt.Errorf("Console follow callbacks are required")
+	}
+	if mode != consoleapi.ModeNormal && mode != consoleapi.ModeDiagnostic {
+		return fmt.Errorf("invalid Console event mode")
 	}
 	notify := func(state ConnectionState, cursor int64) error {
 		if err := onState(FollowState{State: state, Cursor: cursor}); err != nil {
@@ -282,6 +289,9 @@ func (c *Client) Follow(
 			if err == nil && attached.SnapshotSequence < 0 {
 				return fmt.Errorf("Console Attach returned a negative snapshot sequence")
 			}
+			if err == nil && attached.Mode != mode {
+				return fmt.Errorf("Console Attach mode does not match the requested event mode")
+			}
 			if err == nil {
 				if err = onAttach(attached); err != nil {
 					return err
@@ -292,7 +302,7 @@ func (c *Client) Follow(
 		}
 		if err == nil {
 			var stream io.ReadCloser
-			stream, err = c.Events(ctx, agentID, cursor)
+			stream, err = c.Events(ctx, agentID, mode, cursor)
 			if err == nil {
 				if err = notify(ConnectionConnected, cursor); err != nil {
 					_ = stream.Close()

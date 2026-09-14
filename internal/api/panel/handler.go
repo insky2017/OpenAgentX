@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	openapi "openagentx/internal/api"
+	consoleapi "openagentx/internal/api/console"
 	requestauth "openagentx/internal/auth"
 	cliauth "openagentx/internal/auth/cli"
 	webauth "openagentx/internal/auth/web"
@@ -62,11 +63,13 @@ type networkProfileState interface {
 }
 
 type Handler struct {
-	state    State
-	commands *controlplane.CommandService
-	network  *controlplane.NetworkWorkflowService
-	auth     requestauth.RequestAuthorizer
-	mux      *http.ServeMux
+	state       State
+	commands    *controlplane.CommandService
+	network     *controlplane.NetworkWorkflowService
+	auth        requestauth.RequestAuthorizer
+	mux         *http.ServeMux
+	now         func() time.Time
+	expiryTimer func(time.Duration) (<-chan time.Time, func())
 }
 
 func NewHandler(state State, commands *controlplane.CommandService, manager *webauth.Manager, network ...*controlplane.NetworkWorkflowService) (*Handler, error) {
@@ -93,7 +96,11 @@ func newHandler(state State, commands *controlplane.CommandService, authorizer r
 	if len(network) > 0 {
 		networkService = network[0]
 	}
-	h := &Handler{state: state, commands: commands, network: networkService, auth: authorizer, mux: http.NewServeMux()}
+	h := &Handler{state: state, commands: commands, network: networkService, auth: authorizer,
+		mux: http.NewServeMux(), now: time.Now, expiryTimer: func(delay time.Duration) (<-chan time.Time, func()) {
+			timer := time.NewTimer(delay)
+			return timer.C, func() { timer.Stop() }
+		}}
 	h.mux.HandleFunc("GET "+openapi.ObserveHealthPath, h.health)
 	h.mux.HandleFunc("GET /api/observe/v1/overview", h.overview)
 	h.mux.HandleFunc("GET /api/observe/v1/agents", h.agents)
@@ -155,8 +162,15 @@ func panelRequirement(r *http.Request, write bool) requestauth.Requirement {
 		return requirement
 	}
 	switch r.URL.Path {
-	case "/api/observe/v1/agents", openapi.ObserveEventsStreamPath:
+	case "/api/observe/v1/agents":
 		requirement.Scope = domain.CLIScopeConsoleRead
+	case openapi.ObserveEventsStreamPath:
+		if r.URL.Query().Get("mode") == consoleapi.ModeDiagnostic {
+			requirement.Role = domain.WebRoleOwner
+			requirement.Scope = domain.CLIScopeConsoleDiagnostic
+		} else {
+			requirement.Scope = domain.CLIScopeConsoleRead
+		}
 	}
 	return requirement
 }
@@ -1011,8 +1025,22 @@ func containsString(values []string, wanted string) bool {
 	}
 	return false
 }
+
 func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
-	if _, ok := h.session(w, r, false); !ok {
+	modes := r.URL.Query()["mode"]
+	if len(modes) != 1 || (modes[0] != consoleapi.ModeNormal && modes[0] != consoleapi.ModeDiagnostic) {
+		http.Error(w, "invalid Console event mode", http.StatusBadRequest)
+		return
+	}
+	mode := modes[0]
+	principal, err := h.auth.Authorize(r, panelRequirement(r, false))
+	if err != nil {
+		h.auth.WriteFailure(w, err)
+		return
+	}
+	now := h.now().UTC()
+	if principal.ExpiresAt.IsZero() || !now.Before(principal.ExpiresAt.UTC()) {
+		h.auth.WriteFailure(w, errors.New("session expired"))
 		return
 	}
 	fl, ok := w.(http.Flusher)
@@ -1055,6 +1083,21 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	if !h.now().UTC().Before(principal.ExpiresAt.UTC()) {
+		h.auth.WriteFailure(w, errors.New("session expired"))
+		return
+	}
+	streamContext, cancelStream := context.WithCancel(r.Context())
+	expired, stopExpiryTimer := h.expiryTimer(principal.ExpiresAt.UTC().Sub(h.now().UTC()))
+	defer cancelStream()
+	defer stopExpiryTimer()
+	go func() {
+		select {
+		case <-expired:
+			cancelStream()
+		case <-streamContext.Done():
+		}
+	}()
 	_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -1064,16 +1107,22 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 	defer ticker.Stop()
 	defer keepalive.Stop()
 	for {
-		events, e := h.state.ListJournal(r.Context(), after, 100)
+		if streamContext.Err() != nil || !h.now().UTC().Before(principal.ExpiresAt.UTC()) {
+			return
+		}
+		events, e := h.state.ListJournal(streamContext, after, 100)
 		if e != nil {
 			return
 		}
 		for _, ev := range events {
+			if streamContext.Err() != nil || !h.now().UTC().Before(principal.ExpiresAt.UTC()) {
+				return
+			}
 			if !observableAggregate(ev.AggregateType) {
 				after = ev.Sequence
 				continue
 			}
-			if agentID != "" && !h.eventMatchesAgent(r.Context(), ev, agentID) {
+			if agentID != "" && !h.eventMatchesAgent(streamContext, ev, agentID) {
 				after = ev.Sequence
 				continue
 			}
@@ -1082,22 +1131,28 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			// the SSE boundary and therefore cannot expose runtime diagnostics or
 			// credentials through a reconnecting client.
 			model := projectEvents([]domain.JournalEvent{ev})[0]
+			if mode == consoleapi.ModeNormal {
+				stripDiagnostic(&model)
+			}
 			if ev.AggregateType == "worker_instance" {
-				worker, projectionErr := h.workerEventSnapshot(r.Context(), ev.AggregateID)
+				worker, projectionErr := h.workerEventSnapshot(streamContext, ev.AggregateID)
 				if projectionErr != nil {
 					return
 				}
 				model.Worker = worker
 			} else if ev.AggregateType == "run_attempt" {
-				model.Run = h.runEventSnapshot(r.Context(), ev.AggregateID)
+				model.Run = h.runEventSnapshot(streamContext, ev.AggregateID)
 			}
 			b, _ := json.Marshal(model)
+			if !h.now().UTC().Before(principal.ExpiresAt.UTC()) {
+				return
+			}
 			fmt.Fprintf(w, "id: %d\ndata: %s\n\n", ev.Sequence, b)
 			after = ev.Sequence
 		}
 		fl.Flush()
 		select {
-		case <-r.Context().Done():
+		case <-streamContext.Done():
 			return
 		case <-ticker.C:
 		case <-keepalive.C:
@@ -1105,6 +1160,19 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			fl.Flush()
 		}
 	}
+}
+
+func stripDiagnostic(event *openapi.JournalEventReadModel) {
+	if event == nil || event.Output == nil {
+		return
+	}
+	output := *event.Output
+	output.Diagnostic = ""
+	if output.Stage == "" && output.Status == "" && output.Text == "" && !output.HasOutput && !output.HasError {
+		event.Output = nil
+		return
+	}
+	event.Output = &output
 }
 
 func (h *Handler) eventMatchesAgent(ctx context.Context, event domain.JournalEvent, agentID string) bool {

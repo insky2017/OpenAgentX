@@ -68,7 +68,8 @@ func (s *CommandService) CreateTask(ctx context.Context, principal string, req a
 		return nil, err
 	}
 	s.broker.Publish(AgentMailboxTopic(req.TargetAgentID))
-	return &api.CreateTaskResponse{TaskID: result.Task.ID, Sequence: result.MailboxItem.Sequence}, nil
+	return &api.CreateTaskResponse{TaskID: result.Task.ID, TaskVersion: result.Task.Version,
+		TaskStatus: result.Task.Status, Sequence: result.MailboxItem.Sequence}, nil
 }
 
 func (s *CommandService) CreateMessage(ctx context.Context, principal, taskID string, req api.CreateMessageRequest) (*api.CreateMessageResponse, error) {
@@ -87,7 +88,9 @@ func (s *CommandService) CreateMessage(ctx context.Context, principal, taskID st
 		return nil, err
 	}
 	s.broker.Publish(AgentMailboxTopic(task.TargetAgentID))
-	return &api.CreateMessageResponse{MessageID: result.Message.ID, Sequence: result.MailboxItem.Sequence}, nil
+	return &api.CreateMessageResponse{MessageID: result.Message.ID, MessageVersion: result.Message.Version,
+		TaskID: result.Task.ID, TaskVersion: result.Task.Version, TaskStatus: result.Task.Status,
+		Sequence: result.MailboxItem.Sequence}, nil
 }
 
 func (s *CommandService) CancelTask(ctx context.Context, principal, taskID string, req api.CancelTaskRequest) (*api.CancelTaskResponse, error) {

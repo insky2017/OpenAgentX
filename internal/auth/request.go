@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	openapi "openagentx/internal/api"
 	cliauth "openagentx/internal/auth/cli"
@@ -13,10 +14,11 @@ import (
 )
 
 type Principal struct {
-	ID       string
-	UserID   string
-	Username string
-	Roles    []domain.WebRole
+	ID        string
+	UserID    string
+	Username  string
+	Roles     []domain.WebRole
+	ExpiresAt time.Time
 }
 
 func (p Principal) HasRole(required domain.WebRole) bool {
@@ -61,7 +63,8 @@ func (a *WebAuthorizer) Authorize(request *http.Request, requirement Requirement
 	for _, candidate := range session.User.Roles {
 		roles = append(roles, domain.WebRole(candidate))
 	}
-	principal := Principal{ID: session.User.ID, UserID: session.User.WebUserID, Username: session.User.Username, Roles: roles}
+	principal := Principal{ID: session.User.ID, UserID: session.User.WebUserID, Username: session.User.Username,
+		Roles: roles, ExpiresAt: session.IdleExpiresAt}
 	if !principal.HasRole(requirement.Role) {
 		return Principal{}, &authorizationError{status: http.StatusForbidden, message: "forbidden"}
 	}
@@ -99,7 +102,7 @@ func (a *CLIAuthorizer) Authorize(request *http.Request, requirement Requirement
 		return Principal{}, cliauth.ErrForbidden
 	}
 	return Principal{ID: principal.PrincipalID, UserID: principal.WebUserID, Username: principal.Username,
-		Roles: append([]domain.WebRole(nil), principal.Roles...)}, nil
+		Roles: append([]domain.WebRole(nil), principal.Roles...), ExpiresAt: principal.ExpiresAt}, nil
 }
 
 func (a *CLIAuthorizer) WriteFailure(response http.ResponseWriter, err error) {

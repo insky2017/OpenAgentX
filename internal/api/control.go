@@ -330,8 +330,10 @@ func (r CreateTaskRequest) Validate() error {
 }
 
 type CreateTaskResponse struct {
-	TaskID   string `json:"task_id"`
-	Sequence int64  `json:"sequence"`
+	TaskID      string            `json:"task_id"`
+	TaskVersion int64             `json:"task_version"`
+	TaskStatus  domain.TaskStatus `json:"task_status"`
+	Sequence    int64             `json:"sequence"`
 }
 
 type CreateMessageRequest struct {
@@ -354,8 +356,12 @@ func (r CreateMessageRequest) Validate() error {
 }
 
 type CreateMessageResponse struct {
-	MessageID string `json:"message_id"`
-	Sequence  int64  `json:"sequence"`
+	MessageID      string            `json:"message_id"`
+	MessageVersion int64             `json:"message_version"`
+	TaskID         string            `json:"task_id"`
+	TaskVersion    int64             `json:"task_version"`
+	TaskStatus     domain.TaskStatus `json:"task_status"`
+	Sequence       int64             `json:"sequence"`
 }
 
 type CancelTaskRequest struct {

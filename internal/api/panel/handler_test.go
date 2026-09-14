@@ -13,6 +13,7 @@ import (
 	"time"
 
 	openapi "openagentx/internal/api"
+	consoleapi "openagentx/internal/api/console"
 	cliauth "openagentx/internal/auth/cli"
 	"openagentx/internal/auth/web"
 	"openagentx/internal/controlplane"
@@ -379,6 +380,7 @@ func newCLIAuthenticatedPanel(t *testing.T, role domain.WebRole) (*Handler, stri
 	if err != nil {
 		t.Fatal(err)
 	}
+	handler.now = func() time.Time { return now }
 	return handler, issued.Token
 }
 
@@ -742,7 +744,7 @@ func TestSSEReplaysAfterHighestClientSequence(t *testing.T) {
 	}}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
 	ctx, cancel := context.WithCancel(context.Background())
-	request := httptest.NewRequest(http.MethodGet, "/api/observe/v1/events/stream?after_sequence=2", nil).WithContext(ctx)
+	request := httptest.NewRequest(http.MethodGet, "/api/observe/v1/events/stream?mode=normal&after_sequence=2", nil).WithContext(ctx)
 	request.Header.Set("Last-Event-ID", "3")
 	request.AddCookie(panel.cookie)
 	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
@@ -763,7 +765,7 @@ func TestSSERetentionGapIsStructuredBeforeStreamStarts(t *testing.T) {
 		{Sequence: 11, ID: "event-11", EventType: "task.running"},
 	}}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
-	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?after_sequence=8", nil)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&after_sequence=8", nil)
 	request.AddCookie(panel.cookie)
 	response := httptest.NewRecorder()
 	panel.handler.ServeHTTP(response, request)
@@ -801,7 +803,7 @@ func TestSSERetentionBoundariesRemainReadable(t *testing.T) {
 			} else {
 				defer cancel()
 			}
-			request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?after_sequence="+testCase.after, nil).WithContext(ctx)
+			request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&after_sequence="+testCase.after, nil).WithContext(ctx)
 			request.AddCookie(panel.cookie)
 			response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 			panel.handler.ServeHTTP(response, request)
@@ -834,7 +836,7 @@ func TestSSEAgentFilterIncludesOnlyMatchingSafeRuntimeEvents(t *testing.T) {
 	}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
 	ctx, cancel := context.WithCancel(context.Background())
-	request := httptest.NewRequest(http.MethodGet, "/api/observe/v1/events/stream?agent_id=quote", nil).WithContext(ctx)
+	request := httptest.NewRequest(http.MethodGet, "/api/observe/v1/events/stream?mode=normal&agent_id=quote", nil).WithContext(ctx)
 	request.AddCookie(panel.cookie)
 	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 	panel.handler.ServeHTTP(response, request)
@@ -861,7 +863,7 @@ func TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot(t *testing.T) {
 	}}}}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
 	ctx, cancel := context.WithCancel(context.Background())
-	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?agent_id=quote", nil).WithContext(ctx)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&agent_id=quote", nil).WithContext(ctx)
 	request.AddCookie(panel.cookie)
 	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 	panel.handler.ServeHTTP(response, request)
@@ -887,7 +889,7 @@ func TestSSEBackendProjectionFailureDoesNotSendOrCrossWorkerEvent(t *testing.T) 
 		},
 	}, backendErr: errors.New("injected Backend projection failure")}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
-	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath, nil)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal", nil)
 	request.AddCookie(panel.cookie)
 	response := httptest.NewRecorder()
 	panel.handler.ServeHTTP(response, request)
@@ -909,7 +911,7 @@ func TestSSEIncludesSafeRunProjectionForReducer(t *testing.T) {
 	}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
 	ctx, cancel := context.WithCancel(context.Background())
-	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?agent_id=quote", nil).WithContext(ctx)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&agent_id=quote", nil).WithContext(ctx)
 	request.AddCookie(panel.cookie)
 	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 	panel.handler.ServeHTTP(response, request)
@@ -925,6 +927,114 @@ func TestSSEIncludesSafeRunProjectionForReducer(t *testing.T) {
 	}
 }
 
+func TestSSEModeAuthorizationAndValidation(t *testing.T) {
+	for _, mode := range []string{"", "raw", "DIAGNOSTIC", "normal&mode=diagnostic"} {
+		handler, _ := newCLIAuthenticatedPanel(t, domain.WebRoleOwner)
+		request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode="+mode, nil)
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		if response.Code != http.StatusBadRequest {
+			t.Fatalf("invalid mode %q status=%d body=%s", mode, response.Code, response.Body.String())
+		}
+	}
+
+	for _, role := range []domain.WebRole{domain.WebRoleViewer, domain.WebRoleOperator} {
+		handler, token := newCLIAuthenticatedPanel(t, role)
+		request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=diagnostic", nil)
+		request.Header.Set("Authorization", "Bearer "+token)
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		if response.Code != http.StatusForbidden {
+			t.Fatalf("diagnostic role %s status=%d body=%s", role, response.Code, response.Body.String())
+		}
+		var failure openapi.ErrorResponse
+		if json.Unmarshal(response.Body.Bytes(), &failure) != nil || failure.Code != openapi.ErrorCLIForbidden {
+			t.Fatalf("diagnostic role %s error=%+v body=%s", role, failure, response.Body.String())
+		}
+	}
+	for _, role := range []web.Role{web.RoleViewer, web.RoleOperator} {
+		panel := newAuthenticatedPanel(t, role, &testPanelState{})
+		request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=diagnostic", nil)
+		request.AddCookie(panel.cookie)
+		response := httptest.NewRecorder()
+		panel.handler.ServeHTTP(response, request)
+		if response.Code != http.StatusForbidden {
+			t.Fatalf("Web diagnostic role %s status=%d body=%s", role, response.Code, response.Body.String())
+		}
+	}
+
+	for _, testCase := range []struct {
+		name string
+		role domain.WebRole
+		mode string
+	}{
+		{name: "viewer normal", role: domain.WebRoleViewer, mode: consoleapi.ModeNormal},
+		{name: "owner diagnostic", role: domain.WebRoleOwner, mode: consoleapi.ModeDiagnostic},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			handler, token := newCLIAuthenticatedPanel(t, testCase.role)
+			ctx, cancel := context.WithCancel(context.Background())
+			cancel()
+			request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode="+testCase.mode, nil).WithContext(ctx)
+			request.Header.Set("Authorization", "Bearer "+token)
+			response := httptest.NewRecorder()
+			handler.ServeHTTP(response, request)
+			if response.Code != http.StatusOK || response.Header().Get("Content-Type") != "text/event-stream" {
+				t.Fatalf("allowed stream status=%d content-type=%q body=%s", response.Code, response.Header().Get("Content-Type"), response.Body.String())
+			}
+		})
+	}
+}
+
+func TestSSEModeSeparatesNormalAndDiagnosticSafeProjection(t *testing.T) {
+	state := &testPanelState{journal: []domain.JournalEvent{{
+		Sequence: 1, ID: "event-runtime", AggregateType: "runtime", AggregateID: "run-1", EventType: "runtime.turn.output",
+		Payload: json.RawMessage(`{"payload":{"text":"safe progress","diagnostic":"stderr token=private-value"}}`),
+	}}}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	requestBody := func(mode string) string {
+		t.Helper()
+		ctx, cancel := context.WithCancel(context.Background())
+		request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode="+mode, nil).WithContext(ctx)
+		request.AddCookie(panel.cookie)
+		response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+		panel.handler.ServeHTTP(response, request)
+		if response.Code != http.StatusOK {
+			t.Fatalf("mode %s status=%d body=%s", mode, response.Code, response.Body.String())
+		}
+		return response.Body.String()
+	}
+	normal := requestBody(consoleapi.ModeNormal)
+	if !strings.Contains(normal, `"text":"safe progress"`) || strings.Contains(normal, "diagnostic") ||
+		strings.Contains(normal, "private-value") || strings.Contains(normal, "stderr") {
+		t.Fatalf("normal stream leaked diagnostic projection: %s", normal)
+	}
+	diagnostic := requestBody(consoleapi.ModeDiagnostic)
+	if !strings.Contains(diagnostic, `"diagnostic":"stderr token=[REDACTED]"`) || strings.Contains(diagnostic, "private-value") {
+		t.Fatalf("diagnostic stream projection is missing or unsafe: %s", diagnostic)
+	}
+}
+
+func TestSSEClosesAtInjectedCLIAbsoluteExpiry(t *testing.T) {
+	handler, token := newCLIAuthenticatedPanel(t, domain.WebRoleOwner)
+	expired := make(chan time.Time, 1)
+	expired <- handler.now()
+	var requestedDelay time.Duration
+	stopped := false
+	handler.expiryTimer = func(delay time.Duration) (<-chan time.Time, func()) {
+		requestedDelay = delay
+		return expired, func() { stopped = true }
+	}
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal", nil)
+	request.Header.Set("Authorization", "Bearer "+token)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK || requestedDelay <= 0 || !stopped || response.Header().Get("Content-Type") != "text/event-stream" {
+		t.Fatalf("expiry stream status=%d delay=%s stopped=%v content-type=%q body=%s", response.Code, requestedDelay, stopped,
+			response.Header().Get("Content-Type"), response.Body.String())
+	}
+}
+
 func TestCLIRouteScopeRequirementsFailClosed(t *testing.T) {
 	for name, testCase := range map[string]struct {
 		method string
@@ -934,7 +1044,8 @@ func TestCLIRouteScopeRequirementsFailClosed(t *testing.T) {
 		scope  domain.CLIScope
 	}{
 		"agent list":               {method: http.MethodGet, path: "/api/observe/v1/agents", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
-		"event stream":             {method: http.MethodGet, path: "/api/observe/v1/events/stream", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
+		"normal event stream":      {method: http.MethodGet, path: "/api/observe/v1/events/stream?mode=normal", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
+		"diagnostic event stream":  {method: http.MethodGet, path: "/api/observe/v1/events/stream?mode=diagnostic", role: domain.WebRoleOwner, scope: domain.CLIScopeConsoleDiagnostic},
 		"overview":                 {method: http.MethodGet, path: "/api/observe/v1/overview", role: domain.WebRoleViewer, scope: ""},
 		"tasks":                    {method: http.MethodGet, path: "/api/observe/v1/tasks", role: domain.WebRoleViewer, scope: ""},
 		"task":                     {method: http.MethodGet, path: "/api/observe/v1/tasks/task-1", role: domain.WebRoleViewer, scope: ""},

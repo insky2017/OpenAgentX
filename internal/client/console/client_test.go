@@ -79,8 +79,13 @@ func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testi
 			attachCount++
 			generation := attachCount
 			mu.Unlock()
-			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", Generation: int64(generation), WorkerInstanceID: "worker-" + strconv.Itoa(generation), SnapshotSequence: 4})
+			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
+				Generation: int64(generation), WorkerInstanceID: "worker-" + strconv.Itoa(generation), SnapshotSequence: 4})
 		case openapi.ObserveEventsStreamPath:
+			if r.URL.Query().Get("mode") != consoleapi.ModeNormal {
+				http.Error(w, "invalid mode", http.StatusBadRequest)
+				return
+			}
 			after, _ := strconv.ParseInt(r.URL.Query().Get("after_sequence"), 10, 64)
 			mu.Lock()
 			afterValues = append(afterValues, after)
@@ -155,8 +160,13 @@ func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
 			if count > 1 {
 				sequence = 20
 			}
-			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-current", Generation: 3, SnapshotSequence: sequence})
+			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
+				WorkerInstanceID: "worker-current", Generation: 3, SnapshotSequence: sequence})
 		case openapi.ObserveEventsStreamPath:
+			if r.URL.Query().Get("mode") != consoleapi.ModeNormal {
+				http.Error(w, "invalid mode", http.StatusBadRequest)
+				return
+			}
 			after, _ := strconv.ParseInt(r.URL.Query().Get("after_sequence"), 10, 64)
 			mu.Lock()
 			afterValues = append(afterValues, after)
@@ -420,6 +430,14 @@ func TestEventStreamAdvancesOnlyAfterSuccessfulApplyAndDeduplicates(t *testing.T
 	})
 	if err == nil || cursor != 5 || applied != 1 {
 		t.Fatalf("failed apply cursor=%d applied=%d err=%v", cursor, applied, err)
+	}
+}
+
+func TestEventsRejectsInvalidModeBeforeNetwork(t *testing.T) {
+	requests := 0
+	client := newUnixTestClient(t, http.HandlerFunc(func(http.ResponseWriter, *http.Request) { requests++ }))
+	if _, err := client.Events(context.Background(), "quote", "raw", 0); err == nil || requests != 0 {
+		t.Fatalf("invalid mode err=%v network requests=%d", err, requests)
 	}
 }
 

@@ -93,10 +93,12 @@ type followStartedMsg struct {
 
 type followSnapshotMsg struct {
 	Snapshot consoleapi.AttachResponse
+	Ack      chan<- error
 }
 
 type followEventMsg struct {
 	Event openapi.JournalEventReadModel
+	Ack   chan<- error
 }
 
 type followConnectionMsg struct {
@@ -128,8 +130,22 @@ type controlRequest struct {
 }
 
 type controlResultMsg struct {
-	Kind controlKind
-	Err  error
+	Kind    controlKind
+	Outcome controlOutcome
+	Err     error
+}
+
+type controlOutcome struct {
+	TaskID         string
+	TaskVersion    int64
+	TaskStatus     domain.TaskStatus
+	MessageID      string
+	MessageVersion int64
+	ApprovalID     string
+	DecisionID     string
+	Decision       domain.ApprovalDecisionValue
+	DecisionState  domain.ApprovalDecisionState
+	Sequence       int64
 }
 
 type timelineBuffer struct {
@@ -265,6 +281,17 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		m.resize(msg.Width, msg.Height)
 		return m, nil
 	case tickMsg:
+		if m.session.Authenticated && !msg.Now.UTC().Before(m.session.ExpiresAt.UTC()) {
+			socketPath := m.session.SocketPath
+			m.session = sessionStatus{SocketPath: socketPath}
+			m.connection = consoleclient.ConnectionDisconnected
+			m.pending = false
+			m.notice = "CLI session expired; run openagentx console login"
+			if m.screen == screenAttach {
+				m.timeline.Add(m.notice)
+				m.syncTimeline(false)
+			}
+		}
 		return m, tickCommand(m.now)
 	case sessionResultMsg:
 		m.busy = false
@@ -343,14 +370,22 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		m.follow = msg.Updates
 		return m, waitFollow(m.follow)
 	case followConnectionMsg:
-		m.connection = msg.State.State
+		if m.session.Authenticated {
+			m.connection = msg.State.State
+		} else {
+			m.connection = consoleclient.ConnectionDisconnected
+		}
 		command := waitFollow(m.follow)
 		if msg.State.State == consoleclient.ConnectionRetentionReattach {
 			m.timeline.Add("Event history expired; refreshing the authoritative snapshot")
-			m.syncTimeline(true)
+			m.syncTimeline(false)
 		}
 		return m, command
 	case followSnapshotMsg:
+		if !m.session.Authenticated {
+			ackFollow(msg.Ack, errLoginRequired)
+			return m, waitFollow(m.follow)
+		}
 		var err error
 		if m.reducer == nil {
 			m.reducer, err = consolemodel.New(msg.Snapshot)
@@ -358,37 +393,47 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			err = m.reducer.ApplySnapshot(msg.Snapshot)
 		}
 		if err != nil {
+			ackFollow(msg.Ack, err)
 			m.connection = consoleclient.ConnectionDisconnected
 			m.overlay = overlayError
 			m.notice = "Snapshot rejected: " + safeErrorSummary(err)
-			return m, nil
+			return m, waitFollow(m.follow)
 		}
+		ackFollow(msg.Ack, nil)
 		m.timeline.Add(fmt.Sprintf("Snapshot applied at cursor %d", m.reducer.Cursor()))
-		m.syncTimeline(true)
+		m.syncTimeline(false)
 		return m, waitFollow(m.follow)
 	case followEventMsg:
+		if !m.session.Authenticated {
+			ackFollow(msg.Ack, errLoginRequired)
+			return m, waitFollow(m.follow)
+		}
 		if m.reducer == nil {
+			err := fmt.Errorf("Event arrived before the authoritative snapshot")
+			ackFollow(msg.Ack, err)
 			m.overlay = overlayError
-			m.notice = "Event arrived before the authoritative snapshot"
-			return m, nil
+			m.notice = err.Error()
+			return m, waitFollow(m.follow)
 		}
 		result, err := m.reducer.Apply(msg.Event)
 		if err != nil {
+			ackFollow(msg.Ack, err)
 			m.connection = consoleclient.ConnectionDisconnected
 			m.overlay = overlayError
 			m.notice = "Event rejected: " + safeErrorSummary(err)
-			return m, nil
+			return m, waitFollow(m.follow)
 		}
+		ackFollow(msg.Ack, nil)
 		if result.Timeline != nil {
-			m.timeline.Add(eventSummary(*result.Timeline))
-			m.syncTimeline(true)
+			m.timeline.Add(eventSummary(*result.Timeline, m.mode))
+			m.syncTimeline(false)
 		}
 		return m, waitFollow(m.follow)
 	case followDoneMsg:
 		m.connection = consoleclient.ConnectionDisconnected
 		if msg.Err != nil && !errors.Is(msg.Err, context.Canceled) {
 			m.timeline.Add("Connection stopped: " + safeErrorSummary(msg.Err))
-			m.syncTimeline(true)
+			m.syncTimeline(false)
 		}
 		return m, nil
 	case controlResultMsg:
@@ -396,9 +441,9 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Err != nil {
 			m.timeline.Add(string(msg.Kind) + " failed: " + safeErrorSummary(msg.Err))
 		} else {
-			m.timeline.Add(string(msg.Kind) + " succeeded")
+			m.timeline.Add(msg.Outcome.summary(msg.Kind))
 		}
-		m.syncTimeline(true)
+		m.syncTimeline(false)
 		return m, nil
 	}
 
@@ -600,12 +645,15 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 	case errors.Is(err, errQuitCommand):
 		return m, tea.Quit
 	case errors.Is(err, errStatusCommand):
+		m.input.Reset()
 		m.overlay = overlayStatus
 		return m, nil
 	case errors.Is(err, errHelpCommand):
+		m.input.Reset()
 		m.overlay = overlayHelp
 		return m, nil
 	case errors.Is(err, errDiagnosticCommand):
+		m.input.Reset()
 		m.overlay = overlayDiagnostic
 		return m, nil
 	case errors.Is(err, errForegroundCommand):
@@ -615,6 +663,11 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 		return m, nil
 	case err != nil:
 		m.timeline.Add("Command rejected: " + safeErrorSummary(err))
+		m.syncTimeline(true)
+		return m, nil
+	}
+	if !m.session.Authenticated {
+		m.timeline.Add("Command disabled because the CLI session expired; run openagentx console login")
 		m.syncTimeline(true)
 		return m, nil
 	}
@@ -880,11 +933,21 @@ func (m tuiModel) failAttach(message string) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func eventSummary(event openapi.JournalEventReadModel) string {
+func ackFollow(ack chan<- error, err error) {
+	if ack != nil {
+		ack <- err
+	}
+}
+
+func eventSummary(event openapi.JournalEventReadModel, mode string) string {
 	prefix := fmt.Sprintf("#%d %s", event.Sequence, boundedSafeText(event.EventType, 128))
 	if event.Output != nil {
 		parts := []string{prefix}
-		for _, value := range []string{event.Output.Stage, event.Output.Status, event.Output.Text, event.Output.Diagnostic} {
+		values := []string{event.Output.Stage, event.Output.Status, event.Output.Text}
+		if mode == consoleapi.ModeDiagnostic {
+			values = append(values, event.Output.Diagnostic)
+		}
+		for _, value := range values {
 			if value != "" {
 				parts = append(parts, boundedSafeText(value, maxTimelineEntryBytes/2))
 			}
@@ -898,6 +961,24 @@ func eventSummary(event openapi.JournalEventReadModel) string {
 		return fmt.Sprintf("%s | Run %s %s", prefix, shortID(event.Run.ID), event.Run.Status)
 	}
 	return prefix
+}
+
+func (o controlOutcome) summary(kind controlKind) string {
+	parts := []string{string(kind) + " succeeded"}
+	switch kind {
+	case controlDispatch, controlCancel:
+		parts = append(parts, "task "+shortID(o.TaskID), fmt.Sprintf("version %d", o.TaskVersion), "status "+string(o.TaskStatus))
+	case controlSteer:
+		parts = append(parts, "task "+shortID(o.TaskID), fmt.Sprintf("task version %d", o.TaskVersion),
+			"status "+string(o.TaskStatus), "message "+shortID(o.MessageID), fmt.Sprintf("message version %d", o.MessageVersion))
+	case controlApprove, controlReject:
+		parts = append(parts, "approval "+shortID(o.ApprovalID), "decision "+string(o.Decision),
+			"decision id "+shortID(o.DecisionID), "status "+string(o.DecisionState))
+	}
+	if o.Sequence > 0 {
+		parts = append(parts, fmt.Sprintf("sequence %d", o.Sequence))
+	}
+	return strings.Join(parts, " | ")
 }
 
 func safeErrorSummary(err error) string {

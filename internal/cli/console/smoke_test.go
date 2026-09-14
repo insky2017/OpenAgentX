@@ -94,7 +94,8 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
 				WorkerStatus: domain.WorkerStatusOffline, SnapshotSequence: 0})
 		case openapi.ObserveEventsStreamPath:
-			if r.URL.Query().Get("agent_id") != "quote" || r.URL.Query().Get("after_sequence") != "0" {
+			if r.URL.Query().Get("agent_id") != "quote" || r.URL.Query().Get("mode") != consoleapi.ModeNormal ||
+				r.URL.Query().Get("after_sequence") != "0" {
 				http.Error(w, "invalid cursor", http.StatusBadRequest)
 				return
 			}
@@ -197,7 +198,8 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	_ = attach.Wait()
 
 	output := terminal.String()
-	if !strings.Contains(output, "\x1b[?1049h") || !strings.Contains(output, "> /help") {
+	plainOutput := stripTerminalControls(output)
+	if !strings.Contains(output, "\x1b[?1049h") || !strings.Contains(plainOutput, "> /help") {
 		t.Fatalf("real TUI did not enter alt-screen Attach view: %q", output)
 	}
 	name, err := tmux("display-message", "-p", "-t", windowID, "-F", "#{window_name}")
@@ -215,5 +217,59 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	panes, err := tmux("list-panes", "-t", windowID, "-F", "#{pane_index}")
 	if err != nil || strings.Fields(panes)[0] != "0" || !strings.Contains(panes, "1\n") || !strings.Contains(panes, "2\n") {
 		t.Fatalf("pane topology=%q err=%v", panes, err)
+	}
+}
+
+func stripTerminalControls(value string) string {
+	var result strings.Builder
+	for index := 0; index < len(value); {
+		if value[index] == 0x1b {
+			index++
+			if index >= len(value) {
+				break
+			}
+			switch value[index] {
+			case '[':
+				index++
+				for index < len(value) {
+					final := value[index]
+					index++
+					if final >= 0x40 && final <= 0x7e {
+						break
+					}
+				}
+			case ']', 'P', 'X', '^', '_':
+				index++
+				for index < len(value) {
+					if value[index] == 0x07 {
+						index++
+						break
+					}
+					if value[index] == 0x1b && index+1 < len(value) && value[index+1] == '\\' {
+						index += 2
+						break
+					}
+					index++
+				}
+			default:
+				index++
+			}
+			continue
+		}
+		if value[index] < 0x20 && value[index] != '\n' && value[index] != '\t' || value[index] == 0x7f {
+			index++
+			continue
+		}
+		result.WriteByte(value[index])
+		index++
+	}
+	return result.String()
+}
+
+func TestStripTerminalControlsPreservesRenderedTextAcrossANSI(t *testing.T) {
+	rendered := "> /\x1b[38;5;42mhelp\x1b[0m\r\n\x1b]0;ignored\x07Agent quote"
+	plain := stripTerminalControls(rendered)
+	if !strings.Contains(plain, "> /help") || !strings.Contains(plain, "Agent quote") || strings.Contains(plain, "ignored") {
+		t.Fatalf("stripped terminal output=%q", plain)
 	}
 }

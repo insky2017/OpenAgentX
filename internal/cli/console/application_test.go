@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	consoleclient "openagentx/internal/client/console"
@@ -33,7 +34,10 @@ type fakeConsoleClient struct {
 	targets     []string
 	followAgent string
 	followMode  string
-	logoutCalls int
+	followFunc  func(context.Context, string, string, func(consoleapi.AttachResponse) error,
+		func(openapi.JournalEventReadModel) error, func(consoleclient.FollowState) error) error
+	followCursor int64
+	logoutCalls  int
 }
 
 func (c *fakeConsoleClient) record(value string) {
@@ -69,10 +73,13 @@ func (c *fakeConsoleClient) ListAgentOptions(context.Context) ([]domain.ConsoleA
 func (c *fakeConsoleClient) Attach(context.Context, string, string) (consoleapi.AttachResponse, error) {
 	return consoleapi.AttachResponse{}, nil
 }
-func (c *fakeConsoleClient) Follow(_ context.Context, agentID, mode string, onAttach func(consoleapi.AttachResponse) error,
-	_ func(openapi.JournalEventReadModel) error, onState func(consoleclient.FollowState) error) error {
+func (c *fakeConsoleClient) Follow(ctx context.Context, agentID, mode string, onAttach func(consoleapi.AttachResponse) error,
+	onEvent func(openapi.JournalEventReadModel) error, onState func(consoleclient.FollowState) error) error {
 	c.record("follow")
 	c.followAgent, c.followMode = agentID, mode
+	if c.followFunc != nil {
+		return c.followFunc(ctx, agentID, mode, onAttach, onEvent, onState)
+	}
 	if err := onState(consoleclient.FollowState{State: consoleclient.ConnectionConnected}); err != nil {
 		return err
 	}
@@ -81,25 +88,30 @@ func (c *fakeConsoleClient) Follow(_ context.Context, agentID, mode string, onAt
 func (c *fakeConsoleClient) Dispatch(_ context.Context, request openapi.CreateTaskRequest) (openapi.CreateTaskResponse, error) {
 	c.record("dispatch")
 	c.dispatches = append(c.dispatches, request)
-	return openapi.CreateTaskResponse{}, nil
+	return openapi.CreateTaskResponse{TaskID: "task-created", TaskVersion: 1,
+		TaskStatus: domain.TaskStatusQueued, Sequence: 11}, nil
 }
 func (c *fakeConsoleClient) Steer(_ context.Context, target string, request openapi.CreateMessageRequest) (openapi.CreateMessageResponse, error) {
 	c.record("steer")
 	c.targets = append(c.targets, target)
 	c.steers = append(c.steers, request)
-	return openapi.CreateMessageResponse{}, nil
+	return openapi.CreateMessageResponse{MessageID: "message-created", MessageVersion: 1,
+		TaskID: target, TaskVersion: request.Meta.ExpectedVersion + 1,
+		TaskStatus: domain.TaskStatusRunning, Sequence: 12}, nil
 }
 func (c *fakeConsoleClient) Cancel(_ context.Context, target string, request openapi.CancelTaskRequest) (openapi.CancelTaskResponse, error) {
 	c.record("cancel")
 	c.targets = append(c.targets, target)
 	c.cancels = append(c.cancels, request)
-	return openapi.CancelTaskResponse{}, nil
+	return openapi.CancelTaskResponse{Task: domain.Task{ID: target, Version: request.Meta.ExpectedVersion + 1,
+		Status: domain.TaskStatusCancelRequested}, Sequence: 13}, nil
 }
 func (c *fakeConsoleClient) DecideApproval(_ context.Context, target string, request openapi.DecideApprovalRequest) (openapi.DecideApprovalResponse, error) {
 	c.record("approval")
 	c.targets = append(c.targets, target)
 	c.decisions = append(c.decisions, request)
-	return openapi.DecideApprovalResponse{}, nil
+	return openapi.DecideApprovalResponse{Decision: domain.ApprovalDecision{ID: "decision-1",
+		ApprovalRequestID: target, Decision: request.Decision, State: domain.ApprovalDecisionPersisted}, Sequence: 14}, nil
 }
 
 type fakeCredentialStore struct {
@@ -308,11 +320,24 @@ func TestControlCmdUsesOfficialClientExactlyOnceWithCAS(t *testing.T) {
 		{Kind: controlApprove, AgentID: "quote", TargetID: "approval-1", ExpectedVersion: 9},
 		{Kind: controlReject, AgentID: "quote", TargetID: "approval-2", ExpectedVersion: 10},
 	}
+	wantOutcome := map[controlKind][]string{
+		controlDispatch: {"task task-created", "version 1", "status queued", "sequence 11"},
+		controlSteer:    {"task task-1", "task version 8", "status running", "message message-created", "sequence 12"},
+		controlCancel:   {"task task-1", "version 9", "status cancel_requested", "sequence 13"},
+		controlApprove:  {"approval approval-1", "decision approve", "decision id decision-1", "status persisted", "sequence 14"},
+		controlReject:   {"approval approval-2", "decision reject", "decision id decision-1", "status persisted", "sequence 14"},
+	}
 	for _, request := range requests {
 		message := application.controlCmd(9, request)()
 		result, ok := message.(controlResultMsg)
 		if !ok || result.Err != nil {
 			t.Fatalf("control %s result=%+v", request.Kind, message)
+		}
+		summary := result.Outcome.summary(request.Kind)
+		for _, fragment := range wantOutcome[request.Kind] {
+			if !strings.Contains(summary, fragment) {
+				t.Fatalf("control %s outcome %q omitted %q", request.Kind, summary, fragment)
+			}
 		}
 	}
 	if len(client.dispatches) != 1 || client.dispatches[0].OrganizationID != "org-main" || client.dispatches[0].TargetAgentID != "quote" {
@@ -322,6 +347,89 @@ func TestControlCmdUsesOfficialClientExactlyOnceWithCAS(t *testing.T) {
 		len(client.decisions) != 2 || client.decisions[0].Meta.ExpectedVersion != 9 || client.decisions[1].Meta.ExpectedVersion != 10 ||
 		client.decisions[0].Decision != domain.ApprovalDecisionApprove || client.decisions[1].Decision != domain.ApprovalDecisionReject {
 		t.Fatalf("CAS controls steer=%+v cancel=%+v decisions=%+v", client.steers, client.cancels, client.decisions)
+	}
+}
+
+func TestFollowWaitsForReducerAckBeforeAdvancingClientCursor(t *testing.T) {
+	application, client, _, _ := applicationFixture(t, true)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	application.ctx = ctx
+	application.prepared[17] = preparedAttach{client: client, mode: consoleapi.ModeNormal}
+	client.followFunc = func(_ context.Context, agentID, mode string,
+		onAttach func(consoleapi.AttachResponse) error, onEvent func(openapi.JournalEventReadModel) error,
+		onState func(consoleclient.FollowState) error) error {
+		if err := onState(consoleclient.FollowState{State: consoleclient.ConnectionConnected}); err != nil {
+			return err
+		}
+		if err := onAttach(consoleapi.AttachResponse{AgentID: agentID, Mode: mode,
+			WorkerInstanceID: "worker-current", Generation: 4, WorkerStatus: domain.WorkerStatusOnline,
+			SnapshotSequence: 4}); err != nil {
+			return err
+		}
+		client.mu.Lock()
+		client.followCursor = 4
+		client.mu.Unlock()
+		invalid := openapi.JournalEventReadModel{Sequence: 5, ID: "event-invalid",
+			AggregateType: "worker_instance", AggregateID: "worker-current", EventType: "worker.heartbeat",
+			Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-current", AgentID: "quote",
+				Generation: 4, Status: "invalid"}}
+		if err := onEvent(invalid); err != nil {
+			return err
+		}
+		client.mu.Lock()
+		client.followCursor = invalid.Sequence
+		client.mu.Unlock()
+		return nil
+	}
+
+	started, ok := application.startFollowCmd(17, "quote")().(followStartedMsg)
+	if !ok {
+		t.Fatal("Follow did not return its typed update channel")
+	}
+	m := newTUIModel(application, fixedNow, nil)
+	m.screen = screenAttach
+	m.mode = consoleapi.ModeNormal
+	m.selectedAgent = "quote"
+	m.session = sessionStatus{Authenticated: true, ExpiresAt: fixedNow().Add(time.Hour)}
+	m.follow = started.Updates
+
+	receive := func() tea.Msg {
+		t.Helper()
+		select {
+		case message, open := <-started.Updates:
+			if !open {
+				t.Fatal("Follow update channel closed before terminal result")
+			}
+			return message
+		case <-time.After(time.Second):
+			t.Fatal("timed out waiting for acknowledged Follow update")
+			return nil
+		}
+	}
+	for range 4 {
+		message := receive()
+		m, _ = updateModel(t, m, message)
+		if _, done := message.(followDoneMsg); done {
+			break
+		}
+	}
+	if m.reducer == nil || m.reducer.Cursor() != 4 || m.overlay != overlayError {
+		t.Fatalf("rejected event state cursor=%v overlay=%v notice=%q", m.reducer, m.overlay, m.notice)
+	}
+	client.mu.Lock()
+	cursor := client.followCursor
+	client.mu.Unlock()
+	if cursor != 4 {
+		t.Fatalf("client cursor crossed rejected event: %d", cursor)
+	}
+	select {
+	case _, open := <-started.Updates:
+		if open {
+			t.Fatal("Follow goroutine left updates open after reducer rejection")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Follow goroutine did not terminate after reducer rejection")
 	}
 }
 
