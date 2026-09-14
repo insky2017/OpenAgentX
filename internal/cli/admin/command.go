@@ -160,7 +160,7 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 		fmt.Fprintln(deps.Err, "Usage: openagentx agent apply --db <path> --file <identity.yaml> [--owner-username owner]")
 		return 2
 	}
-	definition, err := loadAgentDefinition(*definitionPath)
+	definition, err := LoadAgentDefinition(*definitionPath)
 	if err != nil {
 		fmt.Fprintf(deps.Err, "load Agent identity: %v\n", err)
 		return 1
@@ -211,7 +211,7 @@ func newEvent(deps Dependencies, actorID, organizationID, aggregateType, aggrega
 	return &domain.JournalEvent{ID: deps.NewID("event"), OrganizationID: organizationID, AggregateType: aggregateType, AggregateID: aggregateID, EventType: eventType, ActorPrincipalID: actorID, Payload: encoded, CreatedAt: deps.Now().UTC()}
 }
 
-type agentDefinition struct {
+type AgentDefinition struct {
 	Version        int    `yaml:"version"`
 	AgentID        string `yaml:"agent_id"`
 	PrincipalID    string `yaml:"principal_id"`
@@ -225,7 +225,7 @@ type agentDefinition struct {
 	} `yaml:"profile"`
 }
 
-func loadAgentDefinition(path string) (*agentDefinition, error) {
+func LoadAgentDefinition(path string) (*AgentDefinition, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -233,7 +233,7 @@ func loadAgentDefinition(path string) (*agentDefinition, error) {
 	defer file.Close()
 	decoder := yaml.NewDecoder(file)
 	decoder.KnownFields(true)
-	var definition agentDefinition
+	var definition AgentDefinition
 	if err := decoder.Decode(&definition); err != nil {
 		return nil, err
 	}

@@ -328,7 +328,7 @@ CREATE TABLE worker_commands (
     worker_command_id TEXT PRIMARY KEY,
     worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id) ON DELETE CASCADE,
     generation INTEGER NOT NULL CHECK (generation > 0),
-    kind TEXT NOT NULL CHECK (kind IN ('drain', 'stop', 'health_check')),
+    kind TEXT NOT NULL CHECK (kind IN ('drain', 'stop', 'force_stop', 'health_check')),
     state TEXT NOT NULL CHECK (state IN ('pending', 'claimed', 'applied', 'failed')),
     requested_by TEXT NOT NULL REFERENCES principals(principal_id),
     idempotency_key TEXT NOT NULL,

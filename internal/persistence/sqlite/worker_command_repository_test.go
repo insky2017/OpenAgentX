@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func TestWorkerCommandLifecycleParsesPersistedTimestamps(t *testing.T) {
@@ -156,6 +157,70 @@ func TestReleaseWorkerLeaseFencesAndAllowsOnlyReleasedStopAck(t *testing.T) {
 	if err := repository.AcknowledgeReleasedWorkerCommand(context.Background(), stale, command.ID, domain.WorkerCommandApplied, "stopped",
 		journalEvent("event-released-ack-stale", "worker_command.acknowledged", fixture.ownerPrincipal, fixture.organizationID)); !errors.Is(err, domain.ErrFencingRejected) {
 		t.Fatalf("stale released ack err=%v", err)
+	}
+}
+
+func TestReleasedForceStopCanBeAcknowledged(t *testing.T) {
+	repository, fixture, _, guard, command := setupClaimedWorkerCommand(t, "force-release")
+	if _, err := repository.db.Exec(`UPDATE worker_commands SET kind='force_stop' WHERE worker_command_id=?`, command.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repository.ReleaseWorkerLease(context.Background(), guard,
+		journalEvent("event-worker-force-released", "worker.released", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+		t.Fatal(err)
+	}
+	releasedGuard := guard
+	releasedGuard.FencingToken++
+	if err := repository.AcknowledgeReleasedWorkerCommand(context.Background(), releasedGuard, command.ID, domain.WorkerCommandApplied, "force-stopped",
+		journalEvent("event-force-released-ack", "worker_command.acknowledged", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestWorkerRegistrationResumesPersistedGracefulStopOnNewGeneration(t *testing.T) {
+	repository, fixture, oldWorker, _, command := setupClaimedWorkerCommand(t, "resume-stop")
+	if _, err := repository.db.Exec(`UPDATE worker_commands SET kind='stop' WHERE worker_command_id=?`, command.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repository.db.Exec(`UPDATE worker_instances SET lease_until=? WHERE worker_instance_id=?`,
+		formatTime(repositoryTestTime.Add(-time.Second)), oldWorker.ID); err != nil {
+		t.Fatal(err)
+	}
+	registration := domain.WorkerRegistration{
+		WorkerInstanceID: "worker-resumed-stop", AgentID: fixture.agentID, Transport: domain.WorkerTransportUnix,
+		PrincipalID: fixture.agentPrincipal, Capabilities: []string{"coding"}, SessionTokenDigest: "resumed-stop-digest",
+		TokenExpiresAt: repositoryTestTime.Add(time.Hour), LeaseUntil: repositoryTestTime.Add(time.Hour),
+	}
+	worker, _, err := repository.RegisterWorker(context.Background(), registration, []openruntime.BackendRegistration{{
+		BackendID: "local", Descriptor: messageDescriptor(openruntime.SteerNative), Health: openruntime.BackendHealthy,
+		Network: domain.NetworkPolicy{Mode: domain.NetworkInherit},
+	}}, journalEvent("event-worker-resumed-stop", "worker.registered", fixture.ownerPrincipal, fixture.organizationID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if worker.Generation != oldWorker.Generation+1 || worker.Status != domain.WorkerStatusDraining {
+		t.Fatalf("resumed Worker=%+v", worker)
+	}
+	var workerID string
+	var generation int64
+	var state domain.WorkerCommandState
+	if err := repository.db.QueryRow(`SELECT worker_instance_id,generation,state FROM worker_commands WHERE worker_command_id=?`, command.ID).
+		Scan(&workerID, &generation, &state); err != nil {
+		t.Fatal(err)
+	}
+	if workerID != worker.ID || generation != worker.Generation || state != domain.WorkerCommandPending {
+		t.Fatalf("resumed command worker=%s generation=%d state=%s", workerID, generation, state)
+	}
+	events, err := repository.ListJournal(context.Background(), 0, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, event := range events {
+		found = found || event.EventType == "worker.lifecycle_intent.resumed" && event.AggregateID == worker.ID
+	}
+	if !found {
+		t.Fatal("resumed lifecycle intent was not journaled")
 	}
 }
 

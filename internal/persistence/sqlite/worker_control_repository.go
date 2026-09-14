@@ -2,7 +2,9 @@ package sqlite
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -85,10 +87,21 @@ func (r *Repository) RegisterWorker(
 		&generation, &fencingToken); err != nil {
 		return nil, nil, fmt.Errorf("allocate Worker generation/fencing: %w", err)
 	}
+	var pendingGracefulStops int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM worker_commands c
+		JOIN worker_instances w ON w.worker_instance_id=c.worker_instance_id
+		WHERE w.agent_id=? AND c.kind='stop' AND c.state IN ('pending','claimed')`, registration.AgentID).
+		Scan(&pendingGracefulStops); err != nil {
+		return nil, nil, fmt.Errorf("inspect persisted graceful-stop intent: %w", err)
+	}
+	initialStatus := domain.WorkerStatusBootstrapping
+	if pendingGracefulStops > 0 {
+		initialStatus = domain.WorkerStatusDraining
+	}
 	worker := &domain.WorkerInstance{
 		ID: registration.WorkerInstanceID, AgentID: registration.AgentID, Generation: generation,
 		Transport: registration.Transport, AuthenticatedPrincipal: registration.PrincipalID,
-		Capabilities: capabilities, Status: domain.WorkerStatusBootstrapping,
+		Capabilities: capabilities, Status: initialStatus,
 		LastHeartbeatAt: now, LeaseUntil: registration.LeaseUntil.UTC(), FencingToken: fencingToken,
 		StartedAt: now, UpdatedAt: now,
 	}
@@ -102,6 +115,19 @@ func (r *Repository) RegisterWorker(
 		formatTime(worker.LastHeartbeatAt), formatTime(worker.LeaseUntil), worker.FencingToken,
 		formatTime(worker.StartedAt), formatTime(worker.UpdatedAt)); err != nil {
 		return nil, nil, fmt.Errorf("register Worker: %w", err)
+	}
+	if pendingGracefulStops > 0 {
+		result, err := tx.ExecContext(ctx, `UPDATE worker_commands SET
+			worker_instance_id=?, generation=?, state='pending', lease_until=NULL, claimed_at=NULL
+			WHERE kind='stop' AND state IN ('pending','claimed') AND worker_instance_id IN (
+				SELECT worker_instance_id FROM worker_instances WHERE agent_id=? AND worker_instance_id<>?
+			)`, worker.ID, worker.Generation, registration.AgentID, worker.ID)
+		if err != nil {
+			return nil, nil, fmt.Errorf("resume persisted graceful-stop intent: %w", err)
+		}
+		if changed, _ := result.RowsAffected(); changed != int64(pendingGracefulStops) {
+			return nil, nil, domain.ErrConflict("persisted graceful-stop intent changed during Worker registration")
+		}
 	}
 	for _, backend := range backends {
 		descriptorJSON, err := json.Marshal(backend.Descriptor)
@@ -130,6 +156,19 @@ func (r *Repository) RegisterWorker(
 	}
 	if err := insertJournal(ctx, tx, event); err != nil {
 		return nil, nil, err
+	}
+	if pendingGracefulStops > 0 {
+		resumedEvent := *event
+		digest := sha256.Sum256([]byte(event.ID + "\x00" + worker.ID))
+		resumedEvent.ID = "event-lifecycle-" + hex.EncodeToString(digest[:16])
+		resumedEvent.EventType = "worker.lifecycle_intent.resumed"
+		resumedEvent.Payload, _ = json.Marshal(map[string]any{"kind": domain.WorkerCommandStop, "command_count": pendingGracefulStops})
+		if err := validateJournalForAggregate(&resumedEvent, "worker_instance", worker.ID, now); err != nil {
+			return nil, nil, err
+		}
+		if err := insertJournal(ctx, tx, &resumedEvent); err != nil {
+			return nil, nil, err
+		}
 	}
 	bindings, err := listNetworkBindings(ctx, tx, registration.AgentID)
 	if err != nil {

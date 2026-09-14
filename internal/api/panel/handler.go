@@ -18,6 +18,7 @@ import (
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/safeoutput"
 )
 
 type State interface {
@@ -31,11 +32,13 @@ type State interface {
 	ListTaskJournalRange(context.Context, string, int64, int64, int) ([]domain.JournalEvent, error)
 	GetTask(context.Context, string) (*domain.Task, error)
 	ListMessages(context.Context, string) ([]domain.Message, error)
+	GetMessage(context.Context, string) (*domain.Message, error)
 	ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error)
 	GetRunAttempt(context.Context, string) (*domain.RunAttempt, error)
 	GetWorkerInstance(context.Context, string) (*domain.WorkerInstance, error)
 	ListRunAttemptsForTask(context.Context, string, int) ([]domain.RunAttempt, error)
 	ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error)
+	GetApprovalRequest(context.Context, string) (*domain.ApprovalRequest, error)
 	LatestJournalSequence(context.Context) (int64, error)
 }
 
@@ -143,7 +146,17 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
 	tasks, _ := h.state.ListTasks(r.Context(), "", 100)
 	approvals, _ := h.state.ListPendingApprovals(r.Context(), 100)
 	latestSequence, _ := h.state.LatestJournalSequence(r.Context())
-	writeJSON(w, map[string]any{"agents": agents, "workers": workers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "server_time": time.Now().UTC()})
+	projectedWorkers := make([]openapi.WorkerReadModel, 0, len(workers))
+	for _, worker := range workers {
+		projectedWorkers = append(projectedWorkers, workerReadModel(worker))
+	}
+	writeJSON(w, map[string]any{"agents": agents, "workers": projectedWorkers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "server_time": time.Now().UTC()})
+}
+
+func workerReadModel(worker domain.WorkerInstance) openapi.WorkerReadModel {
+	return openapi.WorkerReadModel{WorkerInstanceID: worker.ID, AgentID: worker.AgentID, Generation: worker.Generation,
+		Capabilities: append([]string(nil), worker.Capabilities...), Status: worker.Status, LastHeartbeatAt: worker.LastHeartbeatAt,
+		LeaseUntil: worker.LeaseUntil, StartedAt: worker.StartedAt, UpdatedAt: worker.UpdatedAt}
 }
 func (h *Handler) agents(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
@@ -422,9 +435,32 @@ func taskListItem(task domain.Task) openapi.TaskListItem {
 func projectEvents(events []domain.JournalEvent) []openapi.JournalEventReadModel {
 	projected := make([]openapi.JournalEventReadModel, 0, len(events))
 	for _, event := range events {
-		projected = append(projected, openapi.JournalEventReadModel{Sequence: event.Sequence, ID: event.ID, AggregateType: event.AggregateType, AggregateID: event.AggregateID, EventType: event.EventType, CreatedAt: event.CreatedAt})
+		model := openapi.JournalEventReadModel{Sequence: event.Sequence, ID: event.ID, AggregateType: event.AggregateType, AggregateID: event.AggregateID, EventType: event.EventType, CreatedAt: event.CreatedAt}
+		model.Output = projectRuntimeOutput(event)
+		projected = append(projected, model)
 	}
 	return projected
+}
+
+func projectRuntimeOutput(event domain.JournalEvent) *openapi.SafeOutputReadModel {
+	if !strings.HasPrefix(event.EventType, "runtime.") || event.EventType == "runtime.approval.requested" {
+		return nil
+	}
+	var envelope struct {
+		Payload json.RawMessage `json:"payload"`
+	}
+	if json.Unmarshal(event.Payload, &envelope) != nil || len(envelope.Payload) == 0 {
+		return nil
+	}
+	projected := safeoutput.ProjectRuntimePayload(envelope.Payload)
+	var output openapi.SafeOutputReadModel
+	if len(projected) == 0 || json.Unmarshal(projected, &output) != nil {
+		return nil
+	}
+	if output.Stage == "" && output.Status == "" && output.Text == "" && output.Diagnostic == "" && !output.HasOutput && !output.HasError {
+		return nil
+	}
+	return &output
 }
 
 func lastEventSequence(events []openapi.JournalEventReadModel) int64 {
@@ -470,7 +506,7 @@ func turnResultReadModel(resultJSON string) (*openapi.TurnResultReadModel, strin
 		source = "runtime_reported"
 	}
 	return &openapi.TurnResultReadModel{
-		RuntimeStatus: result.Status, Body: result.Result, Error: result.Error,
+		RuntimeStatus: result.Status, Body: safeoutput.RedactText(result.Result), Error: safeoutput.RedactText(result.Error),
 		RuntimeSideEffectsKnown: result.RuntimeSideEffectsKnown, SideEffectsSource: source,
 		BusinessVerificationSource: "not_recorded",
 	}, "available"
@@ -953,6 +989,13 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var after int64
+	agentID := strings.TrimSpace(r.URL.Query().Get("agent_id"))
+	if agentID != "" {
+		if err := domain.ValidateIdentifier("agent_id", agentID); err != nil {
+			http.Error(w, "invalid agent_id", http.StatusBadRequest)
+			return
+		}
+	}
 	for _, afterValue := range []string{r.URL.Query().Get("after_sequence"), r.Header.Get("Last-Event-ID")} {
 		if afterValue == "" {
 			continue
@@ -984,11 +1027,19 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 				after = ev.Sequence
 				continue
 			}
+			if agentID != "" && !h.eventMatchesAgent(r.Context(), ev, agentID) {
+				after = ev.Sequence
+				continue
+			}
 			// The panel currently runs in a single authenticated organization scope.
 			// Stream only the browser-safe projection; Journal payloads never cross
 			// the SSE boundary and therefore cannot expose runtime diagnostics or
 			// credentials through a reconnecting client.
-			b, _ := json.Marshal(projectEvents([]domain.JournalEvent{ev})[0])
+			model := projectEvents([]domain.JournalEvent{ev})[0]
+			if ev.AggregateType == "worker_instance" {
+				model.Worker = h.workerEventSnapshot(r.Context(), ev.AggregateID)
+			}
+			b, _ := json.Marshal(model)
 			fmt.Fprintf(w, "id: %d\ndata: %s\n\n", ev.Sequence, b)
 			after = ev.Sequence
 		}
@@ -1004,9 +1055,61 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) eventMatchesAgent(ctx context.Context, event domain.JournalEvent, agentID string) bool {
+	switch event.AggregateType {
+	case "task":
+		task, err := h.state.GetTask(ctx, event.AggregateID)
+		return err == nil && task.TargetAgentID == agentID
+	case "run_attempt", "runtime":
+		run, err := h.state.GetRunAttempt(ctx, event.AggregateID)
+		return err == nil && run.AgentID == agentID
+	case "worker_instance":
+		workers, err := h.state.ListWorkers(ctx, 1000)
+		if err != nil {
+			return false
+		}
+		for _, worker := range workers {
+			if worker.ID == event.AggregateID {
+				return worker.AgentID == agentID
+			}
+		}
+		return false
+	case "message":
+		message, err := h.state.GetMessage(ctx, event.AggregateID)
+		if err != nil {
+			return false
+		}
+		task, err := h.state.GetTask(ctx, message.TaskID)
+		return err == nil && task.TargetAgentID == agentID
+	case "approval_request":
+		approval, err := h.state.GetApprovalRequest(ctx, event.AggregateID)
+		if err != nil {
+			return false
+		}
+		task, err := h.state.GetTask(ctx, approval.TaskID)
+		return err == nil && task.TargetAgentID == agentID
+	default:
+		return false
+	}
+}
+
+func (h *Handler) workerEventSnapshot(ctx context.Context, workerID string) *openapi.WorkerReadModel {
+	workers, err := h.state.ListWorkers(ctx, 1000)
+	if err != nil {
+		return nil
+	}
+	for _, worker := range workers {
+		if worker.ID == workerID {
+			model := workerReadModel(worker)
+			return &model
+		}
+	}
+	return nil
+}
+
 func observableAggregate(aggregateType string) bool {
 	switch aggregateType {
-	case "", "task", "run_attempt", "message", "approval_request":
+	case "", "task", "run_attempt", "runtime", "worker_instance", "message", "approval_request":
 		return true
 	default:
 		return false

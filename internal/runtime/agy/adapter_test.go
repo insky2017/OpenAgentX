@@ -41,9 +41,12 @@ func TestParseStreamJSONNormalizesEventsAndResult(t *testing.T) {
 		t.Fatal("normalized event payload is not JSON")
 	}
 	for _, event := range events {
-		if strings.Contains(string(event.Payload), "conv-1") || strings.Contains(string(event.Payload), "hello") || strings.Contains(string(event.Payload), "done") {
+		if strings.Contains(string(event.Payload), "conv-1") {
 			t.Fatalf("public Runtime Event leaked raw AGY fields: %s", event.Payload)
 		}
+	}
+	if !strings.Contains(string(events[1].Payload), `"text":"hello"`) || !strings.Contains(string(events[2].Payload), `"text":"done"`) {
+		t.Fatalf("safe structured output was not projected: %+v", events)
 	}
 }
 

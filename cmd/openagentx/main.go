@@ -16,10 +16,13 @@ import (
 	openapi "openagentx/internal/api"
 	adminapi "openagentx/internal/api/admin"
 	apiauth "openagentx/internal/api/auth"
+	consoleapi "openagentx/internal/api/console"
 	"openagentx/internal/api/panel"
 	"openagentx/internal/api/workerapi"
 	webAuth "openagentx/internal/auth/web"
 	admincli "openagentx/internal/cli/admin"
+	consolecli "openagentx/internal/cli/console"
+	fleetcli "openagentx/internal/cli/fleet"
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
@@ -44,6 +47,10 @@ func execute(args []string) int {
 		return admincli.ExecuteAgent(args[1:], admincli.DefaultDependencies())
 	case "worker":
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
+	case "console":
+		return consolecli.Execute(args[1:], consolecli.DefaultDependencies())
+	case "fleet":
+		return fleetcli.Execute(args[1:], fleetcli.DefaultDependencies())
 	case "serve":
 		return runDaemon(args[1:])
 	case "schema":
@@ -55,6 +62,8 @@ func execute(args []string) int {
 		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
 		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
+		fmt.Fprintln(os.Stderr, "       openagentx console attach --socket <path> --agent <agent-id> [--diagnostic] [--once]")
+		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|up|status|down|force-stop> --file <fleet.yaml> [--db <path>]")
 		fmt.Fprintln(os.Stderr, "       openagentx schema verify --db <path>")
 		return 0
 	default:
@@ -126,11 +135,6 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create Worker API: %v\n", err)
 		return 1
 	}
-	server, err := unixhttp.NewServer(*socketPath, handler, slog.Default())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "create Unix server: %v\n", err)
-		return 1
-	}
 	if *workerHTTPSAddr != "" {
 		if *workerMTLSCA == "" || *workerMTLSCert == "" || *workerMTLSKey == "" || len(workerBindings) == 0 {
 			fmt.Fprintln(os.Stderr, "remote Worker HTTPS requires mTLS files and at least one --worker-mtls-binding")
@@ -188,12 +192,32 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create Worker admin handler: %v\n", err)
 		return 1
 	}
+	consoleHandler, err := consoleapi.NewHandler(repository, authManager)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create Console attach handler: %v\n", err)
+		return 1
+	}
 	authHandler := apiauth.NewHandler(authManager)
+	unixMux := http.NewServeMux()
+	unixMux.Handle("/api/v1/", handler)
+	unixMux.Handle(openapi.AuthLoginPath, authHandler)
+	unixMux.Handle(openapi.AuthLogoutPath, authHandler)
+	unixMux.Handle(openapi.AuthSessionPath, authHandler)
+	unixMux.Handle("/api/console/", consoleHandler)
+	unixMux.Handle("/api/admin/", adminHandler)
+	unixMux.Handle("/api/observe/", panelHandler)
+	unixMux.Handle("/api/control/", panelHandler)
+	server, err := unixhttp.NewServer(*socketPath, unixMux, slog.Default())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create Unix server: %v\n", err)
+		return 1
+	}
 	webMux := http.NewServeMux()
 	webMux.Handle(openapi.AuthLoginPath, authHandler)
 	webMux.Handle(openapi.AuthLogoutPath, authHandler)
 	webMux.Handle(openapi.AuthSessionPath, authHandler)
 	webMux.Handle("/api/admin/", adminHandler)
+	webMux.Handle("/api/console/", consoleHandler)
 	webMux.Handle("/api/", panelHandler)
 	webFS, err := os.Open(filepath.Clean(*webDir))
 	if err != nil {

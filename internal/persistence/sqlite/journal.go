@@ -91,7 +91,7 @@ func (r *Repository) ListTaskJournal(ctx context.Context, taskID string, afterSe
 		FROM event_journal e
 		WHERE e.sequence > ? AND (
 			(e.aggregate_type = 'task' AND e.aggregate_id = ?) OR
-			(e.aggregate_type = 'run_attempt' AND EXISTS (
+			(e.aggregate_type IN ('run_attempt','runtime') AND EXISTS (
 				SELECT 1 FROM run_attempts r WHERE r.run_id = e.aggregate_id AND r.task_id = ?
 			))
 		)

@@ -23,6 +23,9 @@ func NewHandler(service *controlplane.WorkerAdminService, auth *web.Manager) (*H
 	}
 	handler := &Handler{service: service, auth: auth, mux: http.NewServeMux()}
 	handler.mux.HandleFunc("POST /api/admin/v1/workers/{workerID}/health-check", handler.healthCheck)
+	handler.mux.HandleFunc("POST /api/admin/v1/workers/{workerID}/drain", handler.drain)
+	handler.mux.HandleFunc("POST /api/admin/v1/workers/{workerID}/stop", handler.stop)
+	handler.mux.HandleFunc("POST /api/admin/v1/workers/{workerID}/force-stop", handler.forceStop)
 	return handler, nil
 }
 
@@ -37,6 +40,18 @@ func (h *Handler) ServeHTTP(response http.ResponseWriter, request *http.Request)
 }
 
 func (h *Handler) healthCheck(response http.ResponseWriter, request *http.Request) {
+	h.createCommand(response, request, domain.WorkerCommandHealthCheck)
+}
+
+func (h *Handler) drain(response http.ResponseWriter, request *http.Request) {
+	h.createCommand(response, request, domain.WorkerCommandDrain)
+}
+
+func (h *Handler) stop(response http.ResponseWriter, request *http.Request) {
+	h.createCommand(response, request, domain.WorkerCommandStop)
+}
+
+func (h *Handler) createCommand(response http.ResponseWriter, request *http.Request, kind domain.WorkerCommandKind) {
 	session, ok := h.authorize(response, request)
 	if !ok {
 		return
@@ -50,7 +65,35 @@ func (h *Handler) healthCheck(response http.ResponseWriter, request *http.Reques
 		return
 	}
 	command.RequestedBy = session.User.ID
-	created, err := h.service.Command(request.Context(), session.User.ID, request.PathValue("workerID"), domain.WorkerCommandHealthCheck, command)
+	created, err := h.service.Command(request.Context(), session.User.ID, request.PathValue("workerID"), kind, command)
+	if err != nil {
+		http.Error(response, err.Error(), http.StatusConflict)
+		return
+	}
+	response.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(response).Encode(openapi.WorkerCommandResponse{Command: *created})
+}
+
+func (h *Handler) forceStop(response http.ResponseWriter, request *http.Request) {
+	session, ok := h.authorize(response, request)
+	if !ok {
+		return
+	}
+	var command openapi.WorkerForceStopRequest
+	if err := openapi.DecodeStrictJSON(request.Body, &command); err != nil {
+		http.Error(response, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if !command.Confirm || request.Header.Get("X-Confirm-Dangerous") != "force-stop" {
+		http.Error(response, "force stop requires explicit confirmation", http.StatusBadRequest)
+		return
+	}
+	if !requireIdempotencyHeader(response, request, command.Meta) {
+		return
+	}
+	created, err := h.service.Command(request.Context(), session.User.ID, request.PathValue("workerID"), domain.WorkerCommandForceStop, openapi.WorkerAdminRequest{
+		Meta: command.Meta, RequestedBy: session.User.ID, ExpectedGeneration: command.ExpectedGeneration,
+	})
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusConflict)
 		return

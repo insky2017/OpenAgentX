@@ -82,11 +82,12 @@ type WorkerCommandKind string
 const (
 	WorkerCommandDrain       WorkerCommandKind = "drain"
 	WorkerCommandStop        WorkerCommandKind = "stop"
+	WorkerCommandForceStop   WorkerCommandKind = "force_stop"
 	WorkerCommandHealthCheck WorkerCommandKind = "health_check"
 )
 
 func (k WorkerCommandKind) Valid() bool {
-	return k == WorkerCommandDrain || k == WorkerCommandStop || k == WorkerCommandHealthCheck
+	return k == WorkerCommandDrain || k == WorkerCommandStop || k == WorkerCommandForceStop || k == WorkerCommandHealthCheck
 }
 
 type WorkerCommandState string

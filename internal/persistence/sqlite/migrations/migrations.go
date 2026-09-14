@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 const CurrentVersion = 1
@@ -58,6 +59,9 @@ func Apply(ctx context.Context, db *sql.DB) error {
 		if err := ensureNetworkTables(ctx, db); err != nil {
 			return err
 		}
+		if err := ensureWorkerCommandKinds(ctx, db); err != nil {
+			return err
+		}
 		return ValidateCurrent(ctx, db)
 	}
 
@@ -82,6 +86,50 @@ func Apply(ctx context.Context, db *sql.DB) error {
 	}
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit target schema v%d: %w", CurrentVersion, err)
+	}
+	return nil
+}
+
+func ensureWorkerCommandKinds(ctx context.Context, db *sql.DB) error {
+	var definition string
+	if err := db.QueryRowContext(ctx, `SELECT sql FROM sqlite_master WHERE type='table' AND name='worker_commands'`).Scan(&definition); errors.Is(err, sql.ErrNoRows) {
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("inspect Worker command schema: %w", err)
+	}
+	if strings.Contains(definition, "'force_stop'") {
+		return nil
+	}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin Worker command schema upgrade: %w", err)
+	}
+	defer tx.Rollback()
+	statements := []string{
+		`ALTER TABLE worker_commands RENAME TO worker_commands_legacy`,
+		`CREATE TABLE worker_commands (
+			worker_command_id TEXT PRIMARY KEY,
+			worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id) ON DELETE CASCADE,
+			generation INTEGER NOT NULL CHECK (generation > 0),
+			kind TEXT NOT NULL CHECK (kind IN ('drain', 'stop', 'force_stop', 'health_check')),
+			state TEXT NOT NULL CHECK (state IN ('pending', 'claimed', 'applied', 'failed')),
+			requested_by TEXT NOT NULL REFERENCES principals(principal_id),
+			idempotency_key TEXT NOT NULL, lease_until TEXT,
+			attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+			created_at TEXT NOT NULL, claimed_at TEXT, applied_at TEXT, result TEXT,
+			UNIQUE (requested_by, idempotency_key)
+		)`,
+		`INSERT INTO worker_commands SELECT worker_command_id,worker_instance_id,generation,kind,state,requested_by,idempotency_key,lease_until,attempts,created_at,claimed_at,applied_at,result FROM worker_commands_legacy`,
+		`DROP TABLE worker_commands_legacy`,
+		`CREATE INDEX idx_worker_commands_claim ON worker_commands(worker_instance_id, generation, state, created_at)`,
+	}
+	for _, statement := range statements {
+		if _, err := tx.ExecContext(ctx, statement); err != nil {
+			return fmt.Errorf("upgrade Worker command schema: %w", err)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit Worker command schema upgrade: %w", err)
 	}
 	return nil
 }

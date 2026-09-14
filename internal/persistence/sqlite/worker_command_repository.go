@@ -286,7 +286,7 @@ func (r *Repository) ReleaseWorkerLease(ctx context.Context, guard domain.Worker
 }
 
 // AcknowledgeReleasedWorkerCommand is intentionally narrower than the normal
-// ACK path: only a claimed stop command may be acknowledged after the Worker
+// ACK path: only a claimed graceful or force stop command may be acknowledged after the Worker
 // has atomically released its lease.
 func (r *Repository) AcknowledgeReleasedWorkerCommand(ctx context.Context, guard domain.WorkerWriteGuard, commandID string, state domain.WorkerCommandState, result string, event *domain.JournalEvent) error {
 	if state != domain.WorkerCommandApplied && state != domain.WorkerCommandFailed {
@@ -317,7 +317,8 @@ func (r *Repository) AcknowledgeReleasedWorkerCommand(ctx context.Context, guard
 	} else if err != nil {
 		return err
 	}
-	if commandWorkerID != guard.WorkerInstanceID || commandGeneration != guard.Generation || kind != domain.WorkerCommandStop {
+	if commandWorkerID != guard.WorkerInstanceID || commandGeneration != guard.Generation ||
+		(kind != domain.WorkerCommandStop && kind != domain.WorkerCommandForceStop) {
 		return domain.ErrForbidden("Worker command is not an acknowledged stop")
 	}
 	if currentState != domain.WorkerCommandClaimed {

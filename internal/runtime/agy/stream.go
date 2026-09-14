@@ -11,6 +11,7 @@ import (
 	"time"
 
 	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/safeoutput"
 )
 
 const maxStreamLine = 4 << 20
@@ -169,28 +170,44 @@ func firstString(values map[string]any, keys ...string) string {
 }
 
 type publicEventPayload struct {
-	Stage     string                       `json:"stage"`
-	Status    openruntime.TurnResultStatus `json:"status,omitempty"`
-	HasOutput bool                         `json:"has_output,omitempty"`
-	HasError  bool                         `json:"has_error,omitempty"`
+	Stage      string                       `json:"stage"`
+	Status     openruntime.TurnResultStatus `json:"status,omitempty"`
+	Text       string                       `json:"text,omitempty"`
+	Diagnostic string                       `json:"diagnostic,omitempty"`
+	HasOutput  bool                         `json:"has_output,omitempty"`
+	HasError   bool                         `json:"has_error,omitempty"`
 }
 
 func publicStreamEvent(record streamRecord) (string, json.RawMessage) {
 	stage := "event"
+	publishContent := false
 	switch strings.ToLower(strings.TrimSpace(record.Type)) {
 	case "init":
 		stage = "init"
 	case "step_update":
 		stage = "step_update"
+		publishContent = true
 	case "result":
 		stage = "result"
+		publishContent = true
 	default:
 		if record.Error != "" || strings.Contains(strings.ToLower(record.Type), "error") {
 			stage = "error"
+			publishContent = true
 		}
+	}
+	text := record.Result
+	if text == "" {
+		text = record.Text
+	}
+	diagnostic := record.Error
+	if !publishContent {
+		text = ""
+		diagnostic = ""
 	}
 	payload, _ := json.Marshal(publicEventPayload{
 		Stage: stage, Status: publicStatus(record.Status),
+		Text: safeoutput.RedactText(text), Diagnostic: safeoutput.RedactText(diagnostic),
 		HasOutput: record.Result != "" || record.Text != "", HasError: record.Error != "",
 	})
 	return "agy." + stage, payload

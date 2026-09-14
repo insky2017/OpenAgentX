@@ -19,6 +19,7 @@ import (
 	"openagentx/internal/api"
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/safeoutput"
 )
 
 type WorkerState interface {
@@ -545,6 +546,7 @@ func publicRuntimeEvent(event openruntime.RuntimeEvent, now time.Time) (string, 
 		case "agy.init", "agy.step_update", "agy.result", "agy.error", "agy.event",
 			"turn.output", "turn.heartbeat":
 			publicType = event.Type
+			publicPayload = safeoutput.ProjectRuntimePayload(event.Payload)
 		}
 	}
 	payload, err := json.Marshal(publicRuntimeEventEnvelope{

@@ -51,6 +51,12 @@ print_matches() {
         --glob '*.service' \
         -- "${pattern}" "${existing[@]}" 2>/dev/null || true)
 
+	# ADR-005 requires documenting and negatively testing forbidden tmux
+	# control commands. Those literals are evidence, not executable paths.
+	if [[ "${label}" == "tmux_control" && -n "${matches}" ]]; then
+		matches=$(printf '%s\n' "${matches}" | rg -v '(^|/)[^:]*_test\.go:|\.md:' || true)
+	fi
+
     if [[ -z "${matches}" ]]; then
         printf 'CLEAN %s\n' "${label}"
         return

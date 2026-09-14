@@ -23,6 +23,7 @@ type testPanelState struct {
 	agents            []domain.AgentIdentity
 	workers           []domain.WorkerInstance
 	tasks             []domain.Task
+	messages          []domain.Message
 	runs              []domain.RunAttempt
 	journal           []domain.JournalEvent
 	approvals         []domain.ApprovalRequest
@@ -154,8 +155,24 @@ func (s *testPanelState) GetTask(_ context.Context, taskID string) (*domain.Task
 	return nil, domain.ErrNotFound
 }
 
-func (s *testPanelState) ListMessages(context.Context, string) ([]domain.Message, error) {
-	return nil, nil
+func (s *testPanelState) ListMessages(_ context.Context, taskID string) ([]domain.Message, error) {
+	var result []domain.Message
+	for _, message := range s.messages {
+		if message.TaskID == taskID {
+			result = append(result, message)
+		}
+	}
+	return result, nil
+}
+
+func (s *testPanelState) GetMessage(_ context.Context, messageID string) (*domain.Message, error) {
+	for index := range s.messages {
+		if s.messages[index].ID == messageID {
+			message := s.messages[index]
+			return &message, nil
+		}
+	}
+	return nil, domain.ErrNotFound
 }
 
 func (s *testPanelState) ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error) {
@@ -188,6 +205,16 @@ func (s *testPanelState) ListRunAttemptsForTask(_ context.Context, taskID string
 
 func (s *testPanelState) ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error) {
 	return s.approvals, nil
+}
+
+func (s *testPanelState) GetApprovalRequest(_ context.Context, approvalID string) (*domain.ApprovalRequest, error) {
+	for index := range s.approvals {
+		if s.approvals[index].ID == approvalID {
+			approval := s.approvals[index]
+			return &approval, nil
+		}
+	}
+	return nil, domain.ErrNotFound
 }
 
 func (s *testPanelState) LatestJournalSequence(context.Context) (int64, error) {
@@ -259,7 +286,10 @@ func newAuthenticatedPanel(t *testing.T, role web.Role, state State) authenticat
 }
 
 func TestOverviewRequiresSessionAndExposesLatestSequence(t *testing.T) {
-	state := &testPanelState{journal: []domain.JournalEvent{{Sequence: 7}}}
+	state := &testPanelState{journal: []domain.JournalEvent{{Sequence: 7}}, workers: []domain.WorkerInstance{{
+		ID: "worker-safe", AgentID: "quote", Generation: 2, Status: domain.WorkerStatusOnline,
+		FencingToken: 987654321, AuthenticatedPrincipal: "private-worker-principal",
+	}}}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
 
 	unauthenticated := httptest.NewRecorder()
@@ -283,6 +313,9 @@ func TestOverviewRequiresSessionAndExposesLatestSequence(t *testing.T) {
 	}
 	if response.Header().Get("Cache-Control") != "no-store" {
 		t.Fatalf("overview cache policy=%q", response.Header().Get("Cache-Control"))
+	}
+	if strings.Contains(response.Body.String(), "987654321") || strings.Contains(response.Body.String(), "private-worker-principal") || strings.Contains(response.Body.String(), "fencing_token") {
+		t.Fatalf("overview leaked Worker security material: %s", response.Body.String())
 	}
 }
 
@@ -489,6 +522,25 @@ func TestTaskDetailProjectsSafeRunEvidence(t *testing.T) {
 	}
 }
 
+func TestRuntimeTimelineUsesSafeStructuredProjection(t *testing.T) {
+	events := projectEvents([]domain.JournalEvent{{
+		Sequence: 4, AggregateType: "runtime", AggregateID: "run-1", EventType: "runtime.turn.output",
+		Payload: json.RawMessage(`{"runtime_event_type":"turn.output","payload":{"stage":"running","text":"working token=top-secret","stderr":"raw stderr","reasoning":"hidden"},"occurred_at":"2026-09-14T00:00:00Z"}`),
+	}})
+	if len(events) != 1 || events[0].Output == nil || events[0].Output.Text != "working token=[REDACTED]" {
+		t.Fatalf("safe output projection=%+v", events)
+	}
+	encoded, err := json.Marshal(events[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, forbidden := range []string{"top-secret", "raw stderr", "hidden", "reasoning"} {
+		if strings.Contains(string(encoded), forbidden) {
+			t.Fatalf("timeline leaked %q: %s", forbidden, encoded)
+		}
+	}
+}
+
 func TestHealthIsPublicMinimalJSONProbe(t *testing.T) {
 	panel := newAuthenticatedPanel(t, web.RoleOwner, &testPanelState{})
 
@@ -605,5 +657,62 @@ func TestSSEReplaysAfterHighestClientSequence(t *testing.T) {
 	}
 	if response.Header().Get("X-Accel-Buffering") != "no" {
 		t.Fatalf("SSE buffering header=%q", response.Header().Get("X-Accel-Buffering"))
+	}
+}
+
+func TestSSEAgentFilterIncludesOnlyMatchingSafeRuntimeEvents(t *testing.T) {
+	state := &testPanelState{
+		tasks:    []domain.Task{{ID: "task-quote", TargetAgentID: "quote"}, {ID: "task-risk", TargetAgentID: "risk"}},
+		messages: []domain.Message{{ID: "message-quote", TaskID: "task-quote"}, {ID: "message-risk", TaskID: "task-risk"}},
+		approvals: []domain.ApprovalRequest{
+			{ID: "approval-quote", TaskID: "task-quote"}, {ID: "approval-risk", TaskID: "task-risk"},
+		},
+		runs: []domain.RunAttempt{{ID: "run-quote", AgentID: "quote"}, {ID: "run-risk", AgentID: "risk"}},
+		journal: []domain.JournalEvent{
+			{Sequence: 1, ID: "event-risk", AggregateType: "runtime", AggregateID: "run-risk", EventType: "runtime.turn.output", Payload: json.RawMessage(`{"payload":{"text":"risk"}}`)},
+			{Sequence: 2, ID: "event-quote", AggregateType: "runtime", AggregateID: "run-quote", EventType: "runtime.turn.output", Payload: json.RawMessage(`{"payload":{"text":"quote token=private"}}`)},
+			{Sequence: 3, ID: "event-message-risk", AggregateType: "message", AggregateID: "message-risk", EventType: "message.created"},
+			{Sequence: 4, ID: "event-message-quote", AggregateType: "message", AggregateID: "message-quote", EventType: "message.created"},
+			{Sequence: 5, ID: "event-approval-risk", AggregateType: "approval_request", AggregateID: "approval-risk", EventType: "approval.requested"},
+			{Sequence: 6, ID: "event-approval-quote", AggregateType: "approval_request", AggregateID: "approval-quote", EventType: "approval.requested"},
+		},
+	}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	ctx, cancel := context.WithCancel(context.Background())
+	request := httptest.NewRequest(http.MethodGet, "/api/observe/v1/events/stream?agent_id=quote", nil).WithContext(ctx)
+	request.AddCookie(panel.cookie)
+	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+	panel.handler.ServeHTTP(response, request)
+	body := response.Body.String()
+	if strings.Contains(body, "risk") || !strings.Contains(body, `"text":"quote token=[REDACTED]"`) || strings.Contains(body, "private") ||
+		!strings.Contains(body, "event-message-quote") || !strings.Contains(body, "event-approval-quote") {
+		t.Fatalf("agent-filtered SSE body=%q", body)
+	}
+}
+
+func TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot(t *testing.T) {
+	state := &testPanelState{
+		workers: []domain.WorkerInstance{{
+			ID: "worker-quote", AgentID: "quote", Generation: 8, Status: domain.WorkerStatusDraining,
+			FencingToken: 998877, AuthenticatedPrincipal: "private-worker-principal",
+		}},
+		journal: []domain.JournalEvent{{
+			Sequence: 1, ID: "event-worker-draining", AggregateType: "worker_instance", AggregateID: "worker-quote", EventType: "worker.heartbeat",
+		}},
+	}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	ctx, cancel := context.WithCancel(context.Background())
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?agent_id=quote", nil).WithContext(ctx)
+	request.AddCookie(panel.cookie)
+	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+	panel.handler.ServeHTTP(response, request)
+	body := response.Body.String()
+	if !strings.Contains(body, `"worker":{"worker_instance_id":"worker-quote","agent_id":"quote","generation":8`) || !strings.Contains(body, `"status":"draining"`) {
+		t.Fatalf("worker drain snapshot missing from SSE: %q", body)
+	}
+	for _, forbidden := range []string{"998877", "private-worker-principal", "fencing_token", "authenticated_principal"} {
+		if strings.Contains(body, forbidden) {
+			t.Fatalf("worker SSE leaked %q: %s", forbidden, body)
+		}
 	}
 }

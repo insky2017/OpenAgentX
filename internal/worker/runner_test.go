@@ -58,6 +58,7 @@ type fakeWorkerClient struct {
 	runCounter      int
 	beginAttempts   int
 	heartbeatFail   int
+	registerStatus  domain.WorkerStatus
 
 	wakeup        chan struct{}
 	commandWake   chan struct{}
@@ -85,10 +86,14 @@ func (c *fakeWorkerClient) RegisterWorker(_ context.Context, request api.Registe
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.registerRequest = request
+	status := c.registerStatus
+	if status == "" {
+		status = domain.WorkerStatusBootstrapping
+	}
 	c.session = api.WorkerSession{Worker: domain.WorkerInstance{
 		ID: request.WorkerInstanceID, AgentID: request.AgentID, Generation: 1,
 		Transport: request.Transport, AuthenticatedPrincipal: "worker-principal",
-		Capabilities: request.Capabilities, Status: domain.WorkerStatusBootstrapping,
+		Capabilities: request.Capabilities, Status: status,
 		FencingToken: 1, LastHeartbeatAt: time.Now(), LeaseUntil: time.Now().Add(time.Minute),
 		StartedAt: time.Now(), UpdatedAt: time.Now(),
 	}, SessionToken: "fake-worker-session-token", TokenExpiresAt: time.Now().Add(time.Hour)}
@@ -762,7 +767,7 @@ func TestTurnCompletionRacesAllControlOperationsWithoutDeadlockOrDuplicateFinish
 	}
 }
 
-func TestControlledStopCancelsAndReconcilesBeforeAcknowledgement(t *testing.T) {
+func TestControlledStopDrainsAndReconcilesBeforeAcknowledgement(t *testing.T) {
 	runner, client, adapter := newRunnerFixture(t, true)
 	result := make(chan error, 1)
 	go func() { result <- runner.Run(context.Background()) }()
@@ -777,10 +782,8 @@ func TestControlledStopCancelsAndReconcilesBeforeAcknowledgement(t *testing.T) {
 		Kind: domain.WorkerCommandStop, State: domain.WorkerCommandClaimed,
 		RequestedBy: "human-owner", IdempotencyKey: "stop-idem", Attempts: 1, CreatedAt: time.Now(),
 	})
-	if err := handle.NextCancel(testContext(t)); err != nil {
-		t.Fatal(err)
-	}
-	waitSignal(t, client.finishHit, "shutdown reconciliation")
+	handle.Complete(openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "completed during drain", SideEffectsKnown: true})
+	waitSignal(t, client.finishHit, "graceful drain reconciliation")
 	if err := waitWorkerExit(t, result); err != nil {
 		t.Fatalf("controlled stop must return success: %v", err)
 	}
@@ -796,8 +799,119 @@ func TestControlledStopCancelsAndReconcilesBeforeAcknowledgement(t *testing.T) {
 	if len(client.eventLog) < 2 || client.eventLog[len(client.eventLog)-2] != "release" || client.eventLog[len(client.eventLog)-1] != "released-ack" {
 		t.Fatalf("stop release/ack order=%v", client.eventLog)
 	}
+	if len(client.finishes) != 1 || client.finishes[0].request.Result.Status != openruntime.TurnResultSucceeded {
+		t.Fatalf("graceful drain reconciliation=%+v", client.finishes)
+	}
+}
+
+func TestGracefulStopReleasesIdleWorkerWithoutRuntimeCancellation(t *testing.T) {
+	runner, client, _ := newRunnerFixture(t, true)
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(context.Background()) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	client.enqueueCommand(domain.WorkerCommand{
+		ID: "command-idle-stop", WorkerInstanceID: "worker-1", Generation: 1,
+		Kind: domain.WorkerCommandStop, State: domain.WorkerCommandClaimed,
+		RequestedBy: "human-owner", IdempotencyKey: "idle-stop-idem", Attempts: 1, CreatedAt: time.Now(),
+	})
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("idle graceful stop must return success: %v", err)
+	}
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if len(client.finishes) != 0 || len(client.releases) != 1 || len(client.commandAcks) != 1 {
+		t.Fatalf("idle graceful stop finishes=%d releases=%d acks=%d", len(client.finishes), len(client.releases), len(client.commandAcks))
+	}
+}
+
+func TestGracefulStopRedeliveryRenewsIntentDuringBusyDrain(t *testing.T) {
+	runner, client, adapter := newRunnerFixture(t, true)
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(context.Background()) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	client.enqueueMailbox(workItem("mailbox-renew-stop", 1))
+	handle, err := adapter.NextHandle(testContext(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	stop := domain.WorkerCommand{
+		ID: "command-renew-stop", WorkerInstanceID: "worker-1", Generation: 1,
+		Kind: domain.WorkerCommandStop, State: domain.WorkerCommandClaimed,
+		RequestedBy: "human-owner", IdempotencyKey: "renew-stop-idem", Attempts: 1, CreatedAt: time.Now(),
+	}
+	client.enqueueCommand(stop)
+	stop.Attempts++
+	client.enqueueCommand(stop)
+	waitSignal(t, client.heartbeatHit, "initial graceful-stop drain")
+	waitSignal(t, client.heartbeatHit, "redelivered graceful-stop drain")
+	client.mu.Lock()
+	if len(client.commandAcks) != 0 {
+		client.mu.Unlock()
+		t.Fatalf("redelivered graceful stop was prematurely acknowledged: %+v", client.commandAcks)
+	}
+	client.mu.Unlock()
+	handle.Complete(openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "completed after renewal", SideEffectsKnown: true})
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("renewed graceful stop must return success: %v", err)
+	}
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if len(client.commandAcks) != 1 || client.commandAcks[0].commandID != stop.ID || len(client.releases) != 1 {
+		t.Fatalf("renewed graceful stop acks=%+v releases=%d", client.commandAcks, len(client.releases))
+	}
+}
+
+func TestResumedGracefulStopStartsNewGenerationDrainingAndTakesNoWork(t *testing.T) {
+	runner, client, _ := newRunnerFixture(t, true)
+	client.registerStatus = domain.WorkerStatusDraining
+	client.enqueueMailbox(workItem("mailbox-must-not-start", 1))
+	client.enqueueCommand(domain.WorkerCommand{
+		ID: "command-resumed-stop", WorkerInstanceID: "worker-1", Generation: 1,
+		Kind: domain.WorkerCommandStop, State: domain.WorkerCommandClaimed,
+		RequestedBy: "human-owner", IdempotencyKey: "resumed-stop-idem", Attempts: 2, CreatedAt: time.Now(),
+	})
+	if err := runner.Run(context.Background()); err != nil {
+		t.Fatalf("resumed graceful stop failed: %v", err)
+	}
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if client.beginAttempts != 0 || len(client.releases) != 1 || len(client.commandAcks) != 1 {
+		t.Fatalf("resumed stop begin attempts=%d releases=%d acks=%d", client.beginAttempts, len(client.releases), len(client.commandAcks))
+	}
+	if len(client.heartbeats) == 0 || client.heartbeats[0].Status != domain.WorkerStatusDraining {
+		t.Fatalf("resumed stop initial heartbeat=%+v", client.heartbeats)
+	}
+}
+
+func TestForceStopIsSeparateAndCancelsActiveRun(t *testing.T) {
+	runner, client, adapter := newRunnerFixture(t, true)
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(context.Background()) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	client.enqueueMailbox(workItem("mailbox-force-stop", 1))
+	handle, err := adapter.NextHandle(testContext(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.enqueueCommand(domain.WorkerCommand{
+		ID: "command-force-stop", WorkerInstanceID: "worker-1", Generation: 1,
+		Kind: domain.WorkerCommandForceStop, State: domain.WorkerCommandClaimed,
+		RequestedBy: "human-owner", IdempotencyKey: "force-stop-idem", Attempts: 1, CreatedAt: time.Now(),
+	})
+	if err := handle.NextCancel(testContext(t)); err != nil {
+		t.Fatal(err)
+	}
+	waitSignal(t, client.finishHit, "forced shutdown reconciliation")
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("force stop must return success after reconciliation: %v", err)
+	}
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if len(client.commandAcks) != 1 || !strings.Contains(client.commandAcks[0].request.Result, "force-stopped") {
+		t.Fatalf("force-stop acknowledgement=%+v", client.commandAcks)
+	}
 	if len(client.finishes) != 1 || client.finishes[0].request.Result.Status != openruntime.TurnResultUncertain {
-		t.Fatalf("shutdown reconciliation=%+v", client.finishes)
+		t.Fatalf("forced reconciliation=%+v", client.finishes)
 	}
 }
 

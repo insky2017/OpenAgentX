@@ -31,6 +31,18 @@ type AgentReadModel struct {
 	PendingMailboxItems int                      `json:"pending_mailbox_items"`
 }
 
+type WorkerReadModel struct {
+	WorkerInstanceID string              `json:"worker_instance_id"`
+	AgentID          string              `json:"agent_id"`
+	Generation       int64               `json:"generation"`
+	Capabilities     []string            `json:"capabilities,omitempty"`
+	Status           domain.WorkerStatus `json:"status"`
+	LastHeartbeatAt  time.Time           `json:"last_heartbeat_at"`
+	LeaseUntil       time.Time           `json:"lease_until"`
+	StartedAt        time.Time           `json:"started_at"`
+	UpdatedAt        time.Time           `json:"updated_at"`
+}
+
 type TaskReadModel struct {
 	Task                  TaskReadModelTask       `json:"task"`
 	Messages              []domain.Message        `json:"messages"`
@@ -115,12 +127,23 @@ type TurnResultReadModel struct {
 }
 
 type JournalEventReadModel struct {
-	Sequence      int64     `json:"sequence"`
-	ID            string    `json:"event_id"`
-	AggregateType string    `json:"aggregate_type"`
-	AggregateID   string    `json:"aggregate_id"`
-	EventType     string    `json:"event_type"`
-	CreatedAt     time.Time `json:"created_at"`
+	Sequence      int64                `json:"sequence"`
+	ID            string               `json:"event_id"`
+	AggregateType string               `json:"aggregate_type"`
+	AggregateID   string               `json:"aggregate_id"`
+	EventType     string               `json:"event_type"`
+	CreatedAt     time.Time            `json:"created_at"`
+	Output        *SafeOutputReadModel `json:"output,omitempty"`
+	Worker        *WorkerReadModel     `json:"worker,omitempty"`
+}
+
+type SafeOutputReadModel struct {
+	Stage      string `json:"stage,omitempty"`
+	Status     string `json:"status,omitempty"`
+	Text       string `json:"text,omitempty"`
+	Diagnostic string `json:"diagnostic,omitempty"`
+	HasOutput  bool   `json:"has_output,omitempty"`
+	HasError   bool   `json:"has_error,omitempty"`
 }
 
 type EventPage struct {

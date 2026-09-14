@@ -217,3 +217,59 @@ func TestListTaskJournalBeforeReturnsNewestHistoryInChronologicalOrder(t *testin
 		t.Fatalf("bounded live page=%+v latest=%d", rangePage, latest)
 	}
 }
+
+func TestTaskJournalQueriesIncludeRuntimeAggregateForItsRun(t *testing.T) {
+	repository, _ := openTestRepository(t, nil)
+	fixture := seedRepository(t, repository)
+	created := createTask(t, repository, fixture, "runtime-history")
+	now := formatTime(repositoryTestTime)
+	if _, err := repository.db.Exec(`INSERT INTO worker_instances (
+		worker_instance_id,agent_id,generation,transport,authenticated_principal,capabilities_json,status,
+		last_heartbeat_at,lease_until,fencing_token,started_at,updated_at
+	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`, "worker-runtime-history", fixture.agentID, 1, "unix", fixture.ownerPrincipal, "[]", "online", now, now, 1, now, now); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repository.db.Exec(`INSERT INTO run_attempts (
+		run_id,task_id,agent_id,version,status,worker_instance_id,fencing_token,lease_until,execution_spec_version,
+		requested_execution_json,resolved_execution_json,adapter_id,backend_id,model,reasoning_mode,reasoning_value,
+		started_at,created_at,updated_at
+	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, "run-runtime-history", created.Task.ID, fixture.agentID, 1, "running",
+		"worker-runtime-history", 1, now, 1, "{}", "{}", "agy", "local", "model", "none", "", now, now, now); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repository.db.Exec(`INSERT INTO event_journal (
+		event_id,organization_id,aggregate_type,aggregate_id,event_type,actor_principal_id,payload_json,created_at
+	) VALUES (?,?,?,?,?,?,?,?)`, "event-runtime-history", fixture.organizationID, "runtime", "run-runtime-history",
+		"runtime.turn.output", fixture.ownerPrincipal, `{"payload":{"text":"safe"}}`, now); err != nil {
+		t.Fatal(err)
+	}
+	latest, err := repository.LatestJournalSequence(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, load := range map[string]func() ([]domain.JournalEvent, error){
+		"legacy": func() ([]domain.JournalEvent, error) {
+			return repository.ListTaskJournal(context.Background(), created.Task.ID, 0, 100)
+		},
+		"history": func() ([]domain.JournalEvent, error) {
+			return repository.ListTaskJournalBefore(context.Background(), created.Task.ID, latest+1, 100)
+		},
+		"range": func() ([]domain.JournalEvent, error) {
+			return repository.ListTaskJournalRange(context.Background(), created.Task.ID, 0, latest, 100)
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			events, err := load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			found := false
+			for _, event := range events {
+				found = found || event.ID == "event-runtime-history"
+			}
+			if !found {
+				t.Fatalf("runtime event missing from %s query: %+v", name, events)
+			}
+		})
+	}
+}

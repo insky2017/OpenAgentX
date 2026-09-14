@@ -39,6 +39,9 @@ func NewWorkerAdminService(state WorkerAdminState, broker WakeupBroker, now func
 }
 
 func (s *WorkerAdminService) Command(ctx context.Context, principalID, workerID string, kind domain.WorkerCommandKind, request api.WorkerAdminRequest) (*domain.WorkerCommand, error) {
+	if !kind.Valid() {
+		return nil, domain.ErrInvalidInput("unsupported Worker command kind")
+	}
 	if err := request.Validate(); err != nil {
 		return nil, err
 	}

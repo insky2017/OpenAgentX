@@ -3,6 +3,7 @@ package codebuddy
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -17,11 +18,13 @@ import (
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
 	runtimenetwork "openagentx/internal/runtime/network"
+	"openagentx/internal/safeoutput"
 )
 
 const (
-	defaultOutputLimit = 1 << 20
-	defaultCancelGrace = 10 * time.Second
+	defaultOutputLimit  = 1 << 20
+	defaultCancelGrace  = 10 * time.Second
+	maxLiveOutputEvents = 256
 )
 
 type Config struct {
@@ -123,7 +126,7 @@ func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, er
 		},
 		SessionModes: []domain.SessionMode{domain.SessionModeNew}, Steer: openruntime.SteerQueued,
 		Approval: openruntime.ApprovalPreflight, Cancel: openruntime.CancelProcessSignal,
-		Streams: false, MaxConcurrency: 1, NetworkModes: []string{"inherit", "direct"}, BackendOptionsJSON: []byte(`{"type":"object"}`), RuntimeIdentity: a.config.RuntimeIdentity,
+		Streams: true, MaxConcurrency: 1, NetworkModes: []string{"inherit", "direct"}, BackendOptionsJSON: []byte(`{"type":"object"}`), RuntimeIdentity: a.config.RuntimeIdentity,
 	}, nil
 }
 
@@ -170,7 +173,7 @@ func (a *Adapter) Health(ctx context.Context) error {
 	return nil
 }
 
-func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, _ openruntime.EventSink) (openruntime.TurnHandle, error) {
+func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, sink openruntime.EventSink) (openruntime.TurnHandle, error) {
 	expectedIdentity := request.Execution.Spec.Network.RuntimeIdentity
 	if expectedIdentity.IsZero() {
 		expectedIdentity = a.config.RuntimeIdentity
@@ -203,7 +206,7 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.WaitDelay = a.config.CancelGrace
 	command.Stdin = strings.NewReader(buildPrompt(request))
-	stdout := newBoundedBuffer(a.config.OutputLimit)
+	stdout := newLiveOutputBuffer(a.config.OutputLimit, sink)
 	stderr := newBoundedBuffer(a.config.OutputLimit)
 	command.Stdout = stdout
 	command.Stderr = stderr
@@ -251,7 +254,8 @@ func buildPrompt(request openruntime.TurnRequest) string {
 
 type turnHandle struct {
 	command         *exec.Cmd
-	stdout, stderr  *boundedBuffer
+	stdout          *liveOutputBuffer
+	stderr          *boundedBuffer
 	done            chan struct{}
 	cancelGrace     time.Duration
 	once            sync.Once
@@ -262,6 +266,8 @@ type turnHandle struct {
 
 func (h *turnHandle) collect() {
 	waitErr := h.command.Wait()
+	h.stdout.Flush()
+	streamErr := h.stdout.EventError()
 	result := openruntime.TurnResult{}
 	var resultErr error
 	switch {
@@ -276,6 +282,11 @@ func (h *turnHandle) collect() {
 			result.Error += ": " + details
 		}
 		resultErr = fmt.Errorf("CodeBuddy process exited: %w", waitErr)
+	case streamErr != nil:
+		result.Status = openruntime.TurnResultUncertain
+		result.SideEffectsKnown = false
+		result.Error = "CodeBuddy output event could not be persisted"
+		resultErr = fmt.Errorf("emit CodeBuddy output event: %w", streamErr)
 	case h.stdout.Truncated() || h.stderr.Truncated():
 		result.Status = openruntime.TurnResultUncertain
 		result.SideEffectsKnown = false
@@ -351,6 +362,86 @@ type boundedBuffer struct {
 	data      bytes.Buffer
 	limit     int
 	truncated bool
+}
+
+// liveOutputBuffer keeps the authoritative bounded final stdout while
+// publishing only complete, redacted lines. Event count and event size are
+// bounded so a noisy CLI cannot turn stdout into an unbounded Journal stream.
+type liveOutputBuffer struct {
+	storage  *boundedBuffer
+	sink     openruntime.EventSink
+	mu       sync.Mutex
+	pending  []byte
+	captured int
+	events   int
+	eventErr error
+}
+
+func newLiveOutputBuffer(limit int, sink openruntime.EventSink) *liveOutputBuffer {
+	return &liveOutputBuffer{storage: newBoundedBuffer(limit), sink: sink}
+}
+
+func (b *liveOutputBuffer) Write(value []byte) (int, error) {
+	written, _ := b.storage.Write(value)
+	if b.sink == nil {
+		return written, nil
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	remaining := b.storage.limit - b.captured
+	if remaining <= 0 || b.events >= maxLiveOutputEvents {
+		return written, nil
+	}
+	if len(value) > remaining {
+		value = value[:remaining]
+	}
+	b.captured += len(value)
+	b.pending = append(b.pending, value...)
+	for b.events < maxLiveOutputEvents {
+		newline := bytes.IndexByte(b.pending, '\n')
+		if newline < 0 {
+			break
+		}
+		line := append([]byte(nil), b.pending[:newline]...)
+		b.pending = b.pending[newline+1:]
+		b.emitLocked(line)
+	}
+	return written, nil
+}
+
+func (b *liveOutputBuffer) Flush() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if len(b.pending) == 0 || b.events >= maxLiveOutputEvents {
+		return
+	}
+	line := append([]byte(nil), b.pending...)
+	b.pending = nil
+	b.emitLocked(line)
+}
+
+func (b *liveOutputBuffer) emitLocked(line []byte) {
+	if b.eventErr != nil {
+		return
+	}
+	text := strings.TrimSpace(safeoutput.RedactText(string(line)))
+	if text == "" {
+		return
+	}
+	payload, _ := json.Marshal(map[string]any{"stage": "output", "status": "running", "text": text, "has_output": true})
+	if err := b.sink.Emit(context.Background(), openruntime.RuntimeEvent{Type: "turn.output", Payload: payload, OccurredAt: time.Now().UTC()}); err != nil && b.eventErr == nil {
+		b.eventErr = err
+	}
+	b.events++
+}
+
+func (b *liveOutputBuffer) String() string  { return b.storage.String() }
+func (b *liveOutputBuffer) Truncated() bool { return b.storage.Truncated() }
+
+func (b *liveOutputBuffer) EventError() error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.eventErr
 }
 
 func newBoundedBuffer(limit int) *boundedBuffer { return &boundedBuffer{limit: limit} }

@@ -146,7 +146,7 @@ function RunTimeline({ detail, onLoadMore, loadingMore }) {
       </div>
       {detail.has_older_events && <button className="load-more history-more" type="button" onClick={onLoadMore} disabled={loadingMore}>{loadingMore ? '加载中...' : '加载更早事件'}</button>}
       <ol className="timeline" aria-label="运行时间线">
-        {events.map((event) => <li key={`${event.sequence}-${event.event_id}`}><span className="timeline-marker" /><div><strong>{eventLabel(event.event_type)}</strong><p>{event.event_type} · {event.aggregate_type}</p><time>{new Date(event.created_at).toLocaleString()} · #{event.sequence}</time></div></li>)}
+        {events.map((event) => <li key={`${event.sequence}-${event.event_id}`}><span className="timeline-marker" /><div><strong>{eventLabel(event.event_type)}</strong><p>{event.event_type} · {event.aggregate_type}</p>{event.output?.text && <pre className="timeline-output">{event.output.text}</pre>}{event.output?.diagnostic && <pre className="timeline-output diagnostic-output">{event.output.diagnostic}</pre>}<time>{new Date(event.created_at).toLocaleString()} · #{event.sequence}</time></div></li>)}
         {!events.length && <li className="empty-state">暂无运行事件</li>}
       </ol>
     </div>

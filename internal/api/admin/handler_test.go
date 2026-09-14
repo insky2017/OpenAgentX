@@ -129,3 +129,46 @@ func TestHealthCheckRequiresOwnerCSRFAndMatchingIdempotencyKey(t *testing.T) {
 		t.Fatalf("Admin cache policy=%q", response.Header().Get("Cache-Control"))
 	}
 }
+
+func TestLifecycleRoutesSeparateGracefulAndForceStop(t *testing.T) {
+	owner := newAdminFixture(t, web.RoleOwner)
+	for _, test := range []struct {
+		path string
+		kind domain.WorkerCommandKind
+	}{
+		{path: "/api/admin/v1/workers/worker-7/drain", kind: domain.WorkerCommandDrain},
+		{path: "/api/admin/v1/workers/worker-7/stop", kind: domain.WorkerCommandStop},
+	} {
+		body, _ := json.Marshal(openapi.WorkerAdminRequest{Meta: openapi.CommandMeta{IdempotencyKey: string(test.kind) + "-key", ExpectedVersion: 7}, ExpectedGeneration: 7})
+		request := httptest.NewRequest(http.MethodPost, test.path, bytes.NewReader(body))
+		request.AddCookie(owner.cookie)
+		request.Header.Set("X-CSRF-Token", owner.session.CSRFToken)
+		request.Header.Set("Idempotency-Key", string(test.kind)+"-key")
+		response := httptest.NewRecorder()
+		owner.handler.ServeHTTP(response, request)
+		if response.Code != http.StatusOK || owner.state.command == nil || owner.state.command.Kind != test.kind {
+			t.Fatalf("route=%s status=%d command=%+v body=%s", test.path, response.Code, owner.state.command, response.Body.String())
+		}
+	}
+
+	forceBody, _ := json.Marshal(openapi.WorkerForceStopRequest{Meta: openapi.CommandMeta{IdempotencyKey: "force-key", ExpectedVersion: 7}, ExpectedGeneration: 7, Confirm: true})
+	forceRequest := func() *http.Request {
+		request := httptest.NewRequest(http.MethodPost, "/api/admin/v1/workers/worker-7/force-stop", bytes.NewReader(forceBody))
+		request.AddCookie(owner.cookie)
+		request.Header.Set("X-CSRF-Token", owner.session.CSRFToken)
+		request.Header.Set("Idempotency-Key", "force-key")
+		return request
+	}
+	withoutDangerHeader := httptest.NewRecorder()
+	owner.handler.ServeHTTP(withoutDangerHeader, forceRequest())
+	if withoutDangerHeader.Code != http.StatusBadRequest {
+		t.Fatalf("force stop without danger confirmation status=%d", withoutDangerHeader.Code)
+	}
+	confirmed := forceRequest()
+	confirmed.Header.Set("X-Confirm-Dangerous", "force-stop")
+	confirmedResponse := httptest.NewRecorder()
+	owner.handler.ServeHTTP(confirmedResponse, confirmed)
+	if confirmedResponse.Code != http.StatusOK || owner.state.command.Kind != domain.WorkerCommandForceStop {
+		t.Fatalf("confirmed force stop status=%d command=%+v", confirmedResponse.Code, owner.state.command)
+	}
+}

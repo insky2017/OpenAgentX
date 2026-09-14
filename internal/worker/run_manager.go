@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -45,6 +46,7 @@ type ActiveRunManager struct {
 	items       chan mailboxSubmission
 	completions chan waitResult
 	active      atomic.Bool
+	stateMu     sync.Mutex
 	capacity    chan struct{}
 	draining    *atomic.Bool
 	shutdown    time.Duration
@@ -78,6 +80,17 @@ func (m *ActiveRunManager) WorkCapacity() int {
 		return 0
 	}
 	return 1
+}
+
+func (m *ActiveRunManager) IsIdle() bool { return !m.active.Load() }
+
+// BeginDrain closes the work-admission race with beginActive. After it
+// returns, no new RunAttempt can become active.
+func (m *ActiveRunManager) BeginDrain() bool {
+	m.stateMu.Lock()
+	defer m.stateMu.Unlock()
+	m.draining.Store(true)
+	return !m.active.Load()
 }
 
 func (m *ActiveRunManager) Submit(ctx context.Context, item domain.MailboxItem) error {
@@ -129,7 +142,7 @@ func (m *ActiveRunManager) startWork(ctx context.Context, active *activeTurn, it
 	if m.draining.Load() {
 		return active, nil
 	}
-	if active != nil || !m.active.CompareAndSwap(false, true) {
+	if active != nil || !m.beginActive() {
 		return active, fmt.Errorf("Run Manager received work without capacity")
 	}
 	request := api.BeginAttemptRequest{
@@ -203,11 +216,23 @@ func (m *ActiveRunManager) failStartedRun(ctx context.Context, request openrunti
 }
 
 func (m *ActiveRunManager) releaseCapacity() {
+	m.stateMu.Lock()
 	m.active.Store(false)
+	m.stateMu.Unlock()
 	select {
 	case m.capacity <- struct{}{}:
 	default:
 	}
+}
+
+func (m *ActiveRunManager) beginActive() bool {
+	m.stateMu.Lock()
+	defer m.stateMu.Unlock()
+	if m.draining.Load() || m.active.Load() {
+		return false
+	}
+	m.active.Store(true)
+	return true
 }
 
 func (m *ActiveRunManager) applyControl(ctx context.Context, active *activeTurn, item domain.MailboxItem) error {

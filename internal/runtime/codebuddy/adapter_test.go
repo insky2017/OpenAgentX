@@ -64,6 +64,82 @@ printf 'verified by CodeBuddy fixture\n'
 	}
 }
 
+func TestAdapterPublishesBoundedRedactedOutputBeforeTurnCompletes(t *testing.T) {
+	directory := t.TempDir()
+	releasePath := filepath.Join(directory, "release")
+	binary := writeFixture(t, directory, `#!/bin/sh
+if [ "$1" = "--version" ]; then exit 0; fi
+cat >/dev/null
+printf 'working token=runtime-secret\n'
+	while [ ! -f "$OAX_READY" ]; do sleep 0.01; done
+printf '{"token":"json-secret","result":"done"}\n'
+`)
+	adapter, err := NewAdapter(Config{
+		Binary: binary, WorkingDir: directory, Models: []string{"hy4-preview"},
+		Environment: []string{"OAX_READY=" + releasePath},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	events := make(chan openruntime.RuntimeEvent, 4)
+	handle, err := adapter.StartTurn(context.Background(), turnRequest("stream"), openruntime.EventSinkFunc(func(_ context.Context, event openruntime.RuntimeEvent) error {
+		events <- event
+		return nil
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	leader := handle.(*turnHandle)
+	t.Cleanup(func() {
+		if leader.command.Process != nil {
+			_ = signalProcessGroup(leader.command.Process.Pid, syscall.SIGKILL)
+		}
+	})
+	select {
+	case event := <-events:
+		if event.Type != "turn.output" || strings.Contains(string(event.Payload), "runtime-secret") || !strings.Contains(string(event.Payload), "token=[REDACTED]") {
+			t.Fatalf("unsafe live event: %+v", event)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("live output was not published before process completion")
+	}
+	if err := os.WriteFile(releasePath, []byte("release"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	result, err := handle.Wait(context.Background())
+	if err != nil || result.Status != openruntime.TurnResultSucceeded {
+		t.Fatalf("result=%+v err=%v", result, err)
+	}
+	second := <-events
+	for _, forbidden := range []string{"json-secret", "runtime-secret"} {
+		if strings.Contains(string(second.Payload), forbidden) {
+			t.Fatalf("live event leaked %q: %s", forbidden, second.Payload)
+		}
+	}
+}
+
+func TestLiveOutputBufferBoundsEventsAndRecordsSinkFailure(t *testing.T) {
+	var emitted int
+	buffer := newLiveOutputBuffer(1<<20, openruntime.EventSinkFunc(func(context.Context, openruntime.RuntimeEvent) error {
+		emitted++
+		return nil
+	}))
+	_, _ = buffer.Write([]byte(strings.Repeat("line\n", maxLiveOutputEvents+20)))
+	buffer.Flush()
+	if emitted != maxLiveOutputEvents {
+		t.Fatalf("live event count=%d want=%d", emitted, maxLiveOutputEvents)
+	}
+
+	sinkFailure := errors.New("event sink unavailable")
+	failing := newLiveOutputBuffer(1024, openruntime.EventSinkFunc(func(context.Context, openruntime.RuntimeEvent) error {
+		return sinkFailure
+	}))
+	_, _ = failing.Write([]byte("first\nsecond\n"))
+	if !errors.Is(failing.EventError(), sinkFailure) {
+		t.Fatalf("sink failure=%v", failing.EventError())
+	}
+}
+
 func TestAdapterClassifiesFailureAndCancellation(t *testing.T) {
 	t.Run("failure", func(t *testing.T) {
 		directory := t.TempDir()

@@ -29,6 +29,11 @@ type Runner struct {
 	health   map[string]openruntime.BackendHealth
 }
 
+type controlledStop struct {
+	command domain.WorkerCommand
+	force   bool
+}
+
 type networkBindingPullClient interface {
 	PullNetworkBindings(context.Context, api.NetworkBindingPullRequest) ([]domain.NetworkBinding, error)
 }
@@ -60,6 +65,10 @@ func (r *Runner) Run(ctx context.Context) error {
 	}
 	networkAcks := r.applyNetworkBindings(session.NetworkBindings)
 	initialStatus := workerStatusForHealth(health)
+	if session.Worker.Status == domain.WorkerStatusDraining {
+		r.draining.Store(true)
+		initialStatus = domain.WorkerStatusDraining
+	}
 	if err := r.heartbeat(ctx, session, initialStatus, networkAcks); err != nil {
 		return fmt.Errorf("initial Worker heartbeat: %w", err)
 	}
@@ -76,27 +85,31 @@ func (r *Runner) Run(ctx context.Context) error {
 	runContext, cancelRun := context.WithCancel(ctx)
 	defer cancelRun()
 	group, groupContext := errgroup.WithContext(runContext)
-	stopCommands := make(chan domain.WorkerCommand, 1)
+	stopCommands := make(chan controlledStop, 1)
 	group.Go(func() error { return r.heartbeatLoop(groupContext, session, networkAcks) })
 	group.Go(func() error { return r.healthLoop(groupContext) })
 	group.Go(func() error { return r.networkWorkLoop(groupContext, session) })
 	group.Go(func() error { return r.mailboxPump(groupContext, session, manager) })
 	group.Go(func() error { return manager.Run(groupContext) })
-	group.Go(func() error { return r.workerControlLoop(groupContext, session, stopCommands) })
+	group.Go(func() error { return r.workerControlLoop(groupContext, session, manager, stopCommands) })
 
 	err = group.Wait()
 	if errors.Is(err, errControlledStop) {
 		select {
-		case command := <-stopCommands:
+		case stop := <-stopCommands:
 			ackContext, cancel := context.WithTimeout(context.Background(), r.config.ShutdownTimeout)
 			defer cancel()
 			if releaseErr := r.releaseWorker(ackContext, session); releaseErr != nil {
 				return fmt.Errorf("release Worker lease before stop acknowledgement: %w", releaseErr)
 			}
-			if ackErr := r.client.AcknowledgeReleasedWorkerCommand(ackContext, command.ID, api.ControlAckRequest{
+			result := "Worker stopped after graceful drain"
+			if stop.force {
+				result = "Worker force-stopped; active RunAttempt may be uncertain"
+			}
+			if ackErr := r.client.AcknowledgeReleasedWorkerCommand(ackContext, stop.command.ID, api.ControlAckRequest{
 				WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
 				FencingToken: session.Worker.FencingToken,
-				State:        domain.WorkerCommandApplied, Result: "Worker stopped after controlled reconciliation",
+				State:        domain.WorkerCommandApplied, Result: result,
 			}); ackErr != nil {
 				return fmt.Errorf("acknowledge controlled Worker stop: %w", ackErr)
 			}
@@ -331,16 +344,29 @@ func (r *Runner) mailboxPump(ctx context.Context, session *api.WorkerSession, ma
 	}
 }
 
-func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSession, stopCommands chan<- domain.WorkerCommand) error {
+func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSession, manager *ActiveRunManager, stopCommands chan<- controlledStop) error {
 	if !r.config.EnableControlLoop {
 		<-ctx.Done()
 		return nil
 	}
+	var pendingStop *domain.WorkerCommand
 	for {
+		if pendingStop != nil && manager.IsIdle() {
+			select {
+			case stopCommands <- controlledStop{command: *pendingStop}:
+				return errControlledStop
+			case <-ctx.Done():
+				return nil
+			}
+		}
+		waitSeconds := int(r.config.ControlWait / time.Second)
+		if pendingStop != nil && waitSeconds > 1 {
+			waitSeconds = 1
+		}
 		command, err := r.client.ClaimWorkerCommand(ctx, api.ControlClaimRequest{
 			WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
 			FencingToken: session.Worker.FencingToken,
-			WaitSeconds:  int(r.config.ControlWait / time.Second),
+			WaitSeconds:  waitSeconds,
 		})
 		if err != nil {
 			if ctx.Err() != nil {
@@ -353,7 +379,7 @@ func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSessi
 		}
 		switch command.Kind {
 		case domain.WorkerCommandDrain:
-			r.draining.Store(true)
+			manager.BeginDrain()
 			if err := r.heartbeat(ctx, session, domain.WorkerStatusDraining, nil); err != nil {
 				return fmt.Errorf("enter Worker draining state: %w", err)
 			}
@@ -373,9 +399,41 @@ func (r *Runner) workerControlLoop(ctx context.Context, session *api.WorkerSessi
 				return fmt.Errorf("acknowledge Worker health check: %w", err)
 			}
 		case domain.WorkerCommandStop:
-			r.draining.Store(true)
+			manager.BeginDrain()
+			if err := r.heartbeat(ctx, session, domain.WorkerStatusDraining, nil); err != nil {
+				return fmt.Errorf("enter Worker graceful-stop drain: %w", err)
+			}
+			if pendingStop != nil {
+				if pendingStop.ID == command.ID {
+					// A long-running turn can outlive the command claim lease. The
+					// repository redelivers the same durable intent so this refreshes
+					// its lease without turning the original stop into a failed command.
+					pendingStop = command
+					continue
+				}
+				if err := r.client.AcknowledgeWorkerCommand(ctx, command.ID, api.ControlAckRequest{
+					WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+					FencingToken: session.Worker.FencingToken, State: domain.WorkerCommandFailed,
+					Result: "A graceful stop is already pending",
+				}); err != nil {
+					return fmt.Errorf("reject duplicate graceful stop: %w", err)
+				}
+				continue
+			}
+			pendingStop = command
+		case domain.WorkerCommandForceStop:
+			manager.BeginDrain()
+			if pendingStop != nil {
+				if err := r.client.AcknowledgeWorkerCommand(ctx, pendingStop.ID, api.ControlAckRequest{
+					WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+					FencingToken: session.Worker.FencingToken, State: domain.WorkerCommandFailed,
+					Result: "Graceful stop was superseded by an explicit force stop",
+				}); err != nil {
+					return fmt.Errorf("supersede graceful stop: %w", err)
+				}
+			}
 			select {
-			case stopCommands <- *command:
+			case stopCommands <- controlledStop{command: *command, force: true}:
 				return errControlledStop
 			case <-ctx.Done():
 				return nil

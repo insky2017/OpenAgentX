@@ -58,6 +58,41 @@ func TestApplyCreatesTargetSchemaAndIsRepeatable(t *testing.T) {
 	}
 }
 
+func TestApplyUpgradesWorkerCommandKindsForForceStop(t *testing.T) {
+	ctx := context.Background()
+	db := openDB(t)
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	for _, statement := range []string{
+		`DROP TABLE worker_commands`,
+		`CREATE TABLE worker_commands (
+			worker_command_id TEXT PRIMARY KEY,
+			worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id) ON DELETE CASCADE,
+			generation INTEGER NOT NULL CHECK (generation > 0),
+			kind TEXT NOT NULL CHECK (kind IN ('drain', 'stop', 'health_check')),
+			state TEXT NOT NULL CHECK (state IN ('pending', 'claimed', 'applied', 'failed')),
+			requested_by TEXT NOT NULL REFERENCES principals(principal_id), idempotency_key TEXT NOT NULL,
+			lease_until TEXT, attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0), created_at TEXT NOT NULL,
+			claimed_at TEXT, applied_at TEXT, result TEXT, UNIQUE (requested_by, idempotency_key))`,
+		`CREATE INDEX idx_worker_commands_claim ON worker_commands(worker_instance_id, generation, state, created_at)`,
+	} {
+		if _, err := db.ExecContext(ctx, statement); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	var definition string
+	if err := db.QueryRowContext(ctx, `SELECT sql FROM sqlite_master WHERE type='table' AND name='worker_commands'`).Scan(&definition); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(definition, "'force_stop'") {
+		t.Fatalf("force_stop was not added to Worker command schema: %s", definition)
+	}
+}
+
 func TestApplyUpgradesN1WorkerNetworkColumns(t *testing.T) {
 	ctx := context.Background()
 	db := openDB(t)
