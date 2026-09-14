@@ -6,22 +6,40 @@ import (
 	"net/http"
 
 	openapi "openagentx/internal/api"
-	"openagentx/internal/auth/web"
+	requestauth "openagentx/internal/auth"
+	cliauth "openagentx/internal/auth/cli"
+	webauth "openagentx/internal/auth/web"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
 )
 
 type Handler struct {
 	service *controlplane.WorkerAdminService
-	auth    *web.Manager
+	auth    requestauth.RequestAuthorizer
 	mux     *http.ServeMux
 }
 
-func NewHandler(service *controlplane.WorkerAdminService, auth *web.Manager) (*Handler, error) {
-	if service == nil || auth == nil {
-		return nil, fmt.Errorf("Worker admin service and Web Auth are required")
+func NewHandler(service *controlplane.WorkerAdminService, manager *webauth.Manager) (*Handler, error) {
+	authorizer, err := requestauth.NewWebAuthorizer(manager)
+	if err != nil {
+		return nil, err
 	}
-	handler := &Handler{service: service, auth: auth, mux: http.NewServeMux()}
+	return newHandler(service, authorizer)
+}
+
+func NewCLIHandler(service *controlplane.WorkerAdminService, cliService *cliauth.Service) (*Handler, error) {
+	authorizer, err := requestauth.NewCLIAuthorizer(cliService)
+	if err != nil {
+		return nil, err
+	}
+	return newHandler(service, authorizer)
+}
+
+func newHandler(service *controlplane.WorkerAdminService, authorizer requestauth.RequestAuthorizer) (*Handler, error) {
+	if service == nil || authorizer == nil {
+		return nil, fmt.Errorf("Worker admin service and request authorizer are required")
+	}
+	handler := &Handler{service: service, auth: authorizer, mux: http.NewServeMux()}
 	handler.mux.HandleFunc("POST /api/admin/v1/workers/{workerID}/health-check", handler.healthCheck)
 	handler.mux.HandleFunc("POST /api/admin/v1/workers/{workerID}/drain", handler.drain)
 	handler.mux.HandleFunc("POST /api/admin/v1/workers/{workerID}/stop", handler.stop)
@@ -64,8 +82,8 @@ func (h *Handler) createCommand(response http.ResponseWriter, request *http.Requ
 	if !requireIdempotencyHeader(response, request, command.Meta) {
 		return
 	}
-	command.RequestedBy = session.User.ID
-	created, err := h.service.Command(request.Context(), session.User.ID, request.PathValue("workerID"), kind, command)
+	command.RequestedBy = session.ID
+	created, err := h.service.Command(request.Context(), session.ID, request.PathValue("workerID"), kind, command)
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusConflict)
 		return
@@ -91,8 +109,8 @@ func (h *Handler) forceStop(response http.ResponseWriter, request *http.Request)
 	if !requireIdempotencyHeader(response, request, command.Meta) {
 		return
 	}
-	created, err := h.service.Command(request.Context(), session.User.ID, request.PathValue("workerID"), domain.WorkerCommandForceStop, openapi.WorkerAdminRequest{
-		Meta: command.Meta, RequestedBy: session.User.ID, ExpectedGeneration: command.ExpectedGeneration,
+	created, err := h.service.Command(request.Context(), session.ID, request.PathValue("workerID"), domain.WorkerCommandForceStop, openapi.WorkerAdminRequest{
+		Meta: command.Meta, RequestedBy: session.ID, ExpectedGeneration: command.ExpectedGeneration,
 	})
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusConflict)
@@ -102,21 +120,13 @@ func (h *Handler) forceStop(response http.ResponseWriter, request *http.Request)
 	_ = json.NewEncoder(response).Encode(openapi.WorkerCommandResponse{Command: *created})
 }
 
-func (h *Handler) authorize(response http.ResponseWriter, request *http.Request) (*web.Session, bool) {
-	session, err := h.auth.Authenticate(request)
+func (h *Handler) authorize(response http.ResponseWriter, request *http.Request) (*requestauth.Principal, bool) {
+	session, err := h.auth.Authorize(request, requestauth.Requirement{Role: domain.WebRoleOwner, Scope: domain.CLIScopeFleetLifecycle, Write: true})
 	if err != nil {
-		http.Error(response, "unauthorized", http.StatusUnauthorized)
+		h.auth.WriteFailure(response, err)
 		return nil, false
 	}
-	if err := web.RequireRole(session, web.RoleOwner); err != nil {
-		http.Error(response, "forbidden", http.StatusForbidden)
-		return nil, false
-	}
-	if err := web.ValidateCSRF(session, request.Header.Get("X-CSRF-Token")); err != nil {
-		http.Error(response, "invalid csrf token", http.StatusForbidden)
-		return nil, false
-	}
-	return session, true
+	return &session, true
 }
 
 func requireIdempotencyHeader(response http.ResponseWriter, request *http.Request, meta openapi.CommandMeta) bool {

@@ -24,8 +24,8 @@ import (
 type Client struct {
 	httpClient     *http.Client
 	baseURL        string
-	cookie         *http.Cookie
-	csrf           string
+	bearerToken    string
+	installationID string
 	reconnectDelay time.Duration
 }
 
@@ -67,23 +67,68 @@ func NewUnixClient(socketPath string) (*Client, error) {
 	return &Client{httpClient: &http.Client{Transport: transport}, baseURL: "http://unix", reconnectDelay: time.Second}, nil
 }
 
-func (c *Client) Login(ctx context.Context, username, password string) error {
-	var session openapi.WebSessionResponse
-	response, err := c.do(ctx, http.MethodPost, openapi.AuthLoginPath, nil, openapi.LoginRequest{Username: username, Password: password}, &session, false, "", false)
+func (c *Client) Login(context.Context, string, string) error {
+	return fmt.Errorf("direct password login is disabled; run openagentx console login")
+}
+
+func (c *Client) ProbeInstallation(ctx context.Context) (openapi.CLIInstallationResponse, error) {
+	var result openapi.CLIInstallationResponse
+	_, err := c.do(ctx, http.MethodGet, openapi.CLIInstallationProbePath, nil, nil, &result, false, "", false)
+	if err == nil && strings.TrimSpace(result.InstallationID) == "" {
+		return openapi.CLIInstallationResponse{}, fmt.Errorf("Console installation probe returned an empty identity")
+	}
+	return result, err
+}
+
+func (c *Client) LoginCredential(ctx context.Context, username, password string) (openapi.CLILoginResponse, error) {
+	probe, err := c.ProbeInstallation(ctx)
+	if err != nil {
+		return openapi.CLILoginResponse{}, err
+	}
+	var result openapi.CLILoginResponse
+	_, err = c.do(ctx, http.MethodPost, openapi.CLIAuthLoginPath, nil, openapi.LoginRequest{Username: username, Password: password}, &result, false, "", false)
+	if err != nil {
+		return openapi.CLILoginResponse{}, err
+	}
+	if result.Token == "" || result.InstallationID != probe.InstallationID {
+		return openapi.CLILoginResponse{}, fmt.Errorf("Console login returned an invalid installation-bound credential")
+	}
+	c.bearerToken = result.Token
+	c.installationID = result.InstallationID
+	return result, nil
+}
+
+func (c *Client) UseCredential(ctx context.Context, installationID, token string) error {
+	probe, err := c.ProbeInstallation(ctx)
 	if err != nil {
 		return err
 	}
-	for _, cookie := range response.Cookies() {
-		if cookie.Name == "openagentx_session" {
-			c.cookie = cookie
-			break
-		}
+	if strings.TrimSpace(installationID) == "" || probe.InstallationID != installationID {
+		return fmt.Errorf("Console installation identity does not match the stored credential")
 	}
-	if c.cookie == nil || session.CSRFToken == "" {
-		return fmt.Errorf("Console login did not return a complete session")
+	if strings.TrimSpace(token) == "" {
+		return fmt.Errorf("Console credential token is empty")
 	}
-	c.csrf = session.CSRFToken
+	c.installationID = installationID
+	c.bearerToken = token
 	return nil
+}
+
+func (c *Client) Session(ctx context.Context) (openapi.CLISessionResponse, error) {
+	var result openapi.CLISessionResponse
+	_, err := c.do(ctx, http.MethodGet, openapi.CLIAuthSessionPath, nil, nil, &result, true, "", false)
+	return result, err
+}
+
+func (c *Client) Logout(ctx context.Context) error {
+	response, err := c.do(ctx, http.MethodPost, openapi.CLIAuthLogoutPath, nil, nil, nil, true, "", false)
+	if response != nil && response.Body != nil {
+		_ = response.Body.Close()
+	}
+	if err == nil {
+		c.bearerToken = ""
+	}
+	return err
 }
 
 func (c *Client) Attach(ctx context.Context, agentID, mode string) (consoleapi.AttachResponse, error) {
@@ -313,13 +358,10 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 		request.Header.Set("Content-Type", "application/json")
 	}
 	if authenticated {
-		if c.cookie == nil {
+		if c.bearerToken == "" {
 			return nil, fmt.Errorf("Console is not authenticated")
 		}
-		request.AddCookie(c.cookie)
-		if method != http.MethodGet {
-			request.Header.Set("X-CSRF-Token", c.csrf)
-		}
+		request.Header.Set("Authorization", "Bearer "+c.bearerToken)
 	}
 	if idempotencyKey != "" {
 		request.Header.Set("Idempotency-Key", idempotencyKey)

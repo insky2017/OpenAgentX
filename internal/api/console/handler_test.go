@@ -168,3 +168,14 @@ func TestDiagnosticAttachIsAuthorizedRateLimitedAndDoesNotExposeFencing(t *testi
 		t.Fatalf("unauthorized diagnostic status=%d", unauthorized.Code)
 	}
 }
+
+func TestCLIAttachScopeRequirements(t *testing.T) {
+	normal := attachRequirement(ModeNormal)
+	if normal.Role != domain.WebRoleViewer || normal.Scope != domain.CLIScopeConsoleRead {
+		t.Fatalf("normal requirement=%+v", normal)
+	}
+	diagnostic := attachRequirement(ModeDiagnostic)
+	if diagnostic.Role != domain.WebRoleOwner || diagnostic.Scope != domain.CLIScopeConsoleDiagnostic {
+		t.Fatalf("diagnostic requirement=%+v", diagnostic)
+	}
+}

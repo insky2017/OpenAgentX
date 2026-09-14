@@ -145,6 +145,12 @@ func (r *Repository) GetWebUserByUsername(ctx context.Context, username string) 
 		FROM web_users WHERE username=?`, strings.TrimSpace(username)))
 }
 
+func (r *Repository) GetWebUserByID(ctx context.Context, webUserID string) (*domain.WebUserRecord, error) {
+	return scanWebUser(r.db.QueryRowContext(ctx, `SELECT web_user_id, principal_id, username,
+		password_hash, roles_json, status, password_changed_at, created_at, updated_at
+		FROM web_users WHERE web_user_id=?`, strings.TrimSpace(webUserID)))
+}
+
 func (r *Repository) ListWebUsers(ctx context.Context) ([]domain.WebUserRecord, error) {
 	rows, err := r.db.QueryContext(ctx, `SELECT web_user_id, principal_id, username,
 		password_hash, roles_json, status, password_changed_at, created_at, updated_at

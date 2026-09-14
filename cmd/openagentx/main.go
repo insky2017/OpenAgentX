@@ -20,6 +20,7 @@ import (
 	consoleapi "openagentx/internal/api/console"
 	"openagentx/internal/api/panel"
 	"openagentx/internal/api/workerapi"
+	cliAuth "openagentx/internal/auth/cli"
 	webAuth "openagentx/internal/auth/web"
 	admincli "openagentx/internal/cli/admin"
 	consolecli "openagentx/internal/cli/console"
@@ -179,12 +180,17 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "configure web users: %v\n", err)
 		return 1
 	}
+	cliAuthService, err := cliAuth.NewService(repository, cliAuth.Config{})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "configure CLI authentication: %v\n", err)
+		return 1
+	}
 	commands, err := controlplane.NewCommandService(repository, broker, time.Now)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create command service: %v\n", err)
 		return 1
 	}
-	panelHandler, err := panel.NewHandler(repository, commands, authManager, networkWorkflow)
+	webPanelHandler, err := panel.NewHandler(repository, commands, authManager, networkWorkflow)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create panel handler: %v\n", err)
 		return 1
@@ -194,45 +200,50 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "create Worker admin service: %v\n", err)
 		return 1
 	}
-	adminHandler, err := adminapi.NewHandler(workerAdminService, authManager)
+	webAdminHandler, err := adminapi.NewHandler(workerAdminService, authManager)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Worker admin handler: %v\n", err)
 		return 1
 	}
-	consoleHandler, err := consoleapi.NewHandler(repository, authManager)
+	webConsoleHandler, err := consoleapi.NewHandler(repository, authManager)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Console attach handler: %v\n", err)
 		return 1
 	}
-	authHandler := apiauth.NewHandler(authManager)
-	unixMux := http.NewServeMux()
-	unixMux.Handle("/api/v1/", handler)
-	unixMux.Handle(openapi.AuthLoginPath, authHandler)
-	unixMux.Handle(openapi.AuthLogoutPath, authHandler)
-	unixMux.Handle(openapi.AuthSessionPath, authHandler)
-	unixMux.Handle("/api/console/", consoleHandler)
-	unixMux.Handle("/api/admin/", adminHandler)
-	unixMux.Handle("/api/observe/", panelHandler)
-	unixMux.Handle("/api/control/", panelHandler)
+	cliPanelHandler, err := panel.NewCLIHandler(repository, commands, cliAuthService, networkWorkflow)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create CLI panel handler: %v\n", err)
+		return 1
+	}
+	cliAdminHandler, err := adminapi.NewCLIHandler(workerAdminService, cliAuthService)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create CLI Worker admin handler: %v\n", err)
+		return 1
+	}
+	cliConsoleHandler, err := consoleapi.NewCLIHandler(repository, cliAuthService)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create CLI Console attach handler: %v\n", err)
+		return 1
+	}
+	webAuthHandler := apiauth.NewHandler(authManager)
+	cliAuthHandler, err := apiauth.NewCLIHandler(cliAuthService)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create CLI auth handler: %v\n", err)
+		return 1
+	}
+	unixMux := newUnixMux(handler, cliAuthHandler, cliConsoleHandler, cliAdminHandler, cliPanelHandler)
 	server, err := unixhttp.NewServer(*socketPath, unixMux, slog.Default())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Unix server: %v\n", err)
 		return 1
 	}
-	webMux := http.NewServeMux()
-	webMux.Handle(openapi.AuthLoginPath, authHandler)
-	webMux.Handle(openapi.AuthLogoutPath, authHandler)
-	webMux.Handle(openapi.AuthSessionPath, authHandler)
-	webMux.Handle("/api/admin/", adminHandler)
-	webMux.Handle("/api/console/", consoleHandler)
-	webMux.Handle("/api/", panelHandler)
 	webFS, err := os.Open(filepath.Clean(*webDir))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "open web directory: %v\n", err)
 		return 1
 	}
 	defer webFS.Close()
-	webMux.Handle("/", staticHandler(filepath.Clean(*webDir)))
+	webMux := newWebMux(webAuthHandler, webAdminHandler, webConsoleHandler, webPanelHandler, staticHandler(filepath.Clean(*webDir)))
 	httpServer := &http.Server{
 		Addr:              *httpAddr,
 		Handler:           webMux,
@@ -253,6 +264,30 @@ func runDaemon(args []string) int {
 	defer cancelShutdown()
 	_ = httpServer.Shutdown(shutdownCtx)
 	return 0
+}
+
+func newUnixMux(worker, cliAuthentication, console, admin, panelHandler http.Handler) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.Handle("/api/v1/", worker)
+	mux.Handle("/api/auth/v1/cli/", cliAuthentication)
+	mux.Handle("/api/console/", console)
+	mux.Handle("/api/admin/", admin)
+	mux.Handle("/api/observe/", panelHandler)
+	mux.Handle("/api/control/", panelHandler)
+	return mux
+}
+
+func newWebMux(authentication, admin, console, panelHandler, static http.Handler) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.Handle("/api/auth/v1/cli/", http.NotFoundHandler())
+	mux.Handle(openapi.AuthLoginPath, authentication)
+	mux.Handle(openapi.AuthLogoutPath, authentication)
+	mux.Handle(openapi.AuthSessionPath, authentication)
+	mux.Handle("/api/admin/", admin)
+	mux.Handle("/api/console/", console)
+	mux.Handle("/api/", panelHandler)
+	mux.Handle("/", static)
+	return mux
 }
 
 type serveOptions struct {

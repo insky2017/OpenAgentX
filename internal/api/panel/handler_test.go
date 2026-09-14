@@ -844,3 +844,28 @@ func TestSSEIncludesSafeRunProjectionForReducer(t *testing.T) {
 		}
 	}
 }
+
+func TestCLIRouteScopeRequirementsFailClosed(t *testing.T) {
+	for name, testCase := range map[string]struct {
+		method string
+		path   string
+		write  bool
+		role   domain.WebRole
+		scope  domain.CLIScope
+	}{
+		"agent list":               {method: http.MethodGet, path: "/api/observe/v1/agents", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
+		"event stream":             {method: http.MethodGet, path: "/api/observe/v1/events/stream", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
+		"dispatch":                 {method: http.MethodPost, path: "/api/control/v1/tasks", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
+		"steer":                    {method: http.MethodPost, path: "/api/control/v1/tasks/task-1/messages", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
+		"cancel":                   {method: http.MethodPost, path: "/api/control/v1/tasks/task-1/cancel", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
+		"approval":                 {method: http.MethodPost, path: "/api/control/v1/approvals/approval-1/decisions", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
+		"unfrozen network control": {method: http.MethodPost, path: "/api/control/v1/network/profiles", write: true, role: domain.WebRoleOwner, scope: ""},
+	} {
+		t.Run(name, func(t *testing.T) {
+			requirement := panelRequirement(httptest.NewRequest(testCase.method, testCase.path, nil), testCase.write)
+			if requirement.Role != testCase.role || requirement.Scope != testCase.scope || requirement.Write != testCase.write {
+				t.Fatalf("requirement=%+v", requirement)
+			}
+		})
+	}
+}

@@ -57,6 +57,10 @@ func TestAPIBoundariesAreVersionedAndSeparated(t *testing.T) {
 		api.ObserveOverviewPath,
 		api.AdminWorkerStopPath,
 		api.AuthLoginPath,
+		api.CLIAuthLoginPath,
+		api.CLIAuthSessionPath,
+		api.CLIAuthLogoutPath,
+		api.CLIInstallationProbePath,
 	}
 	for _, path := range paths {
 		if !strings.Contains(path, "/v1/") && !strings.HasSuffix(path, "/v1") {

@@ -409,6 +409,32 @@ CREATE TABLE web_sessions (
 CREATE INDEX idx_web_sessions_expiry
 ON web_sessions(idle_expires_at, absolute_expires_at);
 
+CREATE TABLE installation_metadata (
+    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+    installation_id TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE cli_tokens (
+    token_id TEXT PRIMARY KEY,
+    token_digest TEXT NOT NULL UNIQUE,
+    web_user_id TEXT NOT NULL REFERENCES web_users(web_user_id) ON DELETE CASCADE,
+    principal_id TEXT NOT NULL REFERENCES principals(principal_id),
+    scopes_json TEXT NOT NULL,
+    installation_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    last_used_at TEXT NOT NULL,
+    absolute_expires_at TEXT NOT NULL,
+    revoked_at TEXT,
+    FOREIGN KEY (installation_id) REFERENCES installation_metadata(installation_id)
+);
+
+CREATE INDEX idx_cli_tokens_expiry
+ON cli_tokens(absolute_expires_at, revoked_at);
+
+CREATE INDEX idx_cli_tokens_user
+ON cli_tokens(web_user_id, installation_id, revoked_at);
+
 CREATE TABLE network_profiles (
     profile_id TEXT NOT NULL,
     version INTEGER NOT NULL CHECK (version > 0),

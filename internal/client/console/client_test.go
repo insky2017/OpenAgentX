@@ -45,10 +45,20 @@ func newUnixTestClient(t *testing.T, handler http.Handler) *Client {
 	return client
 }
 
-func loginResponse(w http.ResponseWriter) {
-	http.SetCookie(w, &http.Cookie{Name: "openagentx_session", Value: "session-value", Path: "/"})
+func cliAuthResponse(w http.ResponseWriter, r *http.Request) bool {
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(openapi.WebSessionResponse{CSRFToken: "csrf-value"})
+	switch r.URL.Path {
+	case openapi.CLIInstallationProbePath:
+		_ = json.NewEncoder(w).Encode(openapi.CLIInstallationResponse{InstallationID: "installation-test"})
+		return true
+	case openapi.CLIAuthLoginPath:
+		_ = json.NewEncoder(w).Encode(openapi.CLILoginResponse{CLISessionResponse: openapi.CLISessionResponse{
+			Principal: openapi.CLIPrincipal{TokenID: "token-id", Username: "owner"}, InstallationID: "installation-test",
+			AbsoluteExpiresAt: time.Now().Add(time.Hour)}, Token: "opaque-token-value"})
+		return true
+	default:
+		return false
+	}
 }
 
 func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testing.T) {
@@ -59,9 +69,10 @@ func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testi
 	defer cancel()
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if cliAuthResponse(w, r) {
+			return
+		}
 		switch r.URL.Path {
-		case openapi.AuthLoginPath:
-			loginResponse(w)
 		case consoleapi.AttachPath:
 			mu.Lock()
 			attachCount++
@@ -89,7 +100,7 @@ func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testi
 	})
 	client := newUnixTestClient(t, handler)
 	client.reconnectDelay = time.Millisecond
-	if err := client.Login(ctx, "owner", "password"); err != nil {
+	if _, err := client.LoginCredential(ctx, "owner", "password"); err != nil {
 		t.Fatal(err)
 	}
 	var generations, sequences []int64
@@ -122,9 +133,10 @@ func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if cliAuthResponse(w, r) {
+			return
+		}
 		switch r.URL.Path {
-		case openapi.AuthLoginPath:
-			loginResponse(w)
 		case consoleapi.AttachPath:
 			mu.Lock()
 			attachCount++
@@ -155,7 +167,7 @@ func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
 	})
 	client := newUnixTestClient(t, handler)
 	client.reconnectDelay = time.Millisecond
-	if err := client.Login(ctx, "owner", "password"); err != nil {
+	if _, err := client.LoginCredential(ctx, "owner", "password"); err != nil {
 		t.Fatal(err)
 	}
 	var snapshots, events []int64
@@ -182,16 +194,15 @@ func TestControlMethodsUseAuthenticatedOfficialAPIs(t *testing.T) {
 	var mu sync.Mutex
 	var paths []string
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == openapi.AuthLoginPath {
-			loginResponse(w)
+		if cliAuthResponse(w, r) {
 			return
 		}
-		if cookie, err := r.Cookie("openagentx_session"); err != nil || cookie.Value != "session-value" {
+		if r.Header.Get("Authorization") != "Bearer opaque-token-value" {
 			http.Error(w, "missing session", http.StatusUnauthorized)
 			return
 		}
-		if r.Method != http.MethodGet && r.Header.Get("X-CSRF-Token") != "csrf-value" {
-			http.Error(w, "missing csrf", http.StatusForbidden)
+		if r.Header.Get("X-CSRF-Token") != "" {
+			http.Error(w, "unexpected csrf", http.StatusForbidden)
 			return
 		}
 		mu.Lock()
@@ -202,7 +213,7 @@ func TestControlMethodsUseAuthenticatedOfficialAPIs(t *testing.T) {
 	})
 	client := newUnixTestClient(t, handler)
 	ctx := context.Background()
-	if err := client.Login(ctx, "owner", "password"); err != nil {
+	if _, err := client.LoginCredential(ctx, "owner", "password"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := client.Dispatch(ctx, openapi.CreateTaskRequest{Meta: openapi.CommandMeta{IdempotencyKey: "dispatch"}}); err != nil {
@@ -236,6 +247,41 @@ func TestControlMethodsUseAuthenticatedOfficialAPIs(t *testing.T) {
 	defer mu.Unlock()
 	if !reflect.DeepEqual(paths, want) {
 		t.Fatalf("official API paths=%v want=%v", paths, want)
+	}
+}
+
+func TestStoredCredentialIsNotSentAfterSocketInstallationReplacement(t *testing.T) {
+	authenticatedRequests := 0
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == openapi.CLIInstallationProbePath {
+			_ = json.NewEncoder(w).Encode(openapi.CLIInstallationResponse{InstallationID: "replacement-installation"})
+			return
+		}
+		if r.Header.Get("Authorization") != "" {
+			authenticatedRequests++
+		}
+		http.NotFound(w, r)
+	})
+	client := newUnixTestClient(t, handler)
+	if err := client.UseCredential(context.Background(), "original-installation", "stored-secret-token"); err == nil {
+		t.Fatal("credential for replaced installation was accepted")
+	}
+	if authenticatedRequests != 0 || client.bearerToken != "" {
+		t.Fatalf("credential crossed installation boundary requests=%d retained=%v", authenticatedRequests, client.bearerToken != "")
+	}
+}
+
+func TestLegacyDirectPasswordLoginFailsBeforeNetwork(t *testing.T) {
+	requests := 0
+	client := newUnixTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		http.NotFound(w, r)
+	}))
+	if err := client.Login(context.Background(), "owner", "must-not-be-sent"); err == nil {
+		t.Fatal("legacy direct password login was accepted")
+	}
+	if requests != 0 {
+		t.Fatalf("legacy password login reached UDS requests=%d", requests)
 	}
 }
 

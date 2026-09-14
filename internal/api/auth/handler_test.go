@@ -100,3 +100,15 @@ func TestLoginSessionRotationAndLogoutLifecycle(t *testing.T) {
 		t.Fatalf("revoked Session status=%d", revoked.Code)
 	}
 }
+
+func TestWebAuthRejectsCLIBearerWithoutCreatingCookie(t *testing.T) {
+	manager := web.NewManager(web.Config{})
+	handler := NewHandler(manager)
+	request := httptest.NewRequest(http.MethodGet, openapi.AuthSessionPath, nil)
+	request.Header.Set("Authorization", "Bearer opaque-cli-token")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusUnauthorized || len(response.Result().Cookies()) != 0 {
+		t.Fatalf("Web auth accepted CLI bearer status=%d cookies=%d", response.Code, len(response.Result().Cookies()))
+	}
+}

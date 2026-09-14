@@ -14,6 +14,7 @@ import (
 
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
+	"openagentx/internal/credentialstore"
 	"openagentx/internal/domain"
 	"openagentx/internal/localprofile"
 )
@@ -34,10 +35,36 @@ type testClient struct {
 	attachedAgentID   string
 	followEvents      []openapi.JournalEventReadModel
 	eventsDelivered   chan struct{}
+	installationID    string
+	tokenSent         bool
+	logoutCount       int
 }
 
-func (c *testClient) Login(context.Context, string, string) error {
+func (c *testClient) ProbeInstallation(context.Context) (openapi.CLIInstallationResponse, error) {
+	if c.installationID == "" {
+		c.installationID = "installation-test"
+	}
+	return openapi.CLIInstallationResponse{InstallationID: c.installationID}, nil
+}
+
+func (c *testClient) LoginCredential(context.Context, string, string) (openapi.CLILoginResponse, error) {
 	c.loginCount++
+	return openapi.CLILoginResponse{CLISessionResponse: openapi.CLISessionResponse{
+		Principal: openapi.CLIPrincipal{TokenID: "token-id", Username: "owner"}, InstallationID: c.installationID,
+		AbsoluteExpiresAt: time.Now().Add(time.Hour)}, Token: "opaque-token"}, nil
+}
+
+func (c *testClient) UseCredential(_ context.Context, installationID, token string) error {
+	c.loginCount++
+	if installationID != c.installationID || token == "" {
+		return fmt.Errorf("credential mismatch")
+	}
+	c.tokenSent = true
+	return nil
+}
+
+func (c *testClient) Logout(context.Context) error {
+	c.logoutCount++
 	return nil
 }
 
@@ -117,6 +144,35 @@ type testTmux struct {
 	calls   []string
 }
 
+type testCredentialStore struct {
+	credential credentialstore.Credential
+	missing    bool
+	deleted    bool
+	saved      bool
+}
+
+func (s *testCredentialStore) Save(value credentialstore.Credential) error {
+	s.credential = value
+	s.saved = true
+	return nil
+}
+func (s *testCredentialStore) Load(_, installationID, username string) (credentialstore.Credential, error) {
+	if s.missing || (username != "" && username != s.credential.Username) || installationID != s.credential.InstallationID {
+		return credentialstore.Credential{}, credentialstore.ErrNotFound
+	}
+	return s.credential, nil
+}
+func (s *testCredentialStore) LoadCurrentForSocket(string) (credentialstore.Credential, error) {
+	if s.missing {
+		return credentialstore.Credential{}, credentialstore.ErrNotFound
+	}
+	return s.credential, nil
+}
+func (s *testCredentialStore) Delete(credentialstore.Credential) (bool, error) {
+	s.deleted = true
+	return true, nil
+}
+
 func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 	t.calls = append(t.calls, strings.Join(args, " "))
 	if t.err != nil {
@@ -134,10 +190,13 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 func consoleDeps(client Client, input string, interactive bool) (Dependencies, *bytes.Buffer, *bytes.Buffer) {
 	out := &bytes.Buffer{}
 	errOut := &bytes.Buffer{}
+	store := &testCredentialStore{credential: credentialstore.Credential{SocketPath: "/run/openagentx.sock",
+		InstallationID: "installation-test", Username: "owner", TokenID: "token-id", Token: "opaque-token", AbsoluteExpires: time.Now().Add(time.Hour)}}
 	return Dependencies{
 		Out: out, Err: errOut, In: strings.NewReader(input), IsInteractive: func() bool { return interactive },
-		ReadPassword: func(string) (string, error) { return "password", nil },
-		NewClient:    func(string) (Client, error) { return client, nil },
+		ReadPassword:       func(string) (string, error) { return "password", nil },
+		NewClient:          func(string) (Client, error) { return client, nil },
+		NewCredentialStore: func(string) (CredentialStore, error) { return store, nil },
 	}, out, errOut
 }
 
@@ -310,7 +369,8 @@ func TestConsoleTTYCredentialAndHelpContracts(t *testing.T) {
 		t.Fatalf("non-interactive login code/output mismatch: code=%d stderr=%s", code, stderr.String())
 	}
 	deps, _, stderr = consoleDeps(client, "", false)
-	if code := Execute([]string{"logout"}, deps); code != 1 || !strings.Contains(stderr.String(), "credential not found") {
+	deps.NewCredentialStore = func(string) (CredentialStore, error) { return &testCredentialStore{missing: true}, nil }
+	if code := Execute([]string{"logout"}, deps); code != 0 {
 		t.Fatalf("missing credential code/output mismatch: code=%d stderr=%s", code, stderr.String())
 	}
 
@@ -327,5 +387,70 @@ func TestConsoleTTYCredentialAndHelpContracts(t *testing.T) {
 	deps, _, stderr = consoleDeps(client, "", true)
 	if code := Execute([]string{"login", "--content", "must-not-be-accepted"}, deps); code != 2 {
 		t.Fatalf("login accepted unrelated legacy flag: code=%d stderr=%s", code, stderr.String())
+	}
+}
+
+func TestLoginReadsPasswordOnlyFromTTYAndStoresInstallationCredential(t *testing.T) {
+	root := t.TempDir()
+	client := &testClient{installationID: "installation-login"}
+	store := &testCredentialStore{missing: true}
+	deps, out, stderr := consoleDeps(client, "", true)
+	deps.ReadPassword = func(prompt string) (string, error) {
+		if !strings.Contains(prompt, "password") {
+			t.Fatalf("unexpected password prompt %q", prompt)
+		}
+		return "private-password", nil
+	}
+	deps.NewCredentialStore = func(string) (CredentialStore, error) { return store, nil }
+	if code := Execute([]string{"login", "--socket", "/run/openagentx.sock", "--credentials", filepath.Join(root, "credentials.json")}, deps); code != 0 {
+		t.Fatalf("login code=%d stderr=%s", code, stderr.String())
+	}
+	if !store.saved || store.credential.InstallationID != "installation-login" || store.credential.Token != "opaque-token" {
+		t.Fatalf("stored credential=%+v saved=%v", store.credential, store.saved)
+	}
+	combined := out.String() + stderr.String()
+	if strings.Contains(combined, "private-password") || strings.Contains(combined, "opaque-token") {
+		t.Fatalf("login output leaked secret material: %s", combined)
+	}
+}
+
+func TestAuthenticatedCommandLoadsCredentialWithoutPasswordPrompt(t *testing.T) {
+	client := &testClient{attached: consoleapi.AttachResponse{WorkerStatus: domain.WorkerStatusOffline}}
+	deps, _, stderr := consoleDeps(client, "", false)
+	deps.ReadPassword = func(string) (string, error) { t.Fatal("authenticated command prompted for password"); return "", nil }
+	if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "quote", "--once"}, deps); code != 0 {
+		t.Fatalf("attach code=%d stderr=%s", code, stderr.String())
+	}
+	if !client.tokenSent || client.attachCount != 1 {
+		t.Fatalf("credential/API path tokenSent=%v attach=%d", client.tokenSent, client.attachCount)
+	}
+}
+
+func TestLogoutDeletesLocalCredentialWithoutSendingAcrossInstallationOrWhenOffline(t *testing.T) {
+	for name, configure := range map[string]func(*Dependencies, *testClient, *testCredentialStore){
+		"replacement": func(_ *Dependencies, client *testClient, _ *testCredentialStore) {
+			client.installationID = "replacement-installation"
+		},
+		"offline": func(deps *Dependencies, _ *testClient, _ *testCredentialStore) {
+			deps.NewClient = func(string) (Client, error) { return nil, fmt.Errorf("daemon unavailable") }
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			client := &testClient{installationID: "installation-test"}
+			store := &testCredentialStore{credential: credentialstore.Credential{SocketPath: "/run/openagentx.sock",
+				InstallationID: "installation-test", Username: "owner", TokenID: "token-id", Token: "stored-secret", AbsoluteExpires: time.Now().Add(time.Hour)}}
+			deps, _, stderr := consoleDeps(client, "", false)
+			deps.NewCredentialStore = func(string) (CredentialStore, error) { return store, nil }
+			configure(&deps, client, store)
+			if code := Execute([]string{"logout", "--socket", "/run/openagentx.sock", "--credentials", filepath.Join(t.TempDir(), "credentials.json")}, deps); code != 0 {
+				t.Fatalf("logout code=%d stderr=%s", code, stderr.String())
+			}
+			if !store.deleted || client.tokenSent || client.logoutCount != 0 {
+				t.Fatalf("logout boundary deleted=%v tokenSent=%v remoteLogout=%d", store.deleted, client.tokenSent, client.logoutCount)
+			}
+			if !strings.Contains(stderr.String(), "local CLI credential deleted") {
+				t.Fatalf("logout warning missing: %s", stderr.String())
+			}
+		})
 	}
 }

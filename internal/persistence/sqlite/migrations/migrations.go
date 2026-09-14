@@ -2,11 +2,14 @@ package migrations
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	_ "embed"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 const CurrentVersion = 1
@@ -23,6 +26,7 @@ var requiredTables = []string{
 	"worker_instances", "runtime_backend_registrations", "tasks", "messages", "run_attempts", "session_bindings",
 	"workspace_leases", "approval_requests", "approval_decisions", "mailbox_items", "worker_commands", "artifacts",
 	"event_journal", "web_users", "web_sessions",
+	"installation_metadata", "cli_tokens",
 	"network_profiles", "network_profile_bindings",
 	"network_profile_heads", "network_tests", "network_work_items", "network_workflow_commands", "network_imports",
 	"network_profile_publications", "network_mode_policies", "network_mode_tests",
@@ -30,10 +34,31 @@ var requiredTables = []string{
 
 var requiredTriggers = []string{"event_journal_reject_update", "event_journal_reject_delete", "network_profiles_reject_update", "network_profiles_reject_delete", "network_mode_policies_reject_update", "network_mode_policies_reject_delete"}
 
+var requiredIndexes = []string{"idx_cli_tokens_expiry", "idx_cli_tokens_user"}
+
+var requiredColumns = map[string][]string{
+	"installation_metadata": {"singleton", "installation_id", "created_at"},
+	"cli_tokens":            {"token_id", "token_digest", "web_user_id", "principal_id", "scopes_json", "installation_id", "created_at", "last_used_at", "absolute_expires_at", "revoked_at"},
+}
+
+var requiredDefinitionFragments = map[string][]string{
+	"installation_metadata": {"singleton integer primary key", "check (singleton = 1)", "installation_id text not null unique"},
+	"cli_tokens":            {"token_id text primary key", "token_digest text not null unique", "references web_users(web_user_id)", "references principals(principal_id)", "references installation_metadata(installation_id)"},
+}
+
 //go:embed 001_target_schema.sql
 var targetSchema string
 
 func Apply(ctx context.Context, db *sql.DB) error {
+	return apply(ctx, db, migrationOptions{})
+}
+
+type migrationOptions struct {
+	newInstallationID func() (string, error)
+	beforeCLICommit   func() error
+}
+
+func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	if db == nil {
 		return fmt.Errorf("database is nil")
 	}
@@ -62,6 +87,9 @@ func Apply(ctx context.Context, db *sql.DB) error {
 		if err := ensureWorkerCommandKinds(ctx, db); err != nil {
 			return err
 		}
+		if err := ensureCLITokenTables(ctx, db, options); err != nil {
+			return err
+		}
 		return ValidateCurrent(ctx, db)
 	}
 
@@ -81,13 +109,103 @@ func Apply(ctx context.Context, db *sql.DB) error {
 	if _, err := tx.ExecContext(ctx, targetSchema); err != nil {
 		return fmt.Errorf("apply target schema v%d: %w", CurrentVersion, err)
 	}
+	if err := applyCLITokenSchema(ctx, tx, options); err != nil {
+		return err
+	}
 	if err := validateObjects(ctx, tx); err != nil {
 		return err
+	}
+	if options.beforeCLICommit != nil {
+		if err := options.beforeCLICommit(); err != nil {
+			return fmt.Errorf("CLI Token schema pre-commit: %w", err)
+		}
 	}
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit target schema v%d: %w", CurrentVersion, err)
 	}
 	return nil
+}
+
+func ensureCLITokenTables(ctx context.Context, db *sql.DB, options migrationOptions) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin CLI Token schema upgrade: %w", err)
+	}
+	defer tx.Rollback()
+	if err := applyCLITokenSchema(ctx, tx, options); err != nil {
+		return err
+	}
+	if err := validateCLIObjects(ctx, tx); err != nil {
+		return err
+	}
+	if options.beforeCLICommit != nil {
+		if err := options.beforeCLICommit(); err != nil {
+			return fmt.Errorf("CLI Token schema pre-commit: %w", err)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit CLI Token schema upgrade: %w", err)
+	}
+	return nil
+}
+
+func applyCLITokenSchema(ctx context.Context, tx *sql.Tx, options migrationOptions) error {
+	statements := []string{
+		`CREATE TABLE IF NOT EXISTS installation_metadata (
+			singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+			installation_id TEXT NOT NULL UNIQUE,
+			created_at TEXT NOT NULL
+		)`,
+		`CREATE TABLE IF NOT EXISTS cli_tokens (
+			token_id TEXT PRIMARY KEY,
+			token_digest TEXT NOT NULL UNIQUE,
+			web_user_id TEXT NOT NULL REFERENCES web_users(web_user_id) ON DELETE CASCADE,
+			principal_id TEXT NOT NULL REFERENCES principals(principal_id),
+			scopes_json TEXT NOT NULL,
+			installation_id TEXT NOT NULL,
+			created_at TEXT NOT NULL,
+			last_used_at TEXT NOT NULL,
+			absolute_expires_at TEXT NOT NULL,
+			revoked_at TEXT,
+			FOREIGN KEY (installation_id) REFERENCES installation_metadata(installation_id)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_cli_tokens_expiry ON cli_tokens(absolute_expires_at, revoked_at)`,
+		`CREATE INDEX IF NOT EXISTS idx_cli_tokens_user ON cli_tokens(web_user_id, installation_id, revoked_at)`,
+	}
+	for _, statement := range statements {
+		if _, err := tx.ExecContext(ctx, statement); err != nil {
+			return fmt.Errorf("apply CLI Token schema upgrade: %w", err)
+		}
+	}
+	var count int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM installation_metadata WHERE singleton=1`).Scan(&count); err != nil {
+		return fmt.Errorf("inspect installation identity: %w", err)
+	}
+	if count == 0 {
+		generator := options.newInstallationID
+		if generator == nil {
+			generator = randomInstallationID
+		}
+		installationID, err := generator()
+		if err != nil {
+			return fmt.Errorf("generate installation identity: %w", err)
+		}
+		if strings.TrimSpace(installationID) == "" {
+			return fmt.Errorf("generate installation identity: empty value")
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO installation_metadata(singleton,installation_id,created_at) VALUES(1,?,?)`, installationID, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+			return fmt.Errorf("persist installation identity: %w", err)
+		}
+	}
+	return nil
+}
+
+func randomInstallationID() (string, error) {
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(raw), nil
 }
 
 func ensureWorkerCommandKinds(ctx context.Context, db *sql.DB) error {
@@ -408,6 +526,46 @@ func validateObjects(ctx context.Context, queryer schemaQueryer) error {
 		if err := requireSchemaObject(ctx, queryer, "trigger", trigger); err != nil {
 			return err
 		}
+	}
+	return validateCLIObjects(ctx, queryer)
+}
+
+func validateCLIObjects(ctx context.Context, queryer schemaQueryer) error {
+	for _, index := range requiredIndexes {
+		if err := requireSchemaObject(ctx, queryer, "index", index); err != nil {
+			return err
+		}
+	}
+	for table, columns := range requiredColumns {
+		for _, column := range columns {
+			var count int
+			query := fmt.Sprintf("SELECT COUNT(*) FROM pragma_table_info('%s') WHERE name=?", table)
+			if err := queryer.QueryRowContext(ctx, query, column).Scan(&count); err != nil {
+				return fmt.Errorf("inspect schema column %s.%s: %w", table, column, err)
+			}
+			if count != 1 {
+				return fmt.Errorf("%w: missing column %s.%s", ErrIncompleteSchema, table, column)
+			}
+		}
+	}
+	for table, fragments := range requiredDefinitionFragments {
+		var definition string
+		if err := queryer.QueryRowContext(ctx, `SELECT sql FROM sqlite_master WHERE type='table' AND name=?`, table).Scan(&definition); err != nil {
+			return fmt.Errorf("inspect schema definition %s: %w", table, err)
+		}
+		normalized := strings.ToLower(strings.Join(strings.Fields(definition), " "))
+		for _, fragment := range fragments {
+			if !strings.Contains(normalized, fragment) {
+				return fmt.Errorf("%w: invalid definition for table %s", ErrIncompleteSchema, table)
+			}
+		}
+	}
+	var installationRows int
+	if err := queryer.QueryRowContext(ctx, `SELECT COUNT(*) FROM installation_metadata WHERE singleton=1 AND length(trim(installation_id))>0`).Scan(&installationRows); err != nil {
+		return fmt.Errorf("inspect installation identity row: %w", err)
+	}
+	if installationRows != 1 {
+		return fmt.Errorf("%w: installation identity row is missing or invalid", ErrIncompleteSchema)
 	}
 	return nil
 }

@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	openapi "openagentx/internal/api"
+	requestauth "openagentx/internal/auth"
 	"openagentx/internal/auth/web"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
@@ -17,6 +19,18 @@ import (
 
 type recordingAdminState struct {
 	command *domain.WorkerCommand
+}
+
+type capturingAuthorizer struct {
+	requirement requestauth.Requirement
+}
+
+func (a *capturingAuthorizer) Authorize(_ *http.Request, requirement requestauth.Requirement) (requestauth.Principal, error) {
+	a.requirement = requirement
+	return requestauth.Principal{}, errors.New("stop after authorization capture")
+}
+func (a *capturingAuthorizer) WriteFailure(response http.ResponseWriter, _ error) {
+	response.WriteHeader(http.StatusUnauthorized)
 }
 
 func (s *recordingAdminState) CreateWorkerCommand(_ context.Context, command *domain.WorkerCommand, _ *domain.JournalEvent) (*domain.WorkerCommand, error) {
@@ -127,6 +141,19 @@ func TestHealthCheckRequiresOwnerCSRFAndMatchingIdempotencyKey(t *testing.T) {
 	}
 	if response.Header().Get("Cache-Control") != "no-store" {
 		t.Fatalf("Admin cache policy=%q", response.Header().Get("Cache-Control"))
+	}
+}
+
+func TestCLIWorkerLifecycleRequiresOwnerAndFleetScope(t *testing.T) {
+	authorizer := &capturingAuthorizer{}
+	handler, err := newHandler(new(controlplane.WorkerAdminService), authorizer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/api/admin/v1/workers/worker-1/stop", nil))
+	if authorizer.requirement.Role != domain.WebRoleOwner || authorizer.requirement.Scope != domain.CLIScopeFleetLifecycle || !authorizer.requirement.Write {
+		t.Fatalf("lifecycle requirement=%+v", authorizer.requirement)
 	}
 }
 

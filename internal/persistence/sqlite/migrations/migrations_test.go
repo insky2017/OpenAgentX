@@ -45,7 +45,7 @@ func TestApplyCreatesTargetSchemaAndIsRepeatable(t *testing.T) {
 		"position_assignments", "reporting_lines", "authority_policies", "worker_instances", "execution_profiles",
 		"runtime_backend_registrations", "tasks", "messages", "event_journal", "mailbox_items", "worker_commands",
 		"run_attempts", "session_bindings", "workspace_leases", "artifacts", "approval_requests", "approval_decisions",
-		"web_users", "web_sessions",
+		"web_users", "web_sessions", "installation_metadata", "cli_tokens",
 	}
 	for _, table := range requiredTables {
 		var count int
@@ -55,6 +55,57 @@ func TestApplyCreatesTargetSchemaAndIsRepeatable(t *testing.T) {
 		if count != 1 {
 			t.Fatalf("required table %s is missing", table)
 		}
+	}
+}
+
+func TestExistingV1ReopenEnsuresCLITokenSchemaAndStableInstallation(t *testing.T) {
+	ctx := context.Background()
+	db := openDB(t)
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	var original string
+	if err := db.QueryRowContext(ctx, `SELECT installation_id FROM installation_metadata WHERE singleton=1`).Scan(&original); err != nil {
+		t.Fatal(err)
+	}
+	for _, statement := range []string{`DROP TABLE cli_tokens`, `DROP TABLE installation_metadata`} {
+		if _, err := db.ExecContext(ctx, statement); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	var restored string
+	if err := db.QueryRowContext(ctx, `SELECT installation_id FROM installation_metadata WHERE singleton=1`).Scan(&restored); err != nil {
+		t.Fatal(err)
+	}
+	if restored == "" || restored == original {
+		t.Fatalf("recreated installation identity original=%q restored=%q", original, restored)
+	}
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	var repeated string
+	if err := db.QueryRowContext(ctx, `SELECT installation_id FROM installation_metadata WHERE singleton=1`).Scan(&repeated); err != nil || repeated != restored {
+		t.Fatalf("installation identity changed on repeat: got=%q want=%q err=%v", repeated, restored, err)
+	}
+}
+
+func TestExistingV1RejectsMalformedCLITokenObject(t *testing.T) {
+	ctx := context.Background()
+	db := openDB(t)
+	if err := migrations.Apply(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `DROP TABLE cli_tokens`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `CREATE TABLE cli_tokens(token_id TEXT PRIMARY KEY)`); err != nil {
+		t.Fatal(err)
+	}
+	if err := migrations.Apply(ctx, db); err == nil {
+		t.Fatal("malformed CLI Token table was accepted")
 	}
 }
 

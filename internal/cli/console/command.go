@@ -2,6 +2,7 @@ package console
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -9,29 +10,35 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"golang.org/x/term"
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	consoleclient "openagentx/internal/client/console"
+	"openagentx/internal/credentialstore"
 	"openagentx/internal/domain"
 	fleetmodel "openagentx/internal/fleet"
 	"openagentx/internal/localprofile"
 )
 
 type Dependencies struct {
-	Out           io.Writer
-	Err           io.Writer
-	In            io.Reader
-	ReadPassword  func(string) (string, error)
-	IsInteractive func() bool
-	NewClient     func(string) (Client, error)
-	Tmux          fleetmodel.CommandRunner
-	Context       context.Context
+	Out                io.Writer
+	Err                io.Writer
+	In                 io.Reader
+	ReadPassword       func(string) (string, error)
+	IsInteractive      func() bool
+	NewClient          func(string) (Client, error)
+	NewCredentialStore func(string) (CredentialStore, error)
+	Tmux               fleetmodel.CommandRunner
+	Context            context.Context
 }
 
 type Client interface {
-	Login(context.Context, string, string) error
+	ProbeInstallation(context.Context) (openapi.CLIInstallationResponse, error)
+	LoginCredential(context.Context, string, string) (openapi.CLILoginResponse, error)
+	UseCredential(context.Context, string, string) error
+	Logout(context.Context) error
 	Attach(context.Context, string, string) (consoleapi.AttachResponse, error)
 	Follow(context.Context, string, string, func(consoleapi.AttachResponse) error, func(openapi.JournalEventReadModel) error) error
 	Dispatch(context.Context, openapi.CreateTaskRequest) (openapi.CreateTaskResponse, error)
@@ -41,10 +48,20 @@ type Client interface {
 	WorkerCommand(context.Context, string, int64, domain.WorkerCommandKind, string, bool) (openapi.WorkerCommandResponse, error)
 }
 
+type CredentialStore interface {
+	Save(credentialstore.Credential) error
+	Load(string, string, string) (credentialstore.Credential, error)
+	LoadCurrentForSocket(string) (credentialstore.Credential, error)
+	Delete(credentialstore.Credential) (bool, error)
+}
+
 func DefaultDependencies() Dependencies {
 	return Dependencies{Out: os.Stdout, Err: os.Stderr, In: os.Stdin, Tmux: fleetmodel.ExecRunner{},
 		IsInteractive: func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
 		NewClient:     func(socketPath string) (Client, error) { return consoleclient.NewUnixClient(socketPath) },
+		NewCredentialStore: func(path string) (CredentialStore, error) {
+			return credentialstore.New(path, credentialstore.Options{})
+		},
 		ReadPassword: func(prompt string) (string, error) {
 			if !term.IsTerminal(int(os.Stdin.Fd())) {
 				return "", fmt.Errorf("interactive terminal is required for password input")
@@ -76,6 +93,9 @@ func Execute(args []string, deps Dependencies) int {
 	if deps.NewClient == nil {
 		deps.NewClient = defaults.NewClient
 	}
+	if deps.NewCredentialStore == nil {
+		deps.NewCredentialStore = defaults.NewCredentialStore
+	}
 	if deps.Tmux == nil {
 		deps.Tmux = defaults.Tmux
 	}
@@ -103,46 +123,46 @@ func Execute(args []string, deps Dependencies) int {
 	var socketFlag localprofile.PathFlag
 	var credentialsFlag localprofile.PathFlag
 	flags.Var(&socketFlag, "socket", localprofile.PathUsage(localprofile.SocketPath, "OpenAgentX Unix socket"))
+	flags.Var(&credentialsFlag, "credentials", localprofile.PathUsage(localprofile.CredentialsPath, "CLI credential file"))
 	var username, agentID, taskID, approvalID, organizationID, content string
 	var version int64
 	var diagnostic, once, confirmForce bool
-	username = "owner"
+	username = ""
 	organizationID = "default"
 	switch command {
 	case "login":
-		flags.Var(&credentialsFlag, "credentials", localprofile.PathUsage(localprofile.CredentialsPath, "CLI credential file"))
+		username = "owner"
 		flags.StringVar(&username, "username", username, "Web user name")
 	case "logout":
-		flags.Var(&credentialsFlag, "credentials", localprofile.PathUsage(localprofile.CredentialsPath, "CLI credential file"))
 	case "attach":
-		flags.StringVar(&username, "username", username, "Web user name")
+		flags.StringVar(&username, "username", username, "CLI user name (default: current selection)")
 		flags.StringVar(&agentID, "agent", "", "Agent ID")
 		flags.StringVar(&organizationID, "organization", organizationID, "Organization ID")
 		flags.BoolVar(&diagnostic, "diagnostic", false, "Enable authorized diagnostic projection")
 		flags.BoolVar(&once, "once", false, "Print current state without following events")
 	case "dispatch":
-		flags.StringVar(&username, "username", username, "Web user name")
+		flags.StringVar(&username, "username", username, "CLI user name (default: current selection)")
 		flags.StringVar(&agentID, "agent", "", "Agent ID")
 		flags.StringVar(&organizationID, "organization", organizationID, "Organization ID")
 		flags.StringVar(&content, "content", "", "Task content")
 	case "steer":
-		flags.StringVar(&username, "username", username, "Web user name")
+		flags.StringVar(&username, "username", username, "CLI user name (default: current selection)")
 		flags.StringVar(&taskID, "task", "", "Task ID")
 		flags.StringVar(&content, "content", "", "Steering content")
 		flags.Int64Var(&version, "version", 0, "Expected Task version")
 	case "cancel":
-		flags.StringVar(&username, "username", username, "Web user name")
+		flags.StringVar(&username, "username", username, "CLI user name (default: current selection)")
 		flags.StringVar(&taskID, "task", "", "Task ID")
 		flags.Int64Var(&version, "version", 0, "Expected Task version")
 	case "approve", "reject":
-		flags.StringVar(&username, "username", username, "Web user name")
+		flags.StringVar(&username, "username", username, "CLI user name (default: current selection)")
 		flags.StringVar(&approvalID, "approval", "", "Approval request ID")
 		flags.Int64Var(&version, "version", 0, "Expected approval version")
 	case "down":
-		flags.StringVar(&username, "username", username, "Web user name")
+		flags.StringVar(&username, "username", username, "CLI user name (default: current selection)")
 		flags.StringVar(&agentID, "agent", "", "Agent ID")
 	case "force-stop":
-		flags.StringVar(&username, "username", username, "Web user name")
+		flags.StringVar(&username, "username", username, "CLI user name (default: current selection)")
 		flags.StringVar(&agentID, "agent", "", "Agent ID")
 		flags.BoolVar(&confirmForce, "confirm-force-stop", false, "Acknowledge force-stop risk")
 	}
@@ -163,29 +183,10 @@ func Execute(args []string, deps Dependencies) int {
 		fmt.Fprintf(deps.Err, "resolve Console socket: %v\n", err)
 		return 2
 	}
-	if command == "login" || command == "logout" {
-		credentials, resolveErr := resolver.Resolve(localprofile.CredentialsPath, credentialsFlag.Override())
-		if resolveErr != nil {
-			fmt.Fprintf(deps.Err, "resolve Console credentials: %v\n", resolveErr)
-			return 2
-		}
-		if command == "login" {
-			if !deps.IsInteractive() {
-				fmt.Fprintln(deps.Err, "openagentx console login requires an interactive TTY")
-				return 2
-			}
-			fmt.Fprintln(deps.Err, "CLI credential login is not available in this build")
-			return 1
-		}
-		if _, statErr := os.Stat(credentials.Path); os.IsNotExist(statErr) {
-			fmt.Fprintf(deps.Err, "Console credential not found: %s\n", credentials.Path)
-			return 1
-		} else if statErr != nil {
-			fmt.Fprintf(deps.Err, "inspect Console credential: %v\n", statErr)
-			return 1
-		}
-		fmt.Fprintln(deps.Err, "CLI credential logout is not available in this build")
-		return 1
+	credentials, resolveErr := resolver.Resolve(localprofile.CredentialsPath, credentialsFlag.Override())
+	if resolveErr != nil {
+		fmt.Fprintf(deps.Err, "resolve Console credentials: %v\n", resolveErr)
+		return 2
 	}
 	baseContext := deps.Context
 	if baseContext == nil {
@@ -193,6 +194,45 @@ func Execute(args []string, deps Dependencies) int {
 	}
 	ctx, cancel := signal.NotifyContext(baseContext, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+	store, err := deps.NewCredentialStore(credentials.Path)
+	if err != nil {
+		fmt.Fprintf(deps.Err, "open Console credential store: %v\n", err)
+		return 1
+	}
+	if command == "login" {
+		if !deps.IsInteractive() {
+			fmt.Fprintln(deps.Err, "openagentx console login requires an interactive TTY")
+			return 2
+		}
+		client, clientErr := deps.NewClient(socket.Path)
+		if clientErr != nil {
+			fmt.Fprintln(deps.Err, clientErr)
+			return 1
+		}
+		password, passwordErr := deps.ReadPassword("Console password: ")
+		if passwordErr != nil {
+			fmt.Fprintf(deps.Err, "read Console password: %v\n", passwordErr)
+			return 1
+		}
+		issued, loginErr := client.LoginCredential(ctx, strings.TrimSpace(username), password)
+		if loginErr != nil {
+			fmt.Fprintf(deps.Err, "Console login failed: %v\n", loginErr)
+			return 1
+		}
+		credential := credentialstore.Credential{SocketPath: socket.Path, InstallationID: issued.InstallationID,
+			Username: issued.Principal.Username, TokenID: issued.Principal.TokenID, Token: issued.Token,
+			AbsoluteExpires: issued.AbsoluteExpiresAt}
+		if err := store.Save(credential); err != nil {
+			_ = client.Logout(ctx)
+			fmt.Fprintf(deps.Err, "store Console credential: %v\n", err)
+			return 1
+		}
+		fmt.Fprintf(deps.Out, "CLI session established for %s; expires %s\n", credential.Username, credential.AbsoluteExpires.UTC().Format(time.RFC3339))
+		return 0
+	}
+	if command == "logout" {
+		return executeLogout(ctx, socket.Path, store, deps)
+	}
 	if command == "attach" {
 		if strings.TrimSpace(agentID) == "" {
 			resolved, resolveErr := resolveAgentFromTmux(ctx, deps.Tmux)
@@ -207,18 +247,23 @@ func Execute(args []string, deps Dependencies) int {
 			return 2
 		}
 	}
-	password, err := deps.ReadPassword("Console password: ")
-	if err != nil {
-		fmt.Fprintf(deps.Err, "read Console password: %v\n", err)
-		return 1
-	}
 	client, err := deps.NewClient(socket.Path)
 	if err != nil {
 		fmt.Fprintln(deps.Err, err)
 		return 1
 	}
-	if err := client.Login(ctx, strings.TrimSpace(username), password); err != nil {
-		fmt.Fprintf(deps.Err, "Console login failed: %v\n", err)
+	probe, err := client.ProbeInstallation(ctx)
+	if err != nil {
+		fmt.Fprintf(deps.Err, "probe Console installation: %v\n", err)
+		return 1
+	}
+	credential, err := store.Load(socket.Path, probe.InstallationID, strings.TrimSpace(username))
+	if err != nil {
+		fmt.Fprintln(deps.Err, "Console credential is unavailable; run openagentx console login")
+		return 1
+	}
+	if err := client.UseCredential(ctx, credential.InstallationID, credential.Token); err != nil {
+		fmt.Fprintf(deps.Err, "validate Console credential audience: %v\n", err)
 		return 1
 	}
 	idem := consoleclient.IdempotencyKey("console-" + command)
@@ -306,6 +351,44 @@ func Execute(args []string, deps Dependencies) int {
 			fmt.Fprintln(deps.Err, err)
 			return 1
 		}
+	}
+	return 0
+}
+
+func executeLogout(ctx context.Context, socketPath string, store CredentialStore, deps Dependencies) int {
+	credential, err := store.LoadCurrentForSocket(socketPath)
+	if errors.Is(err, credentialstore.ErrNotFound) {
+		fmt.Fprintln(deps.Out, "No local CLI credential is stored for this socket")
+		return 0
+	}
+	if err != nil {
+		fmt.Fprintf(deps.Err, "load Console credential: %v\n", err)
+		return 1
+	}
+	warning := ""
+	client, clientErr := deps.NewClient(socketPath)
+	if clientErr != nil {
+		warning = "daemon unavailable; server-side token status is unknown"
+	} else {
+		probe, probeErr := client.ProbeInstallation(ctx)
+		if probeErr != nil {
+			warning = "daemon unavailable; server-side token status is unknown"
+		} else if probe.InstallationID != credential.InstallationID {
+			warning = "installation identity changed; token was not sent to the replacement daemon"
+		} else if useErr := client.UseCredential(ctx, credential.InstallationID, credential.Token); useErr != nil {
+			warning = "credential audience validation failed; token was not sent"
+		} else if logoutErr := client.Logout(ctx); logoutErr != nil {
+			warning = "server-side token was already invalid or could not be revoked"
+		}
+	}
+	if _, deleteErr := store.Delete(credential); deleteErr != nil {
+		fmt.Fprintf(deps.Err, "delete local Console credential: %v\n", deleteErr)
+		return 1
+	}
+	if warning != "" {
+		fmt.Fprintf(deps.Err, "warning: local CLI credential deleted; %s\n", warning)
+	} else {
+		fmt.Fprintln(deps.Out, "CLI session revoked and local credential deleted")
 	}
 	return 0
 }

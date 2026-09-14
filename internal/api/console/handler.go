@@ -12,7 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"openagentx/internal/auth/web"
+	requestauth "openagentx/internal/auth"
+	cliauth "openagentx/internal/auth/cli"
+	webauth "openagentx/internal/auth/web"
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
 )
@@ -32,16 +34,32 @@ type ObserveState interface {
 
 type Handler struct {
 	state   ObserveState
-	auth    *web.Manager
+	auth    requestauth.RequestAuthorizer
 	limiter *limiter
 	mux     *http.ServeMux
 }
 
-func NewHandler(state ObserveState, auth *web.Manager) (*Handler, error) {
-	if state == nil || auth == nil {
+func NewHandler(state ObserveState, manager *webauth.Manager) (*Handler, error) {
+	authorizer, err := requestauth.NewWebAuthorizer(manager)
+	if err != nil {
+		return nil, err
+	}
+	return newHandler(state, authorizer)
+}
+
+func NewCLIHandler(state ObserveState, service *cliauth.Service) (*Handler, error) {
+	authorizer, err := requestauth.NewCLIAuthorizer(service)
+	if err != nil {
+		return nil, err
+	}
+	return newHandler(state, authorizer)
+}
+
+func newHandler(state ObserveState, authorizer requestauth.RequestAuthorizer) (*Handler, error) {
+	if state == nil || authorizer == nil {
 		return nil, fmt.Errorf("console state and auth are required")
 	}
-	h := &Handler{state: state, auth: auth, limiter: newLimiter(), mux: http.NewServeMux()}
+	h := &Handler{state: state, auth: authorizer, limiter: newLimiter(), mux: http.NewServeMux()}
 	h.mux.HandleFunc("GET "+AttachPath, h.attach)
 	return h, nil
 }
@@ -88,20 +106,6 @@ type DiagnosticView struct {
 }
 
 func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
-	session, err := h.auth.Authenticate(r)
-	if err != nil {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	if err := web.RequireRole(session, web.RoleOperator); err != nil {
-		http.Error(w, "forbidden", http.StatusForbidden)
-		return
-	}
-	agentID := r.URL.Query().Get("agent_id")
-	if err := domain.ValidateIdentifier("agent_id", agentID); err != nil {
-		http.Error(w, "invalid agent_id", http.StatusBadRequest)
-		return
-	}
 	mode := r.URL.Query().Get("mode")
 	if mode == "" {
 		mode = ModeNormal
@@ -110,7 +114,18 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unsupported attach mode", http.StatusBadRequest)
 		return
 	}
-	if mode == ModeDiagnostic && !h.limiter.Allow(session.User.ID) {
+	requirement := attachRequirement(mode)
+	principal, err := h.auth.Authorize(r, requirement)
+	if err != nil {
+		h.auth.WriteFailure(w, err)
+		return
+	}
+	agentID := r.URL.Query().Get("agent_id")
+	if err := domain.ValidateIdentifier("agent_id", agentID); err != nil {
+		http.Error(w, "invalid agent_id", http.StatusBadRequest)
+		return
+	}
+	if mode == ModeDiagnostic && !h.limiter.Allow(principal.ID) {
 		http.Error(w, "diagnostic attach rate limited", http.StatusTooManyRequests)
 		return
 	}
@@ -161,6 +176,13 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 			StartedAt: run.StartedAt, UpdatedAt: run.UpdatedAt}
 	}
 	writeJSON(w, response)
+}
+
+func attachRequirement(mode string) requestauth.Requirement {
+	if mode == ModeDiagnostic {
+		return requestauth.Requirement{Role: domain.WebRoleOwner, Scope: domain.CLIScopeConsoleDiagnostic}
+	}
+	return requestauth.Requirement{Role: domain.WebRoleViewer, Scope: domain.CLIScopeConsoleRead}
 }
 
 func validateAttachSnapshot(snapshot domain.ConsoleSnapshot, agentID string) error {

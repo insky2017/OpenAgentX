@@ -5,10 +5,13 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	openapi "openagentx/internal/api"
 	webAuth "openagentx/internal/auth/web"
 	"openagentx/internal/domain"
 	"openagentx/internal/localprofile"
@@ -18,6 +21,38 @@ type staticWebUsers struct {
 	webAuth.SessionStore
 	users []domain.WebUserRecord
 	err   error
+}
+
+func TestDaemonMuxesKeepCLIAuthUDSOnly(t *testing.T) {
+	cliCalls := 0
+	panelCalls := 0
+	cliHandler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		cliCalls++
+		w.WriteHeader(http.StatusNoContent)
+	})
+	panelHandler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		panelCalls++
+		w.WriteHeader(http.StatusNoContent)
+	})
+	notFound := http.NotFoundHandler()
+	unixMux := newUnixMux(notFound, cliHandler, notFound, notFound, panelHandler)
+	udsCLI := httptest.NewRecorder()
+	unixMux.ServeHTTP(udsCLI, httptest.NewRequest(http.MethodGet, openapi.CLIInstallationProbePath, nil))
+	if udsCLI.Code != http.StatusNoContent || cliCalls != 1 {
+		t.Fatalf("UDS CLI auth route status=%d calls=%d", udsCLI.Code, cliCalls)
+	}
+	udsWeb := httptest.NewRecorder()
+	unixMux.ServeHTTP(udsWeb, httptest.NewRequest(http.MethodPost, openapi.AuthLoginPath, nil))
+	if udsWeb.Code != http.StatusNotFound {
+		t.Fatalf("UDS exposed Web login status=%d", udsWeb.Code)
+	}
+
+	webMux := newWebMux(notFound, notFound, notFound, panelHandler, notFound)
+	webCLI := httptest.NewRecorder()
+	webMux.ServeHTTP(webCLI, httptest.NewRequest(http.MethodPost, openapi.CLIAuthLoginPath, nil))
+	if webCLI.Code != http.StatusNotFound || cliCalls != 1 || panelCalls != 0 {
+		t.Fatalf("Web CLI auth isolation status=%d cliCalls=%d panelCalls=%d", webCLI.Code, cliCalls, panelCalls)
+	}
 }
 
 func TestServeAndSchemaUseProfilePathsWithExplicitPrecedence(t *testing.T) {

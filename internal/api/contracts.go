@@ -22,6 +22,8 @@ const (
 	ErrorUnsupportedCapability = "UNSUPPORTED_CAPABILITY"
 	ErrorBackendUnavailable    = "BACKEND_UNAVAILABLE"
 	ErrorEventCursorExpired    = "EVENT_CURSOR_EXPIRED"
+	ErrorCLIUnauthenticated    = "CLI_UNAUTHENTICATED"
+	ErrorCLIForbidden          = "CLI_FORBIDDEN"
 	ErrorInternal              = "INTERNAL_ERROR"
 )
 

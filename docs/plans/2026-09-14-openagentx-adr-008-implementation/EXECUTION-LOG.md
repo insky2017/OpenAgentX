@@ -54,7 +54,7 @@ M  deploy/systemd/openagentx-user.service
 | 01 | 基线隔离、契约冻结与测试地图 | completed | `35bd44564773882cfedefb31fad0afd64c0514e4` | GO |
 | 02 | 默认路径与 CLI 表面 | completed | `e690bbbd11046e63841a4a869a90f6aeb42c5575` + fix `c0e8d4aeae2516c005cedbce6c5b35d1b8b07553` | GO |
 | 03 | 一致 Attach cursor 与代际 reducer | completed | `4aea5a6291b47792b1c69256ae0ae6422a890cb4` + fix `9e18246dc4f61ee8ccc044509229b13b0e191f9d` + fix `2f9772753b3a75e6304abd76c4eb6a259c9e0c6f` | GO |
-| 04 | 可撤销 CLI Token 会话 | pending | — | WAIT |
+| 04 | 可撤销 CLI Token 会话 | active | — | WAIT |
 | 05 | `OAX` workspace 与非破坏绑定 | pending | — | WAIT |
 | 06 | Console 主菜单、Agent selector 与全屏 TUI | pending | — | WAIT |
 | 07 | Fleet、user-systemd 与默认 profile 集成 | pending | — | WAIT |
@@ -478,11 +478,91 @@ M  deploy/systemd/openagentx-user.service
 - 主计划和 Task 03 front matter 已在本 docs-only gate record 同步为 `completed`；Task 04
   继续保持 `pending/WAIT`，未开始实现。
 
+### Task 04 — 可撤销 CLI Token 会话
+
+### 开始信息
+
+- 状态：active
+- 执行者：Codex
+- 开始时间（UTC）：`2026-09-14T17:12:49Z`
+- feature 基线：`c1196d7d43e10bf573cbfcc02525973debe9ba1f`
+- branch/worktree：`codex/adr008-implementation` / `/home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree`
+- 开始状态：工作树 clean，相对 `origin/main` ahead 9；监督者已明确 `GO Task 04`。
+- 边界：仅实现 CLI Token domain/service/repository、schema v1 compatible ensure、UDS-only auth
+  与 scope、credential store 及现有 Console/Fleet API bearer 接线；不开始 `OAX` workspace、
+  TUI 或 Fleet 集成，不操作任何真实运行状态。
+- 主计划和 Task 04 front matter 按 gate-record 协议继续保持 `pending`；监督门禁保持 `WAIT`。
+
+### 实现范围与安全决策
+
+- 新增 `domain.CLITokenRecord` 与四个冻结 scope；`internal/auth/cli` 使用 32-byte
+  CSPRNG opaque Token、SHA-256 digest、可注入 clock 和最长 30 天绝对期限。认证同时校验
+  当前 installation、用户状态、principal、当前角色与签发 scope；last-used 更新不延长期限。
+- SQLite v1 target schema 和既有 v1 `ensureCLITokenTables` 同时增加
+  `installation_metadata`、`cli_tokens` 与两个索引。installation ID 为持久化随机值；ensure
+  在一个事务内完成 DDL、ID 初始化、定义/列/索引/单例行校验，故障注入不会留下半表。
+- Replace Login 在同一 repository 事务先撤销同 installation/user 的旧 Token，再插入新
+  digest；logout 对尚未过期且 audience 匹配的已撤销 Token 幂等。提供按 web user 撤销全部
+  CLI Token 的 service/repository hook；当前没有密码修改入口，因此未虚构 UI 集成。
+- UDS 独立挂载 versioned CLI login/session/logout，以及必要的 UDS-only installation probe；
+  Web mux 对 CLI auth 前缀固定 404。Console/Panel/Admin 分别构造 Web cookie+CSRF 和 UDS
+  bearer authorizer，不存在全局 bearer fallback。未知的 UDS network mutation 没有冻结 scope，
+  因而 fail closed。
+- Normal Attach、Observe/Agent/SSE 使用 `console.read`+viewer；dispatch/steer/cancel/approval
+  使用 `console.control`+operator；Diagnostic Attach 使用 `console.diagnostic`+owner；Worker
+  drain/stop/force-stop 使用 `fleet.lifecycle`+owner。CLI auth 失败稳定为
+  `401 CLI_UNAUTHENTICATED` 或 `403 CLI_FORBIDDEN`。
+- `internal/credentialstore` 以 canonical socket、installation ID、username 隔离 credential；
+  支持同 socket 当前用户选择，校验 owner、目录不宽于 `0700`、文件不宽于 `0600`，拒绝
+  symlink/非普通文件，使用同目录唯一临时文件、fsync、rename、目录 fsync 和失败清理。
+- `console login` 是唯一向 UDS login 发送密码的 CLI 路径；后续 Attach/控制先 probe，再加载
+  匹配 credential 并使用 Bearer。logout 在 daemon 不可达、Token 无效或 installation 替换时
+  仍删除本地副本；installation 不匹配时不发送 Token。共享 client 的旧直接密码 Login 入口
+  显式 fail closed，Fleet credential 接线留在 Task 07，不在本任务提前实现。
+
+### 文件范围
+
+- domain/auth/API：`internal/domain/cli_token.go`、`internal/auth/request.go`、
+  `internal/auth/cli/`、`internal/api/auth.go`、`internal/api/contracts.go`、
+  `internal/api/auth/cli_handler.go`，以及 Console/Panel/Admin handler 的双 authorizer 接线。
+- persistence：`internal/persistence/sqlite/cli_token_repository.go`、
+  `internal/persistence/sqlite/bootstrap_repository.go`、migrations target/ensure/required validation。
+- local client/CLI：`internal/credentialstore/`、`internal/client/console/`、
+  `internal/cli/console/`；`cmd/openagentx/main.go` 仅组装 UDS/Web 隔离 mux。
+- 测试同步覆盖上述 package 与 `cmd/openagentx`；未修改主计划、Task 04 front matter、ADR、Web
+  产品代码、Fleet 实现、workspace、tmux 或 TUI。
+
+### 失败、纠正与验证
+
+| 时间 UTC | 命令/检查 | 退出码 | 脱敏结果/纠正 |
+|---|---|---:|---|
+| Task 04 阅读阶段 | 首次按章节边界抽取冻结文档 | 非预期输出 | awk 边界产生重复/空输出；随后按精确行号完整重读 Task 04、CONTRACT-FREEZE 5/8、ADR-008 11-12 和 execution log，未把首次输出作为证据 |
+| 2026-09-14T17:28Z | 首轮定向 `go test` | 1 | 双 authorizer 返回值指针和旧 client/CLI test fixture 尚未同步，出现编译/旧 Web endpoint 404；集中修正接口与 fixture 后重跑通过，无产品运行状态变化 |
+| 2026-09-14T17:36Z | 定向安全 package tests | 1 | 发现 operator 未继承 viewer 读取权限，修正为 owner > operator > viewer；credential fixture 的辅助现场混合导致预期安全拒绝，拆分隔离 fixture；重跑全部通过 |
+| 2026-09-14T17:42Z | `go test -race ./internal/auth/... ./internal/api/auth ./internal/api/console ./internal/api/admin ./internal/api/panel ./internal/client/console ./internal/cli/console ./internal/credentialstore ./internal/persistence/sqlite/...` | 0 | Task 04 auth/API/client/CLI/store/schema 与受影响 Panel/Admin race 全部通过 |
+| 2026-09-14T17:43Z | `go test ./...` | 0 | 全部 Go package 通过 |
+| 2026-09-14T17:43Z | `npm test -- --runInBand` | 1 | 仓库没有通用 `test` script；改用 package.json 现有 `test:observation`，保留本失败记录 |
+| 2026-09-14T17:43Z | `npm run test:pwa && npm run build` | 127 | PWA assertions 通过；worktree 缺少 `node_modules`，`vite` 不存在。随后 `npm ci` 按 lockfile 安装 123 packages，audit 为 0 vulnerability |
+| 2026-09-14T17:44Z | `npm run test:observation` / `npm run test:pwa` / `npm run build` | 0 | observation 4/4、PWA assertions、Vite production build 全部通过；仅产生 ignored `web/node_modules` 和 `web/dist` |
+| 2026-09-14T17:44Z | `go vet ./internal/auth/... ./internal/api/... ./internal/client/console ./internal/cli/console ./internal/credentialstore ./internal/persistence/sqlite/... ./cmd/openagentx` | 0 | 受影响 packages 无 vet 问题 |
+| 2026-09-14T17:44Z | `go build ./...` | 0 | 全部 Go targets 构建通过 |
+| 2026-09-14T17:44Z | `./scripts/check-legacy-control-paths.sh --release` | 0 | release scanner 全部类别 CLEAN |
+| 2026-09-14T17:45Z | 最终 `go test ./...` + 受影响 `go vet` + `go build ./...` + release scanner + `git diff --check` | 0 | 在旧直接密码 Login fail-closed 收口后，最终源码全量通过 |
+| 2026-09-14T17:48Z | CLI auth handler nil dependency fail-closed 审计后，`go test -race ./internal/api/auth ./cmd/openagentx` + `go test ./...` + 受影响 vet/build + release scanner + diff check | 0 | 构造器改为拒绝 nil service；最终源码与组装测试全部通过 |
+
+### Task 04 提交前安全点
+
+- 状态保持 `active/WAIT`；主计划与 Task 04 front matter 保持 `pending`，Task 05 未开始。
+- 实现提交将在本记录随同实现和测试一起创建；提交本身无法包含自身 SHA，精确 SHA、实际
+  post-commit clean/ahead 与监督结论由后续独立 docs-only gate record 记录。
+- 未 push feature、未安装 binary、未重启服务，未访问真实 DB/socket/default tmux；未修改
+  `steadyflow` 父仓或主工作树。所有 DB、HOME、credential 和 UDS 测试均使用临时路径。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
 |---|---|---|---|---|---|---|
-| — | — | — | — | 当前无已登记实施问题 | — | — |
+| T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | pending；不阻断 Task 04 安全边界 |
 
 ## 8. 安全与范围事件
 
@@ -495,6 +575,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T14:57:22Z | 监督复核通过 P0 与 Task 01；发现计划状态和提交证据不一致 | 仅文档 gate 状态不一致；产品、runtime 和远端 feature 未变化 | 独立 docs-only gate correction 记录 `35bd445`、实际 status 与 `GO`；Task 02 保持 `pending/WAIT` | Task 01 GO；等待 Task 02 单独授权 |
 | 2026-09-14T15:54:57Z | 监督最终复核 Task 02 主实现与 review-fix | 首次 Termux UDS 长路径失败已由 `c0e8d4a` 修复；最终默认 `TMPDIR` 和其余定向测试/vet 均通过 | 核验主实现 13-file、fix 2-file 范围及无产品语义偏移；同步 docs-only gate record | Task 02 GO；Task 03 保持 WAIT |
 | 2026-09-14T17:07:08Z | 三个 Task 03 实现/review-fix 提交及独立验证均通过 | 两轮 NO-GO 缺口已分别由 `9e18246`、`2f97727` 修复；无剩余 Task 03 阻断 | 记录三个精确 SHA、实际 clean/ahead 与最终结论；仅同步 docs gate 状态 | Task 03 GO；Task 04 保持 `pending/WAIT` |
+| 2026-09-14T17:45:58Z | Task 04 实现与隔离验证完成，等待阶段提交 | CLI Token、v1 ensure、UDS/Web auth 隔离、credential store 和 Console bearer 路径已形成最小闭环；Fleet 集成未越界 | 保留两次代码测试失败和两次 Web 环境/命令失败及纠正；最终 Go/race/Web/release/diff 通过 | Task 04 保持 active/WAIT，提交后停止等待 gate |
 
 ## 9. 最终产物（Task 08 填写）
 

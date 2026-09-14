@@ -14,7 +14,9 @@ import (
 	"unicode/utf8"
 
 	openapi "openagentx/internal/api"
-	"openagentx/internal/auth/web"
+	requestauth "openagentx/internal/auth"
+	cliauth "openagentx/internal/auth/cli"
+	webauth "openagentx/internal/auth/web"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
@@ -63,19 +65,35 @@ type Handler struct {
 	state    State
 	commands *controlplane.CommandService
 	network  *controlplane.NetworkWorkflowService
-	auth     *web.Manager
+	auth     requestauth.RequestAuthorizer
 	mux      *http.ServeMux
 }
 
-func NewHandler(state State, commands *controlplane.CommandService, auth *web.Manager, network ...*controlplane.NetworkWorkflowService) (*Handler, error) {
-	if state == nil || commands == nil || auth == nil {
+func NewHandler(state State, commands *controlplane.CommandService, manager *webauth.Manager, network ...*controlplane.NetworkWorkflowService) (*Handler, error) {
+	authorizer, err := requestauth.NewWebAuthorizer(manager)
+	if err != nil {
+		return nil, err
+	}
+	return newHandler(state, commands, authorizer, network...)
+}
+
+func NewCLIHandler(state State, commands *controlplane.CommandService, service *cliauth.Service, network ...*controlplane.NetworkWorkflowService) (*Handler, error) {
+	authorizer, err := requestauth.NewCLIAuthorizer(service)
+	if err != nil {
+		return nil, err
+	}
+	return newHandler(state, commands, authorizer, network...)
+}
+
+func newHandler(state State, commands *controlplane.CommandService, authorizer requestauth.RequestAuthorizer, network ...*controlplane.NetworkWorkflowService) (*Handler, error) {
+	if state == nil || commands == nil || authorizer == nil {
 		return nil, fmt.Errorf("panel state, commands and auth are required")
 	}
 	var networkService *controlplane.NetworkWorkflowService
 	if len(network) > 0 {
 		networkService = network[0]
 	}
-	h := &Handler{state: state, commands: commands, network: networkService, auth: auth, mux: http.NewServeMux()}
+	h := &Handler{state: state, commands: commands, network: networkService, auth: authorizer, mux: http.NewServeMux()}
 	h.mux.HandleFunc("GET "+openapi.ObserveHealthPath, h.health)
 	h.mux.HandleFunc("GET /api/observe/v1/overview", h.overview)
 	h.mux.HandleFunc("GET /api/observe/v1/agents", h.agents)
@@ -111,23 +129,31 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
 	h.mux.ServeHTTP(w, r)
 }
-func (h *Handler) session(w http.ResponseWriter, r *http.Request, write bool) (*web.Session, bool) {
-	s, err := h.auth.Authenticate(r)
+func (h *Handler) session(w http.ResponseWriter, r *http.Request, write bool) (*requestauth.Principal, bool) {
+	requirement := panelRequirement(r, write)
+	s, err := h.auth.Authorize(r, requirement)
 	if err != nil {
-		http.Error(w, "unauthorized", 401)
+		h.auth.WriteFailure(w, err)
 		return nil, false
 	}
+	return &s, true
+}
+
+func panelRequirement(r *http.Request, write bool) requestauth.Requirement {
+	requirement := requestauth.Requirement{Role: domain.WebRoleViewer, Scope: domain.CLIScopeConsoleRead, Write: write}
 	if write {
-		if err := web.RequireRole(s, web.RoleOperator); err != nil {
-			http.Error(w, "forbidden", 403)
-			return nil, false
-		}
-		if err := web.ValidateCSRF(s, r.Header.Get("X-CSRF-Token")); err != nil {
-			http.Error(w, "invalid csrf token", 403)
-			return nil, false
+		switch {
+		case r.URL.Path == "/api/control/v1/tasks",
+			strings.HasPrefix(r.URL.Path, "/api/control/v1/tasks/"),
+			strings.HasPrefix(r.URL.Path, "/api/control/v1/approvals/"):
+			requirement.Role = domain.WebRoleOperator
+			requirement.Scope = domain.CLIScopeConsoleControl
+		default:
+			requirement.Role = domain.WebRoleOwner
+			requirement.Scope = ""
 		}
 	}
-	return s, true
+	return requirement
 }
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
@@ -656,7 +682,7 @@ func (h *Handler) createNetworkProfile(w http.ResponseWriter, r *http.Request) {
 		if !requireIdempotencyHeader(w, r, req.Meta) {
 			return
 		}
-		result, err := h.network.CreateDraft(r.Context(), s.User.ID, req)
+		result, err := h.network.CreateDraft(r.Context(), s.ID, req)
 		writeNetworkCommandResult(w, result, err)
 		return
 	}
@@ -673,7 +699,7 @@ func (h *Handler) createNetworkProfile(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	p, err := req.Validate(s.User.ID)
+	p, err := req.Validate(s.ID)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
@@ -700,7 +726,7 @@ func (h *Handler) publishNetworkProfile(w http.ResponseWriter, r *http.Request) 
 		if !requireIdempotencyHeader(w, r, req.Meta) {
 			return
 		}
-		result, err := h.network.Publish(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+		result, err := h.network.Publish(r.Context(), s.ID, r.PathValue("profileID"), req)
 		writeNetworkCommandResult(w, result, err)
 		return
 	}
@@ -721,7 +747,7 @@ func (h *Handler) publishNetworkProfile(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	p, err := state.PublishProxyProfile(r.Context(), r.PathValue("profileID"), req.Meta.ExpectedVersion, s.User.ID, time.Now().UTC())
+	p, err := state.PublishProxyProfile(r.Context(), r.PathValue("profileID"), req.Meta.ExpectedVersion, s.ID, time.Now().UTC())
 	if err != nil {
 		http.Error(w, err.Error(), 409)
 		return
@@ -744,7 +770,7 @@ func (h *Handler) bindNetworkProfile(w http.ResponseWriter, r *http.Request) {
 		if !requireIdempotencyHeader(w, r, req.Meta) {
 			return
 		}
-		result, err := h.network.Bind(r.Context(), s.User.ID, req)
+		result, err := h.network.Bind(r.Context(), s.ID, req)
 		writeNetworkCommandResult(w, result, err)
 		return
 	}
@@ -816,7 +842,7 @@ func (h *Handler) editNetworkProfile(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	result, err := h.network.EditDraft(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+	result, err := h.network.EditDraft(r.Context(), s.ID, r.PathValue("profileID"), req)
 	writeNetworkCommandResult(w, result, err)
 }
 
@@ -825,7 +851,7 @@ func (h *Handler) replaceNetworkSecret(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := web.RequireRole(s, web.RoleOwner); err != nil {
+	if !s.HasRole(domain.WebRoleOwner) {
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
@@ -841,7 +867,7 @@ func (h *Handler) replaceNetworkSecret(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	result, err := h.network.ReplaceSecret(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+	result, err := h.network.ReplaceSecret(r.Context(), s.ID, r.PathValue("profileID"), req)
 	writeNetworkCommandResult(w, result, err)
 }
 
@@ -861,7 +887,7 @@ func (h *Handler) testNetworkProfile(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	result, err := h.network.StartTest(r.Context(), s.User.ID, r.PathValue("profileID"), req)
+	result, err := h.network.StartTest(r.Context(), s.ID, r.PathValue("profileID"), req)
 	writeNetworkCommandResult(w, result, err)
 }
 
@@ -881,7 +907,7 @@ func (h *Handler) rollbackNetworkBinding(w http.ResponseWriter, r *http.Request)
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	result, err := h.network.Rollback(r.Context(), s.User.ID, req)
+	result, err := h.network.Rollback(r.Context(), s.ID, req)
 	writeNetworkCommandResult(w, result, err)
 }
 
@@ -901,7 +927,7 @@ func (h *Handler) testNetworkMode(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	result, err := h.network.StartModeTest(r.Context(), s.User.ID, req)
+	result, err := h.network.StartModeTest(r.Context(), s.ID, req)
 	writeNetworkCommandResult(w, result, err)
 }
 
@@ -921,7 +947,7 @@ func (h *Handler) publishNetworkMode(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	result, err := h.network.PublishMode(r.Context(), s.User.ID, req)
+	result, err := h.network.PublishMode(r.Context(), s.ID, req)
 	writeNetworkCommandResult(w, result, err)
 }
 
@@ -930,7 +956,7 @@ func (h *Handler) importNetworkProfile(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := web.RequireRole(s, web.RoleOwner); err != nil {
+	if !s.HasRole(domain.WebRoleOwner) {
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
@@ -946,7 +972,7 @@ func (h *Handler) importNetworkProfile(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	result, err := h.network.StartImport(r.Context(), s.User.ID, req)
+	result, err := h.network.StartImport(r.Context(), s.ID, req)
 	writeNetworkCommandResult(w, result, err)
 }
 
@@ -1192,8 +1218,8 @@ func (h *Handler) createTask(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	req.SenderPrincipalID = s.User.ID
-	v, e := h.commands.CreateTask(r.Context(), s.User.ID, req)
+	req.SenderPrincipalID = s.ID
+	v, e := h.commands.CreateTask(r.Context(), s.ID, req)
 	if e != nil {
 		http.Error(w, e.Error(), 400)
 		return
@@ -1213,8 +1239,8 @@ func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	req.SenderPrincipalID = s.User.ID
-	v, e := h.commands.CreateMessage(r.Context(), s.User.ID, r.PathValue("taskID"), req)
+	req.SenderPrincipalID = s.ID
+	v, e := h.commands.CreateMessage(r.Context(), s.ID, r.PathValue("taskID"), req)
 	if e != nil {
 		http.Error(w, e.Error(), 400)
 		return
@@ -1234,8 +1260,8 @@ func (h *Handler) cancelTask(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	req.RequestedBy = s.User.ID
-	v, e := h.commands.CancelTask(r.Context(), s.User.ID, r.PathValue("taskID"), req)
+	req.RequestedBy = s.ID
+	v, e := h.commands.CancelTask(r.Context(), s.ID, r.PathValue("taskID"), req)
 	if e != nil {
 		status := 400
 		if errors.Is(e, domain.ErrTerminalState) {
@@ -1260,8 +1286,8 @@ func (h *Handler) decideApproval(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
-	req.DecidedBy = s.User.ID
-	result, err := h.commands.DecideApproval(r.Context(), s.User.ID, r.PathValue("approvalID"), req)
+	req.DecidedBy = s.ID
+	result, err := h.commands.DecideApproval(r.Context(), s.ID, r.PathValue("approvalID"), req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
