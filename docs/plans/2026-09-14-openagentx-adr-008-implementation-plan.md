@@ -56,7 +56,7 @@ M  deploy/systemd/openagentx-user.service
 | ID | 阶段 | 任务 | 依赖 | 状态 |
 |---|---|---|---|---|
 | 01 | G0 | [基线隔离、契约冻结与测试地图](2026-09-14-openagentx-adr-008-implementation/01-baseline-isolation-and-contract-freeze.md) | ADR-008、受保护现场收口 | completed |
-| 02 | G1 | [默认路径与 CLI 表面](2026-09-14-openagentx-adr-008-implementation/02-default-paths-and-cli-surface.md) | 01 | pending |
+| 02 | G1 | [默认路径与 CLI 表面](2026-09-14-openagentx-adr-008-implementation/02-default-paths-and-cli-surface.md) | 01 | completed |
 | 03 | G2 | [一致 Attach cursor 与代际 reducer](2026-09-14-openagentx-adr-008-implementation/03-consistent-attach-cursor-and-reducer.md) | 02 | pending |
 | 04 | G3 | [可撤销 CLI Token 会话](2026-09-14-openagentx-adr-008-implementation/04-revocable-cli-token-session.md) | 03 | pending |
 | 05 | G4 | [`OAX` workspace 与非破坏绑定](2026-09-14-openagentx-adr-008-implementation/05-oax-workspace-and-window-binding.md) | 04 | pending |

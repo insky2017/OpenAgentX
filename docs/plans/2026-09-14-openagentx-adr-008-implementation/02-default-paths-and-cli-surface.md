@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-14
 ---
@@ -64,3 +64,15 @@ git diff --check
 - 命令语法已冻结但尚未造成 Attach 功能空窗；
 - 未创建或修改真实 `~/.openagentx`；
 - 阶段提交和 execution log 完成后暂停。
+
+## 完成记录
+
+- 主实现提交：`e690bbbd11046e63841a4a869a90f6aeb42c5575`；review-fix 提交：
+  `c0e8d4aeae2516c005cedbce6c5b35d1b8b07553`。
+- 核心产物：唯一 `internal/localprofile` resolver、Console/Fleet/admin/serve/schema 默认路径接线、
+  fail-closed 路径与 Console parser 测试，以及可移植的短 UDS 测试 fixture。
+- 验证：Task 02 定向 Go 测试、`internal/client/console -count=1`、受影响 package `go vet`、
+  `go build`、help smoke 和 `git diff --check` 均通过；独立 Termux review 最终在默认 `TMPDIR`
+  下通过。
+- 产品范围保持不变：未实现 Task 03 cursor/reducer，也未实现 CLI Token、`OAX` workspace 或
+  全屏 TUI 等 Task 04+ 行为。
