@@ -37,6 +37,21 @@ type APIError struct {
 
 type terminalFollowError struct{ err error }
 
+type ConnectionState string
+
+const (
+	ConnectionConnecting        ConnectionState = "connecting"
+	ConnectionConnected         ConnectionState = "connected"
+	ConnectionDisconnected      ConnectionState = "disconnected"
+	ConnectionReconnecting      ConnectionState = "reconnecting"
+	ConnectionRetentionReattach ConnectionState = "retention-reattach"
+)
+
+type FollowState struct {
+	State  ConnectionState
+	Cursor int64
+}
+
 func (e *terminalFollowError) Error() string { return e.err.Error() }
 func (e *terminalFollowError) Unwrap() error { return e.err }
 
@@ -141,10 +156,39 @@ func (c *Client) Attach(ctx context.Context, agentID, mode string) (consoleapi.A
 	return result, err
 }
 
-func (c *Client) ListAgents(ctx context.Context) ([]domain.AgentIdentity, error) {
-	var result []domain.AgentIdentity
-	_, err := c.do(ctx, http.MethodGet, openapi.ObserveAgentsPath, nil, nil, &result, true, "", false)
-	return result, err
+func (c *Client) ListAgentOptions(ctx context.Context) ([]domain.ConsoleAgentOption, error) {
+	const maxAgentOptions = 10000
+	result := make([]domain.ConsoleAgentOption, 0)
+	cursor := ""
+	for {
+		query := url.Values{}
+		if cursor != "" {
+			query.Set("after_agent_id", cursor)
+		}
+		var page consoleapi.AgentOptionsPage
+		if _, err := c.do(ctx, http.MethodGet, consoleapi.AgentsPath, query, nil, &page, true, "", false); err != nil {
+			return nil, err
+		}
+		for _, option := range page.Agents {
+			if err := option.Validate(); err != nil || (cursor != "" && option.AgentID <= cursor) {
+				return nil, fmt.Errorf("Console Agent list returned an invalid projection")
+			}
+			cursor = option.AgentID
+			result = append(result, option)
+			if len(result) > maxAgentOptions {
+				return nil, fmt.Errorf("Console Agent list exceeds the supported safe bound")
+			}
+		}
+		if !page.HasMore {
+			if page.NextCursor != "" {
+				return nil, fmt.Errorf("Console Agent list returned an unexpected cursor")
+			}
+			return result, nil
+		}
+		if len(page.Agents) == 0 || page.NextCursor == "" || page.NextCursor != cursor {
+			return nil, fmt.Errorf("Console Agent list pagination did not advance")
+		}
+	}
 }
 
 func (c *Client) Dispatch(ctx context.Context, request openapi.CreateTaskRequest) (openapi.CreateTaskResponse, error) {
@@ -210,9 +254,16 @@ func (c *Client) Follow(
 	mode string,
 	onAttach func(consoleapi.AttachResponse) error,
 	onEvent func(openapi.JournalEventReadModel) error,
+	onState func(FollowState) error,
 ) error {
-	if onAttach == nil || onEvent == nil {
+	if onAttach == nil || onEvent == nil || onState == nil {
 		return fmt.Errorf("Console follow callbacks are required")
+	}
+	notify := func(state ConnectionState, cursor int64) error {
+		if err := onState(FollowState{State: state, Cursor: cursor}); err != nil {
+			return &terminalFollowError{err: err}
+		}
+		return nil
 	}
 	delay := c.reconnectDelay
 	if delay <= 0 {
@@ -223,6 +274,9 @@ func (c *Client) Follow(
 	for {
 		var err error
 		if needsAttach {
+			if err = notify(ConnectionConnecting, cursor); err != nil {
+				return err
+			}
 			var attached consoleapi.AttachResponse
 			attached, err = c.Attach(ctx, agentID, mode)
 			if err == nil && attached.SnapshotSequence < 0 {
@@ -240,6 +294,10 @@ func (c *Client) Follow(
 			var stream io.ReadCloser
 			stream, err = c.Events(ctx, agentID, cursor)
 			if err == nil {
+				if err = notify(ConnectionConnected, cursor); err != nil {
+					_ = stream.Close()
+					return err
+				}
 				cursor, err = readEventStream(stream, cursor, onEvent)
 				_ = stream.Close()
 			}
@@ -253,11 +311,20 @@ func (c *Client) Follow(
 		}
 		var apiErr *APIError
 		if errors.As(err, &apiErr) && apiErr.StatusCode == http.StatusConflict && apiErr.Code == openapi.ErrorEventCursorExpired {
+			if notifyErr := notify(ConnectionRetentionReattach, cursor); notifyErr != nil {
+				return notifyErr
+			}
 			needsAttach = true
 			continue
 		}
 		if errors.As(err, &apiErr) && apiErr.StatusCode >= 400 && apiErr.StatusCode < 500 {
 			return err
+		}
+		if notifyErr := notify(ConnectionDisconnected, cursor); notifyErr != nil {
+			return notifyErr
+		}
+		if notifyErr := notify(ConnectionReconnecting, cursor); notifyErr != nil {
+			return notifyErr
 		}
 		timer := time.NewTimer(delay)
 		select {

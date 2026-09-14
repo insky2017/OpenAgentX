@@ -106,16 +106,16 @@ sudo install -D -o root -g "$(id -gn quote-service)" -m 0640 agents/quote-servic
 ./bin/openagentx fleet up --file fleet.yaml --socket run/openagentx.sock
 ```
 
-协调器只创建缺失的具名 window 并保留额外或已移除的 window；重名、非 pane `0`、多 pane 或未知程序占用会在变更前失败。它不删除、重排或覆盖现场，也不使用 `send-keys`、`paste-buffer` 或 `capture-pane`。tmux 不是 Worker 宿主或权威身份，关闭 Console、window、session 或 SSH 不影响 systemd Worker。
+协调器只创建缺失的具名 window 并保留额外或已移除的 window；受管目标缺少 pane `0`、名称/marker 冲突或未知程序占用目标名会在变更前失败。额外 pane `1+` 和无关 unmanaged window 会原样保留。协调器不删除、重排或覆盖现场，也不使用 `send-keys`、`paste-buffer` 或 `capture-pane`。tmux 不是 Worker 宿主或权威身份，关闭 Console、window、session 或 SSH 不影响 systemd Worker。
 
-Console attach 按逻辑 `agent_id` 跟随当前 generation，展示安全投影后的状态和实时事件，并通过正式 Control/Admin API 执行 dispatch、steer、cancel、approval 与停止操作：
+`openagentx console` 在 TTY 中启动全屏主菜单，可登录/替换登录、退出登录、选择 Normal 或 Diagnostic Attach。主菜单可在 tmux 外运行；Attach 按逻辑 `agent_id` 跟随当前 generation，展示安全投影后的状态和实时事件，并通过正式 Control API 执行 dispatch、steer、cancel 与 approval：
 
 ```bash
 ./bin/openagentx console attach --socket run/openagentx.sock --agent quote-service
 ./bin/openagentx console attach --socket run/openagentx.sock --agent quote-service --diagnostic
 ```
 
-交互 attach 同时订阅事件并读取 TTY 命令栏，支持 `/dispatch`、`/steer`、`/cancel`、`/approve`、`/reject`、`/down`、`/foreground` 和 `/quit`；所有写操作仍调用 authenticated Control/Admin API。`/foreground` 只返回规划中提示。Attach 无论是否显式提供 `--agent`，都必须从 `OAX` session 的 pane `0` 执行并通过 window/marker 冲突检查；省略 `--agent` 时只复用当前名称与 Agent marker 一致的受管 window，未绑定场景在 Task 06 selector 完成前 fail closed。所选 Agent 必须先由 authenticated Agent list 验证，之后才允许绑定当前 window。非交互调用必须使用 `--once`，该模式只输出一次 attach 快照且不读取 stdin。
+全屏 Attach 包含状态栏、可滚动且有界的 Timeline、固定输入区以及 `/status`、`/help` overlay；命令支持 `/dispatch`、`/steer`、`/cancel`、`/approve`、`/reject`、`/diagnostic`、`/foreground` 和 `/quit`。所有写操作只调用 authenticated Control API，断线时禁用且不排队；`/foreground` 只返回规划中提示。Attach 无论是否显式提供 `--agent`，都必须从 `OAX` session 的 pane `0` 执行严格 preflight。Agent 依次来自显式 `--agent`、当前 compatible managed window、经认证控制面 selector，并在任何绑定前由完整分页 Agent list 验证。非 TTY Attach 固定返回 code `2` 且无副作用；自动化读取状态应使用 Observe API，不存在 `--once` 或 JSON fallback。
 
 普通停止是持久化 graceful drain-and-stop：先为全部在线目标提交停止意图，再持续显示 Agent、当前 RunAttempt、draining、elapsed、最近状态和“不会领取新任务”，直到全部 offline；终端中断只结束观察，不撤销意图。Worker 停止领取新工作，等待活动 RunAttempt 自然完成，idle 后释放 lease 并正常退出。强制停止是独立危险路径，必须显式确认且不显示为 graceful：
 

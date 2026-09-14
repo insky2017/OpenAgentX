@@ -23,13 +23,16 @@ const (
 	ModeNormal      = "normal"
 	ModeDiagnostic  = "diagnostic"
 	AttachPath      = "/api/console/v1/attach"
+	AgentsPath      = "/api/console/v1/agents"
 	diagnosticBurst = 10
+	agentPageSize   = 100
 )
 
 // ObserveState is intentionally narrow and does not expose repository handles
 // or Worker internals to the Console transport.
 type ObserveState interface {
 	ConsoleSnapshot(context.Context, string) (domain.ConsoleSnapshot, error)
+	ListConsoleAgentOptions(context.Context, string, int) ([]domain.ConsoleAgentOption, error)
 }
 
 type Handler struct {
@@ -61,7 +64,54 @@ func newHandler(state ObserveState, authorizer requestauth.RequestAuthorizer) (*
 	}
 	h := &Handler{state: state, auth: authorizer, limiter: newLimiter(), mux: http.NewServeMux()}
 	h.mux.HandleFunc("GET "+AttachPath, h.attach)
+	h.mux.HandleFunc("GET "+AgentsPath, h.agents)
 	return h, nil
+}
+
+type AgentOptionsPage struct {
+	Agents     []domain.ConsoleAgentOption `json:"agents"`
+	NextCursor string                      `json:"next_cursor,omitempty"`
+	HasMore    bool                        `json:"has_more"`
+}
+
+func (h *Handler) agents(w http.ResponseWriter, r *http.Request) {
+	if _, err := h.auth.Authorize(r, requestauth.Requirement{Role: domain.WebRoleViewer, Scope: domain.CLIScopeConsoleRead}); err != nil {
+		h.auth.WriteFailure(w, err)
+		return
+	}
+	after := r.URL.Query().Get("after_agent_id")
+	if after != "" {
+		if err := domain.ValidateIdentifier("after_agent_id", after); err != nil {
+			http.Error(w, "invalid Agent cursor", http.StatusBadRequest)
+			return
+		}
+	}
+	options, err := h.state.ListConsoleAgentOptions(r.Context(), after, agentPageSize+1)
+	if err != nil {
+		http.Error(w, "failed to list Console Agents", http.StatusInternalServerError)
+		return
+	}
+	page := AgentOptionsPage{Agents: options}
+	if len(page.Agents) > agentPageSize {
+		page.HasMore = true
+		page.Agents = page.Agents[:agentPageSize]
+	}
+	previous := after
+	for _, option := range page.Agents {
+		if err := option.Validate(); err != nil {
+			http.Error(w, "invalid Console Agent projection", http.StatusInternalServerError)
+			return
+		}
+		if previous != "" && option.AgentID <= previous {
+			http.Error(w, "invalid Console Agent ordering", http.StatusInternalServerError)
+			return
+		}
+		previous = option.AgentID
+	}
+	if page.HasMore {
+		page.NextCursor = page.Agents[len(page.Agents)-1].AgentID
+	}
+	writeJSON(w, page)
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

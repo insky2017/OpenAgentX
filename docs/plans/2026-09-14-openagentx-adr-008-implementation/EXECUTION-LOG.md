@@ -56,7 +56,7 @@ M  deploy/systemd/openagentx-user.service
 | 03 | 一致 Attach cursor 与代际 reducer | completed | `4aea5a6291b47792b1c69256ae0ae6422a890cb4` + fix `9e18246dc4f61ee8ccc044509229b13b0e191f9d` + fix `2f9772753b3a75e6304abd76c4eb6a259c9e0c6f` | GO |
 | 04 | 可撤销 CLI Token 会话 | completed | `c240aa4dbd47565181d22f602ea3203e5fbfe4dc` + fix `0a5e85987f0c9bd29275ece138200083be13171e` | GO |
 | 05 | `OAX` workspace 与非破坏绑定 | completed | `c9339bb8c8cfa35a0a2bbd74608d273eb00bd2f6` + fix `e40e28bed11abc9789c143977363e601f067e4d3` + test `5468ffeb634ee5a4aed5577fbea5c1201a591cce` | GO |
-| 06 | Console 主菜单、Agent selector 与全屏 TUI | pending | — | WAIT |
+| 06 | Console 主菜单、Agent selector 与全屏 TUI | active | — | WAIT |
 | 07 | Fleet、user-systemd 与默认 profile 集成 | pending | — | WAIT |
 | 08 | 集成审查、实机候选与发布门禁 | pending | — | WAIT |
 
@@ -820,6 +820,90 @@ M  deploy/systemd/openagentx-user.service
   `T05-01` 必须在 Task 07 gate 前提供只针对 compatible managed pane 0 的安全显式 respawn 路径。
 - 主计划和 Task 05 front matter 已在本 docs-only gate record 同步为 `completed`；Task 06
   保持 `pending/WAIT`，未开始实现。监督者最终结论为 Task 05 `GO`。
+
+### Task 06 — Console 主菜单、Agent selector 与全屏 TUI
+
+### 开始信息
+
+- 状态：active
+- 执行者：Codex
+- 开始时间（UTC）：`2026-09-14T19:52:54Z`
+- feature 基线：`daf1fb0db4697d04539a108ff90f3cde57ef5a79`
+- branch/worktree：`codex/adr008-implementation` /
+  `/home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree`
+- 开始状态：工作树 clean，相对 `origin/main` ahead 16；监督者已明确 `GO Task 06`。
+- 边界：仅实现固定 Charmbracelet 依赖、Console 主菜单/认证表单/Agent selector、真正全屏 Attach
+  TUI 和最终 CLI grammar；不开始 Fleet credential、user-systemd、dead-pane respawn 或 Task 07，
+  不操作真实 `OAX`/default tmux/service/DB/socket/installed binary 或父仓。
+- 主计划和 Task 06 front matter 按 gate-record 协议继续保持 `pending`；监督门禁保持 `WAIT`。
+- Open Issue `T04-01`、`T05-01` 继续归属 Task 07/pending，本阶段不触碰。
+
+### Task 06 实现记录
+
+- 依赖按冻结版本引入 Bubble Tea `v1.3.4`、Bubbles `v0.20.0`、Lip Gloss `v1.1.0`；
+  `go mod tidy` 只补充其传递依赖。Console 默认 runner 使用 Bubble Tea alt-screen，未增加行式或
+  自制 ANSI fallback。
+- 最终 CLI grammar 仅保留 `console`、`console login`、`console logout`、
+  `console attach [--agent] [--diagnostic]` 与 socket/credential path override；原子删除
+  `--once`、Attach `--username`、独立 status/dispatch/steer/cancel/approve/reject/down/
+  force-stop 和 Scanner REPL。menu/login/attach 在非 TTY 时于 path、credential、tmux、网络前
+  code 2；自动化被引导至 Observe API。
+- 新增单一 Console application service，主菜单和直接 login/logout 共用 Task 04 的 installation
+  probe、authenticated session validation、Replace Login 和本地 credential 生命周期。应用内仅
+  保留最新 Attach preparation；login/logout 后清除旧 authenticated client reference。
+- Attach 顺序固定为 Task 05 workspace preflight、authenticated CLI session、完整分页安全 Agent
+  option list、显式 Agent/compatible marker/selector 解析、`BindCurrent` 二次 preflight 与确认绑定。
+  selector endpoint 每页 100 条并验证严格递增 cursor；client 自动遍历且以 10000 条显式安全上限
+  fail closed，不会静默截断。SQLite 投影只返回 Agent/organization、display name、当前 Worker
+  status/generation 和 fence 到当前 Worker 的 active Run status。
+- 全屏 model 提供菜单、masked Login/Replace Login、Agent selector、rebind confirmation、
+  Normal/Diagnostic Attach、固定 header/viewport/status/input 与 `/status`、`/help`、
+  `/diagnostic` overlay。Timeline 严格限制 256 条、64 KiB、单条 2 KiB（含换行与省略号）；
+  View 无 I/O，Follow/控制/resize/tick 全部经 typed Msg/Cmd。
+- Follow 公开 connecting/connected/disconnected/reconnecting/retention-reattach typed 状态；继续使用
+  Task 03 reducer 作为唯一状态，普通重连从 last-applied cursor 继续，retention gap 才 re-Attach。
+  断线和 pending 状态禁用写入、不排队；dispatch/steer/cancel/approve/reject 各只调用正式 client
+  API 一次，CAS expected version 由输入命令传入。Timeline 只消费 safe projection/结构化摘要。
+- `/foreground` 和菜单 Foreground Takeover 仅显示“规划中，暂不可用”；没有 TurnHandle、tmux
+  产品控制、Worker stop/drain、Foreground Runtime TTY 或 Task 07 行为。
+- `README.md` 与用户安装指南同步全屏菜单、Attach/selector、非 TTY Observe API 和无 `--once`
+  契约；未修改 Fleet credential、user-systemd 或 dead-pane respawn 指引。
+
+### Task 06 测试与失败纠正
+
+- 初始编译探针 `go test ./internal/cli/console ./internal/client/console ./internal/api/console
+  ./internal/persistence/sqlite -run '^$'` 通过；随后补回并重写被最终 grammar 取代的 Console CLI
+  测试，不以删除旧测试减少覆盖。
+- SQLite selector 测试首次失败：fixture 在旧 Worker 仍 online 时注册新 Worker，触发合法的
+  `CONFLICT: logical Agent already has an active Worker`。纠正为隔离 fixture 先将旧 Worker 标记
+  offline、保留迟到 active Run，再注册 generation 2；证明旧 Run 不进入当前 selector。四包定向
+  测试随后通过（约 12 秒）。
+- 隔离 TTY smoke 的前三次环境失败均保留：`pane-base-index` 最初误用 session target，纠正为
+  本次 window ID 的 `-w` option；zsh 将 shell 字符串中的 `=OAX` 当作 command expansion，测试
+  attach target 改为普通精确 `OAX`；伪终端缺 `TERM` 导致 tmux 拒绝 clear，显式设置
+  `TERM=xterm-256color`。第四次已完成真实绑定但渲染断言早于 Bubble Tea frame，加入 250ms
+  渲染稳定窗口并以 Attach input、pane dead exit 0 和正式 endpoint 共同证明。最终 smoke 约
+  1.14 秒通过；仅操作随机 `tmux -L` server、短路径临时 UDS/HOME/credential，未使用
+  send-keys/paste/capture，pane `0/1/2`、精确 rename 和两个 marker 均保留。
+- 辅助文档检查首次调用不存在的 `scripts/check_docs.py`，退出 2；后续改用仓库现有文件集合上的
+  Perl relative-link 检查。禁用扫描两次仅命中 `handler.go:3` 的负向架构注释
+  “never receives a Worker TurnHandle”；最终扫描显式允许该注释，其他 TurnHandle 及
+  send-keys/paste-buffer/capture-pane 引用为零。
+- help 后的两个 shell smoke 首次因 zsh 的只读特殊变量 `status` 退出 1；改名
+  `command_status` 后，非 TTY Attach code 2/零副作用提示与旧 `console status` 拒绝均通过。
+- 已通过：`go test ./internal/cli/console ./internal/client/console ./internal/api/console
+  ./internal/persistence/sqlite -count=1`；`go test -race` 同四包（约 15.2 秒）；`go test ./...`
+  （约 11.2 秒）；受影响包 `go vet`；`go build -o /tmp/openagentx-adr008-task06
+  ./cmd/openagentx`；三个 Console help/legacy/non-TTY smoke；
+  `bash scripts/check-legacy-control-paths.sh --release`；Web observation/PWA tests 与 Vite build；
+  禁用控制扫描和 `git diff --check`。
+
+### Task 06 阶段安全点（提交前）
+
+- 实现提交：待创建；精确 SHA 由提交后只读核验记录，后续监督 gate record 再同步 completed/GO。
+- 状态继续为 `active/WAIT`；主计划和 Task 06 front matter 继续 `pending`，Task 07 未开始。
+- `T04-01`、`T05-01` 原样保留给 Task 07；未 push、安装、重启或操作真实 service/DB/socket/
+  default tmux/installed binary/父仓。
 
 ## 7. Open Issues
 

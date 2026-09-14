@@ -188,22 +188,24 @@ Attach 必须从大小写敏感的 `OAX` session 内、目标 window 的 pane `0
 tmux attach-session -t OAX
 ```
 
-单次查看指定 Agent：
+主菜单可在 tmux 外启动，用于 Login/Replace Login、Logout 和进入 Attach 流程：
 
 ```bash
-~/.local/bin/openagentx console attach \
-  --socket ~/.openagentx/run/openagentx.sock \
-  --agent quote-service \
-  --once
+~/.local/bin/openagentx console \
+  --socket ~/.openagentx/run/openagentx.sock
 ```
 
-交互式 Console：
+Attach 必须在 `OAX` 的 pane `0` 中运行。可显式指定 Agent，也可复用 compatible managed
+window marker；未绑定 window 会显示经认证控制面的 Agent selector：
 
 ```bash
 ~/.local/bin/openagentx console attach \
   --socket ~/.openagentx/run/openagentx.sock \
   --agent quote-service
 ```
+
+Console 仅提供全屏交互模式，不提供 `--once` 或连续 JSON fallback。非 TTY 自动化应调用
+Observe API；退出 TUI 只 detach Console，不会停止或 drain Worker。
 
 用户级安装不要运行 `fleet up` 或依赖 `fleet status` 的 Worker unit 结果；这两个
 命令面向系统级 `openagentx-worker@<agent>.service`。Worker 应由单独审核过的

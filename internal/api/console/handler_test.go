@@ -3,6 +3,7 @@ package console
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,11 +16,25 @@ import (
 
 type testState struct {
 	snapshot domain.ConsoleSnapshot
+	agents   []domain.ConsoleAgentOption
 	err      error
 }
 
 func (s testState) ConsoleSnapshot(context.Context, string) (domain.ConsoleSnapshot, error) {
 	return s.snapshot, s.err
+}
+
+func (s testState) ListConsoleAgentOptions(_ context.Context, after string, limit int) ([]domain.ConsoleAgentOption, error) {
+	options := make([]domain.ConsoleAgentOption, 0, limit)
+	for _, option := range s.agents {
+		if option.AgentID > after {
+			options = append(options, option)
+			if len(options) == limit {
+				break
+			}
+		}
+	}
+	return options, s.err
 }
 
 type consoleFixture struct {
@@ -177,5 +192,50 @@ func TestCLIAttachScopeRequirements(t *testing.T) {
 	diagnostic := attachRequirement(ModeDiagnostic)
 	if diagnostic.Role != domain.WebRoleOwner || diagnostic.Scope != domain.CLIScopeConsoleDiagnostic {
 		t.Fatalf("diagnostic requirement=%+v", diagnostic)
+	}
+}
+
+func TestAgentOptionsArePaginatedWithoutSensitiveWorkerFields(t *testing.T) {
+	agents := make([]domain.ConsoleAgentOption, 101)
+	for index := range agents {
+		agents[index] = domain.ConsoleAgentOption{AgentID: fmt.Sprintf("agent-%03d", index), OrganizationID: "org-main",
+			DisplayName: fmt.Sprintf("Agent %03d", index), WorkerStatus: domain.WorkerStatusOffline}
+	}
+	fixture := newConsoleFixtureWithState(t, testState{agents: agents})
+	first := fixture.request(AgentsPath)
+	var page AgentOptionsPage
+	if first.Code != http.StatusOK || json.Unmarshal(first.Body.Bytes(), &page) != nil {
+		t.Fatalf("first page status=%d body=%s", first.Code, first.Body.String())
+	}
+	if len(page.Agents) != 100 || !page.HasMore || page.NextCursor != "agent-099" {
+		t.Fatalf("first page=%+v", page)
+	}
+	body := first.Body.String()
+	for _, forbidden := range []string{"principal", "fencing", "transport", "runtime_payload", "descriptor", "network_policy"} {
+		if strings.Contains(body, forbidden) {
+			t.Fatalf("Agent option projection exposed %q: %s", forbidden, body)
+		}
+	}
+	second := fixture.request(AgentsPath + "?after_agent_id=" + page.NextCursor)
+	if second.Code != http.StatusOK || json.Unmarshal(second.Body.Bytes(), &page) != nil || len(page.Agents) != 1 || page.Agents[0].AgentID != "agent-100" || page.HasMore {
+		t.Fatalf("second page status=%d page=%+v", second.Code, page)
+	}
+}
+
+func TestAgentOptionsFailClosedOnInvalidOrUnorderedProjection(t *testing.T) {
+	for name, agents := range map[string][]domain.ConsoleAgentOption{
+		"unordered": {
+			{AgentID: "risk", OrganizationID: "org-main", DisplayName: "Risk", WorkerStatus: domain.WorkerStatusOffline},
+			{AgentID: "quote", OrganizationID: "org-main", DisplayName: "Quote", WorkerStatus: domain.WorkerStatusOffline},
+		},
+		"invalid": {{AgentID: "quote", OrganizationID: "", DisplayName: "Quote", WorkerStatus: domain.WorkerStatusOffline}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			fixture := newConsoleFixtureWithState(t, testState{agents: agents})
+			response := fixture.request(AgentsPath)
+			if response.Code != http.StatusInternalServerError || strings.Contains(response.Body.String(), "org-main") {
+				t.Fatalf("status=%d body=%q", response.Code, response.Body.String())
+			}
+		})
 	}
 }

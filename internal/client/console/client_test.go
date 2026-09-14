@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -104,6 +105,7 @@ func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testi
 		t.Fatal(err)
 	}
 	var generations, sequences []int64
+	var states []ConnectionState
 	err := client.Follow(ctx, "quote", consoleapi.ModeNormal,
 		func(attached consoleapi.AttachResponse) error {
 			generations = append(generations, attached.Generation)
@@ -115,6 +117,9 @@ func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testi
 				cancel()
 			}
 			return nil
+		}, func(state FollowState) error {
+			states = append(states, state.State)
+			return nil
 		})
 	if err != nil {
 		t.Fatal(err)
@@ -123,6 +128,10 @@ func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testi
 	defer mu.Unlock()
 	if !reflect.DeepEqual(generations, []int64{1}) || !reflect.DeepEqual(sequences, []int64{5, 6}) || !reflect.DeepEqual(afterValues, []int64{4, 5}) {
 		t.Fatalf("reconnect generations=%v sequences=%v cursors=%v", generations, sequences, afterValues)
+	}
+	wantStates := []ConnectionState{ConnectionConnecting, ConnectionConnected, ConnectionDisconnected, ConnectionReconnecting, ConnectionConnected}
+	if !reflect.DeepEqual(states, wantStates) {
+		t.Fatalf("connection states=%v want=%v", states, wantStates)
 	}
 }
 
@@ -171,6 +180,7 @@ func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
 		t.Fatal(err)
 	}
 	var snapshots, events []int64
+	var states []ConnectionState
 	err := client.Follow(ctx, "quote", consoleapi.ModeNormal,
 		func(attached consoleapi.AttachResponse) error {
 			snapshots = append(snapshots, attached.SnapshotSequence)
@@ -178,6 +188,9 @@ func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
 		}, func(event openapi.JournalEventReadModel) error {
 			events = append(events, event.Sequence)
 			cancel()
+			return nil
+		}, func(state FollowState) error {
+			states = append(states, state.State)
 			return nil
 		})
 	if err != nil {
@@ -187,6 +200,10 @@ func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
 	defer mu.Unlock()
 	if !reflect.DeepEqual(snapshots, []int64{4, 20}) || !reflect.DeepEqual(afterValues, []int64{4, 20}) || !reflect.DeepEqual(events, []int64{21}) {
 		t.Fatalf("gap recovery snapshots=%v cursors=%v events=%v", snapshots, afterValues, events)
+	}
+	wantStates := []ConnectionState{ConnectionConnecting, ConnectionRetentionReattach, ConnectionConnecting, ConnectionConnected}
+	if !reflect.DeepEqual(states, wantStates) {
+		t.Fatalf("retention states=%v want=%v", states, wantStates)
 	}
 }
 
@@ -250,13 +267,13 @@ func TestControlMethodsUseAuthenticatedOfficialAPIs(t *testing.T) {
 	}
 }
 
-func TestListAgentsUsesAuthenticatedOfficialObserveAPI(t *testing.T) {
-	requested := false
+func TestListAgentOptionsUsesAuthenticatedPaginatedConsoleAPI(t *testing.T) {
+	var cursors []string
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if cliAuthResponse(w, r) {
 			return
 		}
-		if r.Method != http.MethodGet || r.URL.Path != openapi.ObserveAgentsPath {
+		if r.Method != http.MethodGet || r.URL.Path != consoleapi.AgentsPath {
 			http.NotFound(w, r)
 			return
 		}
@@ -264,22 +281,40 @@ func TestListAgentsUsesAuthenticatedOfficialObserveAPI(t *testing.T) {
 			http.Error(w, "missing session", http.StatusUnauthorized)
 			return
 		}
-		requested = true
-		now := time.Now().UTC()
-		_ = json.NewEncoder(w).Encode([]domain.AgentIdentity{{ID: "quote", PrincipalID: "principal-quote", OrganizationID: "default",
-			DisplayName: "Quote", Status: domain.AgentIdentityActive, Version: 1, CreatedAt: now, UpdatedAt: now}})
+		cursor := r.URL.Query().Get("after_agent_id")
+		cursors = append(cursors, cursor)
+		start := 0
+		if cursor != "" {
+			parsed, err := strconv.Atoi(strings.TrimPrefix(cursor, "agent-"))
+			if err != nil {
+				t.Fatalf("cursor=%q", cursor)
+			}
+			start = parsed + 1
+		}
+		end := min(start+100, 205)
+		page := consoleapi.AgentOptionsPage{}
+		for index := start; index < end; index++ {
+			page.Agents = append(page.Agents, domain.ConsoleAgentOption{AgentID: fmt.Sprintf("agent-%03d", index),
+				OrganizationID: "default", DisplayName: "Agent", WorkerStatus: domain.WorkerStatusOffline})
+		}
+		if end < 205 {
+			page.HasMore = true
+			page.NextCursor = page.Agents[len(page.Agents)-1].AgentID
+		}
+		_ = json.NewEncoder(w).Encode(page)
 	})
 	client := newUnixTestClient(t, handler)
 	ctx := context.Background()
 	if _, err := client.LoginCredential(ctx, "owner", "password"); err != nil {
 		t.Fatal(err)
 	}
-	agents, err := client.ListAgents(ctx)
+	agents, err := client.ListAgentOptions(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !requested || len(agents) != 1 || agents[0].ID != "quote" {
-		t.Fatalf("unexpected Agent list: requested=%v agents=%+v", requested, agents)
+	if len(agents) != 205 || agents[0].AgentID != "agent-000" || agents[204].AgentID != "agent-204" ||
+		!reflect.DeepEqual(cursors, []string{"", "agent-099", "agent-199"}) {
+		t.Fatalf("unexpected Agent list: count=%d cursors=%v", len(agents), cursors)
 	}
 }
 
