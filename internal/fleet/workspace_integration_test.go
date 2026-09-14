@@ -2,6 +2,7 @@ package fleet
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -215,6 +216,74 @@ func TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t
 	}
 }
 
+func TestIsolatedTmuxBindCurrentPreservesPanesAndRequiresConfirmation(t *testing.T) {
+	ctx, runner := isolatedTmux(t)
+	createManagedIntegrationWindow(t, ctx, runner, SessionName, OverviewWindow, "")
+	output, err := runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+SessionName, "-n", "scratch", "sleep", "30")
+	if err != nil {
+		t.Fatal(err)
+	}
+	windowID := strings.TrimSpace(output)
+	if _, err := runner.Run(ctx, "set-option", "-w", "-t", windowID, "pane-base-index", "0"); err != nil {
+		t.Fatal(err)
+	}
+	for range 2 {
+		if _, err := runner.Run(ctx, "split-window", "-d", "-t", windowID); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	currentRunner := runner
+	currentRunner.CurrentTarget = windowID + ".0"
+	workspace := Workspace{Runner: currentRunner}
+	location, err := workspace.PreflightAttach(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := workspace.BindCurrent(ctx, location, "quote", false)
+	if err != nil || result.Status != BindingCreated || !result.Mutated || result.OriginalName != "scratch" || result.CurrentName != "quote" {
+		t.Fatalf("initial real tmux binding failed: result=%+v err=%v", result, err)
+	}
+	quote := requireIntegrationWindow(t, ctx, workspace, windowID)
+	if quote.Name != "quote" || quote.Managed != (OptionValue{Set: true, Value: "1"}) || quote.AgentID != (OptionValue{Set: true, Value: "quote"}) || !reflect.DeepEqual(quote.PaneIndices, []int{0, 1, 2}) {
+		t.Fatalf("initial binding changed name/markers/panes incorrectly: %+v", quote)
+	}
+
+	location, err = workspace.PreflightAttach(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err = workspace.BindCurrent(ctx, location, "quote", false)
+	if err != nil || result.Status != BindingReused || result.Mutated {
+		t.Fatalf("same-Agent real tmux binding was not idempotent: result=%+v err=%v", result, err)
+	}
+	if unchanged := requireIntegrationWindow(t, ctx, workspace, windowID); !reflect.DeepEqual(unchanged, quote) {
+		t.Fatalf("idempotent binding mutated real tmux state: before=%+v after=%+v", quote, unchanged)
+	}
+
+	location, err = workspace.PreflightAttach(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err = workspace.BindCurrent(ctx, location, "risk", false)
+	var confirmation *ConfirmationRequiredError
+	if !errors.As(err, &confirmation) || result.Status != BindingConfirmationRequired || result.Mutated {
+		t.Fatalf("different-Agent binding did not require confirmation: result=%+v err=%v", result, err)
+	}
+	if unchanged := requireIntegrationWindow(t, ctx, workspace, windowID); !reflect.DeepEqual(unchanged, quote) {
+		t.Fatalf("unconfirmed binding mutated real tmux state: before=%+v after=%+v", quote, unchanged)
+	}
+
+	result, err = workspace.BindCurrent(ctx, location, "risk", true)
+	if err != nil || result.Status != BindingCreated || !result.Mutated || result.OriginalName != "quote" || result.CurrentName != "risk" {
+		t.Fatalf("confirmed real tmux rebinding failed: result=%+v err=%v", result, err)
+	}
+	risk := requireIntegrationWindow(t, ctx, workspace, windowID)
+	if risk.Name != "risk" || risk.Managed != (OptionValue{Set: true, Value: "1"}) || risk.AgentID != (OptionValue{Set: true, Value: "risk"}) || !reflect.DeepEqual(risk.PaneIndices, []int{0, 1, 2}) {
+		t.Fatalf("confirmed rebinding changed name/markers/panes incorrectly: %+v", risk)
+	}
+}
+
 func TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero(t *testing.T) {
 	t.Run("wrong pane", func(t *testing.T) {
 		ctx, runner := isolatedTmux(t)
@@ -282,4 +351,17 @@ func findWindowByName(windows []Window, name string) (Window, bool) {
 		}
 	}
 	return Window{}, false
+}
+
+func requireIntegrationWindow(t *testing.T, ctx context.Context, workspace Workspace, windowID string) Window {
+	t.Helper()
+	windows, err := workspace.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	window, ok := windowByID(windows, windowID)
+	if !ok {
+		t.Fatalf("tmux window %s disappeared: %+v", windowID, windows)
+	}
+	return window
 }

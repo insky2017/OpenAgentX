@@ -777,11 +777,33 @@ M  deploy/systemd/openagentx-user.service
   明确变为 dead，避免读取部分文件或进程退出竞态造成测试抖动；随后再次运行定向测试
   （7.63s）、race（9.39s）、六组隔离 tmux（7.51s）和 `go test ./...`（13.97s），退出码均为 0。
 
+### Task 05 最终真实 binding integration 补证
+
+- `2026-09-14T19:39:21Z`：监督在独立 Termux 环境完成 `e40e28b` 重验，六组
+  `TestIsolatedTmux*` 与 Fleet/CLI Console/client 四 package 定向测试均通过；此前 literal TAB
+  format 被规范化为 `_` 的平台失败已由单字段查询协议消除，无 `TMPDIR` 或解析 workaround。
+- 新增第七组隔离 tmux integration，实际执行 unmanaged `OAX:scratch.0` 的
+  `PreflightAttach -> BindCurrent`：真实 rename、managed/Agent marker、pane `0/1/2` 保留通过；
+  同 Agent 再绑定返回幂等复用；异 Agent 未确认返回 `confirmation-required` 且结构化 inventory
+  无变化，`confirm=true` 后真实重绑定成功。首轮单测通过，无产品实现修复。
+
+| 时间 UTC | 命令 | 退出码 | 耗时 | 脱敏结果/证据 |
+|---|---|---:|---:|---|
+| 2026-09-14T19:40Z | `go test -v ./internal/fleet -run '^TestIsolatedTmux' -count=1` | 0 | 8.84s | 七组唯一 `tmux -L` integration 全部实际运行并通过，新增真实 binding 状态机用例 1.72s |
+| 2026-09-14T19:40Z | `go test ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 9.31s | Task 05 四包无缓存定向测试通过 |
+| 2026-09-14T19:40Z | `go test -race ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 11.14s | Task 05 四包 race 通过 |
+| 2026-09-14T19:40Z | `go test ./... -count=1` | 0 | 13.94s | 全仓 Go 测试通过 |
+| 2026-09-14T19:40Z | `go vet ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console` | 0 | 0.11s | 受影响 package vet 通过 |
+| 2026-09-14T19:40Z | `go build ./...` | 0 | 2.47s | 全部 Go targets 构建通过，未安装二进制 |
+| 2026-09-14T19:40Z | `./scripts/check-legacy-control-paths.sh --release` | 0 | <0.1s | release scanner 全部类别 CLEAN |
+| 2026-09-14T19:40Z | `git diff --check` | 0 | <0.1s | 无 whitespace error；提交前继续执行 cached path/check |
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
 |---|---|---|---|---|---|---|
 | T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | pending；不阻断 Task 04 安全边界 |
+| T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | pending；不阻断 Task 05，Task 07 gate 前必须关闭 |
 
 ## 8. 安全与范围事件
 
