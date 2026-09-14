@@ -39,6 +39,15 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 		return "", fmt.Errorf("missing")
 	}
 	switch args[0] {
+	case "display-message":
+		window := t.windows[fleetArgAfter(args, "-t")]
+		if window == nil {
+			return "", fmt.Errorf("window missing")
+		}
+		if fleetArgAfter(args, "-F") != "#{window_name}" {
+			return "", fmt.Errorf("unexpected display format")
+		}
+		return window.name + "\n", nil
 	case "list-windows":
 		ids := make([]string, 0, len(t.windows))
 		for id := range t.windows {
@@ -47,7 +56,7 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 		sort.Strings(ids)
 		var output strings.Builder
 		for _, id := range ids {
-			fmt.Fprintf(&output, "%s\t%s\n", id, t.windows[id].name)
+			fmt.Fprintln(&output, id)
 		}
 		return output.String(), nil
 	case "list-panes":
@@ -89,6 +98,8 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 				}
 			}
 		}
+	case "respawn-pane":
+		return "", nil
 	}
 	return "", nil
 }

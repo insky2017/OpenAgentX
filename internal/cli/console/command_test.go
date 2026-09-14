@@ -231,17 +231,35 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 	}
 	switch args[0] {
 	case "display-message":
+		target := testArgAfter(args, "-t")
 		window := t.windows[t.currentID]
+		if target != "" {
+			window = t.windows[target]
+		}
 		if window == nil {
 			return "", fmt.Errorf("current window missing")
 		}
-		return fmt.Sprintf("%s\t%s\t%s\t%d\n", t.session, t.currentID, window.name, t.currentPane), nil
+		switch testArgAfter(args, "-F") {
+		case "#{window_id}":
+			if target != "" {
+				return target + "\n", nil
+			}
+			return t.currentID + "\n", nil
+		case "#{window_name}":
+			return window.name + "\n", nil
+		case "#{pane_index}":
+			return fmt.Sprintf("%d\n", t.currentPane), nil
+		case "#{session_name}":
+			return t.session + "\n", nil
+		default:
+			return "", fmt.Errorf("unexpected display format")
+		}
 	case "has-session":
 		return "", nil
 	case "list-windows":
 		var output strings.Builder
 		for _, id := range sortedTestTmuxIDs(t.windows) {
-			fmt.Fprintf(&output, "%s\t%s\n", id, t.windows[id].name)
+			fmt.Fprintln(&output, id)
 		}
 		return output.String(), nil
 	case "list-panes":

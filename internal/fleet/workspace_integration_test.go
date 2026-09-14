@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -120,6 +121,100 @@ func TestIsolatedTmuxCreatesOAXWithoutMigratingExistingAgentx(t *testing.T) {
 	}
 }
 
+func TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified(t *testing.T) {
+	ctx, runner := isolatedTmux(t)
+	evidencePath := filepath.Join(t.TempDir(), "console-started.txt")
+	helperPath := filepath.Join(t.TempDir(), "record-console-preconditions.sh")
+	helper := `#!/bin/sh
+{
+  tmux list-panes -t '=OAX:=quote' -F '#{pane_index}'
+  tmux show-options -w -v -t '=OAX:=quote' @openagentx_managed
+  tmux show-options -w -v -t '=OAX:=quote' @openagentx_agent_id
+} > "$1"
+`
+	if err := os.WriteFile(helperPath, []byte(helper), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
+	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{helperPath, evidencePath} }}
+	if _, err := workspace.Reconcile(ctx, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	deadline := time.Now().Add(3 * time.Second)
+	var evidence []byte
+	for time.Now().Before(deadline) {
+		evidence, _ = os.ReadFile(evidencePath)
+		if string(evidence) == "0\n1\nquote\n" {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if string(evidence) != "0\n1\nquote\n" {
+		t.Fatalf("Console observed invalid startup preconditions: %q", evidence)
+	}
+
+	windows, err := workspace.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	quote, ok := findWindowByName(windows, "quote")
+	if !ok || !quote.HasPane(0) {
+		t.Fatalf("Console exit removed its remain-on-exit window: %+v", windows)
+	}
+	deadline = time.Now().Add(3 * time.Second)
+	var dead string
+	for time.Now().Before(deadline) {
+		dead, err = runner.Run(ctx, "list-panes", "-t", quote.ID, "-F", "#{pane_dead}")
+		if err == nil && strings.TrimSpace(dead) == "1" {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if err != nil || strings.TrimSpace(dead) != "1" {
+		t.Fatalf("Console helper pane was not retained after exit: dead=%q err=%v", dead, err)
+	}
+}
+
+func TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t *testing.T) {
+	ctx, runner := isolatedTmux(t)
+	createManagedIntegrationWindow(t, ctx, runner, SessionName, OverviewWindow, "")
+	for range 2 {
+		output, err := runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+SessionName, "-n", "scratch", "sleep", "30")
+		if err != nil {
+			t.Fatal(err)
+		}
+		windowID := strings.TrimSpace(output)
+		if _, err := runner.Run(ctx, "set-option", "-w", "-t", windowID, "pane-base-index", "1"); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
+	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	report, err := workspace.Reconcile(ctx, manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(report.Unmanaged, []string{"scratch", "scratch"}) {
+		t.Fatalf("duplicate unmanaged windows were not preserved in report: %+v", report)
+	}
+	windows, err := workspace.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	quote, ok := findWindowByName(windows, "quote")
+	if !ok {
+		t.Fatalf("created Agent window missing: %+v", windows)
+	}
+	attachRunner := runner
+	attachRunner.CurrentTarget = quote.ID + ".0"
+	location, err := (Workspace{Runner: attachRunner}).PreflightAttach(ctx)
+	if err != nil || location.BoundAgentID != "quote" {
+		t.Fatalf("irrelevant unmanaged windows blocked Attach: location=%+v err=%v", location, err)
+	}
+}
+
 func TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero(t *testing.T) {
 	t.Run("wrong pane", func(t *testing.T) {
 		ctx, runner := isolatedTmux(t)
@@ -178,4 +273,13 @@ func TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation(t *tes
 			}
 		})
 	}
+}
+
+func findWindowByName(windows []Window, name string) (Window, bool) {
+	for _, window := range windows {
+		if window.Name == name {
+			return window, true
+		}
+	}
+	return Window{}, false
 }

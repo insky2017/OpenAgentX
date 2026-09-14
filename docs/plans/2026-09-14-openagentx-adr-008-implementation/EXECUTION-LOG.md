@@ -723,6 +723,60 @@ M  deploy/systemd/openagentx-user.service
 - Web 产品代码未修改；Task 05 计划未要求 Web 构建，未将其记为本阶段验证证据。
 - Open Issue `T04-01` 继续归属 Task 07/pending，本阶段未触碰。
 
+### Task 05 监督 NO-GO 与 review-fix
+
+- `2026-09-14T19:25:50Z`：监督对实现提交
+  `c9339bb8c8cfa35a0a2bbd74608d273eb00bd2f6` 暂定 `NO-GO`。Ubuntu 上的本地测试曾通过，
+  但独立 Termux tmux 3.4 将 format 中 literal TAB 规范化为 `_`，正向 inventory/current
+  解析均 fail closed；另确认全局 topology 约束误伤无关 unmanaged window，且新 window 在
+  marker/pane 验证前直接启动 Console，存在真实启动竞态。Task 05 继续 `active/WAIT`，主计划和
+  front matter 继续 `pending`，Task 06 未开始。
+- 查询协议改为先用单字段 `#{window_id}` 列出内部 immutable handle，再按 handle 分别读取单字段
+  window name、pane index 列表和 window options；current context 对 session/name/window handle/
+  pane index 全部单字段读取，并在 inventory 前后完整重读比较。协议不依赖控制字符或任意
+  unmanaged window name 中可能出现的分隔符，opaque `AttachLocation` 保持不变。
+- topology 校验拆为 managed inventory、Fleet manifest target 和 Attach current 三层：合法 managed
+  window、manifest target/overview、当前 Attach window继续要求 pane 0 与 marker 一致；重复 Agent
+  marker、目标/当前位置歧义继续 fail closed；无关 unmanaged window 的缺 pane 0 和重复名称只进入
+  report 并原样保留。
+- 新 Agent window 先启动仅属于本次创建过程的 sentinel，设置 pane-base-index、remain-on-exit 和
+  markers 后进行结构化重读；只有验证为唯一 pane 0 后，才对该已知 sentinel pane 使用允许的
+  `respawn-pane -k` 启动正式 Console。配置、验证、空 command、respawn 或启动后重读失败均返回错误、
+  不加入 `Created`，并保留窗口供诊断；不使用 send-keys/paste/capture，也不 kill 既有/未知 pane。
+
+| 时间 UTC | 现象 | 根因 | 安全影响 | 纠正/结果 |
+|---|---|---|---|---|
+| 2026-09-14T19:18Z | 新增启动顺序集成 helper 首次只记录 `0/1`，缺 Agent marker | detached tmux helper 未指定 target，最后一次 `show-options` 读取 overview | 仅唯一 `tmux -L` 测试失败；产品与真实状态未修改 | helper 改为精确 `=OAX:=quote` 单字段查询，不使用 pane ID；同组隔离测试重跑通过 |
+| 2026-09-14T19:21Z | review-fix 首轮四 package 定向测试中 Fleet/Console CLI fake 失败 | 两个上层测试双桩仍返回旧 TAB 复合记录且不支持 sentinel respawn | 产品 `internal/fleet` 和 client 已通过；CLI 在网络/mutation 前 fail closed，无外部副作用 | 仅更新测试双桩为单字段 format/respawn 模型；四 package 无缓存重跑全部通过 |
+| 2026-09-14T19:23Z | current-name/空 command 收紧补丁被 `apply_patch` 拒绝 | patch 上下文顺序与当前文件不一致 | 原子拒绝，无文件部分修改 | 读取精确上下文后拆分应用；定向测试通过 |
+
+### Task 05 review-fix 最终验证
+
+- 提交前审计确认 sentinel 仅用于新 Agent window；overview 保持原有 shell，不被长期 sleep
+  替换。新 Agent 的每个配置、验证、空 command、respawn 和启动后重读失败点均由 fake runner
+  证明保留诊断 window 且不写入成功 `Created` report。
+- 当前直接验证环境为 Ubuntu 24.04 compatible、tmux 3.4、Go 1.22.4。Termux 主机未由本工作树
+  远程操作；同一隔离测试无需 `TMPDIR` 或 format workaround，且单元断言证明所有 `-F` 查询
+  都是单字段、无 literal TAB/控制字符，消除了监督端 tmux 的已知平台差异触发条件。
+
+| 时间 UTC | 命令 | 退出码 | 耗时 | 脱敏结果/证据 |
+|---|---|---:|---:|---|
+| 2026-09-14T19:28Z | `go test ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 7.78s | Task 05 四 package 无缓存定向测试通过 |
+| 2026-09-14T19:28Z | `go test -race ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 9.76s | Task 05 四 package race 通过 |
+| 2026-09-14T19:28Z | `go test -v ./internal/fleet -run '^TestIsolatedTmux' -count=1` | 0 | 7.50s | 六组唯一 `tmux -L` 测试全部实际运行；覆盖跨构建单字段查询、启动顺序、helper 即时退出后 window 保留、无关 unmanaged duplicate/no-pane0、既有冲突与旧 `agentx` 隔离 |
+| 2026-09-14T19:28Z | `go test ./... -count=1` | 0 | 14.04s | 全仓 Go 测试通过 |
+| 2026-09-14T19:28Z | `go vet ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console` | 0 | 0.14s | 受影响 package vet 通过 |
+| 2026-09-14T19:28Z | `go build ./...` | 0 | 2.60s | 全部 Go targets 构建通过，未安装二进制 |
+| 2026-09-14T19:28Z | `./scripts/check-legacy-control-paths.sh --release` | 0 | <0.1s | release scanner 全部类别 CLEAN |
+| 2026-09-14T19:28Z | 产品 Go 文件禁用 tmux command/identity `rg` | 1（预期零命中） | <0.1s | 无 send/paste/capture、pane process/ID、window index、既有 pane/window kill/move；唯一 `respawn-pane -k` 严格定位本次新建 sentinel pane 0 |
+| 2026-09-14T19:28Z | 旧复合 tmux format/parser `rg` | 1（预期零命中） | <0.1s | 无 TAB format、`windowListFormat`、`currentFormat` 或 `parseRecords` 残留 |
+| 2026-09-14T19:28Z | `git diff --check` | 0 | <0.1s | 无 whitespace error |
+- review-fix 后状态继续为 Task 05 `active/WAIT`；主计划和 Task 05 front matter 继续 `pending`，
+  Task 06 未开始，`T04-01` 继续归属 Task 07。
+- `2026-09-14T19:30Z`：将启动 helper 的等待条件收紧为完整三行证据，并等待即时退出的 pane
+  明确变为 dead，避免读取部分文件或进程退出竞态造成测试抖动；随后再次运行定向测试
+  （7.63s）、race（9.39s）、六组隔离 tmux（7.51s）和 `go test ./...`（13.97s），退出码均为 0。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |

@@ -61,7 +61,7 @@ func (w Workspace) preflightAttach(ctx context.Context) (AttachLocation, []Windo
 	if err != nil {
 		return AttachLocation{}, nil, err
 	}
-	if err := validateTopology(windows); err != nil {
+	if err := validateAttachTopology(windows, current.WindowID); err != nil {
 		return AttachLocation{}, nil, err
 	}
 	window, ok := windowByID(windows, current.WindowID)
@@ -162,7 +162,7 @@ func (w Workspace) verifyBinding(ctx context.Context, windowID, agentID string) 
 	if current.WindowID != windowID {
 		return fmt.Errorf("current tmux window changed during binding verification")
 	}
-	if err := validateTopology(windows); err != nil {
+	if err := validateAttachTopology(windows, windowID); err != nil {
 		return err
 	}
 	window, ok := windowByID(windows, windowID)

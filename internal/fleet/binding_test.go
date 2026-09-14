@@ -48,6 +48,31 @@ func TestAttachPreflightOutsideTmuxFailsClosed(t *testing.T) {
 	assertNoMutationTmux(t, runner.calls)
 }
 
+func TestAttachPreflightPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t *testing.T) {
+	current := managedWindow("@1", "quote", 0, 1)
+	runner := attachRunner(current,
+		&fakeWindow{id: "@2", name: "scratch", panes: []int{1}},
+		&fakeWindow{id: "@3", name: "scratch", panes: []int{1, 2}},
+	)
+	location, err := (Workspace{Runner: runner}).PreflightAttach(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if location.WindowName != "quote" || location.BoundAgentID != "quote" {
+		t.Fatalf("unexpected Attach location: %+v", location)
+	}
+	assertNoMutationTmux(t, runner.calls)
+}
+
+func TestAttachPreflightRejectsAmbiguousCurrentUnmanagedName(t *testing.T) {
+	current := &fakeWindow{id: "@1", name: "scratch", panes: []int{0}}
+	runner := attachRunner(current, &fakeWindow{id: "@2", name: "scratch", panes: []int{1}})
+	if _, err := (Workspace{Runner: runner}).PreflightAttach(context.Background()); err == nil || !strings.Contains(err.Error(), "duplicated") {
+		t.Fatalf("ambiguous current window did not fail closed: %v", err)
+	}
+	assertNoMutationTmux(t, runner.calls)
+}
+
 func TestBindCurrentBindsUnmanagedWindowAndPreservesAdditionalPanes(t *testing.T) {
 	current := &fakeWindow{id: "@7", name: "shell", panes: []int{0, 1, 2}}
 	runner := attachRunner(current, managedWindow("@2", OverviewWindow, 0))

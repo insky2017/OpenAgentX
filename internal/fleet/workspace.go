@@ -17,10 +17,13 @@ const (
 	ManagedOption = "@openagentx_managed"
 	AgentIDOption = "@openagentx_agent_id"
 
-	windowListFormat = "#{window_id}\t#{window_name}"
-	paneListFormat   = "#{pane_index}"
-	currentFormat    = "#{session_name}\t#{window_id}\t#{window_name}\t#{pane_index}"
+	windowIDFormat    = "#{window_id}"
+	windowNameFormat  = "#{window_name}"
+	paneIndexFormat   = "#{pane_index}"
+	sessionNameFormat = "#{session_name}"
 )
+
+var provisioningCommand = []string{"sh", "-c", "while :; do sleep 86400; done"}
 
 type CommandRunner interface {
 	Run(context.Context, ...string) (string, error)
@@ -39,7 +42,7 @@ func (r ExecRunner) Run(ctx context.Context, args ...string) (string, error) {
 	if r.SocketName != "" {
 		commandArgs = append([]string{"-L", r.SocketName}, commandArgs...)
 	}
-	if r.CurrentTarget != "" && len(args) > 0 && args[0] == "display-message" {
+	if r.CurrentTarget != "" && len(args) > 0 && args[0] == "display-message" && !hasFlag(args, "-t") {
 		commandArgs = append(commandArgs, "-t", r.CurrentTarget)
 	}
 	command := exec.CommandContext(ctx, "tmux", commandArgs...)
@@ -51,6 +54,15 @@ func (r ExecRunner) Run(ctx context.Context, args ...string) (string, error) {
 		return string(output), fmt.Errorf("tmux %s: %w: %s", strings.Join(commandArgs, " "), err, strings.TrimSpace(string(output)))
 	}
 	return string(output), nil
+}
+
+func hasFlag(args []string, flag string) bool {
+	for _, arg := range args {
+		if arg == flag {
+			return true
+		}
+	}
+	return false
 }
 
 type OptionValue struct {
@@ -104,32 +116,29 @@ func (w Workspace) Inspect(ctx context.Context) ([]Window, error) {
 	if _, err := w.Runner.Run(ctx, "has-session", "-t", "="+SessionName); err != nil {
 		return nil, ErrSessionMissing
 	}
-	output, err := w.Runner.Run(ctx, "list-windows", "-t", "="+SessionName, "-F", windowListFormat)
+	output, err := w.Runner.Run(ctx, "list-windows", "-t", "="+SessionName, "-F", windowIDFormat)
 	if err != nil {
 		return nil, fmt.Errorf("list OAX windows: %w", err)
 	}
-	records, err := parseRecords(output, 2, "window")
+	windowIDs, err := parseWindowIDs(output)
 	if err != nil {
 		return nil, err
 	}
-	if len(records) == 0 {
+	if len(windowIDs) == 0 {
 		return nil, fmt.Errorf("tmux OAX session returned no windows")
 	}
-	windows := make([]Window, 0, len(records))
-	seenIDs := make(map[string]struct{}, len(records))
-	for _, parts := range records {
-		window := Window{ID: parts[0], Name: parts[1]}
-		if !validWindowID(window.ID) {
-			return nil, fmt.Errorf("tmux returned invalid internal window handle")
+	windows := make([]Window, 0, len(windowIDs))
+	for _, windowID := range windowIDs {
+		nameOutput, nameErr := w.Runner.Run(ctx, "display-message", "-p", "-t", windowID, "-F", windowNameFormat)
+		if nameErr != nil {
+			return nil, fmt.Errorf("read name for tmux window: %w", nameErr)
 		}
-		if _, duplicate := seenIDs[window.ID]; duplicate {
-			return nil, fmt.Errorf("tmux returned duplicate internal window handle")
+		windowName, nameErr := parseSingleField(nameOutput, "window name")
+		if nameErr != nil {
+			return nil, nameErr
 		}
-		seenIDs[window.ID] = struct{}{}
-		if strings.TrimSpace(window.Name) == "" || strings.ContainsAny(window.Name, "\r\n\t") {
-			return nil, fmt.Errorf("tmux returned invalid window name")
-		}
-		paneOutput, paneErr := w.Runner.Run(ctx, "list-panes", "-t", window.ID, "-F", paneListFormat)
+		window := Window{ID: windowID, Name: windowName}
+		paneOutput, paneErr := w.Runner.Run(ctx, "list-panes", "-t", window.ID, "-F", paneIndexFormat)
 		if paneErr != nil {
 			return nil, fmt.Errorf("list panes for tmux window %q: %w", window.Name, paneErr)
 		}
@@ -154,25 +163,12 @@ func (w Workspace) InspectCurrent(ctx context.Context) (CurrentPane, []Window, e
 	if w.Runner == nil {
 		return CurrentPane{}, nil, fmt.Errorf("tmux command runner is required")
 	}
-	output, err := w.Runner.Run(ctx, "display-message", "-p", "-F", currentFormat)
+	current, err := w.inspectCurrentHandle(ctx)
 	if err != nil {
-		return CurrentPane{}, nil, fmt.Errorf("inspect current tmux location: %w", err)
+		return CurrentPane{}, nil, err
 	}
-	records, err := parseRecords(output, 4, "current pane")
-	if err != nil || len(records) != 1 {
-		return CurrentPane{}, nil, fmt.Errorf("tmux returned an invalid current pane record")
-	}
-	parts := records[0]
-	paneIndex, err := strconv.Atoi(parts[3])
-	if err != nil || paneIndex < 0 {
-		return CurrentPane{}, nil, fmt.Errorf("tmux returned an invalid current pane index")
-	}
-	current := CurrentPane{SessionName: parts[0], WindowID: parts[1], WindowName: parts[2], PaneIndex: paneIndex}
 	if current.SessionName != SessionName {
 		return CurrentPane{}, nil, fmt.Errorf("current tmux location is %s:%s.%d; switch to %s:<agent-id>.0", current.SessionName, current.WindowName, current.PaneIndex, SessionName)
-	}
-	if !validWindowID(current.WindowID) || strings.TrimSpace(current.WindowName) == "" {
-		return CurrentPane{}, nil, fmt.Errorf("tmux returned an invalid current window")
 	}
 	windows, err := w.Inspect(ctx)
 	if err != nil {
@@ -187,7 +183,17 @@ func (w Workspace) InspectCurrent(ctx context.Context) (CurrentPane, []Window, e
 			matched = &windows[index]
 		}
 	}
-	if matched == nil || matched.Name != current.WindowName {
+	verified, err := w.inspectCurrentHandle(ctx)
+	if err != nil {
+		return CurrentPane{}, nil, err
+	}
+	if verified.SessionName != current.SessionName || verified.WindowID != current.WindowID || verified.WindowName != current.WindowName || verified.PaneIndex != current.PaneIndex {
+		return CurrentPane{}, nil, fmt.Errorf("current tmux window changed during inspection; retry from %s pane 0", SessionName)
+	}
+	if matched == nil {
+		return CurrentPane{}, nil, fmt.Errorf("current tmux window changed during inspection; retry from %s pane 0", SessionName)
+	}
+	if matched.Name != current.WindowName {
 		return CurrentPane{}, nil, fmt.Errorf("current tmux window changed during inspection; retry from %s pane 0", SessionName)
 	}
 	if current.PaneIndex != 0 {
@@ -197,6 +203,49 @@ func (w Workspace) InspectCurrent(ctx context.Context) (CurrentPane, []Window, e
 		return CurrentPane{}, nil, fmt.Errorf("tmux window %q has no pane 0; repair it explicitly before Attach", current.WindowName)
 	}
 	return current, windows, nil
+}
+
+func (w Workspace) inspectCurrentHandle(ctx context.Context) (CurrentPane, error) {
+	windowBefore, err := w.readCurrentField(ctx, windowIDFormat, "current window handle")
+	if err != nil {
+		return CurrentPane{}, err
+	}
+	session, err := w.readCurrentField(ctx, sessionNameFormat, "current session name")
+	if err != nil {
+		return CurrentPane{}, err
+	}
+	windowName, err := w.readCurrentField(ctx, windowNameFormat, "current window name")
+	if err != nil {
+		return CurrentPane{}, err
+	}
+	paneText, err := w.readCurrentField(ctx, paneIndexFormat, "current pane index")
+	if err != nil {
+		return CurrentPane{}, err
+	}
+	windowAfter, err := w.readCurrentField(ctx, windowIDFormat, "current window handle")
+	if err != nil {
+		return CurrentPane{}, err
+	}
+	if windowBefore != windowAfter || !validWindowID(windowBefore) {
+		return CurrentPane{}, fmt.Errorf("current tmux window changed during inspection")
+	}
+	paneIndex, err := strconv.Atoi(paneText)
+	if err != nil || paneIndex < 0 {
+		return CurrentPane{}, fmt.Errorf("tmux returned an invalid current pane index")
+	}
+	return CurrentPane{SessionName: session, WindowID: windowBefore, WindowName: windowName, PaneIndex: paneIndex}, nil
+}
+
+func (w Workspace) readCurrentField(ctx context.Context, format, label string) (string, error) {
+	output, err := w.Runner.Run(ctx, "display-message", "-p", "-F", format)
+	if err != nil {
+		return "", fmt.Errorf("inspect current tmux location: %w", err)
+	}
+	value, err := parseSingleField(output, label)
+	if err != nil {
+		return "", err
+	}
+	return value, nil
 }
 
 func (w Workspace) Preflight(ctx context.Context, manifest Manifest) error {
@@ -251,17 +300,10 @@ func (w Workspace) Reconcile(ctx context.Context, manifest Manifest) (WorkspaceR
 		if createErr != nil {
 			return report, createErr
 		}
+		if finishErr := w.finishCreatedWindow(ctx, windowID, name); finishErr != nil {
+			return report, finishErr
+		}
 		report.Created = append(report.Created, name)
-		if markErr := w.markCreatedWindow(ctx, windowID, name); markErr != nil {
-			return report, markErr
-		}
-		verified, inspectErr := w.Inspect(ctx)
-		if inspectErr != nil {
-			return report, fmt.Errorf("verify created tmux window %q: %w", name, inspectErr)
-		}
-		if verifyErr := validateCreatedWindow(verified, windowID, name); verifyErr != nil {
-			return report, verifyErr
-		}
 	}
 	for _, window := range windows {
 		if _, managed := expected[window.Name]; managed {
@@ -279,55 +321,76 @@ func (w Workspace) Reconcile(ctx context.Context, manifest Manifest) (WorkspaceR
 }
 
 func (w Workspace) createWorkspace(ctx context.Context, manifest Manifest) (WorkspaceReport, error) {
-	output, err := w.Runner.Run(ctx, "new-session", "-d", "-P", "-F", "#{window_id}", "-s", SessionName, "-n", OverviewWindow)
+	args := []string{"new-session", "-d", "-P", "-F", windowIDFormat, "-s", SessionName, "-n", OverviewWindow}
+	output, err := w.Runner.Run(ctx, args...)
 	if err != nil {
 		return WorkspaceReport{}, err
 	}
 	overviewID, err := parseCreatedWindowID(output)
-	report := WorkspaceReport{SessionCreated: true, Created: []string{OverviewWindow}}
+	report := WorkspaceReport{SessionCreated: true}
 	if err != nil {
 		return report, err
 	}
-	if err := w.markCreatedWindow(ctx, overviewID, OverviewWindow); err != nil {
+	if err := w.finishCreatedWindow(ctx, overviewID, OverviewWindow); err != nil {
 		return report, err
 	}
-	verified, err := w.Inspect(ctx)
-	if err != nil {
-		return report, fmt.Errorf("verify created tmux overview window: %w", err)
-	}
-	if err := validateCreatedWindow(verified, overviewID, OverviewWindow); err != nil {
-		return report, err
-	}
+	report.Created = append(report.Created, OverviewWindow)
 	for _, agent := range manifest.Agents {
 		windowID, createErr := w.createWindow(ctx, agent.AgentID)
 		if createErr != nil {
 			return report, createErr
 		}
+		if finishErr := w.finishCreatedWindow(ctx, windowID, agent.AgentID); finishErr != nil {
+			return report, finishErr
+		}
 		report.Created = append(report.Created, agent.AgentID)
-		if markErr := w.markCreatedWindow(ctx, windowID, agent.AgentID); markErr != nil {
-			return report, markErr
-		}
-		verified, inspectErr := w.Inspect(ctx)
-		if inspectErr != nil {
-			return report, fmt.Errorf("verify created tmux window %q: %w", agent.AgentID, inspectErr)
-		}
-		if verifyErr := validateCreatedWindow(verified, windowID, agent.AgentID); verifyErr != nil {
-			return report, verifyErr
-		}
 	}
 	return report, nil
 }
 
 func (w Workspace) createWindow(ctx context.Context, name string) (string, error) {
-	args := []string{"new-window", "-d", "-P", "-F", "#{window_id}", "-t", "=" + SessionName, "-n", name}
+	args := []string{"new-window", "-d", "-P", "-F", windowIDFormat, "-t", "=" + SessionName, "-n", name}
 	if name != OverviewWindow {
-		args = append(args, w.ConsoleCommand(name)...)
+		args = append(args, provisioningCommand...)
 	}
 	output, err := w.Runner.Run(ctx, args...)
 	if err != nil {
 		return "", err
 	}
 	return parseCreatedWindowID(output)
+}
+
+func (w Workspace) finishCreatedWindow(ctx context.Context, windowID, name string) error {
+	if err := w.markCreatedWindow(ctx, windowID, name); err != nil {
+		return fmt.Errorf("%w; the newly created provisioning window was retained for diagnosis", err)
+	}
+	verified, err := w.Inspect(ctx)
+	if err != nil {
+		return fmt.Errorf("verify created tmux window %q: %w; the provisioning window was retained for diagnosis", name, err)
+	}
+	if err := validateCreatedWindow(verified, windowID, name); err != nil {
+		return fmt.Errorf("%w; the provisioning window was retained for diagnosis", err)
+	}
+	if name == OverviewWindow {
+		return nil
+	}
+	command := w.ConsoleCommand(name)
+	if len(command) == 0 {
+		return fmt.Errorf("start Console in newly created tmux window %q: Console command is empty; the configured window was retained for diagnosis", name)
+	}
+	args := []string{"respawn-pane", "-k", "-t", windowID + ".0", "--"}
+	args = append(args, command...)
+	if _, err := w.Runner.Run(ctx, args...); err != nil {
+		return fmt.Errorf("start Console in newly created tmux window %q: %w; the configured window was retained for diagnosis", name, err)
+	}
+	verified, err = w.Inspect(ctx)
+	if err != nil {
+		return fmt.Errorf("verify started Console tmux window %q: %w; the window was retained for diagnosis", name, err)
+	}
+	if err := validateCreatedWindow(verified, windowID, name); err != nil {
+		return fmt.Errorf("verify started Console: %w; the window was retained for diagnosis", err)
+	}
+	return nil
 }
 
 func (w Workspace) markCreatedWindow(ctx context.Context, windowID, name string) error {
@@ -350,12 +413,15 @@ func (w Workspace) markCreatedWindow(ctx context.Context, windowID, name string)
 }
 
 func validateWindows(manifest Manifest, windows []Window) error {
-	if err := validateTopology(windows); err != nil {
+	if err := validateManagedInventory(windows); err != nil {
 		return err
 	}
 	byName := windowsByName(windows)
 	for _, name := range manifest.WindowNames() {
 		matches := byName[name]
+		if len(matches) > 1 {
+			return fmt.Errorf("tmux Fleet target window name %q is duplicated; refusing to guess by index", name)
+		}
 		if len(matches) == 0 {
 			continue
 		}
@@ -376,17 +442,9 @@ func validateWindows(manifest Manifest, windows []Window) error {
 	return nil
 }
 
-func validateTopology(windows []Window) error {
-	names := make(map[string]struct{}, len(windows))
+func validateManagedInventory(windows []Window) error {
 	agents := make(map[string]string, len(windows))
 	for _, window := range windows {
-		if _, duplicate := names[window.Name]; duplicate {
-			return fmt.Errorf("tmux window name %q is duplicated; refusing to guess by index", window.Name)
-		}
-		names[window.Name] = struct{}{}
-		if !window.HasPane(0) {
-			return fmt.Errorf("tmux window %q has no stable pane 0; refusing to alter existing workspace", window.Name)
-		}
 		if window.Managed.Set && window.Managed.Value != "1" {
 			return fmt.Errorf("tmux window %q has invalid managed marker", window.Name)
 		}
@@ -405,6 +463,9 @@ func validateTopology(windows []Window) error {
 			}
 			continue
 		}
+		if !window.HasPane(0) {
+			return fmt.Errorf("managed tmux window %q has no stable pane 0; refusing to alter existing workspace", window.Name)
+		}
 		if window.Name == OverviewWindow {
 			if window.AgentID.Set {
 				return fmt.Errorf("overview tmux window must not have an Agent marker")
@@ -421,15 +482,44 @@ func validateTopology(windows []Window) error {
 	return nil
 }
 
+func validateAttachTopology(windows []Window, currentWindowID string) error {
+	if err := validateManagedInventory(windows); err != nil {
+		return err
+	}
+	current, ok := windowByID(windows, currentWindowID)
+	if !ok {
+		return fmt.Errorf("current tmux window changed during preflight")
+	}
+	if !current.HasPane(0) {
+		return fmt.Errorf("tmux window %q has no pane 0; repair it explicitly before Attach", current.Name)
+	}
+	nameMatches := 0
+	for _, window := range windows {
+		if window.Name == current.Name {
+			nameMatches++
+		}
+	}
+	if nameMatches != 1 {
+		return fmt.Errorf("current tmux window name %q is duplicated; refusing to guess by index", current.Name)
+	}
+	return nil
+}
+
 func validateCreatedWindow(windows []Window, windowID, name string) error {
-	if err := validateTopology(windows); err != nil {
+	if err := validateManagedInventory(windows); err != nil {
 		return fmt.Errorf("verify created tmux window %q: %w", name, err)
 	}
+	nameMatches := 0
+	found := false
 	for _, window := range windows {
+		if window.Name == name {
+			nameMatches++
+		}
 		if window.ID != windowID {
 			continue
 		}
-		if window.Name != name || !window.Managed.Set || window.Managed.Value != "1" || !window.HasPane(0) {
+		found = true
+		if window.Name != name || !window.Managed.Set || window.Managed.Value != "1" || !window.HasPane(0) || len(window.PaneIndices) != 1 {
 			return fmt.Errorf("created tmux window %q did not retain its required structure", name)
 		}
 		if name == OverviewWindow && window.AgentID.Set {
@@ -438,29 +528,42 @@ func validateCreatedWindow(windows []Window, windowID, name string) error {
 		if name != OverviewWindow && (!window.AgentID.Set || window.AgentID.Value != name) {
 			return fmt.Errorf("created tmux window %q did not retain its Agent marker", name)
 		}
-		return nil
+		if nameMatches > 1 {
+			return fmt.Errorf("created tmux window name %q is ambiguous", name)
+		}
+		continue
 	}
-	return fmt.Errorf("created tmux window %q disappeared before verification", name)
+	if !found || nameMatches != 1 {
+		return fmt.Errorf("created tmux window %q disappeared or became ambiguous before verification", name)
+	}
+	return nil
 }
 
-func parseRecords(output string, fieldCount int, label string) ([][]string, error) {
+func parseWindowIDs(output string) ([]string, error) {
 	trimmed := strings.TrimSuffix(output, "\n")
 	if trimmed == "" {
 		return nil, nil
 	}
-	if strings.Contains(trimmed, "\r") {
-		return nil, fmt.Errorf("tmux returned an invalid %s record", label)
-	}
-	lines := strings.Split(trimmed, "\n")
-	records := make([][]string, 0, len(lines))
-	for _, line := range lines {
-		parts := strings.Split(line, "\t")
-		if len(parts) != fieldCount {
-			return nil, fmt.Errorf("tmux returned an invalid %s record", label)
+	windowIDs := strings.Split(trimmed, "\n")
+	seen := make(map[string]struct{}, len(windowIDs))
+	for _, windowID := range windowIDs {
+		if !validWindowID(windowID) || strings.ContainsAny(windowID, "\r\t ") {
+			return nil, fmt.Errorf("tmux returned invalid internal window handle")
 		}
-		records = append(records, parts)
+		if _, duplicate := seen[windowID]; duplicate {
+			return nil, fmt.Errorf("tmux returned duplicate internal window handle")
+		}
+		seen[windowID] = struct{}{}
 	}
-	return records, nil
+	return windowIDs, nil
+}
+
+func parseSingleField(output, label string) (string, error) {
+	value := strings.TrimSuffix(output, "\n")
+	if value == "" || strings.ContainsAny(value, "\r\n") {
+		return "", fmt.Errorf("tmux returned an invalid %s", label)
+	}
+	return value, nil
 }
 
 func parsePaneIndices(name, output string) ([]int, error) {

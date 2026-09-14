@@ -46,19 +46,35 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 			return "", errors.New("missing")
 		}
 	case "display-message":
+		format := valueAfter(args, "-F")
+		target := valueAfter(args, "-t")
 		window := r.window(r.currentID)
+		if target != "" {
+			window = r.window(target)
+		}
 		if window == nil {
 			return "", errors.New("current window missing")
 		}
-		session := r.currentSession
-		if session == "" {
-			session = SessionName
+		switch format {
+		case windowIDFormat:
+			return window.id + "\n", nil
+		case windowNameFormat:
+			return window.name + "\n", nil
+		case paneIndexFormat:
+			return strconv.Itoa(r.currentPane) + "\n", nil
+		case sessionNameFormat:
+			session := r.currentSession
+			if session == "" {
+				session = SessionName
+			}
+			return session + "\n", nil
+		default:
+			return "", fmt.Errorf("unexpected display format %q", format)
 		}
-		return fmt.Sprintf("%s\t%s\t%s\t%d\n", session, window.id, window.name, r.currentPane), nil
 	case "list-windows":
 		var output strings.Builder
 		for _, window := range r.windows {
-			fmt.Fprintf(&output, "%s\t%s\n", window.id, window.name)
+			fmt.Fprintln(&output, window.id)
 		}
 		return output.String(), nil
 	case "list-panes":
@@ -118,6 +134,11 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 			return "", errors.New("window missing")
 		}
 		window.name = args[len(args)-1]
+	case "respawn-pane":
+		window := r.window(strings.TrimSuffix(valueAfter(args, "-t"), ".0"))
+		if window == nil || !containsInt(window.panes, 0) {
+			return "", errors.New("sentinel pane missing")
+		}
 	default:
 		return "", fmt.Errorf("unexpected tmux command %q", args[0])
 	}
@@ -152,6 +173,15 @@ func valueAfter(args []string, flag string) string {
 func containsArg(args []string, expected string) bool {
 	for _, arg := range args {
 		if arg == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func containsInt(values []int, expected int) bool {
+	for _, value := range values {
+		if value == expected {
 			return true
 		}
 	}
@@ -193,10 +223,96 @@ func TestWorkspaceCreatesMissingOAXSessionWithMarkers(t *testing.T) {
 	}
 	joined := strings.Join(runner.calls, "\n")
 	if !strings.Contains(joined, "new-session -d -P -F #{window_id} -s OAX -n overview") ||
-		!strings.Contains(joined, "new-window -d -P -F #{window_id} -t =OAX -n quote openagentx console attach") {
+		!strings.Contains(joined, "new-window -d -P -F #{window_id} -t =OAX -n quote sh -c") ||
+		!strings.Contains(joined, "respawn-pane -k -t @2.0 -- openagentx console attach") {
 		t.Fatalf("workspace did not use OAX/formal Console command: %v", runner.calls)
 	}
+	if strings.Contains(joined, "-n overview sh -c") {
+		t.Fatalf("overview was incorrectly replaced by the Agent provisioning sentinel: %v", runner.calls)
+	}
 	assertNoForbiddenTmux(t, runner.calls)
+}
+
+func TestWorkspaceVerifiesCreatedAgentWindowBeforeStartingConsole(t *testing.T) {
+	runner := &fakeRunner{session: true, windows: []*fakeWindow{managedWindow("@1", OverviewWindow, 0)}, nextID: 1}
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
+	report, err := workspace(runner).Reconcile(context.Background(), manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(report.Created, []string{"quote"}) {
+		t.Fatalf("unexpected report: %+v", report)
+	}
+	newIndex := callIndex(runner.calls, "new-window -d -P -F #{window_id} -t =OAX -n quote sh -c")
+	managedIndex := callIndex(runner.calls, "set-option -w -t @2 "+ManagedOption+" 1")
+	agentIndex := callIndex(runner.calls, "set-option -w -t @2 "+AgentIDOption+" quote")
+	verifyIndex := callIndexAfter(runner.calls, "list-panes -t @2 -F #{pane_index}", agentIndex)
+	startIndex := callIndex(runner.calls, "respawn-pane -k -t @2.0 -- openagentx console attach")
+	if newIndex < 0 || managedIndex <= newIndex || agentIndex <= managedIndex || verifyIndex <= agentIndex || startIndex <= verifyIndex {
+		t.Fatalf("Console started before pane/marker verification: %v", runner.calls)
+	}
+}
+
+func TestWorkspaceConsoleStartFailureRetainsConfiguredWindowWithoutReportingSuccess(t *testing.T) {
+	runner := &fakeRunner{session: true, windows: []*fakeWindow{managedWindow("@1", OverviewWindow, 0)}, nextID: 1}
+	runner.fail = func(call string, _ int) bool { return strings.HasPrefix(call, "respawn-pane -k -t @2.0") }
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
+	report, err := workspace(runner).Reconcile(context.Background(), manifest)
+	if err == nil || !strings.Contains(err.Error(), "retained for diagnosis") {
+		t.Fatalf("expected diagnostic Console start failure, got report=%+v err=%v", report, err)
+	}
+	quote := runner.window("@2")
+	if quote == nil || quote.name != "quote" || quote.managed.Value != "1" || quote.agent.Value != "quote" || len(report.Created) != 0 {
+		t.Fatalf("failed Agent window state was lost or reported successful: report=%+v window=%+v", report, quote)
+	}
+}
+
+func TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess(t *testing.T) {
+	tests := map[string]struct {
+		failurePrefix string
+		failListCall  int
+		emptyAtStart  bool
+	}{
+		"pane base":         {failurePrefix: "set-option -w -t @2 pane-base-index"},
+		"remain on exit":    {failurePrefix: "set-option -w -t @2 remain-on-exit"},
+		"managed marker":    {failurePrefix: "set-option -w -t @2 " + ManagedOption},
+		"Agent marker":      {failurePrefix: "set-option -w -t @2 " + AgentIDOption},
+		"pre-start verify":  {failListCall: 3},
+		"Console start":     {failurePrefix: "respawn-pane -k -t @2.0"},
+		"post-start verify": {failListCall: 4},
+		"empty command":     {emptyAtStart: true},
+	}
+	for name, testCase := range tests {
+		t.Run(name, func(t *testing.T) {
+			runner := &fakeRunner{session: true, windows: []*fakeWindow{managedWindow("@1", OverviewWindow, 0)}, nextID: 1}
+			listCalls := 0
+			runner.fail = func(call string, _ int) bool {
+				if strings.HasPrefix(call, "list-windows") {
+					listCalls++
+					if listCalls == testCase.failListCall {
+						return true
+					}
+				}
+				return testCase.failurePrefix != "" && strings.HasPrefix(call, testCase.failurePrefix)
+			}
+			commandCalls := 0
+			candidate := Workspace{Runner: runner, ConsoleCommand: func(agentID string) []string {
+				commandCalls++
+				if testCase.emptyAtStart && commandCalls > 1 {
+					return nil
+				}
+				return []string{"openagentx", "console", "attach", "--agent", agentID}
+			}}
+			manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
+			report, err := candidate.Reconcile(context.Background(), manifest)
+			if err == nil || !strings.Contains(err.Error(), "retained for diagnosis") {
+				t.Fatalf("expected retained diagnostic failure, got report=%+v err=%v", report, err)
+			}
+			if len(report.Created) != 0 || runner.window("@2") == nil {
+				t.Fatalf("failed provisioning was reported successful or removed: report=%+v windows=%+v", report, runner.windows)
+			}
+		})
+	}
 }
 
 func TestWorkspacePreservesExtraPanesUnmanagedAndOrphanedWindows(t *testing.T) {
@@ -215,6 +331,22 @@ func TestWorkspacePreservesExtraPanesUnmanagedAndOrphanedWindows(t *testing.T) {
 	}
 	if !reflect.DeepEqual(runner.window("@1").panes, []int{0, 1, 2}) || !reflect.DeepEqual(runner.window("@3").panes, []int{0, 1, 2}) {
 		t.Fatalf("extra panes changed: %+v", runner.windows)
+	}
+	assertNoForbiddenTmux(t, runner.calls)
+}
+
+func TestWorkspacePreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t *testing.T) {
+	runner := &fakeRunner{session: true, nextID: 3, windows: []*fakeWindow{
+		managedWindow("@1", OverviewWindow, 0),
+		{id: "@2", name: "scratch", panes: []int{1}},
+		{id: "@3", name: "scratch", panes: []int{1, 2}},
+	}}
+	report, err := workspace(runner).Reconcile(context.Background(), workspaceManifest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(report.Unmanaged, []string{"scratch", "scratch"}) || !reflect.DeepEqual(runner.window("@2").panes, []int{1}) || !reflect.DeepEqual(runner.window("@3").panes, []int{1, 2}) {
+		t.Fatalf("irrelevant unmanaged windows were not preserved: report=%+v windows=%+v", report, runner.windows)
 	}
 	assertNoForbiddenTmux(t, runner.calls)
 }
@@ -281,8 +413,15 @@ func TestWorkspaceInspectUsesPerWindowPaneAndOptionQueries(t *testing.T) {
 		t.Fatalf("unexpected structured inspection: %+v", windows)
 	}
 	joined := strings.Join(runner.calls, "\n")
-	if !strings.Contains(joined, "list-panes -t @7 -F #{pane_index}") || !strings.Contains(joined, "show-options -w -t @7") {
+	if !strings.Contains(joined, "list-windows -t =OAX -F #{window_id}") ||
+		!strings.Contains(joined, "display-message -p -t @7 -F #{window_name}") ||
+		!strings.Contains(joined, "list-panes -t @7 -F #{pane_index}") || !strings.Contains(joined, "show-options -w -t @7") {
 		t.Fatalf("missing explicit pane/option queries: %v", runner.calls)
+	}
+	for _, call := range runner.calls {
+		if strings.ContainsAny(call, "\t\r") {
+			t.Fatalf("structured inspection used a control-character delimiter: %q", call)
+		}
 	}
 	for _, forbidden := range []string{"pane_current_command", "pane_id", "window_index"} {
 		if strings.Contains(joined, forbidden) {
@@ -323,10 +462,23 @@ func assertNoForbiddenTmux(t *testing.T, calls []string) {
 func assertNoMutationTmux(t *testing.T, calls []string) {
 	t.Helper()
 	for _, call := range calls {
-		for _, mutation := range []string{"new-session", "new-window", "set-option", "rename-window"} {
+		for _, mutation := range []string{"new-session", "new-window", "set-option", "rename-window", "respawn-pane"} {
 			if strings.Contains(call, mutation) {
 				t.Fatalf("conflict caused tmux mutation: %v", calls)
 			}
 		}
 	}
+}
+
+func callIndex(calls []string, prefix string) int {
+	return callIndexAfter(calls, prefix, -1)
+}
+
+func callIndexAfter(calls []string, prefix string, after int) int {
+	for index := after + 1; index < len(calls); index++ {
+		if strings.HasPrefix(calls[index], prefix) {
+			return index
+		}
+	}
+	return -1
 }
