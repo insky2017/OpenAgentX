@@ -14,6 +14,7 @@ type fakeWindow struct {
 	id      string
 	name    string
 	panes   []int
+	dead    bool
 	managed OptionValue
 	agent   OptionValue
 }
@@ -50,7 +51,7 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 		target := valueAfter(args, "-t")
 		window := r.window(r.currentID)
 		if target != "" {
-			window = r.window(target)
+			window = r.window(strings.TrimSuffix(target, ".0"))
 		}
 		if window == nil {
 			return "", errors.New("current window missing")
@@ -62,6 +63,11 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 			return window.name + "\n", nil
 		case paneIndexFormat:
 			return strconv.Itoa(r.currentPane) + "\n", nil
+		case paneDeadFormat:
+			if window.dead {
+				return "1\n", nil
+			}
+			return "0\n", nil
 		case sessionNameFormat:
 			session := r.currentSession
 			if session == "" {
@@ -139,6 +145,10 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 		if window == nil || !containsInt(window.panes, 0) {
 			return "", errors.New("sentinel pane missing")
 		}
+		if !containsArg(args, "-k") && !window.dead {
+			return "", errors.New("refusing to respawn live pane")
+		}
+		window.dead = false
 	default:
 		return "", fmt.Errorf("unexpected tmux command %q", args[0])
 	}
@@ -333,6 +343,65 @@ func TestWorkspacePreservesExtraPanesUnmanagedAndOrphanedWindows(t *testing.T) {
 		t.Fatalf("extra panes changed: %+v", runner.windows)
 	}
 	assertNoForbiddenTmux(t, runner.calls)
+}
+
+func TestWorkspaceExplicitlyRespawnsOnlyCompatibleDeadPaneZero(t *testing.T) {
+	quote := managedWindow("@2", "quote", 0, 1, 2)
+	quote.dead = true
+	runner := &fakeRunner{session: true, windows: []*fakeWindow{
+		managedWindow("@1", OverviewWindow, 0), quote,
+		{id: "@3", name: "scratch", panes: []int{0, 1}, dead: true},
+	}, nextID: 3}
+
+	report, err := workspace(runner).Reconcile(context.Background(), workspaceManifest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(report.Dead, []string{"quote"}) || !quote.dead {
+		t.Fatalf("dead pane changed without explicit request: report=%+v dead=%v", report, quote.dead)
+	}
+	before := len(runner.calls)
+	candidate := workspace(runner)
+	candidate.RespawnDead = true
+	report, err = candidate.Reconcile(context.Background(), workspaceManifest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(report.Respawned, []string{"quote"}) || quote.dead {
+		t.Fatalf("explicit dead respawn failed: report=%+v dead=%v", report, quote.dead)
+	}
+	calls := strings.Join(runner.calls[before:], "\n")
+	if !strings.Contains(calls, "respawn-pane -t @2.0 -- openagentx console attach") || strings.Contains(calls, "respawn-pane -k -t @2.0") {
+		t.Fatalf("existing dead pane used unsafe respawn: %s", calls)
+	}
+	if strings.Contains(calls, "@3.0") || !reflect.DeepEqual(quote.panes, []int{0, 1, 2}) {
+		t.Fatalf("auxiliary/unmanaged panes changed: calls=%s panes=%v", calls, quote.panes)
+	}
+}
+
+func TestWorkspaceDeadPaneTOCTOUFailsWithoutKillingLivePane(t *testing.T) {
+	quote := managedWindow("@2", "quote", 0, 1)
+	quote.dead = true
+	runner := &fakeRunner{session: true, windows: []*fakeWindow{managedWindow("@1", OverviewWindow, 0), quote}, nextID: 2}
+	seenDeadChecks := 0
+	runner.before = func(_ *fakeRunner, call string, _ int) {
+		if strings.Contains(call, "display-message -p -t @2.0 -F #{pane_dead}") {
+			seenDeadChecks++
+			if seenDeadChecks == 3 {
+				quote.dead = false
+			}
+		}
+	}
+	candidate := workspace(runner)
+	candidate.RespawnDead = true
+	if _, err := candidate.Reconcile(context.Background(), workspaceManifest()); err == nil {
+		t.Fatal("dead-to-live race was accepted")
+	}
+	for _, call := range runner.calls {
+		if strings.HasPrefix(call, "respawn-pane") {
+			t.Fatalf("TOCTOU killed a live pane: %v", runner.calls)
+		}
+	}
 }
 
 func TestWorkspacePreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero(t *testing.T) {

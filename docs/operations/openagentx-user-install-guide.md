@@ -6,12 +6,12 @@
 
 - 可执行文件：`~/.local/bin/openagentx`
 - 配置与状态根目录：`~/.openagentx`
-- systemd unit：`~/.config/systemd/user/openagentx.service`
+- systemd units：`~/.config/systemd/user/openagentx.service`、`openagentx-worker@.service`
 - 管理方式：`systemctl --user`
 
-该布局不依赖源码仓库持续存在。systemd 系统级 Worker 模板和 `fleet up`
-仍使用 `/etc/openagentx/workers/%i.yaml` 与系统级 `systemctl`，不属于本指南的
-用户级安装路径；不要在两种部署方式之间混用。
+该布局不依赖源码仓库持续存在。Fleet 默认使用用户级 Worker unit 和
+`systemctl --user`。系统级 `deploy/systemd/openagentx-worker@.service` 继续供明确的
+系统部署使用；不要与用户级模板混装。
 
 ## 目录布局
 
@@ -96,6 +96,8 @@ install -m 0755 /tmp/openagentx-release ~/.local/bin/openagentx
 cp -a web/dist/. ~/.openagentx/web/
 install -m 0644 deploy/systemd/openagentx-user.service \
   ~/.config/systemd/user/openagentx.service
+install -m 0644 deploy/systemd/openagentx-worker-user@.service \
+  ~/.config/systemd/user/openagentx-worker@.service
 ```
 
 写入本次发布证据，不在其中记录秘密：
@@ -143,8 +145,7 @@ version: 1
 session: OAX
 agents:
   - agent_id: quote-service
-    identity_file: identities/quote-service.yaml
-    worker_config: workers/quote-service.yaml
+    worker_config: /home/<user>/.openagentx/workers/quote-service.yaml
     enabled: true
 ```
 
@@ -168,23 +169,19 @@ runtime_backends:
         - model-name
 ```
 
-identity 定义放在 `~/.openagentx/identities/`。迁移既有数据库时，其解析后的
-`instructions_path`、`workspace_root` 和 capabilities 必须与数据库中的现有
-AgentProfile 一致，否则 `fleet init` 会 fail closed，不会静默改写身份。
+Fleet 不创建虚构 Runtime 配置，也不再通过 identity 直接写数据库。先通过正式 Agent
+管理入口创建 Agent。若为兼容旧 manifest 保留 `identity_file`，它只会核对 Agent ID、
+组织和显示名是否与经认证控制面列表一致；不一致时 fail closed。
 
 ## 7. Console 与 Fleet workspace
 
 Attach 必须从大小写敏感的 `OAX` session 内、目标 window 的 pane `0` 执行。旧
-`agentx` session 不会自动迁移或合并。先应用 identity 并创建 `OAX` workspace，再进入
+`agentx` session 不会自动迁移或合并。先登录 CLI Token 并创建 `OAX` workspace，再进入
 对应 Agent window 的 pane `0`：
 
 ```bash
-~/.local/bin/openagentx console login \
-  --socket ~/.openagentx/run/openagentx.sock
-~/.local/bin/openagentx fleet init \
-  --file ~/.openagentx/fleet.yaml \
-  --db ~/.openagentx/data/openagentx.db \
-  --socket ~/.openagentx/run/openagentx.sock
+~/.local/bin/openagentx console login
+~/.local/bin/openagentx fleet init --agent quote-service
 tmux attach-session -t OAX
 ```
 
@@ -207,9 +204,18 @@ window marker；未绑定 window 会显示经认证控制面的 Agent selector�
 Console 仅提供全屏交互模式，不提供 `--once` 或连续 JSON fallback。非 TTY 自动化应调用
 Observe API；退出 TUI 只 detach Console，不会停止或 drain Worker。
 
-用户级安装不要运行 `fleet up` 或依赖 `fleet status` 的 Worker unit 结果；这两个
-命令面向系统级 `openagentx-worker@<agent>.service`。Worker 应由单独审核过的
-用户级 unit 启动，且其配置应放在 `~/.openagentx/workers/`。
+`fleet up` 会先验证已加载用户 unit 的实际 `ExecStart` 精确读取
+`~/.openagentx/workers/<agent-id>.yaml`，然后才协调 workspace 并执行
+`systemctl --user start`。它只读取 Linger 状态并提示，不会自动 enable unit、daemon 或
+linger。Worker 环境文件若存在，路径为 `~/.openagentx/workers/<agent-id>.env`，必须由当前
+用户持有且权限不宽于 `0600`。
+
+Console pane 退出后，pane `0` 会以 remain-on-exit 保留为 dead。确认 window 名、两个 marker
+和 pane `0` 均 compatible 后，可显式恢复；该命令不会碰 live pane 或 pane `1+`：
+
+```bash
+~/.local/bin/openagentx fleet workspace --respawn-dead
+```
 
 ## 8. 更新
 
@@ -217,8 +223,7 @@ Observe API；退出 TUI 只 detach Console，不会停止或 drain Worker。
 
 ```bash
 ~/.local/bin/openagentx fleet down \
-  --file ~/.openagentx/fleet.yaml \
-  --socket ~/.openagentx/run/openagentx.sock
+  --file ~/.openagentx/fleet.yaml
 
 sqlite3 ~/.openagentx/data/openagentx.db \
   ".backup '$HOME/.openagentx/backups/openagentx-before-update.db'"
@@ -230,6 +235,15 @@ systemctl --user start openagentx.service
 
 更新后重复第 5 节的全部验证。终端中断 `fleet down` 的观察不会撤销已经持久化的
 graceful-stop intent。
+
+强制停止不是 graceful 的替代写法。只有明确接受活动 RunAttempt 可能变为 uncertain 时，
+才使用两个独立确认：
+
+```bash
+~/.local/bin/openagentx fleet force-stop \
+  --confirm-force-stop \
+  --confirm-active-run-uncertain
+```
 
 ## 9. 回滚
 

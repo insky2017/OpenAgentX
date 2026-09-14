@@ -66,7 +66,7 @@ func execute(args []string) int {
 		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx console [login|logout|attach]")
-		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>]")
+		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|workspace|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--worker-dir <dir>] [--credentials <path>]")
 		fmt.Fprintln(os.Stderr, "       openagentx schema verify [--db <path>]")
 		fmt.Fprintln(os.Stderr, "Local path precedence: explicit flag > resource environment > OPENAGENTX_HOME > ~/.openagentx")
 		return 0

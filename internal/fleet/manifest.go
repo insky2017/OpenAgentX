@@ -24,7 +24,7 @@ type Manifest struct {
 
 type Agent struct {
 	AgentID      string `yaml:"agent_id"`
-	IdentityFile string `yaml:"identity_file"`
+	IdentityFile string `yaml:"identity_file,omitempty"`
 	WorkerConfig string `yaml:"worker_config"`
 	Enabled      bool   `yaml:"enabled"`
 }
@@ -83,11 +83,25 @@ func (m Manifest) Validate() error {
 			return fmt.Errorf("Fleet Agent %q is duplicated", agent.AgentID)
 		}
 		seen[agent.AgentID] = struct{}{}
-		if strings.TrimSpace(agent.IdentityFile) == "" || strings.TrimSpace(agent.WorkerConfig) == "" {
-			return fmt.Errorf("Fleet Agent %q requires identity_file and worker_config", agent.AgentID)
+		if strings.TrimSpace(agent.WorkerConfig) == "" {
+			return fmt.Errorf("Fleet Agent %q requires worker_config", agent.AgentID)
 		}
 	}
 	return nil
+}
+
+func Encode(manifest Manifest) ([]byte, error) {
+	if manifest.Session == "" {
+		manifest.Session = SessionName
+	}
+	if err := manifest.Validate(); err != nil {
+		return nil, err
+	}
+	encoded, err := yaml.Marshal(manifest)
+	if err != nil {
+		return nil, fmt.Errorf("encode Fleet manifest: %w", err)
+	}
+	return encoded, nil
 }
 
 func (m Manifest) WindowNames() []string {

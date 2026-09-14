@@ -176,6 +176,8 @@ func (r *applicationTmuxRunner) Run(_ context.Context, args ...string) (string, 
 		return r.name + "\n", nil
 	case "list-panes -t @1 -F #{pane_index}":
 		return "0\n1\n", nil
+	case "display-message -p -t @1.0 -F #{pane_dead}":
+		return "0\n", nil
 	case "show-options -w -t @1":
 		if r.managed {
 			return fleetmodel.ManagedOption + " 1\n" + fleetmodel.AgentIDOption + " " + r.agentID + "\n", nil

@@ -34,3 +34,18 @@ agents:
 		})
 	}
 }
+
+func TestManifestAllowsOptionalIdentityAndEncodesDeterministically(t *testing.T) {
+	manifest := Manifest{Version: 1, Agents: []Agent{{AgentID: "quote", WorkerConfig: "/tmp/quote.yaml", Enabled: true}}}
+	first, err := Encode(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := Encode(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(first) != string(second) || strings.Contains(string(first), "identity_file") || !strings.Contains(string(first), "session: OAX") {
+		t.Fatalf("encoded manifest=%q", first)
+	}
+}

@@ -86,27 +86,31 @@ version: 1
 session: OAX
 agents:
   - agent_id: quote-service
-    identity_file: agents/quote-service/identity.yaml
-    worker_config: agents/quote-service/agent.yaml
+    worker_config: /home/<user>/.openagentx/workers/quote-service.yaml
     enabled: true
 ```
 
-`fleet init` 一次认证后校验并应用 identity，协调固定、大小写敏感的 `OAX` tmux workspace；旧 `agentx` session 不会自动迁移或合并。`fleet up` 通过 systemd 模板启动已启用 Worker。Agent window 的 pane `0` 是经 UDS 正式 API 连接的稳定 Console pane，用户增加的 pane `1+` 会被保留：
+先使用 `openagentx console login` 建立 installation-bound CLI Token 会话。Fleet 不读取 Owner 密码，也不直接修改数据库；可选 `identity_file` 只用于核对控制面中已经存在的 Agent。缺少 manifest 时，TTY 会从完整分页的正式 Agent 列表明确多选；非 TTY 必须重复提供 `--agent`。每个 Agent 必须已有 canonical Worker 配置，或用 `--worker-config agent-id=/absolute/source.yaml` 明确导入，Fleet 不生成样例 Runtime 配置：
 
 ```bash
-./bin/openagentx fleet init --file fleet.yaml --db data/openagentx.db --socket run/openagentx.sock
-./bin/openagentx fleet up --file fleet.yaml --socket run/openagentx.sock
-./bin/openagentx fleet status --file fleet.yaml
+openagentx console login
+openagentx fleet init --agent quote-service \
+  --worker-config quote-service=/absolute/source/quote-service.yaml
+openagentx fleet workspace
+openagentx fleet up
+openagentx fleet status
 ```
 
-systemd 模板实际读取 `/etc/openagentx/workers/%i.yaml`。`fleet up` 会在任何 workspace 或 `systemctl start` 副作用前，验证每个启用 Agent 的 `worker_config` 与该 canonical 文件是同一文件或内容 SHA-256 完全一致；缺失或不一致时 fail closed。部署配置后再启动，例如：
+默认 Worker 宿主是用户级 systemd。将 `deploy/systemd/openagentx-worker-user@.service` 安装为 `~/.config/systemd/user/openagentx-worker@.service`；它实际执行 `%h/.local/bin/openagentx worker run --config %h/.openagentx/workers/%i.yaml`。`fleet up` 在任何 tmux 或 start 副作用前读取已加载 unit 的实际 `ExecStart`，并要求它与已验证的 canonical 配置路径精确一致；所有 systemctl 调用都使用 `--user`。系统级 `deploy/systemd/openagentx-worker@.service` 仍保留给明确的系统部署，不是 Fleet 默认值。
 
 ```bash
-sudo install -D -o root -g "$(id -gn quote-service)" -m 0640 agents/quote-service/agent.yaml /etc/openagentx/workers/quote-service.yaml
-./bin/openagentx fleet up --file fleet.yaml --socket run/openagentx.sock
+install -m 0644 deploy/systemd/openagentx-worker-user@.service \
+  ~/.config/systemd/user/openagentx-worker@.service
+systemctl --user daemon-reload
+openagentx fleet up
 ```
 
-协调器只创建缺失的具名 window 并保留额外或已移除的 window；受管目标缺少 pane `0`、名称/marker 冲突或未知程序占用目标名会在变更前失败。额外 pane `1+` 和无关 unmanaged window 会原样保留。协调器不删除、重排或覆盖现场，也不使用 `send-keys`、`paste-buffer` 或 `capture-pane`。tmux 不是 Worker 宿主或权威身份，关闭 Console、window、session 或 SSH 不影响 systemd Worker。
+协调器只创建缺失的具名 window 并保留额外或已移除的 window；受管目标缺少 pane `0`、名称/marker 冲突或未知程序占用目标名会在变更前失败。额外 pane `1+` 和无关 unmanaged window 会原样保留。compatible managed pane `0` 退出后会保留为 dead，只有显式执行 `openagentx fleet workspace --respawn-dead` 才能恢复；live pane、pane `1+`、unmanaged/orphaned window 绝不 respawn。协调器不删除、重排或覆盖现场，也不使用 `send-keys`、`paste-buffer` 或 `capture-pane`。tmux 不是 Worker 宿主或权威身份，关闭 Console、window、session 或 SSH 不影响 user-systemd Worker。
 
 `openagentx console` 在 TTY 中启动全屏主菜单，可登录/替换登录、退出登录、选择 Normal 或 Diagnostic Attach。主菜单可在 tmux 外运行；Attach 按逻辑 `agent_id` 跟随当前 generation，展示安全投影后的状态和实时事件，并通过正式 Control API 执行 dispatch、steer、cancel 与 approval：
 
@@ -120,8 +124,8 @@ sudo install -D -o root -g "$(id -gn quote-service)" -m 0640 agents/quote-servic
 普通停止是持久化 graceful drain-and-stop：先为全部在线目标提交停止意图，再持续显示 Agent、当前 RunAttempt、draining、elapsed、最近状态和“不会领取新任务”，直到全部 offline；终端中断只结束观察，不撤销意图。Worker 停止领取新工作，等待活动 RunAttempt 自然完成，idle 后释放 lease 并正常退出。强制停止是独立危险路径，必须显式确认且不显示为 graceful：
 
 ```bash
-./bin/openagentx fleet down --file fleet.yaml --socket run/openagentx.sock
-./bin/openagentx fleet force-stop --file fleet.yaml --socket run/openagentx.sock --confirm-force-stop
+openagentx fleet down
+openagentx fleet force-stop --confirm-force-stop --confirm-active-run-uncertain
 ```
 
 `Foreground Takeover（规划中，暂不可用）` 仅作为禁用提示；当前实现不会把 Worker 切换到 Runtime TTY。

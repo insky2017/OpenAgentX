@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -174,6 +175,90 @@ func TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified(t *testing.
 	}
 	if err != nil || strings.TrimSpace(dead) != "1" {
 		t.Fatalf("Console helper pane was not retained after exit: dead=%q err=%v", dead, err)
+	}
+}
+
+func TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxiliaryPanes(t *testing.T) {
+	ctx, runner := isolatedTmux(t)
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", WorkerConfig: "/tmp/quote.yaml", Enabled: true}}}
+	initial := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	if _, err := initial.Reconcile(ctx, manifest); err != nil {
+		t.Fatal(err)
+	}
+	windows, err := initial.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	quote, ok := findWindowByName(windows, "quote")
+	if !ok {
+		t.Fatalf("quote window missing: %+v", windows)
+	}
+	for range 2 {
+		if _, err := runner.Run(ctx, "split-window", "-d", "-t", quote.ID, "sleep", "30"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := runner.Run(ctx, "respawn-pane", "-k", "-t", quote.ID+".0", "--", "sh", "-c", "exit 0"); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		windows, err = initial.Inspect(ctx)
+		if err == nil {
+			quote, ok = findWindowByName(windows, "quote")
+			if ok && quote.PaneZeroSeen && quote.PaneZeroDead {
+				break
+			}
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if !ok || !quote.PaneZeroDead {
+		t.Fatalf("pane 0 did not become dead: %+v err=%v", quote, err)
+	}
+
+	recovering := Workspace{Runner: runner, RespawnDead: true, ConsoleCommand: func(string) []string { return []string{"sleep", "30"} }}
+	report, err := recovering.Reconcile(ctx, manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(report.Respawned, []string{"quote"}) {
+		t.Fatalf("report=%+v", report)
+	}
+	quote = requireIntegrationWindow(t, ctx, recovering, quote.ID)
+	if quote.PaneZeroDead || !reflect.DeepEqual(quote.PaneIndices, []int{0, 1, 2}) {
+		t.Fatalf("recovered topology=%+v", quote)
+	}
+
+	report, err = recovering.Reconcile(ctx, manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Respawned) != 0 || !reflect.DeepEqual(report.Reused, []string{"overview", "quote"}) {
+		t.Fatalf("live pane was not reused: %+v", report)
+	}
+}
+
+func TestIsolatedTmuxConsoleSessionExitDoesNotTerminateIndependentWorker(t *testing.T) {
+	worker := exec.Command("sleep", "30")
+	if err := worker.Start(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = worker.Process.Kill()
+		_, _ = worker.Process.Wait()
+	})
+
+	ctx, runner := isolatedTmux(t)
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", WorkerConfig: "/tmp/quote.yaml", Enabled: true}}}
+	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sh", "-c", "exit 0"} }}
+	if _, err := workspace.Reconcile(ctx, manifest); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runner.Run(ctx, "kill-server"); err != nil {
+		t.Fatal(err)
+	}
+	if err := worker.Process.Signal(syscall.Signal(0)); err != nil {
+		t.Fatalf("independent Worker stopped with Console/tmux: %v", err)
 	}
 }
 

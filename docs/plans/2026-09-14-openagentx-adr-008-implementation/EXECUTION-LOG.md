@@ -57,7 +57,7 @@ M  deploy/systemd/openagentx-user.service
 | 04 | 可撤销 CLI Token 会话 | completed | `c240aa4dbd47565181d22f602ea3203e5fbfe4dc` + fix `0a5e85987f0c9bd29275ece138200083be13171e` | GO |
 | 05 | `OAX` workspace 与非破坏绑定 | completed | `c9339bb8c8cfa35a0a2bbd74608d273eb00bd2f6` + fix `e40e28bed11abc9789c143977363e601f067e4d3` + test `5468ffeb634ee5a4aed5577fbea5c1201a591cce` | GO |
 | 06 | Console 主菜单、Agent selector 与全屏 TUI | completed | `4b5d2c0675a9b00f6d48e52395710b2639b8acac` + fix `5aa6c973abd864a3c7e80b41f4bdc422600d002c` + fix `c42414b7a21b98bd35ab0de3949778d591705709` | GO |
-| 07 | Fleet、user-systemd 与默认 profile 集成 | pending | — | WAIT |
+| 07 | Fleet、user-systemd 与默认 profile 集成 | active | — | WAIT |
 | 08 | 集成审查、实机候选与发布门禁 | pending | — | WAIT |
 
 允许状态：`pending`、`active`、`blocked`、`completed`。监督门禁只允许：`WAIT`、`GO`、`NO-GO`。
@@ -1013,12 +1013,91 @@ M  deploy/systemd/openagentx-user.service
 - 主计划和 Task 06 front matter 已在本 docs-only gate record 同步为 `completed`；Task 07 保持
   `pending/WAIT`，未开始实现。Open Issue `T04-01`、`T05-01` 均继续归属 Task 07/pending。
 
+### Task 07 — Fleet、user-systemd 与默认 profile 集成
+
+### 开始信息
+
+- 状态：active
+- 执行者：Codex
+- 开始时间（UTC）：`2026-09-14T21:37:57Z`
+- feature 基线：`a2ea14650a9deb668c4ab6af861dc03445329d61`
+- branch/worktree：`codex/adr008-implementation` /
+  `/home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree`
+- 开始状态：工作树 clean，相对 `origin/main` ahead 20；监督者已明确 `GO Task 07`。
+- 边界：只集成 Fleet 默认 profile、显式 manifest/config 初始化、CLI Token lifecycle、user-systemd
+  canonical unit、graceful/force 分离和 compatible managed dead pane 0 恢复；不开始 Task 08、发布、
+  安装或真实运行状态操作，不修改 ADR-006/007。
+- 主计划和 Task 07 front matter 按 gate-record 协议继续保持 `pending`；监督门禁保持 `WAIT`。
+- Open Issue `T04-01`、`T05-01` 仅在正式 bearer lifecycle 与 dead-pane respawn 的完整隔离证据
+  成立后关闭。
+
+### Task 07 实现记录（append-only）
+
+- 实现时间（UTC）：`2026-09-14T22:08:43Z`
+- 默认 profile：Fleet 的 manifest、database、socket、Worker config directory 和 CLI credential
+  全部经 `internal/localprofile` 解析；显式 flag 保持最高优先级。新增 `fleet workspace`，不扫描
+  Agent/样例/测试目录，也不从 tmux 推断控制面 Agent。
+- 初始化：manifest 缺失时，非 TTY 必须重复提供 `--agent`；TTY 使用经认证、完整分页的安全 Agent
+  options 做明确多选。Worker config 必须已在 canonical 路径，或由
+  `--worker-config agent-id=/absolute/source.yaml` 明确导入；导入前严格验证 Agent ID 和 Unix socket。
+  manifest/config 使用当前用户持有的 0700 目录、0600 唯一临时文件、file fsync、Linux
+  `renameat2(RENAME_NOREPLACE)` 和 directory fsync。相同内容幂等，不同内容在任何 tmux/systemd
+  副作用前返回仅含路径和 SHA-256 前缀的摘要；不生成 Runtime 样例配置。
+- 兼容 identity：`identity_file` 改为可选且只读校验 Agent ID、organization 和 display name；删除
+  Fleet 的 Owner password、username、Web password digest 和直接 SQLite `ApplyAgent` 路径。需要先经
+  正式 Agent 管理入口建立 Agent，不提供明文密码 fallback。
+- CLI Token：Fleet 先 probe installation，再按 canonical socket+installation+current user 读取
+  credential，发送 token 前检查本地 absolute expiry，再调用正式 `/cli/session` 核对 installation、
+  token ID、username 和 expiry。401/本地过期删除本地副本；installation mismatch 不发送 token。
+  `init/up/down/force-stop` 要求 owner+`fleet.lifecycle`，`workspace/status` 要求 viewer+`console.read`。
+- user-systemd：新增 `deploy/systemd/openagentx-worker-user@.service`，安装后名称为
+  `openagentx-worker@.service`，实际 argv 固定为 `%h/.local/bin/openagentx worker run --config
+  %h/.openagentx/workers/%i.yaml`。Fleet 所有 systemctl 调用显式带 `--user`；`up` 在任何 mutation
+  前读取已加载 unit 的结构化 `LoadState/ExecStart` 并与 canonical config 精确比较。Linger 仅调用
+  `loginctl show-user ... --property=Linger --value` 并提示，不 enable daemon/unit/linger。可选 Worker
+  `.env` 要求当前用户持有、普通文件且权限不宽于 0600；user Worker 不用会阻止显式 workspace 写入
+  的 ProtectHome/ProtectSystem 限制。
+- workspace：结构化 inventory 增加仅对 compatible managed Agent pane 0 的 `pane_dead` 查询。
+  `--respawn-dead` 经过第二次全量 preflight 后，只对名称、两个 marker、pane 0 和 dead 状态仍一致的
+  内部 window handle 执行不带 `-k` 的 `respawn-pane`；live pane 竞态由 tmux fail closed，pane 1+、
+  unmanaged/orphaned 和未知进程不读取内容、不 kill、不 respawn。新 pane 命令只含正式
+  `console attach --socket ... --credentials ... --agent ...` 路径，不含用户名、密码或 token。
+- 生命周期：`fleet down` 继续先为全部 online Agent 持久化 stop intent，再无限观察 busy/draining/
+  idle/offline；context cancel 只停止观察。`force-stop` 独立要求 `--confirm-force-stop` 与
+  `--confirm-active-run-uncertain`，不调用 systemctl stop，也不伪装 graceful。
+
+### Task 07 测试与失败纠正
+
+- 首次定向编译中，旧 Fleet 测试仍引用 `ReadPassword/SystemdConfigPath`，Console/Tmux fake 尚未响应
+  新的 `pane_dead` 查询；同时原子写故障测试的临时目录权限受测试环境 umask 影响。已将测试迁移到
+  probe→credential→session 夹具、补结构化 pane 状态，并显式建立 0700 测试目录。随后四包定向测试通过。
+- workspace dead→live TOCTOU 测试首次在第二次 inventory 时已观察到 live，正确幂等复用而未进入
+  respawn；测试调整为在 respawn 内部第三次 preflight 注入转换，证明无 `respawn-pane` mutation。
+- `systemd-analyze verify` 首次在源码目录同时解析同名系统级 `openagentx.service`，未实例化的
+  `User=%i` 导致退出 1。改用临时目录按实际用户安装名放置 `openagentx.service` 和
+  `openagentx-worker@.service` 后，`systemd-analyze --user verify` 退出 0；未启动或重载真实 unit。
+- `python3 scripts/check_docs.py` 退出 2，因为仓库仍不存在该 README 历史引用脚本；这与 Task 06 已记录
+  的既有缺口一致。本轮文档改动改用 whitespace、文件路径和相对链接只读检查，不把缺失脚本声称为通过。
+- 已通过：Task 07 四包定向测试；新增 Fleet/workspace/Worker race；`go test ./...`；受影响包
+  `go vet`；`go build -o /tmp/openagentx-adr008-task07 ./cmd/openagentx`；隔离随机 `tmux -L` 的全部
+  integration（含 pane 0/1/2、dead respawn、Console/tmux 退出后独立 Worker 存活）；Worker unit 静态
+  shell 断言；按安装名的 `systemd-analyze --user verify`；Web observation/PWA tests 和 Vite build；
+  release scanner、禁用 tmux 控制扫描、旧 Fleet password/username 扫描、help smoke 和 `git diff --check`。
+- 测试全部只使用临时 HOME/config/credential、fake UDS/session/systemd/loginctl 和唯一 tmux server；
+  未读取或修改真实 credential/token、service、DB、socket、默认 tmux、installed binary 或父仓库。
+- `T04-01` 关闭证据：Fleet production package 中不存在密码读取、password Login、owner username flag 或
+  直接 DB identity apply；role/scope/expiry/401/installation replacement 与 argv/输出不含 secret 均有测试。
+- `T05-01` 关闭证据：fake runner 和真实隔离 tmux 均证明只有 compatible managed dead pane 0 可显式
+  恢复，live/竞态/pane 1+/unmanaged 不 mutation，Console/tmux 退出不影响独立 Worker。
+- 当前 Task 07 仍为 `active/WAIT`；主计划和 Task 07 front matter 按 gate-record 协议保持 `pending`，
+  等待阶段实现提交后的监督复核。Task 08 未开始。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
 |---|---|---|---|---|---|---|
-| T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | pending；不阻断 Task 04 安全边界 |
-| T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | pending；不阻断 Task 05，Task 07 gate 前必须关闭 |
+| T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | closed；Task 07 删除 Fleet password/username/直接 DB apply，统一使用 installation-bound credential+session 验证和 owner+lifecycle scope；隔离测试与 secret/argv 扫描通过 |
+| T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | closed；`fleet workspace --respawn-dead` 经二次 preflight 仅 respawn compatible managed dead pane 0；fake/TOCTOU/真实隔离 tmux 证明 live、pane 1+ 与 unmanaged 不受影响 |
 
 ## 8. 安全与范围事件
 

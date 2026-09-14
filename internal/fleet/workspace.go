@@ -20,6 +20,7 @@ const (
 	windowIDFormat    = "#{window_id}"
 	windowNameFormat  = "#{window_name}"
 	paneIndexFormat   = "#{pane_index}"
+	paneDeadFormat    = "#{pane_dead}"
 	sessionNameFormat = "#{session_name}"
 )
 
@@ -73,11 +74,13 @@ type OptionValue struct {
 type Window struct {
 	// ID is an internal tmux handle used only to keep mutations on the window
 	// that passed preflight. It is never an Agent identity or API value.
-	ID          string
-	Name        string
-	PaneIndices []int
-	Managed     OptionValue
-	AgentID     OptionValue
+	ID           string
+	Name         string
+	PaneIndices  []int
+	PaneZeroDead bool
+	PaneZeroSeen bool
+	Managed      OptionValue
+	AgentID      OptionValue
 }
 
 func (w Window) HasPane(index int) bool {
@@ -100,6 +103,8 @@ type WorkspaceReport struct {
 	SessionCreated bool
 	Created        []string
 	Reused         []string
+	Respawned      []string
+	Dead           []string
 	Unmanaged      []string
 	Orphaned       []string
 }
@@ -107,6 +112,7 @@ type WorkspaceReport struct {
 type Workspace struct {
 	Runner         CommandRunner
 	ConsoleCommand func(agentID string) []string
+	RespawnDead    bool
 }
 
 func (w Workspace) Inspect(ctx context.Context) ([]Window, error) {
@@ -153,6 +159,18 @@ func (w Workspace) Inspect(ctx context.Context) ([]Window, error) {
 		window.Managed, window.AgentID, err = parseWindowOptions(optionOutput)
 		if err != nil {
 			return nil, fmt.Errorf("read options for tmux window %q: %w", window.Name, err)
+		}
+		if window.HasPane(0) && window.Managed == (OptionValue{Set: true, Value: "1"}) &&
+			window.Name != OverviewWindow && window.AgentID == (OptionValue{Set: true, Value: window.Name}) {
+			deadOutput, deadErr := w.Runner.Run(ctx, "display-message", "-p", "-t", window.ID+".0", "-F", paneDeadFormat)
+			if deadErr != nil {
+				return nil, fmt.Errorf("read pane 0 state for managed tmux window %q: %w", window.Name, deadErr)
+			}
+			dead, deadErr := parsePaneDead(deadOutput)
+			if deadErr != nil {
+				return nil, fmt.Errorf("read pane 0 state for managed tmux window %q: %w", window.Name, deadErr)
+			}
+			window.PaneZeroDead, window.PaneZeroSeen = dead, true
 		}
 		windows = append(windows, window)
 	}
@@ -293,6 +311,18 @@ func (w Workspace) Reconcile(ctx context.Context, manifest Manifest) (WorkspaceR
 	report := WorkspaceReport{}
 	for _, name := range manifest.WindowNames() {
 		if len(byName[name]) == 1 {
+			window := byName[name][0]
+			if name != OverviewWindow && window.PaneZeroSeen && window.PaneZeroDead {
+				if !w.RespawnDead {
+					report.Dead = append(report.Dead, name)
+					continue
+				}
+				if err := w.respawnDeadPane(ctx, manifest, window.ID, name); err != nil {
+					return report, err
+				}
+				report.Respawned = append(report.Respawned, name)
+				continue
+			}
 			report.Reused = append(report.Reused, name)
 			continue
 		}
@@ -318,6 +348,37 @@ func (w Workspace) Reconcile(ctx context.Context, manifest Manifest) (WorkspaceR
 	sort.Strings(report.Unmanaged)
 	sort.Strings(report.Orphaned)
 	return report, nil
+}
+
+func (w Workspace) respawnDeadPane(ctx context.Context, manifest Manifest, windowID, agentID string) error {
+	windows, err := w.Inspect(ctx)
+	if err != nil {
+		return fmt.Errorf("recheck dead Console pane for Agent %q: %w", agentID, err)
+	}
+	if err := validateWindows(manifest, windows); err != nil {
+		return err
+	}
+	window, ok := windowByID(windows, windowID)
+	if !ok || window.Name != agentID || !window.PaneZeroSeen || !window.PaneZeroDead ||
+		window.Managed != (OptionValue{Set: true, Value: "1"}) || window.AgentID != (OptionValue{Set: true, Value: agentID}) {
+		return fmt.Errorf("managed Console pane for Agent %q changed before respawn; no process was replaced", agentID)
+	}
+	command := w.ConsoleCommand(agentID)
+	args := []string{"respawn-pane", "-t", window.ID + ".0", "--"}
+	args = append(args, command...)
+	if _, err := w.Runner.Run(ctx, args...); err != nil {
+		return fmt.Errorf("respawn dead managed Console pane for Agent %q: %w; no live pane was killed", agentID, err)
+	}
+	verified, err := w.Inspect(ctx)
+	if err != nil {
+		return fmt.Errorf("verify respawned Console pane for Agent %q: %w", agentID, err)
+	}
+	current, ok := windowByID(verified, windowID)
+	if !ok || current.Name != agentID || !current.PaneZeroSeen || current.PaneZeroDead ||
+		current.Managed != (OptionValue{Set: true, Value: "1"}) || current.AgentID != (OptionValue{Set: true, Value: agentID}) {
+		return fmt.Errorf("respawned Console pane for Agent %q did not retain its compatible live state", agentID)
+	}
+	return nil
 }
 
 func (w Workspace) createWorkspace(ctx context.Context, manifest Manifest) (WorkspaceReport, error) {
@@ -586,6 +647,21 @@ func parsePaneIndices(name, output string) ([]int, error) {
 	}
 	sort.Ints(indices)
 	return indices, nil
+}
+
+func parsePaneDead(output string) (bool, error) {
+	value, err := parseSingleField(output, "pane dead state")
+	if err != nil {
+		return false, err
+	}
+	switch value {
+	case "0":
+		return false, nil
+	case "1":
+		return true, nil
+	default:
+		return false, fmt.Errorf("tmux returned an invalid pane dead state")
+	}
 }
 
 func parseWindowOptions(output string) (OptionValue, OptionValue, error) {

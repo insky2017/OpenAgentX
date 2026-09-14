@@ -1,8 +1,8 @@
 package fleet
 
 import (
+	"bufio"
 	"context"
-	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -12,62 +12,95 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
-	"github.com/google/uuid"
 	"golang.org/x/term"
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
-	webAuth "openagentx/internal/auth/web"
 	admincli "openagentx/internal/cli/admin"
 	consoleclient "openagentx/internal/client/console"
+	"openagentx/internal/credentialstore"
 	"openagentx/internal/domain"
 	fleetmodel "openagentx/internal/fleet"
 	"openagentx/internal/localprofile"
-	openagentsqlite "openagentx/internal/persistence/sqlite"
 	workerconfig "openagentx/internal/worker"
 )
 
+const maxWorkerConfigBytes = 1 << 20
+
 type Dependencies struct {
-	Out               io.Writer
-	Err               io.Writer
-	ReadPassword      func(string) (string, error)
-	Tmux              fleetmodel.CommandRunner
-	RunSystemctl      func(context.Context, ...string) (string, error)
-	NewConsole        func(string) (consoleClient, error)
-	Now               func() time.Time
-	NewID             func(string) string
-	Context           context.Context
-	Wait              func(context.Context, time.Duration) error
-	SystemdConfigPath func(string) string
+	Out                io.Writer
+	Err                io.Writer
+	In                 io.Reader
+	IsInteractive      func() bool
+	SelectAgents       func([]domain.ConsoleAgentOption) ([]string, error)
+	Tmux               fleetmodel.CommandRunner
+	RunSystemctl       func(context.Context, ...string) (string, error)
+	RunLoginctl        func(context.Context, ...string) (string, error)
+	NewConsole         func(string) (consoleClient, error)
+	NewCredentialStore func(string) (credentialStore, error)
+	Now                func() time.Time
+	Context            context.Context
+	Wait               func(context.Context, time.Duration) error
+	Executable         func() (string, error)
+	UserHomeDir        func() (string, error)
+	BeforeAtomicRename func(string) error
 }
 
 type consoleClient interface {
-	Login(context.Context, string, string) error
+	ProbeInstallation(context.Context) (openapi.CLIInstallationResponse, error)
+	UseCredential(context.Context, string, string) error
+	Session(context.Context) (openapi.CLISessionResponse, error)
+	ListAgentOptions(context.Context) ([]domain.ConsoleAgentOption, error)
 	Attach(context.Context, string, string) (consoleapi.AttachResponse, error)
 	WorkerCommand(context.Context, string, int64, domain.WorkerCommandKind, string, bool) (openapi.WorkerCommandResponse, error)
 }
 
+type credentialStore interface {
+	Load(string, string, string) (credentialstore.Credential, error)
+	Delete(credentialstore.Credential) (bool, error)
+}
+
+type stringListFlag []string
+
+func (f *stringListFlag) String() string { return strings.Join(*f, ",") }
+func (f *stringListFlag) Set(value string) error {
+	*f = append(*f, value)
+	return nil
+}
+
+type preparedAgent struct {
+	entry      fleetmodel.Agent
+	workerPath string
+}
+
+type fleetPaths struct {
+	manifest    string
+	database    string
+	socket      string
+	workerDir   string
+	credentials string
+}
+
 func DefaultDependencies() Dependencies {
+	run := func(ctx context.Context, name string, args ...string) (string, error) {
+		output, err := exec.CommandContext(ctx, name, args...).CombinedOutput()
+		return strings.TrimSpace(string(output)), err
+	}
 	return Dependencies{
-		Out: os.Stdout, Err: os.Stderr, Tmux: fleetmodel.ExecRunner{}, Now: time.Now,
-		NewID: func(prefix string) string { return prefix + "-" + uuid.NewString() },
-		ReadPassword: func(prompt string) (string, error) {
-			if !term.IsTerminal(int(os.Stdin.Fd())) {
-				return "", fmt.Errorf("interactive terminal is required for password input")
-			}
-			fmt.Fprint(os.Stderr, prompt)
-			value, err := term.ReadPassword(int(os.Stdin.Fd()))
-			fmt.Fprintln(os.Stderr)
-			return string(value), err
+		Out: os.Stdout, Err: os.Stderr, In: os.Stdin,
+		IsInteractive: func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
+		Tmux:          fleetmodel.ExecRunner{}, Now: time.Now, Executable: os.Executable, UserHomeDir: os.UserHomeDir,
+		RunSystemctl: func(ctx context.Context, args ...string) (string, error) { return run(ctx, "systemctl", args...) },
+		RunLoginctl:  func(ctx context.Context, args ...string) (string, error) { return run(ctx, "loginctl", args...) },
+		NewConsole:   func(socketPath string) (consoleClient, error) { return consoleclient.NewUnixClient(socketPath) },
+		NewCredentialStore: func(path string) (credentialStore, error) {
+			return credentialstore.New(path, credentialstore.Options{})
 		},
-		RunSystemctl: func(ctx context.Context, args ...string) (string, error) {
-			output, err := exec.CommandContext(ctx, "systemctl", args...).CombinedOutput()
-			return strings.TrimSpace(string(output)), err
-		},
-		NewConsole: func(socketPath string) (consoleClient, error) { return consoleclient.NewUnixClient(socketPath) },
 		Wait: func(ctx context.Context, duration time.Duration) error {
 			timer := time.NewTimer(duration)
 			defer timer.Stop()
@@ -78,15 +111,7 @@ func DefaultDependencies() Dependencies {
 				return nil
 			}
 		},
-		SystemdConfigPath: func(agentID string) string { return filepath.Join("/etc/openagentx/workers", agentID+".yaml") },
 	}
-}
-
-type preparedAgent struct {
-	entry      fleetmodel.Agent
-	definition *admincli.AgentDefinition
-	worker     *workerconfig.ProcessConfig
-	workerPath string
 }
 
 func Execute(args []string, deps Dependencies) int {
@@ -101,66 +126,46 @@ func Execute(args []string, deps Dependencies) int {
 		return 0
 	}
 	switch command {
-	case "init", "up", "status", "down", "force-stop":
+	case "init", "workspace", "up", "status", "down", "force-stop":
 	default:
 		usage(deps.Err)
 		return 2
 	}
+
 	flags := flag.NewFlagSet("fleet "+command, flag.ContinueOnError)
 	flags.SetOutput(deps.Err)
-	var manifestFlag localprofile.PathFlag
-	var databaseFlag localprofile.PathFlag
-	var socketFlag localprofile.PathFlag
+	var manifestFlag, databaseFlag, socketFlag, workerDirFlag, credentialsFlag localprofile.PathFlag
+	var agents, workerSources stringListFlag
 	flags.Var(&manifestFlag, "file", localprofile.PathUsage(localprofile.FleetManifest, "Fleet manifest"))
 	flags.Var(&databaseFlag, "db", localprofile.PathUsage(localprofile.DatabasePath, "OpenAgentX SQLite database"))
 	flags.Var(&socketFlag, "socket", localprofile.PathUsage(localprofile.SocketPath, "OpenAgentX Unix socket"))
-	ownerUsername := flags.String("owner-username", "owner", "Owner username")
-	confirmForce := flags.Bool("confirm-force-stop", false, "Acknowledge force-stop risk")
+	flags.Var(&workerDirFlag, "worker-dir", localprofile.PathUsage(localprofile.WorkerConfigDir, "Worker config directory"))
+	flags.Var(&credentialsFlag, "credentials", localprofile.PathUsage(localprofile.CredentialsPath, "CLI credential file"))
+	flags.Var(&agents, "agent", "Agent ID to include when initializing a missing manifest (repeatable)")
+	flags.Var(&workerSources, "worker-config", "agent-id=/absolute/source.yaml to import atomically during init (repeatable)")
+	respawnDead := flags.Bool("respawn-dead", false, "Respawn only compatible managed dead pane 0 consoles")
+	confirmForce := flags.Bool("confirm-force-stop", false, "Acknowledge that force-stop is destructive")
+	confirmUncertain := flags.Bool("confirm-active-run-uncertain", false, "Acknowledge active RunAttempt may become uncertain")
 	if err := flags.Parse(args[1:]); err != nil {
-		if err == flag.ErrHelp {
+		if errors.Is(err, flag.ErrHelp) {
 			return 0
 		}
 		usage(deps.Err)
 		return 2
 	}
-	if flags.NArg() != 0 {
+	if flags.NArg() != 0 || (command != "init" && (len(agents) != 0 || len(workerSources) != 0)) {
 		usage(deps.Err)
 		return 2
 	}
-	resolver := localprofile.DefaultResolver()
-	manifestPath, err := resolver.Resolve(localprofile.FleetManifest, manifestFlag.Override())
-	if err != nil {
-		fmt.Fprintf(deps.Err, "resolve Fleet manifest: %v\n", err)
+	if command == "force-stop" && (!*confirmForce || !*confirmUncertain) {
+		fmt.Fprintln(deps.Err, "force-stop requires both --confirm-force-stop and --confirm-active-run-uncertain")
 		return 2
 	}
-	resolvedPaths := map[string]string{"manifest": manifestPath.Path}
-	var databasePath, socketPath string
-	if databaseFlag.Override().Set || command == "init" {
-		resolved, resolveErr := resolver.Resolve(localprofile.DatabasePath, databaseFlag.Override())
-		if resolveErr != nil {
-			fmt.Fprintf(deps.Err, "resolve Fleet database: %v\n", resolveErr)
-			return 2
-		}
-		databasePath = resolved.Path
-		resolvedPaths["database"] = databasePath
-	}
-	if socketFlag.Override().Set || command == "init" || command == "up" || command == "down" || command == "force-stop" {
-		resolved, resolveErr := resolver.Resolve(localprofile.SocketPath, socketFlag.Override())
-		if resolveErr != nil {
-			fmt.Fprintf(deps.Err, "resolve Fleet socket: %v\n", resolveErr)
-			return 2
-		}
-		socketPath = resolved.Path
-		resolvedPaths["socket"] = socketPath
-	}
-	if err := localprofile.EnsureDistinct(resolvedPaths); err != nil {
+
+	paths, err := resolveFleetPaths(manifestFlag, databaseFlag, socketFlag, workerDirFlag, credentialsFlag)
+	if err != nil {
 		fmt.Fprintf(deps.Err, "resolve Fleet paths: %v\n", err)
 		return 2
-	}
-	manifest, prepared, err := prepare(manifestPath.Path)
-	if err != nil {
-		fmt.Fprintf(deps.Err, "Fleet preflight failed: %v\n", err)
-		return 1
 	}
 	baseContext := deps.Context
 	if baseContext == nil {
@@ -168,25 +173,71 @@ func Execute(args []string, deps Dependencies) int {
 	}
 	ctx, cancel := signal.NotifyContext(baseContext, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
-	workspace := fleetmodel.Workspace{Runner: deps.Tmux}
-	if command == "init" || command == "up" {
-		binary, executableErr := os.Executable()
-		if executableErr != nil {
-			fmt.Fprintf(deps.Err, "resolve OpenAgentX executable: %v\n", executableErr)
+
+	requiredRole, requiredScope := domain.WebRoleOwner, domain.CLIScopeFleetLifecycle
+	if command == "status" || command == "workspace" {
+		requiredRole, requiredScope = domain.WebRoleViewer, domain.CLIScopeConsoleRead
+	}
+	client, session, err := authenticateFleetClient(ctx, paths, requiredRole, requiredScope, deps)
+	if err != nil {
+		fmt.Fprintf(deps.Err, "Fleet CLI session failed: %v; run openagentx console login\n", safeAuthError(err))
+		return 1
+	}
+	options, err := client.ListAgentOptions(ctx)
+	if err != nil {
+		fmt.Fprintf(deps.Err, "Fleet Agent list failed: %v\n", safeAuthError(err))
+		return 1
+	}
+	optionMap, err := validateAgentOptions(options)
+	if err != nil {
+		fmt.Fprintf(deps.Err, "Fleet Agent list failed: %v\n", err)
+		return 1
+	}
+
+	manifestMissing := false
+	if _, err := os.Lstat(paths.manifest); os.IsNotExist(err) {
+		manifestMissing = true
+	} else if err != nil {
+		fmt.Fprintf(deps.Err, "Fleet manifest preflight failed: %v\n", err)
+		return 1
+	}
+	if manifestMissing && command != "init" {
+		fmt.Fprintf(deps.Err, "Fleet manifest is missing at %s; run fleet init with explicit Agent selection first\n", paths.manifest)
+		return 1
+	}
+	if manifestMissing {
+		if _, err := initializeManifest(paths, agents, workerSources, options, deps); err != nil {
+			fmt.Fprintf(deps.Err, "Fleet init failed: %v\n", err)
 			return 1
 		}
-		workspace.ConsoleCommand = func(agentID string) []string {
-			return []string{binary, "console", "attach", "--socket", socketPath, "--username", strings.TrimSpace(*ownerUsername), "--agent", agentID}
-		}
-		if preflightErr := workspace.Preflight(ctx, manifest); preflightErr != nil {
-			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", preflightErr)
+	} else if command == "init" && (len(agents) != 0 || len(workerSources) != 0) {
+		if _, err := initializeManifest(paths, agents, workerSources, options, deps); err != nil {
+			fmt.Fprintf(deps.Err, "Fleet init conflict: %v\n", err)
 			return 1
 		}
 	}
+
+	manifest, prepared, err := prepare(paths.manifest, paths.workerDir, paths.socket, optionMap)
+	if err != nil {
+		fmt.Fprintf(deps.Err, "Fleet preflight failed: %v\n", err)
+		return 1
+	}
+	binary, err := deps.Executable()
+	if err != nil || !filepath.IsAbs(binary) {
+		fmt.Fprintf(deps.Err, "resolve OpenAgentX executable: %v\n", err)
+		return 1
+	}
+	workspace := fleetmodel.Workspace{
+		Runner: deps.Tmux, RespawnDead: *respawnDead,
+		ConsoleCommand: func(agentID string) []string {
+			return []string{binary, "console", "attach", "--socket", paths.socket, "--credentials", paths.credentials, "--agent", agentID}
+		},
+	}
+
 	switch command {
-	case "init":
-		if err := applyIdentities(ctx, databasePath, *ownerUsername, prepared, deps); err != nil {
-			fmt.Fprintf(deps.Err, "Fleet identity apply failed: %v\n", err)
+	case "init", "workspace":
+		if err := workspace.Preflight(ctx, manifest); err != nil {
+			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
 			return 1
 		}
 		report, err := workspace.Reconcile(ctx, manifest)
@@ -194,39 +245,40 @@ func Execute(args []string, deps Dependencies) int {
 			fmt.Fprintf(deps.Err, "Fleet workspace failed: %v\n", err)
 			return 1
 		}
-		return printJSON(deps, report)
+		return printJSON(deps, map[string]any{"cli_username": session.Principal.Username, "workspace": report})
 	case "up":
-		if err := verifySystemdConfigs(prepared, deps.SystemdConfigPath); err != nil {
-			fmt.Fprintf(deps.Err, "Fleet systemd config preflight failed: %v\n", err)
+		if err := workspace.Preflight(ctx, manifest); err != nil {
+			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
+			return 1
+		}
+		if err := verifyUserUnits(ctx, prepared, deps); err != nil {
+			fmt.Fprintf(deps.Err, "Fleet user-systemd preflight failed: %v\n", err)
 			return 1
 		}
 		if _, err := workspace.Reconcile(ctx, manifest); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace failed: %v\n", err)
 			return 1
 		}
+		checkLinger(ctx, deps)
 		for _, agent := range prepared {
 			if !agent.entry.Enabled {
 				continue
 			}
-			unit := "openagentx-worker@" + agent.entry.AgentID + ".service"
-			if output, err := deps.RunSystemctl(ctx, "start", unit); err != nil {
-				fmt.Fprintf(deps.Err, "start %s: %v %s\n", unit, err, output)
+			unit := workerUnit(agent.entry.AgentID)
+			if output, err := deps.RunSystemctl(ctx, "--user", "start", unit); err != nil {
+				fmt.Fprintf(deps.Err, "start %s: %v %s\n", unit, err, bounded(output, 512))
 				return 1
 			}
-			fmt.Fprintf(deps.Out, "started %s\n", unit)
+			fmt.Fprintf(deps.Out, "started user unit %s\n", unit)
 		}
 		return 0
 	case "status":
-		return fleetStatus(ctx, manifest, prepared, deps)
+		return fleetStatus(ctx, manifest, prepared, options, deps)
 	case "down", "force-stop":
 		force := command == "force-stop"
-		if force && !*confirmForce {
-			fmt.Fprintln(deps.Err, "force-stop requires --confirm-force-stop")
-			return 2
-		}
-		client, targets, err := queueStops(ctx, socketPath, *ownerUsername, manifest, force, deps)
+		client, targets, err := queueStops(ctx, client, manifest, force, deps)
 		if err != nil {
-			fmt.Fprintf(deps.Err, "Fleet stop failed: %v\n", err)
+			fmt.Fprintf(deps.Err, "Fleet stop failed: %v\n", safeAuthError(err))
 			return 1
 		}
 		if !force {
@@ -235,13 +287,12 @@ func Execute(args []string, deps Dependencies) int {
 					fmt.Fprintln(deps.Out, "Fleet down observation canceled; persisted graceful-stop intents remain active")
 					return 0
 				}
-				fmt.Fprintf(deps.Err, "Fleet down observation failed: %v\n", err)
+				fmt.Fprintf(deps.Err, "Fleet down observation failed: %v\n", safeAuthError(err))
 				return 1
 			}
 		}
 		return 0
 	default:
-		usage(deps.Err)
 		return 2
 	}
 }
@@ -254,8 +305,11 @@ func withDefaults(deps Dependencies) Dependencies {
 	if deps.Err == nil {
 		deps.Err = defaults.Err
 	}
-	if deps.ReadPassword == nil {
-		deps.ReadPassword = defaults.ReadPassword
+	if deps.In == nil {
+		deps.In = defaults.In
+	}
+	if deps.IsInteractive == nil {
+		deps.IsInteractive = defaults.IsInteractive
 	}
 	if deps.Tmux == nil {
 		deps.Tmux = defaults.Tmux
@@ -263,138 +317,375 @@ func withDefaults(deps Dependencies) Dependencies {
 	if deps.RunSystemctl == nil {
 		deps.RunSystemctl = defaults.RunSystemctl
 	}
+	if deps.RunLoginctl == nil {
+		deps.RunLoginctl = defaults.RunLoginctl
+	}
 	if deps.NewConsole == nil {
 		deps.NewConsole = defaults.NewConsole
+	}
+	if deps.NewCredentialStore == nil {
+		deps.NewCredentialStore = defaults.NewCredentialStore
 	}
 	if deps.Now == nil {
 		deps.Now = defaults.Now
 	}
-	if deps.NewID == nil {
-		deps.NewID = defaults.NewID
-	}
 	if deps.Wait == nil {
 		deps.Wait = defaults.Wait
 	}
-	if deps.SystemdConfigPath == nil {
-		deps.SystemdConfigPath = defaults.SystemdConfigPath
+	if deps.Executable == nil {
+		deps.Executable = defaults.Executable
+	}
+	if deps.UserHomeDir == nil {
+		deps.UserHomeDir = defaults.UserHomeDir
 	}
 	return deps
 }
 
-func verifySystemdConfigs(prepared []preparedAgent, canonicalPath func(string) string) error {
-	if canonicalPath == nil {
-		return fmt.Errorf("systemd config path resolver is required")
+func resolveFleetPaths(manifest, database, socket, workerDir, credentials localprofile.PathFlag) (fleetPaths, error) {
+	resolver := localprofile.DefaultResolver()
+	var result fleetPaths
+	resources := []struct {
+		resource localprofile.Resource
+		override localprofile.Override
+		target   *string
+	}{
+		{localprofile.FleetManifest, manifest.Override(), &result.manifest},
+		{localprofile.DatabasePath, database.Override(), &result.database},
+		{localprofile.SocketPath, socket.Override(), &result.socket},
+		{localprofile.WorkerConfigDir, workerDir.Override(), &result.workerDir},
+		{localprofile.CredentialsPath, credentials.Override(), &result.credentials},
 	}
-	for _, agent := range prepared {
-		if !agent.entry.Enabled {
-			continue
-		}
-		canonical := filepath.Clean(strings.TrimSpace(canonicalPath(agent.entry.AgentID)))
-		if !filepath.IsAbs(canonical) {
-			return fmt.Errorf("Agent %q canonical systemd config must be an absolute path", agent.entry.AgentID)
-		}
-		validatedInfo, err := os.Stat(agent.workerPath)
+	resolved := make(map[string]string, len(resources))
+	for _, item := range resources {
+		path, err := resolver.Resolve(item.resource, item.override)
 		if err != nil {
-			return fmt.Errorf("stat validated config for Agent %q: %w", agent.entry.AgentID, err)
+			return fleetPaths{}, err
 		}
-		canonicalInfo, err := os.Stat(canonical)
+		*item.target = path.Path
+		resolved[string(item.resource)] = path.Path
+	}
+	if err := localprofile.EnsureDistinct(resolved); err != nil {
+		return fleetPaths{}, err
+	}
+	return result, nil
+}
+
+func authenticateFleetClient(ctx context.Context, paths fleetPaths, role domain.WebRole, scope domain.CLIScope, deps Dependencies) (consoleClient, openapi.CLISessionResponse, error) {
+	client, err := deps.NewConsole(paths.socket)
+	if err != nil {
+		return nil, openapi.CLISessionResponse{}, err
+	}
+	probe, err := client.ProbeInstallation(ctx)
+	if err != nil {
+		return nil, openapi.CLISessionResponse{}, err
+	}
+	store, err := deps.NewCredentialStore(paths.credentials)
+	if err != nil {
+		return nil, openapi.CLISessionResponse{}, err
+	}
+	credential, err := store.Load(paths.socket, probe.InstallationID, "")
+	if err != nil {
+		return nil, openapi.CLISessionResponse{}, err
+	}
+	if !deps.Now().UTC().Before(credential.AbsoluteExpires.UTC()) {
+		_, _ = store.Delete(credential)
+		return nil, openapi.CLISessionResponse{}, fmt.Errorf("stored CLI credential is expired")
+	}
+	if err := client.UseCredential(ctx, credential.InstallationID, credential.Token); err != nil {
+		return nil, openapi.CLISessionResponse{}, err
+	}
+	session, err := client.Session(ctx)
+	if err != nil {
+		var apiErr *consoleclient.APIError
+		if errors.As(err, &apiErr) && apiErr.StatusCode == 401 && apiErr.Code == openapi.ErrorCLIUnauthenticated {
+			_, _ = store.Delete(credential)
+		}
+		return nil, openapi.CLISessionResponse{}, err
+	}
+	if session.InstallationID != credential.InstallationID || session.Principal.TokenID != credential.TokenID ||
+		session.Principal.Username != credential.Username || !session.AbsoluteExpiresAt.Equal(credential.AbsoluteExpires) ||
+		!deps.Now().UTC().Before(session.AbsoluteExpiresAt.UTC()) {
+		return nil, openapi.CLISessionResponse{}, fmt.Errorf("server CLI session does not match stored credential")
+	}
+	if !roleAllowed(session.Principal.Roles, role) || !contains(session.Principal.Scopes, string(scope)) {
+		return nil, openapi.CLISessionResponse{}, fmt.Errorf("CLI session lacks required role %s and scope %s", role, scope)
+	}
+	return client, session, nil
+}
+
+func roleAllowed(roles []string, required domain.WebRole) bool {
+	rank := map[string]int{string(domain.WebRoleViewer): 1, string(domain.WebRoleOperator): 2, string(domain.WebRoleOwner): 3}
+	for _, role := range roles {
+		if rank[role] >= rank[string(required)] {
+			return true
+		}
+	}
+	return false
+}
+
+func contains(values []string, expected string) bool {
+	for _, value := range values {
+		if value == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func validateAgentOptions(options []domain.ConsoleAgentOption) (map[string]domain.ConsoleAgentOption, error) {
+	result := make(map[string]domain.ConsoleAgentOption, len(options))
+	for _, option := range options {
+		if err := option.Validate(); err != nil {
+			return nil, fmt.Errorf("invalid safe Agent projection")
+		}
+		if _, exists := result[option.AgentID]; exists {
+			return nil, fmt.Errorf("duplicate Agent %q", option.AgentID)
+		}
+		result[option.AgentID] = option
+	}
+	return result, nil
+}
+
+func initializeManifest(paths fleetPaths, requested, sourceFlags []string, options []domain.ConsoleAgentOption, deps Dependencies) (fleetmodel.Manifest, error) {
+	selected := append([]string(nil), requested...)
+	if len(selected) == 0 {
+		if !deps.IsInteractive() {
+			return fleetmodel.Manifest{}, fmt.Errorf("non-interactive init requires at least one explicit --agent")
+		}
+		var err error
+		if deps.SelectAgents != nil {
+			selected, err = deps.SelectAgents(options)
+		} else {
+			selected, err = selectAgents(deps, options)
+		}
 		if err != nil {
-			return fmt.Errorf("stat canonical systemd config %q for Agent %q: %w", canonical, agent.entry.AgentID, err)
+			return fleetmodel.Manifest{}, err
 		}
-		if os.SameFile(validatedInfo, canonicalInfo) {
-			continue
+	}
+	if len(selected) == 0 {
+		return fleetmodel.Manifest{}, fmt.Errorf("at least one Agent must be selected")
+	}
+	optionMap, err := validateAgentOptions(options)
+	if err != nil {
+		return fleetmodel.Manifest{}, err
+	}
+	sources, err := parseWorkerSources(sourceFlags)
+	if err != nil {
+		return fleetmodel.Manifest{}, err
+	}
+	seen := make(map[string]struct{}, len(selected))
+	sort.Strings(selected)
+	manifest := fleetmodel.Manifest{Version: fleetmodel.ManifestVersion, Session: fleetmodel.SessionName}
+	type install struct {
+		path    string
+		content []byte
+	}
+	installs := make([]install, 0, len(selected))
+	resolver := localprofile.DefaultResolver()
+	workerOverride := localprofile.Override{Set: true, Value: paths.workerDir}
+	for _, agentID := range selected {
+		if _, duplicate := seen[agentID]; duplicate {
+			return fleetmodel.Manifest{}, fmt.Errorf("Agent %q selected more than once", agentID)
 		}
-		validated, err := os.ReadFile(agent.workerPath)
+		seen[agentID] = struct{}{}
+		if _, ok := optionMap[agentID]; !ok {
+			return fleetmodel.Manifest{}, fmt.Errorf("Agent %q is not in the authenticated control-plane list", agentID)
+		}
+		canonical, err := resolver.WorkerConfig(workerOverride, agentID)
 		if err != nil {
-			return fmt.Errorf("read validated config for Agent %q: %w", agent.entry.AgentID, err)
+			return fleetmodel.Manifest{}, err
 		}
-		deployed, err := os.ReadFile(canonical)
+		source := sources[agentID]
+		if source == "" {
+			source = canonical.Path
+		}
+		content, err := readWorkerSource(source)
 		if err != nil {
-			return fmt.Errorf("read canonical systemd config for Agent %q: %w", agent.entry.AgentID, err)
+			return fleetmodel.Manifest{}, fmt.Errorf("Agent %q worker config: %w", agentID, err)
 		}
-		if sha256.Sum256(validated) != sha256.Sum256(deployed) {
-			return fmt.Errorf("Agent %q worker_config %q does not match canonical systemd config %q", agent.entry.AgentID, agent.workerPath, canonical)
+		if err := validateWorkerConfig(source, agentID, paths.socket); err != nil {
+			return fleetmodel.Manifest{}, err
 		}
+		if _, err := fleetmodel.CheckExactFile(canonical.Path, content); err != nil {
+			return fleetmodel.Manifest{}, err
+		}
+		if source != canonical.Path {
+			installs = append(installs, install{path: canonical.Path, content: content})
+		}
+		manifest.Agents = append(manifest.Agents, fleetmodel.Agent{AgentID: agentID, WorkerConfig: canonical.Path, Enabled: true})
+	}
+	for agentID := range sources {
+		if _, ok := seen[agentID]; !ok {
+			return fleetmodel.Manifest{}, fmt.Errorf("worker config source supplied for unselected Agent %q", agentID)
+		}
+	}
+	encoded, err := fleetmodel.Encode(manifest)
+	if err != nil {
+		return fleetmodel.Manifest{}, err
+	}
+	if _, err := fleetmodel.CheckExactFile(paths.manifest, encoded); err != nil {
+		return fleetmodel.Manifest{}, err
+	}
+	for _, item := range installs {
+		if _, err := fleetmodel.WriteExactFileAtomic(item.path, item.content, fleetmodel.AtomicFileOptions{BeforeRename: atomicHook(deps, item.path)}); err != nil {
+			return fleetmodel.Manifest{}, err
+		}
+	}
+	if _, err := fleetmodel.WriteExactFileAtomic(paths.manifest, encoded, fleetmodel.AtomicFileOptions{BeforeRename: atomicHook(deps, paths.manifest)}); err != nil {
+		return fleetmodel.Manifest{}, err
+	}
+	return manifest, nil
+}
+
+func atomicHook(deps Dependencies, path string) func() error {
+	if deps.BeforeAtomicRename == nil {
+		return nil
+	}
+	return func() error { return deps.BeforeAtomicRename(path) }
+}
+
+func selectAgents(deps Dependencies, options []domain.ConsoleAgentOption) ([]string, error) {
+	if len(options) == 0 {
+		return nil, fmt.Errorf("authenticated Agent list is empty")
+	}
+	fmt.Fprintln(deps.Err, "Select one or more Agents by comma-separated Agent ID:")
+	for _, option := range options {
+		fmt.Fprintf(deps.Err, "  %s\t%s\t%s\tgeneration=%d\n", option.AgentID, option.DisplayName, option.WorkerStatus, option.Generation)
+	}
+	fmt.Fprint(deps.Err, "Agents: ")
+	line, err := bufio.NewReader(deps.In).ReadString('\n')
+	if err != nil && !errors.Is(err, io.EOF) {
+		return nil, err
+	}
+	parts := strings.Split(strings.TrimSpace(line), ",")
+	selected := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if value := strings.TrimSpace(part); value != "" {
+			selected = append(selected, value)
+		}
+	}
+	return selected, nil
+}
+
+func parseWorkerSources(values []string) (map[string]string, error) {
+	result := make(map[string]string, len(values))
+	for _, value := range values {
+		agentID, path, ok := strings.Cut(value, "=")
+		if !ok || strings.TrimSpace(agentID) != agentID || !filepath.IsAbs(path) {
+			return nil, fmt.Errorf("--worker-config must be agent-id=/absolute/source.yaml")
+		}
+		if err := domain.ValidateIdentifier("agent_id", agentID); err != nil {
+			return nil, err
+		}
+		if _, duplicate := result[agentID]; duplicate {
+			return nil, fmt.Errorf("duplicate worker config source for Agent %q", agentID)
+		}
+		result[agentID] = filepath.Clean(path)
+	}
+	return result, nil
+}
+
+func readWorkerSource(path string) ([]byte, error) {
+	if !filepath.IsAbs(path) {
+		return nil, fmt.Errorf("worker config path must be absolute")
+	}
+	info, err := os.Lstat(path)
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() || info.Size() > maxWorkerConfigBytes {
+		return nil, fmt.Errorf("worker config must be a regular file within the safe size limit")
+	}
+	return os.ReadFile(path)
+}
+
+func validateWorkerConfig(path, agentID, socketPath string) error {
+	config, err := workerconfig.LoadProcessConfig(path)
+	if err != nil {
+		return fmt.Errorf("load Agent %q worker config: %w", agentID, err)
+	}
+	if config.AgentID != agentID {
+		return fmt.Errorf("Agent %q worker config declares %q", agentID, config.AgentID)
+	}
+	if config.Transport == domain.WorkerTransportUnix && filepath.Clean(config.UnixSocket) != socketPath {
+		return fmt.Errorf("Agent %q worker config socket %q does not match canonical Fleet socket %q", agentID, config.UnixSocket, socketPath)
 	}
 	return nil
 }
 
-func prepare(path string) (fleetmodel.Manifest, []preparedAgent, error) {
-	manifest, err := fleetmodel.LoadFile(path)
+func prepare(manifestPath, workerDir, socketPath string, options map[string]domain.ConsoleAgentOption) (fleetmodel.Manifest, []preparedAgent, error) {
+	if err := validatePrivateRegularFile(manifestPath, "Fleet manifest"); err != nil {
+		return fleetmodel.Manifest{}, nil, err
+	}
+	manifest, err := fleetmodel.LoadFile(manifestPath)
 	if err != nil {
 		return fleetmodel.Manifest{}, nil, err
 	}
-	base, err := filepath.Abs(filepath.Dir(path))
-	if err != nil {
-		return fleetmodel.Manifest{}, nil, err
-	}
+	resolver := localprofile.DefaultResolver()
+	workerOverride := localprofile.Override{Set: true, Value: workerDir}
 	prepared := make([]preparedAgent, 0, len(manifest.Agents))
 	for _, entry := range manifest.Agents {
-		identityPath := resolve(base, entry.IdentityFile)
-		workerPath := resolve(base, entry.WorkerConfig)
-		definition, err := admincli.LoadAgentDefinition(identityPath)
+		option, ok := options[entry.AgentID]
+		if !ok {
+			return fleetmodel.Manifest{}, nil, fmt.Errorf("Agent %q is not in the authenticated control-plane list", entry.AgentID)
+		}
+		canonical, err := resolver.WorkerConfig(workerOverride, entry.AgentID)
 		if err != nil {
-			return fleetmodel.Manifest{}, nil, fmt.Errorf("Agent %q identity: %w", entry.AgentID, err)
+			return fleetmodel.Manifest{}, nil, err
 		}
-		if definition.AgentID != entry.AgentID {
-			return fleetmodel.Manifest{}, nil, fmt.Errorf("Agent %q identity file declares %q", entry.AgentID, definition.AgentID)
+		if !filepath.IsAbs(entry.WorkerConfig) || filepath.Clean(entry.WorkerConfig) != canonical.Path {
+			return fleetmodel.Manifest{}, nil, fmt.Errorf("Agent %q worker_config must be canonical path %q", entry.AgentID, canonical.Path)
 		}
-		worker, err := workerconfig.LoadProcessConfig(workerPath)
-		if err != nil {
-			return fleetmodel.Manifest{}, nil, fmt.Errorf("Agent %q worker config: %w", entry.AgentID, err)
+		if err := validatePrivateRegularFile(canonical.Path, "Worker config"); err != nil {
+			return fleetmodel.Manifest{}, nil, err
 		}
-		if worker.AgentID != entry.AgentID {
-			return fleetmodel.Manifest{}, nil, fmt.Errorf("Agent %q worker config declares %q", entry.AgentID, worker.AgentID)
+		environmentPath := strings.TrimSuffix(canonical.Path, filepath.Ext(canonical.Path)) + ".env"
+		if _, err := os.Lstat(environmentPath); err == nil {
+			if err := validatePrivateRegularFile(environmentPath, "Worker environment file"); err != nil {
+				return fleetmodel.Manifest{}, nil, err
+			}
+		} else if !os.IsNotExist(err) {
+			return fleetmodel.Manifest{}, nil, fmt.Errorf("inspect Worker environment file: %w", err)
 		}
-		prepared = append(prepared, preparedAgent{entry: entry, definition: definition, worker: worker, workerPath: workerPath})
+		if err := validateWorkerConfig(canonical.Path, entry.AgentID, socketPath); err != nil {
+			return fleetmodel.Manifest{}, nil, err
+		}
+		if entry.IdentityFile != "" {
+			if err := validateIdentityCompatibility(manifestPath, entry.IdentityFile, option); err != nil {
+				return fleetmodel.Manifest{}, nil, err
+			}
+		}
+		prepared = append(prepared, preparedAgent{entry: entry, workerPath: canonical.Path})
 	}
 	return manifest, prepared, nil
 }
 
-func resolve(base, value string) string {
-	if filepath.IsAbs(value) {
-		return filepath.Clean(value)
+func validatePrivateRegularFile(path, label string) error {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return fmt.Errorf("inspect %s %q: %w", label, path, err)
 	}
-	return filepath.Join(base, filepath.Clean(value))
+	if !info.Mode().IsRegular() || info.Mode().Perm()&0o077 != 0 {
+		return fmt.Errorf("%s %q must be a regular file with permissions no wider than 0600", label, path)
+	}
+	stat, ok := info.Sys().(*syscall.Stat_t)
+	if !ok || int(stat.Uid) != os.Geteuid() {
+		return fmt.Errorf("%s %q must be owned by the current user", label, path)
+	}
+	return nil
 }
 
-func authenticateOwner(repository *openagentsqlite.Repository, username string, deps Dependencies) (*domain.WebUserRecord, error) {
-	owner, err := repository.GetWebUserByUsername(context.Background(), strings.TrimSpace(username))
-	if err != nil || owner.Status != domain.IdentityActive || !owner.HasRole(domain.WebRoleOwner) {
-		return nil, fmt.Errorf("active owner is required")
+func validateIdentityCompatibility(manifestPath, value string, option domain.ConsoleAgentOption) error {
+	path := value
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(filepath.Dir(manifestPath), path)
 	}
-	password, err := deps.ReadPassword("Owner password: ")
+	definition, err := admincli.LoadAgentDefinition(path)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("Agent %q identity_file: %w", option.AgentID, err)
 	}
-	if !webAuth.VerifyPassword(owner.PasswordDigest, password) {
-		return nil, fmt.Errorf("owner authentication failed")
-	}
-	return owner, nil
-}
-
-func applyIdentities(ctx context.Context, databasePath, username string, prepared []preparedAgent, deps Dependencies) error {
-	repository, err := openagentsqlite.Open(ctx, databasePath, openagentsqlite.Options{Now: deps.Now})
-	if err != nil {
-		return err
-	}
-	defer repository.Close()
-	owner, err := authenticateOwner(repository, username, deps)
-	if err != nil {
-		return err
-	}
-	for _, item := range prepared {
-		definition := item.definition
-		principal := &domain.Principal{ID: definition.PrincipalID, Kind: domain.PrincipalAgent, DisplayName: definition.DisplayName, Status: domain.IdentityActive}
-		agent := &domain.AgentIdentity{ID: definition.AgentID, PrincipalID: definition.PrincipalID, OrganizationID: definition.OrganizationID, DisplayName: definition.DisplayName, Status: domain.AgentIdentityActive, Version: 1}
-		profile := &domain.AgentProfileRecord{AgentID: definition.AgentID, Version: 1, InstructionsPath: definition.Profile.InstructionsPath, WorkspaceRoot: definition.Profile.WorkspaceRoot, DefaultExecutionProfileID: definition.Profile.DefaultExecutionProfileID, Capabilities: definition.Profile.Capabilities}
-		events := []*domain.JournalEvent{
-			fleetEvent(deps, owner.PrincipalID, definition.OrganizationID, "principal", principal.ID, "principal.created"),
-			fleetEvent(deps, owner.PrincipalID, definition.OrganizationID, "agent", agent.ID, "agent.created"),
-		}
-		if _, err := repository.ApplyAgent(ctx, principal, agent, profile, events); err != nil {
-			return fmt.Errorf("apply Agent %q: %w", agent.ID, err)
-		}
+	if definition.AgentID != option.AgentID || definition.OrganizationID != option.OrganizationID || definition.DisplayName != option.DisplayName {
+		return fmt.Errorf("Agent %q identity_file does not match the existing authenticated Agent; use the formal Agent management entrypoint", option.AgentID)
 	}
 	return nil
 }
@@ -415,18 +706,7 @@ type stopObservation struct {
 	Message      string                  `json:"message"`
 }
 
-func queueStops(ctx context.Context, socketPath, username string, manifest fleetmodel.Manifest, force bool, deps Dependencies) (consoleClient, []stopTarget, error) {
-	password, err := deps.ReadPassword("Owner password: ")
-	if err != nil {
-		return nil, nil, err
-	}
-	client, err := deps.NewConsole(socketPath)
-	if err != nil {
-		return nil, nil, err
-	}
-	if err := client.Login(ctx, strings.TrimSpace(username), password); err != nil {
-		return nil, nil, err
-	}
+func queueStops(ctx context.Context, client consoleClient, manifest fleetmodel.Manifest, force bool, deps Dependencies) (consoleClient, []stopTarget, error) {
 	kind := domain.WorkerCommandStop
 	if force {
 		kind = domain.WorkerCommandForceStop
@@ -473,15 +753,13 @@ func waitForOffline(ctx context.Context, client consoleClient, targets []stopTar
 				if ctx.Err() != nil {
 					return ctx.Err()
 				}
-				if code := printJSON(deps, stopObservation{AgentID: agentID,
-					Elapsed: elapsedString(now.Sub(target.QueuedAt)), Message: "observation temporarily unavailable; persisted graceful-stop intent remains active"}); code != 0 {
-					return fmt.Errorf("write graceful-stop observation failure")
+				if printJSON(deps, stopObservation{AgentID: agentID, Elapsed: elapsedString(now.Sub(target.QueuedAt)), Message: "observation temporarily unavailable; persisted graceful-stop intent remains active"}) != 0 {
+					return fmt.Errorf("write graceful-stop observation")
 				}
 				continue
 			}
 			if effectivelyOffline(attached, now) {
-				if code := printJSON(deps, stopObservation{AgentID: agentID, WorkerStatus: domain.WorkerStatusOffline,
-					Elapsed: elapsedString(now.Sub(target.QueuedAt)), Message: "offline; graceful stop completed"}); code != 0 {
+				if printJSON(deps, stopObservation{AgentID: agentID, WorkerStatus: domain.WorkerStatusOffline, Elapsed: elapsedString(now.Sub(target.QueuedAt)), Message: "offline; graceful stop completed"}) != 0 {
 					return fmt.Errorf("write graceful-stop completion")
 				}
 				delete(pending, agentID)
@@ -496,9 +774,9 @@ func waitForOffline(ctx context.Context, client consoleClient, targets []stopTar
 			if draining {
 				message = "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
 			}
-			if code := printJSON(deps, stopObservation{AgentID: agentID, Generation: attached.Generation, WorkerStatus: attached.WorkerStatus,
+			if printJSON(deps, stopObservation{AgentID: agentID, Generation: attached.Generation, WorkerStatus: attached.WorkerStatus,
 				RunAttempt: attached.ActiveRun, Elapsed: elapsedString(now.Sub(target.QueuedAt)), RecentStatus: recent,
-				NoNewTasks: draining, Message: message}); code != 0 {
+				NoNewTasks: draining, Message: message}) != 0 {
 				return fmt.Errorf("write graceful-stop observation")
 			}
 		}
@@ -524,9 +802,18 @@ func elapsedString(duration time.Duration) string {
 	return duration.Round(time.Second).String()
 }
 
-func fleetStatus(ctx context.Context, manifest fleetmodel.Manifest, prepared []preparedAgent, deps Dependencies) int {
+func fleetStatus(ctx context.Context, manifest fleetmodel.Manifest, prepared []preparedAgent, options []domain.ConsoleAgentOption, deps Dependencies) int {
 	windows, workspaceErr := (fleetmodel.Workspace{Runner: deps.Tmux}).Inspect(ctx)
-	status := map[string]any{"session": fleetmodel.SessionName, "windows": windows, "foreground_takeover": "Foreground Takeover（规划中，暂不可用）"}
+	windowStatus := make([]map[string]any, 0, len(windows))
+	for _, window := range windows {
+		windowStatus = append(windowStatus, map[string]any{
+			"name": window.Name, "pane_indices": window.PaneIndices,
+			"managed":  window.Managed.Set && window.Managed.Value == "1",
+			"agent_id": window.AgentID.Value, "pane_zero_dead": window.PaneZeroSeen && window.PaneZeroDead,
+		})
+	}
+	status := map[string]any{"session": fleetmodel.SessionName, "windows": windowStatus, "agents": options,
+		"foreground_takeover": "Foreground Takeover（规划中，暂不可用）"}
 	if workspaceErr != nil {
 		status["workspace_status"] = "missing_or_unavailable"
 	} else {
@@ -534,21 +821,22 @@ func fleetStatus(ctx context.Context, manifest fleetmodel.Manifest, prepared []p
 	}
 	units := make(map[string]string, len(prepared))
 	for _, agent := range prepared {
-		unit := "openagentx-worker@" + agent.entry.AgentID + ".service"
-		output, err := deps.RunSystemctl(ctx, "is-active", unit)
+		output, err := deps.RunSystemctl(ctx, "--user", "is-active", workerUnit(agent.entry.AgentID))
 		if err != nil && output == "" {
 			output = "unknown"
 		}
-		units[agent.entry.AgentID] = output
+		units[agent.entry.AgentID] = bounded(output, 128)
 	}
 	status["workers"] = units
 	status["fleet_agents"] = manifest.Agents
 	return printJSON(deps, status)
 }
 
-func fleetEvent(deps Dependencies, actor, organization, aggregate, aggregateID, eventType string) *domain.JournalEvent {
-	payload, _ := json.Marshal(map[string]string{"source": "fleet"})
-	return &domain.JournalEvent{ID: deps.NewID("event"), OrganizationID: organization, AggregateType: aggregate, AggregateID: aggregateID, EventType: eventType, ActorPrincipalID: actor, Payload: payload, CreatedAt: deps.Now().UTC()}
+func checkLinger(ctx context.Context, deps Dependencies) {
+	output, err := deps.RunLoginctl(ctx, "show-user", strconv.Itoa(os.Getuid()), "--property=Linger", "--value")
+	if err != nil || strings.TrimSpace(output) != "yes" {
+		fmt.Fprintln(deps.Err, "warning: user linger is not confirmed; Fleet will not enable it automatically")
+	}
 }
 
 func printJSON(deps Dependencies, value any) int {
@@ -561,10 +849,28 @@ func printJSON(deps Dependencies, value any) int {
 	return 0
 }
 
+func bounded(value string, maximum int) string {
+	value = strings.TrimSpace(value)
+	if len(value) > maximum {
+		return value[:maximum] + "..."
+	}
+	return value
+}
+
+func safeAuthError(err error) string {
+	var apiErr *consoleclient.APIError
+	if errors.As(err, &apiErr) {
+		return apiErr.Code + ": " + apiErr.Message
+	}
+	return bounded(err.Error(), 512)
+}
+
 func usage(writer io.Writer) {
-	fmt.Fprintln(writer, "Usage: openagentx fleet <init|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--confirm-force-stop]")
+	fmt.Fprintln(writer, "Usage: openagentx fleet <init|workspace|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--worker-dir <dir>] [--credentials <path>]")
+	fmt.Fprintln(writer, "       fleet init [--agent <agent-id> ...] [--worker-config <agent-id=/absolute/source.yaml> ...] [--respawn-dead]")
+	fmt.Fprintln(writer, "       fleet workspace [--respawn-dead]")
+	fmt.Fprintln(writer, "       fleet force-stop --confirm-force-stop --confirm-active-run-uncertain")
+	fmt.Fprintln(writer, "Fleet uses the stored CLI session from openagentx console login; it never reads an Owner password")
 	fmt.Fprintln(writer, "Managed tmux workspace: exact session OAX with stable pane 0; existing agentx sessions are not migrated")
-	fmt.Fprintf(writer, "Default manifest source: $%s > $%s > ~/.openagentx/fleet.yaml\n", localprofile.EnvFleetManifest, localprofile.EnvHome)
-	fmt.Fprintf(writer, "Default database source: $%s > $%s > ~/.openagentx/data/openagentx.db\n", localprofile.EnvDatabasePath, localprofile.EnvHome)
-	fmt.Fprintf(writer, "Default socket source: $%s > $%s > ~/.openagentx/run/openagentx.sock\n", localprofile.EnvSocketPath, localprofile.EnvHome)
+	fmt.Fprintf(writer, "Defaults: $%s/$%s/$%s/$%s/$%s > $%s > ~/.openagentx\n", localprofile.EnvFleetManifest, localprofile.EnvDatabasePath, localprofile.EnvSocketPath, localprofile.EnvWorkerConfigDir, localprofile.EnvCredentialsPath, localprofile.EnvHome)
 }

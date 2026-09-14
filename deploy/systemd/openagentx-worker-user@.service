@@ -1,0 +1,21 @@
+[Unit]
+Description=OpenAgentX user Worker (%i)
+After=openagentx.service
+Requires=openagentx.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/.openagentx/workers/%i.env
+ExecStart=%h/.local/bin/openagentx worker run --config %h/.openagentx/workers/%i.yaml
+Restart=on-failure
+RestartSec=3s
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=false
+ProtectHome=false
+
+[Install]
+WantedBy=default.target
