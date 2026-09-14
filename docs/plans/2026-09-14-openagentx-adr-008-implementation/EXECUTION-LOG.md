@@ -251,6 +251,7 @@ M  deploy/systemd/openagentx-user.service
 |---|---|---|---|
 | `2026-09-14T15:23:15Z` | `internal/localprofile` | 新增唯一无副作用 resolver、五类资源默认路径、显式 flag 出现性、canonical/fail-closed 与 Agent ID 路径约束 | none |
 | `2026-09-14T15:23:15Z` | `internal/cli/{console,fleet,admin}`、`internal/client/console`、`cmd/openagentx` | 将默认 profile 接入 Console/Fleet/init/agent apply/serve/schema；冻结 Console parser，保留旧 Attach/REPL；细分 TTY、credential 与 socket 错误 | none；未实现 Token/TUI/cursor/workspace 新行为 |
+| `2026-09-14T15:49:21Z` | `internal/client/console/client_test.go` | review fix：Unix socket fixture 改用短随机临时目录和单字符 socket 名，并显式 cleanup | none；test-only，未修改 `NewUnixClient` 或产品行为 |
 
 #### 决策
 
@@ -268,6 +269,7 @@ M  deploy/systemd/openagentx-user.service
 |---|---|---|---|---|---|
 | `2026-09-14T15:23:15Z` | 首次定向测试中 `internal/cli/fleet` 的 `TestFleetUpPreflightsWorkspaceStartsConsoleAndEnabledSystemdUnits` 失败；其他 5 个 package 通过 | 既有测试假定未传 `--socket` 时从 Worker YAML 推导 `/run/openagentx/openagentx.sock`，与 Task 01 冻结的统一 profile socket 默认值冲突 | 仅测试期断言失败；未执行真实 tmux/systemd/DB/socket | 旧兼容场景显式传原 socket，并新增 profile 默认 socket 接线测试 | 待重验 |
 | `2026-09-14T15:29:19Z` | 上述 Fleet 测试纠正后重验 | n/a | 无 | 运行同一 6-package 定向测试，并补齐默认/空/相对路径测试 | 全部通过，退出码 0 |
+| 监督复核（独立 Termux review worktree） | `internal/client/console` 两个使用 UDS fixture 的测试在默认 `t.TempDir()` 下报 `bind: invalid argument`；将 `TMPDIR` 设为短路径后全部通过 | `t.TempDir()` 包含完整长测试名，最终路径超过 `sockaddr_un` 长度限制 | 产品代码未失败；测试依赖 CI 临时根和测试名长度，存在平台可移植性缺陷 | fixture 改用 `os.MkdirTemp("", "oax-uds-")` 和 socket 名 `s`，注册 `RemoveAll` cleanup；不放宽 client fail-closed 检查 | 本机不设置 `TMPDIR` 重验全部通过 |
 
 #### 验证
 
@@ -284,6 +286,13 @@ M  deploy/systemd/openagentx-user.service
 | `2026-09-14T15:33:32Z` | `go test ./internal/localprofile/...` | 0 | 0.13s | resolver 最终测试再次通过 |
 | `2026-09-14T15:33:32Z` | `go build -o /tmp/openagentx-adr008-task02 ./cmd/openagentx` | 0 | 2.63s | 最终临时构建通过；未安装 |
 | `2026-09-14T15:33:32Z` | `/tmp/openagentx-adr008-task02 console {login --help,attach --help,login --content must-not-be-accepted}`（逐条执行） | 0/0/2 | <0.1s total | help 仅显示子命令相关 flags；login 对无关 legacy flag fail closed |
+| 监督复核（独立 Termux review worktree） | `TMPDIR=<short-path> go test ./internal/client/console -count=1` | 0 | 未提供 | 短路径重验通过，确认失败来自 UDS fixture 路径长度；该 workaround 不作为最终验收条件 |
+| `2026-09-14T15:49:21Z` | `go test ./internal/client/console -count=1` | 0 | 0.63s | 未设置 `TMPDIR`；短路径 fixture 下 Follow/正式控制 API/client 错误测试全部通过 |
+| `2026-09-14T15:49:21Z` | `go test ./internal/cli/... ./internal/fleet/... ./cmd/openagentx/... -count=1` | 0 | 2.08s | Task 02 CLI、Fleet 和 main 定向测试全部通过 |
+| `2026-09-14T15:49:21Z` | `go test ./internal/localprofile/... -count=1` | 0 | 0.26s | Task 02 resolver 定向测试通过 |
+| `2026-09-14T15:49:21Z` | `go vet ./internal/cli/... ./internal/fleet/... ./internal/client/console ./internal/localprofile/... ./cmd/openagentx/...` | 0 | 0.57s | 受影响 packages 无诊断 |
+| `2026-09-14T15:49:21Z` | `go build -o /tmp/openagentx-adr008-task02-review-fix ./cmd/openagentx` | 0 | 2.52s | 临时二进制构建通过；未安装 |
+| `2026-09-14T15:49:21Z` | `git diff --check` | 0 | <0.01s | review fix 无 whitespace error；提交前将再次复核 staged path |
 
 #### 外部状态与阶段安全点
 

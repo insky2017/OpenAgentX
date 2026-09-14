@@ -21,7 +21,12 @@ import (
 
 func newUnixTestClient(t *testing.T, handler http.Handler) *Client {
 	t.Helper()
-	socketPath := filepath.Join(t.TempDir(), "console.sock")
+	directory, err := os.MkdirTemp("", "oax-uds-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(directory) })
+	socketPath := filepath.Join(directory, "s")
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
 		t.Fatal(err)
