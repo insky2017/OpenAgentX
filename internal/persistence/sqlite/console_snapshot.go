@@ -78,6 +78,13 @@ func (r *Repository) consoleSnapshot(ctx context.Context, agentID string, afterS
 	} else if err != nil {
 		return snapshot, fmt.Errorf("read Console active RunAttempt: %w", err)
 	}
+	if snapshot.ActiveRun != nil {
+		if err := tx.QueryRowContext(ctx, `SELECT generation FROM worker_instances
+			WHERE worker_instance_id=?`, snapshot.ActiveRun.WorkerInstanceID).
+			Scan(&snapshot.ActiveRunWorkerGeneration); err != nil {
+			return snapshot, fmt.Errorf("read Console active RunAttempt Worker generation: %w", err)
+		}
+	}
 
 	if afterStateRead != nil {
 		afterStateRead()

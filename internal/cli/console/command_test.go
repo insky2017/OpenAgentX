@@ -49,7 +49,7 @@ func (c *testClient) Attach(_ context.Context, agentID, _ string) (consoleapi.At
 	return response, nil
 }
 
-func (c *testClient) Follow(ctx context.Context, agentID, _ string, _ int64, onAttach func(consoleapi.AttachResponse) error, onEvent func(openapi.JournalEventReadModel) error) error {
+func (c *testClient) Follow(ctx context.Context, agentID, _ string, onAttach func(consoleapi.AttachResponse) error, onEvent func(openapi.JournalEventReadModel) error) error {
 	c.followCount++
 	response := c.attached
 	response.AgentID = agentID
@@ -179,11 +179,11 @@ func TestInteractiveAttachUsesReducerIdentityAndSuppressesOldHeartbeats(t *testi
 		attached: consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-48",
 			Generation: 48, WorkerStatus: domain.WorkerStatusOnline, LeaseUntil: now.Add(time.Minute), SnapshotSequence: 100},
 		followEvents: []openapi.JournalEventReadModel{
-			{Sequence: 101, ID: "old-generation-heartbeat", EventType: "worker.heartbeat",
+			{Sequence: 101, ID: "old-generation-heartbeat", AggregateType: "worker_instance", AggregateID: "worker-42", EventType: "worker.heartbeat",
 				Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-42", AgentID: "quote", Generation: 42, Status: domain.WorkerStatusOffline}},
-			{Sequence: 102, ID: "current-heartbeat", EventType: "worker.heartbeat",
+			{Sequence: 102, ID: "current-heartbeat", AggregateType: "worker_instance", AggregateID: "worker-48", EventType: "worker.heartbeat",
 				Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-48", AgentID: "quote", Generation: 48, Status: domain.WorkerStatusOnline, LeaseUntil: now.Add(2 * time.Minute)}},
-			{Sequence: 103, ID: "worker-replacement", EventType: "worker.registered",
+			{Sequence: 103, ID: "worker-replacement", AggregateType: "worker_instance", AggregateID: "worker-49", EventType: "worker.registered",
 				Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-49", AgentID: "quote", Generation: 49, Status: domain.WorkerStatusOnline, LeaseUntil: now.Add(3 * time.Minute)}},
 		},
 		eventsDelivered: delivered,

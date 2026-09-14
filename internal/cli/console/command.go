@@ -33,7 +33,7 @@ type Dependencies struct {
 type Client interface {
 	Login(context.Context, string, string) error
 	Attach(context.Context, string, string) (consoleapi.AttachResponse, error)
-	Follow(context.Context, string, string, int64, func(consoleapi.AttachResponse) error, func(openapi.JournalEventReadModel) error) error
+	Follow(context.Context, string, string, func(consoleapi.AttachResponse) error, func(openapi.JournalEventReadModel) error) error
 	Dispatch(context.Context, openapi.CreateTaskRequest) (openapi.CreateTaskResponse, error)
 	Steer(context.Context, string, openapi.CreateMessageRequest) (openapi.CreateMessageResponse, error)
 	Cancel(context.Context, string, openapi.CancelTaskRequest) (openapi.CancelTaskResponse, error)

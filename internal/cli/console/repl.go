@@ -86,7 +86,7 @@ func runInteractiveAttach(ctx context.Context, cancel context.CancelFunc, client
 	updates := make(chan attachUpdate)
 	followDone := make(chan error, 1)
 	go func() {
-		followDone <- client.Follow(ctx, agentID, mode, 0,
+		followDone <- client.Follow(ctx, agentID, mode,
 			func(attached consoleapi.AttachResponse) error {
 				select {
 				case updates <- attachUpdate{attached: &attached}:

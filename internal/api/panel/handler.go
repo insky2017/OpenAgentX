@@ -1117,6 +1117,11 @@ func (h *Handler) workerEventSnapshot(ctx context.Context, workerID string) *ope
 	}
 	for _, worker := range workers {
 		if worker.ID == workerID {
+			if domain.ValidateOpaqueID("worker_instance_id", worker.ID) != nil ||
+				domain.ValidateIdentifier("agent_id", worker.AgentID) != nil ||
+				worker.Generation <= 0 || !worker.Status.Valid() {
+				return nil
+			}
 			model := workerReadModel(worker)
 			return &model
 		}
@@ -1129,9 +1134,17 @@ func (h *Handler) runEventSnapshot(ctx context.Context, runID string) *openapi.R
 	if err != nil {
 		return nil
 	}
+	if domain.ValidateOpaqueID("run_id", run.ID) != nil || domain.ValidateOpaqueID("task_id", run.TaskID) != nil ||
+		domain.ValidateIdentifier("agent_id", run.AgentID) != nil ||
+		domain.ValidateOpaqueID("worker_instance_id", run.WorkerInstanceID) != nil || !run.Status.Valid() {
+		return nil
+	}
 	var worker *domain.WorkerInstance
 	if run.WorkerInstanceID != "" {
 		worker, _ = h.state.GetWorkerInstance(ctx, run.WorkerInstanceID)
+	}
+	if worker == nil || worker.ID != run.WorkerInstanceID || worker.Generation <= 0 || !worker.Status.Valid() {
+		return nil
 	}
 	model := runReadModel(*run, worker)
 	return &model

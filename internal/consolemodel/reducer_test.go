@@ -9,6 +9,7 @@ import (
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func workerEvent(sequence, generation int64, workerID string, status domain.WorkerStatus, heartbeat, lease time.Time) openapi.JournalEventReadModel {
@@ -18,6 +19,15 @@ func workerEvent(sequence, generation int64, workerID string, status domain.Work
 		Worker: &openapi.WorkerReadModel{WorkerInstanceID: workerID, AgentID: "quote",
 			Generation: generation, Status: status, LastHeartbeatAt: heartbeat, LeaseUntil: lease},
 	}
+}
+
+func generation(value int64) *int64 { return &value }
+
+func runEvent(sequence int64, runID, workerID string, workerGeneration int64, status domain.RunAttemptStatus) openapi.JournalEventReadModel {
+	return openapi.JournalEventReadModel{Sequence: sequence, ID: "event-" + runID,
+		AggregateType: "run_attempt", AggregateID: runID, EventType: "run_attempt.updated",
+		Run: &openapi.RunAttemptReadModel{ID: runID, TaskID: "task-" + runID, AgentID: "quote",
+			Status: status, WorkerInstanceID: workerID, WorkerGeneration: generation(workerGeneration)}}
 }
 
 func TestReducerRejectsGenerationRollbackAndAdvancesIgnoredCursor(t *testing.T) {
@@ -97,8 +107,8 @@ func TestReducerSwitchesAndClearsActiveRunFromSafeProjection(t *testing.T) {
 		t.Fatal(err)
 	}
 	for sequence, run := range []openapi.RunAttemptReadModel{
-		{ID: "run-1", TaskID: "task-1", AgentID: "quote", Status: domain.RunAttemptRunning, StartedAt: now, UpdatedAt: now},
-		{ID: "run-2", TaskID: "task-2", AgentID: "quote", Status: domain.RunAttemptWaitingApproval, StartedAt: now, UpdatedAt: now.Add(time.Second)},
+		{ID: "run-1", TaskID: "task-1", AgentID: "quote", Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), StartedAt: now, UpdatedAt: now},
+		{ID: "run-2", TaskID: "task-2", AgentID: "quote", Status: domain.RunAttemptWaitingApproval, WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), StartedAt: now, UpdatedAt: now.Add(time.Second)},
 	} {
 		result, applyErr := reducer.Apply(openapi.JournalEventReadModel{Sequence: int64(51 + sequence), ID: run.ID,
 			AggregateType: "run_attempt", AggregateID: run.ID, EventType: "run_attempt.updated", Run: &run})
@@ -109,13 +119,96 @@ func TestReducerSwitchesAndClearsActiveRunFromSafeProjection(t *testing.T) {
 	if active := reducer.Snapshot().ActiveRun; active == nil || active.RunID != "run-2" || active.Status != domain.RunAttemptWaitingApproval {
 		t.Fatalf("active run did not switch: %+v", active)
 	}
-	finished := openapi.RunAttemptReadModel{ID: "run-2", TaskID: "task-2", AgentID: "quote", Status: domain.RunAttemptSucceeded, UpdatedAt: now.Add(2 * time.Second)}
+	finished := openapi.RunAttemptReadModel{ID: "run-2", TaskID: "task-2", AgentID: "quote", Status: domain.RunAttemptSucceeded,
+		WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), UpdatedAt: now.Add(2 * time.Second)}
 	if _, err := reducer.Apply(openapi.JournalEventReadModel{Sequence: 53, ID: "run-2-finished",
 		AggregateType: "run_attempt", AggregateID: "run-2", EventType: "run_attempt.finished", Run: &finished}); err != nil {
 		t.Fatal(err)
 	}
 	if active := reducer.Snapshot().ActiveRun; active != nil {
 		t.Fatalf("terminal run remained active: %+v", active)
+	}
+}
+
+func TestReducerFencesOldWorkerRunWhileAdvancingTimelineCursor(t *testing.T) {
+	currentGeneration := int64(48)
+	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-48",
+		Generation: currentGeneration, WorkerStatus: domain.WorkerStatusOnline, SnapshotSequence: 100,
+		ActiveRun: &consoleapi.RunSnapshot{RunID: "run-current", TaskID: "task-current",
+			Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-48", WorkerGeneration: &currentGeneration}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, event := range []openapi.JournalEventReadModel{
+		runEvent(101, "run-old-generation", "worker-42", 42, domain.RunAttemptRunning),
+		runEvent(102, "run-same-generation-conflict", "worker-conflict", 48, domain.RunAttemptWaitingApproval),
+	} {
+		result, applyErr := reducer.Apply(event)
+		if applyErr != nil || !result.CursorAdvanced || result.Timeline == nil {
+			t.Fatalf("old Run result=%+v err=%v", result, applyErr)
+		}
+		active := reducer.Snapshot().ActiveRun
+		if active == nil || active.RunID != "run-current" || active.WorkerInstanceID != "worker-48" {
+			t.Fatalf("old Run replaced current ActiveRun: %+v", active)
+		}
+	}
+	if reducer.Cursor() != 102 {
+		t.Fatalf("ignored Run cursor=%d", reducer.Cursor())
+	}
+}
+
+func TestReducerClearsWorkerScopedStateOnReplacementAndOffline(t *testing.T) {
+	now := time.Now().UTC()
+	for _, testCase := range []struct {
+		name  string
+		event openapi.JournalEventReadModel
+	}{
+		{name: "replacement", event: workerEvent(201, 49, "worker-49", domain.WorkerStatusOnline, now.Add(time.Minute), now.Add(3*time.Minute))},
+		{name: "offline", event: workerEvent(201, 48, "worker-48", domain.WorkerStatusOffline, now.Add(time.Minute), now)},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			currentGeneration := int64(48)
+			reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeDiagnostic,
+				WorkerInstanceID: "worker-48", Generation: currentGeneration, WorkerStatus: domain.WorkerStatusOnline,
+				BackendHealth: map[string]openruntime.BackendHealth{"legacy": openruntime.BackendHealthy},
+				Diagnostic:    &consoleapi.DiagnosticView{StartedAt: now.Add(-time.Hour), UpdatedAt: now},
+				ActiveRun: &consoleapi.RunSnapshot{RunID: "run-48", TaskID: "task-48", Status: domain.RunAttemptRunning,
+					WorkerInstanceID: "worker-48", WorkerGeneration: &currentGeneration}, SnapshotSequence: 200})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := reducer.Apply(testCase.event); err != nil {
+				t.Fatal(err)
+			}
+			state := reducer.Snapshot()
+			if len(state.BackendHealth) != 0 || state.Diagnostic != nil || state.ActiveRun != nil {
+				t.Fatalf("%s retained stale Worker state: %+v", testCase.name, state)
+			}
+		})
+	}
+}
+
+func TestReducerFailsClosedBeforeCursorAdvanceOnInvalidProjection(t *testing.T) {
+	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-8",
+		Generation: 8, WorkerStatus: domain.WorkerStatusOnline, SnapshotSequence: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	invalidWorker := workerEvent(11, 8, "worker-8", "unknown", time.Time{}, time.Time{})
+	if _, err := reducer.Apply(invalidWorker); err == nil || reducer.Cursor() != 10 {
+		t.Fatalf("invalid Worker projection err=%v cursor=%d", err, reducer.Cursor())
+	}
+	invalidRun := runEvent(11, "run-invalid", "worker-8", 8, domain.RunAttemptRunning)
+	invalidRun.Run.WorkerGeneration = nil
+	if _, err := reducer.Apply(invalidRun); err == nil || reducer.Cursor() != 10 {
+		t.Fatalf("invalid Run projection err=%v cursor=%d", err, reducer.Cursor())
+	}
+	badGeneration := int64(7)
+	if _, err := New(consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-8",
+		Generation: 8, WorkerStatus: domain.WorkerStatusOnline,
+		ActiveRun: &consoleapi.RunSnapshot{RunID: "run-old", TaskID: "task-old", Status: domain.RunAttemptRunning,
+			WorkerInstanceID: "worker-7", WorkerGeneration: &badGeneration}}); err == nil {
+		t.Fatal("invalid Attach Run identity was accepted")
 	}
 }
 

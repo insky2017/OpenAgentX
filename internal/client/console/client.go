@@ -157,21 +157,17 @@ func (c *Client) Follow(
 	ctx context.Context,
 	agentID string,
 	mode string,
-	afterSequence int64,
 	onAttach func(consoleapi.AttachResponse) error,
 	onEvent func(openapi.JournalEventReadModel) error,
 ) error {
 	if onAttach == nil || onEvent == nil {
 		return fmt.Errorf("Console follow callbacks are required")
 	}
-	if afterSequence < 0 {
-		return fmt.Errorf("after sequence cannot be negative")
-	}
 	delay := c.reconnectDelay
 	if delay <= 0 {
 		delay = time.Second
 	}
-	cursor := afterSequence
+	var cursor int64
 	needsAttach := true
 	for {
 		var err error

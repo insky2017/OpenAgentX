@@ -93,7 +93,7 @@ func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testi
 		t.Fatal(err)
 	}
 	var generations, sequences []int64
-	err := client.Follow(ctx, "quote", consoleapi.ModeNormal, 0,
+	err := client.Follow(ctx, "quote", consoleapi.ModeNormal,
 		func(attached consoleapi.AttachResponse) error {
 			generations = append(generations, attached.Generation)
 			return nil
@@ -159,7 +159,7 @@ func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
 		t.Fatal(err)
 	}
 	var snapshots, events []int64
-	err := client.Follow(ctx, "quote", consoleapi.ModeNormal, 0,
+	err := client.Follow(ctx, "quote", consoleapi.ModeNormal,
 		func(attached consoleapi.AttachResponse) error {
 			snapshots = append(snapshots, attached.SnapshotSequence)
 			return nil

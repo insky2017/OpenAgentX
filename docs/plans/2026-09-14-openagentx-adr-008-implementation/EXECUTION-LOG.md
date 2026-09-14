@@ -375,6 +375,48 @@ M  deploy/systemd/openagentx-user.service
   干净的 `main@c3fc1bba8ddbae3eedace0c7a32537e2f47db307`。父仓只显示既有 submodule
   pointer 差异，本阶段未修改父仓。
 
+### Task 03 监督 NO-GO 与 review fix
+
+- `2026-09-14T16:42:53Z` 监督者复核主实现
+  `4aea5a6291b47792b1c69256ae0ae6422a890cb4` 后暂定 `NO-GO`：事务快照、SSE retention gap
+  和旧 Worker heartbeat 主路径通过，但发现三项状态正确性缺口。Task 03 继续保持
+  `active/WAIT`，主计划与 Task 03 front matter 继续保持 `pending`。
+- 根因一：`Follow` 的公开签名仍接受可误用的初始 `afterSequence`，REPL 和测试显式传 `0`；
+  review fix 删除该参数，首次 cursor 现在只能来自事务 Attach 的 `snapshot_sequence`，普通重连
+  仍只使用 client 内部最后成功应用的 sequence。
+- 根因二：Attach 的 `RunSnapshot` 未携带 Worker identity，reducer 只按 `agent_id` 接受 Run
+  投影；review fix 增加安全的 `worker_instance_id`/`worker_generation`，并在更新 ActiveRun 前
+  同时校验当前 Agent、Worker ID、generation 和非 offline 状态。合法旧 generation 或同代异
+  instance Run 只进入安全 Timeline、推进 cursor，不覆盖当前状态；无效投影 fail closed 且不
+  推进 cursor。
+- 根因三：Worker replacement/offline 后保留旧 Worker scoped 状态；review fix 在转换时清空
+  Backend health、Diagnostic 和 ActiveRun，后续 ActiveRun 仅能由明确绑定当前 Worker 的 Run
+  投影恢复。Attach、Worker 与 Run 安全 read model 同时增加必要 identity/status 校验，不投影
+  原始 Journal payload、stderr 或凭据。
+- review fix 文件范围：`internal/api/console`、`internal/api/panel`、`internal/cli/console`、
+  `internal/client/console`、`internal/consolemodel`、`internal/domain`、
+  `internal/persistence/sqlite` 的实现与测试，以及本 execution log；未修改 ADR、主计划、
+  Task 03 front matter 或 Task 04+ 产品行为。
+
+#### Review fix 验证
+
+| 时间 UTC | 命令 | 退出码/耗时 | 结果 |
+|---|---|---:|---|
+| `2026-09-14T16:42:53Z` | `go test ./internal/api/console ./internal/client/console ./internal/persistence/sqlite/... ./internal/safeoutput/... ./internal/api/panel ./internal/cli/console ./internal/consolemodel -count=1` | `0` / 10.27s | 无缓存定向测试全部通过；覆盖旧/冲突 Run fencing、replacement/offline 清理、Attach fail-closed 与现有竞态/cursor/safe-output 场景 |
+| `2026-09-14T16:42:53Z` | `go test -race ./internal/api/console ./internal/client/console ./internal/persistence/sqlite/... ./internal/safeoutput/... ./internal/api/panel ./internal/cli/console ./internal/consolemodel -count=1` | `0` / 21.86s | Task 03 受影响路径 race 全部通过 |
+| `2026-09-14T16:42:53Z` | `go test ./... -count=1` | `0` / 13.18s | 全仓 Go 测试全部通过；仅既有无测试文件 package 提示 |
+| `2026-09-14T16:42:53Z` | `go vet ./internal/domain ./internal/persistence/sqlite/... ./internal/api ./internal/api/console ./internal/api/panel ./internal/client/console ./internal/consolemodel ./internal/cli/console ./cmd/openagentx` | `0` / 0.47s | 受影响 package 无诊断 |
+| `2026-09-14T16:42:53Z` | `go build -o /tmp/openagentx-adr008-task03-review-fix ./cmd/openagentx` | `0` / 2.58s | 临时二进制构建成功；未安装 |
+| `2026-09-14T16:42:53Z` | `./scripts/check-legacy-control-paths.sh --release` | `0` / <0.01s | 11 项 `CLEAN`，release scanner 通过 |
+| `2026-09-14T16:42:53Z` | `git diff --check` | `0` / <0.01s | 无 whitespace error；提交前将再次检查 staged 边界 |
+
+#### Review fix 外部状态
+
+- 所有测试使用 Go 临时目录中的 SQLite/HTTP/UDS fixture；构建产物仅写入
+  `/tmp/openagentx-adr008-task03-review-fix`。
+- 未 push feature、未操作 service、真实 DB/socket/default tmux、installed binary 或
+  `steadyflow` 父仓；未开始 CLI Token、schema、`OAX` workspace、TUI 或 Task 04。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |

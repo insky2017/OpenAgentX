@@ -70,11 +70,13 @@ type AttachResponse struct {
 }
 
 type RunSnapshot struct {
-	RunID     string                  `json:"run_id"`
-	TaskID    string                  `json:"task_id"`
-	Status    domain.RunAttemptStatus `json:"status"`
-	StartedAt time.Time               `json:"started_at"`
-	UpdatedAt time.Time               `json:"updated_at"`
+	RunID            string                  `json:"run_id"`
+	TaskID           string                  `json:"task_id"`
+	Status           domain.RunAttemptStatus `json:"status"`
+	WorkerInstanceID string                  `json:"worker_instance_id"`
+	WorkerGeneration *int64                  `json:"worker_generation,omitempty"`
+	StartedAt        time.Time               `json:"started_at"`
+	UpdatedAt        time.Time               `json:"updated_at"`
 }
 
 type DiagnosticView struct {
@@ -121,6 +123,10 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	if err := validateAttachSnapshot(snapshot, agentID); err != nil {
+		http.Error(w, "invalid Console snapshot", http.StatusInternalServerError)
+		return
+	}
 	response := AttachResponse{AgentID: agentID, Mode: mode, WorkerStatus: domain.WorkerStatusOffline,
 		ObserveBasePath: "/api/observe/v1", ControlBasePath: "/api/control/v1",
 		SnapshotSequence: snapshot.SnapshotSequence}
@@ -131,12 +137,12 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 		response.Capabilities = append([]string(nil), worker.Capabilities...)
 		response.LastHeartbeatAt = worker.LastHeartbeatAt
 		response.LeaseUntil = worker.LeaseUntil
-		if mode == ModeDiagnostic {
+		if mode == ModeDiagnostic && worker.Status != domain.WorkerStatusOffline {
 			response.Diagnostic = &DiagnosticView{LeaseUntil: worker.LeaseUntil, LastHeartbeatAt: worker.LastHeartbeatAt,
 				StartedAt: worker.StartedAt, UpdatedAt: worker.UpdatedAt, Draining: worker.Status == domain.WorkerStatusDraining}
 		}
 	}
-	if len(snapshot.BackendHealth) > 0 {
+	if len(snapshot.BackendHealth) > 0 && response.WorkerStatus != domain.WorkerStatusOffline {
 		response.BackendHealth = make(map[string]openruntime.BackendHealth, len(snapshot.BackendHealth))
 		for backendID, healthValue := range snapshot.BackendHealth {
 			health := openruntime.BackendHealth(healthValue)
@@ -149,13 +155,66 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 	}
 	if snapshot.ActiveRun != nil {
 		run := snapshot.ActiveRun
-		if run.AgentID != agentID {
-			http.Error(w, "invalid active RunAttempt in Console snapshot", http.StatusInternalServerError)
-			return
-		}
-		response.ActiveRun = &RunSnapshot{RunID: run.ID, TaskID: run.TaskID, Status: run.Status, StartedAt: run.StartedAt, UpdatedAt: run.UpdatedAt}
+		generation := snapshot.ActiveRunWorkerGeneration
+		response.ActiveRun = &RunSnapshot{RunID: run.ID, TaskID: run.TaskID, Status: run.Status,
+			WorkerInstanceID: run.WorkerInstanceID, WorkerGeneration: &generation,
+			StartedAt: run.StartedAt, UpdatedAt: run.UpdatedAt}
 	}
 	writeJSON(w, response)
+}
+
+func validateAttachSnapshot(snapshot domain.ConsoleSnapshot, agentID string) error {
+	if snapshot.SnapshotSequence < 0 || snapshot.Agent.ID != agentID || !snapshot.Agent.Status.Valid() {
+		return fmt.Errorf("invalid Agent snapshot identity or status")
+	}
+	worker := snapshot.Worker
+	if worker == nil {
+		if len(snapshot.BackendHealth) != 0 || snapshot.ActiveRun != nil || snapshot.ActiveRunWorkerGeneration != 0 {
+			return fmt.Errorf("worker-scoped state requires a Worker snapshot")
+		}
+		return nil
+	}
+	if err := domain.ValidateOpaqueID("worker_instance_id", worker.ID); err != nil {
+		return err
+	}
+	if worker.AgentID != agentID || worker.Generation <= 0 || !worker.Status.Valid() {
+		return fmt.Errorf("invalid Worker snapshot identity or status")
+	}
+	for _, capability := range worker.Capabilities {
+		if err := domain.ValidateIdentifier("capability", capability); err != nil {
+			return err
+		}
+	}
+	for backendID, healthValue := range snapshot.BackendHealth {
+		if err := domain.ValidateIdentifier("backend_id", backendID); err != nil {
+			return err
+		}
+		if !openruntime.BackendHealth(healthValue).Valid() {
+			return fmt.Errorf("invalid Backend health")
+		}
+	}
+	if snapshot.ActiveRun == nil {
+		if snapshot.ActiveRunWorkerGeneration != 0 {
+			return fmt.Errorf("Run generation requires an active RunAttempt")
+		}
+		return nil
+	}
+	run := snapshot.ActiveRun
+	if err := domain.ValidateOpaqueID("run_id", run.ID); err != nil {
+		return err
+	}
+	if err := domain.ValidateOpaqueID("task_id", run.TaskID); err != nil {
+		return err
+	}
+	if err := domain.ValidateOpaqueID("worker_instance_id", run.WorkerInstanceID); err != nil {
+		return err
+	}
+	if run.AgentID != agentID || !run.Status.Active() || snapshot.ActiveRunWorkerGeneration <= 0 ||
+		worker.ID != run.WorkerInstanceID || worker.Generation != snapshot.ActiveRunWorkerGeneration ||
+		worker.Status == domain.WorkerStatusOffline {
+		return fmt.Errorf("active RunAttempt is not fenced to the current Worker")
+	}
+	return nil
 }
 
 func writeJSON(w http.ResponseWriter, value any) {

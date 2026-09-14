@@ -3,11 +3,12 @@ package domain
 // ConsoleSnapshot is the transport-independent, transactionally consistent
 // state used to attach an interactive Console to one logical Agent.
 type ConsoleSnapshot struct {
-	Agent            AgentIdentity
-	Worker           *WorkerInstance
-	BackendHealth    map[string]string
-	ActiveRun        *RunAttempt
-	SnapshotSequence int64
+	Agent                     AgentIdentity
+	Worker                    *WorkerInstance
+	BackendHealth             map[string]string
+	ActiveRun                 *RunAttempt
+	ActiveRunWorkerGeneration int64
+	SnapshotSequence          int64
 }
 
 type JournalSequenceBounds struct {

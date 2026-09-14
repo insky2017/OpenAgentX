@@ -791,7 +791,7 @@ func TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot(t *testing.T) {
 func TestSSEIncludesSafeRunProjectionForReducer(t *testing.T) {
 	now := time.Now().UTC()
 	state := &testPanelState{
-		workers: []domain.WorkerInstance{{ID: "worker-quote", AgentID: "quote", Generation: 9}},
+		workers: []domain.WorkerInstance{{ID: "worker-quote", AgentID: "quote", Generation: 9, Status: domain.WorkerStatusOnline}},
 		runs: []domain.RunAttempt{{ID: "run-quote", TaskID: "task-quote", AgentID: "quote",
 			Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-quote", FencingToken: 998877,
 			RequestedExecutionJSON: `{"secret":"must-not-appear"}`, ResolvedExecutionJSON: `{}`,

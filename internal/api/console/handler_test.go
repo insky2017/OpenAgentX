@@ -28,7 +28,7 @@ type consoleFixture struct {
 }
 
 func newConsoleFixture(t *testing.T, workers []domain.WorkerInstance) consoleFixture {
-	snapshot := domain.ConsoleSnapshot{Agent: domain.AgentIdentity{ID: "quote"}}
+	snapshot := domain.ConsoleSnapshot{Agent: domain.AgentIdentity{ID: "quote", Status: domain.AgentIdentityActive}}
 	if len(workers) > 0 {
 		current := workers[0]
 		for _, worker := range workers[1:] {
@@ -67,18 +67,40 @@ func newConsoleFixtureWithState(t *testing.T, state testState) consoleFixture {
 func TestAttachIncludesCurrentRunAndBackendHealth(t *testing.T) {
 	now := time.Now().UTC()
 	fixture := newConsoleFixtureWithState(t, testState{
-		snapshot: domain.ConsoleSnapshot{Agent: domain.AgentIdentity{ID: "quote"},
-			Worker:        &domain.WorkerInstance{ID: "worker-current", AgentID: "quote", Generation: 4, Status: domain.WorkerStatusOnline},
-			ActiveRun:     &domain.RunAttempt{ID: "run-current", TaskID: "task-current", AgentID: "quote", Status: domain.RunAttemptRunning, StartedAt: now, UpdatedAt: now},
-			BackendHealth: map[string]string{"agy": "healthy"}, SnapshotSequence: 17},
+		snapshot: domain.ConsoleSnapshot{Agent: domain.AgentIdentity{ID: "quote", Status: domain.AgentIdentityActive},
+			Worker:                    &domain.WorkerInstance{ID: "worker-current", AgentID: "quote", Generation: 4, Status: domain.WorkerStatusOnline},
+			ActiveRun:                 &domain.RunAttempt{ID: "run-current", TaskID: "task-current", AgentID: "quote", Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-current", StartedAt: now, UpdatedAt: now},
+			ActiveRunWorkerGeneration: 4, BackendHealth: map[string]string{"agy": "healthy"}, SnapshotSequence: 17},
 	})
 	response := fixture.request(AttachPath + "?agent_id=quote")
 	var attached AttachResponse
 	if response.Code != http.StatusOK || json.Unmarshal(response.Body.Bytes(), &attached) != nil {
 		t.Fatalf("attach status=%d body=%s", response.Code, response.Body.String())
 	}
-	if attached.ActiveRun == nil || attached.ActiveRun.RunID != "run-current" || attached.BackendHealth["agy"] != "healthy" || attached.SnapshotSequence != 17 {
+	if attached.ActiveRun == nil || attached.ActiveRun.RunID != "run-current" ||
+		attached.ActiveRun.WorkerInstanceID != "worker-current" || attached.ActiveRun.WorkerGeneration == nil ||
+		*attached.ActiveRun.WorkerGeneration != 4 || attached.BackendHealth["agy"] != "healthy" || attached.SnapshotSequence != 17 {
 		t.Fatalf("attach omitted active state: %+v", attached)
+	}
+}
+
+func TestAttachFailsClosedOnInvalidWorkerOrRunIdentity(t *testing.T) {
+	tests := map[string]domain.ConsoleSnapshot{
+		"invalid Worker status": {Agent: domain.AgentIdentity{ID: "quote", Status: domain.AgentIdentityActive},
+			Worker: &domain.WorkerInstance{ID: "worker-current", AgentID: "quote", Generation: 4, Status: "unknown"}},
+		"Run bound to old Worker": {Agent: domain.AgentIdentity{ID: "quote", Status: domain.AgentIdentityActive},
+			Worker:                    &domain.WorkerInstance{ID: "worker-current", AgentID: "quote", Generation: 4, Status: domain.WorkerStatusOnline},
+			ActiveRun:                 &domain.RunAttempt{ID: "run-old", TaskID: "task-old", AgentID: "quote", Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-old"},
+			ActiveRunWorkerGeneration: 3},
+	}
+	for name, snapshot := range tests {
+		t.Run(name, func(t *testing.T) {
+			fixture := newConsoleFixtureWithState(t, testState{snapshot: snapshot})
+			response := fixture.request(AttachPath + "?agent_id=quote")
+			if response.Code != http.StatusInternalServerError || strings.Contains(response.Body.String(), "worker-old") {
+				t.Fatalf("invalid snapshot status=%d body=%q", response.Code, response.Body.String())
+			}
+		})
 	}
 }
 

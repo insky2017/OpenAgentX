@@ -38,7 +38,7 @@ func TestConsoleSnapshotReadsAgentWorkerBackendRunAndHighWaterTogether(t *testin
 	}
 	if snapshot.Agent.ID != fixture.agentID || snapshot.Worker == nil || snapshot.Worker.ID != worker.ID ||
 		snapshot.ActiveRun == nil || snapshot.ActiveRun.ID != run.ID || snapshot.SnapshotSequence != wantSequence ||
-		snapshot.BackendHealth["local"] != "unavailable" {
+		snapshot.ActiveRunWorkerGeneration != worker.Generation || snapshot.BackendHealth["local"] != "unavailable" {
 		t.Fatalf("incomplete Console snapshot: %+v", snapshot)
 	}
 }
