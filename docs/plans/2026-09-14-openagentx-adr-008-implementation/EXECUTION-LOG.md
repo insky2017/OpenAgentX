@@ -1253,13 +1253,33 @@ M  deploy/systemd/openagentx-user.service
   `no-go`，`T08-01` 保持 open，Task 08 保持 `active/WAIT`，等待监督复核。未 push、部署、安装、
   重启或操作真实 service/DB/socket/default tmux/systemd/父仓。
 
+### T08-01 监督关闭与 Task 08 恢复验证（append-only）
+
+- `2026-09-14T23:52:33Z`：监督复核确认 `b26c9c4928d5c1cbdd971473cecb5b535a3d39dc`
+  通过；归属、Run、Worker、Backend、安全输出、JSON encode 和 frame write 失败均不会发送当前事件或
+  推进 cursor，独立定向重验通过。`T08-01` 关闭，Task 08 获准从完整矩阵重新执行。
+- 恢复基线为 clean 的 `codex/adr008-implementation@b26c9c4`，相对 `origin/main` ahead 26；重新盘点
+  为 26 commits、88 files、15094 insertions、1643 deletions。26 个提交逐一 `git show --check`、
+  完整 diff whitespace、ADR-006/007、生成物、禁用 tmux 控制和 Secret 差异审查通过。
+- 无缓存矩阵已执行部分：`go mod verify` exit 0（1.03s）；Web observation 4/4 exit 0（0.65s）、PWA
+  exit 0（0.36s）、build 266 modules exit 0（1.48s）；release scanner exit 0（0.14s），全部类别
+  `CLEAN`。Web build 只产生 `.gitignore` 已覆盖的 `web/dist`，工作树仍 clean。
+- `go test ./... -count=1` 首次执行 exit 1（17.94s）。唯一失败为
+  `TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes`：真实隔离 `tmux -L` 已进入 alt-screen、
+  绑定 `quote` 并收到 `/quit`，但 pane 状态在 10 秒观察窗结束时仍为 `0:1:`、`1:0:`、`2:0:`，pane 0
+  未成为 dead+exit 0。该次失败登记 `T08-02`，归属 Task 06 的 TUI/Follow/PTY 确定性退出状态机。
+- 按 Task 08“任一全量/隔离检查失败即 no-go 并停止，禁止重复直到偶然绿色”规则，没有重跑该测试，
+  也没有继续 race、vet、剩余隔离场景、systemd analyze、detached 候选构建或 `rtx4090` 只读核验。
+  当前 validation report 保持 `no-go`，Task 08 保持 `active/WAIT`；未修改产品代码或真实状态。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
 |---|---|---|---|---|---|---|
 | T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | closed；[Fleet credential/lifecycle 测试](../../../internal/cli/fleet/command_test.go)证明 installation-bound session、owner+lifecycle scope、无密码路径和 graceful/force 分离，监督双平台复核通过 |
 | T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | closed；[真实隔离 tmux 测试](../../../internal/fleet/workspace_integration_test.go)与 [workspace 状态机测试](../../../internal/fleet/workspace_test.go)证明二次 preflight 只 respawn compatible dead pane 0，并保留 live/pane 1+/unmanaged 现场 |
-| T08-01 | 2026-09-14T23:18:02Z | 03 | P0 | Observe SSE Agent filter/Run projection 查询或校验失败时会推进 event cursor，可能永久跳过未应用状态 | Task 03 | open；需要独立 review-fix，使查询/投影失败结束 stream 且不发送、不跨过 sequence，并补失败注入测试 |
+| T08-01 | 2026-09-14T23:18:02Z | 03 | P0 | Observe SSE Agent filter/Run projection 查询或校验失败时会推进 event cursor，可能永久跳过未应用状态 | Task 03 | closed；`b26c9c4` 以精确归属查询和 projection/encode/write fail-closed 修复，故障注入证明失败事件与 N+1 不跨 cursor，监督独立复核通过 |
+| T08-02 | 2026-09-14T23:52:33Z | 06 | P0 | 真实 PTY/tmux smoke 收到 `/quit` 后 pane 0 未在 10 秒内退出，候选无法证明 Console detach 确定性 | Task 06 | open；需定位 TUI、Follow 与 PTY 退出协调并提供 Ubuntu/Termux 确定性回归，禁止靠重复测试偶然变绿 |
 
 ## 8. 安全与范围事件
 
@@ -1281,15 +1301,18 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T22:50:57Z | 监督确认 `f5c0d0d` hardening 与 Termux 完整 Fleet 通过，给出最终两项 `NO-GO` | umask 使 0722 fixture 实际权限收窄；init 在 binary preflight 前已写入 config/manifest | 显式 chmod 并断言 fixture mode；把 init/workspace/up builder preflight 提升到所有 Fleet 文件/tmux/systemd mutation 之前，补零副作用和 status/down 回归 | Task 07 保持 `active/WAIT`；等待最终 gate，Task 08 未开始 |
 | 2026-09-14T23:02:54Z | 监督最终复核 Task 07 三个提交 | 两轮 `NO-GO` 缺口已由 `f5c0d0d`、`e13db7b` 修复；Termux 完整 Fleet/CLI/Console/Worker 和 Ubuntu systemd/tmux 证据通过 | 记录三个精确 SHA、实际 clean/ahead、双平台证据并关闭 T04-01/T05-01；仅同步三份 docs gate 状态 | Task 07 GO；Task 08 保持 `pending/WAIT` |
 | 2026-09-14T23:18:02Z | Task 08 最终语义审查发现 SSE cursor fail-closed 缺口 | Agent filter/Run projection 查询错误可能被当作已处理并跨过 sequence；候选不能证明不丢状态 | 登记 `T08-01` 归属 Task 03，生成 `no-go` validation report；停止后续全量/隔离/候选/现场检查，不夹带代码修复 | Task 08 保持 `active/WAIT`；等待监督授权 Task 03 review-fix |
+| 2026-09-14T23:52:33Z | 监督关闭 `T08-01` 后恢复完整矩阵；首次无缓存全仓 Go 测试发现 PTY quit 失败 | T08-01 已关闭；新 `T08-02` 使 Console 确定性 detach 证据不成立，候选仍不能发布 | 保留失败输出，未重跑；停止 race/隔离/候选/现场检查，登记 Task 06 owner | Task 08 保持 `active/WAIT` 和 `no-go`；等待监督决定 T08-02 修复 gate |
 
 ## 9. 最终产物（Task 08 填写）
 
 - validation report：[2026-09-14-openagentx-adr008-release-candidate.md](../../reports/validation/2026-09-14-openagentx-adr008-release-candidate.md)，结论 `no-go`
-- traceability matrix：已写入 validation report；ADR-008 §9 因 `T08-01` 阻断
-- release-candidate binary：未构建；语义审查失败后按停止规则退出
+- traceability matrix：已按 `origin/main..b26c9c4` 重审并写入 validation report；§9 的 `T08-01`
+  已关闭，§6/§8 因 `T08-02` 阻断
+- release-candidate binary：未构建；无缓存全仓测试失败后按停止规则退出
 - binary SHA-256：无
-- implementation HEAD：`f16496c9da33c2ee8013b6b61f719ddc358e3b41`
-- 全量验证结论：未执行；不得在 `T08-01` 修复前声称候选通过
-- 只读目标主机检查：未执行；审查失败后未继续接触外部状态
+- implementation HEAD：`b26c9c4928d5c1cbdd971473cecb5b535a3d39dc`
+- 全量验证结论：`go test ./... -count=1` 因 `T08-02` 失败；其余已执行 Web/module/release 检查通过，
+  race/vet/剩余隔离矩阵未执行，不得声称候选通过
+- 只读目标主机检查：未执行；全仓测试失败后未继续接触外部状态
 - 未执行的人工步骤：备份、安装、服务重启/升级、真实 `OAX` workspace 操作、正式 graceful drain
 - 最终监督结论：WAIT
