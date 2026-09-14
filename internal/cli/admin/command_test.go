@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"openagentx/internal/localprofile"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 )
 
@@ -116,5 +117,27 @@ profile:
 	defer repository.Close()
 	if _, _, err := repository.GetAgent(context.Background(), "denied-agent"); err == nil {
 		t.Fatal("unauthorized Agent was created")
+	}
+}
+
+func TestInitUsesDefaultDatabaseAndRejectsInvalidExplicitPath(t *testing.T) {
+	databasePath := filepath.Join(t.TempDir(), "profile", "openagentx.db")
+	t.Setenv(localprofile.EnvDatabasePath, databasePath)
+	var out, stderr bytes.Buffer
+	deps := Dependencies{
+		Out: &out, Err: &stderr,
+		ReadPassword: func(string) (string, error) { return "correct horse battery staple", nil },
+	}
+	if code := ExecuteInit(nil, deps); code != 0 {
+		t.Fatalf("default init code=%d stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(databasePath); err != nil {
+		t.Fatalf("default database was not created: %v", err)
+	}
+	for _, args := range [][]string{{"--db="}, {"--db", "relative/openagentx.db"}} {
+		stderr.Reset()
+		if code := ExecuteInit(args, deps); code != 2 {
+			t.Fatalf("invalid db %v code=%d stderr=%s", args, code, stderr.String())
+		}
 	}
 }

@@ -14,6 +14,7 @@ import (
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	"openagentx/internal/domain"
+	"openagentx/internal/localprofile"
 )
 
 type testTmux struct {
@@ -147,7 +148,7 @@ func TestFleetUpPreflightsWorkspaceStartsConsoleAndEnabledSystemdUnits(t *testin
 			return "", nil
 		},
 	}
-	if code := Execute([]string{"up", "--file", manifestPath}, deps); code != 0 {
+	if code := Execute([]string{"up", "--file", manifestPath, "--socket", "/run/openagentx/openagentx.sock"}, deps); code != 0 {
 		t.Fatalf("Fleet up code=%d stderr=%s", code, deps.Err)
 	}
 	if !reflect.DeepEqual(units, []string{"start openagentx-worker@quote.service"}) {
@@ -156,6 +157,60 @@ func TestFleetUpPreflightsWorkspaceStartsConsoleAndEnabledSystemdUnits(t *testin
 	joined := strings.Join(tmux.calls, "\n")
 	if !strings.Contains(joined, "console attach --socket /run/openagentx/openagentx.sock --username owner --agent quote") {
 		t.Fatalf("workspace did not start formal Console: %v", tmux.calls)
+	}
+}
+
+func TestFleetUsesProfileDefaultsAndRejectsInvalidOverrides(t *testing.T) {
+	manifestPath := writeFleetFixture(t)
+	profileHome := filepath.Dir(manifestPath)
+	for _, name := range []string{localprofile.EnvFleetManifest, localprofile.EnvSocketPath, localprofile.EnvDatabasePath} {
+		value, present := os.LookupEnv(name)
+		if err := os.Unsetenv(name); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			if present {
+				_ = os.Setenv(name, value)
+			} else {
+				_ = os.Unsetenv(name)
+			}
+		})
+	}
+	t.Setenv(localprofile.EnvHome, profileHome)
+	validatedConfig, err := os.ReadFile(filepath.Join(profileHome, "quote.worker.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonicalConfig := filepath.Join(t.TempDir(), "quote.yaml")
+	if err := os.WriteFile(canonicalConfig, validatedConfig, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	tmux := &testTmux{}
+	deps := Dependencies{
+		Out: &bytes.Buffer{}, Err: &bytes.Buffer{}, Tmux: tmux,
+		SystemdConfigPath: func(string) string { return canonicalConfig },
+		RunSystemctl:      func(context.Context, ...string) (string, error) { return "", nil },
+	}
+	if code := Execute([]string{"up"}, deps); code != 0 {
+		t.Fatalf("default Fleet up code=%d stderr=%s", code, deps.Err)
+	}
+	defaultSocket := filepath.Join(profileHome, "run", "openagentx.sock")
+	if calls := strings.Join(tmux.calls, "\n"); !strings.Contains(calls, "console attach --socket "+defaultSocket) {
+		t.Fatalf("Fleet did not use profile socket %q: %s", defaultSocket, calls)
+	}
+
+	tests := [][]string{
+		{"status", "--file="},
+		{"status", "--file", "relative/fleet.yaml"},
+		{"up", "--file", manifestPath, "--socket="},
+		{"init", "--file", manifestPath, "--db", "relative/openagentx.db"},
+	}
+	for _, args := range tests {
+		var stderr bytes.Buffer
+		invalidDeps := Dependencies{Out: &bytes.Buffer{}, Err: &stderr, Tmux: &testTmux{}}
+		if code := Execute(args, invalidDeps); code != 2 {
+			t.Fatalf("invalid override %v code=%d stderr=%s", args, code, stderr.String())
+		}
 	}
 }
 

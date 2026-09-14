@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
@@ -12,6 +13,7 @@ import (
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	"openagentx/internal/domain"
+	"openagentx/internal/localprofile"
 )
 
 type testClient struct {
@@ -199,5 +201,73 @@ func TestTmuxAgentResolutionFailsClosedForWrongOrAmbiguousWindow(t *testing.T) {
 				t.Fatalf("resolved ambiguous Agent %q err=%v", agentID, err)
 			}
 		})
+	}
+}
+
+func TestConsoleUsesDefaultSocketAndRejectsInvalidOverrides(t *testing.T) {
+	client := &testClient{attached: consoleapi.AttachResponse{WorkerStatus: domain.WorkerStatusOffline}}
+	defaultSocket := filepath.Join(t.TempDir(), "run", "openagentx.sock")
+	t.Setenv(localprofile.EnvSocketPath, defaultSocket)
+	deps, _, stderr := consoleDeps(client, "", false)
+	var usedSocket string
+	deps.NewClient = func(socketPath string) (Client, error) {
+		usedSocket = socketPath
+		return client, nil
+	}
+	if code := Execute([]string{"attach", "--agent", "quote", "--once"}, deps); code != 0 {
+		t.Fatalf("default socket attach code=%d stderr=%s", code, stderr.String())
+	}
+	if usedSocket != defaultSocket {
+		t.Fatalf("Console socket=%q want=%q", usedSocket, defaultSocket)
+	}
+
+	for _, value := range []string{"", "relative/openagentx.sock", "~/openagentx.sock"} {
+		clientCalls := 0
+		deps, _, stderr = consoleDeps(client, "", false)
+		deps.NewClient = func(string) (Client, error) {
+			clientCalls++
+			return client, nil
+		}
+		if code := Execute([]string{"attach", "--socket=" + value, "--agent", "quote", "--once"}, deps); code != 2 {
+			t.Fatalf("invalid socket %q code=%d stderr=%s", value, code, stderr.String())
+		}
+		if clientCalls != 0 {
+			t.Fatalf("invalid socket %q reached Console client", value)
+		}
+	}
+}
+
+func TestConsoleTTYCredentialAndHelpContracts(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv(localprofile.EnvSocketPath, filepath.Join(root, "openagentx.sock"))
+	t.Setenv(localprofile.EnvCredentialsPath, filepath.Join(root, "missing-credentials.json"))
+	client := &testClient{}
+
+	deps, _, stderr := consoleDeps(client, "", false)
+	if code := Execute(nil, deps); code != 2 || !strings.Contains(stderr.String(), "interactive TTY") {
+		t.Fatalf("non-interactive menu code/output mismatch: code=%d stderr=%s", code, stderr.String())
+	}
+	deps, _, stderr = consoleDeps(client, "", false)
+	if code := Execute([]string{"login"}, deps); code != 2 || !strings.Contains(stderr.String(), "interactive TTY") {
+		t.Fatalf("non-interactive login code/output mismatch: code=%d stderr=%s", code, stderr.String())
+	}
+	deps, _, stderr = consoleDeps(client, "", false)
+	if code := Execute([]string{"logout"}, deps); code != 1 || !strings.Contains(stderr.String(), "credential not found") {
+		t.Fatalf("missing credential code/output mismatch: code=%d stderr=%s", code, stderr.String())
+	}
+
+	secretPath := filepath.Join(root, "must-not-appear", "credentials.json")
+	t.Setenv(localprofile.EnvCredentialsPath, secretPath)
+	deps, out, _ := consoleDeps(client, "", false)
+	if code := Execute([]string{"help"}, deps); code != 0 {
+		t.Fatalf("Console help code=%d", code)
+	}
+	if strings.Contains(out.String(), secretPath) || strings.Contains(strings.ToLower(out.String()), "password=") {
+		t.Fatalf("Console help leaked sensitive configuration: %s", out.String())
+	}
+
+	deps, _, stderr = consoleDeps(client, "", true)
+	if code := Execute([]string{"login", "--content", "must-not-be-accepted"}, deps); code != 2 {
+		t.Fatalf("login accepted unrelated legacy flag: code=%d stderr=%s", code, stderr.String())
 	}
 }

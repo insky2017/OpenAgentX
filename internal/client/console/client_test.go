@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net"
 	"net/http"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -179,5 +180,19 @@ func TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch(t *testing.T) {
 				t.Fatal("unsafe SSE frame was accepted")
 			}
 		})
+	}
+}
+
+func TestNewUnixClientDistinguishesMissingAndNonSocketPaths(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "missing.sock")
+	if _, err := NewUnixClient(missing); err == nil || !strings.Contains(err.Error(), "does not exist") {
+		t.Fatalf("missing socket error=%v", err)
+	}
+	regular := filepath.Join(t.TempDir(), "regular-file")
+	if err := os.WriteFile(regular, []byte("not a socket"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewUnixClient(regular); err == nil || !strings.Contains(err.Error(), "not a Unix socket") {
+		t.Fatalf("non-socket error=%v", err)
 	}
 }

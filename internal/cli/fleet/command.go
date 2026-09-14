@@ -25,6 +25,7 @@ import (
 	consoleclient "openagentx/internal/client/console"
 	"openagentx/internal/domain"
 	fleetmodel "openagentx/internal/fleet"
+	"openagentx/internal/localprofile"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	workerconfig "openagentx/internal/worker"
 )
@@ -94,18 +95,69 @@ func Execute(args []string, deps Dependencies) int {
 		usage(deps.Err)
 		return 2
 	}
-	flags := flag.NewFlagSet("fleet "+args[0], flag.ContinueOnError)
-	flags.SetOutput(deps.Err)
-	manifestPath := flags.String("file", "", "Fleet manifest")
-	databasePath := flags.String("db", "", "OpenAgentX SQLite database")
-	socketPath := flags.String("socket", "", "OpenAgentX Unix socket")
-	ownerUsername := flags.String("owner-username", "owner", "Owner username")
-	confirmForce := flags.Bool("confirm-force-stop", false, "Acknowledge force-stop risk")
-	if err := flags.Parse(args[1:]); err != nil || *manifestPath == "" {
+	command := args[0]
+	if command == "help" || command == "--help" || command == "-h" {
+		usage(deps.Out)
+		return 0
+	}
+	switch command {
+	case "init", "up", "status", "down", "force-stop":
+	default:
 		usage(deps.Err)
 		return 2
 	}
-	manifest, prepared, err := prepare(*manifestPath)
+	flags := flag.NewFlagSet("fleet "+command, flag.ContinueOnError)
+	flags.SetOutput(deps.Err)
+	var manifestFlag localprofile.PathFlag
+	var databaseFlag localprofile.PathFlag
+	var socketFlag localprofile.PathFlag
+	flags.Var(&manifestFlag, "file", localprofile.PathUsage(localprofile.FleetManifest, "Fleet manifest"))
+	flags.Var(&databaseFlag, "db", localprofile.PathUsage(localprofile.DatabasePath, "OpenAgentX SQLite database"))
+	flags.Var(&socketFlag, "socket", localprofile.PathUsage(localprofile.SocketPath, "OpenAgentX Unix socket"))
+	ownerUsername := flags.String("owner-username", "owner", "Owner username")
+	confirmForce := flags.Bool("confirm-force-stop", false, "Acknowledge force-stop risk")
+	if err := flags.Parse(args[1:]); err != nil {
+		if err == flag.ErrHelp {
+			return 0
+		}
+		usage(deps.Err)
+		return 2
+	}
+	if flags.NArg() != 0 {
+		usage(deps.Err)
+		return 2
+	}
+	resolver := localprofile.DefaultResolver()
+	manifestPath, err := resolver.Resolve(localprofile.FleetManifest, manifestFlag.Override())
+	if err != nil {
+		fmt.Fprintf(deps.Err, "resolve Fleet manifest: %v\n", err)
+		return 2
+	}
+	resolvedPaths := map[string]string{"manifest": manifestPath.Path}
+	var databasePath, socketPath string
+	if databaseFlag.Override().Set || command == "init" {
+		resolved, resolveErr := resolver.Resolve(localprofile.DatabasePath, databaseFlag.Override())
+		if resolveErr != nil {
+			fmt.Fprintf(deps.Err, "resolve Fleet database: %v\n", resolveErr)
+			return 2
+		}
+		databasePath = resolved.Path
+		resolvedPaths["database"] = databasePath
+	}
+	if socketFlag.Override().Set || command == "init" || command == "up" || command == "down" || command == "force-stop" {
+		resolved, resolveErr := resolver.Resolve(localprofile.SocketPath, socketFlag.Override())
+		if resolveErr != nil {
+			fmt.Fprintf(deps.Err, "resolve Fleet socket: %v\n", resolveErr)
+			return 2
+		}
+		socketPath = resolved.Path
+		resolvedPaths["socket"] = socketPath
+	}
+	if err := localprofile.EnsureDistinct(resolvedPaths); err != nil {
+		fmt.Fprintf(deps.Err, "resolve Fleet paths: %v\n", err)
+		return 2
+	}
+	manifest, prepared, err := prepare(manifestPath.Path)
 	if err != nil {
 		fmt.Fprintf(deps.Err, "Fleet preflight failed: %v\n", err)
 		return 1
@@ -117,32 +169,23 @@ func Execute(args []string, deps Dependencies) int {
 	ctx, cancel := signal.NotifyContext(baseContext, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 	workspace := fleetmodel.Workspace{Runner: deps.Tmux}
-	if args[0] == "init" || args[0] == "up" {
-		consoleSocket, socketErr := resolveConsoleSocket(*socketPath, prepared)
-		if socketErr != nil {
-			fmt.Fprintf(deps.Err, "Fleet Console preflight failed: %v\n", socketErr)
-			return 1
-		}
+	if command == "init" || command == "up" {
 		binary, executableErr := os.Executable()
 		if executableErr != nil {
 			fmt.Fprintf(deps.Err, "resolve OpenAgentX executable: %v\n", executableErr)
 			return 1
 		}
 		workspace.ConsoleCommand = func(agentID string) []string {
-			return []string{binary, "console", "attach", "--socket", consoleSocket, "--username", strings.TrimSpace(*ownerUsername), "--agent", agentID}
+			return []string{binary, "console", "attach", "--socket", socketPath, "--username", strings.TrimSpace(*ownerUsername), "--agent", agentID}
 		}
 		if preflightErr := workspace.Preflight(ctx, manifest); preflightErr != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", preflightErr)
 			return 1
 		}
 	}
-	switch args[0] {
+	switch command {
 	case "init":
-		if *databasePath == "" {
-			usage(deps.Err)
-			return 2
-		}
-		if err := applyIdentities(ctx, *databasePath, *ownerUsername, prepared, deps); err != nil {
+		if err := applyIdentities(ctx, databasePath, *ownerUsername, prepared, deps); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet identity apply failed: %v\n", err)
 			return 1
 		}
@@ -176,16 +219,12 @@ func Execute(args []string, deps Dependencies) int {
 	case "status":
 		return fleetStatus(ctx, manifest, prepared, deps)
 	case "down", "force-stop":
-		if *socketPath == "" {
-			usage(deps.Err)
-			return 2
-		}
-		force := args[0] == "force-stop"
+		force := command == "force-stop"
 		if force && !*confirmForce {
 			fmt.Fprintln(deps.Err, "force-stop requires --confirm-force-stop")
 			return 2
 		}
-		client, targets, err := queueStops(ctx, *socketPath, *ownerUsername, manifest, force, deps)
+		client, targets, err := queueStops(ctx, socketPath, *ownerUsername, manifest, force, deps)
 		if err != nil {
 			fmt.Fprintf(deps.Err, "Fleet stop failed: %v\n", err)
 			return 1
@@ -310,29 +349,6 @@ func prepare(path string) (fleetmodel.Manifest, []preparedAgent, error) {
 		prepared = append(prepared, preparedAgent{entry: entry, definition: definition, worker: worker, workerPath: workerPath})
 	}
 	return manifest, prepared, nil
-}
-
-func resolveConsoleSocket(explicit string, prepared []preparedAgent) (string, error) {
-	if value := strings.TrimSpace(explicit); value != "" {
-		return value, nil
-	}
-	var socket string
-	for _, item := range prepared {
-		if item.worker.Transport != domain.WorkerTransportUnix || strings.TrimSpace(item.worker.UnixSocket) == "" {
-			return "", fmt.Errorf("--socket is required when Fleet contains a non-Unix Worker")
-		}
-		if socket == "" {
-			socket = item.worker.UnixSocket
-			continue
-		}
-		if socket != item.worker.UnixSocket {
-			return "", fmt.Errorf("--socket is required when Worker configs use different Unix sockets")
-		}
-	}
-	if socket == "" {
-		return "", fmt.Errorf("Console socket could not be resolved")
-	}
-	return socket, nil
 }
 
 func resolve(base, value string) string {
@@ -546,5 +562,8 @@ func printJSON(deps Dependencies, value any) int {
 }
 
 func usage(writer io.Writer) {
-	fmt.Fprintln(writer, "Usage: openagentx fleet <init|up|status|down|force-stop> --file <fleet.yaml> [--db <path>] [--socket <path>] [--confirm-force-stop]")
+	fmt.Fprintln(writer, "Usage: openagentx fleet <init|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--confirm-force-stop]")
+	fmt.Fprintf(writer, "Default manifest source: $%s > $%s > ~/.openagentx/fleet.yaml\n", localprofile.EnvFleetManifest, localprofile.EnvHome)
+	fmt.Fprintf(writer, "Default database source: $%s > $%s > ~/.openagentx/data/openagentx.db\n", localprofile.EnvDatabasePath, localprofile.EnvHome)
+	fmt.Fprintf(writer, "Default socket source: $%s > $%s > ~/.openagentx/run/openagentx.sock\n", localprofile.EnvSocketPath, localprofile.EnvHome)
 }

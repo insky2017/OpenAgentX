@@ -16,6 +16,7 @@ import (
 	"gopkg.in/yaml.v3"
 	webAuth "openagentx/internal/auth/web"
 	"openagentx/internal/domain"
+	"openagentx/internal/localprofile"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 )
 
@@ -71,17 +72,30 @@ func ExecuteInit(args []string, dependencies Dependencies) int {
 	deps := dependencies.withDefaults()
 	flags := flag.NewFlagSet("init", flag.ContinueOnError)
 	flags.SetOutput(deps.Err)
-	databasePath := flags.String("db", "", "Target SQLite database path")
+	var databaseFlag localprofile.PathFlag
+	flags.Var(&databaseFlag, "db", localprofile.PathUsage(localprofile.DatabasePath, "Target SQLite database path"))
 	username := flags.String("owner-username", "owner", "Initial owner username")
 	displayName := flags.String("owner-display-name", "Owner", "Initial owner display name")
 	organizationID := flags.String("organization-id", "default", "Initial Organization ID")
 	organizationName := flags.String("organization-name", "Default Organization", "Initial Organization name")
-	if err := flags.Parse(args); err != nil || strings.TrimSpace(*databasePath) == "" {
-		fmt.Fprintln(deps.Err, "Usage: openagentx init --db <path> [--owner-username owner] [--organization-id default]")
+	if err := flags.Parse(args); err != nil {
+		if err == flag.ErrHelp {
+			return 0
+		}
+		initUsage(deps.Err)
+		return 2
+	}
+	if flags.NArg() != 0 {
+		initUsage(deps.Err)
+		return 2
+	}
+	databasePath, err := localprofile.DefaultResolver().Resolve(localprofile.DatabasePath, databaseFlag.Override())
+	if err != nil {
+		fmt.Fprintf(deps.Err, "resolve initialization database: %v\n", err)
 		return 2
 	}
 	ctx := context.Background()
-	repository, err := openagentsqlite.Open(ctx, *databasePath, openagentsqlite.Options{Now: deps.Now})
+	repository, err := openagentsqlite.Open(ctx, databasePath.Path, openagentsqlite.Options{Now: deps.Now})
 	if err != nil {
 		fmt.Fprintf(deps.Err, "initialize database: %v\n", err)
 		return 1
@@ -148,16 +162,29 @@ func ExecuteInit(args []string, dependencies Dependencies) int {
 func ExecuteAgent(args []string, dependencies Dependencies) int {
 	deps := dependencies.withDefaults()
 	if len(args) == 0 || args[0] != "apply" {
-		fmt.Fprintln(deps.Err, "Usage: openagentx agent apply --db <path> --file <identity.yaml> [--owner-username owner]")
+		agentUsage(deps.Err)
 		return 2
 	}
 	flags := flag.NewFlagSet("agent apply", flag.ContinueOnError)
 	flags.SetOutput(deps.Err)
-	databasePath := flags.String("db", "", "Target SQLite database path")
+	var databaseFlag localprofile.PathFlag
+	flags.Var(&databaseFlag, "db", localprofile.PathUsage(localprofile.DatabasePath, "Target SQLite database path"))
 	definitionPath := flags.String("file", "", "Agent identity definition")
 	ownerUsername := flags.String("owner-username", "owner", "Owner username")
-	if err := flags.Parse(args[1:]); err != nil || strings.TrimSpace(*databasePath) == "" || strings.TrimSpace(*definitionPath) == "" {
-		fmt.Fprintln(deps.Err, "Usage: openagentx agent apply --db <path> --file <identity.yaml> [--owner-username owner]")
+	if err := flags.Parse(args[1:]); err != nil {
+		if err == flag.ErrHelp {
+			return 0
+		}
+		agentUsage(deps.Err)
+		return 2
+	}
+	if flags.NArg() != 0 || strings.TrimSpace(*definitionPath) == "" {
+		agentUsage(deps.Err)
+		return 2
+	}
+	databasePath, err := localprofile.DefaultResolver().Resolve(localprofile.DatabasePath, databaseFlag.Override())
+	if err != nil {
+		fmt.Fprintf(deps.Err, "resolve Agent database: %v\n", err)
 		return 2
 	}
 	definition, err := LoadAgentDefinition(*definitionPath)
@@ -166,7 +193,7 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 		return 1
 	}
 	ctx := context.Background()
-	repository, err := openagentsqlite.Open(ctx, *databasePath, openagentsqlite.Options{Now: deps.Now})
+	repository, err := openagentsqlite.Open(ctx, databasePath.Path, openagentsqlite.Options{Now: deps.Now})
 	if err != nil {
 		fmt.Fprintf(deps.Err, "open database: %v\n", err)
 		return 1
@@ -209,6 +236,16 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 func newEvent(deps Dependencies, actorID, organizationID, aggregateType, aggregateID, eventType string, payload any) *domain.JournalEvent {
 	encoded, _ := json.Marshal(payload)
 	return &domain.JournalEvent{ID: deps.NewID("event"), OrganizationID: organizationID, AggregateType: aggregateType, AggregateID: aggregateID, EventType: eventType, ActorPrincipalID: actorID, Payload: encoded, CreatedAt: deps.Now().UTC()}
+}
+
+func initUsage(writer io.Writer) {
+	fmt.Fprintln(writer, "Usage: openagentx init [--db <path>] [--owner-username owner] [--organization-id default]")
+	fmt.Fprintf(writer, "Default database source: $%s > $%s > ~/.openagentx/data/openagentx.db\n", localprofile.EnvDatabasePath, localprofile.EnvHome)
+}
+
+func agentUsage(writer io.Writer) {
+	fmt.Fprintln(writer, "Usage: openagentx agent apply [--db <path>] --file <identity.yaml> [--owner-username owner]")
+	fmt.Fprintf(writer, "Default database source: $%s > $%s > ~/.openagentx/data/openagentx.db\n", localprofile.EnvDatabasePath, localprofile.EnvHome)
 }
 
 type AgentDefinition struct {

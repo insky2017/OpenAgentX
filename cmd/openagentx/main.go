@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -26,6 +27,7 @@ import (
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
+	"openagentx/internal/localprofile"
 	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	"openagentx/internal/transport/remotehttps"
@@ -57,14 +59,15 @@ func execute(args []string) int {
 		return runSchema(args[1:])
 	case "help", "--help", "-h":
 		fmt.Fprintln(os.Stderr, "OpenAgentX - Agent Organization Control Plane")
-		fmt.Fprintln(os.Stderr, "Usage: openagentx init --db <path>")
-		fmt.Fprintln(os.Stderr, "       openagentx agent apply --db <path> --file <identity.yaml>")
-		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
+		fmt.Fprintln(os.Stderr, "Usage: openagentx init [--db <path>]")
+		fmt.Fprintln(os.Stderr, "       openagentx agent apply [--db <path>] --file <identity.yaml>")
+		fmt.Fprintln(os.Stderr, "       openagentx serve [--db <path>] [--socket <path>] [--http-addr :18100] [--web-dir web/dist]")
 		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
-		fmt.Fprintln(os.Stderr, "       openagentx console attach --socket <path> --agent <agent-id> [--diagnostic] [--once]")
-		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|up|status|down|force-stop> --file <fleet.yaml> [--db <path>]")
-		fmt.Fprintln(os.Stderr, "       openagentx schema verify --db <path>")
+		fmt.Fprintln(os.Stderr, "       openagentx console [login|logout|attach]")
+		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>]")
+		fmt.Fprintln(os.Stderr, "       openagentx schema verify [--db <path>]")
+		fmt.Fprintln(os.Stderr, "Local path precedence: explicit flag > resource environment > OPENAGENTX_HOME > ~/.openagentx")
 		return 0
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", args[0])
@@ -73,22 +76,26 @@ func execute(args []string) int {
 }
 
 func runDaemon(args []string) int {
-	flags := flag.NewFlagSet("serve", flag.ContinueOnError)
-	dbPath := flags.String("db", "", "Target SQLite database path")
-	networkSecretDir := flags.String("network-secret-dir", "", "Network secret directory (default: <absolute-db-path>.network-secrets)")
-	socketPath := flags.String("socket", "", "Unix Socket path")
-	httpAddr := flags.String("http-addr", ":18100", "Private HTTP listen address for Web Panel")
-	webDir := flags.String("web-dir", "web/dist", "Built Web Panel directory")
-	workerHTTPSAddr := flags.String("worker-https-addr", "", "Optional HTTPS listen address for remote Workers")
-	workerMTLSCA := flags.String("worker-mtls-ca", "", "Remote Worker mTLS client CA PEM")
-	workerMTLSCert := flags.String("worker-mtls-cert", "", "Remote Worker mTLS server certificate PEM")
-	workerMTLSKey := flags.String("worker-mtls-key", "", "Remote Worker mTLS server private key")
-	var workerBindings bindingFlags
-	flags.Var(&workerBindings, "worker-mtls-binding", "mTLS principal to Agent binding (principal=agent[,agent...]); repeatable")
-	if err := flags.Parse(args); err != nil || *dbPath == "" || *socketPath == "" {
-		fmt.Fprintln(os.Stderr, "Usage: openagentx serve --db <path> --socket <path> [--http-addr :18100] [--web-dir web/dist]")
+	options, err := parseServeOptions(args, os.Stderr)
+	if err == flag.ErrHelp {
+		return 0
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "serve configuration: %v\n", err)
+		serveUsage(os.Stderr)
 		return 2
 	}
+	dbPath := &options.dbPath
+	networkSecretDir := &options.networkSecretDir
+	socketPath := &options.socketPath
+	httpAddr := &options.httpAddr
+	webDir := &options.webDir
+	workerHTTPSAddr := &options.workerHTTPSAddr
+	workerMTLSCA := &options.workerMTLSCA
+	workerMTLSCert := &options.workerMTLSCert
+	workerMTLSKey := &options.workerMTLSKey
+	workerBindings := options.workerBindings
+
 	if *workerHTTPSAddr == "" && (*workerMTLSCA != "" || *workerMTLSCert != "" || *workerMTLSKey != "" || len(workerBindings) != 0) {
 		fmt.Fprintln(os.Stderr, "remote Worker mTLS options require --worker-https-addr")
 		return 2
@@ -248,6 +255,57 @@ func runDaemon(args []string) int {
 	return 0
 }
 
+type serveOptions struct {
+	dbPath, networkSecretDir, socketPath, httpAddr, webDir       string
+	workerHTTPSAddr, workerMTLSCA, workerMTLSCert, workerMTLSKey string
+	workerBindings                                               bindingFlags
+}
+
+func parseServeOptions(args []string, output io.Writer) (serveOptions, error) {
+	var options serveOptions
+	flags := flag.NewFlagSet("serve", flag.ContinueOnError)
+	flags.SetOutput(output)
+	var databaseFlag localprofile.PathFlag
+	var socketFlag localprofile.PathFlag
+	flags.Var(&databaseFlag, "db", localprofile.PathUsage(localprofile.DatabasePath, "Target SQLite database path"))
+	flags.StringVar(&options.networkSecretDir, "network-secret-dir", "", "Network secret directory (default: <absolute-db-path>.network-secrets)")
+	flags.Var(&socketFlag, "socket", localprofile.PathUsage(localprofile.SocketPath, "Unix Socket path"))
+	flags.StringVar(&options.httpAddr, "http-addr", ":18100", "Private HTTP listen address for Web Panel")
+	flags.StringVar(&options.webDir, "web-dir", "web/dist", "Built Web Panel directory")
+	flags.StringVar(&options.workerHTTPSAddr, "worker-https-addr", "", "Optional HTTPS listen address for remote Workers")
+	flags.StringVar(&options.workerMTLSCA, "worker-mtls-ca", "", "Remote Worker mTLS client CA PEM")
+	flags.StringVar(&options.workerMTLSCert, "worker-mtls-cert", "", "Remote Worker mTLS server certificate PEM")
+	flags.StringVar(&options.workerMTLSKey, "worker-mtls-key", "", "Remote Worker mTLS server private key")
+	flags.Var(&options.workerBindings, "worker-mtls-binding", "mTLS principal to Agent binding (principal=agent[,agent...]); repeatable")
+	if err := flags.Parse(args); err != nil {
+		return serveOptions{}, err
+	}
+	if flags.NArg() != 0 {
+		return serveOptions{}, fmt.Errorf("serve does not accept positional arguments")
+	}
+	resolver := localprofile.DefaultResolver()
+	databasePath, err := resolver.Resolve(localprofile.DatabasePath, databaseFlag.Override())
+	if err != nil {
+		return serveOptions{}, fmt.Errorf("resolve database: %w", err)
+	}
+	socketPath, err := resolver.Resolve(localprofile.SocketPath, socketFlag.Override())
+	if err != nil {
+		return serveOptions{}, fmt.Errorf("resolve socket: %w", err)
+	}
+	if err := localprofile.EnsureDistinct(map[string]string{"database": databasePath.Path, "socket": socketPath.Path}); err != nil {
+		return serveOptions{}, err
+	}
+	options.dbPath = databasePath.Path
+	options.socketPath = socketPath.Path
+	return options, nil
+}
+
+func serveUsage(writer io.Writer) {
+	fmt.Fprintln(writer, "Usage: openagentx serve [--db <path>] [--socket <path>] [--http-addr :18100] [--web-dir web/dist]")
+	fmt.Fprintf(writer, "Default database source: $%s > $%s > ~/.openagentx/data/openagentx.db\n", localprofile.EnvDatabasePath, localprofile.EnvHome)
+	fmt.Fprintf(writer, "Default socket source: $%s > $%s > ~/.openagentx/run/openagentx.sock\n", localprofile.EnvSocketPath, localprofile.EnvHome)
+}
+
 type bindingFlags map[string][]string
 
 func (f *bindingFlags) String() string { return fmt.Sprint(map[string][]string(*f)) }
@@ -343,13 +401,16 @@ func staticHandler(directory string) http.Handler {
 }
 
 func runSchema(args []string) int {
-	flags := flag.NewFlagSet("schema verify", flag.ContinueOnError)
-	dbPath := flags.String("db", "", "Target SQLite database path")
-	if len(args) == 0 || args[0] != "verify" || flags.Parse(args[1:]) != nil || *dbPath == "" {
-		fmt.Fprintln(os.Stderr, "Usage: openagentx schema verify --db <path>")
+	dbPath, err := parseSchemaDatabase(args, os.Stderr)
+	if err == flag.ErrHelp {
+		return 0
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "schema configuration: %v\n", err)
+		schemaUsage(os.Stderr)
 		return 2
 	}
-	db, err := openagentsqlite.Open(context.Background(), *dbPath, openagentsqlite.Options{})
+	db, err := openagentsqlite.Open(context.Background(), dbPath, openagentsqlite.Options{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "schema verification failed: %v\n", err)
 		return 1
@@ -357,4 +418,30 @@ func runSchema(args []string) int {
 	defer db.Close()
 	fmt.Printf("OpenAgentX schema v%d verified\n", 1)
 	return 0
+}
+
+func parseSchemaDatabase(args []string, output io.Writer) (string, error) {
+	flags := flag.NewFlagSet("schema verify", flag.ContinueOnError)
+	flags.SetOutput(output)
+	var databaseFlag localprofile.PathFlag
+	flags.Var(&databaseFlag, "db", localprofile.PathUsage(localprofile.DatabasePath, "Target SQLite database path"))
+	if len(args) == 0 || args[0] != "verify" {
+		return "", fmt.Errorf("schema subcommand must be verify")
+	}
+	if err := flags.Parse(args[1:]); err != nil {
+		return "", err
+	}
+	if flags.NArg() != 0 {
+		return "", fmt.Errorf("schema verify does not accept positional arguments")
+	}
+	resolved, err := localprofile.DefaultResolver().Resolve(localprofile.DatabasePath, databaseFlag.Override())
+	if err != nil {
+		return "", fmt.Errorf("resolve database: %w", err)
+	}
+	return resolved.Path, nil
+}
+
+func schemaUsage(writer io.Writer) {
+	fmt.Fprintln(writer, "Usage: openagentx schema verify [--db <path>]")
+	fmt.Fprintf(writer, "Default database source: $%s > $%s > ~/.openagentx/data/openagentx.db\n", localprofile.EnvDatabasePath, localprofile.EnvHome)
 }

@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -45,6 +46,16 @@ func (e *APIError) Error() string {
 func NewUnixClient(socketPath string) (*Client, error) {
 	if strings.TrimSpace(socketPath) == "" {
 		return nil, fmt.Errorf("Console socket path is required")
+	}
+	info, err := os.Stat(socketPath)
+	if os.IsNotExist(err) {
+		return nil, fmt.Errorf("Console socket does not exist: %s", socketPath)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("inspect Console socket: %w", err)
+	}
+	if info.Mode()&os.ModeSocket == 0 {
+		return nil, fmt.Errorf("Console socket path is not a Unix socket: %s", socketPath)
 	}
 	transport := &http.Transport{DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
 		return (&net.Dialer{}).DialContext(ctx, "unix", socketPath)

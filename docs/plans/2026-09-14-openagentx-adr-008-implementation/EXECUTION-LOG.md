@@ -52,7 +52,7 @@ M  deploy/systemd/openagentx-user.service
 |---|---|---|---|---|
 | P0 | 受保护现场独立收口 | completed | `c3fc1bba8ddbae3eedace0c7a32537e2f47db307` | GO |
 | 01 | 基线隔离、契约冻结与测试地图 | completed | `35bd44564773882cfedefb31fad0afd64c0514e4` | GO |
-| 02 | 默认路径与 CLI 表面 | pending | — | WAIT |
+| 02 | 默认路径与 CLI 表面 | active | 待本任务提交 | WAIT |
 | 03 | 一致 Attach cursor 与代际 reducer | pending | — | WAIT |
 | 04 | 可撤销 CLI Token 会话 | pending | — | WAIT |
 | 05 | `OAX` workspace 与非破坏绑定 | pending | — | WAIT |
@@ -231,6 +231,70 @@ M  deploy/systemd/openagentx-user.service
   service、真实 DB/socket/default tmux server 或 installed binary。
 - 唯一 `NO-GO` 原因为主计划/任务 front matter/执行日志未同步已复核事实；本 docs-only gate
   correction 将 Task 01 同步为 `completed/GO` 并记录精确 SHA，Task 02 保持 `pending/WAIT`。
+
+### Task 02 — 默认路径与 CLI 表面
+
+#### 开始
+
+- 状态：active
+- 执行者：Codex
+- 开始时间（UTC）：`2026-09-14T15:07:21Z`
+- 基线提交：`01751ce35c1635a8166304e8095cc9b32caf31fd`
+- 监督者放行依据：监督者明确 `GO Task 02`，且限制只执行 Task 02
+- 计划文件：`02-default-paths-and-cli-surface.md`
+- 主计划/任务 front matter：按 gate-record 协议继续保持 `pending`，待监督复核后同步
+- 监督门禁：`WAIT`
+
+#### 变更
+
+| 时间 UTC | 文件/package | 变更目的 | 范围偏差 |
+|---|---|---|---|
+| `2026-09-14T15:23:15Z` | `internal/localprofile` | 新增唯一无副作用 resolver、五类资源默认路径、显式 flag 出现性、canonical/fail-closed 与 Agent ID 路径约束 | none |
+| `2026-09-14T15:23:15Z` | `internal/cli/{console,fleet,admin}`、`internal/client/console`、`cmd/openagentx` | 将默认 profile 接入 Console/Fleet/init/agent apply/serve/schema；冻结 Console parser，保留旧 Attach/REPL；细分 TTY、credential 与 socket 错误 | none；未实现 Token/TUI/cursor/workspace 新行为 |
+
+#### 决策
+
+| ID | 决策 | 依据 | 是否需 ADR/监督确认 |
+|---|---|---|---|
+| D-02-01 | resolver 按调用方实际使用的资源逐项解析；未使用资源中的坏环境值不阻断无关命令 | fail closed 应作用于已选择资源，避免 `fleet status` 被无关 socket 配置阻断 | Task 01 已冻结；本 Task 实现 |
+| D-02-02 | Fleet Console socket 统一来自 resolver，不再从 Worker YAML 猜测；显式 `--socket` 保持最高优先级 | Task 01 默认路径契约、单一 installation identity | Task 01 已冻结；本 Task 实现 |
+| D-02-03 | `console login/logout` 本阶段只冻结 parser、TTY 与 credential 路径错误；明确返回未实现，不创建伪 credential | CLI Token 属于 Task 04，Task 02 禁止提前实现认证行为 | Task 04 前仍需监督 `GO` |
+| D-02-04 | `attach --once`、旧 REPL 与正式 API 控制命令全部保留；连续 Attach 继续要求 TTY | Task 06 必须在全屏 TUI 同一提交原子替换旧入口 | Task 06 前仍需监督 `GO` |
+| D-02-05 | Console 每个子命令只注册自身有效 flags；legacy 控制仍保留原参数，但不污染 `login/logout/attach` parser | 最终 CLI grammar 必须 fail closed，help 不应暗示无效能力 | Task 01 已冻结；本 Task 实现 |
+
+#### 失败与纠正（append-only）
+
+| 时间 UTC | 现象 | 根因 | 安全影响 | 纠正 | 重验结果 |
+|---|---|---|---|---|---|
+| `2026-09-14T15:23:15Z` | 首次定向测试中 `internal/cli/fleet` 的 `TestFleetUpPreflightsWorkspaceStartsConsoleAndEnabledSystemdUnits` 失败；其他 5 个 package 通过 | 既有测试假定未传 `--socket` 时从 Worker YAML 推导 `/run/openagentx/openagentx.sock`，与 Task 01 冻结的统一 profile socket 默认值冲突 | 仅测试期断言失败；未执行真实 tmux/systemd/DB/socket | 旧兼容场景显式传原 socket，并新增 profile 默认 socket 接线测试 | 待重验 |
+| `2026-09-14T15:29:19Z` | 上述 Fleet 测试纠正后重验 | n/a | 无 | 运行同一 6-package 定向测试，并补齐默认/空/相对路径测试 | 全部通过，退出码 0 |
+
+#### 验证
+
+| 时间 UTC | 命令 | 退出码 | 耗时 | 脱敏结果/证据 |
+|---|---|---:|---:|---|
+| `2026-09-14T15:23:15Z` | `gofmt -w cmd/openagentx/main.go internal/cli/console/command.go internal/client/console/client.go internal/cli/admin/command.go internal/cli/fleet/command.go internal/localprofile/profile.go internal/localprofile/profile_test.go && go test ./cmd/openagentx ./internal/cli/admin ./internal/cli/console ./internal/client/console ./internal/cli/fleet ./internal/localprofile` | 1 | 2.5s | 5 个 package 通过；Fleet 旧默认 socket 断言失败，详见失败与纠正 |
+| `2026-09-14T15:29:19Z` | `go test ./internal/cli/... ./internal/fleet/... ./cmd/openagentx/...` | 0 | 2.35s | admin、console、fleet、worker CLI，Fleet model 和 main 全部通过 |
+| `2026-09-14T15:29:19Z` | `go test ./internal/localprofile/...` | 0 | 0.38s | 全资源优先级、不同 home、无 home、空/相对/NUL override、`~`、Agent ID 逃逸、冲突、无副作用与不泄漏测试通过 |
+| `2026-09-14T15:29:19Z` | `go build -o /tmp/openagentx-adr008-task02 ./cmd/openagentx` | 0 | 2.68s | 临时二进制构建成功；未安装 |
+| `2026-09-14T15:29:19Z` | `env OPENAGENTX_DATABASE_PATH=/tmp/task02-help-redacted.db OPENAGENTX_SOCKET_PATH=/tmp/task02-help-redacted.sock OPENAGENTX_CREDENTIALS_PATH=/tmp/task02-help-redacted.json /tmp/openagentx-adr008-task02 --help` | 0 | <0.01s | 顶层 grammar/default precedence 可见，环境值未回显 |
+| `2026-09-14T15:29:19Z` | `/tmp/openagentx-adr008-task02 {console help,fleet help,serve --help,schema verify --help,init --help,agent apply --help}`（逐条执行） | 0 | <0.3s total | 6 个子命令 help smoke 全部通过；未访问 DB/socket/tmux/service |
+| Task 02 提交前 | `git diff --check` | 0 | <0.01s | 无 whitespace error；提交前将再次复核 staged path 边界 |
+| `2026-09-14T15:33:32Z` | `go test ./internal/cli/... ./internal/fleet/... ./cmd/openagentx/...` | 0 | 1.48s | Console 子命令 parser 收紧后全部通过 |
+| `2026-09-14T15:33:32Z` | `go test ./internal/localprofile/...` | 0 | 0.13s | resolver 最终测试再次通过 |
+| `2026-09-14T15:33:32Z` | `go build -o /tmp/openagentx-adr008-task02 ./cmd/openagentx` | 0 | 2.63s | 最终临时构建通过；未安装 |
+| `2026-09-14T15:33:32Z` | `/tmp/openagentx-adr008-task02 console {login --help,attach --help,login --content must-not-be-accepted}`（逐条执行） | 0/0/2 | <0.1s total | help 仅显示子命令相关 flags；login 对无关 legacy flag fail closed |
+
+#### 外部状态与阶段安全点
+
+- 实现和测试只写 feature worktree、Go build cache、Go test 临时目录及
+  `/tmp/openagentx-adr008-task02`；未创建或修改真实 `~/.openagentx`。
+- 未操作 service、真实 DB/socket、default tmux server、installed binary、remote feature branch 或
+  `steadyflow` 父仓库。
+- Task 02 实现提交无法自包含自身 SHA；提交后仅只读核验 SHA、feature/main/runtime 状态，精确 SHA
+  和监督结论由后续 docs-only gate record 提交记录。
+- 本阶段保持 `active/WAIT`；主计划和 Task 02 front matter 保持 `pending`，Task 03 保持
+  `pending/WAIT`。
 
 ## 7. Open Issues
 
