@@ -153,30 +153,6 @@ function RunTimeline({ detail, onLoadMore, loadingMore }) {
   )
 }
 
-function RunResults({ runs = [] }) {
-  const completed = runs.filter((run) => run.turn_result || run.turn_result_state === 'invalid')
-  if (!completed.length) return null
-  return (
-    <div className="run-results">
-      {completed.map((run) => (
-        <article className="run-result" key={run.run_id}>
-          <div className="run-result-head">
-            <strong>{run.run_id}</strong>
-            <span>Runtime {run.turn_result?.runtime_status || run.status}</span>
-          </div>
-          {run.turn_result_state === 'invalid' ? <div className="diagnostic">Run 结果记录无法安全解析</div> : (
-            <>
-              <p className="result-evidence">副作用来源：{run.turn_result.side_effects_source === 'runtime_reported' ? `Runtime 自报${run.turn_result.runtime_side_effects_known ? '已知' : '未知'}` : '未记录'} · 业务核验：未记录</p>
-              {run.turn_result.body && <MarkdownContent value={run.turn_result.body} />}
-              {run.turn_result.error && <div className="diagnostic"><strong>Runtime 错误</strong><pre>{run.turn_result.error}</pre></div>}
-            </>
-          )}
-        </article>
-      ))}
-    </div>
-  )
-}
-
 function Login({ onLogin }) {
   const [username, setUsername] = useState('owner')
   const [password, setPassword] = useState('')
@@ -246,6 +222,7 @@ function App() {
   const [loadingMoreTasks, setLoadingMoreTasks] = useState(false)
   const [taskRefreshTick, setTaskRefreshTick] = useState(0)
   const [taskView, setTaskView] = useState('content')
+  const [showRunLog, setShowRunLog] = useState(false)
   const [newOutput, setNewOutput] = useState(false)
   const [loadingMoreEvents, setLoadingMoreEvents] = useState(false)
   const lastSequenceRef = useRef(0)
@@ -430,6 +407,16 @@ function App() {
   const onlineAgents = agents.filter((agent) => activeWorkers.get(agentID(agent))?.status === 'online').length
   const tasks = taskPage.tasks || []
   const selectedTask = taskDetail?.task || tasks.find((task) => taskID(task) === selectedTaskID)
+  const completedRuns = useMemo(() => (taskDetail?.run_attempts || []).filter((run) => run.turn_result || run.turn_result_state === 'invalid'), [taskDetail])
+  const latestRun = completedRuns[completedRuns.length - 1] || (taskDetail?.run_attempts || [])[(taskDetail?.run_attempts || []).length - 1]
+  const resultBody = taskDetail?.task?.result || latestRun?.turn_result?.body || ''
+  const followUpMessages = useMemo(() => {
+    return (taskDetail?.messages || []).filter((message) => {
+      if (message.kind === 'instruction') return false
+      if (message.sequence === 1 && message.content === taskDetail?.task?.content) return false
+      return true
+    })
+  }, [taskDetail])
   const selectTask = (task, trigger) => {
     const id = typeof task === 'string' ? task : taskID(task)
     if (id === selectedTaskRef.current) return
@@ -441,6 +428,7 @@ function App() {
     setTaskDetail(null)
     setReplyTask(null)
     setTaskView('content')
+    setShowRunLog(false)
     setNewOutput(false)
   }
 
@@ -451,6 +439,7 @@ function App() {
     detailCatchUpPendingRef.current = false
     setSelectedTaskID('')
     setTaskDetail(null)
+    setShowRunLog(false)
     setTaskDetailState('idle')
     requestAnimationFrame(() => {
       if (!isCurrentObservation(
@@ -1020,17 +1009,78 @@ function App() {
                   <div className="detail-actions">
                     {taskDetail.task.status === 'waiting_input' && <button className="outline" type="button" disabled={!canWrite} onClick={() => { setReplyTask(taskDetail.task); setDraft(''); document.getElementById('command')?.focus() }}>回复</button>}
                     {!terminalTask(taskDetail.task.status) && taskDetail.task.status !== 'cancel_requested' && <button className="outline danger" type="button" disabled={!canWrite} onClick={() => cancelTask(taskDetail.task)}>取消任务</button>}
+                    <button className={`outline ${showRunLog ? 'active' : ''}`} type="button" onClick={() => setShowRunLog((prev) => !prev)}>
+                      {showRunLog ? '收起运行日志' : '查看运行日志'}
+                    </button>
                     {newOutput && <button className="new-output" type="button" onClick={jumpToLatest}>跳到最新</button>}
                   </div>
                   {taskDetailState === 'replay_error' && <div className="replay-error" role="alert"><span>事件回放失败，当前内容可能不是最新。</span><button className="outline" type="button" onClick={() => replayRetryRef.current()}>重试</button></div>}
-                  <div className="detail-tabs" role="tablist" aria-label="任务详情视图">
-                    {['content', 'conversation', 'run', 'result'].map((view) => <button type="button" role="tab" aria-selected={taskView === view} className={taskView === view ? 'active' : ''} onClick={() => setTaskView(view)} key={view}>{({ content: '内容', conversation: '对话', run: '运行', result: '结果' })[view]}</button>)}
-                  </div>
                   <div className="detail-scroll" ref={detailScrollRef} onScroll={(event) => { const node = event.currentTarget; readingLatestRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 48; if (readingLatestRef.current) setNewOutput(false) }}>
-                    {taskView === 'content' && <MarkdownContent value={taskDetail.task.content} />}
-                    {taskView === 'conversation' && <div className="conversation-list">{(taskDetail.messages || []).map((message) => <article className="message-item" key={message.id}><div><strong>{message.sender_principal_id}</strong><time>{message.created_at}</time></div><MarkdownContent value={message.content} compact /></article>)}{!taskDetail.messages?.length && <div className="empty-state">暂无对话消息</div>}</div>}
-                    {taskView === 'run' && <RunTimeline detail={taskDetail} onLoadMore={loadMoreEvents} loadingMore={loadingMoreEvents} />}
-                    {taskView === 'result' && <div className="result-view">{taskDetail.task.result && <MarkdownContent value={taskDetail.task.result} />}{taskDetail.task.error && <div className="diagnostic"><strong>执行诊断</strong><pre>{taskDetail.task.error}</pre></div>}<RunResults runs={taskDetail.run_attempts} />{!taskDetail.task.result && !taskDetail.task.error && !(taskDetail.run_attempts || []).some((run) => run.turn_result) && <div className="empty-state">任务尚未产生最终结果</div>}</div>}
+                    <div className="task-content-view">
+                      <div className="task-section">
+                        <div className="task-section-head">
+                          <h3 className="section-title">任务指令</h3>
+                        </div>
+                        <MarkdownContent value={taskDetail.task.content} />
+                      </div>
+                      <div className="task-section task-result-section">
+                        <div className="task-section-head">
+                          <h3 className="section-title">执行结果</h3>
+                          {latestRun && (
+                            <span className="run-meta-tag">
+                              {latestRun.run_id} · Runtime {latestRun.turn_result?.runtime_status || latestRun.status}
+                            </span>
+                          )}
+                        </div>
+                        {latestRun?.turn_result && (
+                          <p className="result-evidence">
+                            副作用来源：{latestRun.turn_result.side_effects_source === 'runtime_reported' ? `Runtime 自报${latestRun.turn_result.runtime_side_effects_known ? '已知' : '未知'}` : '未记录'} · 业务核验：未记录
+                          </p>
+                        )}
+                        {taskDetail.task.error && (
+                          <div className="diagnostic">
+                            <strong>执行诊断</strong>
+                            <pre>{taskDetail.task.error}</pre>
+                          </div>
+                        )}
+                        {resultBody ? (
+                          <MarkdownContent value={resultBody} />
+                        ) : (
+                          !taskDetail.task.error && (
+                            <div className="empty-state">
+                              {terminalTask(taskDetail.task.status) ? '任务尚未产生最终结果' : '任务正在执行中，尚未产生最终结果...'}
+                            </div>
+                          )
+                        )}
+                      </div>
+                      {followUpMessages.length > 0 && (
+                        <div className="task-section task-conversation-section">
+                          <div className="task-section-head">
+                            <h3 className="section-title">后续对话 ({followUpMessages.length})</h3>
+                          </div>
+                          <div className="conversation-list">
+                            {followUpMessages.map((message) => (
+                              <article className="message-item" key={message.id}>
+                                <div>
+                                  <strong>{message.sender_principal_id}</strong>
+                                  <time>{message.created_at}</time>
+                                </div>
+                                <MarkdownContent value={message.content} compact />
+                              </article>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {showRunLog && (
+                        <div className="task-section task-runlog-section">
+                          <div className="task-section-head">
+                            <h3 className="section-title">底层运行事件流水 (Run Timeline)</h3>
+                            <button className="mini-close" type="button" onClick={() => setShowRunLog(false)} aria-label="收起日志">×</button>
+                          </div>
+                          <RunTimeline detail={taskDetail} onLoadMore={loadMoreEvents} loadingMore={loadingMoreEvents} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </>
               )}

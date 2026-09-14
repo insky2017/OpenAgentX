@@ -534,10 +534,11 @@ func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	type option struct {
-		WorkerID   string                          `json:"worker_id"`
-		Generation int64                           `json:"generation"`
-		AgentID    string                          `json:"agent_id"`
-		Backend    openruntime.BackendRegistration `json:"backend"`
+		WorkerID     string                          `json:"worker_id"`
+		Generation   int64                           `json:"generation"`
+		AgentID      string                          `json:"agent_id"`
+		WorkerStatus string                          `json:"worker_status,omitempty"`
+		Backend      openruntime.BackendRegistration `json:"backend"`
 	}
 	options := make([]option, 0)
 	for _, worker := range workers {
@@ -549,7 +550,13 @@ func (h *Handler) executionOptions(w http.ResponseWriter, r *http.Request) {
 			// BackendRegistration only carries a profile reference and health;
 			// it never exposes credentials or config file contents.
 			backend.Network.ConfigFile = ""
-			options = append(options, option{WorkerID: worker.ID, Generation: worker.Generation, AgentID: worker.AgentID, Backend: backend})
+			options = append(options, option{
+				WorkerID:     worker.ID,
+				Generation:   worker.Generation,
+				AgentID:      worker.AgentID,
+				WorkerStatus: string(worker.Status),
+				Backend:      backend,
+			})
 		}
 	}
 	writeJSON(w, map[string]any{"backends": options})

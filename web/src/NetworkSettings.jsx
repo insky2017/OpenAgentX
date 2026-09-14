@@ -4,8 +4,11 @@ import './network-settings.css'
 
 const EMPTY_FORM = {
   mode: 'only_http_proxy',
+  id: '',
   host: '',
-  port: '8080',
+  port: '7897',
+  username: '',
+  password: '',
   direct_ips: '',
 }
 
@@ -13,65 +16,41 @@ const stateLabels = {
   draft: '草稿',
   testing: '测试中',
   ready: '测试通过',
-  published: '已发布',
-  stale: '需重新测试',
+  published: '已就绪',
+  stale: '需重测',
   pending: '等待 Worker',
   claimed: '执行中',
   applied: '已应用',
   failed: '失败',
-  succeeded: '流程完成',
-  queued: '排队中',
-  starting: '启动中',
-  running: '运行中',
-  waiting_approval: '等待审批',
-  finishing: '收尾中',
-  uncertain: '结果不确定',
-  canceled: '已取消',
-  healthy: '正常',
+  succeeded: '成功',
+  healthy: '健康',
   degraded: '降级',
-  unavailable: '不可用',
+  unavailable: '离线',
   unknown: '未知',
 }
 
 const modeLabels = {
-  inherit: '继承 Worker 环境',
-  direct: '不注入代理',
-  named_profile: '命名代理方案',
+  inherit: '系统默认 (inherit)',
+  direct: '直接联网 (direct)',
+  named_profile: '代理服务器',
   only_http_proxy: 'HTTP 代理',
   only_socks5: 'SOCKS5 代理',
 }
 
 const diagnosticLabels = {
   INVALID_CONFIG: '配置无效',
-  SECRET_MISSING: '缺少凭据',
+  SECRET_MISSING: '缺少密码',
   ENDPOINT_UNREACHABLE: '端点不可达',
   MATERIALIZATION_FAILED: '配置写入失败',
   RUNTIME_HEALTH_FAILED: 'Runtime 健康检查失败',
-  RUNTIME_IDENTITY_CHANGED: 'Runtime 身份已变化',
+  RUNTIME_IDENTITY_CHANGED: 'Runtime 身份变化',
   UNSUPPORTED_CAPABILITY: '能力不支持',
-  NOT_VERIFIED: '未执行核验',
+  NOT_VERIFIED: '未核验',
   INHERITED_CONFIGURATION_UNVERIFIED: '继承配置无法核验',
 }
 
-const probeLayerLabels = {
-  configuration: '配置',
-  secret: '凭据',
-  endpoint: '代理端点',
-  direct_rules: '直连规则',
-  runtime_health: 'Runtime 健康',
-  network_effect: '网络效果',
-  model_call: '模型调用',
-}
-
-const probeStateLabels = {
-  passed: '通过',
-  failed: '失败',
-  not_applicable: '不适用',
-  not_verified: '未核验',
-}
-
 const newProfileID = () => {
-  const suffix = crypto.randomUUID?.().replaceAll('-', '').slice(0, 10) || `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+  const suffix = crypto.randomUUID?.().replaceAll('-', '').slice(0, 8) || `${Date.now().toString(36)}`
   return `proxy-${suffix}`
 }
 
@@ -89,7 +68,16 @@ const targetKey = (option) => [
   option.backend?.backend_id,
 ].join('|')
 
-const targetLabel = (option) => `${option.agent_id} / ${option.backend?.backend_id} · Worker ${option.worker_id} · gen ${option.generation}`
+const targetLabel = (option, isCurrent) => {
+  const backend = option.backend?.backend_id === 'primary' ? '主服务' : option.backend?.backend_id || 'default'
+  const gen = `gen ${option.generation}`
+  if (isCurrent) {
+    const status = option.worker_status ? ` · ${displayState(option.worker_status)}` : ''
+    return `${option.agent_id} (${backend}) · ${gen} [当前${status}]`
+  }
+  const status = option.worker_status === 'offline' ? '已离线' : (displayState(option.worker_status) || '历史')
+  return `${option.agent_id} (${backend}) · ${gen} [${status}]`
+}
 
 const supportsNamedProfile = (option) => option?.backend?.descriptor?.network_modes?.includes('named_profile')
 
@@ -98,47 +86,16 @@ const supportedNetworkModes = (option) => option?.backend?.descriptor?.network_m
 const supportsAnyNetworkMode = (option) => supportedNetworkModes(option)
   .some((mode) => ['inherit', 'direct', 'named_profile'].includes(mode))
 
-const displayState = (value) => stateLabels[value] || '未知'
+const displayState = (value) => stateLabels[value] || value || '未知'
 
-const displayDiagnostic = (value) => value
-  ? diagnosticLabels[value] || '未识别的诊断'
-  : '无诊断'
-
-const shortDigest = (value) => value ? `${value.slice(0, 10)}...${value.slice(-6)}` : '无'
-
-const displayTime = (value) => {
-  if (!value) return '未知'
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? '未知' : date.toLocaleString()
-}
-
-const desiredBindingText = (binding) => {
-  if (!binding) return '未绑定'
-  if (binding.mode === 'named_profile') {
-    return binding.profile_id && binding.profile_version
-      ? `${modeLabels.named_profile} · ${binding.profile_id} v${binding.profile_version}`
-      : `${modeLabels.named_profile} · 版本未知`
-  }
-  if (binding.mode === 'inherit' || binding.mode === 'direct') {
-    return `${modeLabels[binding.mode]} · policy v${binding.policy_version || '未知'}`
-  }
-  return '未识别的期望状态'
-}
-
-const appliedBindingText = (binding) => {
-  if (!binding?.applied_mode) return binding ? `${displayState(binding.desired_status)} · 尚未应用` : '未绑定'
-  const configuration = binding.applied_mode === 'named_profile'
-    ? `${modeLabels.named_profile} · ${binding.applied_profile_id || '未知方案'} v${binding.applied_profile_version || '未知'}`
-    : `${modeLabels[binding.applied_mode] || binding.applied_mode} · policy v${binding.applied_policy_version || '未知'}`
-  return `${configuration} · Worker ${binding.applied_worker_id || '未知'} · gen ${binding.applied_generation || '未知'}`
-}
+const displayDiagnostic = (value) => value ? diagnosticLabels[value] || value : ''
 
 const activeRunNetworkText = (run) => {
   if (!run?.network_mode || !['inherit', 'direct', 'named_profile'].includes(run.network_mode)) return '网络模式未记录'
   if (run.network_mode === 'named_profile') {
-    return `${modeLabels.named_profile} · ${run.network_profile_id || '方案未记录'} · ${run.network_profile_version ? `v${run.network_profile_version}` : '版本未记录'}`
+    return `代理 ${run.network_profile_id || '未知'}`
   }
-  return `${modeLabels[run.network_mode]} · ${run.network_policy_version ? `policy v${run.network_policy_version}` : 'policy 未记录'}`
+  return modeLabels[run.network_mode] || run.network_mode
 }
 
 const activeRunMatchesBinding = (run, binding) => {
@@ -153,54 +110,78 @@ const activeRunMatchesBinding = (run, binding) => {
 }
 
 const requestErrorText = (error) => {
+  if (!error) return '操作失败，未知错误。'
+
+  // 1. 网络离线、连接中断或后台服务正在重启
+  const msg = typeof error.message === 'string' ? error.message.trim() : ''
+  const isNetworkFailure = (
+    error instanceof TypeError ||
+    error.name === 'TypeError' ||
+    msg.includes('Failed to fetch') ||
+    msg.includes('NetworkError') ||
+    msg.includes('network error') ||
+    msg.includes('Load failed')
+  )
+  if (isNetworkFailure) {
+    return '网络连接中断或后台服务正在重启，请稍候重试。'
+  }
+
+  // 提取具体的错误信息（如果是 JSON 则提取 error/message 字段）
+  let detail = msg
+  if (detail) {
+    try {
+      const parsed = JSON.parse(detail)
+      detail = parsed.error || parsed.message || detail
+    } catch {
+      // 保持原始字符串
+    }
+  }
+
+  // 2. 根据 HTTP 状态码生成可读摘要
+  let prefix = ''
   switch (error?.status) {
   case 400:
-    return '输入无效，请检查当前内容。'
+    prefix = '请求参数无效'
+    break
   case 401:
-    return '登录状态已失效，请重新登录。'
+    prefix = '登录状态已失效，请重新登录'
+    break
   case 403:
-    return '当前账号没有执行此操作的权限。'
+    prefix = '当前账号无权执行此操作'
+    break
   case 404:
-    return '操作对象已不存在，请刷新。'
+    prefix = '操作的目标对象不存在或已下线'
+    break
   case 409:
-    return '版本已变化。非秘密输入仍已保留，请刷新后重新确认。'
+    prefix = '状态或版本已发生变化，请刷新后重试'
+    break
   case 422:
-    return '目标 Runtime 未声明所需的网络能力。'
+    prefix = '目标 Runtime 未声明所需的网络能力'
+    break
+  case 500:
+    prefix = '服务内部处理异常'
+    break
+  case 501:
+    prefix = '该功能在当前服务版本中暂未开放'
+    break
+  case 502:
+  case 503:
+  case 504:
+    prefix = `后台服务暂时不可用或响应超时 (HTTP ${error.status})`
+    break
   default:
-    return '无法确认操作结果，请刷新核对后再决定是否重试。'
+    if (error?.status) {
+      prefix = `操作失败 (HTTP ${error.status})`
+    } else {
+      prefix = '操作未完成'
+    }
+    break
   }
-}
 
-function StatusFact({ label, value, tone = '' }) {
-  return (
-    <div className="network-fact">
-      <span>{label}</span>
-      <strong className={tone}>{value}</strong>
-    </div>
-  )
-}
-
-function ProbeResults({ results }) {
-  if (!Array.isArray(results) || !results.length) {
-    return <div className="network-probe-empty">无分层记录</div>
+  if (detail && detail !== prefix && !detail.startsWith('<')) {
+    return `${prefix}: ${detail}`
   }
-  return (
-    <div className="network-probe-list" aria-label="分层检查事实">
-      {results.map((probe, index) => {
-        const knownLayer = Object.hasOwn(probeLayerLabels, probe?.layer)
-        const knownState = Object.hasOwn(probeStateLabels, probe?.state)
-        const state = knownState ? probe.state : 'unknown'
-        return (
-          <div className="network-probe-row" key={`${knownLayer ? probe.layer : 'unknown'}-${index}`}>
-            <strong>{knownLayer ? probeLayerLabels[probe.layer] : '未知检查项'}</strong>
-            <span className={`probe-state state-${state}`}>{knownState ? probeStateLabels[probe.state] : '状态未知'}</span>
-            <span>{displayDiagnostic(probe?.diagnostic_code)}</span>
-            <span>{Number.isFinite(probe?.duration_ms) && probe.duration_ms > 0 ? `${probe.duration_ms} ms` : '耗时未记录'}</span>
-          </div>
-        )
-      })}
-    </div>
-  )
+  return `${prefix}。`
 }
 
 export default function NetworkSettings({
@@ -216,33 +197,65 @@ export default function NetworkSettings({
   onOpenTask,
 }) {
   const profiles = networkState.profiles || []
-  const versions = networkState.versions || []
   const tests = networkState.tests || []
   const modeTests = networkState.mode_tests || []
   const bindings = networkState.bindings || []
   const activeRuns = networkState.active_runs || []
   const targets = useMemo(() => runtimeOptions.filter(supportsAnyNetworkMode), [runtimeOptions])
-  const [selectedProfileID, setSelectedProfileID] = useState('')
+
+  const { activeTargets, historyTargets, isTargetCurrent } = useMemo(() => {
+    const maxGenMap = new Map()
+    for (const opt of targets) {
+      const key = `${opt.agent_id}|${opt.backend?.backend_id || ''}`
+      const cur = maxGenMap.get(key) || 0
+      if (opt.generation > cur) {
+        maxGenMap.set(key, opt.generation)
+      }
+    }
+
+    const isCurrent = (opt) => {
+      const key = `${opt.agent_id}|${opt.backend?.backend_id || ''}`
+      const isMax = opt.generation === maxGenMap.get(key)
+      if (opt.worker_status) {
+        return isMax && opt.worker_status !== 'offline'
+      }
+      return isMax
+    }
+
+    const active = []
+    const history = []
+
+    for (const opt of targets) {
+      if (isCurrent(opt)) {
+        active.push(opt)
+      } else {
+        history.push(opt)
+      }
+    }
+
+    active.sort((a, b) => a.agent_id.localeCompare(b.agent_id))
+    history.sort((a, b) => b.generation - a.generation)
+
+    return {
+      activeTargets: active,
+      historyTargets: history,
+      isTargetCurrent: isCurrent,
+    }
+  }, [targets])
+
   const [selectedTargetKey, setSelectedTargetKey] = useState('')
-  const [showCreate, setShowCreate] = useState(false)
-  const [createID, setCreateID] = useState(() => newProfileID())
-  const [createForm, setCreateForm] = useState(EMPTY_FORM)
-  const [editForm, setEditForm] = useState(EMPTY_FORM)
-  const [editDirty, setEditDirty] = useState(false)
-  const [editBaselineRevision, setEditBaselineRevision] = useState(0)
-  const [editConflict, setEditConflict] = useState(false)
-  const [secretForm, setSecretForm] = useState({ username: '', password: '' })
-  const [importProfileID, setImportProfileID] = useState(() => newProfileID())
+  const [selectedProfileID, setSelectedProfileID] = useState('')
   const [modeDraft, setModeDraft] = useState('')
+  const [showCreate, setShowCreate] = useState(false)
+  const [createForm, setCreateForm] = useState(EMPTY_FORM)
   const [localBusy, setLocalBusy] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const commandAttempts = useRef(new Map())
-  const editProfileID = useRef('')
   const modeTargetKey = useRef('')
 
-  const selectedProfile = profiles.find((profile) => profile.profile_id === selectedProfileID) || null
   const selectedTarget = targets.find((option) => targetKey(option) === selectedTargetKey) || null
+  const selectedProfile = profiles.find((profile) => profile.profile_id === selectedProfileID) || null
   const selectedBinding = selectedTarget
     ? bindings.find((binding) => binding.agent_id === selectedTarget.agent_id && binding.backend_id === selectedTarget.backend?.backend_id)
     : null
@@ -250,22 +263,33 @@ export default function NetworkSettings({
     ? activeRuns.find((run) => run.agent_id === selectedTarget.agent_id && run.backend_id === selectedTarget.backend?.backend_id) || null
     : null
   const activeRunBindingMatch = activeRunMatchesBinding(selectedActiveRun, selectedBinding)
-  const selectedTargetModes = supportedNetworkModes(selectedTarget)
   const selectedTargetSupportsProfile = supportsNamedProfile(selectedTarget)
-  const selectablePolicyModes = selectedTargetModes.filter((mode) => mode === 'inherit' || mode === 'direct')
+  const availableTargetModes = useMemo(() => {
+    if (!selectedTarget) return []
+    return supportedNetworkModes(selectedTarget).filter((mode) => ['inherit', 'direct', 'named_profile'].includes(mode))
+  }, [selectedTarget])
   const bindingRevision = selectedBinding?.version || 0
-  const profileVersions = versions
-    .filter((version) => version.profile_id === selectedProfileID)
-    .sort((left, right) => right.content_version - left.content_version)
-  const profileTests = tests
-    .filter((test) => test.profile_id === selectedProfileID)
-    .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))
+
+  // Latest test results
   const targetModeTests = modeTests
     .filter((test) => test.agent_id === selectedTarget?.agent_id && test.backend_id === selectedTarget?.backend?.backend_id)
     .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))
 
+  const latestMatchingModeTest = targetModeTests.find((test) =>
+    test.mode === modeDraft
+    && test.worker_instance_id === selectedTarget?.worker_id
+    && test.generation === selectedTarget?.generation
+    && test.binding_revision === bindingRevision
+  )
+
+  const profileTestsOnTarget = tests
+    .filter((test) => test.profile_id === selectedProfileID && test.backend_id === selectedTarget?.backend?.backend_id)
+    .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))
+
+  const latestProfileTest = profileTestsOnTarget[0] || null
+
   const isModeTestPublishable = (test) => Boolean(selectedTarget
-    && test.state === 'succeeded'
+    && test?.state === 'succeeded'
     && test.agent_id === selectedTarget.agent_id
     && test.backend_id === selectedTarget.backend?.backend_id
     && test.mode === modeDraft
@@ -273,67 +297,57 @@ export default function NetworkSettings({
     && test.generation === selectedTarget.generation
     && test.binding_revision === bindingRevision)
 
-  const versionBelongsToSelectedBinding = (version) => Boolean(selectedTarget
-    && selectedProfile
-    && selectedBinding?.mode === 'named_profile'
-    && selectedBinding.agent_id === selectedTarget.agent_id
-    && selectedBinding.backend_id === selectedTarget.backend?.backend_id
-    && version.profile_id === selectedProfile.profile_id
-    && selectedBinding.profile_id === selectedProfile.profile_id)
+  const appliedToSelected = selectedBinding?.desired_status === 'applied'
+    && selectedBinding.applied_mode === 'named_profile'
+    && selectedBinding.applied_profile_id === selectedProfile?.profile_id
+    && selectedBinding.applied_profile_version === selectedProfile?.published_content_version
+    && selectedBinding.applied_worker_id === selectedTarget?.worker_id
+    && selectedBinding.applied_generation === selectedTarget?.generation
 
-  useEffect(() => {
-    if (!profiles.length) {
-      setSelectedProfileID('')
-      return
-    }
-    if (!profiles.some((profile) => profile.profile_id === selectedProfileID)) {
-      setSelectedProfileID(profiles[0].profile_id)
-    }
-  }, [profiles, selectedProfileID])
-
+  // Sync target selection (prefer active target)
   useEffect(() => {
     if (!targets.length) {
       setSelectedTargetKey('')
       return
     }
     if (!targets.some((option) => targetKey(option) === selectedTargetKey)) {
-      setSelectedTargetKey(targetKey(targets[0]))
+      const defaultTarget = activeTargets[0] || targets[0]
+      setSelectedTargetKey(targetKey(defaultTarget))
     }
-  }, [targets, selectedTargetKey])
+  }, [targets, activeTargets, selectedTargetKey])
 
+  // Sync mode draft
   useEffect(() => {
     const nextTargetKey = selectedTarget ? targetKey(selectedTarget) : ''
     const targetChanged = modeTargetKey.current !== nextTargetKey
     modeTargetKey.current = nextTargetKey
     setModeDraft((current) => {
-      if (!selectedTarget || !selectablePolicyModes.length) return ''
-      if (!targetChanged && selectablePolicyModes.includes(current)) return current
-      if (selectablePolicyModes.includes(selectedBinding?.mode)) return selectedBinding.mode
-      return selectablePolicyModes[0]
+      if (!selectedTarget || !availableTargetModes.length) return ''
+      if (targetChanged && selectedBinding?.mode && availableTargetModes.includes(selectedBinding.mode)) {
+        return selectedBinding.mode
+      }
+      if (!targetChanged && current && availableTargetModes.includes(current)) return current
+      if (selectedBinding?.mode && availableTargetModes.includes(selectedBinding.mode)) {
+        return selectedBinding.mode
+      }
+      return availableTargetModes[0] || ''
     })
-  }, [selectedTargetKey, selectedTargetModes.join('|'), selectedBinding?.mode])
+  }, [selectedTargetKey, availableTargetModes, selectedBinding?.mode])
 
+  // Sync profile selection from binding
   useEffect(() => {
-    if (!selectedProfile) return
-    const profileChanged = editProfileID.current !== selectedProfile.profile_id
-    editProfileID.current = selectedProfile.profile_id
-    if (!profileChanged && editDirty) return
-    setEditForm({
-      mode: selectedProfile.mode || 'only_http_proxy',
-      host: selectedProfile.host || '',
-      port: String(selectedProfile.port || ''),
-      direct_ips: (selectedProfile.direct_ips || []).join('\n'),
-    })
-    setEditBaselineRevision(selectedProfile.state_revision)
-    setEditConflict(false)
-    if (profileChanged) {
-      setEditDirty(false)
-      setSecretForm({ username: '', password: '' })
+    if (selectedBinding?.mode === 'named_profile' && selectedBinding.profile_id) {
+      if (profiles.some((p) => p.profile_id === selectedBinding.profile_id)) {
+        setSelectedProfileID(selectedBinding.profile_id)
+        return
+      }
     }
-  }, [selectedProfile?.profile_id, selectedProfile?.current_content_version, selectedProfile?.state_revision, selectedProfile?.manifest_digest, editDirty])
+    if (profiles.length && !profiles.some((p) => p.profile_id === selectedProfileID)) {
+      setSelectedProfileID(profiles[0].profile_id)
+    }
+  }, [selectedBinding?.profile_id, selectedBinding?.mode, profiles, selectedProfileID])
 
   const writeDisabled = offline || busy || Boolean(localBusy) || !canWrite
-  const ownerWriteDisabled = writeDisabled || !canManageSecrets
 
   const reload = async () => {
     if (!onReload || offline || loading || localBusy) return
@@ -364,39 +378,140 @@ export default function NetworkSettings({
         },
       })
       commandAttempts.current.delete(scope)
-      setNotice(successMessage)
+      if (successMessage) setNotice(successMessage)
       let refreshFailed = false
       if (onReload) {
         try {
           await onReload()
         } catch {
           refreshFailed = true
-          setError('操作已提交，但状态刷新失败。请手动刷新。')
         }
       }
       return { ok: true, refreshFailed }
     } catch (requestError) {
-      setError(secret && (!requestError?.status || requestError.status >= 500)
-        ? '无法确认凭据是否已替换，输入已清空。请刷新核对版本后重新输入。'
-        : requestErrorText(requestError))
-      if (secret && onReload) {
-        try { await onReload() } catch { /* The explicit reload action remains available. */ }
-      }
+      setError(requestErrorText(requestError))
       return { ok: false, status: requestError?.status }
     } finally {
       setLocalBusy('')
     }
   }
 
-  const submitCreate = async (event) => {
+  // 1. One-click Test Connection
+  const handleTestConnection = async () => {
+    if (!selectedTarget) return
+    setError('')
+    setNotice('')
+
+    if (!isTargetCurrent(selectedTarget)) {
+      setError(`选中的 Runtime [${targetLabel(selectedTarget, false)}] 为历史已退役代次，实例已下线，无法下发测试。请切换到【当前活跃代次】后再测试。`)
+      return
+    }
+
+    if (modeDraft === 'inherit' || modeDraft === 'direct') {
+      await execute(`mode-test:${selectedTargetKey}`, '/api/control/v1/network-bindings/mode/tests', {
+        agent_id: selectedTarget.agent_id,
+        backend_id: selectedTarget.backend.backend_id,
+        mode: modeDraft,
+        worker_instance_id: selectedTarget.worker_id,
+        generation: selectedTarget.generation,
+        meta: { expected_version: bindingRevision },
+      }, `已向 Worker 发送【${modeLabels[modeDraft]}】连通性测试。`)
+    } else if (modeDraft === 'named_profile') {
+      if (!selectedProfile) {
+        setError('请先在下方选择一个代理服务器。')
+        return
+      }
+      if (!selectedTargetSupportsProfile) {
+        setError('当前 Runtime 未声明代理扩展能力。')
+        return
+      }
+      await execute(`test:${selectedProfile.profile_id}:${selectedTargetKey}`, `/api/control/v1/network-profiles/${encodeURIComponent(selectedProfile.profile_id)}/tests`, {
+        worker_instance_id: selectedTarget.worker_id,
+        generation: selectedTarget.generation,
+        backend_id: selectedTarget.backend.backend_id,
+        meta: { expected_version: selectedProfile.state_revision },
+      }, `已向 Worker 发送【${selectedProfile.profile_id}】连通性测试。`)
+    }
+  }
+
+  // 2. One-click Save & Apply
+  const handleSaveAndApply = async () => {
+    if (!selectedTarget) return
+    setError('')
+    setNotice('')
+
+    if (!isTargetCurrent(selectedTarget)) {
+      setError(`选中的 Runtime [${targetLabel(selectedTarget, false)}] 为历史已退役代次，实例已下线，无法保存配置。请切换到【当前活跃代次】后再保存。`)
+      return
+    }
+
+    if (modeDraft === 'inherit' || modeDraft === 'direct') {
+      if (isModeTestPublishable(latestMatchingModeTest)) {
+        await execute(`mode-publish:${selectedTargetKey}:${latestMatchingModeTest.test_id}`, '/api/control/v1/network-bindings/mode/publish', {
+          test_id: latestMatchingModeTest.test_id,
+          worker_instance_id: selectedTarget.worker_id,
+          generation: selectedTarget.generation,
+          meta: { expected_version: latestMatchingModeTest.binding_revision },
+        }, `【${modeLabels[modeDraft]}】已保存并下发应用。`)
+      } else if (selectedBinding?.mode === modeDraft && selectedBinding?.desired_status === 'applied') {
+        setNotice(`当前 Runtime 已经生效为【${modeLabels[modeDraft]}】，无需重复保存。`)
+      } else {
+        setError(`尚未完成连通测试，请先点击【⚡ 测试连接】，确认通畅后再保存应用。`)
+      }
+    } else if (modeDraft === 'named_profile') {
+      if (!selectedProfile) {
+        setError('请先选择一个代理方案。')
+        return
+      }
+      if (!selectedTargetSupportsProfile) {
+        setError('当前 Runtime 未声明代理扩展能力。')
+        return
+      }
+
+      // If already published, directly bind
+      if (selectedProfile.published_content_version) {
+        await execute(`bind:${selectedTargetKey}`, '/api/control/v1/network-bindings', {
+          agent_id: selectedTarget.agent_id,
+          backend_id: selectedTarget.backend.backend_id,
+          profile_id: selectedProfile.profile_id,
+          profile_version: selectedProfile.published_content_version,
+          worker_instance_id: selectedTarget.worker_id,
+          generation: selectedTarget.generation,
+          meta: { expected_version: selectedBinding?.version || 0 },
+        }, `代理【${selectedProfile.profile_id}】已成功绑定到当前 Runtime。`)
+      } else if (selectedProfile.state === 'ready' && selectedProfile.ready_test_id) {
+        // Auto-publish then bind!
+        const pubResult = await execute(`publish:${selectedProfile.profile_id}`, `/api/control/v1/network-profiles/${encodeURIComponent(selectedProfile.profile_id)}/publish`, {
+          meta: { expected_version: selectedProfile.state_revision },
+        }, '')
+        if (pubResult.ok) {
+          await execute(`bind:${selectedTargetKey}`, '/api/control/v1/network-bindings', {
+            agent_id: selectedTarget.agent_id,
+            backend_id: selectedTarget.backend.backend_id,
+            profile_id: selectedProfile.profile_id,
+            profile_version: selectedProfile.current_content_version,
+            worker_instance_id: selectedTarget.worker_id,
+            generation: selectedTarget.generation,
+            meta: { expected_version: selectedBinding?.version || 0 },
+          }, `代理【${selectedProfile.profile_id}】已发布并成功绑定到当前 Runtime。`)
+        }
+      } else {
+        setError(`代理尚未通过目标连通测试，请先点击【⚡ 测试连接】，确认通畅后再保存。`)
+      }
+    }
+  }
+
+  // 3. Add New Proxy
+  const handleCreateProxy = async (event) => {
     event.preventDefault()
-    const profileID = createID.trim()
+    const profileID = (createForm.id || newProfileID()).trim()
     const host = createForm.host.trim()
     const port = Number(createForm.port)
     if (!profileID || !host || !Number.isInteger(port) || port < 1 || port > 65535) {
-      setError('请填写有效的方案 ID、主机和端口。')
+      setError('请填写有效的主机和端口（1-65535）。')
       return
     }
+
     const result = await execute('create', '/api/control/v1/network-profiles', {
       profile_id: profileID,
       mode: createForm.mode,
@@ -404,404 +519,326 @@ export default function NetworkSettings({
       port,
       direct_ips: directIPs(createForm.direct_ips),
       meta: { expected_version: 0 },
-    }, '方案草稿已创建。')
+    }, '代理已成功添加到代理池。')
+
     if (result.ok) {
+      if (createForm.mode === 'only_socks5' && (createForm.username || createForm.password) && canManageSecrets) {
+        await execute(`secret:${profileID}`, `/api/control/v1/network-profiles/${encodeURIComponent(profileID)}/secret`, {
+          username: createForm.username,
+          password: createForm.password,
+          meta: { expected_version: 1 },
+        }, '代理及凭据已成功添加到代理池。', true)
+      }
       setSelectedProfileID(profileID)
-      setCreateID(newProfileID())
+      setModeDraft('named_profile')
       setCreateForm(EMPTY_FORM)
       setShowCreate(false)
     }
   }
 
-  const submitEdit = async (event) => {
-    event.preventDefault()
-    if (!selectedProfile) return
-    if (editBaselineRevision !== selectedProfile.state_revision) {
-      setEditConflict(true)
-      setError('方案版本已变化。请先重新确认编辑基线或放弃本地修改。')
-      return
+  // Applied text summary
+  const appliedSummary = useMemo(() => {
+    if (!selectedBinding?.applied_mode) {
+      return selectedBinding ? `${displayState(selectedBinding.desired_status)} (等待应用)` : '未绑定'
     }
-    const port = Number(editForm.port)
-    if (!editForm.host.trim() || !Number.isInteger(port) || port < 1 || port > 65535) {
-      setError('请填写有效的主机和端口。')
-      return
+    if (selectedBinding.applied_mode === 'named_profile') {
+      return `代理: ${selectedBinding.applied_profile_id || '未知'} (v${selectedBinding.applied_profile_version || '1'})`
     }
-    const result = await execute(`edit:${selectedProfile.profile_id}`, `/api/control/v1/network-profiles/${encodeURIComponent(selectedProfile.profile_id)}/draft`, {
-      mode: editForm.mode,
-      host: editForm.host.trim(),
-      port,
-      direct_ips: directIPs(editForm.direct_ips),
-      meta: { expected_version: editBaselineRevision },
-    }, '新草稿版本已保存。')
-    if (result.status === 409) setEditConflict(true)
-    if (result.ok && !result.refreshFailed) setEditDirty(false)
-  }
+    return modeLabels[selectedBinding.applied_mode] || selectedBinding.applied_mode
+  }, [selectedBinding])
 
-  const submitSecret = async (event) => {
-    event.preventDefault()
-    if (!selectedProfile || !canManageSecrets || !secretForm.password) return
-    const secret = { username: secretForm.username, password: secretForm.password }
-    setSecretForm({ username: '', password: '' })
-    await execute(`secret:${selectedProfile.profile_id}`, `/api/control/v1/network-profiles/${encodeURIComponent(selectedProfile.profile_id)}/secret`, {
-      ...secret,
-      meta: { expected_version: selectedProfile.state_revision },
-    }, '凭据已替换，新内容需要重新测试。', true)
-  }
-
-  const testProfile = async () => {
-    if (!selectedProfile || !selectedTarget || !selectedTargetSupportsProfile) return
-    await execute(`test:${selectedProfile.profile_id}:${selectedTargetKey}`, `/api/control/v1/network-profiles/${encodeURIComponent(selectedProfile.profile_id)}/tests`, {
-      worker_instance_id: selectedTarget.worker_id,
-      generation: selectedTarget.generation,
-      backend_id: selectedTarget.backend.backend_id,
-      meta: { expected_version: selectedProfile.state_revision },
-    }, '测试已提交。')
-  }
-
-  const publishProfile = async () => {
-    if (!selectedProfile) return
-    await execute(`publish:${selectedProfile.profile_id}`, `/api/control/v1/network-profiles/${encodeURIComponent(selectedProfile.profile_id)}/publish`, {
-      meta: { expected_version: selectedProfile.state_revision },
-    }, '内容版本已发布。')
-  }
-
-  const bindProfile = async () => {
-    if (!selectedProfile || !selectedTarget || !selectedTargetSupportsProfile || !selectedProfile.published_content_version) return
-    await execute(`bind:${selectedTargetKey}`, '/api/control/v1/network-bindings', {
-      agent_id: selectedTarget.agent_id,
-      backend_id: selectedTarget.backend.backend_id,
-      profile_id: selectedProfile.profile_id,
-      profile_version: selectedProfile.published_content_version,
-      worker_instance_id: selectedTarget.worker_id,
-      generation: selectedTarget.generation,
-      meta: { expected_version: selectedBinding?.version || 0 },
-    }, '绑定已提交，等待 Worker 应用。')
-  }
-
-  const rollback = async (version) => {
-    if (!selectedTargetSupportsProfile || !versionBelongsToSelectedBinding(version)) {
-      setError('当前目标绑定的不是所选方案，无法使用该版本回退。请先选择该绑定方案。')
-      return
-    }
-    if (!version.published || version.current_published) return
-    await execute(`rollback:${selectedTargetKey}:${version.content_version}`, '/api/control/v1/network-bindings/rollback', {
-      agent_id: selectedTarget.agent_id,
-      backend_id: selectedTarget.backend.backend_id,
-      target_content_version: version.content_version,
-      worker_instance_id: selectedTarget.worker_id,
-      generation: selectedTarget.generation,
-      meta: { expected_version: selectedBinding.version },
-    }, `已从 v${version.content_version} 创建回退草稿，需重新测试并发布。`)
-  }
-
-  const importProfile = async (event) => {
-    event.preventDefault()
-    if (!selectedTarget || !selectedTargetSupportsProfile || !canManageSecrets || !importProfileID.trim()) return
-    const result = await execute(`import:${selectedTargetKey}`, '/api/control/v1/network-imports', {
-      profile_id: importProfileID.trim(),
-      worker_instance_id: selectedTarget.worker_id,
-      generation: selectedTarget.generation,
-      backend_id: selectedTarget.backend.backend_id,
-      meta: { expected_version: 0 },
-    }, '一次性导入已提交。')
-    if (result.ok) setImportProfileID(newProfileID())
-  }
-
-  const testMode = async () => {
-    if (!selectedTarget || !selectablePolicyModes.includes(modeDraft)) return
-    await execute(`mode-test:${selectedTargetKey}`, '/api/control/v1/network-bindings/mode/tests', {
-      agent_id: selectedTarget.agent_id,
-      backend_id: selectedTarget.backend.backend_id,
-      mode: modeDraft,
-      worker_instance_id: selectedTarget.worker_id,
-      generation: selectedTarget.generation,
-      meta: { expected_version: bindingRevision },
-    }, `${modeLabels[modeDraft]}测试已提交。`)
-  }
-
-  const publishMode = async (test) => {
-    if (!isModeTestPublishable(test)) return
-    await execute(`mode-publish:${selectedTargetKey}:${test.test_id}`, '/api/control/v1/network-bindings/mode/publish', {
-      test_id: test.test_id,
-      worker_instance_id: selectedTarget.worker_id,
-      generation: selectedTarget.generation,
-      meta: { expected_version: test.binding_revision },
-    }, `${modeLabels[test.mode]}已发布，等待 Worker 应用。`)
-  }
-
-  const rebaseEdit = () => {
-    if (!selectedProfile) return
-    setEditBaselineRevision(selectedProfile.state_revision)
-    setEditConflict(false)
-    setError('')
-    setNotice(`本地修改已重新基于状态 r${selectedProfile.state_revision}，请复核后提交。`)
-  }
-
-  const discardEdit = () => {
-    if (!selectedProfile) return
-    setEditForm({
-      mode: selectedProfile.mode || 'only_http_proxy',
-      host: selectedProfile.host || '',
-      port: String(selectedProfile.port || ''),
-      direct_ips: (selectedProfile.direct_ips || []).join('\n'),
-    })
-    setEditBaselineRevision(selectedProfile.state_revision)
-    setEditDirty(false)
-    setEditConflict(false)
-    setError('')
-    setNotice('本地修改已放弃。')
-  }
-
-  const configurationStatus = ['ready', 'published'].includes(selectedProfile?.state)
-    ? '已验证'
-    : selectedProfile?.state === 'testing' ? '验证中' : '待验证'
-  const testReady = selectedProfile?.state === 'ready'
-  const appliedProfile = appliedBindingText(selectedBinding)
-  const appliedToSelected = selectedBinding?.desired_status === 'applied'
-    && selectedBinding.applied_mode === 'named_profile'
-    && selectedBinding.applied_profile_id === selectedProfile?.profile_id
-    && selectedBinding.applied_profile_version === selectedProfile?.published_content_version
-    && selectedBinding.applied_worker_id === selectedTarget?.worker_id
-    && selectedBinding.applied_generation === selectedTarget?.generation
-  const runtimeHealth = selectedTarget?.backend?.health || 'unknown'
+  // Current active test result
+  const currentTest = modeDraft === 'named_profile' ? latestProfileTest : latestMatchingModeTest
 
   return (
-    <section className="network-settings" aria-busy={loading || busy || Boolean(localBusy)}>
-      <header className="network-settings-head">
+    <section className="network-settings-simple" aria-busy={loading || busy || Boolean(localBusy)}>
+      <header className="simple-header">
         <div>
-          <p className="eyebrow">RUNTIME NETWORK</p>
-          <h2>网络配置</h2>
+          <h2>出网与代理设置</h2>
+          <p>管理 Agent Runtime 的网络出口策略与代理服务器</p>
         </div>
-        <div className="network-head-actions">
-          <span className={`network-connection ${offline ? 'is-offline' : ''}`}>{offline ? '离线' : '在线'}</span>
-          <button type="button" className="outline" onClick={reload} disabled={offline || loading || Boolean(localBusy)}>刷新</button>
-          <button type="button" className="primary" onClick={() => setShowCreate((value) => !value)} disabled={writeDisabled} aria-expanded={showCreate}>
-            {showCreate ? '收起' : '新建方案'}
+        <div className="header-actions">
+          <span className={`net-dot ${offline ? 'is-offline' : 'is-online'}`}>{offline ? '离线' : '在线'}</span>
+          <button type="button" className="outline mini-btn" onClick={reload} disabled={offline || loading || Boolean(localBusy)}>
+            刷新
           </button>
         </div>
       </header>
 
-      {offline && <div className="network-alert warning" role="status">当前离线，所有配置写入均已禁用。</div>}
-      {error && <div className="network-alert error" role="alert"><span>{error}</span>{error.includes('刷新') && <button type="button" onClick={reload} disabled={offline || loading}>刷新</button>}</div>}
-      {notice && <div className="network-alert success" role="status">{notice}</div>}
+      {offline && <div className="simple-alert warning">当前网络离线，所有配置写入已禁用。</div>}
+      {error && <div className="simple-alert error">{error}</div>}
+      {notice && <div className="simple-alert success">{notice}</div>}
 
-      {showCreate && (
-        <form className="network-create" onSubmit={submitCreate}>
-          <div className="network-section-title"><h3>新建方案草稿</h3><span>expected v0</span></div>
-          <div className="network-form-grid">
-            <label><span>方案 ID</span><input value={createID} onChange={(event) => setCreateID(event.target.value)} required disabled={writeDisabled} /></label>
-            <label><span>代理模式</span><select value={createForm.mode} onChange={(event) => setCreateForm({ ...createForm, mode: event.target.value })} disabled={writeDisabled}><option value="only_http_proxy">HTTP 代理</option><option value="only_socks5">SOCKS5 代理</option></select></label>
-            <label className="wide"><span>代理主机</span><input value={createForm.host} onChange={(event) => setCreateForm({ ...createForm, host: event.target.value })} placeholder="proxy.example.net" required disabled={writeDisabled} /></label>
-            <label><span>端口</span><input type="number" min="1" max="65535" value={createForm.port} onChange={(event) => setCreateForm({ ...createForm, port: event.target.value })} required disabled={writeDisabled} /></label>
-            <label className="full"><span>直连 IP（每行一个）</span><textarea value={createForm.direct_ips} onChange={(event) => setCreateForm({ ...createForm, direct_ips: event.target.value })} rows="3" placeholder={'10.0.0.8\n2001:db8::8'} disabled={writeDisabled} /></label>
-          </div>
-          <div className="network-form-actions"><button className="primary" type="submit" disabled={writeDisabled}>创建草稿</button></div>
-        </form>
-      )}
-
-      <div className="network-target-row">
-        <label htmlFor="network-runtime-target">目标 Agent / Backend / Worker</label>
-        <select id="network-runtime-target" value={selectedTargetKey} onChange={(event) => setSelectedTargetKey(event.target.value)} disabled={!targets.length || loading}>
-          {!targets.length && <option value="">暂无声明网络能力的 Runtime</option>}
-          {targets.map((option) => <option key={targetKey(option)} value={targetKey(option)}>{targetLabel(option)}</option>)}
-        </select>
-      </div>
-
-      <section className="network-mode-section" aria-label="目标网络模式">
-        <div className="network-section-title">
-          <h3>目标网络模式</h3>
-          <span>{selectedTarget ? `binding r${bindingRevision} · Runtime ${displayState(selectedTarget.backend?.health || 'unknown')}` : '未选择目标'}</span>
-        </div>
-        {selectedTarget && (
-          <>
-            <div className="network-mode-overview">
-              <div className="network-mode-control">
-                <span className="network-control-label">待测模式</span>
-                <div className="network-mode-options" role="radiogroup" aria-label="待测网络模式">
-                  {selectablePolicyModes.map((mode) => (
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={modeDraft === mode}
-                      className={modeDraft === mode ? 'selected' : ''}
-                      key={mode}
-                      onClick={() => setModeDraft(mode)}
-                      disabled={writeDisabled}
-                    >
-                      {modeLabels[mode]}
-                    </button>
+      {/* 1. Runtime 出网配置卡片 */}
+      <div className="simple-card runtime-card">
+        <div className="card-head">
+          <div className="target-select-row">
+            <span className="target-label">目标 Runtime:</span>
+            <select
+              className="target-dropdown"
+              value={selectedTargetKey}
+              onChange={(event) => setSelectedTargetKey(event.target.value)}
+              disabled={!targets.length || loading}
+            >
+              {!targets.length && <option value="">暂无可用 Runtime</option>}
+              {activeTargets.length > 0 && (
+                <optgroup label="当前活跃 Runtime (当前代次)">
+                  {activeTargets.map((option) => (
+                    <option key={targetKey(option)} value={targetKey(option)}>
+                      {targetLabel(option, true)}
+                    </option>
                   ))}
-                  {!selectablePolicyModes.length && <span className="network-inline-state">该 Runtime 未声明 inherit/direct 能力</span>}
-                </div>
-                {modeDraft === 'direct' && <small>Runtime 不注入代理，仍受主机路由与外部网络策略约束。</small>}
-              </div>
-              <div className="network-mode-facts">
-                <StatusFact label="期望状态" value={desiredBindingText(selectedBinding)} />
-                <StatusFact label="实际应用" value={appliedBindingText(selectedBinding)} tone={selectedBinding?.desired_status === 'applied' ? 'ok' : 'warn'} />
-                <StatusFact label="声明能力" value={selectedTargetModes.map((mode) => modeLabels[mode] || mode).join(' / ')} />
-              </div>
-            </div>
-            <div className="network-active-run" aria-label="当前 Backend 活动任务网络快照">
-              {selectedActiveRun ? (
-                <>
-                  <div className="network-active-run-head">
-                    <div><span>活动任务网络快照</span><strong>Task {selectedActiveRun.task_id || '未记录'}</strong></div>
-                    <span className={`network-state state-${selectedActiveRun.status}`}>{displayState(selectedActiveRun.status)}</span>
-                    {selectedActiveRun.task_id && typeof onOpenTask === 'function' && <button type="button" className="text-button" onClick={() => onOpenTask(selectedActiveRun.task_id)}>打开任务</button>}
-                  </div>
-                  <span>固定快照：{activeRunNetworkText(selectedActiveRun)} · binding r{selectedActiveRun.network_binding_revision || '未记录'}</span>
-                  <span>执行 Worker：{selectedActiveRun.worker_instance_id || '未记录'} · gen {selectedActiveRun.worker_generation || '未记录'}</span>
-                  <span>当前期望：{desiredBindingText(selectedBinding)}</span>
-                  <strong className={activeRunBindingMatch === true ? 'match' : activeRunBindingMatch === false ? 'mismatch' : ''}>
-                    对照：{activeRunBindingMatch === true ? '与当前期望一致' : activeRunBindingMatch === false ? '固定快照与当前期望不同' : selectedBinding ? '快照字段未记录，无法确认' : '当前无期望绑定，无法确认'}
-                  </strong>
-                </>
-              ) : <div className="network-inline-state">当前 Backend 无活动 Run</div>}
-            </div>
-            <div className="network-command-actions network-mode-actions">
-              <button className="outline" type="button" onClick={testMode} disabled={writeDisabled || !modeDraft}>测试模式</button>
-            </div>
-            <div className="network-mode-test-list" aria-label="模式测试历史">
-              {targetModeTests.map((test) => {
-                const publishable = isModeTestPublishable(test)
-                const matchesSelection = test.mode === modeDraft
-                  && test.worker_instance_id === selectedTarget.worker_id
-                  && test.generation === selectedTarget.generation
-                  && test.binding_revision === bindingRevision
-                return (
-                  <div className="network-mode-test-row" key={test.test_id}>
-                    <span className={`network-state state-${test.state}`}>{displayState(test.state)}</span>
-                    <strong>{modeLabels[test.mode] || test.mode} · policy v{test.policy_version}</strong>
-                    <span>binding r{test.binding_revision} · Worker {test.worker_instance_id} · gen {test.generation}</span>
-                    <span>{test.duration_ms ? `${test.duration_ms} ms` : '耗时未知'} · {displayDiagnostic(test.diagnostic_code)}</span>
-                    <time>{displayTime(test.created_at)}</time>
-                    <div className="network-mode-test-action">
-                      <span className={publishable ? 'match' : ''}>{publishable ? '当前可发布' : matchesSelection && ['pending', 'claimed'].includes(test.state) ? '等待测试通过' : matchesSelection ? '测试未通过' : '与当前选择不匹配'}</span>
-                      <button className="outline" type="button" onClick={() => publishMode(test)} disabled={writeDisabled || !publishable}>发布模式</button>
-                    </div>
-                    <ProbeResults results={test.probe_results} />
-                  </div>
-                )
-              })}
-              {!targetModeTests.length && <div className="network-empty compact">暂无模式测试记录</div>}
-            </div>
-          </>
-        )}
-        {!selectedTarget && <div className="network-empty compact">暂无可配置的 Runtime 目标</div>}
-      </section>
-
-      <div className="network-workspace">
-        <aside className="network-profile-pane" aria-label="网络方案列表">
-          <div className="network-pane-title"><strong>方案</strong><span>{profiles.length}</span></div>
-          <div className="network-profile-list">
-            {profiles.map((profile) => (
-              <button type="button" key={profile.profile_id} className={profile.profile_id === selectedProfileID ? 'selected' : ''} onClick={() => setSelectedProfileID(profile.profile_id)} aria-pressed={profile.profile_id === selectedProfileID}>
-                <span><strong>{profile.profile_id}</strong><small>{modeLabels[profile.mode] || profile.mode} · {profile.host}:{profile.port}</small></span>
-                <span className={`network-state state-${profile.state}`}>{displayState(profile.state)}</span>
-                <small>内容 v{profile.current_content_version} · 状态 r{profile.state_revision}</small>
-              </button>
-            ))}
-            {!profiles.length && <div className="network-empty">暂无网络方案</div>}
+                </optgroup>
+              )}
+              {historyTargets.length > 0 && (
+                <optgroup label="历史代次 (旧 Worker 实例)">
+                  {historyTargets.map((option) => (
+                    <option key={targetKey(option)} value={targetKey(option)}>
+                      {targetLabel(option, false)}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
           </div>
-        </aside>
-
-        <div className="network-detail-pane">
-          {loading && <div className="network-empty" role="status">正在同步网络状态...</div>}
-          {!loading && !selectedProfile && <div className="network-empty">选择或创建一个网络方案</div>}
-          {!loading && selectedProfile && (
-            <>
-              <div className="network-detail-head">
-                <div><span className="eyebrow">{selectedProfile.profile_id}</span><h3>{selectedProfile.host}:{selectedProfile.port}</h3></div>
-                <span className={`network-state state-${selectedProfile.state}`}>{displayState(selectedProfile.state)}</span>
-              </div>
-
-              <div className="network-facts" aria-label="配置状态">
-                <StatusFact label="配置有效" value={configurationStatus} tone={configurationStatus === '已验证' ? 'ok' : 'warn'} />
-                <StatusFact label="测试状态" value={displayState(selectedProfile.state)} tone={testReady || selectedProfile.state === 'published' ? 'ok' : 'warn'} />
-                <StatusFact label="发布内容" value={selectedProfile.published_content_version ? `v${selectedProfile.published_content_version}` : '未发布'} />
-                <StatusFact label="Worker 应用" value={appliedProfile} tone={appliedToSelected ? 'ok' : 'warn'} />
-                <StatusFact label="Runtime 健康" value={displayState(runtimeHealth)} tone={runtimeHealth === 'healthy' ? 'ok' : runtimeHealth === 'unknown' ? '' : 'warn'} />
-              </div>
-
-              <form className="network-section" onSubmit={submitEdit}>
-                <div className="network-section-title"><h3>方案内容</h3><span>内容 v{selectedProfile.current_content_version} · 编辑基线 r{editBaselineRevision} · 当前 r{selectedProfile.state_revision}</span></div>
-                {(editConflict || (editDirty && editBaselineRevision !== selectedProfile.state_revision)) && <div className="network-edit-conflict" role="alert"><span>服务端版本已变化，本地修改尚未重新基于当前版本。</span><div><button type="button" className="outline" onClick={rebaseEdit}>按当前版本重新确认</button><button type="button" className="text-button" onClick={discardEdit}>放弃本地修改</button></div></div>}
-                <div className="network-form-grid">
-                  <label><span>代理模式</span><select value={editForm.mode} onChange={(event) => { setEditForm({ ...editForm, mode: event.target.value }); setEditDirty(true) }} disabled={writeDisabled}><option value="only_http_proxy">HTTP 代理</option><option value="only_socks5">SOCKS5 代理</option></select></label>
-                  <label className="wide"><span>代理主机</span><input value={editForm.host} onChange={(event) => { setEditForm({ ...editForm, host: event.target.value }); setEditDirty(true) }} required disabled={writeDisabled} /></label>
-                  <label><span>端口</span><input type="number" min="1" max="65535" value={editForm.port} onChange={(event) => { setEditForm({ ...editForm, port: event.target.value }); setEditDirty(true) }} required disabled={writeDisabled} /></label>
-                  <label className="full"><span>直连 IP（每行一个，不支持 CIDR）</span><textarea value={editForm.direct_ips} onChange={(event) => { setEditForm({ ...editForm, direct_ips: event.target.value }); setEditDirty(true) }} rows="3" disabled={writeDisabled} /></label>
-                </div>
-                <div className="network-form-actions"><span>manifest {shortDigest(selectedProfile.manifest_digest)}</span><button className="outline" type="submit" disabled={writeDisabled || editConflict || editBaselineRevision !== selectedProfile.state_revision}>保存为新草稿</button></div>
-              </form>
-
-              <section className="network-section">
-                <div className="network-section-title"><h3>凭据</h3><span>{selectedProfile.secret_present ? '已配置' : '未配置'}</span></div>
-                {selectedProfile.mode === 'only_http_proxy' && <div className="network-inline-state">HTTP 代理模式不支持认证凭据。</div>}
-                {selectedProfile.mode === 'only_socks5' && !canManageSecrets && <div className="network-inline-state">仅 Owner 可替换凭据。</div>}
-                {selectedProfile.mode === 'only_socks5' && canManageSecrets && (
-                  <form className="network-secret-form" onSubmit={submitSecret} autoComplete="off">
-                    <label><span>用户名</span><input value={secretForm.username} onChange={(event) => setSecretForm({ ...secretForm, username: event.target.value })} disabled={ownerWriteDisabled} autoComplete="off" /></label>
-                    <label><span>密码</span><input type="password" value={secretForm.password} onChange={(event) => setSecretForm({ ...secretForm, password: event.target.value })} required disabled={ownerWriteDisabled} autoComplete="new-password" /></label>
-                    <button className="outline" type="submit" disabled={ownerWriteDisabled || !secretForm.password}>替换凭据</button>
-                  </form>
-                )}
-              </section>
-
-              <section className="network-section network-command-section">
-                <div className="network-section-title"><h3>测试、发布与绑定</h3><span>{selectedTarget ? targetLabel(selectedTarget) : '未选择目标'}</span></div>
-                {selectedTarget && !selectedTargetSupportsProfile && <div className="network-inline-state">该 Runtime 未声明命名代理方案能力。</div>}
-                <div className="network-command-actions">
-                  <button className="outline" type="button" onClick={testProfile} disabled={writeDisabled || !selectedTarget || !selectedTargetSupportsProfile}>测试当前内容</button>
-                  <button className="outline" type="button" onClick={publishProfile} disabled={writeDisabled || !testReady || !selectedProfile.ready_test_id}>发布已测试内容</button>
-                  <button className="primary" type="button" onClick={bindProfile} disabled={writeDisabled || !selectedTarget || !selectedTargetSupportsProfile || !selectedProfile.published_content_version}>绑定发布版本</button>
-                </div>
-                <div className="network-version-compare">
-                  <span>期望：{desiredBindingText(selectedBinding)}</span>
-                  <span>实际：{appliedBindingText(selectedBinding)}</span>
-                </div>
-              </section>
-
-              <section className="network-section">
-                <div className="network-section-title"><h3>内容版本</h3><span>{profileVersions.length}</span></div>
-                <div className="network-table-wrap">
-                  <table className="network-table">
-                    <thead><tr><th>版本</th><th>端点</th><th>发布事实</th><th>创建时间</th><th><span className="sr-only">操作</span></th></tr></thead>
-                    <tbody>
-                      {profileVersions.map((version) => <tr key={version.content_version}><td>v{version.content_version}</td><td>{modeLabels[version.mode] || version.mode}<br /><small>{version.host}:{version.port}</small></td><td>{version.current_published ? '当前发布' : version.published ? '曾发布' : '未发布'}</td><td>{displayTime(version.created_at)}</td><td><button type="button" className="text-button" onClick={() => rollback(version)} disabled={writeDisabled || !selectedTargetSupportsProfile || !versionBelongsToSelectedBinding(version) || !version.published || version.current_published}>创建回退草稿</button></td></tr>)}
-                      {!profileVersions.length && <tr><td colSpan="5">暂无版本记录</td></tr>}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section className="network-section">
-                <div className="network-section-title"><h3>分层测试</h3><span>{profileTests.length}</span></div>
-                <div className="network-test-list">
-                  {profileTests.map((test) => <div className="network-test-row" key={test.test_id}><span className={`network-state state-${test.state}`}>{displayState(test.state)}</span><strong>内容 v{test.content_version}</strong><span>{test.backend_id} · gen {test.generation}</span><span>{test.duration_ms ? `${test.duration_ms} ms` : '耗时未知'}</span><span>{displayDiagnostic(test.diagnostic_code)}</span><time>{displayTime(test.created_at)}</time><ProbeResults results={test.probe_results} /></div>)}
-                  {!profileTests.length && <div className="network-empty compact">暂无测试记录</div>}
-                </div>
-              </section>
-            </>
+          {selectedTarget && (
+            <div className="target-meta-badges">
+              <span className={`gen-badge ${isTargetCurrent(selectedTarget) ? 'is-current' : 'is-history'}`}>
+                {isTargetCurrent(selectedTarget) ? '● 当前代次' : '○ 历史代次'} (gen {selectedTarget.generation})
+              </span>
+              <span className={`simple-health health-${selectedTarget.backend?.health || 'unknown'}`}>
+                Backend: {displayState(selectedTarget.backend?.health || 'unknown')}
+              </span>
+            </div>
           )}
         </div>
+
+        {selectedTarget ? (
+          <div className="card-body">
+            {!isTargetCurrent(selectedTarget) && (
+              <div className="simple-alert warning" style={{ marginBottom: '14px', fontSize: '13px' }}>
+                提示：当前查看的是历史已退役的 Worker 代次（gen {selectedTarget.generation}），该实例已离线，无法下发网络测试或保存出网配置。如需配置，请在上方选择【当前活跃代次】。
+              </div>
+            )}
+
+            <div className="mode-selection-group">
+              <span className="field-label">出网方式:</span>
+              <div className="mode-pill-row" role="radiogroup">
+                {availableTargetModes.map((mode) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={modeDraft === mode}
+                    className={`mode-pill ${modeDraft === mode ? 'active selected' : ''}`}
+                    key={mode}
+                    onClick={() => setModeDraft(mode)}
+                    disabled={writeDisabled || !isTargetCurrent(selectedTarget)}
+                  >
+                    {mode === 'inherit' && '系统默认 (inherit)'}
+                    {mode === 'direct' && '直接出网 (direct)'}
+                    {mode === 'named_profile' && '走代理服务器'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {modeDraft === 'named_profile' && (
+              <div className="proxy-select-wrap">
+                <label htmlFor="select-proxy-node">选择代理节点:</label>
+                <select
+                  id="select-proxy-node"
+                  className="proxy-dropdown"
+                  value={selectedProfileID}
+                  onChange={(e) => setSelectedProfileID(e.target.value)}
+                  disabled={writeDisabled || !isTargetCurrent(selectedTarget) || !profiles.length}
+                >
+                  {!profiles.length && <option value="">暂无代理节点，请在下方添加</option>}
+                  {profiles.map((p) => (
+                    <option key={p.profile_id} value={p.profile_id}>
+                      {p.profile_id} ({p.mode === 'only_socks5' ? 'SOCKS5' : 'HTTP'}, {p.host}:{p.port})
+                      {p.secret_present ? ' · [含密码]' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* 操作按钮组 */}
+            <div className="actions-row">
+              <button
+                type="button"
+                className="outline test-button"
+                onClick={handleTestConnection}
+                disabled={writeDisabled || !isTargetCurrent(selectedTarget) || (modeDraft === 'named_profile' && !selectedProfile)}
+                title={!isTargetCurrent(selectedTarget) ? '选中的 Runtime 为历史已退役代次' : ''}
+              >
+                ⚡ 测试连接
+              </button>
+              <button
+                type="button"
+                className="primary apply-button"
+                onClick={handleSaveAndApply}
+                disabled={writeDisabled || !isTargetCurrent(selectedTarget) || (modeDraft === 'named_profile' && !selectedProfile)}
+                title={!isTargetCurrent(selectedTarget) ? '选中的 Runtime 为历史已退役代次' : ''}
+              >
+                保存并应用
+              </button>
+            </div>
+
+            {/* 状态简报行 */}
+            <div className="status-brief-row">
+              <div className="brief-item">
+                <span className="brief-label">实际生效:</span>
+                <strong className={selectedBinding?.desired_status === 'applied' ? 'text-ok' : 'text-warn'}>
+                  {appliedSummary}
+                </strong>
+              </div>
+              {currentTest && (
+                <div className="brief-item">
+                  <span className="brief-label">测试结果:</span>
+                  <span className={`test-badge state-${currentTest.state}`}>
+                    ● {displayState(currentTest.state)}
+                    {currentTest.duration_ms ? ` (${currentTest.duration_ms}ms)` : ''}
+                    {currentTest.diagnostic_code ? ` · ${displayDiagnostic(currentTest.diagnostic_code)}` : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* 活动任务运行保护提示 */}
+            {selectedActiveRun && (
+              <div className="active-run-banner">
+                <span>
+                  当前正在运行任务 <strong>{selectedActiveRun.task_id}</strong>，已固定网络快照（{activeRunNetworkText(selectedActiveRun)}）。修改将在下一个任务执行时生效。
+                </span>
+                {selectedActiveRun.task_id && typeof onOpenTask === 'function' && (
+                  <button type="button" className="text-link" onClick={() => onOpenTask(selectedActiveRun.task_id)}>
+                    查看任务 →
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="empty-notice">暂无可配置的 Runtime 目标</div>
+        )}
       </div>
 
-      <section className="network-bindings-section">
-        <div className="network-section-title"><h3>Worker 绑定</h3><span>{bindings.length}</span></div>
-        <div className="network-binding-list">
-          {bindings.map((binding) => <div className="network-binding-row" key={`${binding.agent_id}-${binding.backend_id}`}><div><strong>{binding.agent_id} / {binding.backend_id}</strong><span className={`network-state state-${binding.desired_status}`}>{displayState(binding.desired_status)}</span></div><span>期望 {desiredBindingText(binding)} · binding r{binding.version}</span><span>实际 {appliedBindingText(binding)}</span>{binding.diagnostic && <span className="binding-diagnostic">应用诊断：{displayDiagnostic(binding.diagnostic)}</span>}</div>)}
-          {!bindings.length && <div className="network-empty compact">暂无 Worker 绑定</div>}
+      {/* 2. 代理池管理卡片 */}
+      <div className="simple-card pool-card">
+        <div className="pool-card-head">
+          <div>
+            <h3>代理池管理 ({profiles.length})</h3>
+            <p>可供任何 Runtime 选用的 HTTP / SOCKS5 代理服务器</p>
+          </div>
+          <button
+            type="button"
+            className="outline add-proxy-btn"
+            onClick={() => setShowCreate((v) => !v)}
+            disabled={writeDisabled}
+          >
+            {showCreate ? '收起表单' : '+ 添加新代理'}
+          </button>
         </div>
-      </section>
 
-      {canManageSecrets && (
-        <form className="network-import-section" onSubmit={importProfile}>
-          <div className="network-section-title"><h3>从选中 Worker 一次性导入</h3><span>{selectedTarget ? `gen ${selectedTarget.generation}` : '未选择目标'}</span></div>
-          <label><span>新方案 ID</span><input value={importProfileID} onChange={(event) => setImportProfileID(event.target.value)} required disabled={ownerWriteDisabled} /></label>
-          <button className="outline" type="submit" disabled={ownerWriteDisabled || !selectedTarget || !selectedTargetSupportsProfile || !importProfileID.trim()}>开始导入</button>
-        </form>
-      )}
+        {showCreate && (
+          <form className="simple-create-form" onSubmit={handleCreateProxy}>
+            <h4>添加代理服务器</h4>
+            <div className="form-grid">
+              <label>
+                <span>方案名称 / ID</span>
+                <input
+                  value={createForm.id}
+                  onChange={(e) => setCreateForm({ ...createForm, id: e.target.value })}
+                  placeholder={newProfileID()}
+                  disabled={writeDisabled}
+                />
+              </label>
+              <label>
+                <span>协议类型</span>
+                <select
+                  value={createForm.mode}
+                  onChange={(e) => setCreateForm({ ...createForm, mode: e.target.value })}
+                  disabled={writeDisabled}
+                >
+                  <option value="only_http_proxy">HTTP 代理</option>
+                  <option value="only_socks5">SOCKS5 代理 (支持用户名密码)</option>
+                </select>
+              </label>
+              <label>
+                <span>代理服务器地址</span>
+                <input
+                  value={createForm.host}
+                  onChange={(e) => setCreateForm({ ...createForm, host: e.target.value })}
+                  placeholder="127.0.0.1 或 server"
+                  required
+                  disabled={writeDisabled}
+                />
+              </label>
+              <label>
+                <span>端口号</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="65535"
+                  value={createForm.port}
+                  onChange={(e) => setCreateForm({ ...createForm, port: e.target.value })}
+                  placeholder="7897"
+                  required
+                  disabled={writeDisabled}
+                />
+              </label>
+              {createForm.mode === 'only_socks5' && (
+                <>
+                  <label>
+                    <span>用户名 (可选)</span>
+                    <input
+                      value={createForm.username}
+                      onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
+                      autoComplete="off"
+                      disabled={writeDisabled || !canManageSecrets}
+                    />
+                  </label>
+                  <label>
+                    <span>密码 (可选)</span>
+                    <input
+                      type="password"
+                      value={createForm.password}
+                      onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                      autoComplete="new-password"
+                      disabled={writeDisabled || !canManageSecrets}
+                    />
+                  </label>
+                </>
+              )}
+            </div>
+            <div className="form-actions">
+              <button type="button" className="text-btn" onClick={() => setShowCreate(false)}>取消</button>
+              <button type="submit" className="primary" disabled={writeDisabled}>确认添加到代理池</button>
+            </div>
+          </form>
+        )}
+
+        <div className="proxy-item-list">
+          {profiles.map((p) => (
+            <div className={`proxy-item-card ${p.profile_id === selectedProfileID ? 'selected' : ''}`} key={p.profile_id}>
+              <div className="proxy-item-left">
+                <span className={`protocol-tag ${p.mode}`}>
+                  {p.mode === 'only_socks5' ? 'SOCKS5' : 'HTTP'}
+                </span>
+                <div className="proxy-item-info">
+                  <strong>{p.profile_id}</strong>
+                  <span>{p.host}:{p.port}</span>
+                </div>
+              </div>
+              <div className="proxy-item-right">
+                {p.secret_present && <span className="secret-tag">🔒 已设密码</span>}
+              </div>
+            </div>
+          ))}
+          {!profiles.length && <div className="empty-notice">代理池暂无配置</div>}
+        </div>
+      </div>
     </section>
   )
 }

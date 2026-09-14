@@ -242,6 +242,9 @@ func (r *Runner) heartbeat(ctx context.Context, session *api.WorkerSession, stat
 func (r *Runner) applyNetworkBindings(bindings []domain.NetworkBinding) map[string]api.NetworkBindingAck {
 	acks := make(map[string]api.NetworkBindingAck, len(bindings))
 	for _, binding := range bindings {
+		if binding.Mode != domain.NetworkNamedProfile || binding.ProfileID == "" || binding.Profile == nil {
+			continue
+		}
 		ack := api.NetworkBindingAck{BackendID: binding.BackendID, ProfileID: binding.ProfileID, ProfileVersion: binding.ProfileVersion, BindingRevision: binding.Version, State: "applied"}
 		if err := r.backends.ApplyNetworkBinding(binding); err != nil {
 			ack.State = "failed"

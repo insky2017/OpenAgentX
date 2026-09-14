@@ -1,0 +1,13 @@
+version: 1
+agent_id: orchestrator
+principal_id: agent-orchestrator
+organization_id: default
+display_name: Orchestrator
+profile:
+  instructions_path: ROLE.md
+  workspace_root: ../../..
+  capabilities:
+    - understand
+    - decompose
+    - delegate
+    - review
