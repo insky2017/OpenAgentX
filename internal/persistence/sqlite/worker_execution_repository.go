@@ -20,6 +20,10 @@ func (r *Repository) ListWorkerBackends(ctx context.Context, workerID string) ([
 		return nil, err
 	}
 	defer tx.Rollback()
+	return listWorkerBackends(ctx, tx, workerID)
+}
+
+func listWorkerBackends(ctx context.Context, tx *sql.Tx, workerID string) ([]openruntime.BackendRegistration, error) {
 	var agentID string
 	var generation int64
 	if err := tx.QueryRowContext(ctx, `SELECT agent_id, generation FROM worker_instances WHERE worker_instance_id=?`, workerID).Scan(&agentID, &generation); err != nil {

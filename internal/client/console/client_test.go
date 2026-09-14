@@ -3,6 +3,7 @@ package console
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net"
 	"net/http"
 	"os"
@@ -50,7 +51,7 @@ func loginResponse(w http.ResponseWriter) {
 	_ = json.NewEncoder(w).Encode(openapi.WebSessionResponse{CSRFToken: "csrf-value"})
 }
 
-func TestFollowReconnectsFromLastSequenceAndRefreshesGeneration(t *testing.T) {
+func TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence(t *testing.T) {
 	var mu sync.Mutex
 	attachCount := 0
 	var afterValues []int64
@@ -66,7 +67,7 @@ func TestFollowReconnectsFromLastSequenceAndRefreshesGeneration(t *testing.T) {
 			attachCount++
 			generation := attachCount
 			mu.Unlock()
-			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", Generation: int64(generation), WorkerInstanceID: "worker-" + strconv.Itoa(generation)})
+			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", Generation: int64(generation), WorkerInstanceID: "worker-" + strconv.Itoa(generation), SnapshotSequence: 4})
 		case openapi.ObserveEventsStreamPath:
 			after, _ := strconv.ParseInt(r.URL.Query().Get("after_sequence"), 10, 64)
 			mu.Lock()
@@ -109,8 +110,71 @@ func TestFollowReconnectsFromLastSequenceAndRefreshesGeneration(t *testing.T) {
 	}
 	mu.Lock()
 	defer mu.Unlock()
-	if !reflect.DeepEqual(generations, []int64{1, 2}) || !reflect.DeepEqual(sequences, []int64{5, 6}) || !reflect.DeepEqual(afterValues, []int64{0, 5}) {
+	if !reflect.DeepEqual(generations, []int64{1}) || !reflect.DeepEqual(sequences, []int64{5, 6}) || !reflect.DeepEqual(afterValues, []int64{4, 5}) {
 		t.Fatalf("reconnect generations=%v sequences=%v cursors=%v", generations, sequences, afterValues)
+	}
+}
+
+func TestFollowReattachesOnlyAfterStructuredRetentionGap(t *testing.T) {
+	var mu sync.Mutex
+	attachCount := 0
+	var afterValues []int64
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case openapi.AuthLoginPath:
+			loginResponse(w)
+		case consoleapi.AttachPath:
+			mu.Lock()
+			attachCount++
+			count := attachCount
+			mu.Unlock()
+			sequence := int64(4)
+			if count > 1 {
+				sequence = 20
+			}
+			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-current", Generation: 3, SnapshotSequence: sequence})
+		case openapi.ObserveEventsStreamPath:
+			after, _ := strconv.ParseInt(r.URL.Query().Get("after_sequence"), 10, 64)
+			mu.Lock()
+			afterValues = append(afterValues, after)
+			requestCount := len(afterValues)
+			mu.Unlock()
+			if requestCount == 1 {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusConflict)
+				_ = json.NewEncoder(w).Encode(openapi.ErrorResponse{Code: openapi.ErrorEventCursorExpired, Message: "expired"})
+				return
+			}
+			w.Header().Set("Content-Type", "text/event-stream")
+			_, _ = w.Write([]byte("id: 21\ndata: {\"sequence\":21,\"event_id\":\"event-21\"}\n\n"))
+		default:
+			http.NotFound(w, r)
+		}
+	})
+	client := newUnixTestClient(t, handler)
+	client.reconnectDelay = time.Millisecond
+	if err := client.Login(ctx, "owner", "password"); err != nil {
+		t.Fatal(err)
+	}
+	var snapshots, events []int64
+	err := client.Follow(ctx, "quote", consoleapi.ModeNormal, 0,
+		func(attached consoleapi.AttachResponse) error {
+			snapshots = append(snapshots, attached.SnapshotSequence)
+			return nil
+		}, func(event openapi.JournalEventReadModel) error {
+			events = append(events, event.Sequence)
+			cancel()
+			return nil
+		})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if !reflect.DeepEqual(snapshots, []int64{4, 20}) || !reflect.DeepEqual(afterValues, []int64{4, 20}) || !reflect.DeepEqual(events, []int64{21}) {
+		t.Fatalf("gap recovery snapshots=%v cursors=%v events=%v", snapshots, afterValues, events)
 	}
 }
 
@@ -179,12 +243,30 @@ func TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch(t *testing.T) {
 	for name, stream := range map[string]string{
 		"missing id":        "data: {\"sequence\":1}\n\n",
 		"sequence mismatch": "id: 2\ndata: {\"sequence\":1}\n\n",
+		"backward sequence": "id: 4\ndata: {\"sequence\":4}\n\n",
 	} {
 		t.Run(name, func(t *testing.T) {
-			if _, err := readEventStream(strings.NewReader(stream), 0, func(openapi.JournalEventReadModel) error { return nil }); err == nil {
+			after := int64(0)
+			if name == "backward sequence" {
+				after = 5
+			}
+			if _, err := readEventStream(strings.NewReader(stream), after, func(openapi.JournalEventReadModel) error { return nil }); err == nil {
 				t.Fatal("unsafe SSE frame was accepted")
 			}
 		})
+	}
+}
+
+func TestEventStreamAdvancesOnlyAfterSuccessfulApplyAndDeduplicates(t *testing.T) {
+	applied := 0
+	stream := "id: 5\ndata: {\"sequence\":5,\"event_id\":\"duplicate\"}\n\n" +
+		"id: 6\ndata: {\"sequence\":6,\"event_id\":\"new\"}\n\n"
+	cursor, err := readEventStream(strings.NewReader(stream), 5, func(openapi.JournalEventReadModel) error {
+		applied++
+		return errors.New("apply failed")
+	})
+	if err == nil || cursor != 5 || applied != 1 {
+		t.Fatalf("failed apply cursor=%d applied=%d err=%v", cursor, applied, err)
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	consoleclient "openagentx/internal/client/console"
+	"openagentx/internal/consolemodel"
 	"openagentx/internal/domain"
 	"openagentx/internal/fleet"
 )
@@ -82,7 +83,7 @@ func resolveAgentFromTmux(ctx context.Context, runner fleet.CommandRunner) (stri
 }
 
 func runInteractiveAttach(ctx context.Context, cancel context.CancelFunc, client Client, agentID, organizationID, mode string, deps Dependencies) error {
-	updates := make(chan attachUpdate, 64)
+	updates := make(chan attachUpdate)
 	followDone := make(chan error, 1)
 	go func() {
 		followDone <- client.Follow(ctx, agentID, mode, 0,
@@ -104,13 +105,18 @@ func runInteractiveAttach(ctx context.Context, cancel context.CancelFunc, client
 			})
 	}()
 
-	var current consoleapi.AttachResponse
-	for current.AgentID == "" {
+	var reducer *consolemodel.Reducer
+	for reducer == nil {
 		select {
 		case update := <-updates:
 			if update.attached != nil {
-				current = *update.attached
-				if err := writeJSON(deps.Out, current); err != nil {
+				var err error
+				reducer, err = consolemodel.New(*update.attached)
+				if err != nil {
+					cancel()
+					return err
+				}
+				if err := writeJSON(deps.Out, reducer.Snapshot()); err != nil {
 					cancel()
 					return err
 				}
@@ -131,16 +137,27 @@ func runInteractiveAttach(ctx context.Context, cancel context.CancelFunc, client
 	for {
 		select {
 		case update := <-updates:
-			fmt.Fprintln(deps.Out)
 			if update.attached != nil {
-				current = *update.attached
-				if err := writeJSON(deps.Out, current); err != nil {
+				if err := reducer.ApplySnapshot(*update.attached); err != nil {
+					cancel()
+					return err
+				}
+				fmt.Fprintln(deps.Out)
+				if err := writeJSON(deps.Out, reducer.Snapshot()); err != nil {
 					cancel()
 					return err
 				}
 			} else if update.event != nil {
-				applyWorkerSnapshot(&current, *update.event)
-				if err := writeJSON(deps.Out, *update.event); err != nil {
+				result, err := reducer.Apply(*update.event)
+				if err != nil {
+					cancel()
+					return err
+				}
+				if result.Timeline == nil {
+					continue
+				}
+				fmt.Fprintln(deps.Out)
+				if err := writeJSON(deps.Out, *result.Timeline); err != nil {
 					cancel()
 					return err
 				}
@@ -154,7 +171,7 @@ func runInteractiveAttach(ctx context.Context, cancel context.CancelFunc, client
 				}
 				return fmt.Errorf("read Console command: %w", input.err)
 			}
-			result, plain, quit, err := executeREPLCommand(ctx, client, current, agentID, organizationID, input.line)
+			result, plain, quit, err := executeREPLCommand(ctx, client, reducer.Snapshot(), agentID, organizationID, input.line)
 			if err != nil {
 				fmt.Fprintf(deps.Err, "Console command failed: %v\n", err)
 			} else if plain != "" {
@@ -275,17 +292,6 @@ func positiveVersion(value string) (int64, error) {
 		return 0, fmt.Errorf("version must be a positive integer")
 	}
 	return version, nil
-}
-
-func applyWorkerSnapshot(attached *consoleapi.AttachResponse, event openapi.JournalEventReadModel) {
-	if attached == nil || event.Worker == nil || event.Worker.AgentID != attached.AgentID {
-		return
-	}
-	attached.WorkerInstanceID = event.Worker.WorkerInstanceID
-	attached.Generation = event.Worker.Generation
-	attached.WorkerStatus = event.Worker.Status
-	attached.LastHeartbeatAt = event.Worker.LastHeartbeatAt
-	attached.LeaseUntil = event.Worker.LeaseUntil
 }
 
 func writeJSON(writer io.Writer, value any) error {

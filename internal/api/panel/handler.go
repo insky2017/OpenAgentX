@@ -40,6 +40,7 @@ type State interface {
 	ListPendingApprovals(context.Context, int) ([]domain.ApprovalRequest, error)
 	GetApprovalRequest(context.Context, string) (*domain.ApprovalRequest, error)
 	LatestJournalSequence(context.Context) (int64, error)
+	JournalSequenceBounds(context.Context) (domain.JournalSequenceBounds, error)
 }
 
 // backendOptionsState is optional to keep the observe contract compatible with
@@ -1009,6 +1010,20 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			after = parsed
 		}
 	}
+	bounds, err := h.state.JournalSequenceBounds(r.Context())
+	if err != nil {
+		http.Error(w, "failed to inspect Event Journal cursor", http.StatusInternalServerError)
+		return
+	}
+	if after > 0 && bounds.Earliest > 0 && after < bounds.Earliest-1 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		_ = json.NewEncoder(w).Encode(openapi.ErrorResponse{
+			Code:    openapi.ErrorEventCursorExpired,
+			Message: "Event Journal cursor is no longer retained; re-attach for a consistent snapshot",
+		})
+		return
+	}
 	_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -1038,6 +1053,8 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			model := projectEvents([]domain.JournalEvent{ev})[0]
 			if ev.AggregateType == "worker_instance" {
 				model.Worker = h.workerEventSnapshot(r.Context(), ev.AggregateID)
+			} else if ev.AggregateType == "run_attempt" {
+				model.Run = h.runEventSnapshot(r.Context(), ev.AggregateID)
 			}
 			b, _ := json.Marshal(model)
 			fmt.Fprintf(w, "id: %d\ndata: %s\n\n", ev.Sequence, b)
@@ -1105,6 +1122,19 @@ func (h *Handler) workerEventSnapshot(ctx context.Context, workerID string) *ope
 		}
 	}
 	return nil
+}
+
+func (h *Handler) runEventSnapshot(ctx context.Context, runID string) *openapi.RunAttemptReadModel {
+	run, err := h.state.GetRunAttempt(ctx, runID)
+	if err != nil {
+		return nil
+	}
+	var worker *domain.WorkerInstance
+	if run.WorkerInstanceID != "" {
+		worker, _ = h.state.GetWorkerInstance(ctx, run.WorkerInstanceID)
+	}
+	model := runReadModel(*run, worker)
+	return &model
 }
 
 func observableAggregate(aggregateType string) bool {

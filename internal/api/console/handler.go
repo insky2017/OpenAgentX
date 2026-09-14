@@ -27,10 +27,7 @@ const (
 // ObserveState is intentionally narrow and does not expose repository handles
 // or Worker internals to the Console transport.
 type ObserveState interface {
-	ListAgents(context.Context, int) ([]domain.AgentIdentity, error)
-	ListWorkers(context.Context, int) ([]domain.WorkerInstance, error)
-	GetActiveRunForAgent(context.Context, string) (*domain.RunAttempt, error)
-	ListWorkerBackends(context.Context, string) ([]openruntime.BackendRegistration, error)
+	ConsoleSnapshot(context.Context, string) (domain.ConsoleSnapshot, error)
 }
 
 type Handler struct {
@@ -69,6 +66,7 @@ type AttachResponse struct {
 	ObserveBasePath  string                               `json:"observe_base_path"`
 	ControlBasePath  string                               `json:"control_base_path"`
 	Diagnostic       *DiagnosticView                      `json:"diagnostic,omitempty"`
+	SnapshotSequence int64                                `json:"snapshot_sequence"`
 }
 
 type RunSnapshot struct {
@@ -114,33 +112,19 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "diagnostic attach rate limited", http.StatusTooManyRequests)
 		return
 	}
-	agents, err := h.state.ListAgents(r.Context(), 1000)
+	snapshot, err := h.state.ConsoleSnapshot(r.Context(), agentID)
 	if err != nil {
-		http.Error(w, "failed to resolve Agent", http.StatusInternalServerError)
-		return
-	}
-	found := false
-	for _, agent := range agents {
-		if agent.ID == agentID {
-			found = true
-			break
+		if errors.Is(err, domain.ErrAgentNotFound) || errors.Is(err, domain.ErrNotFound) {
+			http.Error(w, "Agent not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "failed to resolve Console snapshot", http.StatusInternalServerError)
 		}
-	}
-	if !found {
-		http.Error(w, "Agent not found", http.StatusNotFound)
-		return
-	}
-	workers, err := h.state.ListWorkers(r.Context(), 1000)
-	if err != nil {
-		http.Error(w, "failed to resolve Worker", http.StatusInternalServerError)
 		return
 	}
 	response := AttachResponse{AgentID: agentID, Mode: mode, WorkerStatus: domain.WorkerStatusOffline,
-		ObserveBasePath: "/api/observe/v1", ControlBasePath: "/api/control/v1"}
-	for _, worker := range workers {
-		if worker.AgentID != agentID || worker.Generation < response.Generation {
-			continue
-		}
+		ObserveBasePath: "/api/observe/v1", ControlBasePath: "/api/control/v1",
+		SnapshotSequence: snapshot.SnapshotSequence}
+	if worker := snapshot.Worker; worker != nil {
 		response.Generation = worker.Generation
 		response.WorkerStatus = worker.Status
 		response.WorkerInstanceID = worker.ID
@@ -152,22 +136,24 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 				StartedAt: worker.StartedAt, UpdatedAt: worker.UpdatedAt, Draining: worker.Status == domain.WorkerStatusDraining}
 		}
 	}
-	if response.WorkerInstanceID != "" {
-		backends, backendErr := h.state.ListWorkerBackends(r.Context(), response.WorkerInstanceID)
-		if backendErr != nil {
-			http.Error(w, "failed to resolve Backend health", http.StatusInternalServerError)
-			return
-		}
-		response.BackendHealth = make(map[string]openruntime.BackendHealth, len(backends))
-		for _, backend := range backends {
-			response.BackendHealth[backend.BackendID] = backend.Health
+	if len(snapshot.BackendHealth) > 0 {
+		response.BackendHealth = make(map[string]openruntime.BackendHealth, len(snapshot.BackendHealth))
+		for backendID, healthValue := range snapshot.BackendHealth {
+			health := openruntime.BackendHealth(healthValue)
+			if !health.Valid() {
+				http.Error(w, "invalid Backend health in Console snapshot", http.StatusInternalServerError)
+				return
+			}
+			response.BackendHealth[backendID] = health
 		}
 	}
-	if run, runErr := h.state.GetActiveRunForAgent(r.Context(), agentID); runErr == nil {
+	if snapshot.ActiveRun != nil {
+		run := snapshot.ActiveRun
+		if run.AgentID != agentID {
+			http.Error(w, "invalid active RunAttempt in Console snapshot", http.StatusInternalServerError)
+			return
+		}
 		response.ActiveRun = &RunSnapshot{RunID: run.ID, TaskID: run.TaskID, Status: run.Status, StartedAt: run.StartedAt, UpdatedAt: run.UpdatedAt}
-	} else if !errors.Is(runErr, domain.ErrNotFound) {
-		http.Error(w, "failed to resolve active RunAttempt", http.StatusInternalServerError)
-		return
 	}
 	writeJSON(w, response)
 }

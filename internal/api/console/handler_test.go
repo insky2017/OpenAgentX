@@ -11,30 +11,15 @@ import (
 
 	"openagentx/internal/auth/web"
 	"openagentx/internal/domain"
-	openruntime "openagentx/internal/runtime"
 )
 
 type testState struct {
-	agents   []domain.AgentIdentity
-	workers  []domain.WorkerInstance
-	run      *domain.RunAttempt
-	backends map[string][]openruntime.BackendRegistration
+	snapshot domain.ConsoleSnapshot
+	err      error
 }
 
-func (s testState) ListAgents(context.Context, int) ([]domain.AgentIdentity, error) {
-	return s.agents, nil
-}
-func (s testState) ListWorkers(context.Context, int) ([]domain.WorkerInstance, error) {
-	return s.workers, nil
-}
-func (s testState) GetActiveRunForAgent(context.Context, string) (*domain.RunAttempt, error) {
-	if s.run == nil {
-		return nil, domain.ErrNotFound
-	}
-	return s.run, nil
-}
-func (s testState) ListWorkerBackends(_ context.Context, workerID string) ([]openruntime.BackendRegistration, error) {
-	return s.backends[workerID], nil
+func (s testState) ConsoleSnapshot(context.Context, string) (domain.ConsoleSnapshot, error) {
+	return s.snapshot, s.err
 }
 
 type consoleFixture struct {
@@ -43,7 +28,17 @@ type consoleFixture struct {
 }
 
 func newConsoleFixture(t *testing.T, workers []domain.WorkerInstance) consoleFixture {
-	return newConsoleFixtureWithState(t, testState{agents: []domain.AgentIdentity{{ID: "quote"}}, workers: workers})
+	snapshot := domain.ConsoleSnapshot{Agent: domain.AgentIdentity{ID: "quote"}}
+	if len(workers) > 0 {
+		current := workers[0]
+		for _, worker := range workers[1:] {
+			if worker.Generation > current.Generation || worker.Generation == current.Generation && worker.ID > current.ID {
+				current = worker
+			}
+		}
+		snapshot.Worker = &current
+	}
+	return newConsoleFixtureWithState(t, testState{snapshot: snapshot})
 }
 
 func newConsoleFixtureWithState(t *testing.T, state testState) consoleFixture {
@@ -72,19 +67,17 @@ func newConsoleFixtureWithState(t *testing.T, state testState) consoleFixture {
 func TestAttachIncludesCurrentRunAndBackendHealth(t *testing.T) {
 	now := time.Now().UTC()
 	fixture := newConsoleFixtureWithState(t, testState{
-		agents:  []domain.AgentIdentity{{ID: "quote"}},
-		workers: []domain.WorkerInstance{{ID: "worker-current", AgentID: "quote", Generation: 4, Status: domain.WorkerStatusOnline}},
-		run:     &domain.RunAttempt{ID: "run-current", TaskID: "task-current", AgentID: "quote", Status: domain.RunAttemptRunning, StartedAt: now, UpdatedAt: now},
-		backends: map[string][]openruntime.BackendRegistration{
-			"worker-current": {{BackendID: "agy", Health: openruntime.BackendHealthy}},
-		},
+		snapshot: domain.ConsoleSnapshot{Agent: domain.AgentIdentity{ID: "quote"},
+			Worker:        &domain.WorkerInstance{ID: "worker-current", AgentID: "quote", Generation: 4, Status: domain.WorkerStatusOnline},
+			ActiveRun:     &domain.RunAttempt{ID: "run-current", TaskID: "task-current", AgentID: "quote", Status: domain.RunAttemptRunning, StartedAt: now, UpdatedAt: now},
+			BackendHealth: map[string]string{"agy": "healthy"}, SnapshotSequence: 17},
 	})
 	response := fixture.request(AttachPath + "?agent_id=quote")
 	var attached AttachResponse
 	if response.Code != http.StatusOK || json.Unmarshal(response.Body.Bytes(), &attached) != nil {
 		t.Fatalf("attach status=%d body=%s", response.Code, response.Body.String())
 	}
-	if attached.ActiveRun == nil || attached.ActiveRun.RunID != "run-current" || attached.BackendHealth["agy"] != openruntime.BackendHealthy {
+	if attached.ActiveRun == nil || attached.ActiveRun.RunID != "run-current" || attached.BackendHealth["agy"] != "healthy" || attached.SnapshotSequence != 17 {
 		t.Fatalf("attach omitted active state: %+v", attached)
 	}
 }

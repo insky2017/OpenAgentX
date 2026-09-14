@@ -135,6 +135,7 @@ type JournalEventReadModel struct {
 	CreatedAt     time.Time            `json:"created_at"`
 	Output        *SafeOutputReadModel `json:"output,omitempty"`
 	Worker        *WorkerReadModel     `json:"worker,omitempty"`
+	Run           *RunAttemptReadModel `json:"run,omitempty"`
 }
 
 type SafeOutputReadModel struct {

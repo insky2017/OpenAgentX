@@ -224,6 +224,19 @@ func (s *testPanelState) LatestJournalSequence(context.Context) (int64, error) {
 	return s.journal[len(s.journal)-1].Sequence, nil
 }
 
+func (s *testPanelState) JournalSequenceBounds(context.Context) (domain.JournalSequenceBounds, error) {
+	var bounds domain.JournalSequenceBounds
+	for _, event := range s.journal {
+		if bounds.Earliest == 0 || event.Sequence < bounds.Earliest {
+			bounds.Earliest = event.Sequence
+		}
+		if event.Sequence > bounds.Latest {
+			bounds.Latest = event.Sequence
+		}
+	}
+	return bounds, nil
+}
+
 type rejectingCommandState struct{}
 
 func (rejectingCommandState) CreateTask(context.Context, *domain.Task, *domain.Message, *domain.MailboxItem, *domain.JournalEvent) (*domain.CreateTaskResult, error) {
@@ -660,6 +673,64 @@ func TestSSEReplaysAfterHighestClientSequence(t *testing.T) {
 	}
 }
 
+func TestSSERetentionGapIsStructuredBeforeStreamStarts(t *testing.T) {
+	state := &testPanelState{journal: []domain.JournalEvent{
+		{Sequence: 10, ID: "event-10", EventType: "task.created"},
+		{Sequence: 11, ID: "event-11", EventType: "task.running"},
+	}}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?after_sequence=8", nil)
+	request.AddCookie(panel.cookie)
+	response := httptest.NewRecorder()
+	panel.handler.ServeHTTP(response, request)
+	if response.Code != http.StatusConflict || response.Header().Get("Content-Type") != "application/json" ||
+		response.Flushed || strings.Contains(response.Header().Get("Content-Type"), "text/event-stream") {
+		t.Fatalf("gap response status=%d content-type=%q flushed=%v body=%q", response.Code, response.Header().Get("Content-Type"), response.Flushed, response.Body.String())
+	}
+	var apiError openapi.ErrorResponse
+	if err := json.Unmarshal(response.Body.Bytes(), &apiError); err != nil || apiError.Code != openapi.ErrorEventCursorExpired {
+		t.Fatalf("gap error=%+v decode=%v body=%q", apiError, err, response.Body.String())
+	}
+}
+
+func TestSSERetentionBoundariesRemainReadable(t *testing.T) {
+	tests := []struct {
+		name       string
+		journal    []domain.JournalEvent
+		after      string
+		wantEvent  string
+		cancelSoon bool
+	}{
+		{name: "empty journal", after: "0", cancelSoon: true},
+		{name: "after zero", journal: []domain.JournalEvent{{Sequence: 10, ID: "event-10", EventType: "task.created"}}, after: "0", wantEvent: "id: 10\n"},
+		{name: "earliest predecessor", journal: []domain.JournalEvent{{Sequence: 10, ID: "event-10", EventType: "task.created"}}, after: "9", wantEvent: "id: 10\n"},
+		{name: "earliest sequence", journal: []domain.JournalEvent{{Sequence: 10, ID: "event-10", EventType: "task.created"}}, after: "10", cancelSoon: true},
+		{name: "ahead of latest", journal: []domain.JournalEvent{{Sequence: 10, ID: "event-10", EventType: "task.created"}}, after: "11", cancelSoon: true},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			state := &testPanelState{journal: testCase.journal}
+			panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+			ctx, cancel := context.WithCancel(context.Background())
+			if testCase.cancelSoon {
+				cancel()
+			} else {
+				defer cancel()
+			}
+			request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?after_sequence="+testCase.after, nil).WithContext(ctx)
+			request.AddCookie(panel.cookie)
+			response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+			panel.handler.ServeHTTP(response, request)
+			if response.Code != http.StatusOK || response.Header().Get("Content-Type") != "text/event-stream" {
+				t.Fatalf("boundary status=%d content-type=%q body=%q", response.Code, response.Header().Get("Content-Type"), response.Body.String())
+			}
+			if testCase.wantEvent != "" && !strings.Contains(response.Body.String(), testCase.wantEvent) {
+				t.Fatalf("boundary omitted %q: %q", testCase.wantEvent, response.Body.String())
+			}
+		})
+	}
+}
+
 func TestSSEAgentFilterIncludesOnlyMatchingSafeRuntimeEvents(t *testing.T) {
 	state := &testPanelState{
 		tasks:    []domain.Task{{ID: "task-quote", TargetAgentID: "quote"}, {ID: "task-risk", TargetAgentID: "risk"}},
@@ -713,6 +784,35 @@ func TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot(t *testing.T) {
 	for _, forbidden := range []string{"998877", "private-worker-principal", "fencing_token", "authenticated_principal"} {
 		if strings.Contains(body, forbidden) {
 			t.Fatalf("worker SSE leaked %q: %s", forbidden, body)
+		}
+	}
+}
+
+func TestSSEIncludesSafeRunProjectionForReducer(t *testing.T) {
+	now := time.Now().UTC()
+	state := &testPanelState{
+		workers: []domain.WorkerInstance{{ID: "worker-quote", AgentID: "quote", Generation: 9}},
+		runs: []domain.RunAttempt{{ID: "run-quote", TaskID: "task-quote", AgentID: "quote",
+			Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-quote", FencingToken: 998877,
+			RequestedExecutionJSON: `{"secret":"must-not-appear"}`, ResolvedExecutionJSON: `{}`,
+			StartedAt: now, CreatedAt: now, UpdatedAt: now}},
+		journal: []domain.JournalEvent{{Sequence: 1, ID: "event-run-quote", AggregateType: "run_attempt",
+			AggregateID: "run-quote", EventType: "run_attempt.started"}},
+	}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	ctx, cancel := context.WithCancel(context.Background())
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?agent_id=quote", nil).WithContext(ctx)
+	request.AddCookie(panel.cookie)
+	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+	panel.handler.ServeHTTP(response, request)
+	body := response.Body.String()
+	if !strings.Contains(body, `"run":{"run_id":"run-quote","task_id":"task-quote","agent_id":"quote"`) ||
+		!strings.Contains(body, `"worker_generation":9`) {
+		t.Fatalf("safe Run projection missing: %s", body)
+	}
+	for _, forbidden := range []string{"998877", "must-not-appear", "requested_execution_json", "resolved_execution_json"} {
+		if strings.Contains(body, forbidden) {
+			t.Fatalf("Run projection leaked %q: %s", forbidden, body)
 		}
 	}
 }

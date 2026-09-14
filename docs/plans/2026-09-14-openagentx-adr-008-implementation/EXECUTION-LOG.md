@@ -53,7 +53,7 @@ M  deploy/systemd/openagentx-user.service
 | P0 | 受保护现场独立收口 | completed | `c3fc1bba8ddbae3eedace0c7a32537e2f47db307` | GO |
 | 01 | 基线隔离、契约冻结与测试地图 | completed | `35bd44564773882cfedefb31fad0afd64c0514e4` | GO |
 | 02 | 默认路径与 CLI 表面 | completed | `e690bbbd11046e63841a4a869a90f6aeb42c5575` + fix `c0e8d4aeae2516c005cedbce6c5b35d1b8b07553` | GO |
-| 03 | 一致 Attach cursor 与代际 reducer | pending | — | WAIT |
+| 03 | 一致 Attach cursor 与代际 reducer | active | — | WAIT |
 | 04 | 可撤销 CLI Token 会话 | pending | — | WAIT |
 | 05 | `OAX` workspace 与非破坏绑定 | pending | — | WAIT |
 | 06 | Console 主菜单、Agent selector 与全屏 TUI | pending | — | WAIT |
@@ -310,6 +310,70 @@ M  deploy/systemd/openagentx-user.service
   `TMPDIR` 下 `go test ./internal/client/console -count=1` 通过，其余受影响 package 定向测试和
   `go vet` 通过；Task 02 结论为 `GO`。
 - 主计划和 Task 02 front matter 已同步 `completed`；Task 03 保持 `pending/WAIT`，未开始。
+
+## 6. Task 03：一致 Attach cursor 与代际 reducer
+
+### 开始信息
+
+- 执行者：Codex
+- 开始时间（UTC）：`2026-09-14T16:03:37Z`
+- feature 基线：`518d8edd76ad6a5b9c7f17f3bf8a0153ae1e64b9`
+- branch/worktree：`codex/adr008-implementation` / `/home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree`
+- 开始状态：工作树干净，相对 `origin/main` ahead 5；监督者已明确 `GO Task 03`。
+- 边界：仅实现一致 Attach snapshot/cursor、Observe SSE retention gap 和共享 reducer；不开始
+  CLI Token/schema、`OAX` workspace、tmux 身份或 TUI，不操作任何真实运行状态。
+- 主计划和 Task 03 front matter 按 gate-record 协议继续保持 `pending`；Task 03 门禁保持 `WAIT`。
+
+### 实现范围与决策
+
+- `internal/domain/console_contract.go` 定义 transport 无关的 `ConsoleSnapshot` 与 Journal bounds；
+  persistence 未依赖 API DTO。
+- `internal/persistence/sqlite/console_snapshot.go` 在一个 `ReadOnly` SQLite 事务内依次读取
+  Agent、确定性当前 Worker（generation/updated_at/instance ID 降序）、有效 Backend health、
+  active RunAttempt，最后读取 Journal high-water；空 Journal high-water 为 `0`。
+- `internal/persistence/sqlite/worker_execution_repository.go` 仅抽取事务内 Backend 查询 helper，
+  保留既有 network binding 校验和 unavailable 降级语义；`journal.go` 增加 earliest/latest bounds。
+- `internal/api/console/handler.go` 改为一次 repository snapshot 调用并新增唯一
+  `snapshot_sequence`；Normal/Diagnostic 继续共用该路径和既有授权/脱敏边界。
+- `internal/api/panel/handler.go` 在写入 SSE headers 前检查 retention gap；稳定返回 HTTP `409`
+  和 `EVENT_CURSOR_EXPIRED`。空 Journal、`after=0`、earliest predecessor/earliest、
+  `after>latest` 均保持合法。Worker 和 active Run 使用既有安全 read model 投影。
+- `internal/client/console/client.go` 首次从 Attach cursor Follow；普通重连从最后成功应用的
+  sequence 继续且不重新 Attach；只有结构化 retention gap 才重新 Attach。重复幂等，倒退
+  fail closed，callback 失败不推进 cursor。
+- `internal/consolemodel/` 新增纯 reducer：旧 generation、同代异 instance 和无关 Agent 事件
+  安全忽略但推进 cursor；heartbeat burst 合并，Worker replacement、状态/lease 异常和
+  active Run 切换进入 Timeline；输入仅为安全 API read model。
+- `internal/cli/console/repl.go` 使用同一 reducer 维护显示和控制身份；`/down` 始终读取 reducer
+  最新 WorkerInstanceID/generation，普通/旧代 heartbeat 不刷 Timeline。
+- 测试文件覆盖 Attach 投影、N/N+1 事务竞态、Journal/SSE 边界、K/K+1 reconnect、
+  duplicate/backward/gap、generation 48/42、Worker replacement、draining、active Run 切换、
+  heartbeat burst 和安全输出边界。
+
+### 验证记录
+
+| 时间 UTC | 命令 | 退出码/耗时 | 结果 |
+|---|---|---:|---|
+| `2026-09-14T16:09Z` | `go test ./internal/consolemodel ./internal/api/console ./internal/client/console ./internal/api/panel ./internal/cli/console ./internal/persistence/sqlite` | `0` / 约 11.4s | 首批实现与新增边界测试通过 |
+| `2026-09-14T16:12Z` | `go test ./internal/api/console ./internal/client/console ./internal/persistence/sqlite/... ./internal/safeoutput/... ./internal/api/panel ./internal/cli/console ./internal/consolemodel` | `0` / 约 1.2s（缓存为主） | Task 03 全部定向 package 通过 |
+| `2026-09-14T16:12Z` | `go test -race ./internal/api/console ./internal/client/console ./internal/persistence/sqlite/... ./internal/safeoutput/... ./internal/api/panel ./internal/cli/console ./internal/consolemodel` | `0` / 约 16s | race 通过；SQLite 14.198s、panel 15.215s |
+| `2026-09-14T16:13Z` | `go vet ./internal/domain ./internal/persistence/sqlite/... ./internal/api ./internal/api/console ./internal/api/panel ./internal/client/console ./internal/consolemodel ./internal/cli/console ./cmd/openagentx` | `0` / 约 1.2s（含后续命令） | 受影响 package vet 通过 |
+| `2026-09-14T16:13Z` | `go build -o /tmp/openagentx-adr008-task03 ./cmd/openagentx` | `0` | 构建通过；仅写入 `/tmp` |
+| `2026-09-14T16:13Z` | `./scripts/check-legacy-control-paths.sh --release` | `0` | 11 项均为 `CLEAN`，release check 通过 |
+| `2026-09-14T16:13Z` | `git diff --check` | `0` | 通过 |
+| `2026-09-14T16:18Z` | `go test ./...` | `0` / 约 8s | 全仓 Go 测试通过，无 package 失败 |
+| `2026-09-14T16:19Z` | 最终重复执行上述 Task 03 race、vet、build、release scanner、`git diff --check` | `0` / 约 16s | 最终验证全部通过；SQLite race 14.164s、panel race 15.908s |
+
+### 失败、纠正与外部状态
+
+- 本阶段无测试、race、vet、build、release scanner 或 diff-check 失败；无失败记录需要纠正。
+- 未修改 ADR、主计划或 Task 03 front matter；未开始 CLI Token/schema、`OAX` workspace、
+  tmux 身份或 TUI。
+- 仅使用测试临时 SQLite/HTTP/UDS fixture；未读取或修改真实 DB/socket/default tmux，未安装
+  `/tmp/openagentx-adr008-task03`，未操作 service、installed binary、remote feature branch 或父仓。
+- `2026-09-14T16:20:32Z` 提交前核验：feature 基线仍为 `518d8ed`、ahead 5；主工作树仍为
+  干净的 `main@c3fc1bba8ddbae3eedace0c7a32537e2f47db307`。父仓只显示既有 submodule
+  pointer 差异，本阶段未修改父仓。
 
 ## 7. Open Issues
 

@@ -31,6 +31,7 @@ type Client struct {
 
 type APIError struct {
 	StatusCode int
+	Code       string
 	Message    string
 }
 
@@ -40,6 +41,9 @@ func (e *terminalFollowError) Error() string { return e.err.Error() }
 func (e *terminalFollowError) Unwrap() error { return e.err }
 
 func (e *APIError) Error() string {
+	if e.Code != "" {
+		return fmt.Sprintf("Console API status %d (%s): %s", e.StatusCode, e.Code, e.Message)
+	}
 	return fmt.Sprintf("Console API status %d: %s", e.StatusCode, e.Message)
 }
 
@@ -146,9 +150,9 @@ func (c *Client) Events(ctx context.Context, agentID string, afterSequence int64
 	return response.Body, nil
 }
 
-// Follow reconnects the authenticated Agent stream from the last delivered
-// sequence. Attach is resolved again on every connection so a restarted Worker
-// is observed at its current generation rather than a stale instance ID.
+// Follow starts at the transactional Attach cursor and reconnects from the
+// last event successfully applied by the callback. It re-attaches only when
+// the server explicitly reports that retention has expired the cursor.
 func (c *Client) Follow(
 	ctx context.Context,
 	agentID string,
@@ -167,18 +171,29 @@ func (c *Client) Follow(
 	if delay <= 0 {
 		delay = time.Second
 	}
+	cursor := afterSequence
+	needsAttach := true
 	for {
-		attached, err := c.Attach(ctx, agentID, mode)
-		if err == nil {
-			if err = onAttach(attached); err != nil {
-				return err
+		var err error
+		if needsAttach {
+			var attached consoleapi.AttachResponse
+			attached, err = c.Attach(ctx, agentID, mode)
+			if err == nil && attached.SnapshotSequence < 0 {
+				return fmt.Errorf("Console Attach returned a negative snapshot sequence")
+			}
+			if err == nil {
+				if err = onAttach(attached); err != nil {
+					return err
+				}
+				cursor = attached.SnapshotSequence
+				needsAttach = false
 			}
 		}
 		if err == nil {
 			var stream io.ReadCloser
-			stream, err = c.Events(ctx, agentID, afterSequence)
+			stream, err = c.Events(ctx, agentID, cursor)
 			if err == nil {
-				afterSequence, err = readEventStream(stream, afterSequence, onEvent)
+				cursor, err = readEventStream(stream, cursor, onEvent)
 				_ = stream.Close()
 			}
 		}
@@ -190,6 +205,10 @@ func (c *Client) Follow(
 			return terminalErr.err
 		}
 		var apiErr *APIError
+		if errors.As(err, &apiErr) && apiErr.StatusCode == http.StatusConflict && apiErr.Code == openapi.ErrorEventCursorExpired {
+			needsAttach = true
+			continue
+		}
 		if errors.As(err, &apiErr) && apiErr.StatusCode >= 400 && apiErr.StatusCode < 500 {
 			return err
 		}
@@ -219,7 +238,10 @@ func readEventStream(reader io.Reader, afterSequence int64, onEvent func(openapi
 		if eventID <= 0 {
 			return &terminalFollowError{err: fmt.Errorf("Console SSE event is missing a positive id")}
 		}
-		if eventID <= afterSequence {
+		if eventID < afterSequence {
+			return &terminalFollowError{err: fmt.Errorf("Console SSE event sequence moved backward from %d to %d", afterSequence, eventID)}
+		}
+		if eventID == afterSequence {
 			return nil
 		}
 		var event openapi.JournalEventReadModel
@@ -316,6 +338,10 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		defer response.Body.Close()
 		message, _ := io.ReadAll(io.LimitReader(response.Body, 8<<10))
+		var structured openapi.ErrorResponse
+		if json.Unmarshal(message, &structured) == nil && structured.Code != "" {
+			return nil, &APIError{StatusCode: response.StatusCode, Code: structured.Code, Message: structured.Message}
+		}
 		return nil, &APIError{StatusCode: response.StatusCode, Message: strings.TrimSpace(string(message))}
 	}
 	if destination != nil {

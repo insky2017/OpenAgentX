@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
@@ -17,17 +19,21 @@ import (
 )
 
 type testClient struct {
-	mu              sync.Mutex
-	attached        consoleapi.AttachResponse
-	loginCount      int
-	attachCount     int
-	followCount     int
-	dispatches      []openapi.CreateTaskRequest
-	steers          []openapi.CreateMessageRequest
-	cancels         []openapi.CancelTaskRequest
-	approvals       []openapi.DecideApprovalRequest
-	workerCommands  []domain.WorkerCommandKind
-	attachedAgentID string
+	mu                sync.Mutex
+	attached          consoleapi.AttachResponse
+	loginCount        int
+	attachCount       int
+	followCount       int
+	dispatches        []openapi.CreateTaskRequest
+	steers            []openapi.CreateMessageRequest
+	cancels           []openapi.CancelTaskRequest
+	approvals         []openapi.DecideApprovalRequest
+	workerCommands    []domain.WorkerCommandKind
+	workerIDs         []string
+	workerGenerations []int64
+	attachedAgentID   string
+	followEvents      []openapi.JournalEventReadModel
+	eventsDelivered   chan struct{}
 }
 
 func (c *testClient) Login(context.Context, string, string) error {
@@ -50,8 +56,17 @@ func (c *testClient) Follow(ctx context.Context, agentID, _ string, _ int64, onA
 	if err := onAttach(response); err != nil {
 		return err
 	}
-	if err := onEvent(openapi.JournalEventReadModel{Sequence: 1, ID: "event-1", AggregateType: "task", AggregateID: "task-1", EventType: "task.created"}); err != nil {
-		return err
+	events := c.followEvents
+	if events == nil {
+		events = []openapi.JournalEventReadModel{{Sequence: 1, ID: "event-1", AggregateType: "task", AggregateID: "task-1", EventType: "task.created"}}
+	}
+	for _, event := range events {
+		if err := onEvent(event); err != nil {
+			return err
+		}
+	}
+	if c.eventsDelivered != nil {
+		close(c.eventsDelivered)
 	}
 	<-ctx.Done()
 	return nil
@@ -77,9 +92,22 @@ func (c *testClient) DecideApproval(_ context.Context, _ string, request openapi
 	return openapi.DecideApprovalResponse{}, nil
 }
 
-func (c *testClient) WorkerCommand(_ context.Context, _ string, _ int64, kind domain.WorkerCommandKind, _ string, _ bool) (openapi.WorkerCommandResponse, error) {
+func (c *testClient) WorkerCommand(_ context.Context, workerID string, generation int64, kind domain.WorkerCommandKind, _ string, _ bool) (openapi.WorkerCommandResponse, error) {
 	c.workerCommands = append(c.workerCommands, kind)
+	c.workerIDs = append(c.workerIDs, workerID)
+	c.workerGenerations = append(c.workerGenerations, generation)
 	return openapi.WorkerCommandResponse{}, nil
+}
+
+type gatedReader struct {
+	ready <-chan struct{}
+	once  sync.Once
+	inner io.Reader
+}
+
+func (r *gatedReader) Read(p []byte) (int, error) {
+	r.once.Do(func() { <-r.ready })
+	return r.inner.Read(p)
 }
 
 type testTmux struct {
@@ -141,6 +169,36 @@ func TestInteractiveAttachUsesOfficialClientForCommandsWhileFollowing(t *testing
 	}
 	if !strings.Contains(out.String(), foregroundUnavailable) || !strings.Contains(out.String(), replPrompt) || !strings.Contains(out.String(), "task.created") {
 		t.Fatalf("interactive output missing command bar or Follow event: %s", out.String())
+	}
+}
+
+func TestInteractiveAttachUsesReducerIdentityAndSuppressesOldHeartbeats(t *testing.T) {
+	now := time.Now().UTC()
+	delivered := make(chan struct{})
+	client := &testClient{
+		attached: consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-48",
+			Generation: 48, WorkerStatus: domain.WorkerStatusOnline, LeaseUntil: now.Add(time.Minute), SnapshotSequence: 100},
+		followEvents: []openapi.JournalEventReadModel{
+			{Sequence: 101, ID: "old-generation-heartbeat", EventType: "worker.heartbeat",
+				Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-42", AgentID: "quote", Generation: 42, Status: domain.WorkerStatusOffline}},
+			{Sequence: 102, ID: "current-heartbeat", EventType: "worker.heartbeat",
+				Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-48", AgentID: "quote", Generation: 48, Status: domain.WorkerStatusOnline, LeaseUntil: now.Add(2 * time.Minute)}},
+			{Sequence: 103, ID: "worker-replacement", EventType: "worker.registered",
+				Worker: &openapi.WorkerReadModel{WorkerInstanceID: "worker-49", AgentID: "quote", Generation: 49, Status: domain.WorkerStatusOnline, LeaseUntil: now.Add(3 * time.Minute)}},
+		},
+		eventsDelivered: delivered,
+	}
+	deps, out, stderr := consoleDeps(client, "", true)
+	deps.In = &gatedReader{ready: delivered, inner: strings.NewReader("/down\n/quit\n")}
+	if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "quote"}, deps); code != 0 {
+		t.Fatalf("attach code=%d stderr=%s", code, stderr.String())
+	}
+	if !reflect.DeepEqual(client.workerIDs, []string{"worker-49"}) || !reflect.DeepEqual(client.workerGenerations, []int64{49}) {
+		t.Fatalf("down used stale Worker identity ids=%v generations=%v", client.workerIDs, client.workerGenerations)
+	}
+	if strings.Contains(out.String(), "old-generation-heartbeat") || strings.Contains(out.String(), "current-heartbeat") ||
+		!strings.Contains(out.String(), "worker-replacement") {
+		t.Fatalf("heartbeat/replacement Timeline mismatch: %s", out.String())
 	}
 }
 

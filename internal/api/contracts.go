@@ -21,6 +21,7 @@ const (
 	ErrorFencingRejected       = "FENCING_REJECTED"
 	ErrorUnsupportedCapability = "UNSUPPORTED_CAPABILITY"
 	ErrorBackendUnavailable    = "BACKEND_UNAVAILABLE"
+	ErrorEventCursorExpired    = "EVENT_CURSOR_EXPIRED"
 	ErrorInternal              = "INTERNAL_ERROR"
 )
 

@@ -75,6 +75,15 @@ func (r *Repository) ListJournal(ctx context.Context, afterSequence int64, limit
 	return events, nil
 }
 
+func (r *Repository) JournalSequenceBounds(ctx context.Context) (domain.JournalSequenceBounds, error) {
+	var bounds domain.JournalSequenceBounds
+	if err := r.db.QueryRowContext(ctx, `SELECT COALESCE(MIN(sequence), 0), COALESCE(MAX(sequence), 0)
+		FROM event_journal`).Scan(&bounds.Earliest, &bounds.Latest); err != nil {
+		return bounds, fmt.Errorf("read Event Journal sequence bounds: %w", err)
+	}
+	return bounds, nil
+}
+
 func (r *Repository) ListTaskJournal(ctx context.Context, taskID string, afterSequence int64, limit int) ([]domain.JournalEvent, error) {
 	if taskID == "" {
 		return nil, domain.ErrInvalidInput("task id is required")
