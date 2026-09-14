@@ -1135,6 +1135,34 @@ M  deploy/systemd/openagentx-user.service
   review-fix 提交与最终独立重验通过后才可在 Task 07 gate record 中关闭。Task 07 继续
   `active/WAIT`，主计划/front matter 继续 `pending`，Task 08 未开始。
 
+### Task 07 preflight ordering 最终监督 review-fix（append-only）
+
+- `2026-09-14T22:50:57Z`：监督确认 `f5c0d0d549931e4104bc7248c5e5714305a242d9` 的三组
+  host consistency hardening 代码审查通过，Termux 默认环境完整 `go test ./internal/fleet`
+  已稳定通过，耗时约 99 秒；Task 07 gate 仍为 `NO-GO`，只修测试 umask 可移植性和 init
+  preflight 顺序，不进入 Task 08。
+- Termux 默认 umask 会把测试 `os.WriteFile(..., 0722)` 收窄，使文件实际不再 group/other writable，
+  原测试却继续要求产品拒绝。fixture 现在写入后显式 `os.Chmod(binary, 0722)`，先通过 `os.Stat`
+  断言实际 mode 精确为 0722，再验证 `canonicalUserBinary` fail closed；产品对不安全 binary 的检查
+  未放宽。
+- `fleet init` 原先在 manifest 缺失时先原子安装 Worker config 和 manifest，之后才调用
+  `newWorkspace()` 验证 canonical binary；missing/non-executable binary 会返回失败但已留下文件。
+  现在 `init/workspace/up` 在认证、manifest 检查和任何 config/manifest/tmux/systemd mutation 前
+  构造并验证 workspace，后续阶段复用该已验证 builder。`status/down` 不执行 binary preflight，
+  保持观察与 lifecycle 命令在 binary 缺失时可用。
+- 新增表驱动回归证明 missing 和 non-executable binary 均使 `fleet init` 返回失败，且 canonical
+  Worker config、manifest 和 tmux calls 全部为空；missing binary 下 `workspace/up` 的 tmux 和
+  systemctl calls 也全部为空。另有测试删除 binary 后分别执行 `fleet status` 和 `fleet down`，
+  两者均成功。umask 回归、init 零副作用、host 零 mutation 和 status/down 独立性定向测试均通过。
+- 本机 Ubuntu 24.04/tmux 3.4 验证通过：`go test ./internal/cli/fleet ./internal/fleet -count=1`
+  （含唯一 `tmux -L` 全部隔离集成）；Task 07 三包 race；`go test ./... -count=1`；受影响包 vet；
+  Go build；shell syntax；Worker unit 静态断言；临时目录、实际安装名下的
+  `systemd-analyze --user verify`；Web observation/PWA/build；release scanner 和 diff check。
+  本轮未操作真实 service、DB/socket、default tmux、installed binary 或父仓。
+- review-fix 提交精确 SHA 由提交后只读核验，并由下一次监督 gate record 记录；不 amend
+  `f5c0d0d`，feature 不 push。Task 07 继续 `active/WAIT`，主计划/front matter 继续 `pending`，
+  `T04-01`、`T05-01` 继续 `reopened/pending`，Task 08 未开始。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
@@ -1159,6 +1187,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T19:46:50Z | 监督最终复核 Task 05 三个提交 | 独立 Termux tmux 3.4 七组真实集成最终通过；主实现、hardening 和真实 binding 补证范围均通过；`T04-01`、`T05-01` 保留给 Task 07 | 记录三个精确 SHA、实际 clean/ahead、首次 NO-GO 三项修复和最终真实 binding 证据；仅同步三份 docs gate 状态 | Task 05 GO；Task 06 保持 `pending/WAIT` |
 | 2026-09-14T21:30:38Z | 监督最终复核 Task 06 三个提交 | 两轮 NO-GO 分别由 `5aa6c97`、`c42414b` 修复；独立 Termux 真实 PTY/tmux smoke 最终通过，TUI 状态流和 SSE 安全/兼容边界成立 | 记录三个精确 SHA、实际 clean/ahead 与最终验证；仅同步三份 docs gate 状态，保留 `T04-01`、`T05-01` | Task 06 GO；Task 07 保持 `pending/WAIT` |
 | 2026-09-14T22:36:00Z | 监督对 Task 07 主实现 `40fe06e` 给出 host consistency `NO-GO` | Termux 完整 Fleet 包暴露 30 秒 fixture 竞态；配置存在重复打开/TOCTOU；user Worker `Requires=` 与 unit 属性/canonical binary 证明不足 | 仅修 Task 07：长寿命隔离 sentinel、captured-bytes 安全读取、Wants+After、三项实际 unit 属性和固定 binary；恢复 T04-01/T05-01 pending 并完整重验 | Task 07 保持 `active/WAIT`；等待 review-fix 提交后的再次 gate |
+| 2026-09-14T22:50:57Z | 监督确认 `f5c0d0d` hardening 与 Termux 完整 Fleet 通过，给出最终两项 `NO-GO` | umask 使 0722 fixture 实际权限收窄；init 在 binary preflight 前已写入 config/manifest | 显式 chmod 并断言 fixture mode；把 init/workspace/up builder preflight 提升到所有 Fleet 文件/tmux/systemd mutation 之前，补零副作用和 status/down 回归 | Task 07 保持 `active/WAIT`；等待最终 gate，Task 08 未开始 |
 
 ## 9. 最终产物（Task 08 填写）
 

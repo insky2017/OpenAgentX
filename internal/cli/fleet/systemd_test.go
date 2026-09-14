@@ -145,6 +145,16 @@ func TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable(t *testing.T) 
 	if err := os.WriteFile(binary, []byte("binary"), 0o722); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.Chmod(binary, 0o722); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(binary)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mode := info.Mode().Perm(); mode != 0o722 {
+		t.Fatalf("broad executable mode=%#o, want 0722", mode)
+	}
 	if _, err := canonicalUserBinary(deps); err == nil {
 		t.Fatal("group/other-writable canonical binary accepted")
 	}

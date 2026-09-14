@@ -670,24 +670,87 @@ func TestFleetUpRejectsUnitMismatchBeforeAnyMutation(t *testing.T) {
 	}
 }
 
-func TestFleetWorkspaceRejectsMissingCanonicalBinaryBeforeTmuxMutation(t *testing.T) {
+func TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation(t *testing.T) {
+	now := time.Now().UTC()
+	for _, command := range []string{"workspace", "up"} {
+		t.Run(command, func(t *testing.T) {
+			f := newFleetFixture(t)
+			writeManifest(t, f, "quote")
+			if err := os.Remove(f.binary); err != nil {
+				t.Fatal(err)
+			}
+			tmux := &testTmux{}
+			deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+			deps.Tmux = tmux
+			systemctlCalls := 0
+			deps.RunSystemctl = func(context.Context, ...string) (string, error) {
+				systemctlCalls++
+				return "", nil
+			}
+			if code := Execute(f.args(command), deps); code != 1 {
+				t.Fatalf("code=%d stderr=%s", code, stderr.String())
+			}
+			if len(tmux.calls) != 0 || systemctlCalls != 0 {
+				t.Fatalf("missing canonical binary mutated host: tmux=%v systemctl_calls=%d", tmux.calls, systemctlCalls)
+			}
+		})
+	}
+}
+
+func TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation(t *testing.T) {
+	now := time.Now().UTC()
+	for name, invalidate := range map[string]func(t *testing.T, path string){
+		"missing": func(t *testing.T, path string) {
+			if err := os.Remove(path); err != nil {
+				t.Fatal(err)
+			}
+		},
+		"non executable": func(t *testing.T, path string) {
+			if err := os.Chmod(path, 0o600); err != nil {
+				t.Fatal(err)
+			}
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			f := newFleetFixture(t)
+			source := filepath.Join(t.TempDir(), "quote.yaml")
+			writeWorker(t, source, "quote", f.socket)
+			invalidate(t, f.binary)
+			tmux := &testTmux{}
+			deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+			deps.Tmux = tmux
+			args := append(f.args("init"), "--agent", "quote", "--worker-config", "quote="+source)
+			if code := Execute(args, deps); code != 1 {
+				t.Fatalf("code=%d stderr=%s", code, stderr.String())
+			}
+			canonical := filepath.Join(f.workerDir, "quote.yaml")
+			if _, err := os.Stat(canonical); !os.IsNotExist(err) {
+				t.Fatalf("invalid binary created canonical config: %v", err)
+			}
+			if _, err := os.Stat(f.manifest); !os.IsNotExist(err) {
+				t.Fatalf("invalid binary created manifest: %v", err)
+			}
+			if len(tmux.calls) != 0 {
+				t.Fatalf("invalid binary mutated tmux: %v", tmux.calls)
+			}
+		})
+	}
+}
+
+func TestFleetStatusAndDownDoNotRequireCanonicalBinary(t *testing.T) {
 	now := time.Now().UTC()
 	f := newFleetFixture(t)
 	writeManifest(t, f, "quote")
 	if err := os.Remove(f.binary); err != nil {
 		t.Fatal(err)
 	}
-	tmux := &testTmux{}
-	console := ownerConsole(now)
-	console.session.Principal.Roles = []string{"viewer"}
-	console.session.Principal.Scopes = []string{"console.read"}
-	deps, _, _, stderr := fixtureDeps(f, now, console)
-	deps.Tmux = tmux
-	if code := Execute(f.args("workspace"), deps); code != 1 {
-		t.Fatalf("code=%d stderr=%s", code, stderr.String())
-	}
-	if len(tmux.calls) != 0 {
-		t.Fatalf("missing canonical binary mutated tmux: %v", tmux.calls)
+	for _, command := range []string{"status", "down"} {
+		t.Run(command, func(t *testing.T) {
+			deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+			if code := Execute(f.args(command), deps); code != 0 {
+				t.Fatalf("code=%d stderr=%s", code, stderr.String())
+			}
+		})
 	}
 }
 

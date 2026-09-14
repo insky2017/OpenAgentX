@@ -173,6 +173,14 @@ func Execute(args []string, deps Dependencies) int {
 	}
 	ctx, cancel := signal.NotifyContext(baseContext, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+	var workspace fleetmodel.Workspace
+	if command == "init" || command == "workspace" || command == "up" {
+		workspace, err = newWorkspace(paths, *respawnDead, deps)
+		if err != nil {
+			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
+			return 1
+		}
+	}
 
 	requiredRole, requiredScope := domain.WebRoleOwner, domain.CLIScopeFleetLifecycle
 	if command == "status" || command == "workspace" {
@@ -224,11 +232,6 @@ func Execute(args []string, deps Dependencies) int {
 	}
 	switch command {
 	case "init", "workspace":
-		workspace, err := newWorkspace(paths, *respawnDead, deps)
-		if err != nil {
-			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
-			return 1
-		}
 		if err := workspace.Preflight(ctx, manifest); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
 			return 1
@@ -240,11 +243,6 @@ func Execute(args []string, deps Dependencies) int {
 		}
 		return printJSON(deps, map[string]any{"cli_username": session.Principal.Username, "workspace": report})
 	case "up":
-		workspace, err := newWorkspace(paths, *respawnDead, deps)
-		if err != nil {
-			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
-			return 1
-		}
 		if err := workspace.Preflight(ctx, manifest); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
 			return 1
