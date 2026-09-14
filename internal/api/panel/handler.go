@@ -1052,7 +1052,11 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			// credentials through a reconnecting client.
 			model := projectEvents([]domain.JournalEvent{ev})[0]
 			if ev.AggregateType == "worker_instance" {
-				model.Worker = h.workerEventSnapshot(r.Context(), ev.AggregateID)
+				worker, projectionErr := h.workerEventSnapshot(r.Context(), ev.AggregateID)
+				if projectionErr != nil {
+					return
+				}
+				model.Worker = worker
 			} else if ev.AggregateType == "run_attempt" {
 				model.Run = h.runEventSnapshot(r.Context(), ev.AggregateID)
 			}
@@ -1110,23 +1114,40 @@ func (h *Handler) eventMatchesAgent(ctx context.Context, event domain.JournalEve
 	}
 }
 
-func (h *Handler) workerEventSnapshot(ctx context.Context, workerID string) *openapi.WorkerReadModel {
-	workers, err := h.state.ListWorkers(ctx, 1000)
+func (h *Handler) workerEventSnapshot(ctx context.Context, workerID string) (*openapi.WorkerReadModel, error) {
+	worker, err := h.state.GetWorkerInstance(ctx, workerID)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("read Worker projection: %w", err)
 	}
-	for _, worker := range workers {
-		if worker.ID == workerID {
-			if domain.ValidateOpaqueID("worker_instance_id", worker.ID) != nil ||
-				domain.ValidateIdentifier("agent_id", worker.AgentID) != nil ||
-				worker.Generation <= 0 || !worker.Status.Valid() {
-				return nil
-			}
-			model := workerReadModel(worker)
-			return &model
+	if worker == nil || worker.ID != workerID || domain.ValidateOpaqueID("worker_instance_id", worker.ID) != nil ||
+		domain.ValidateIdentifier("agent_id", worker.AgentID) != nil ||
+		worker.Generation <= 0 || !worker.Status.Valid() {
+		return nil, fmt.Errorf("invalid Worker projection")
+	}
+	provider, ok := h.state.(backendOptionsState)
+	if !ok {
+		return nil, fmt.Errorf("Worker Backend projection is unavailable")
+	}
+	backends, err := provider.ListWorkerBackends(ctx, workerID)
+	if err != nil {
+		return nil, fmt.Errorf("read Worker Backend projection: %w", err)
+	}
+	backendHealth := make(map[string]openruntime.BackendHealth, len(backends))
+	for _, backend := range backends {
+		if err := domain.ValidateIdentifier("backend_id", backend.BackendID); err != nil {
+			return nil, fmt.Errorf("invalid Worker Backend projection: %w", err)
 		}
+		if !backend.Health.Valid() {
+			return nil, fmt.Errorf("invalid Worker Backend health")
+		}
+		if _, exists := backendHealth[backend.BackendID]; exists {
+			return nil, fmt.Errorf("duplicate Worker Backend projection")
+		}
+		backendHealth[backend.BackendID] = backend.Health
 	}
-	return nil
+	model := workerReadModel(*worker)
+	model.BackendHealth = backendHealth
+	return &model, nil
 }
 
 func (h *Handler) runEventSnapshot(ctx context.Context, runID string) *openapi.RunAttemptReadModel {

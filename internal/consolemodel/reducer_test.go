@@ -99,6 +99,36 @@ func TestReducerCoalescesHeartbeatBurstAndReportsMeaningfulTransitions(t *testin
 	}
 }
 
+func TestReducerUpdatesBackendHealthFromCurrentWorkerHeartbeat(t *testing.T) {
+	now := time.Now().UTC()
+	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-2",
+		Generation: 2, WorkerStatus: domain.WorkerStatusOnline,
+		BackendHealth: map[string]openruntime.BackendHealth{"local": openruntime.BackendHealthy}, SnapshotSequence: 20})
+	if err != nil {
+		t.Fatal(err)
+	}
+	healthChanged := workerEvent(21, 2, "worker-2", domain.WorkerStatusOnline, now, now.Add(time.Minute))
+	healthChanged.Worker.BackendHealth = map[string]openruntime.BackendHealth{"local": openruntime.BackendUnavailable}
+	result, err := reducer.Apply(healthChanged)
+	if err != nil || result.Timeline == nil || reducer.Snapshot().BackendHealth["local"] != openruntime.BackendUnavailable {
+		t.Fatalf("Backend health transition result=%+v state=%+v err=%v", result, reducer.Snapshot(), err)
+	}
+	unchanged := workerEvent(22, 2, "worker-2", domain.WorkerStatusOnline, now.Add(time.Second), now.Add(2*time.Minute))
+	unchanged.Worker.BackendHealth = map[string]openruntime.BackendHealth{"local": openruntime.BackendUnavailable}
+	if result, err = reducer.Apply(unchanged); err != nil || result.Timeline != nil {
+		t.Fatalf("unchanged Backend health produced Timeline: result=%+v err=%v", result, err)
+	}
+	invalid := workerEvent(23, 2, "worker-2", domain.WorkerStatusOnline, now.Add(2*time.Second), now.Add(3*time.Minute))
+	invalid.Worker.BackendHealth = map[string]openruntime.BackendHealth{"local": "unknown"}
+	if _, err = reducer.Apply(invalid); err == nil || reducer.Cursor() != 22 || len(reducer.Snapshot().BackendHealth) != 0 {
+		t.Fatalf("invalid Backend health err=%v cursor=%d state=%+v", err, reducer.Cursor(), reducer.Snapshot())
+	}
+	missing := workerEvent(23, 2, "worker-2", domain.WorkerStatusOnline, now.Add(3*time.Second), now.Add(4*time.Minute))
+	if result, err = reducer.Apply(missing); err != nil || !result.CursorAdvanced || len(reducer.Snapshot().BackendHealth) != 0 {
+		t.Fatalf("nil Backend health retained old state: result=%+v state=%+v err=%v", result, reducer.Snapshot(), err)
+	}
+}
+
 func TestReducerSwitchesAndClearsActiveRunFromSafeProjection(t *testing.T) {
 	now := time.Now().UTC()
 	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-1",

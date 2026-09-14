@@ -417,6 +417,50 @@ M  deploy/systemd/openagentx-user.service
 - 未 push feature、未操作 service、真实 DB/socket/default tmux、installed binary 或
   `steadyflow` 父仓；未开始 CLI Token、schema、`OAX` workspace、TUI 或 Task 04。
 
+### Task 03 第二次监督 NO-GO 与 Backend health review fix
+
+- `2026-09-14T16:59:17Z` 监督者确认前一轮三项 review fix 已通过，但再次 gate 暂定
+  `NO-GO`：普通 Follow 重连正确地不重复 Attach，而 Worker SSE 安全投影未携带 Backend
+  health，导致同 Worker/generation 的 health 转换无法更新 reducer 状态。Task 03 继续保持
+  `active/WAIT`，主计划和 Task 03 front matter 继续保持 `pending`。
+- 根因：`WorkerReadModel` 只有 Worker 生命周期字段；Panel 在 `worker_instance` 事件上只读取
+  Worker，reducer 也没有以该事件替换 Attach 时的 Backend health。因此 `healthy` 到
+  `unavailable` 等同代转换会永久显示旧值，除非发生 retention re-attach 或 Worker replacement。
+- 修复：`WorkerReadModel.backend_health` 只承载 `backend_id -> BackendHealth enum`。Panel 通过
+  正式 `ListWorkerBackends` state/repository 能力读取当前 Worker health，逐项校验 ID、enum 和
+  重复项，只将 map 加入 SSE；descriptor、network policy、诊断与原始 heartbeat payload 均不
+  投影。读取或校验失败时，在写入该 event ID/data 前结束 stream，使 client 保持 last-applied
+  cursor 并重连，不发送缺字段事件或越过后续事件。
+- reducer 对合法当前 Worker event 原子替换 Backend health；同 generation health 变化作为有
+  意义转换进入 Timeline，未变化 heartbeat 继续合并。`nil` map 清除旧 health；当前 Worker 的
+  无效 map 清除旧 health、返回错误且不推进 cursor。旧 generation/冲突 instance 继续按既有
+  fencing 处理，replacement/offline 继续清除旧 Worker scoped 状态。
+- 文件范围：`internal/api/observe.go`、`internal/api/panel/handler.go` 及测试、
+  `internal/consolemodel/reducer.go` 及测试，以及本 execution log；未修改 Auth、schema、Token、
+  workspace、tmux、TUI 或 Task 04+ 行为。
+
+#### Backend health review fix 验证
+
+| 时间 UTC | 命令 | 退出码/耗时 | 结果 |
+|---|---|---:|---|
+| `2026-09-14T16:59:17Z` | `go test ./internal/api/panel ./internal/consolemodel ./internal/api/console ./internal/client/console ./internal/cli/console -count=1` | `0` / 8.76s | 首轮相关 package 测试通过 |
+| `2026-09-14T16:59:17Z` | `go test ./internal/api/panel -run 'TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot\|TestSSEBackendProjectionFailureDoesNotSendOrCrossWorkerEvent' -count=10` | `0` / 6.22s | SSE safe projection 与查询失败边界重复通过；注入 descriptor/network/diagnostic 未泄漏 |
+| `2026-09-14T16:59:17Z` | `go test ./internal/consolemodel -run 'TestReducerUpdatesBackendHealthFromCurrentWorkerHeartbeat\|TestReducerClearsWorkerScopedStateOnReplacementAndOffline' -count=20` | `0` / 0.39s | 同代 health 更新、Timeline、nil/invalid、replacement/offline 回归重复通过 |
+| `2026-09-14T16:59:17Z` | `go test ./internal/api/console ./internal/client/console ./internal/persistence/sqlite/... ./internal/safeoutput/... ./internal/api/panel ./internal/cli/console ./internal/consolemodel -count=1` | `0` / 11.64s | Task 03 无缓存定向测试全部通过 |
+| `2026-09-14T16:59:17Z` | `go test -race ./internal/api/console ./internal/client/console ./internal/persistence/sqlite/... ./internal/safeoutput/... ./internal/api/panel ./internal/cli/console ./internal/consolemodel -count=1` | `0` / 21.63s | Task 03 受影响路径 race 全部通过 |
+| `2026-09-14T16:59:17Z` | `go test ./... -count=1` | `0` / 13.29s | 全仓 Go 测试通过；仅既有无测试文件 package 提示 |
+| `2026-09-14T16:59:17Z` | `go vet ./internal/domain ./internal/persistence/sqlite/... ./internal/api ./internal/api/console ./internal/api/panel ./internal/client/console ./internal/consolemodel ./internal/cli/console ./cmd/openagentx` | `0` / 0.40s | 受影响 package 无诊断 |
+| `2026-09-14T16:59:17Z` | `go build -o /tmp/openagentx-adr008-task03-backend-health-fix ./cmd/openagentx` | `0` / 2.53s | 临时二进制构建成功；未安装 |
+| `2026-09-14T16:59:17Z` | `./scripts/check-legacy-control-paths.sh --release` | `0` / <0.01s | 11 项 `CLEAN`，release scanner 通过 |
+| `2026-09-14T16:59:17Z` | `git diff --check` | `0` / <0.01s | 无 whitespace error；提交前再次检查 staged 边界 |
+
+#### Backend health review fix 外部状态
+
+- 测试只使用 Go 临时目录中的 SQLite/HTTP/UDS fixture；构建产物仅写入
+  `/tmp/openagentx-adr008-task03-backend-health-fix`。
+- 未 push feature、未操作 service、真实 DB/socket/default tmux、installed binary 或
+  `steadyflow` 父仓；未开始 Task 04。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |

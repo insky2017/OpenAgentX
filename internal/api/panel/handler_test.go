@@ -32,10 +32,14 @@ type testPanelState struct {
 
 type backendPanelState struct {
 	*testPanelState
-	backends map[string][]openruntime.BackendRegistration
+	backends   map[string][]openruntime.BackendRegistration
+	backendErr error
 }
 
 func (s *backendPanelState) ListWorkerBackends(_ context.Context, workerID string) ([]openruntime.BackendRegistration, error) {
+	if s.backendErr != nil {
+		return nil, s.backendErr
+	}
 	return s.backends[workerID], nil
 }
 
@@ -762,7 +766,7 @@ func TestSSEAgentFilterIncludesOnlyMatchingSafeRuntimeEvents(t *testing.T) {
 }
 
 func TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot(t *testing.T) {
-	state := &testPanelState{
+	state := &backendPanelState{testPanelState: &testPanelState{
 		workers: []domain.WorkerInstance{{
 			ID: "worker-quote", AgentID: "quote", Generation: 8, Status: domain.WorkerStatusDraining,
 			FencingToken: 998877, AuthenticatedPrincipal: "private-worker-principal",
@@ -770,7 +774,11 @@ func TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot(t *testing.T) {
 		journal: []domain.JournalEvent{{
 			Sequence: 1, ID: "event-worker-draining", AggregateType: "worker_instance", AggregateID: "worker-quote", EventType: "worker.heartbeat",
 		}},
-	}
+	}, backends: map[string][]openruntime.BackendRegistration{"worker-quote": {{
+		BackendID: "local", Health: openruntime.BackendUnavailable,
+		Descriptor: openruntime.AdapterDescriptor{AdapterID: "private-descriptor", BackendOptionsJSON: json.RawMessage(`{"diagnostic":"private-backend-diagnostic"}`)},
+		Network:    domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ConfigFile: "/private/network-policy"},
+	}}}}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
 	ctx, cancel := context.WithCancel(context.Background())
 	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?agent_id=quote", nil).WithContext(ctx)
@@ -778,13 +786,33 @@ func TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot(t *testing.T) {
 	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 	panel.handler.ServeHTTP(response, request)
 	body := response.Body.String()
-	if !strings.Contains(body, `"worker":{"worker_instance_id":"worker-quote","agent_id":"quote","generation":8`) || !strings.Contains(body, `"status":"draining"`) {
+	if !strings.Contains(body, `"worker":{"worker_instance_id":"worker-quote","agent_id":"quote","generation":8`) ||
+		!strings.Contains(body, `"backend_health":{"local":"unavailable"}`) || !strings.Contains(body, `"status":"draining"`) {
 		t.Fatalf("worker drain snapshot missing from SSE: %q", body)
 	}
-	for _, forbidden := range []string{"998877", "private-worker-principal", "fencing_token", "authenticated_principal"} {
+	for _, forbidden := range []string{"998877", "private-worker-principal", "fencing_token", "authenticated_principal",
+		"private-descriptor", "private-backend-diagnostic", "/private/network-policy", "descriptor", "network"} {
 		if strings.Contains(body, forbidden) {
 			t.Fatalf("worker SSE leaked %q: %s", forbidden, body)
 		}
+	}
+}
+
+func TestSSEBackendProjectionFailureDoesNotSendOrCrossWorkerEvent(t *testing.T) {
+	state := &backendPanelState{testPanelState: &testPanelState{
+		workers: []domain.WorkerInstance{{ID: "worker-quote", AgentID: "quote", Generation: 8, Status: domain.WorkerStatusOnline}},
+		journal: []domain.JournalEvent{
+			{Sequence: 1, ID: "event-worker", AggregateType: "worker_instance", AggregateID: "worker-quote", EventType: "worker.heartbeat"},
+			{Sequence: 2, ID: "event-after", AggregateType: "task", AggregateID: "task-after", EventType: "task.created"},
+		},
+	}, backendErr: errors.New("injected Backend projection failure")}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath, nil)
+	request.AddCookie(panel.cookie)
+	response := httptest.NewRecorder()
+	panel.handler.ServeHTTP(response, request)
+	if body := response.Body.String(); body != "" {
+		t.Fatalf("failed Backend projection sent or crossed event: %q", body)
 	}
 }
 

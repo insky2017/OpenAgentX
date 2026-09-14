@@ -32,15 +32,16 @@ type AgentReadModel struct {
 }
 
 type WorkerReadModel struct {
-	WorkerInstanceID string              `json:"worker_instance_id"`
-	AgentID          string              `json:"agent_id"`
-	Generation       int64               `json:"generation"`
-	Capabilities     []string            `json:"capabilities,omitempty"`
-	Status           domain.WorkerStatus `json:"status"`
-	LastHeartbeatAt  time.Time           `json:"last_heartbeat_at"`
-	LeaseUntil       time.Time           `json:"lease_until"`
-	StartedAt        time.Time           `json:"started_at"`
-	UpdatedAt        time.Time           `json:"updated_at"`
+	WorkerInstanceID string                               `json:"worker_instance_id"`
+	AgentID          string                               `json:"agent_id"`
+	Generation       int64                                `json:"generation"`
+	Capabilities     []string                             `json:"capabilities,omitempty"`
+	BackendHealth    map[string]openruntime.BackendHealth `json:"backend_health,omitempty"`
+	Status           domain.WorkerStatus                  `json:"status"`
+	LastHeartbeatAt  time.Time                            `json:"last_heartbeat_at"`
+	LeaseUntil       time.Time                            `json:"lease_until"`
+	StartedAt        time.Time                            `json:"started_at"`
+	UpdatedAt        time.Time                            `json:"updated_at"`
 }
 
 type TaskReadModel struct {

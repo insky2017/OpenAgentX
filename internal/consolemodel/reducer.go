@@ -73,6 +73,9 @@ func (r *Reducer) Apply(event openapi.JournalEventReadModel) (ApplyResult, error
 	}
 	if event.Worker != nil {
 		if err := validateWorkerProjection(event); err != nil {
+			if workerProjectionTargetsCurrent(event.Worker, r.state) {
+				r.state.BackendHealth = nil
+			}
 			return ApplyResult{}, err
 		}
 	}
@@ -122,6 +125,7 @@ func (r *Reducer) Apply(event openapi.JournalEventReadModel) (ApplyResult, error
 	replaced := worker.Generation > r.state.Generation || worker.WorkerInstanceID != r.state.WorkerInstanceID
 	statusChanged := worker.Status != r.state.WorkerStatus
 	leaseAnomaly := leaseMovedBackward(r.state.LeaseUntil, worker.LeaseUntil)
+	backendHealthChanged := !sameBackendHealth(r.state.BackendHealth, worker.BackendHealth)
 	if replaced || worker.Status == domain.WorkerStatusOffline {
 		r.clearWorkerScopedState()
 	}
@@ -131,12 +135,15 @@ func (r *Reducer) Apply(event openapi.JournalEventReadModel) (ApplyResult, error
 	r.state.Capabilities = append([]string(nil), worker.Capabilities...)
 	r.state.LastHeartbeatAt = worker.LastHeartbeatAt
 	r.state.LeaseUntil = worker.LeaseUntil
+	if worker.Status != domain.WorkerStatusOffline {
+		r.state.BackendHealth = cloneBackendHealth(worker.BackendHealth)
+	}
 	if r.state.Mode == consoleapi.ModeDiagnostic && !replaced && worker.Status != domain.WorkerStatusOffline {
 		r.state.Diagnostic = &consoleapi.DiagnosticView{LeaseUntil: worker.LeaseUntil,
 			LastHeartbeatAt: worker.LastHeartbeatAt, StartedAt: worker.StartedAt,
 			UpdatedAt: worker.UpdatedAt, Draining: worker.Status == domain.WorkerStatusDraining}
 	}
-	if event.EventType != "worker.heartbeat" || replaced || statusChanged || leaseAnomaly {
+	if event.EventType != "worker.heartbeat" || replaced || statusChanged || leaseAnomaly || backendHealthChanged {
 		result.Timeline = cloneEvent(event)
 	}
 	return result, nil
@@ -239,7 +246,43 @@ func validateWorkerProjection(event openapi.JournalEventReadModel) error {
 			return err
 		}
 	}
+	for backendID, health := range worker.BackendHealth {
+		if err := domain.ValidateIdentifier("backend_id", backendID); err != nil {
+			return err
+		}
+		if !health.Valid() {
+			return fmt.Errorf("invalid Worker Backend health projection")
+		}
+	}
 	return nil
+}
+
+func workerProjectionTargetsCurrent(worker *openapi.WorkerReadModel, state consoleapi.AttachResponse) bool {
+	return worker != nil && worker.AgentID == state.AgentID && worker.WorkerInstanceID == state.WorkerInstanceID &&
+		worker.Generation == state.Generation
+}
+
+func sameBackendHealth(left, right map[string]openruntime.BackendHealth) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for backendID, health := range left {
+		if right[backendID] != health {
+			return false
+		}
+	}
+	return true
+}
+
+func cloneBackendHealth(source map[string]openruntime.BackendHealth) map[string]openruntime.BackendHealth {
+	if source == nil {
+		return nil
+	}
+	clone := make(map[string]openruntime.BackendHealth, len(source))
+	for backendID, health := range source {
+		clone[backendID] = health
+	}
+	return clone
 }
 
 func validateRunProjection(event openapi.JournalEventReadModel) error {
@@ -271,13 +314,7 @@ func leaseMovedBackward(previous, next time.Time) bool {
 
 func cloneSnapshot(snapshot consoleapi.AttachResponse) consoleapi.AttachResponse {
 	snapshot.Capabilities = append([]string(nil), snapshot.Capabilities...)
-	if snapshot.BackendHealth != nil {
-		backendHealth := make(map[string]openruntime.BackendHealth, len(snapshot.BackendHealth))
-		for id, health := range snapshot.BackendHealth {
-			backendHealth[id] = health
-		}
-		snapshot.BackendHealth = backendHealth
-	}
+	snapshot.BackendHealth = cloneBackendHealth(snapshot.BackendHealth)
 	if snapshot.ActiveRun != nil {
 		run := *snapshot.ActiveRun
 		if snapshot.ActiveRun.WorkerGeneration != nil {
@@ -298,6 +335,7 @@ func cloneEvent(event openapi.JournalEventReadModel) *openapi.JournalEventReadMo
 	if event.Worker != nil {
 		worker := *event.Worker
 		worker.Capabilities = append([]string(nil), worker.Capabilities...)
+		worker.BackendHealth = cloneBackendHealth(worker.BackendHealth)
 		clone.Worker = &worker
 	}
 	if event.Output != nil {
