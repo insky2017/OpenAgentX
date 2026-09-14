@@ -964,6 +964,36 @@ M  deploy/systemd/openagentx-user.service
 - review-fix 提交精确 SHA 由提交后只读核验并在下一次监督 gate record 中记录；不 amend
   `4b5d2c0`，feature 不 push。
 
+### Task 06 最终 portability/compatibility review-fix
+
+- `2026-09-14T21:25:42Z`：监督确认 `5aa6c97` 的五组状态流修复通过代码审查，但最终 gate
+  继续 `NO-GO`。独立 Termux PTY smoke 中真实 TUI 已进入 alt-screen、绑定 `quote` 并正常退出，
+  pane 现场无误；测试自制的 `stripTerminalControls` 未识别字符集选择序列 `ESC ( B`，把可见
+  `/help` 错判为 `/Bhelp`。测试改为复用已冻结依赖 `github.com/charmbracelet/x/ansi v0.8.0`
+  的 `ansi.Strip`，并加入包含该真实序列、CSI 与 OSC 的回归样本；未降低 alt-screen、正式 UDS、
+  binding、退出状态或 pane `0/1/2` 证据。
+- Observe SSE 保持 v1 向后兼容：完全缺少 `mode` query key 时默认为 `normal`，继续要求
+  viewer/`console.read` 并强制清除 Diagnostic；显式 `mode=`、重复或未知值仍在 stream headers
+  前返回 400，显式 `diagnostic` 仍要求 owner/`console.diagnostic`。Console client 和 Web 继续显式
+  发送 mode。新增测试证明缺省 mode 可读取安全文本且不泄漏 Diagnostic、stderr 或未脱敏值。
+- `x/ansi` 从既有 indirect dependency 提升为直接测试依赖，版本未变化，`go.sum` 未变化。
+  本轮仍只使用临时 HOME/UDS、测试内 HTTP control plane 和唯一隔离 `tmux -L` server；未操作
+  真实 service、DB/socket、default tmux、installed binary 或父仓。Task 06 保持 `active/WAIT`，
+  主计划和 front matter 保持 `pending`；Task 07 未开始。
+
+| 时间 UTC | 命令 | 退出码 | 耗时 | 脱敏结果/证据 |
+|---|---|---:|---:|---|
+| 2026-09-14T21:18Z | `go test -v ./internal/cli/console -run '^Test(IsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes\|StripTerminalControlsPreservesRenderedTextAcrossANSI)$' -count=1` | 0 | 2.12s wall | 本地 tmux 3.4 真实 PTY alt-screen/bind/quit、pane `0/1/2` 与 `ESC ( B` 样本通过 |
+| 2026-09-14T21:18Z | `go test -v ./internal/api/panel -run '^TestSSE(ModeAuthorizationAndValidation\|ModeSeparatesNormalAndDiagnosticSafeProjection)$' -count=1` | 0 | 4.31s wall | 缺省 normal 脱敏、显式 mode 校验及 diagnostic role/scope 边界通过 |
+| 2026-09-14T21:18Z | `go mod tidy -diff` | 2 | <0.1s | Go 1.22.4 不支持 `-diff`；无文件变化，改用兼容命令纠正 |
+| 2026-09-14T21:19Z | `go mod tidy` | 0 | 0.3s | 仅确认 `x/ansi v0.8.0` 为 direct dependency；`go.sum` 无变化 |
+| 2026-09-14T21:22Z | Task 06 九包 `go test -race ... -count=1` | 0 | 26.0s | auth、Console/Panel API、client/TUI、reducer、SQLite、safeoutput、controlplane race 全部通过 |
+| 2026-09-14T21:21Z | `go test ./... -count=1` | 0 | 17.0s wall | 全仓 Go 测试通过，包含隔离 PTY/tmux smoke |
+| 2026-09-14T21:24Z | `go vet` 受影响 10 个 package 与 `cmd/openagentx` | 0 | 0.31s | 无 vet 诊断 |
+| 2026-09-14T21:24Z | `go build -o /tmp/openagentx-adr008-task06-portability ./cmd/openagentx` | 0 | 2.80s | 构建通过，未安装二进制 |
+| 2026-09-14T21:24Z | `npm run test:observation`、`npm run test:pwa`、`npm run build` | 0 | 1.0s 并行批次 | 4 项 observation、PWA assertions 与 Vite 266 modules build 通过 |
+| 2026-09-14T21:24Z | `bash scripts/check-legacy-control-paths.sh --release` | 0 | <0.1s | release scanner 全类别 CLEAN |
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |

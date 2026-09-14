@@ -1027,12 +1027,15 @@ func containsString(values []string, wanted string) bool {
 }
 
 func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
-	modes := r.URL.Query()["mode"]
-	if len(modes) != 1 || (modes[0] != consoleapi.ModeNormal && modes[0] != consoleapi.ModeDiagnostic) {
+	modes, modeProvided := r.URL.Query()["mode"]
+	mode := consoleapi.ModeNormal
+	if modeProvided && (len(modes) != 1 || (modes[0] != consoleapi.ModeNormal && modes[0] != consoleapi.ModeDiagnostic)) {
 		http.Error(w, "invalid Console event mode", http.StatusBadRequest)
 		return
 	}
-	mode := modes[0]
+	if modeProvided {
+		mode = modes[0]
+	}
 	principal, err := h.auth.Authorize(r, panelRequirement(r, false))
 	if err != nil {
 		h.auth.WriteFailure(w, err)

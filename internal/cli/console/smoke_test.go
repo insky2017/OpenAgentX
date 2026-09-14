@@ -16,6 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/charmbracelet/x/ansi"
+
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	"openagentx/internal/credentialstore"
@@ -198,7 +200,7 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	_ = attach.Wait()
 
 	output := terminal.String()
-	plainOutput := stripTerminalControls(output)
+	plainOutput := ansi.Strip(output)
 	if !strings.Contains(output, "\x1b[?1049h") || !strings.Contains(plainOutput, "> /help") {
 		t.Fatalf("real TUI did not enter alt-screen Attach view: %q", output)
 	}
@@ -220,55 +222,9 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	}
 }
 
-func stripTerminalControls(value string) string {
-	var result strings.Builder
-	for index := 0; index < len(value); {
-		if value[index] == 0x1b {
-			index++
-			if index >= len(value) {
-				break
-			}
-			switch value[index] {
-			case '[':
-				index++
-				for index < len(value) {
-					final := value[index]
-					index++
-					if final >= 0x40 && final <= 0x7e {
-						break
-					}
-				}
-			case ']', 'P', 'X', '^', '_':
-				index++
-				for index < len(value) {
-					if value[index] == 0x07 {
-						index++
-						break
-					}
-					if value[index] == 0x1b && index+1 < len(value) && value[index+1] == '\\' {
-						index += 2
-						break
-					}
-					index++
-				}
-			default:
-				index++
-			}
-			continue
-		}
-		if value[index] < 0x20 && value[index] != '\n' && value[index] != '\t' || value[index] == 0x7f {
-			index++
-			continue
-		}
-		result.WriteByte(value[index])
-		index++
-	}
-	return result.String()
-}
-
 func TestStripTerminalControlsPreservesRenderedTextAcrossANSI(t *testing.T) {
-	rendered := "> /\x1b[38;5;42mhelp\x1b[0m\r\n\x1b]0;ignored\x07Agent quote"
-	plain := stripTerminalControls(rendered)
+	rendered := "> /\x1b(B\x1b[38;5;42mhelp\x1b[0m\r\n\x1b]0;ignored\x07Agent quote"
+	plain := ansi.Strip(rendered)
 	if !strings.Contains(plain, "> /help") || !strings.Contains(plain, "Agent quote") || strings.Contains(plain, "ignored") {
 		t.Fatalf("stripped terminal output=%q", plain)
 	}

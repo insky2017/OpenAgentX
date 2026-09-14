@@ -1009,6 +1009,17 @@ func TestSSEModeSeparatesNormalAndDiagnosticSafeProjection(t *testing.T) {
 		strings.Contains(normal, "private-value") || strings.Contains(normal, "stderr") {
 		t.Fatalf("normal stream leaked diagnostic projection: %s", normal)
 	}
+	ctx, cancel := context.WithCancel(context.Background())
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath, nil).WithContext(ctx)
+	request.AddCookie(panel.cookie)
+	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+	panel.handler.ServeHTTP(response, request)
+	defaultNormal := response.Body.String()
+	if response.Code != http.StatusOK || !strings.Contains(defaultNormal, `"text":"safe progress"`) ||
+		strings.Contains(defaultNormal, "diagnostic") || strings.Contains(defaultNormal, "private-value") ||
+		strings.Contains(defaultNormal, "stderr") {
+		t.Fatalf("default normal stream status=%d leaked diagnostic projection: %s", response.Code, defaultNormal)
+	}
 	diagnostic := requestBody(consoleapi.ModeDiagnostic)
 	if !strings.Contains(diagnostic, `"diagnostic":"stderr token=[REDACTED]"`) || strings.Contains(diagnostic, "private-value") {
 		t.Fatalf("diagnostic stream projection is missing or unsafe: %s", diagnostic)
