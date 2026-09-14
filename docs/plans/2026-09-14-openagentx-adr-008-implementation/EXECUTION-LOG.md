@@ -26,7 +26,8 @@ updated_at: 2026-09-14
 | ADR 文档提交 | `cb521aaad2470024255c6f870032837dd3d13538` |
 | 计划 worktree | `/tmp/openagentx-adr008-worktree` |
 | 计划 branch | `adr008-docs` |
-| 计划发布状态 | 本文件随计划提交；实施开始时由执行者从 Git 历史填写计划提交 SHA 与推送验证 |
+| 计划提交 | `16291c731c6f8ce930436e4a6a8e45c2804e595a` (`docs: plan ADR-008 implementation`) |
+| 计划发布状态 | 已通过 GitHub SSH 推送；实施开始时再次确认 `origin/main` 包含本计划 |
 | 目标实现主机 | `rtx4090` |
 | 目标仓库 | `/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX` |
 | Codex pane | `OAX:agentx.2`（计划发布时位置；实施不得依赖该 window 作为身份） |
@@ -185,7 +186,8 @@ M  deploy/systemd/openagentx-user.service
 
 | 时间 UTC | 事件 | 影响 | 立即动作 | 监督结论 |
 |---|---|---|---|---|
-| — | 计划创建期间未修改实现或外部运行状态 | none | none | 待计划发布复核 |
+| 2026-09-14T14:16:32Z | 首次按 `origin` HTTPS URL 推送时因无交互凭据失败；远端未改变 | 无产品/运行状态影响 | 改用仓库既有 GitHub SSH 身份推送，并以 `ls-remote` 验证 `main=16291c7` | 计划发布成功；保留失败记录 |
+| 2026-09-14T14:16:32Z | 计划创建与发布仅改变 `docs/plans/` | 无实现或运行状态变化 | `git diff --check`、链接/语义覆盖和 staged-path 边界检查通过 | 待远端同步复核 |
 
 ## 9. 最终产物（Task 08 填写）
 
