@@ -12,7 +12,7 @@ import (
 
 const (
 	ManifestVersion = 1
-	SessionName     = "agentx"
+	SessionName     = "OAX"
 	OverviewWindow  = "overview"
 )
 
@@ -70,6 +70,9 @@ func (m Manifest) Validate() error {
 	}
 	seen := make(map[string]struct{}, len(m.Agents))
 	for index, agent := range m.Agents {
+		if agent.AgentID != strings.TrimSpace(agent.AgentID) {
+			return fmt.Errorf("Fleet Agent %d: agent_id must not contain surrounding whitespace", index)
+		}
 		if err := domain.ValidateIdentifier("agent_id", agent.AgentID); err != nil {
 			return fmt.Errorf("Fleet Agent %d: %w", index, err)
 		}

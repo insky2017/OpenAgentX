@@ -8,6 +8,7 @@ import (
 	"io"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -44,6 +45,8 @@ type testClient struct {
 	session           openapi.CLISessionResponse
 	sessionErr        error
 	issuedExpiry      time.Time
+	agents            []domain.AgentIdentity
+	listAgentsCount   int
 }
 
 func (c *testClient) ProbeInstallation(context.Context) (openapi.CLIInstallationResponse, error) {
@@ -90,6 +93,14 @@ func (c *testClient) UseCredential(_ context.Context, installationID, token stri
 func (c *testClient) Logout(context.Context) error {
 	c.logoutCount++
 	return nil
+}
+
+func (c *testClient) ListAgents(context.Context) ([]domain.AgentIdentity, error) {
+	c.listAgentsCount++
+	if c.agents != nil {
+		return append([]domain.AgentIdentity(nil), c.agents...), nil
+	}
+	return []domain.AgentIdentity{testAgent("quote"), testAgent("risk")}, nil
 }
 
 func (c *testClient) Attach(_ context.Context, agentID, _ string) (consoleapi.AttachResponse, error) {
@@ -162,10 +173,19 @@ func (r *gatedReader) Read(p []byte) (int, error) {
 }
 
 type testTmux struct {
-	current string
-	windows string
-	err     error
-	calls   []string
+	session     string
+	currentID   string
+	currentPane int
+	windows     map[string]*testTmuxWindow
+	err         error
+	calls       []string
+}
+
+type testTmuxWindow struct {
+	name    string
+	panes   []int
+	managed bool
+	agentID string
 }
 
 type testCredentialStore struct {
@@ -209,13 +229,115 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 	if t.err != nil {
 		return "", t.err
 	}
-	if args[0] == "display-message" {
-		return t.current, nil
-	}
-	if args[0] == "list-windows" {
-		return t.windows, nil
+	switch args[0] {
+	case "display-message":
+		window := t.windows[t.currentID]
+		if window == nil {
+			return "", fmt.Errorf("current window missing")
+		}
+		return fmt.Sprintf("%s\t%s\t%s\t%d\n", t.session, t.currentID, window.name, t.currentPane), nil
+	case "has-session":
+		return "", nil
+	case "list-windows":
+		var output strings.Builder
+		for _, id := range sortedTestTmuxIDs(t.windows) {
+			fmt.Fprintf(&output, "%s\t%s\n", id, t.windows[id].name)
+		}
+		return output.String(), nil
+	case "list-panes":
+		window := t.windows[testArgAfter(args, "-t")]
+		if window == nil {
+			return "", fmt.Errorf("window missing")
+		}
+		var output strings.Builder
+		for _, pane := range window.panes {
+			fmt.Fprintf(&output, "%d\n", pane)
+		}
+		return output.String(), nil
+	case "show-options":
+		window := t.windows[testArgAfter(args, "-t")]
+		if window == nil {
+			return "", fmt.Errorf("window missing")
+		}
+		var output strings.Builder
+		if window.managed {
+			fmt.Fprintln(&output, "@openagentx_managed 1")
+		}
+		if window.agentID != "" {
+			fmt.Fprintf(&output, "@openagentx_agent_id %s\n", window.agentID)
+		}
+		return output.String(), nil
+	case "set-option":
+		window := t.windows[testArgAfter(args, "-t")]
+		if window == nil {
+			return "", fmt.Errorf("window missing")
+		}
+		for index, arg := range args {
+			switch arg {
+			case "@openagentx_managed":
+				window.managed = !testHasArg(args, "-u") && index+1 < len(args) && args[index+1] == "1"
+			case "@openagentx_agent_id":
+				window.agentID = ""
+				if !testHasArg(args, "-u") && index+1 < len(args) {
+					window.agentID = args[index+1]
+				}
+			}
+		}
+		return "", nil
+	case "rename-window":
+		window := t.windows[testArgAfter(args, "-t")]
+		if window == nil {
+			return "", fmt.Errorf("window missing")
+		}
+		window.name = args[len(args)-1]
+		return "", nil
 	}
 	return "", fmt.Errorf("unexpected tmux command")
+}
+
+func boundTestTmux(agentID string) *testTmux {
+	return &testTmux{session: "OAX", currentID: "@1", windows: map[string]*testTmuxWindow{
+		"@1": {name: agentID, panes: []int{0, 1}, managed: true, agentID: agentID},
+	}}
+}
+
+func unmanagedTestTmux(name string) *testTmux {
+	return &testTmux{session: "OAX", currentID: "@1", windows: map[string]*testTmuxWindow{
+		"@1": {name: name, panes: []int{0, 1}},
+	}}
+}
+
+func sortedTestTmuxIDs(windows map[string]*testTmuxWindow) []string {
+	ids := make([]string, 0, len(windows))
+	for id := range windows {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	return ids
+}
+
+func testArgAfter(args []string, flag string) string {
+	for index := range args {
+		if args[index] == flag && index+1 < len(args) {
+			return args[index+1]
+		}
+	}
+	return ""
+}
+
+func testHasArg(args []string, expected string) bool {
+	for _, arg := range args {
+		if arg == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func testAgent(agentID string) domain.AgentIdentity {
+	now := time.Now().UTC()
+	return domain.AgentIdentity{ID: agentID, PrincipalID: "principal-" + agentID, OrganizationID: "default", DisplayName: agentID,
+		Status: domain.AgentIdentityActive, Version: 1, CreatedAt: now, UpdatedAt: now}
 }
 
 func consoleDeps(client Client, input string, interactive bool) (Dependencies, *bytes.Buffer, *bytes.Buffer) {
@@ -238,6 +360,7 @@ func consoleDeps(client Client, input string, interactive bool) (Dependencies, *
 		ReadPassword:       func(string) (string, error) { return "password", nil },
 		NewClient:          func(string) (Client, error) { return client, nil },
 		NewCredentialStore: func(string) (CredentialStore, error) { return store, nil },
+		Tmux:               boundTestTmux("quote"),
 	}, out, errOut
 }
 
@@ -324,39 +447,115 @@ func TestAttachOnceIsExplicitNonInteractiveAndDoesNotReadCommands(t *testing.T) 
 
 func TestAttachDefaultsAgentFromExactManagedTmuxWindow(t *testing.T) {
 	client := &testClient{attached: consoleapi.AttachResponse{WorkerStatus: domain.WorkerStatusOffline}}
-	tmux := &testTmux{current: "agentx\tquote\t0\t1\n", windows: "overview\nquote\nrisk\n"}
+	tmux := boundTestTmux("quote")
 	deps, _, stderr := consoleDeps(client, "", false)
 	deps.Tmux = tmux
 	if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--once"}, deps); code != 0 {
 		t.Fatalf("tmux default attach code=%d stderr=%s", code, stderr.String())
 	}
-	if client.attachedAgentID != "quote" || len(tmux.calls) != 2 || !strings.HasPrefix(tmux.calls[0], "display-message -p -F") {
+	if client.attachedAgentID != "quote" || client.listAgentsCount != 1 || !strings.HasPrefix(tmux.calls[0], "display-message -p -F") {
 		t.Fatalf("resolved Agent=%q tmux calls=%v", client.attachedAgentID, tmux.calls)
 	}
 
-	explicit := &testTmux{err: fmt.Errorf("must not be called")}
+	explicit := unmanagedTestTmux("shell")
 	deps, _, stderr = consoleDeps(client, "", false)
 	deps.Tmux = explicit
 	if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "risk", "--once"}, deps); code != 0 {
 		t.Fatalf("explicit Agent attach code=%d stderr=%s", code, stderr.String())
 	}
-	if len(explicit.calls) != 0 {
-		t.Fatalf("explicit --agent unexpectedly queried tmux: %v", explicit.calls)
+	if explicit.windows["@1"].name != "risk" || explicit.windows["@1"].agentID != "risk" || !explicit.windows["@1"].managed {
+		t.Fatalf("explicit --agent did not bind current window: %+v", explicit.windows["@1"])
 	}
 }
 
-func TestTmuxAgentResolutionFailsClosedForWrongOrAmbiguousWindow(t *testing.T) {
+func TestAttachWorkspacePreflightFailsClosedForWrongOrAmbiguousWindow(t *testing.T) {
+	duplicate := boundTestTmux("quote")
+	duplicate.windows["@2"] = &testTmuxWindow{name: "quote", panes: []int{0}, managed: true, agentID: "quote"}
+	overview := boundTestTmux("quote")
+	overview.windows["@1"] = &testTmuxWindow{name: "overview", panes: []int{0}, managed: true}
+	wrongPane := boundTestTmux("quote")
+	wrongPane.currentPane = 1
+	wrongSession := boundTestTmux("quote")
+	wrongSession.session = "agentx"
+	missingPaneZero := boundTestTmux("quote")
+	missingPaneZero.windows["@1"].panes = []int{1, 2}
 	tests := map[string]*testTmux{
-		"wrong-session": {current: "other\tquote\t0\t1\n", windows: "quote\n"},
-		"overview":      {current: "agentx\toverview\t0\t1\n", windows: "overview\n"},
-		"wrong-pane":    {current: "agentx\tquote\t1\t1\n", windows: "quote\n"},
-		"unmanaged":     {current: "agentx\tquote\t0\t\n", windows: "quote\n"},
-		"duplicate":     {current: "agentx\tquote\t0\t1\n", windows: "quote\nquote\n"},
+		"wrong-session":     wrongSession,
+		"overview":          overview,
+		"wrong-pane":        wrongPane,
+		"missing-pane-zero": missingPaneZero,
+		"duplicate":         duplicate,
 	}
 	for name, tmux := range tests {
 		t.Run(name, func(t *testing.T) {
-			if agentID, err := resolveAgentFromTmux(context.Background(), tmux); err == nil || agentID != "" {
-				t.Fatalf("resolved ambiguous Agent %q err=%v", agentID, err)
+			client := &testClient{}
+			deps, _, stderr := consoleDeps(client, "", false)
+			deps.Tmux = tmux
+			if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "quote", "--once"}, deps); code != 1 {
+				t.Fatalf("code=%d stderr=%s", code, stderr.String())
+			}
+			if client.listAgentsCount != 0 || client.attachCount != 0 {
+				t.Fatalf("workspace conflict reached API: list=%d attach=%d", client.listAgentsCount, client.attachCount)
+			}
+		})
+	}
+}
+
+func TestAttachAuthorizesAgentBeforeAnyTmuxMutation(t *testing.T) {
+	client := &testClient{agents: []domain.AgentIdentity{testAgent("risk")}}
+	tmux := unmanagedTestTmux("shell")
+	deps, _, stderr := consoleDeps(client, "", false)
+	deps.Tmux = tmux
+	if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "quote", "--once"}, deps); code != 1 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	if client.listAgentsCount != 1 || client.attachCount != 0 || tmux.windows["@1"].name != "shell" || tmux.windows["@1"].managed {
+		t.Fatalf("unauthorized Agent caused side effects: client=%+v window=%+v", client, tmux.windows["@1"])
+	}
+	for _, call := range tmux.calls {
+		if strings.HasPrefix(call, "set-option") || strings.HasPrefix(call, "rename-window") {
+			t.Fatalf("unauthorized selection mutated tmux: %v", tmux.calls)
+		}
+	}
+}
+
+func TestAttachWithoutAgentFailsClosedUntilTask06Selector(t *testing.T) {
+	client := &testClient{}
+	tmux := unmanagedTestTmux("shell")
+	deps, _, stderr := consoleDeps(client, "", false)
+	deps.Tmux = tmux
+	if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--once"}, deps); code != 1 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "selector arrives in Task 06") || client.listAgentsCount != 0 || client.attachCount != 0 {
+		t.Fatalf("selector boundary mismatch: stderr=%s list=%d attach=%d", stderr.String(), client.listAgentsCount, client.attachCount)
+	}
+}
+
+func TestAttachBoundToOtherAgentRequiresFutureUIConfirmation(t *testing.T) {
+	client := &testClient{}
+	tmux := boundTestTmux("risk")
+	deps, _, stderr := consoleDeps(client, "", false)
+	deps.Tmux = tmux
+	if code := Execute([]string{"attach", "--socket", "/run/openagentx.sock", "--agent", "quote", "--once"}, deps); code != 1 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "requires explicit confirmation") || client.listAgentsCount != 1 || client.attachCount != 0 || tmux.windows["@1"].name != "risk" {
+		t.Fatalf("confirmation boundary mismatch: stderr=%s list=%d attach=%d window=%+v", stderr.String(), client.listAgentsCount, client.attachCount, tmux.windows["@1"])
+	}
+}
+
+func TestAuthorizeAgentSelectionFailsClosedOnMissingDuplicateOrInvalidProjection(t *testing.T) {
+	invalid := testAgent("quote")
+	invalid.PrincipalID = ""
+	for name, agents := range map[string][]domain.AgentIdentity{
+		"missing":   {testAgent("risk")},
+		"duplicate": {testAgent("quote"), testAgent("quote")},
+		"invalid":   {invalid},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if err := authorizeAgentSelection("quote", agents); err == nil {
+				t.Fatal("invalid authenticated Agent list was accepted")
 			}
 		})
 	}

@@ -250,6 +250,39 @@ func TestControlMethodsUseAuthenticatedOfficialAPIs(t *testing.T) {
 	}
 }
 
+func TestListAgentsUsesAuthenticatedOfficialObserveAPI(t *testing.T) {
+	requested := false
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if cliAuthResponse(w, r) {
+			return
+		}
+		if r.Method != http.MethodGet || r.URL.Path != openapi.ObserveAgentsPath {
+			http.NotFound(w, r)
+			return
+		}
+		if r.Header.Get("Authorization") != "Bearer opaque-token-value" {
+			http.Error(w, "missing session", http.StatusUnauthorized)
+			return
+		}
+		requested = true
+		now := time.Now().UTC()
+		_ = json.NewEncoder(w).Encode([]domain.AgentIdentity{{ID: "quote", PrincipalID: "principal-quote", OrganizationID: "default",
+			DisplayName: "Quote", Status: domain.AgentIdentityActive, Version: 1, CreatedAt: now, UpdatedAt: now}})
+	})
+	client := newUnixTestClient(t, handler)
+	ctx := context.Background()
+	if _, err := client.LoginCredential(ctx, "owner", "password"); err != nil {
+		t.Fatal(err)
+	}
+	agents, err := client.ListAgents(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !requested || len(agents) != 1 || agents[0].ID != "quote" {
+		t.Fatalf("unexpected Agent list: requested=%v agents=%+v", requested, agents)
+	}
+}
+
 func TestStoredCredentialIsNotSentAfterSocketInstallationReplacement(t *testing.T) {
 	authenticatedRequests := 0
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -14,14 +14,11 @@ import (
 	consoleclient "openagentx/internal/client/console"
 	"openagentx/internal/consolemodel"
 	"openagentx/internal/domain"
-	"openagentx/internal/fleet"
 )
 
 const (
-	replPrompt               = "agentx> "
-	foregroundUnavailable    = "Foreground Takeover（规划中，暂不可用）"
-	tmuxCurrentPaneFormat    = "#{session_name}\t#{window_name}\t#{pane_index}\t#{@openagentx_managed}"
-	tmuxWindowNameListFormat = "#{window_name}"
+	replPrompt            = "OAX> "
+	foregroundUnavailable = "Foreground Takeover（规划中，暂不可用）"
 )
 
 type attachUpdate struct {
@@ -32,54 +29,6 @@ type attachUpdate struct {
 type inputResult struct {
 	line string
 	err  error
-}
-
-func resolveAgentFromTmux(ctx context.Context, runner fleet.CommandRunner) (string, error) {
-	if runner == nil {
-		return "", fmt.Errorf("tmux runner is unavailable")
-	}
-	output, err := runner.Run(ctx, "display-message", "-p", "-F", tmuxCurrentPaneFormat)
-	if err != nil {
-		return "", fmt.Errorf("inspect current tmux pane: %w", err)
-	}
-	record := strings.TrimSuffix(output, "\n")
-	if strings.Contains(record, "\n") {
-		return "", fmt.Errorf("tmux returned more than one current pane")
-	}
-	parts := strings.Split(record, "\t")
-	if len(parts) != 4 {
-		return "", fmt.Errorf("tmux returned an invalid current pane record")
-	}
-	session, window, pane, managed := parts[0], parts[1], parts[2], parts[3]
-	if session != fleet.SessionName {
-		return "", fmt.Errorf("current tmux session is %q, want %q", session, fleet.SessionName)
-	}
-	if pane != "0" {
-		return "", fmt.Errorf("current tmux pane is %q, want pane 0", pane)
-	}
-	if window == fleet.OverviewWindow {
-		return "", fmt.Errorf("overview window does not identify one Agent")
-	}
-	if managed != "1" {
-		return "", fmt.Errorf("current tmux window %q is unmanaged", window)
-	}
-	if err := domain.ValidateIdentifier("agent_id", window); err != nil {
-		return "", fmt.Errorf("current tmux window is not a valid Agent name: %w", err)
-	}
-	windows, err := runner.Run(ctx, "list-windows", "-t", "="+fleet.SessionName, "-F", tmuxWindowNameListFormat)
-	if err != nil {
-		return "", fmt.Errorf("verify tmux window name uniqueness: %w", err)
-	}
-	matches := 0
-	for _, name := range strings.Split(strings.TrimSpace(windows), "\n") {
-		if name == window {
-			matches++
-		}
-	}
-	if matches != 1 {
-		return "", fmt.Errorf("tmux window name %q is not unique", window)
-	}
-	return window, nil
 }
 
 func runInteractiveAttach(ctx context.Context, cancel context.CancelFunc, client Client, agentID, organizationID, mode string, deps Dependencies) error {

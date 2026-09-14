@@ -20,10 +20,12 @@ agents:
 		t.Fatalf("unexpected manifest: %+v", manifest)
 	}
 	for name, input := range map[string]string{
-		"empty":     "version: 1\nagents: []\n",
-		"duplicate": "version: 1\nagents:\n- {agent_id: quote, identity_file: a, worker_config: b}\n- {agent_id: quote, identity_file: c, worker_config: d}\n",
-		"unknown":   "version: 1\nagents:\n- {agent_id: quote, identity_file: a, worker_config: b, surprise: true}\n",
-		"session":   "version: 1\nsession: other\nagents:\n- {agent_id: quote, identity_file: a, worker_config: b}\n",
+		"empty":        "version: 1\nagents: []\n",
+		"duplicate":    "version: 1\nagents:\n- {agent_id: quote, identity_file: a, worker_config: b}\n- {agent_id: quote, identity_file: c, worker_config: d}\n",
+		"unknown":      "version: 1\nagents:\n- {agent_id: quote, identity_file: a, worker_config: b, surprise: true}\n",
+		"session":      "version: 1\nsession: other\nagents:\n- {agent_id: quote, identity_file: a, worker_config: b}\n",
+		"old-session":  "version: 1\nsession: agentx\nagents:\n- {agent_id: quote, identity_file: a, worker_config: b}\n",
+		"spaced-agent": "version: 1\nagents:\n- {agent_id: ' quote ', identity_file: a, worker_config: b}\n",
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := Decode(strings.NewReader(input)); err == nil {

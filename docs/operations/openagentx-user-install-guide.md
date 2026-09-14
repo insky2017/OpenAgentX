@@ -140,7 +140,7 @@ Fleet 清单保存在 `~/.openagentx/fleet.yaml`，只显式列出要管理的 A
 
 ```yaml
 version: 1
-session: agentx
+session: OAX
 agents:
   - agent_id: quote-service
     identity_file: identities/quote-service.yaml
@@ -174,6 +174,20 @@ AgentProfile 一致，否则 `fleet init` 会 fail closed，不会静默改写�
 
 ## 7. Console 与 Fleet workspace
 
+Attach 必须从大小写敏感的 `OAX` session 内、目标 window 的 pane `0` 执行。旧
+`agentx` session 不会自动迁移或合并。先应用 identity 并创建 `OAX` workspace，再进入
+对应 Agent window 的 pane `0`：
+
+```bash
+~/.local/bin/openagentx console login \
+  --socket ~/.openagentx/run/openagentx.sock
+~/.local/bin/openagentx fleet init \
+  --file ~/.openagentx/fleet.yaml \
+  --db ~/.openagentx/data/openagentx.db \
+  --socket ~/.openagentx/run/openagentx.sock
+tmux attach-session -t OAX
+```
+
 单次查看指定 Agent：
 
 ```bash
@@ -189,16 +203,6 @@ AgentProfile 一致，否则 `fleet init` 会 fail closed，不会静默改写�
 ~/.local/bin/openagentx console attach \
   --socket ~/.openagentx/run/openagentx.sock \
   --agent quote-service
-```
-
-`fleet init` 可用于应用 identity 并创建固定的 `agentx` tmux workspace：
-
-```bash
-~/.local/bin/openagentx fleet init \
-  --file ~/.openagentx/fleet.yaml \
-  --db ~/.openagentx/data/openagentx.db \
-  --socket ~/.openagentx/run/openagentx.sock
-tmux attach-session -t agentx
 ```
 
 用户级安装不要运行 `fleet up` 或依赖 `fleet status` 的 Worker unit 结果；这两个

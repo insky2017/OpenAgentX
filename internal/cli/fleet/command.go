@@ -563,6 +563,7 @@ func printJSON(deps Dependencies, value any) int {
 
 func usage(writer io.Writer) {
 	fmt.Fprintln(writer, "Usage: openagentx fleet <init|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--confirm-force-stop]")
+	fmt.Fprintln(writer, "Managed tmux workspace: exact session OAX with stable pane 0; existing agentx sessions are not migrated")
 	fmt.Fprintf(writer, "Default manifest source: $%s > $%s > ~/.openagentx/fleet.yaml\n", localprofile.EnvFleetManifest, localprofile.EnvHome)
 	fmt.Fprintf(writer, "Default database source: $%s > $%s > ~/.openagentx/data/openagentx.db\n", localprofile.EnvDatabasePath, localprofile.EnvHome)
 	fmt.Fprintf(writer, "Default socket source: $%s > $%s > ~/.openagentx/run/openagentx.sock\n", localprofile.EnvSocketPath, localprofile.EnvHome)

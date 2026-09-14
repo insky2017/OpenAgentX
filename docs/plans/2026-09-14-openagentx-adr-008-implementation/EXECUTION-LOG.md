@@ -55,7 +55,7 @@ M  deploy/systemd/openagentx-user.service
 | 02 | 默认路径与 CLI 表面 | completed | `e690bbbd11046e63841a4a869a90f6aeb42c5575` + fix `c0e8d4aeae2516c005cedbce6c5b35d1b8b07553` | GO |
 | 03 | 一致 Attach cursor 与代际 reducer | completed | `4aea5a6291b47792b1c69256ae0ae6422a890cb4` + fix `9e18246dc4f61ee8ccc044509229b13b0e191f9d` + fix `2f9772753b3a75e6304abd76c4eb6a259c9e0c6f` | GO |
 | 04 | 可撤销 CLI Token 会话 | completed | `c240aa4dbd47565181d22f602ea3203e5fbfe4dc` + fix `0a5e85987f0c9bd29275ece138200083be13171e` | GO |
-| 05 | `OAX` workspace 与非破坏绑定 | pending | — | WAIT |
+| 05 | `OAX` workspace 与非破坏绑定 | active | — | WAIT |
 | 06 | Console 主菜单、Agent selector 与全屏 TUI | pending | — | WAIT |
 | 07 | Fleet、user-systemd 与默认 profile 集成 | pending | — | WAIT |
 | 08 | 集成审查、实机候选与发布门禁 | pending | — | WAIT |
@@ -618,6 +618,110 @@ M  deploy/systemd/openagentx-user.service
 - Gate record 相对链接/状态检查首次调用环境未安装的 `ruby`，退出 `127`；改用 Perl 等价
   只读检查后 relative links 与 status consistency 均通过。staged path 白名单和
   `git diff --cached --check` 同时通过，仅包含三份 `docs/plans` 文件。
+
+### Task 05 — `OAX` workspace 与非破坏绑定
+
+### 开始信息
+
+- 状态：active
+- 执行者：Codex
+- 开始时间（UTC）：`2026-09-14T18:36:33Z`
+- feature 基线：`0022e9206a4cff01e1e219e3ecf46dcbaa7a46be`
+- branch/worktree：`codex/adr008-implementation` /
+  `/home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree`
+- 开始状态：工作树 clean，相对 `origin/main` ahead 12；监督者已明确 `GO Task 05`。
+- 边界：仅实现结构化 tmux inspect、`OAX` pane 0/marker 冲突模型、显式 Attach 绑定和
+  Fleet workspace reconcile；不开始全屏 TUI、Agent selector UI、Fleet credential/user-systemd
+  集成，不操作真实 `OAX`/default tmux/service/DB/socket/installed binary 或父仓。
+- 主计划和 Task 05 front matter 按 gate-record 协议继续保持 `pending`；监督门禁保持 `WAIT`。
+
+### 实现范围与安全决策
+
+- `internal/fleet` 将受管 session 统一为大小写敏感的 `OAX`，新增结构化 window/pane/option
+  inspection：`list-windows` 只取得内部 window handle 与名称，再对每个唯一 handle 分别执行
+  `list-panes` 和 `show-options`。pane `0` 存在性不再由 active pane、进程名、window index 或
+  `%pane_id` 推断；内部 handle 只用于把 mutation 锁定到已 preflight 的 window，不进入业务 API
+  或用户输出。
+- 固定 marker 为 `@openagentx_managed=1` 和 `@openagentx_agent_id=<exact-agent-id>`；overview
+  仅有 managed marker。统一 topology validator 在副作用前拒绝缺 pane 0、重复名称/Agent marker、
+  非法 marker、name/marker 不一致、unmanaged target、reserved overview 和非精确 Agent ID。
+- 新增单一 window binding service：Attach 初次检查当前 `OAX:<window>.0`，认证后从正式
+  `/api/observe/v1/agents` 精确验证所选 Agent，再做第二次全量 preflight。相同 Agent 幂等复用；
+  另一 Agent 返回 `confirmation-required`，Task 05 CLI 不暴露确认绕过；未绑定且未显式选择时
+  明确等待 Task 06 selector 并 fail closed。
+- 绑定按 managed marker、Agent marker、rename、结构化重读顺序执行；每个 mutation/verify
+  失败均恢复原名称和两个 option 的原始存在性。恢复失败返回显著 `partial-failure` 和人工检查
+  提示，且不继续 Attach。pane `1+` 从不关闭、重排、读取内容或按进程推断状态。
+- Fleet Reconcile 使用两阶段完整 preflight，只补缺并按内部 handle 配置新 window 的
+  `pane-base-index=0`、`remain-on-exit=on` 和 marker，随后重读验证；兼容 window 复用，额外
+  unmanaged/orphaned window 与所有辅助 pane 保留。旧 `agentx` session 不迁移、不合并、不参与
+  `OAX` inspect。
+- Console 现有 `--once`、行式 REPL 和 Follow 能力继续保留；仅将提示符改为 `OAX> `，未添加
+  TUI dependency、菜单、Agent selector、Token/schema、user-systemd 或 Task 06/07 行为。
+- 用户文档同步 manifest、Attach 前置条件、多 pane 和旧 session 边界。变更文件为
+  `README.md`、`docs/operations/openagentx-user-install-guide.md`、`internal/fleet/{manifest,workspace,binding}*`、
+  `internal/client/console/client{,_test}.go`、`internal/cli/console/{command,repl}*.go`、
+  `internal/cli/fleet/{command,command_test}.go` 与本 execution log。
+
+### 失败与纠正（append-only）
+
+| 时间 UTC | 现象 | 根因 | 安全影响 | 纠正/结果 |
+|---|---|---|---|---|
+| 2026-09-14T18:42Z | 首次大补丁被 `apply_patch` 拒绝 | 同一 patch 对 `workspace.go` 同时 delete/add 不受工具支持 | patch 原子拒绝，文件未改变，无产品或外部状态影响 | 拆为两个 `apply_patch` 动作后成功 |
+| 2026-09-14T18:50Z | README/安装指南只读聚合调用报 `ReferenceError: b is not defined` | 工具编排脚本遗漏第二个结果变量声明 | 只读命令未形成结果，无文件或外部状态变化 | 按两个显式变量重跑并取得实际文本 |
+| 2026-09-14T18:56Z | help/零 window 小补丁因 Console usage 上下文不匹配被拒绝 | 预期行与现有 `legacy controls` 文案不同 | patch 原子拒绝，无部分修改 | 读取精确上下文后重做，三项改动成功 |
+| 2026-09-14T18:48Z | 首轮四 package 定向测试 | n/a | 无；只使用 fake runner 和临时 UDS | 全部通过，未出现产品测试失败 |
+
+### 验证
+
+| 时间 UTC | 命令 | 退出码 | 耗时 | 脱敏结果/证据 |
+|---|---|---:|---:|---|
+| 2026-09-14T18:47Z | `tmux -L openagentx-adr008-task05-probe-1838 ...` 结构化 argv probe | 0 | <1s | `new-session -P -F` 返回内部 handle；window-scoped pane base/marker/show-options/list-panes 均符合 tmux 3.4；随后只 kill 该隔离 server |
+| 2026-09-14T18:52Z | `go test -v ./internal/fleet -run 'IsolatedTmux|Workspace|BindCurrent|AttachPreflight' -count=1` | 0 | 3.27s | fake 与真实隔离 tmux 覆盖冲突、幂等、TOCTOU、补偿、多 pane、错误 pane/缺 pane 0、重复 name/marker |
+| 2026-09-14T18:54Z | `go test -race ./internal/fleet ./internal/client/console ./internal/cli/console ./internal/cli/fleet -count=1` | 0 | 5.20s | 首轮受影响 package race 通过 |
+| 2026-09-14T18:55Z | `go test ./... -count=1` | 0 | 13.20s | 首轮全量 Go package 通过 |
+| 2026-09-14T18:55Z | `go vet ./internal/fleet ./internal/client/console ./internal/cli/console ./internal/cli/fleet && go build ./...` | 0 | 2.88s | 受影响 package vet 与全 targets build 通过 |
+| 2026-09-14T18:55Z | `./scripts/check-legacy-control-paths.sh --release` | 0 | <0.1s | release scanner 全部类别 CLEAN |
+| 2026-09-14T18:58Z | `go test ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 4.15s | 最终定向测试通过 |
+| 2026-09-14T18:58Z | `go test -race ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 5.82s | 最终受影响 package race 通过 |
+| 2026-09-14T18:58Z | `go test -v ./internal/fleet -run '^TestIsolatedTmux' -count=1` | 0 | 3.95s | 实际运行未 skip；各测试使用唯一 `tmux -L openagentx-adr008-task05-*`，覆盖 pane 0+1+2、wrong pane、缺 pane 0、重复 name/marker、旧 `agentx` 独立保留，cleanup 只 kill 对应 server |
+| 2026-09-14T18:59Z | `go test ./... -count=1` | 0 | 13.11s | 最终全量 Go package 通过 |
+| 2026-09-14T18:59Z | `go vet ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console && go build -o /tmp/openagentx-adr008-task05 ./cmd/openagentx` | 0 | 2.80s | 受影响 vet 通过；临时二进制构建成功，未安装 |
+| 2026-09-14T18:59Z | `/tmp/openagentx-adr008-task05 console --help` / `fleet --help` | 0 / 0 | <0.1s | help 明确 exact `OAX`、pane 0、`--agent` 不绕过 preflight 和旧 `agentx` 不迁移；无 Secret |
+| 2026-09-14T18:59Z | `./scripts/check-legacy-control-paths.sh --release` | 0 | <0.1s | release scanner 最终全部类别 CLEAN |
+| 2026-09-14T18:59Z | 禁用 tmux 命令/身份字段 `rg` | 0 | <0.1s | 命中仅为负向测试断言；产品代码无 `send-keys`/`paste-buffer`/`capture-pane`、pane process、pane ID、window index、kill/move |
+| 2026-09-14T18:59Z | `git diff --check` | 0 | <0.1s | 无 whitespace error；提交前还将复核 staged path |
+
+### Task 05 提交前追加审计与重验
+
+- `2026-09-14T19:04:53Z`：将 `AttachLocation` 的内部 tmux window handle 收紧为私有 opaque
+  preflight ticket。Console 调用方只能原样把 ticket 交回 `BindCurrent`，不能读取、构造或把该
+  handle 用作 Agent 身份、业务 API 参数或用户输出；`CurrentPane.WindowID` 仍仅存在于
+  `internal/fleet` 的结构化 tmux inspection 模型。
+
+| 时间 UTC | 命令 | 退出码 | 耗时 | 脱敏结果/证据 |
+|---|---|---:|---:|---|
+| 2026-09-14T19:04Z | `go test ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 4.12s | opaque ticket 收紧后最终定向测试通过 |
+| 2026-09-14T19:04Z | `go test -race ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console -count=1` | 0 | 7.17s | 受影响 package race 通过 |
+| 2026-09-14T19:04Z | `go test -v ./internal/fleet -run '^TestIsolatedTmux' -count=1` | 0 | 4.77s | 所有隔离 tmux 用例实际运行且通过；每例仅使用并清理自身唯一 `tmux -L` server |
+| 2026-09-14T19:04Z | `go test ./... -count=1` | 0 | 13.49s | 全量 Go package 通过 |
+| 2026-09-14T19:04Z | `go vet ./internal/fleet ./internal/cli/fleet ./internal/cli/console ./internal/client/console` | 0 | 0.11s | 受影响 package vet 通过 |
+| 2026-09-14T19:04Z | `go build -o /tmp/openagentx-adr008-task05 ./cmd/openagentx` | 0 | 2.54s | 临时二进制构建成功，未安装 |
+| 2026-09-14T19:04Z | `/tmp/openagentx-adr008-task05 console --help` / `fleet --help` | 0 / 0 | <0.1s | help 保持精确 `OAX`、pane 0 和旧 `agentx` 不迁移契约 |
+| 2026-09-14T19:04Z | `./scripts/check-legacy-control-paths.sh --release` | 0 | <0.1s | release scanner 全部类别 CLEAN |
+| 2026-09-14T19:04Z | 产品 Go 文件禁用 tmux command/identity `rg` | 1（预期零命中） | <0.1s | 无 `send-keys`、`paste-buffer`、`capture-pane`、pane process/ID、window index 或 kill/move 控制命令 |
+| 2026-09-14T19:04Z | `git diff --check` | 0 | <0.1s | 无 whitespace error |
+
+### Task 05 提交前安全点
+
+- 状态保持 `active/WAIT`；主计划与 Task 05 front matter 保持 `pending`，Task 06 未开始。
+- 实现提交将在本记录随同实现和测试创建；提交无法自包含自身 SHA，精确 SHA、actual
+  post-commit clean/ahead 与监督结论由后续独立 docs-only gate record 记录。
+- 测试仅使用 fake、Go 临时目录/UDS 和唯一 `tmux -L openagentx-adr008-task05-*`；所有隔离
+  server 均由对应测试 cleanup kill。未访问或修改真实 `OAX`、default tmux、service、DB/socket、
+  installed binary、remote feature branch 或 `steadyflow` 父仓；构建产物仅在 `/tmp`。
+- Web 产品代码未修改；Task 05 计划未要求 Web 构建，未将其记为本阶段验证证据。
+- Open Issue `T04-01` 继续归属 Task 07/pending，本阶段未触碰。
 
 ## 7. Open Issues
 

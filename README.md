@@ -83,7 +83,7 @@ Fleet 清单显式列出受管 Agent，不扫描目录推断启动对象：
 
 ```yaml
 version: 1
-session: agentx
+session: OAX
 agents:
   - agent_id: quote-service
     identity_file: agents/quote-service/identity.yaml
@@ -91,7 +91,7 @@ agents:
     enabled: true
 ```
 
-`fleet init` 一次认证后校验并应用 identity，协调固定的 `agentx` tmux workspace；`fleet up` 通过 systemd 模板启动已启用 Worker。新建 Agent window 只有 pane `0`，默认运行经 UDS 正式 API 连接的 Console 客户端：
+`fleet init` 一次认证后校验并应用 identity，协调固定、大小写敏感的 `OAX` tmux workspace；旧 `agentx` session 不会自动迁移或合并。`fleet up` 通过 systemd 模板启动已启用 Worker。Agent window 的 pane `0` 是经 UDS 正式 API 连接的稳定 Console pane，用户增加的 pane `1+` 会被保留：
 
 ```bash
 ./bin/openagentx fleet init --file fleet.yaml --db data/openagentx.db --socket run/openagentx.sock
@@ -115,7 +115,7 @@ Console attach 按逻辑 `agent_id` 跟随当前 generation，展示安全投影
 ./bin/openagentx console attach --socket run/openagentx.sock --agent quote-service --diagnostic
 ```
 
-交互 attach 同时订阅事件并读取 TTY 命令栏，支持 `/dispatch`、`/steer`、`/cancel`、`/approve`、`/reject`、`/down`、`/foreground` 和 `/quit`；所有写操作仍调用 authenticated Control/Admin API。`/foreground` 只返回规划中提示。省略 `--agent` 时仅从当前 `agentx` session 的受管具名 window、pane `0` 推导；`overview`、unmanaged、重名或错误 pane 均要求显式 `--agent`。非交互调用必须使用 `--once`，该模式只输出一次 attach 快照且不读取 stdin。
+交互 attach 同时订阅事件并读取 TTY 命令栏，支持 `/dispatch`、`/steer`、`/cancel`、`/approve`、`/reject`、`/down`、`/foreground` 和 `/quit`；所有写操作仍调用 authenticated Control/Admin API。`/foreground` 只返回规划中提示。Attach 无论是否显式提供 `--agent`，都必须从 `OAX` session 的 pane `0` 执行并通过 window/marker 冲突检查；省略 `--agent` 时只复用当前名称与 Agent marker 一致的受管 window，未绑定场景在 Task 06 selector 完成前 fail closed。所选 Agent 必须先由 authenticated Agent list 验证，之后才允许绑定当前 window。非交互调用必须使用 `--once`，该模式只输出一次 attach 快照且不读取 stdin。
 
 普通停止是持久化 graceful drain-and-stop：先为全部在线目标提交停止意图，再持续显示 Agent、当前 RunAttempt、draining、elapsed、最近状态和“不会领取新任务”，直到全部 offline；终端中断只结束观察，不撤销意图。Worker 停止领取新工作，等待活动 RunAttempt 自然完成，idle 后释放 lease 并正常退出。强制停止是独立危险路径，必须显式确认且不显示为 graceful：
 

@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -19,8 +21,16 @@ import (
 
 type testTmux struct {
 	session bool
-	windows string
+	windows map[string]*fleetTestWindow
 	calls   []string
+	nextID  int
+}
+
+type fleetTestWindow struct {
+	name    string
+	panes   []int
+	managed bool
+	agentID string
 }
 
 func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
@@ -28,10 +38,77 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 	if args[0] == "has-session" && !t.session {
 		return "", fmt.Errorf("missing")
 	}
-	if args[0] == "list-windows" {
-		return t.windows, nil
+	switch args[0] {
+	case "list-windows":
+		ids := make([]string, 0, len(t.windows))
+		for id := range t.windows {
+			ids = append(ids, id)
+		}
+		sort.Strings(ids)
+		var output strings.Builder
+		for _, id := range ids {
+			fmt.Fprintf(&output, "%s\t%s\n", id, t.windows[id].name)
+		}
+		return output.String(), nil
+	case "list-panes":
+		window := t.windows[fleetArgAfter(args, "-t")]
+		var output strings.Builder
+		for _, pane := range window.panes {
+			fmt.Fprintf(&output, "%d\n", pane)
+		}
+		return output.String(), nil
+	case "show-options":
+		window := t.windows[fleetArgAfter(args, "-t")]
+		var output strings.Builder
+		if window.managed {
+			fmt.Fprintln(&output, "@openagentx_managed 1")
+		}
+		if window.agentID != "" {
+			fmt.Fprintf(&output, "@openagentx_agent_id %s\n", window.agentID)
+		}
+		return output.String(), nil
+	case "new-session", "new-window":
+		if t.windows == nil {
+			t.windows = make(map[string]*fleetTestWindow)
+		}
+		t.session = true
+		t.nextID++
+		id := "@" + strconv.Itoa(t.nextID)
+		t.windows[id] = &fleetTestWindow{name: fleetArgAfter(args, "-n"), panes: []int{0}}
+		return id + "\n", nil
+	case "set-option":
+		window := t.windows[fleetArgAfter(args, "-t")]
+		for index, arg := range args {
+			switch arg {
+			case "@openagentx_managed":
+				window.managed = !fleetHasArg(args, "-u") && index+1 < len(args) && args[index+1] == "1"
+			case "@openagentx_agent_id":
+				window.agentID = ""
+				if !fleetHasArg(args, "-u") && index+1 < len(args) {
+					window.agentID = args[index+1]
+				}
+			}
+		}
 	}
 	return "", nil
+}
+
+func fleetArgAfter(args []string, flag string) string {
+	for index := range args {
+		if args[index] == flag && index+1 < len(args) {
+			return args[index+1]
+		}
+	}
+	return ""
+}
+
+func fleetHasArg(args []string, expected string) bool {
+	for _, arg := range args {
+		if arg == expected {
+			return true
+		}
+	}
+	return false
 }
 
 type testConsole struct {
@@ -250,7 +327,10 @@ func TestFleetUpRejectsMismatchedCanonicalConfigBeforeAnyMutation(t *testing.T) 
 
 func TestFleetUpConflictFailsBeforeTmuxOrSystemdMutation(t *testing.T) {
 	manifestPath := writeFleetFixture(t)
-	tmux := &testTmux{session: true, windows: "overview\t1\t0\tzsh\t1\nquote\t1\t0\tpython\t\n"}
+	tmux := &testTmux{session: true, nextID: 2, windows: map[string]*fleetTestWindow{
+		"@1": {name: "overview", panes: []int{0}, managed: true},
+		"@2": {name: "quote", panes: []int{0}},
+	}}
 	systemctlCalls := 0
 	deps := Dependencies{
 		Out: &bytes.Buffer{}, Err: &bytes.Buffer{}, Tmux: tmux,

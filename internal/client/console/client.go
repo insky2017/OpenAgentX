@@ -141,6 +141,12 @@ func (c *Client) Attach(ctx context.Context, agentID, mode string) (consoleapi.A
 	return result, err
 }
 
+func (c *Client) ListAgents(ctx context.Context) ([]domain.AgentIdentity, error) {
+	var result []domain.AgentIdentity
+	_, err := c.do(ctx, http.MethodGet, openapi.ObserveAgentsPath, nil, nil, &result, true, "", false)
+	return result, err
+}
+
 func (c *Client) Dispatch(ctx context.Context, request openapi.CreateTaskRequest) (openapi.CreateTaskResponse, error) {
 	var result openapi.CreateTaskResponse
 	_, err := c.do(ctx, http.MethodPost, openapi.ControlCreateTaskPath, nil, request, &result, true, request.Meta.IdempotencyKey, false)

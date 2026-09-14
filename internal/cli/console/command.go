@@ -41,6 +41,7 @@ type Client interface {
 	UseCredential(context.Context, string, string) error
 	Session(context.Context) (openapi.CLISessionResponse, error)
 	Logout(context.Context) error
+	ListAgents(context.Context) ([]domain.AgentIdentity, error)
 	Attach(context.Context, string, string) (consoleapi.AttachResponse, error)
 	Follow(context.Context, string, string, func(consoleapi.AttachResponse) error, func(openapi.JournalEventReadModel) error) error
 	Dispatch(context.Context, openapi.CreateTaskRequest) (openapi.CreateTaskResponse, error)
@@ -251,14 +252,31 @@ func Execute(args []string, deps Dependencies) int {
 	if command == "logout" {
 		return executeLogout(ctx, socket.Path, store, deps)
 	}
+	var workspace fleetmodel.Workspace
+	var attachLocation fleetmodel.AttachLocation
 	if command == "attach" {
-		if strings.TrimSpace(agentID) == "" {
-			resolved, resolveErr := resolveAgentFromTmux(ctx, deps.Tmux)
-			if resolveErr != nil {
-				fmt.Fprintf(deps.Err, "resolve Console Agent: %v; use --agent explicitly\n", resolveErr)
+		workspace = fleetmodel.Workspace{Runner: deps.Tmux}
+		var preflightErr error
+		attachLocation, preflightErr = workspace.PreflightAttach(ctx)
+		if preflightErr != nil {
+			fmt.Fprintf(deps.Err, "Console workspace preflight failed: %v\n", preflightErr)
+			return 1
+		}
+		if agentID == "" {
+			if attachLocation.BoundAgentID == "" {
+				fmt.Fprintln(deps.Err, "current OAX pane 0 is not bound to an Agent; use --agent explicitly (interactive Agent selector arrives in Task 06)")
 				return 1
 			}
-			agentID = resolved
+			agentID = attachLocation.BoundAgentID
+		}
+		if agentID != strings.TrimSpace(agentID) {
+			err = fmt.Errorf("agent_id must not contain surrounding whitespace")
+		} else if err = domain.ValidateIdentifier("agent_id", agentID); err == nil && agentID == fleetmodel.OverviewWindow {
+			err = fmt.Errorf("Agent ID %q conflicts with reserved overview window", agentID)
+		}
+		if err != nil {
+			fmt.Fprintf(deps.Err, "resolve Console Agent: %v\n", err)
+			return 1
 		}
 		if !once && !deps.IsInteractive() {
 			fmt.Fprintln(deps.Err, "continuous console attach requires an interactive TTY; use --once for non-interactive output")
@@ -309,6 +327,21 @@ func Execute(args []string, deps Dependencies) int {
 	if err := validateCredentialSession(credential, session, deps.Now()); err != nil {
 		fmt.Fprintf(deps.Err, "validate Console CLI session: %v\n", err)
 		return 1
+	}
+	if command == "attach" {
+		agents, listErr := client.ListAgents(ctx)
+		if listErr != nil {
+			fmt.Fprintf(deps.Err, "authorize Console Agent selection: %v\n", listErr)
+			return 1
+		}
+		if authorizeErr := authorizeAgentSelection(agentID, agents); authorizeErr != nil {
+			fmt.Fprintf(deps.Err, "authorize Console Agent selection: %v\n", authorizeErr)
+			return 1
+		}
+		if _, bindErr := workspace.BindCurrent(ctx, attachLocation, agentID, false); bindErr != nil {
+			fmt.Fprintf(deps.Err, "bind Console workspace: %v\n", bindErr)
+			return 1
+		}
 	}
 	idem := consoleclient.IdempotencyKey("console-" + command)
 	var result any
@@ -399,6 +432,22 @@ func Execute(args []string, deps Dependencies) int {
 	return 0
 }
 
+func authorizeAgentSelection(agentID string, agents []domain.AgentIdentity) error {
+	matches := 0
+	for _, agent := range agents {
+		if err := agent.Validate(); err != nil {
+			return fmt.Errorf("control plane returned an invalid Agent projection")
+		}
+		if agent.ID == agentID {
+			matches++
+		}
+	}
+	if matches != 1 {
+		return fmt.Errorf("Agent %q is not uniquely present in the authenticated Agent list", agentID)
+	}
+	return nil
+}
+
 func validateCredentialSession(credential credentialstore.Credential, session openapi.CLISessionResponse, now time.Time) error {
 	if session.InstallationID != credential.InstallationID || session.Principal.TokenID != credential.TokenID ||
 		session.Principal.Username != credential.Username || !session.AbsoluteExpiresAt.Equal(credential.AbsoluteExpires) {
@@ -453,6 +502,7 @@ func usage(writer io.Writer) {
 	fmt.Fprintln(writer, "       openagentx console login [--socket <path>] [--credentials <path>]")
 	fmt.Fprintln(writer, "       openagentx console logout [--socket <path>] [--credentials <path>]")
 	fmt.Fprintln(writer, "       openagentx console attach [--socket <path>] [--agent <agent-id>] [--diagnostic] [--once]")
+	fmt.Fprintln(writer, "Attach workspace: run from pane 0 of the exact OAX session; --agent does not bypass workspace preflight")
 	fmt.Fprintln(writer, "       legacy controls: dispatch|steer|cancel|approve|reject|down|force-stop")
 	fmt.Fprintf(writer, "Default socket source: $%s > $%s > ~/.openagentx/run/openagentx.sock\n", localprofile.EnvSocketPath, localprofile.EnvHome)
 	fmt.Fprintf(writer, "Default credential source: $%s > $%s > ~/.openagentx/credentials.json\n", localprofile.EnvCredentialsPath, localprofile.EnvHome)
