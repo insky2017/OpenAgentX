@@ -54,7 +54,7 @@ M  deploy/systemd/openagentx-user.service
 | 01 | 基线隔离、契约冻结与测试地图 | completed | `35bd44564773882cfedefb31fad0afd64c0514e4` | GO |
 | 02 | 默认路径与 CLI 表面 | completed | `e690bbbd11046e63841a4a869a90f6aeb42c5575` + fix `c0e8d4aeae2516c005cedbce6c5b35d1b8b07553` | GO |
 | 03 | 一致 Attach cursor 与代际 reducer | completed | `4aea5a6291b47792b1c69256ae0ae6422a890cb4` + fix `9e18246dc4f61ee8ccc044509229b13b0e191f9d` + fix `2f9772753b3a75e6304abd76c4eb6a259c9e0c6f` | GO |
-| 04 | 可撤销 CLI Token 会话 | active | — | WAIT |
+| 04 | 可撤销 CLI Token 会话 | completed | `c240aa4dbd47565181d22f602ea3203e5fbfe4dc` + fix `0a5e85987f0c9bd29275ece138200083be13171e` | GO |
 | 05 | `OAX` workspace 与非破坏绑定 | pending | — | WAIT |
 | 06 | Console 主菜单、Agent selector 与全屏 TUI | pending | — | WAIT |
 | 07 | Fleet、user-systemd 与默认 profile 集成 | pending | — | WAIT |
@@ -482,7 +482,7 @@ M  deploy/systemd/openagentx-user.service
 
 ### 开始信息
 
-- 状态：active
+- 状态：completed
 - 执行者：Codex
 - 开始时间（UTC）：`2026-09-14T17:12:49Z`
 - feature 基线：`c1196d7d43e10bf573cbfcc02525973debe9ba1f`
@@ -598,6 +598,27 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T18:15Z | 新增真实 UDS client session header/结构化 401 测试后的定向测试、race 与 diff check | 0 | Bearer session 请求及 `CLI_UNAUTHENTICATED` 解析证据通过 |
 | 2026-09-14T18:19Z | 最终无缓存定向测试、race 与 `go test -count=1 ./...` | 0 | Task 04 受影响 packages、SQLite、全量 Go packages 均实际重跑通过；定向 11.8s、race 19.8s、全量 13.1s |
 
+### Task 04 完成安全点与最终监督 Gate
+
+- 实现提交：主实现 `c240aa4dbd47565181d22f602ea3203e5fbfe4dc`、session boundary
+  hardening fix `0a5e85987f0c9bd29275ece138200083be13171e`。
+- 监督者独立审查与重验确认：数据库仅存 Token digest；schema v1 空库、既有完整 v1 reopen、
+  重复 ensure 和故障 rollback 成立；CLI endpoint 仅挂 UDS，Web mux、cookie 与 CSRF 边界未
+  弱化；role+scope 白名单和稳定 401/403 成立。
+- 首次监督 `NO-GO` 的 Observe scope 过宽、credential 生命周期不完整和缺少跨进程原子性，
+  已由 `0a5e859` 修复。最终复核确认 authenticated session 校验、installation mismatch
+  发送前阻断、Replace 清理旧 installation，以及 owner/`0700`/`0600`/`O_NOFOLLOW`/`flock`/
+  bounded JSON/结构校验和并发测试均成立；所有既有失败与纠正记录保留在上文。
+- `0a5e859` 提交后实际核验：feature 工作树 clean，相对 `origin/main` ahead 11；主工作树为
+  clean 的 `main@c3fc1bba8ddbae3eedace0c7a32537e2f47db307`。feature 未 push，未操作
+  service、真实 DB/socket/default tmux、installed binary 或 `steadyflow` 父仓。
+- Open Issue `T04-01` 保持 Task 07/pending，由 Task 07 关闭，不阻断 Task 04 gate。
+- 主计划和 Task 04 front matter 已在本 docs-only gate record 同步为 `completed`；Task 05
+  保持 `pending/WAIT`，未开始实现。监督者最终结论为 Task 04 `GO`。
+- Gate record 相对链接/状态检查首次调用环境未安装的 `ruby`，退出 `127`；改用 Perl 等价
+  只读检查后 relative links 与 status consistency 均通过。staged path 白名单和
+  `git diff --cached --check` 同时通过，仅包含三份 `docs/plans` 文件。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
@@ -617,6 +638,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T17:07:08Z | 三个 Task 03 实现/review-fix 提交及独立验证均通过 | 两轮 NO-GO 缺口已分别由 `9e18246`、`2f97727` 修复；无剩余 Task 03 阻断 | 记录三个精确 SHA、实际 clean/ahead 与最终结论；仅同步 docs gate 状态 | Task 03 GO；Task 04 保持 `pending/WAIT` |
 | 2026-09-14T17:45:58Z | Task 04 实现与隔离验证完成，等待阶段提交 | CLI Token、v1 ensure、UDS/Web auth 隔离、credential store 和 Console bearer 路径已形成最小闭环；Fleet 集成未越界 | 保留两次代码测试失败和两次 Web 环境/命令失败及纠正；最终 Go/race/Web/release/diff 通过 | Task 04 保持 active/WAIT，提交后停止等待 gate |
 | 2026-09-14T18:16:09Z | 监督对 `c240aa4` 给出 Task 04 临时 NO-GO | 发现 Observe CLI scope 过宽、credential 生命周期校验/清理不完整、跨进程并发原子性缺口；核心模型/schema/mux 分离结论不变 | 仅在 Task 04 范围实现 scope 白名单、authenticated session validation、严格 bounded credential document 与安全 `flock`，追加测试和日志；未触碰真实状态 | Task 04 保持 `active/WAIT`；等待 review-fix 提交后的再次 gate |
+| 2026-09-14T18:26:41Z | 监督最终复核 Task 04 主实现与 hardening fix | 独立审查确认 schema/auth/mux/store/session/scope/并发安全边界全部成立；`T04-01` 明确留给 Task 07 | 记录两个精确 SHA、实际 clean/ahead、首次 NO-GO 修复和最终结论；仅同步三份 docs gate 状态 | Task 04 GO；Task 05 保持 `pending/WAIT` |
 
 ## 9. 最终产物（Task 08 填写）
 

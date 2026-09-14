@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-14
 ---
@@ -54,3 +54,27 @@ git diff --check
 - 旧 DB 与空库路径均通过；
 - Web Auth 安全属性无回归；
 - 阶段提交和 execution log 完成后暂停。
+
+## 完成记录
+
+- 主实现：`c240aa4dbd47565181d22f602ea3203e5fbfe4dc`；新增独立 CLI Token
+  domain/service/repository，使用至少 256-bit opaque Token，数据库仅保存 SHA-256 digest、
+  principal/scopes/installation audience 与绝对期限、last-used、revoked 等生命周期元数据。
+- schema 保持 `CurrentVersion=1`：空库 target schema 与既有完整 v1 reopen 的事务化幂等
+  ensure/required validation 同步覆盖 `installation_metadata`、`cli_tokens` 和索引；重复 Apply、
+  部分/损坏对象拒绝及故障回滚均有隔离 SQLite 测试。
+- UDS-only versioned login/session/logout 和 installation probe 与 Web mux 分离；Web cookie、
+  Secure/SameSite、CSRF 保持不变。Attach/Agent list/SSE、Diagnostic、task/approval control、
+  Worker lifecycle 分别按冻结 role+scope 授权，稳定区分 `CLI_UNAUTHENTICATED` 与
+  `CLI_FORBIDDEN`。
+- hardening fix：`0a5e85987f0c9bd29275ece138200083be13171e`；将 Observe CLI read
+  缩为 Agent list/events 白名单，业务请求前验证本地 expiry 与 authenticated CLI session，
+  installation mismatch 不发送 Token，Replace Login 清除同 socket/user 的旧 installation
+  credential。
+- credential store 使用 canonical socket+installation+username 隔离，执行 owner、目录
+  `0700`、文件/lock `0600`、`O_NOFOLLOW`、bounded JSON/结构校验、同目录原子替换与 Linux
+  `flock`；同用户 Replace 和不同用户 Save 的并发回归测试通过。
+- 验证包括 Task 04 定向测试与 race、无缓存全仓 Go 测试、受影响 vet、全量 build、Web
+  observation/PWA/build、release scanner 和 diff check；监督者最终结论为 Task 04 `GO`。
+- Open Issue `T04-01` 仍由 Task 07 负责 Fleet credential 集成，保持 pending，不阻断本 gate；
+  未开始 Task 05，未操作真实服务、数据库、socket、tmux 或 installed binary。
