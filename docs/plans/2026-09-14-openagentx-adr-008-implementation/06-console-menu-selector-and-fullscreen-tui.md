@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-14
 ---
@@ -65,3 +65,27 @@ git diff --check
 - 编辑、事件、重连和 terminal restore 通过；
 - `--once` 与独立 status 已删除且帮助同步；
 - 阶段提交和 execution log 完成后暂停。
+
+## 完成记录
+
+- 主实现：`4b5d2c0675a9b00f6d48e52395710b2639b8acac`；按冻结版本引入 Bubble Tea、
+  Bubbles 和 Lip Gloss，交付真正 alt-screen 全屏 TUI、认证状态主菜单、masked Login/Replace
+  Login、Logout、禁用的 Foreground Takeover、Normal/Diagnostic Attach、`/status`/`/help`
+  overlay、固定输入区、bounded Timeline 和 terminal cleanup。
+- Agent selector 完成显式 `--agent`、当前 compatible managed window、经认证控制面分页列表三种
+  来源，并只通过 Task 05 binding service 执行确认重绑。列表安全投影、超过 100 条分页、冲突提示、
+  非 TTY fail-closed 和 pane `1+` 保留均有测试；tmux 仍不承担业务身份或控制。
+- 状态流 hardening：`5aa6c973abd864a3c7e80b41f4bdc422600d002c`；Follow snapshot/event
+  增加 reducer Apply ack，只有成功应用才推进 cursor。普通重连、retention re-Attach、旧代际 fencing、
+  timeline scroll、overlay 输入、断线禁写和 session absolute expiry 均由 typed Msg/Cmd 驱动。
+- Normal SSE 强制移除 Diagnostic，Diagnostic 要求 owner 与 `console.diagnostic`；长连接在 CLI/Web
+  session 到期时关闭。正式 dispatch/steer/cancel/approve/reject 只调用 authenticated API 一次，
+  Timeline 仅显示 ID、version、status、decision、sequence 等结构化安全 outcome。
+- Terminal compatibility：`c42414b7a21b98bd35ab0de3949778d591705709`；smoke 使用锁定的
+  `ansi.Strip` 处理 Termux 的 `ESC ( B` 等真实终端序列。Observe SSE 缺少 mode 时向后兼容为
+  normal 并继续脱敏，显式空值、重复或未知 mode 仍 fail closed。
+- Task 06 定向与 race、全仓 Go 测试、受影响 vet、Go build、Web observation/PWA/build、release
+  scanner、CLI grammar、隔离 PTY/UDS/`tmux -L` smoke 和 diff check 均通过；独立 Termux 真实
+  PTY/tmux smoke 最终通过，监督者结论为 Task 06 `GO`。
+- Task 07 未开始；`T04-01`、`T05-01` 继续归属 Task 07/pending。未 push、安装、重启或操作真实
+  service、DB/socket/default tmux/installed binary/父仓。

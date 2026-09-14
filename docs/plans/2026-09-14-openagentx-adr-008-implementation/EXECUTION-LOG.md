@@ -56,7 +56,7 @@ M  deploy/systemd/openagentx-user.service
 | 03 | 一致 Attach cursor 与代际 reducer | completed | `4aea5a6291b47792b1c69256ae0ae6422a890cb4` + fix `9e18246dc4f61ee8ccc044509229b13b0e191f9d` + fix `2f9772753b3a75e6304abd76c4eb6a259c9e0c6f` | GO |
 | 04 | 可撤销 CLI Token 会话 | completed | `c240aa4dbd47565181d22f602ea3203e5fbfe4dc` + fix `0a5e85987f0c9bd29275ece138200083be13171e` | GO |
 | 05 | `OAX` workspace 与非破坏绑定 | completed | `c9339bb8c8cfa35a0a2bbd74608d273eb00bd2f6` + fix `e40e28bed11abc9789c143977363e601f067e4d3` + test `5468ffeb634ee5a4aed5577fbea5c1201a591cce` | GO |
-| 06 | Console 主菜单、Agent selector 与全屏 TUI | active | — | WAIT |
+| 06 | Console 主菜单、Agent selector 与全屏 TUI | completed | `4b5d2c0675a9b00f6d48e52395710b2639b8acac` + fix `5aa6c973abd864a3c7e80b41f4bdc422600d002c` + fix `c42414b7a21b98bd35ab0de3949778d591705709` | GO |
 | 07 | Fleet、user-systemd 与默认 profile 集成 | pending | — | WAIT |
 | 08 | 集成审查、实机候选与发布门禁 | pending | — | WAIT |
 
@@ -994,6 +994,25 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T21:24Z | `npm run test:observation`、`npm run test:pwa`、`npm run build` | 0 | 1.0s 并行批次 | 4 项 observation、PWA assertions 与 Vite 266 modules build 通过 |
 | 2026-09-14T21:24Z | `bash scripts/check-legacy-control-paths.sh --release` | 0 | <0.1s | release scanner 全类别 CLEAN |
 
+### Task 06 监督门禁完成记录
+
+- `2026-09-14T21:30:38Z`：监督最终复核确认 Task 06 `GO`。主实现
+  `4b5d2c0675a9b00f6d48e52395710b2639b8acac`、状态流 hardening
+  `5aa6c973abd864a3c7e80b41f4bdc422600d002c` 和 terminal compatibility
+  `c42414b7a21b98bd35ab0de3949778d591705709` 的范围与验证均通过。
+- 第一轮 `NO-GO` 的 reducer ack/cursor 时序、Diagnostic 越权、absolute expiry、正式控制 outcome
+  和 TUI scroll/input 状态问题由 `5aa6c97` 修复；第二轮 `NO-GO` 的 Termux `ESC ( B` ANSI
+  portability 与 Observe SSE 缺省 mode 兼容问题由 `c42414b` 修复。既有失败、根因和纠正记录
+  均保留在上文。
+- 独立 Termux 真实 PTY/tmux smoke 最终确认 alt-screen、正式 UDS、`quote` binding、`/quit`、
+  pane 0 正常退出及 pane `0/1/2` 保留。Normal/Diagnostic 安全投影、session expiry、结构化控制
+  outcome、全仓 Go/race/vet/build、Web 回归、release scanner 和 diff 检查证据成立。
+- `c42414b` 提交后实际核验：feature 工作树 clean，相对 `origin/main` ahead 19；主工作树为 clean
+  的 `main@c3fc1bba8ddbae3eedace0c7a32537e2f47db307`。feature 未 push，未操作真实 service、
+  DB/socket/default tmux/installed binary 或 `steadyflow` 父仓。
+- 主计划和 Task 06 front matter 已在本 docs-only gate record 同步为 `completed`；Task 07 保持
+  `pending/WAIT`，未开始实现。Open Issue `T04-01`、`T05-01` 均继续归属 Task 07/pending。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
@@ -1016,6 +1035,7 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T18:16:09Z | 监督对 `c240aa4` 给出 Task 04 临时 NO-GO | 发现 Observe CLI scope 过宽、credential 生命周期校验/清理不完整、跨进程并发原子性缺口；核心模型/schema/mux 分离结论不变 | 仅在 Task 04 范围实现 scope 白名单、authenticated session validation、严格 bounded credential document 与安全 `flock`，追加测试和日志；未触碰真实状态 | Task 04 保持 `active/WAIT`；等待 review-fix 提交后的再次 gate |
 | 2026-09-14T18:26:41Z | 监督最终复核 Task 04 主实现与 hardening fix | 独立审查确认 schema/auth/mux/store/session/scope/并发安全边界全部成立；`T04-01` 明确留给 Task 07 | 记录两个精确 SHA、实际 clean/ahead、首次 NO-GO 修复和最终结论；仅同步三份 docs gate 状态 | Task 04 GO；Task 05 保持 `pending/WAIT` |
 | 2026-09-14T19:46:50Z | 监督最终复核 Task 05 三个提交 | 独立 Termux tmux 3.4 七组真实集成最终通过；主实现、hardening 和真实 binding 补证范围均通过；`T04-01`、`T05-01` 保留给 Task 07 | 记录三个精确 SHA、实际 clean/ahead、首次 NO-GO 三项修复和最终真实 binding 证据；仅同步三份 docs gate 状态 | Task 05 GO；Task 06 保持 `pending/WAIT` |
+| 2026-09-14T21:30:38Z | 监督最终复核 Task 06 三个提交 | 两轮 NO-GO 分别由 `5aa6c97`、`c42414b` 修复；独立 Termux 真实 PTY/tmux smoke 最终通过，TUI 状态流和 SSE 安全/兼容边界成立 | 记录三个精确 SHA、实际 clean/ahead 与最终验证；仅同步三份 docs gate 状态，保留 `T04-01`、`T05-01` | Task 06 GO；Task 07 保持 `pending/WAIT` |
 
 ## 9. 最终产物（Task 08 填写）
 
