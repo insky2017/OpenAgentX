@@ -308,7 +308,11 @@ func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 			events = events[1:]
 		}
 	}
-	projected := projectEvents(events)
+	projected, err := projectEvents(events)
+	if err != nil {
+		http.Error(w, "failed to project task events", http.StatusInternalServerError)
+		return
+	}
 	readModel := openapi.TaskReadModel{Task: taskReadModel(*t), Messages: m, Events: projected, SnapshotSequence: snapshotSequence}
 	if cursor.Mode == observeAfter {
 		readModel.HasMoreLiveEvents = hasMore
@@ -478,35 +482,54 @@ func taskListItem(task domain.Task) openapi.TaskListItem {
 	return openapi.TaskListItem{ID: task.ID, TargetAgentID: task.TargetAgentID, Status: task.Status, Summary: summary, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
 }
 
-func projectEvents(events []domain.JournalEvent) []openapi.JournalEventReadModel {
+func projectEvents(events []domain.JournalEvent) ([]openapi.JournalEventReadModel, error) {
 	projected := make([]openapi.JournalEventReadModel, 0, len(events))
 	for _, event := range events {
-		model := openapi.JournalEventReadModel{Sequence: event.Sequence, ID: event.ID, AggregateType: event.AggregateType, AggregateID: event.AggregateID, EventType: event.EventType, CreatedAt: event.CreatedAt}
-		model.Output = projectRuntimeOutput(event)
+		model, err := projectEvent(event)
+		if err != nil {
+			return nil, err
+		}
 		projected = append(projected, model)
 	}
-	return projected
+	return projected, nil
 }
 
-func projectRuntimeOutput(event domain.JournalEvent) *openapi.SafeOutputReadModel {
+func projectEvent(event domain.JournalEvent) (openapi.JournalEventReadModel, error) {
+	model := openapi.JournalEventReadModel{Sequence: event.Sequence, ID: event.ID, AggregateType: event.AggregateType,
+		AggregateID: event.AggregateID, EventType: event.EventType, CreatedAt: event.CreatedAt}
+	output, err := projectRuntimeOutput(event)
+	if err != nil {
+		return openapi.JournalEventReadModel{}, err
+	}
+	model.Output = output
+	return model, nil
+}
+
+func projectRuntimeOutput(event domain.JournalEvent) (*openapi.SafeOutputReadModel, error) {
 	if !strings.HasPrefix(event.EventType, "runtime.") || event.EventType == "runtime.approval.requested" {
-		return nil
+		return nil, nil
 	}
 	var envelope struct {
 		Payload json.RawMessage `json:"payload"`
 	}
-	if json.Unmarshal(event.Payload, &envelope) != nil || len(envelope.Payload) == 0 {
-		return nil
+	if err := json.Unmarshal(event.Payload, &envelope); err != nil {
+		return nil, fmt.Errorf("decode runtime event projection: %w", err)
+	}
+	if len(envelope.Payload) == 0 {
+		return nil, nil
 	}
 	projected := safeoutput.ProjectRuntimePayload(envelope.Payload)
 	var output openapi.SafeOutputReadModel
-	if len(projected) == 0 || json.Unmarshal(projected, &output) != nil {
-		return nil
+	if len(projected) == 0 {
+		return nil, fmt.Errorf("runtime event projection is invalid")
+	}
+	if err := json.Unmarshal(projected, &output); err != nil {
+		return nil, fmt.Errorf("decode safe runtime event projection: %w", err)
 	}
 	if output.Stage == "" && output.Status == "" && output.Text == "" && output.Diagnostic == "" && !output.HasOutput && !output.HasError {
-		return nil
+		return nil, nil
 	}
-	return &output
+	return &output, nil
 }
 
 func lastEventSequence(events []openapi.JournalEventReadModel) int64 {
@@ -1125,15 +1148,24 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 				after = ev.Sequence
 				continue
 			}
-			if agentID != "" && !h.eventMatchesAgent(streamContext, ev, agentID) {
-				after = ev.Sequence
-				continue
+			if agentID != "" {
+				matched, matchErr := h.eventMatchesAgent(streamContext, ev, agentID)
+				if matchErr != nil {
+					return
+				}
+				if !matched {
+					after = ev.Sequence
+					continue
+				}
 			}
 			// The panel currently runs in a single authenticated organization scope.
 			// Stream only the browser-safe projection; Journal payloads never cross
 			// the SSE boundary and therefore cannot expose runtime diagnostics or
 			// credentials through a reconnecting client.
-			model := projectEvents([]domain.JournalEvent{ev})[0]
+			model, projectionErr := projectEvent(ev)
+			if projectionErr != nil {
+				return
+			}
 			if mode == consoleapi.ModeNormal {
 				stripDiagnostic(&model)
 			}
@@ -1144,13 +1176,22 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 				}
 				model.Worker = worker
 			} else if ev.AggregateType == "run_attempt" {
-				model.Run = h.runEventSnapshot(streamContext, ev.AggregateID)
+				run, projectionErr := h.runEventSnapshot(streamContext, ev.AggregateID)
+				if projectionErr != nil {
+					return
+				}
+				model.Run = run
 			}
-			b, _ := json.Marshal(model)
+			b, encodeErr := json.Marshal(model)
+			if encodeErr != nil {
+				return
+			}
 			if !h.now().UTC().Before(principal.ExpiresAt.UTC()) {
 				return
 			}
-			fmt.Fprintf(w, "id: %d\ndata: %s\n\n", ev.Sequence, b)
+			if _, writeErr := fmt.Fprintf(w, "id: %d\ndata: %s\n\n", ev.Sequence, b); writeErr != nil {
+				return
+			}
 			after = ev.Sequence
 		}
 		fl.Flush()
@@ -1178,41 +1219,74 @@ func stripDiagnostic(event *openapi.JournalEventReadModel) {
 	event.Output = &output
 }
 
-func (h *Handler) eventMatchesAgent(ctx context.Context, event domain.JournalEvent, agentID string) bool {
+func (h *Handler) eventMatchesAgent(ctx context.Context, event domain.JournalEvent, agentID string) (bool, error) {
 	switch event.AggregateType {
 	case "task":
 		task, err := h.state.GetTask(ctx, event.AggregateID)
-		return err == nil && task.TargetAgentID == agentID
+		if err != nil {
+			return false, fmt.Errorf("read Task event ownership: %w", err)
+		}
+		if task == nil || task.ID != event.AggregateID || domain.ValidateOpaqueID("task_id", task.ID) != nil ||
+			domain.ValidateIdentifier("agent_id", task.TargetAgentID) != nil {
+			return false, fmt.Errorf("invalid Task event ownership projection")
+		}
+		return task.TargetAgentID == agentID, nil
 	case "run_attempt", "runtime":
 		run, err := h.state.GetRunAttempt(ctx, event.AggregateID)
-		return err == nil && run.AgentID == agentID
-	case "worker_instance":
-		workers, err := h.state.ListWorkers(ctx, 1000)
 		if err != nil {
-			return false
+			return false, fmt.Errorf("read Run event ownership: %w", err)
 		}
-		for _, worker := range workers {
-			if worker.ID == event.AggregateID {
-				return worker.AgentID == agentID
-			}
+		if run == nil || run.ID != event.AggregateID || domain.ValidateOpaqueID("run_id", run.ID) != nil ||
+			domain.ValidateIdentifier("agent_id", run.AgentID) != nil {
+			return false, fmt.Errorf("invalid Run event ownership projection")
 		}
-		return false
+		return run.AgentID == agentID, nil
+	case "worker_instance":
+		worker, err := h.state.GetWorkerInstance(ctx, event.AggregateID)
+		if err != nil {
+			return false, fmt.Errorf("read Worker event ownership: %w", err)
+		}
+		if worker == nil || worker.ID != event.AggregateID || domain.ValidateOpaqueID("worker_instance_id", worker.ID) != nil ||
+			domain.ValidateIdentifier("agent_id", worker.AgentID) != nil {
+			return false, fmt.Errorf("invalid Worker event ownership projection")
+		}
+		return worker.AgentID == agentID, nil
 	case "message":
 		message, err := h.state.GetMessage(ctx, event.AggregateID)
 		if err != nil {
-			return false
+			return false, fmt.Errorf("read Message event ownership: %w", err)
+		}
+		if message == nil || message.ID != event.AggregateID || domain.ValidateOpaqueID("message_id", message.ID) != nil ||
+			domain.ValidateOpaqueID("task_id", message.TaskID) != nil {
+			return false, fmt.Errorf("invalid Message event ownership projection")
 		}
 		task, err := h.state.GetTask(ctx, message.TaskID)
-		return err == nil && task.TargetAgentID == agentID
+		if err != nil {
+			return false, fmt.Errorf("read Message Task ownership: %w", err)
+		}
+		if task == nil || task.ID != message.TaskID || domain.ValidateIdentifier("agent_id", task.TargetAgentID) != nil {
+			return false, fmt.Errorf("invalid Message Task ownership projection")
+		}
+		return task.TargetAgentID == agentID, nil
 	case "approval_request":
 		approval, err := h.state.GetApprovalRequest(ctx, event.AggregateID)
 		if err != nil {
-			return false
+			return false, fmt.Errorf("read Approval event ownership: %w", err)
+		}
+		if approval == nil || approval.ID != event.AggregateID || domain.ValidateOpaqueID("approval_id", approval.ID) != nil ||
+			domain.ValidateOpaqueID("task_id", approval.TaskID) != nil {
+			return false, fmt.Errorf("invalid Approval event ownership projection")
 		}
 		task, err := h.state.GetTask(ctx, approval.TaskID)
-		return err == nil && task.TargetAgentID == agentID
+		if err != nil {
+			return false, fmt.Errorf("read Approval Task ownership: %w", err)
+		}
+		if task == nil || task.ID != approval.TaskID || domain.ValidateIdentifier("agent_id", task.TargetAgentID) != nil {
+			return false, fmt.Errorf("invalid Approval Task ownership projection")
+		}
+		return task.TargetAgentID == agentID, nil
 	default:
-		return false
+		return false, nil
 	}
 }
 
@@ -1252,25 +1326,29 @@ func (h *Handler) workerEventSnapshot(ctx context.Context, workerID string) (*op
 	return &model, nil
 }
 
-func (h *Handler) runEventSnapshot(ctx context.Context, runID string) *openapi.RunAttemptReadModel {
+func (h *Handler) runEventSnapshot(ctx context.Context, runID string) (*openapi.RunAttemptReadModel, error) {
 	run, err := h.state.GetRunAttempt(ctx, runID)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("read Run projection: %w", err)
 	}
-	if domain.ValidateOpaqueID("run_id", run.ID) != nil || domain.ValidateOpaqueID("task_id", run.TaskID) != nil ||
+	if run == nil || run.ID != runID || domain.ValidateOpaqueID("run_id", run.ID) != nil ||
+		domain.ValidateOpaqueID("task_id", run.TaskID) != nil ||
 		domain.ValidateIdentifier("agent_id", run.AgentID) != nil ||
 		domain.ValidateOpaqueID("worker_instance_id", run.WorkerInstanceID) != nil || !run.Status.Valid() {
-		return nil
+		return nil, fmt.Errorf("invalid Run projection")
 	}
-	var worker *domain.WorkerInstance
-	if run.WorkerInstanceID != "" {
-		worker, _ = h.state.GetWorkerInstance(ctx, run.WorkerInstanceID)
+	worker, err := h.state.GetWorkerInstance(ctx, run.WorkerInstanceID)
+	if err != nil {
+		return nil, fmt.Errorf("read Run Worker projection: %w", err)
 	}
-	if worker == nil || worker.ID != run.WorkerInstanceID || worker.Generation <= 0 || !worker.Status.Valid() {
-		return nil
+	if worker == nil || worker.ID != run.WorkerInstanceID ||
+		domain.ValidateOpaqueID("worker_instance_id", worker.ID) != nil ||
+		domain.ValidateIdentifier("agent_id", worker.AgentID) != nil || worker.AgentID != run.AgentID ||
+		worker.Generation <= 0 || !worker.Status.Valid() {
+		return nil, fmt.Errorf("invalid Run Worker projection")
 	}
 	model := runReadModel(*run, worker)
-	return &model
+	return &model, nil
 }
 
 func observableAggregate(aggregateType string) bool {

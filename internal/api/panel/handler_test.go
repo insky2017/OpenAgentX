@@ -38,6 +38,73 @@ type backendPanelState struct {
 	backendErr error
 }
 
+type faultingPanelState struct {
+	*backendPanelState
+	failMethod       string
+	failAtCall       int
+	failErr          error
+	calls            map[string]int
+	listWorkersCalls int
+}
+
+func (s *faultingPanelState) fault(method string) error {
+	if s.calls == nil {
+		s.calls = make(map[string]int)
+	}
+	s.calls[method]++
+	if method == s.failMethod && s.calls[method] == s.failAtCall {
+		return s.failErr
+	}
+	return nil
+}
+
+func (s *faultingPanelState) GetTask(ctx context.Context, id string) (*domain.Task, error) {
+	if err := s.fault("GetTask"); err != nil {
+		return nil, err
+	}
+	return s.testPanelState.GetTask(ctx, id)
+}
+
+func (s *faultingPanelState) GetRunAttempt(ctx context.Context, id string) (*domain.RunAttempt, error) {
+	if err := s.fault("GetRunAttempt"); err != nil {
+		return nil, err
+	}
+	return s.testPanelState.GetRunAttempt(ctx, id)
+}
+
+func (s *faultingPanelState) GetWorkerInstance(ctx context.Context, id string) (*domain.WorkerInstance, error) {
+	if err := s.fault("GetWorkerInstance"); err != nil {
+		return nil, err
+	}
+	return s.testPanelState.GetWorkerInstance(ctx, id)
+}
+
+func (s *faultingPanelState) GetMessage(ctx context.Context, id string) (*domain.Message, error) {
+	if err := s.fault("GetMessage"); err != nil {
+		return nil, err
+	}
+	return s.testPanelState.GetMessage(ctx, id)
+}
+
+func (s *faultingPanelState) GetApprovalRequest(ctx context.Context, id string) (*domain.ApprovalRequest, error) {
+	if err := s.fault("GetApprovalRequest"); err != nil {
+		return nil, err
+	}
+	return s.testPanelState.GetApprovalRequest(ctx, id)
+}
+
+func (s *faultingPanelState) ListWorkers(context.Context, int) ([]domain.WorkerInstance, error) {
+	s.listWorkersCalls++
+	return nil, errors.New("unexpected non-exact Worker ownership query")
+}
+
+func (s *faultingPanelState) ListWorkerBackends(ctx context.Context, workerID string) ([]openruntime.BackendRegistration, error) {
+	if err := s.fault("ListWorkerBackends"); err != nil {
+		return nil, err
+	}
+	return s.backendPanelState.ListWorkerBackends(ctx, workerID)
+}
+
 type panelCLIRepository struct {
 	installationID string
 	user           domain.WebUserRecord
@@ -622,10 +689,13 @@ func TestTaskDetailProjectsSafeRunEvidence(t *testing.T) {
 }
 
 func TestRuntimeTimelineUsesSafeStructuredProjection(t *testing.T) {
-	events := projectEvents([]domain.JournalEvent{{
+	events, err := projectEvents([]domain.JournalEvent{{
 		Sequence: 4, AggregateType: "runtime", AggregateID: "run-1", EventType: "runtime.turn.output",
 		Payload: json.RawMessage(`{"runtime_event_type":"turn.output","payload":{"stage":"running","text":"working token=top-secret","stderr":"raw stderr","reasoning":"hidden"},"occurred_at":"2026-09-14T00:00:00Z"}`),
 	}})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(events) != 1 || events[0].Output == nil || events[0].Output.Text != "working token=[REDACTED]" {
 		t.Fatalf("safe output projection=%+v", events)
 	}
@@ -637,6 +707,13 @@ func TestRuntimeTimelineUsesSafeStructuredProjection(t *testing.T) {
 		if strings.Contains(string(encoded), forbidden) {
 			t.Fatalf("timeline leaked %q: %s", forbidden, encoded)
 		}
+	}
+	empty, err := projectEvents([]domain.JournalEvent{{
+		Sequence: 5, AggregateType: "runtime", AggregateID: "run-1", EventType: "runtime.event",
+		Payload: json.RawMessage(`{"runtime_event_type":"event","occurred_at":"2026-09-14T00:00:00Z"}`),
+	}})
+	if err != nil || len(empty) != 1 || empty[0].Output != nil {
+		t.Fatalf("valid runtime event without safe output projection=%+v error=%v", empty, err)
 	}
 }
 
@@ -895,6 +972,147 @@ func TestSSEBackendProjectionFailureDoesNotSendOrCrossWorkerEvent(t *testing.T) 
 	panel.handler.ServeHTTP(response, request)
 	if body := response.Body.String(); body != "" {
 		t.Fatalf("failed Backend projection sent or crossed event: %q", body)
+	}
+}
+
+func TestSSEOwnershipLookupFailuresPreserveCursorAndRecover(t *testing.T) {
+	tests := []struct {
+		name       string
+		event      domain.JournalEvent
+		failMethod string
+		failErr    error
+	}{
+		{name: "task", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "task", AggregateID: "task-fail", EventType: "task.updated"}, failMethod: "GetTask", failErr: domain.ErrNotFound},
+		{name: "run", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "run_attempt", AggregateID: "run-fail", EventType: "run_attempt.started"}, failMethod: "GetRunAttempt", failErr: errors.New("injected Run ownership failure")},
+		{name: "runtime", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "runtime", AggregateID: "run-fail", EventType: "runtime.turn.output", Payload: json.RawMessage(`{"payload":{"text":"safe"}}`)}, failMethod: "GetRunAttempt", failErr: domain.ErrNotFound},
+		{name: "worker", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "worker_instance", AggregateID: "worker-fail", EventType: "worker.heartbeat"}, failMethod: "GetWorkerInstance", failErr: errors.New("injected Worker ownership failure")},
+		{name: "message", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "message", AggregateID: "message-fail", EventType: "message.created"}, failMethod: "GetMessage", failErr: domain.ErrNotFound},
+		{name: "message Task", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "message", AggregateID: "message-fail", EventType: "message.created"}, failMethod: "GetTask", failErr: errors.New("injected Message Task ownership failure")},
+		{name: "approval", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "approval_request", AggregateID: "approval-fail", EventType: "approval.requested"}, failMethod: "GetApprovalRequest", failErr: errors.New("injected Approval ownership failure")},
+		{name: "approval Task", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "approval_request", AggregateID: "approval-fail", EventType: "approval.requested"}, failMethod: "GetTask", failErr: domain.ErrNotFound},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			state := newFaultingSSEState(testCase.event, testCase.failMethod, 1, testCase.failErr)
+			panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+			assertSSEStopsBeforeEvent(t, panel, "0")
+			assertSSERecoversEvents(t, panel, "0", 1, 2)
+			if state.listWorkersCalls != 0 {
+				t.Fatalf("ownership used truncated ListWorkers path %d times", state.listWorkersCalls)
+			}
+		})
+	}
+}
+
+func TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover(t *testing.T) {
+	for _, testCase := range []struct {
+		name       string
+		event      domain.JournalEvent
+		failMethod string
+		failAtCall int
+	}{
+		{name: "Run projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "run_attempt", AggregateID: "run-fail", EventType: "run_attempt.started"}, failMethod: "GetRunAttempt", failAtCall: 2},
+		{name: "Run Worker generation query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "run_attempt", AggregateID: "run-fail", EventType: "run_attempt.started"}, failMethod: "GetWorkerInstance", failAtCall: 1},
+		{name: "Worker projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "worker_instance", AggregateID: "worker-fail", EventType: "worker.heartbeat"}, failMethod: "GetWorkerInstance", failAtCall: 2},
+		{name: "Worker Backend projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "worker_instance", AggregateID: "worker-fail", EventType: "worker.heartbeat"}, failMethod: "ListWorkerBackends", failAtCall: 1},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			state := newFaultingSSEState(testCase.event, testCase.failMethod, testCase.failAtCall, errors.New("injected projection failure"))
+			panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+			assertSSEStopsBeforeEvent(t, panel, "0")
+			assertSSERecoversEvents(t, panel, "0", 1, 2)
+		})
+	}
+}
+
+func TestRunEventSnapshotRejectsInvalidIdentityGenerationAndStatus(t *testing.T) {
+	for _, testCase := range []struct {
+		name   string
+		mutate func(*testPanelState)
+	}{
+		{name: "Run identity", mutate: func(state *testPanelState) { state.runs[0].AgentID = "" }},
+		{name: "Run Task identity", mutate: func(state *testPanelState) { state.runs[0].TaskID = "" }},
+		{name: "Run Worker identity", mutate: func(state *testPanelState) { state.runs[0].WorkerInstanceID = "" }},
+		{name: "Run status", mutate: func(state *testPanelState) { state.runs[0].Status = "invalid" }},
+		{name: "Worker identity", mutate: func(state *testPanelState) { state.workers[0].AgentID = "other" }},
+		{name: "Worker generation", mutate: func(state *testPanelState) { state.workers[0].Generation = 0 }},
+		{name: "Worker status", mutate: func(state *testPanelState) { state.workers[0].Status = "invalid" }},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			state := newFaultingSSEState(domain.JournalEvent{}, "", 0, nil)
+			testCase.mutate(state.testPanelState)
+			model, err := (&Handler{state: state}).runEventSnapshot(context.Background(), "run-fail")
+			if err == nil || model != nil {
+				t.Fatalf("invalid Run projection model=%+v error=%v", model, err)
+			}
+		})
+	}
+}
+
+func TestSSEProjectionAndEncodingFailuresPreserveCursor(t *testing.T) {
+	t.Run("runtime safe projection", func(t *testing.T) {
+		event := domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "runtime", AggregateID: "run-fail",
+			EventType: "runtime.turn.output", Payload: json.RawMessage(`{"payload":`)}
+		state := newFaultingSSEState(event, "", 0, nil)
+		panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+		assertSSEStopsBeforeEvent(t, panel, "0")
+		state.journal[0].Payload = json.RawMessage(`{"payload":{"text":"recovered"}}`)
+		assertSSERecoversEvents(t, panel, "0", 1, 2)
+	})
+
+	t.Run("JSON encoding", func(t *testing.T) {
+		event := domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "task", AggregateID: "task-fail",
+			EventType: "task.updated", CreatedAt: time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC)}
+		state := newFaultingSSEState(event, "", 0, nil)
+		panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+		assertSSEStopsBeforeEvent(t, panel, "0")
+		state.journal[0].CreatedAt = time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)
+		assertSSERecoversEvents(t, panel, "0", 1, 2)
+	})
+}
+
+func newFaultingSSEState(event domain.JournalEvent, failMethod string, failAtCall int, failErr error) *faultingPanelState {
+	base := &testPanelState{
+		tasks: []domain.Task{
+			{ID: "task-fail", TargetAgentID: "quote"},
+			{ID: "task-after", TargetAgentID: "quote"},
+		},
+		messages:  []domain.Message{{ID: "message-fail", TaskID: "task-fail"}},
+		approvals: []domain.ApprovalRequest{{ID: "approval-fail", TaskID: "task-fail"}},
+		runs: []domain.RunAttempt{{ID: "run-fail", TaskID: "task-fail", AgentID: "quote", Version: 1,
+			Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-fail"}},
+		workers: []domain.WorkerInstance{{ID: "worker-fail", AgentID: "quote", Generation: 7, Status: domain.WorkerStatusOnline}},
+		journal: []domain.JournalEvent{event, {
+			Sequence: 2, ID: "event-after", AggregateType: "task", AggregateID: "task-after", EventType: "task.updated",
+		}},
+	}
+	return &faultingPanelState{backendPanelState: &backendPanelState{testPanelState: base,
+		backends: map[string][]openruntime.BackendRegistration{"worker-fail": {}}},
+		failMethod: failMethod, failAtCall: failAtCall, failErr: failErr}
+}
+
+func assertSSEStopsBeforeEvent(t *testing.T, panel authenticatedPanel, after string) {
+	t.Helper()
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&agent_id=quote&after_sequence="+after, nil)
+	request.AddCookie(panel.cookie)
+	response := httptest.NewRecorder()
+	panel.handler.ServeHTTP(response, request)
+	if body := response.Body.String(); body != "" {
+		t.Fatalf("failed event or a later event crossed the cursor: %q", body)
+	}
+}
+
+func assertSSERecoversEvents(t *testing.T, panel authenticatedPanel, after string, sequences ...int64) {
+	t.Helper()
+	ctx, cancel := context.WithCancel(context.Background())
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&agent_id=quote&after_sequence="+after, nil).WithContext(ctx)
+	request.AddCookie(panel.cookie)
+	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+	panel.handler.ServeHTTP(response, request)
+	for _, sequence := range sequences {
+		if !strings.Contains(response.Body.String(), fmt.Sprintf("id: %d\n", sequence)) {
+			t.Fatalf("retry did not recover sequence %d: %q", sequence, response.Body.String())
+		}
 	}
 }
 
