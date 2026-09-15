@@ -8,6 +8,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/ansi"
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	consoleclient "openagentx/internal/client/console"
@@ -243,6 +244,93 @@ func TestAttachAsyncMessagesPreserveInputDraftCursorAndFocus(t *testing.T) {
 	}
 	if m.reducer.Snapshot().Generation != 48 || m.timeline.Len() != 0 {
 		t.Fatalf("old generation changed state or Timeline: state=%+v timeline=%v", m.reducer.Snapshot(), m.timeline.entries)
+	}
+}
+
+func TestCompactAttachFitsActualWindowAndKeepsReducerResponsive(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	m.reducer = nil
+	m.follow = make(chan tea.Msg)
+	m.input.SetValue("draft command")
+	m.input.SetCursor(5)
+	m.resize(80, 5)
+
+	snapshotAck := make(chan error, 1)
+	snapshot := consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
+		WorkerInstanceID: "worker-current", Generation: 48, WorkerStatus: domain.WorkerStatusOnline,
+		LastHeartbeatAt: fixedNow().Add(-time.Second), LeaseUntil: fixedNow().Add(time.Minute), SnapshotSequence: 1204}
+	m, _ = updateModel(t, m, followSnapshotMsg{Snapshot: snapshot, Ack: snapshotAck})
+	if err := <-snapshotAck; err != nil {
+		t.Fatalf("compact snapshot ack error=%v", err)
+	}
+	eventAck := make(chan error, 1)
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1205,
+		ID: "event-task", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated"}, Ack: eventAck})
+	if err := <-eventAck; err != nil {
+		t.Fatalf("compact event ack error=%v", err)
+	}
+	cursor := int64(-1)
+	if m.reducer != nil {
+		cursor = m.reducer.Cursor()
+	}
+	if cursor != 1205 || m.input.Value() != "draft command" ||
+		m.input.LineInfo().CharOffset != 5 || !m.input.Focused() {
+		t.Fatalf("compact state cursor=%d draft=%q input_cursor=%d focused=%v",
+			cursor, m.input.Value(), m.input.LineInfo().CharOffset, m.input.Focused())
+	}
+	assertTerminalViewFits(t, m.View(), 80, 5)
+
+	for _, size := range []struct{ width, height int }{{20, 3}, {8, 1}, {1, 1}} {
+		m.resize(size.width, size.height)
+		assertTerminalViewFits(t, m.View(), size.width, size.height)
+		for _, overlay := range []overlayKind{overlayStatus, overlayHelp, overlayDiagnostic, overlayConfirmation, overlayError} {
+			m.overlay = overlay
+			assertTerminalViewFits(t, m.View(), size.width, size.height)
+		}
+		m.overlay = overlayNone
+		if m.input.Value() != "draft command" || !m.input.Focused() {
+			t.Fatalf("resize %dx%d changed input draft=%q focused=%v", size.width, size.height, m.input.Value(), m.input.Focused())
+		}
+	}
+}
+
+func TestEveryConsoleScreenFitsCompactWindow(t *testing.T) {
+	actions := &fakeTUIActions{}
+	menu := newTUIModel(actions, fixedNow, nil)
+	login := newTUIModel(actions, fixedNow, nil)
+	login.screen = screenLogin
+	loading := newTUIModel(actions, fixedNow, nil)
+	loading.screen = screenLoading
+	selector := newTUIModel(actions, fixedNow, nil)
+	selector, _ = updateModel(t, selector, prepareAttachResultMsg{Preparation: attachPreparation{ID: 12,
+		Mode: consoleapi.ModeNormal, Agents: []domain.ConsoleAgentOption{{AgentID: "quote", DisplayName: "Quote"}}}})
+	attach := attachedModel(t, actions)
+
+	for name, initial := range map[string]tuiModel{
+		"menu": menu, "login": login, "loading": loading, "selector": selector, "attach": attach,
+	} {
+		t.Run(name, func(t *testing.T) {
+			model := initial
+			for _, size := range []struct{ width, height int }{{80, 5}, {20, 3}, {8, 1}, {1, 1}} {
+				model.resize(size.width, size.height)
+				assertTerminalViewFits(t, model.View(), size.width, size.height)
+			}
+		})
+	}
+}
+
+func assertTerminalViewFits(t *testing.T, view string, width, height int) {
+	t.Helper()
+	plain := ansi.Strip(view)
+	lines := strings.Split(plain, "\n")
+	if len(lines) > height {
+		t.Fatalf("rendered lines=%d exceed height=%d: %q", len(lines), height, plain)
+	}
+	for index, line := range strings.Split(view, "\n") {
+		if lineWidth := ansi.StringWidth(line); lineWidth > width {
+			t.Fatalf("rendered line %d width=%d exceeds width=%d: %q", index, lineWidth, width, plain)
+		}
 	}
 }
 

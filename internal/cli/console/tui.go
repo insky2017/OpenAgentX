@@ -17,6 +17,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 	openapi "openagentx/internal/api"
 	consoleapi "openagentx/internal/api/console"
 	consoleclient "openagentx/internal/client/console"
@@ -755,14 +756,19 @@ func positiveVersion(value string) (int64, error) {
 }
 
 func (m *tuiModel) resize(width, height int) {
-	m.width = max(width, 20)
-	m.height = max(height, 8)
-	m.input.SetWidth(max(10, m.width-2))
-	m.input.SetHeight(3)
-	m.viewport.Width = max(10, m.width-2)
-	m.viewport.Height = max(1, m.height-8)
+	m.width = max(width, 1)
+	m.height = max(height, 1)
+	contentWidth := max(1, m.width-2)
+	inputHeight := 3
+	if m.height < 8 {
+		inputHeight = 1
+	}
+	m.input.SetWidth(contentWidth)
+	m.input.SetHeight(inputHeight)
+	m.viewport.Width = contentWidth
+	m.viewport.Height = max(1, m.height-2-inputHeight)
 	if m.screen == screenSelector {
-		m.agents.SetSize(m.width, max(5, m.height-2))
+		m.agents.SetSize(m.width, m.height)
 	}
 }
 
@@ -775,6 +781,7 @@ func (m *tuiModel) syncTimeline(forceBottom bool) {
 }
 
 func (m tuiModel) View() string {
+	width, height := m.renderDimensions()
 	var body string
 	switch m.screen {
 	case screenLogin:
@@ -791,7 +798,32 @@ func (m tuiModel) View() string {
 	if m.overlay != overlayNone {
 		body = m.overlayView()
 	}
-	return lipgloss.NewStyle().Width(max(20, m.width)).Height(max(8, m.height)).Render(body)
+	return fitTerminalView(body, width, height)
+}
+
+func (m tuiModel) renderDimensions() (int, int) {
+	width, height := m.width, m.height
+	if width <= 0 {
+		width = 80
+	}
+	if height <= 0 {
+		height = 24
+	}
+	return width, height
+}
+
+func fitTerminalView(body string, width, height int) string {
+	if width < 1 || height < 1 {
+		return ""
+	}
+	lines := strings.Split(strings.ReplaceAll(body, "\r\n", "\n"), "\n")
+	if len(lines) > height {
+		lines = lines[:height]
+	}
+	for index := range lines {
+		lines[index] = ansi.Truncate(strings.TrimSuffix(lines[index], "\r"), width, "")
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (m tuiModel) menuItems() []string {
@@ -836,6 +868,7 @@ func (m tuiModel) loginView() string {
 }
 
 func (m tuiModel) attachView() string {
+	width, height := m.renderDimensions()
 	snapshot := consoleapi.AttachResponse{AgentID: m.selectedAgent, Mode: m.mode, WorkerStatus: domain.WorkerStatusOffline}
 	cursor := int64(0)
 	if m.reducer != nil {
@@ -848,7 +881,18 @@ func (m tuiModel) attachView() string {
 	if m.pending {
 		status += " | command pending"
 	}
-	return strings.Join([]string{boundedSafeText(header, max(20, m.width)), m.viewport.View(), boundedSafeText(status, max(20, m.width)), m.input.View()}, "\n")
+	header = boundedSafeText(header, width)
+	status = boundedSafeText(status, width)
+	switch height {
+	case 1:
+		return m.input.View()
+	case 2:
+		return strings.Join([]string{header, m.input.View()}, "\n")
+	case 3:
+		return strings.Join([]string{header, status, m.input.View()}, "\n")
+	default:
+		return strings.Join([]string{header, m.viewport.View(), status, m.input.View()}, "\n")
+	}
 }
 
 func (m tuiModel) overlayView() string {
@@ -876,9 +920,14 @@ func (m tuiModel) overlayView() string {
 	case overlayError:
 		content = m.notice
 	}
+	width, height := m.renderDimensions()
+	content = boundedSafeMultiline(content, 8<<10)
+	if width < 20 || height < 6 {
+		return fitTerminalView(content, width, height)
+	}
 	box := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(1, 2).
-		Width(min(max(20, m.width-6), 78)).Render(boundedSafeMultiline(content, 8<<10))
-	return lipgloss.Place(max(20, m.width), max(8, m.height), lipgloss.Center, lipgloss.Center, box)
+		Width(min(width-6, 78)).MaxHeight(max(1, height-4)).Render(content)
+	return fitTerminalView(lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, box), width, height)
 }
 
 func (m tuiModel) statusView() string {

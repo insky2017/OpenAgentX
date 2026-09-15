@@ -1303,6 +1303,34 @@ M  deploy/systemd/openagentx-user.service
   `active/WAIT`，等待监督端 Termux 独立复核；未 push、安装、重启或操作真实 service/DB/socket/
   default tmux/systemd/父仓。
 
+### T08-02 compact pane 根因修复（append-only）
+
+- `2026-09-15T00:22:15Z`：监督端 Termux 在 `442bc058046d688f6a83654dc10326c5717b3300`
+  上再次失败，且失败提前到 10 秒内未连接 fake SSE。window 已从 `scratch` 正式绑定为 `quote`，但
+  terminal 持续重复 tmux 重绘且未出现 Attach 输入 placeholder，证明键序修复不是完整根因。
+- 审查确认三 pane 纵向布局使 Termux pane 0 内容高度约 5 行，而 `resize` 将 model height 强制提升到
+  8，`View` 和 overlay 又以至少 8 行渲染；header、viewport、status 和三行 textarea 的输出高于真实
+  PTY。持续滚动/重绘可延迟 Bubble Tea typed message 与 Follow ack，且直接违反窄终端布局不变量。
+- `internal/cli/console/tui.go` 现在保存实际 `WindowSize`（最小仅为一个 cell），高度低于 8 时将输入
+  缩为一行，并按实际高度动态分配 viewport。Attach 在高度 4+ 显示 header/viewport/status/input，
+  高度 3 显示 header/status/input，高度 2 显示 header/input，高度 1 保留可编辑 input。
+- 所有 screen 的最终 View 使用 `ansi.Truncate` 按实际列宽裁剪，并按实际高度截断行数；不再使用
+  `.Height(max(8, ...))`。小于 20x6 的 overlay 使用同一安全紧凑视图，较大 overlay 的 box/place 也受
+  实际宽高和最终裁剪约束。实现仍是 Bubble Tea model/update/view，没有行式 REPL 或 ANSI fallback。
+- `internal/cli/console/tui_test.go` 新增纯 model 回归：`80x5`、`20x3`、`8x1`、`1x1` 下 Attach 和
+  menu/login/loading/selector 全部 screen，以及 status/help/diagnostic/confirmation/error overlay，
+  经 ANSI strip 后行数不超过实际高度且显示宽度不超过实际宽度。另证明 compact resize 后输入
+  focus/draft/cursor 不变，snapshot ack 成功，event ack 成功且 reducer cursor 从 1204 推进到 1205。
+- 保留 `442bc05` 的三 pane smoke、线程安全 recorder、placeholder ready、逐字符输入和独立 Enter；
+  没有改水平 split、增加 pane 高度、放宽 pane 0 exit status 0 或 pane 1/2 保留断言。
+- Ubuntu 最终验证：compact 纯 model tests exit 0（0.020s）；真实三-pane PTY smoke `-count=10`
+  exit 0（package 11.696s）；Console package `-count=3` exit 0（3.612s）；Console race exit 0
+  （3.386s）；`go test ./... -count=1` exit 0（18.19s），全仓 package 通过；
+  `go vet ./internal/cli/console` exit 0（0.29s）。
+- validation report 仍为 `no-go`，`T08-02` 仍 open，Task 08 仍 `active/WAIT`；等待监督端 Termux
+  重验。本轮不恢复 Task 08 候选矩阵，未 push、安装、重启或操作真实 service/DB/socket/default
+  tmux/systemd/父仓。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
