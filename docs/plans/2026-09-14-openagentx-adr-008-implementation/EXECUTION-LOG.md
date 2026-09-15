@@ -1331,6 +1331,63 @@ M  deploy/systemd/openagentx-user.service
   重验。本轮不恢复 Task 08 候选矩阵，未 push、安装、重启或操作真实 service/DB/socket/default
   tmux/systemd/父仓。
 
+### T08-02 本机门禁关闭与 Task 08 完整候选验证（append-only）
+
+- `2026-09-15T16:46:53Z`：监督者明确取消 Termux 最终复核要求，授权在当前 Linux/Ubuntu 主机重新
+  复核 `T08-02` 并恢复完整 Task 08。最终报告不新增 Termux 通过结论，只保留历史失败事实。
+- 本机 `T08-02` 恢复门禁全部通过：
+  - `go test ./internal/cli/console -run
+    '^Test(IsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes|CompactAttachFitsActualWindowAndKeepsReducerResponsive|EveryConsoleScreenFitsCompactWindow)$'
+    -count=10`：exit 0，12.158s；
+  - `go test ./internal/cli/console -count=3`：exit 0，3.744s；
+  - `go test -race ./internal/cli/console -count=1`：exit 0，3.351s。
+  真实三-pane smoke 仍断言 alt-screen、临时 UDS/auth、`scratch -> quote`、pane 0 exit status 0 和
+  pane 1/2 保留；未通过扩高 pane、kill pane 或行式 fallback 放宽。
+- 以 clean `codex/adr008-implementation@138b8d8e266783afe368a39d2235fe7cfbb8d979` 重审
+  `origin/main..HEAD`：ahead 29，29 commits、88 files、15398 insertions、1643 deletions。所有提交逐一
+  `git show --check` 和完整 diff whitespace 通过；ADR-006/007、生成物、Secret、父仓路径和禁用 tmux
+  控制扫描无范围混入。
+- 无缓存全量矩阵：`go test ./... -count=1` exit 0（18.60s）；`go test -race ./... -count=1`
+  exit 0（39.58s）；`go vet ./...` exit 0（0.74s）；`go mod verify` exit 0（0.77s）。Web
+  `test:observation` 4/4（0.51s）、`test:pwa`（0.33s）、build 266 modules（1.48s）均 exit 0。
+- shell/systemd/release：`bash -n scripts/*.sh deploy/scripts/*.sh deploy/systemd/*.sh`、Worker template
+  static test、按实际安装名运行的 `systemd-analyze --user verify` 和 release scanner 均 exit 0。首次
+  systemd verify 错误把 `SYSTEMD_UNIT_PATH` 限制为临时目录，导致系统 `basic.target` 被隐藏并 exit 1；
+  去除该夹具覆盖后通过，临时目录已清理，不是 unit 产品失败。
+- 候选级隔离重验：
+  - Console 唯一 `tmux -L`/PTY/compact：exit 0，package 1.379s；
+  - Task 03 api/console、panel、client、reducer、sqlite/migrations、safeoutput：全部 exit 0，最慢
+    panel 16.047s；projection failure/N+1 恢复包含在内；
+  - Task 04 auth、api/auth、api/admin、credentialstore、client、sqlite/migrations：全部 exit 0，最慢
+    sqlite 13.971s；Token/schema/role-scope/audience/permission/concurrency 包含在内；
+  - Task 07 `internal/fleet ./internal/cli/fleet ./internal/worker`：全部 exit 0，分别
+    10.364s/0.269s/1.572s；真实隔离 workspace/binding/dead-pane 和 graceful/force 包含在内。
+- 临时 HOME/DB/UDS 正式闭环使用候选二进制和 public CLI 完成 init、Agent apply、daemon health、CLI
+  login/session、Agent options、normal/diagnostic Attach、dispatch、SSE cursor `6 -> 7`、重连
+  `7 -> 8`、logout revoke、本地删除和撤销后 `401 CLI_UNAUTHENTICATED`。DB 只存一条 digest，原 token
+  匹配计数为 0，logout 后 revoked row 为 1；credential 与 lock 为 `0600`，profile 为 `0700`。
+- 闭环首次 login 因测试夹具自动创建的 `.openagentx` 为 `0755` 被安全 store 正确拒绝；明确 chmod 为
+  `0700` 后一次通过。额外对 queued、无 active Run 的 Task 发起 cancel 时正式 API 返回 400
+  `resource not found`，是既有 Task 语义的预期 fail-closed；成功 control 闭环使用 dispatch，active
+  Run cancel 成功路径由既有集成测试覆盖。临时 daemon 正常退出，全部临时文件和 socket 已清理。
+- 候选首次从 submodule linked detached worktree 构建时，Go 1.22 没有写入 `vcs.*`，该产物判无效；
+  随后从同一 SHA 的 clean detached standalone clone worktree 运行
+  `go build -buildvcs=true -o /home/sky/.cache/openagentx-builds/openagentx-adr008-138b8d8
+  ./cmd/openagentx`。最终 SHA-256 为
+  `cb99c6713e1076ca762271b2716d288d9b4bf46a7effffd66b258fc7b1c82f78`，`go version -m`
+  确认 `vcs.revision=138b8d8e266783afe368a39d2235fe7cfbb8d979`、`vcs.modified=false`；file/cache
+  directory 均 `0755 sky:sky`。临时 linked worktree、clone 与 probe 已清理。
+- `rtx4090` 最终只读现场：main/origin 均 clean `c3fc1bb`；feature 文档修改前 clean、ahead 29，远端无
+  feature branch；父仓保留用户既有 dashboard/quote/docs/luqiyuan dirty 现场且未修改。user daemon
+  enabled、active/running、`NRestarts=0`，UDS health `ok`；installed binary SHA-256 为
+  `3f84b06c...a29b`，与候选不同。真实 DB 在 `query_only` 下 `quick_check=ok`、schema v1，尚无 CLI
+  token/installation tables；profile 权限符合既有安装，credentials 不存在；`Linger=yes`，user/system
+  Worker template 均未安装；`OAX:agentx.2` 为 live Codex pane 且无 ADR-008 markers。以上均为未部署
+  候选的预期 drift，仅记录未修复。
+- validation report 已更新为 `passed-candidate`。Task 08 仍为 `active/WAIT`，主计划与 Task 08 front
+  matter 仍 `pending`，等待最终监督 gate；未 push/merge/install/restart/migrate，未修改真实 DB/socket/
+  default tmux/service/Worker unit/父仓。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
@@ -1338,7 +1395,7 @@ M  deploy/systemd/openagentx-user.service
 | T04-01 | 2026-09-14T17:45:58Z | 07 | P2 | Fleet down/force-stop 仍是 Task 07 的 credential 集成范围；Task 04 后共享 client 的旧直接密码 Login 会在网络前 fail closed，避免从 Fleet 向 UDS login 发送密码或替换 Console Token | Task 07 | closed；[Fleet credential/lifecycle 测试](../../../internal/cli/fleet/command_test.go)证明 installation-bound session、owner+lifecycle scope、无密码路径和 graceful/force 分离，监督双平台复核通过 |
 | T05-01 | 2026-09-14T19:39:21Z | 07 | P2 | Console 进程退出后，compatible managed window 的 pane 0 由 `remain-on-exit` 保留为 dead；Task 07 必须提供安全、显式且只针对 compatible managed pane 0 的重新进入/respawn 路径，不得触碰 pane 1+ 或未知进程 | Task 07 | closed；[真实隔离 tmux 测试](../../../internal/fleet/workspace_integration_test.go)与 [workspace 状态机测试](../../../internal/fleet/workspace_test.go)证明二次 preflight 只 respawn compatible dead pane 0，并保留 live/pane 1+/unmanaged 现场 |
 | T08-01 | 2026-09-14T23:18:02Z | 03 | P0 | Observe SSE Agent filter/Run projection 查询或校验失败时会推进 event cursor，可能永久跳过未应用状态 | Task 03 | closed；`b26c9c4` 以精确归属查询和 projection/encode/write fail-closed 修复，故障注入证明失败事件与 N+1 不跨 cursor，监督独立复核通过 |
-| T08-02 | 2026-09-14T23:52:33Z | 06 | P0 | 真实 PTY/tmux smoke 收到 `/quit` 后 pane 0 未在 10 秒内退出，候选无法证明 Console detach 确定性 | Task 06 | open；需定位 TUI、Follow 与 PTY 退出协调并提供 Ubuntu/Termux 确定性回归，禁止靠重复测试偶然变绿 |
+| T08-02 | 2026-09-14T23:52:33Z | 06 | P0 | 真实 PTY/tmux smoke 收到 `/quit` 后 pane 0 未在 10 秒内退出，候选无法证明 Console detach 确定性 | Task 06 | closed；`442bc05` 修复输入 ready/键序/cleanup，`138b8d8` 修复实际高度 5 行及更小 pane 布局；本机十轮 PTY、三轮 package、race、全仓和候选矩阵通过，监督者取消 Termux 最终门禁 |
 
 ## 8. 安全与范围事件
 
@@ -1361,17 +1418,19 @@ M  deploy/systemd/openagentx-user.service
 | 2026-09-14T23:02:54Z | 监督最终复核 Task 07 三个提交 | 两轮 `NO-GO` 缺口已由 `f5c0d0d`、`e13db7b` 修复；Termux 完整 Fleet/CLI/Console/Worker 和 Ubuntu systemd/tmux 证据通过 | 记录三个精确 SHA、实际 clean/ahead、双平台证据并关闭 T04-01/T05-01；仅同步三份 docs gate 状态 | Task 07 GO；Task 08 保持 `pending/WAIT` |
 | 2026-09-14T23:18:02Z | Task 08 最终语义审查发现 SSE cursor fail-closed 缺口 | Agent filter/Run projection 查询错误可能被当作已处理并跨过 sequence；候选不能证明不丢状态 | 登记 `T08-01` 归属 Task 03，生成 `no-go` validation report；停止后续全量/隔离/候选/现场检查，不夹带代码修复 | Task 08 保持 `active/WAIT`；等待监督授权 Task 03 review-fix |
 | 2026-09-14T23:52:33Z | 监督关闭 `T08-01` 后恢复完整矩阵；首次无缓存全仓 Go 测试发现 PTY quit 失败 | T08-01 已关闭；新 `T08-02` 使 Console 确定性 detach 证据不成立，候选仍不能发布 | 保留失败输出，未重跑；停止 race/隔离/候选/现场检查，登记 Task 06 owner | Task 08 保持 `active/WAIT` 和 `no-go`；等待监督决定 T08-02 修复 gate |
+| 2026-09-15T16:46:53Z | 监督取消 Termux 最终门禁并授权本机关闭 `T08-02`、恢复 Task 08 | 本机 T08-02、多层自动化、隔离闭环、候选 provenance 和真实现场只读证据全部通过 | 关闭 T08-02，validation 改为 `passed-candidate`；保留两次 no-go 与全部夹具失败/纠正 | Task 08 保持 `active/WAIT`；等待最终 docs gate，不部署 |
 
 ## 9. 最终产物（Task 08 填写）
 
-- validation report：[2026-09-14-openagentx-adr008-release-candidate.md](../../reports/validation/2026-09-14-openagentx-adr008-release-candidate.md)，结论 `no-go`
-- traceability matrix：已按 `origin/main..b26c9c4` 重审并写入 validation report；§9 的 `T08-01`
-  已关闭，§6/§8 因 `T08-02` 阻断
-- release-candidate binary：未构建；无缓存全仓测试失败后按停止规则退出
-- binary SHA-256：无
-- implementation HEAD：`b26c9c4928d5c1cbdd971473cecb5b535a3d39dc`
-- 全量验证结论：`go test ./... -count=1` 因 `T08-02` 失败；其余已执行 Web/module/release 检查通过，
-  race/vet/剩余隔离矩阵未执行，不得声称候选通过
-- 只读目标主机检查：未执行；全仓测试失败后未继续接触外部状态
+- validation report：[2026-09-14-openagentx-adr008-release-candidate.md](../../reports/validation/2026-09-14-openagentx-adr008-release-candidate.md)，结论 `passed-candidate`
+- traceability matrix：已按 `origin/main..138b8d8` 的 29 个提交/88 文件重审并写入 validation report；
+  `T08-01`、`T08-02` 均已关闭，无 ADR-006/007 或未归属 fallback
+- release-candidate binary：`/home/sky/.cache/openagentx-builds/openagentx-adr008-138b8d8`
+- binary SHA-256：`cb99c6713e1076ca762271b2716d288d9b4bf46a7effffd66b258fc7b1c82f78`
+- implementation HEAD：`138b8d8e266783afe368a39d2235fe7cfbb8d979`；`vcs.modified=false`
+- 全量验证结论：Go test/race/vet/module、Web、systemd/shell、release/security、隔离 tmux/PTY、
+  Task 03/04/07 定向场景和临时 daemon/Auth/Control 闭环全部通过
+- 只读目标主机检查：完成；现有服务健康，installed binary/DB/Worker unit/credentials/OAX markers 仍为
+  未部署候选前状态，已记录且未修复
 - 未执行的人工步骤：备份、安装、服务重启/升级、真实 `OAX` workspace 操作、正式 graceful drain
 - 最终监督结论：WAIT

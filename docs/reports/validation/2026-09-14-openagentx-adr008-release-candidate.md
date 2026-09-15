@@ -1,141 +1,172 @@
 ---
 doc_type: validation_report
-status: no-go
+status: passed-candidate
 owner: openagentx
 test_id: ADR-008-T08
-validated_at: 2026-09-14
+validated_at: 2026-09-15
 ---
 
 # OpenAgentX ADR-008 release candidate 验证
 
 ## 结论
 
-`no-go`。首次审查在 `f16496c` 发现的 cursor 安全缺陷 `T08-01` 已由 Task 03 独立修复提交
-`b26c9c4928d5c1cbdd971473cecb5b535a3d39dc` 关闭，监督复核确认归属、Run、Worker、Backend、编码和
-写出失败均不跨过 cursor。恢复 Task 08 后，重新审查 `origin/main..b26c9c4` 的 26 个提交和 88 个
-文件，未发现 ADR-006/007 决策正文、父仓文件、生成物或 Secret 混入；逐提交和完整 diff whitespace
-检查通过。
+`passed-candidate`。`codex/adr008-implementation@138b8d8e266783afe368a39d2235fe7cfbb8d979`
+通过完整范围审查、无缓存 Go/race/vet、Web、systemd、release/security 检查、隔离 tmux/PTY、临时
+DB/UDS/Auth/Control 闭环和目标主机只读核验。候选二进制从 clean detached standalone clone worktree
+构建，`go version -m` 确认 `vcs.revision=138b8d8...` 且 `vcs.modified=false`。
 
-随后首次无缓存 `go test ./... -count=1` 在真实 PTY/tmux smoke
-`TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes` 失败：Console 已进入 alt-screen、绑定
-`quote` 并收到 `/quit`，但 pane 0 在 10 秒观察窗内仍为 live。该失败登记为 `T08-02`，归属 Task 06。
-按 Task 08 硬停止规则，本轮未重跑该测试，也未继续 race、剩余隔离矩阵、候选构建或目标主机只读
-核验；当前不能形成 release candidate。
+首次 `no-go` 的 cursor 缺陷 `T08-01` 已由 Task 03 修复提交 `b26c9c4` 关闭；第二次 `no-go` 的
+PTY/small-pane 缺陷 `T08-02` 已由 Task 06 修复提交 `442bc05`、`138b8d8` 关闭。两次失败、归因和
+修复证据均保留。监督者本轮明确取消 Termux 作为最终门禁，本报告只声明当前 Linux/Ubuntu 主机和
+隔离环境通过，不新增 Termux 结论。
+
+本结论只表示候选可进入最终监督 gate，不表示 ADR-008 已部署。feature 未 push/merge，候选未安装，
+真实 service、DB、socket、Worker unit 和 `OAX` workspace 均未修改。
 
 ## 基线与边界
 
 | 项目 | 结果 |
 | --- | --- |
 | feature branch | `codex/adr008-implementation` |
-| implementation HEAD | `b26c9c4928d5c1cbdd971473cecb5b535a3d39dc` |
-| 比较基线 | `origin/main`，feature ahead 26 |
-| 提交范围 | 26 commits；88 files；15094 insertions；1643 deletions |
+| implementation HEAD | `138b8d8e266783afe368a39d2235fe7cfbb8d979` |
+| 比较基线 | `origin/main@c3fc1bba8ddbae3eedace0c7a32537e2f47db307`；feature ahead 29 |
+| 提交范围 | 29 commits；88 files；15398 insertions；1643 deletions |
 | Task 08 写入边界 | 仅本报告与 `EXECUTION-LOG.md` |
-| 外部状态边界 | 未部署、未安装、未重启、未 merge/push；未操作真实 DB/socket/default tmux/systemd/父仓 |
-| 候选二进制 | 未构建；无缓存全仓测试失败后按规则停止 |
+| 外部状态边界 | 未部署、安装、重启、merge/push；真实 DB/socket/default tmux/systemd/父仓仅只读 |
+| 候选二进制 | `/home/sky/.cache/openagentx-builds/openagentx-adr008-138b8d8` |
+| 候选 SHA-256 | `cb99c6713e1076ca762271b2716d288d9b4bf46a7effffd66b258fc7b1c82f78` |
+| 候选权限 | file `0755 sky:sky`；cache directory `0755 sky:sky` |
+| module files | `go.mod` SHA-256 `efcf07c...ba5e8`；`go.sum` SHA-256 `0794e1e...1466` |
 
 ## Traceability matrix
 
 | ADR-008 条款 | 代码产物 | 测试/文档证据 | 审查结论 |
 | --- | --- | --- | --- |
-| §1 本地默认路径 | `internal/localprofile`；Console/Fleet/serve/admin 接线 | `profile_test.go`；Task 02 contract/gate | 已追踪；显式 override fail closed、resolver 无副作用 |
-| §2 固定 `OAX` workspace | `internal/fleet/workspace.go`；user Worker unit | workspace fake/isolated tmux tests；Task 05/07 gate | 已追踪；旧 `agentx` 不迁移，pane 1+ 保留 |
-| §3 Attach 前置检查 | `internal/fleet/binding.go` | binding tests；isolated tmux wrong-pane/missing-pane0 tests | 已追踪；仅 `OAX` pane 0，失败无 mutation |
-| §4 Agent 解析与选择 | Console application/TUI；Console Agent options repository/API | application、TUI、pagination tests | 已追踪；显式参数、marker、鉴权列表顺序明确且列表不截断 |
-| §5 显式绑定和重命名 | Task 05 binding service | fake mutation/compensation/TOCTOU 与真实 tmux binding tests | 已追踪；marker/name/control-plane 一致，重绑需确认 |
-| §6 Console TUI 主入口 | `internal/cli/console/{command,application,tui}.go` | menu、login/logout、selector、PTY smoke tests | **阻断 `T08-02`**：真实 PTY `/quit` 后 pane 0 未在观察窗内退出 |
-| §7 最终 CLI grammar | Console command parser；旧 REPL 删除 | `TestFinalConsoleGrammar`、help/非 TTY tests | 已追踪；无 `attach --once` 或旧行式控制入口 |
-| §8 全屏 TUI | Bubble Tea/Bubbles/Lip Gloss 固定版本；bounded Timeline | pure Update/View、resize/scroll/overlay、safe rendering、PTY tests | 静态追踪完成；候选级 PTY 退出证据因 `T08-02` 未通过 |
-| §9 一致 snapshot/cursor | SQLite snapshot transaction；Panel SSE；Console Follow/reducer ack | N/N+1、retention、reconnect、ack、backend projection/failure tests | `T08-01` 已由 `b26c9c4` 修复并经监督关闭；所有投影失败在 frame/cursor 前终止 |
-| §10 heartbeat 合并 | `internal/consolemodel/reducer.go` | generation/instance fencing、burst、replacement/backend tests | 已追踪；合法旧事件有明确 cursor 规则，当前状态按身份 fencing |
-| §11 CLI Token | CLI token domain/service/repository；UDS-only auth mux；credential store | role/scope/expiry/revoke/schema/store/concurrency tests | 已追踪；DB 仅 digest，Token 绝对到期且 audience-bound |
-| §12 Logout | Console shared application service | daemon unavailable、audience mismatch、replace/logout tests | 已追踪；匹配时远端 revoke，本地副本始终删除 |
-| §13 Fleet | Fleet init/workspace/up/status/down/force；user-systemd verification | atomic config、canonical argv、graceful/force、dead-pane tests | 已追踪；T04-01/T05-01 已由 Task 07 证据关闭 |
-| 验收不变量/非目标 | mux、safeoutput、workspace、正式 Control API | release scanner、scope/mux、tmux forbidden-command tests；Task 01 freeze | 范围审查未见 ADR-006/007、TurnHandle、tmux 权威身份或 foreground 实现 |
+| §1 本地默认路径 | `internal/localprofile`；Console/Fleet/serve/admin 接线 | resolver 正反测试；Task 02 contract/gate | flag/env/home 优先级、空/相对 override 和 path escape 均 fail closed；resolver 无副作用 |
+| §2 固定 `OAX` workspace | `internal/fleet/workspace.go`；user Worker unit | fake/isolated tmux；Task 05/07 gate | 大小写敏感 `OAX`；旧 `agentx` 不迁移；pane 1+ 保留 |
+| §3 Attach 前置检查 | `internal/fleet/binding.go` | wrong-pane/missing-pane0/conflict/TOCTOU tests | 仅 `OAX` pane 0；失败无 mutation，不暴露 window/pane handle |
+| §4 Agent 解析与选择 | Console application/TUI；安全 Agent options API/repository | explicit/marker/selector、pagination >100 tests | 顺序固定；列表鉴权、分页且不扫描目录/tmux 身份 |
+| §5 显式绑定和重命名 | Task 05 binding service | mutation compensation 与真实 tmux binding tests | marker/name/control-plane 一致；重绑需确认；冲突非破坏 |
+| §6 Console TUI 主入口 | `internal/cli/console/{command,application,tui}.go` | menu/login/logout/selector；真实三-pane PTY smoke | `T08-02` 已关闭；alt-screen 启动、绑定、`/quit` exit 0、pane 1/2 保留 |
+| §7 最终 CLI grammar | Console parser；旧 REPL 删除 | `TestFinalConsoleGrammar`、help/非 TTY smoke | 仅冻结命令；`attach --once`、`console status` 和旧行式控制入口拒绝 |
+| §8 全屏 TUI | Bubble Tea v1.3.4、Bubbles v0.20.0、Lip Gloss v1.1.0 | pure Update/View、80x5/更小布局、scroll/overlay/ack/cleanup tests | 实际高度不溢出；输入稳定；bounded safe Timeline；无行式 fallback |
+| §9 一致 snapshot/cursor | SQLite snapshot transaction；Panel SSE；Follow/reducer ack | N/N+1、retention、reconnect、projection failure recovery | `T08-01` 已关闭；所有 projection/encode/write 失败在 frame/cursor 前终止 |
+| §10 heartbeat 合并 | `internal/consolemodel/reducer.go` | generation/instance fencing、burst/replacement/backend tests | 旧代/异 instance 不回退；heartbeat 默认不刷 Timeline |
+| §11 CLI Token | CLI token domain/service/repository；UDS-only mux；credential store | expiry/revoke/scope/audience/schema/store/concurrency tests；临时 UDS 闭环 | DB 仅 digest；Token 绝对到期、可撤销、installation-bound；Web bearer 拒绝 |
+| §12 Logout | Console shared application service | unavailable/mismatch/repeat tests；临时 UDS revoke 闭环 | 匹配时先远端 revoke；本地副本始终删除；撤销后稳定 401 |
+| §13 Fleet | init/workspace/up/status/down/force；user-systemd verification | captured config、unit argv、graceful/force、dead-pane tests | canonical config/binary/unit fail closed；`--user`；T04-01/T05-01 已关闭 |
+| 安全输出/非目标 | safeoutput、mux、正式 Control API、release scanner | scope/mux/Secret/legacy/tmux forbidden-command tests | 无 ADR-006/007 语义修改、Console TurnHandle、tmux 控制协议或 Foreground 实现 |
 
-## 阻断证据
+## 已关闭阻断历史
 
-### T08-01：SSE 投影错误会跨过未应用事件（已关闭）
+### T08-01：SSE 投影错误会跨过未应用事件
 
-1. `internal/api/panel/handler.go:1128` 调用 `eventMatchesAgent`。该函数只返回 `bool`；
-   `GetTask`、`GetRunAttempt`、`ListWorkers`、`GetMessage`、`GetApprovalRequest` 等任一查询错误均被折叠为
-   `false`。调用方随后在 `handler.go:1129` 将 `after` 直接推进到该事件 sequence。
-2. `internal/api/panel/handler.go:1147` 调用 `runEventSnapshot`。该函数在 Run/Worker 查询错误或投影无效时
-   返回 `nil`，调用方仍在 `handler.go:1153-1154` 发送 SSE frame 并推进 `after`。
-3. 现有 `TestSSEBackendProjectionFailureDoesNotSendOrCrossWorkerEvent` 只覆盖 Worker Backend 查询失败；
-   Agent filter 查询失败和 Run projection 查询失败没有对应的“不得发送、不得跨过”故障注入测试。
-4. 结果是客户端成功应用的 cursor 可能越过未能归属或未能构造安全状态投影的事件；普通重连从该
-   cursor 之后开始，无法再恢复被跳过的状态变化。
+首次审查发现 Agent filter 和 Run projection 会把 repository/projection error 折叠成可跳过状态，并推进
+`after`。`b26c9c4928d5c1cbdd971473cecb5b535a3d39dc` 将归属判断改为 `(matched, error)`，Worker
+归属使用精确 `GetWorkerInstance`，Run/Worker/backend/safe-output/JSON/frame write 错误均在发送与推进
+cursor 前终止。故障注入覆盖 Task、Run、runtime、Worker、Message、Approval 归属和 N/N+1 恢复；
+监督独立复核和本轮 Task 03 定向重验均通过。
 
-所需修复边界属于 Task 03：区分“合法不匹配”和“查询/投影失败”；失败时结束当前 stream，保持
-last-applied cursor；Run projection 必须与 Worker Backend projection 一样返回结构化错误并阻止发送。
-至少补 Agent filter 各关联查询失败、Run/Worker projection 失败及后续 N+1 不被跨过的回归测试。
+### T08-02：真实 PTY `/quit` 与紧凑 pane 不稳定
 
-修复提交 `b26c9c4928d5c1cbdd971473cecb5b535a3d39dc` 将归属判断改为 `(matched, error)`，Worker
-归属使用精确查询，Run/Worker/Backend/安全输出/JSON/frame write 错误均在发送与推进 cursor 前终止；
-故障注入证明从 last-applied cursor 可恢复 N 和 N+1。监督于恢复 Task 08 时确认该项通过并关闭。
+首次 smoke 在已经绑定并显示 `/quit` 后未可靠退出；`442bc05` 改为线程安全 terminal recorder，等待
+真实输入 ready 后逐键输入并单独发送 Enter。随后窄 pane 暴露 `View` 强制至少 8 行、实际 pane 约 5
+行的产品问题；`138b8d8` 改为严格按 `WindowSize` 分配 header/viewport/status/input 和 overlay，极小
+窗口仍保留 Bubble Tea model，不引入 REPL fallback。
 
-### T08-02：真实 PTY `/quit` 未可靠结束 Console pane
+本机恢复门禁通过：三-pane PTY/compact tests `-count=10`、Console package `-count=3`、Console race
+和全仓无缓存测试均为 exit 0。强断言仍包括 alt-screen、正式临时 UDS/auth、`scratch -> quote` 绑定、
+pane 0 exit status 0 与 pane 1/2 保留。
 
-1. 无缓存全仓测试中的真实隔离 smoke 已进入 alt-screen，正式 Attach 完成 `scratch -> quote` 绑定，
-   terminal 证据包含 `> /quit`，pane 1/2 仍存在。
-2. 测试随后连续 10 秒读取隔离 `tmux -L` 的 pane 状态，最终仍为 `0:1:`、`1:0:`、`2:0:`；pane 0
-   没有变成预期的 dead+exit 0 状态，因此失败。
-3. 该问题可能是 TUI quit、Follow shutdown 或 PTY/tmux 退出协调的确定性缺口。候选验证不能以再次
-   单独重跑偶然通过作为证据，也不能在 Task 08 docs-only 提交中修产品或测试。
-
-所需修复边界归属 Task 06：定位 `/quit` 后程序和 Follow goroutine 的退出状态机，提供不会泄漏
-goroutine、不会停止 Worker、并在 Ubuntu/Termux 真实 PTY 下确定性退出的回归证据。
-
-## 已执行检查
+## 自动化与隔离验证
 
 | 命令/检查 | 结果 |
 | --- | --- |
-| `git status --short --branch`、`git rev-parse HEAD`、`git rev-list --count origin/main..HEAD` | PASS；基线 `f16496c`、ahead 24，开始时 clean |
-| `git log --reverse origin/main..HEAD` | PASS；24 个 Task 01-07 实现/fix/gate 提交顺序完整 |
-| `git diff --name-status origin/main..HEAD`、`git diff --stat origin/main..HEAD` | PASS；87 文件范围已盘点 |
-| `git diff --check origin/main..HEAD`、逐提交 `git show --check` | PASS |
-| ADR-006/007 与 `docs/decisions` diff 检查 | PASS；无决策正文修改 |
-| 新增行禁用 tmux 控制扫描 | PASS；仅测试禁止词清单和禁用 Foreground 文案命中 |
-| SSE cursor/projection 语义审查 | FAIL；发现 `T08-01` |
-| 监督复核 `b26c9c4` | PASS；关闭 `T08-01`，授权恢复完整 Task 08 矩阵 |
-| `git status --short --branch`、HEAD/ahead、26 commits/88 files 重审 | PASS；开始时 clean，`b26c9c4`，ahead 26 |
-| 26 次逐提交 `git show --check`、`git diff --check origin/main..HEAD` | PASS |
-| ADR-006/007、生成物、禁用 tmux 控制和 Secret 差异扫描 | PASS；测试占位密码仅存在于测试输入，不是凭据 |
-| `go mod verify` | PASS；1.03s，all modules verified |
-| `npm run test:observation`（`web/`） | PASS；4/4，0.65s |
-| `npm run test:pwa`（`web/`） | PASS；0.36s |
-| `npm run build`（`web/`） | PASS；266 modules，1.48s；`web/dist` 为已忽略产物 |
-| `bash scripts/check-legacy-control-paths.sh --release` | PASS；全部类别 CLEAN，0.14s |
-| `go test ./... -count=1` | **FAIL**；17.94s；真实 PTY smoke 的 pane 0 未可靠退出，登记 `T08-02` |
+| 29 次逐提交 `git show --check`；`git diff --check origin/main..HEAD` | PASS；完整 diff whitespace clean |
+| ADR-006/007、父仓路径、生成物、Secret 与禁用 tmux 控制扫描 | PASS；无范围混入；禁止词仅测试词表/运行时合法接口 |
+| `go test ./... -count=1` | PASS；18.60s |
+| `go test -race ./... -count=1` | PASS；39.58s |
+| `go vet ./...` | PASS；0.74s |
+| `go mod verify` | PASS；0.77s，all modules verified |
+| `npm run test:observation`（`web/`） | PASS；4/4，0.51s |
+| `npm run test:pwa`（`web/`） | PASS；0.33s |
+| `npm run build`（`web/`） | PASS；266 modules，1.48s；`web/dist` 为 ignored 产物 |
+| `bash -n scripts/*.sh deploy/scripts/*.sh deploy/systemd/*.sh` | PASS |
+| `bash deploy/systemd/openagentx-worker_template_test.sh` | PASS；system/user templates 静态约束通过 |
+| `systemd-analyze --user verify <temp>/openagentx.service <temp>/openagentx-worker@.service` | PASS；按实际安装名验证，临时目录已清理 |
+| `bash scripts/check-legacy-control-paths.sh --release` | PASS；全部类别 CLEAN |
+| Console PTY/compact 三项 `-count=10` | PASS；12.158s |
+| `go test ./internal/cli/console -count=3` | PASS；3.744s |
+| `go test -race ./internal/cli/console -count=1` | PASS；3.351s |
+| Task 03 api/panel/client/reducer/sqlite/safeoutput 定向测试 | PASS；projection fault/reconnect 路径包含在内 |
+| Task 04 auth/api/store/sqlite/migrations 定向测试 | PASS；token/schema/permission/audience/concurrency 路径包含在内 |
+| Task 07 `internal/fleet ./internal/cli/fleet ./internal/worker` | PASS；10.364s/0.269s/1.572s |
+| 唯一 `tmux -L` Console/Fleet workspace/binding/dead-pane tests | PASS；pane 1+、冲突、dead-pane、退出边界成立 |
+| 最终 Console help/legacy smoke | PASS；help 无旧命令；`console status` 与 `attach --once` 均 code 2 |
 
-## 首轮 NO-GO 未执行
+### 临时 HOME/DB/UDS 正式闭环
 
-- `go test ./... -count=1`、`go test -race ./... -count=1`、`go vet ./...`、`go mod verify`；
-- Task 08 隔离 tmux/PTY、临时 DB/UDS、fake user-systemd 场景；
-- Web observation/PWA/build、release scanner、systemd analyze/static 和最终 secret scan；
-- `/home/sky/.cache/openagentx-builds/` 独立候选构建、SHA-256 与 module/VCS provenance；
-- `rtx4090` service/binary/DB/schema/socket/credential/Linger/Worker/OAX pane 只读核验。
+候选二进制在唯一 `/tmp/openagentx-adr008-t08-e2e.*` 下通过 public CLI 初始化 owner 和 Agent，启动真实
+daemon/SQLite/UDS；随后完成 CLI login/session、完整 Agent options、normal/diagnostic Attach、正式
+dispatch、SSE cursor `6 -> 7`、重连 `7 -> 8`、logout 远端 revoke、本地 credential 删除和撤销后
+`401 CLI_UNAUTHENTICATED`。credential/lock 为 `0600`、profile directory 为 `0700`；DB 有一条 token
+digest，原 token 搜索为 0，logout 后 revoked row 为 1。所有临时进程和目录均已清理。
 
-这些项目不是失败后可选择忽略的证据。修复经独立 gate 后必须无缓存重跑完整 Task 08 矩阵。
+闭环首次 login 因测试夹具把 `.openagentx` 父目录建成 `0755` 被 credential store 正确拒绝；修正夹具为
+`0700` 后通过。额外 cancel 尝试针对 queued、无 active Run 的 Task，正式 API 以 400 fail closed；
+本轮 dispatch 闭环和既有 active-Run cancel 集成测试共同覆盖控制路径，没有修改 ADR-006 Task 语义。
 
-## 第二轮 NO-GO 后停止的项目
+## 候选构建与 provenance
 
-- `go test -race ./... -count=1`、`go vet ./...`；
-- Task 03 cursor 故障、Task 04 token/schema/store、Task 07 Fleet/user-systemd/graceful 的候选级独立重验；
-- 全部唯一 `tmux -L` workspace/binding/dead-pane 与单独 PTY 场景；
-- shell/systemd static/analyze 和最终 diff/status 检查；
-- detached clean worktree 候选构建、SHA-256、`go version -m` provenance；
-- `rtx4090` service/binary/DB/schema/socket/credential/Linger/Worker/OAX pane 只读核验。
+构建命令：
 
-未执行这些项目是测试失败后的预期停止行为，不是通过或豁免。
+```bash
+go build -buildvcs=true \
+  -o /home/sky/.cache/openagentx-builds/openagentx-adr008-138b8d8 \
+  ./cmd/openagentx
+```
 
-## 失败历史与下一门禁
+首次从 submodule linked worktree 构建时，Go 1.22 未写入 `vcs.*`，该产物判无效。随后从同一
+`138b8d8` 的 clean detached standalone clone worktree 重建并覆盖无效产物；最终 `go version -m`
+确认：
 
-- `2026-09-14T23:18:02Z`：最终语义审查首次发现 `T08-01`，没有通过重复测试或兼容 fallback 掩盖。
-- `T08-01`：由 `b26c9c4` 修复并经监督复核关闭；首次 no-go 证据保留。
-- `2026-09-14T23:52:33Z`：恢复矩阵后的首次无缓存全仓测试发现 `T08-02`；没有重跑失败项，按规则停止。
-- 当前结论仅表示候选不能进入最终 gate；不表示 ADR-008 已部署或实现已完成。
-- 下一步必须由监督者决定是否授权 Task 06 独立 review-fix；通过后 Task 08 仍需从完整矩阵重新开始。
-- 仍需人工批准的发布步骤保持未执行：备份、安装、服务升级/重启、真实 `OAX` workspace 体验和
-  正式 graceful drain。
+```text
+go1.22.4 linux/amd64
+path openagentx/cmd/openagentx
+mod  openagentx (devel)
+vcs=git
+vcs.revision=138b8d8e266783afe368a39d2235fe7cfbb8d979
+vcs.modified=false
+```
+
+最终文件大小 `18676856` bytes，SHA-256 为
+`cb99c6713e1076ca762271b2716d288d9b4bf46a7effffd66b258fc7b1c82f78`。linked worktree、detached
+clone 和 probe binary 均已安全清理，只保留候选文件。
+
+## rtx4090 只读现场
+
+| 对象 | 只读结果 | 候选影响 |
+| --- | --- | --- |
+| main/remote | main 与 `origin/main` 均为 `c3fc1bb` 且 clean；remote 无 feature branch | 符合未 push/merge 边界 |
+| feature | `138b8d8`，ahead 29，文档修改前 clean | 与候选 revision 一致 |
+| steadyflow 父仓 | 既有 dashboard/quote/docs/luqiyuan dirty 现场；`M OpenAgentX` 为 submodule index 差异 | 未修改、未提交；发布时继续保护 |
+| daemon service | user `openagentx.service` enabled、active/running、`NRestarts=0` | 健康；仍运行旧 installed binary |
+| ExecStart | `~/.local/bin/openagentx serve --db ~/.openagentx/data/openagentx.db --socket ~/.openagentx/run/openagentx.sock ...` | 路径符合现有 user service；未重启 |
+| installed binary | SHA-256 `3f84b06c...a29b`，`0755 sky:sky` | 与候选不同，符合“未安装”预期 |
+| real DB | `PRAGMA query_only=ON`；`quick_check=ok`；schema version 1 | 未迁移；当前尚无 CLI token/installation tables，部署前需备份 |
+| socket/profile | UDS health `{"status":"ok"}`；socket `0600`；data/run/workers/identities `0700`；config `0600` | 权限符合既有安装；credentials 尚不存在 |
+| Linger/Worker unit | `Linger=yes`；user/system 均无已安装 `openagentx-worker@` unit | Task 07 unit 尚未安装，需人工发布步骤 |
+| real tmux | `OAX:agentx.2` live，current command `codex`；ADR-008 markers 不存在 | 旧现场未改；不得自动迁移，发布后需显式协调 |
+
+## 失败历史与人工步骤
+
+- `2026-09-14T23:18:02Z`：`T08-01` 首次使 Task 08 `no-go`；没有绕过 cursor 缺陷。
+- `2026-09-14T23:52:33Z`：`T08-02` 再次使 Task 08 `no-go`；随后由两个 Task 06 独立提交修复。
+- systemd 验证首次错误设置 temp-only `SYSTEMD_UNIT_PATH`，隐藏系统 `basic.target` 并 exit 1；去除该
+  夹具覆盖、保留临时安装名后 exit 0，不是 unit 产品失败。
+- 候选首次缺 `vcs.*`、临时 credential 目录权限错误和 cancel 无 active Run 的结果均按上文保留；
+  没有用偶然重跑或兼容 fallback 掩盖。
+
+仍需监督者/人工明确批准后执行：push feature、merge main、备份真实 DB/profile、安装候选及 Web/unit、
+daemon-reload/restart、验证 schema ensure、执行 `console login`、安装/启动 user Worker、显式协调真实
+`OAX` workspace，以及对 busy Worker 做正式 graceful drain（force-stop 仍为独立危险路径）。
