@@ -25,6 +25,35 @@ import (
 )
 
 const consoleTTYHelperEnvironment = "OPENAGENTX_TASK06_TTY_HELPER"
+const consoleTTYFixtureSentinelSeconds = "86400"
+
+type synchronizedTerminal struct {
+	mu     sync.Mutex
+	buffer bytes.Buffer
+}
+
+func (terminal *synchronizedTerminal) Write(data []byte) (int, error) {
+	terminal.mu.Lock()
+	defer terminal.mu.Unlock()
+	return terminal.buffer.Write(data)
+}
+
+func (terminal *synchronizedTerminal) String() string {
+	terminal.mu.Lock()
+	defer terminal.mu.Unlock()
+	return terminal.buffer.String()
+}
+
+func waitForRenderedTerminalText(terminal *synchronizedTerminal, expected string, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if strings.Contains(ansi.Strip(terminal.String()), expected) {
+			return true
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	return strings.Contains(ansi.Strip(terminal.String()), expected)
+}
 
 func TestConsoleTTYHelper(t *testing.T) {
 	if os.Getenv(consoleTTYHelperEnvironment) != "1" {
@@ -147,7 +176,7 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 		t.Fatal(err)
 	}
 	for range 2 {
-		if _, err := tmux("split-window", "-d", "-t", windowID, "sleep", "30"); err != nil {
+		if _, err := tmux("split-window", "-d", "-t", windowID, "sleep", consoleTTYFixtureSentinelSeconds); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -155,7 +184,7 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 		t.Fatal(err)
 	}
 
-	var terminal bytes.Buffer
+	var terminal synchronizedTerminal
 	attach := exec.Command("script", "-qfec", "tmux -L "+socketName+" attach-session -t OAX", "/dev/null")
 	attach.Env = append(os.Environ(), "TERM=xterm-256color")
 	stdin, err := attach.StdinPipe()
@@ -167,22 +196,40 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	if err := attach.Start(); err != nil {
 		t.Fatal(err)
 	}
+	var stopAttachOnce sync.Once
+	stopAttach := func() {
+		stopAttachOnce.Do(func() {
+			_ = stdin.Close()
+			_ = attach.Process.Kill()
+			_ = attach.Wait()
+		})
+	}
+	t.Cleanup(stopAttach)
 	if err := os.WriteFile(readyPath, []byte("ready"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	select {
 	case <-connected:
 	case <-time.After(10 * time.Second):
-		_ = attach.Process.Kill()
-		_ = attach.Wait()
+		stopAttach()
 		t.Fatalf("Console did not reach the fake event stream: %s", terminal.String())
 	}
-	time.Sleep(250 * time.Millisecond)
-	if _, err := stdin.Write([]byte("/quit\r")); err != nil {
-		_ = attach.Wait()
-		t.Fatalf("write Console input: %v; terminal output=%q", err, terminal.String())
+	if !waitForRenderedTerminalText(&terminal, "> /help", 10*time.Second) {
+		stopAttach()
+		t.Fatalf("Console input was not ready: %q", terminal.String())
 	}
-	_ = stdin.Close()
+	for _, key := range []byte("/quit") {
+		if _, err := stdin.Write([]byte{key}); err != nil {
+			stopAttach()
+			t.Fatalf("write Console key: %v; terminal output=%q", err, terminal.String())
+		}
+		time.Sleep(30 * time.Millisecond)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if _, err := stdin.Write([]byte{'\r'}); err != nil {
+		stopAttach()
+		t.Fatalf("write Console Enter: %v; terminal output=%q", err, terminal.String())
+	}
 	deadline := time.Now().Add(10 * time.Second)
 	for {
 		panes, paneErr := tmux("list-panes", "-t", windowID, "-F", "#{pane_index}:#{pane_dead}:#{pane_dead_status}")
@@ -190,14 +237,12 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 			break
 		}
 		if time.Now().After(deadline) {
-			_ = attach.Process.Kill()
-			_ = attach.Wait()
+			stopAttach()
 			t.Fatalf("Console did not exit pane 0: panes=%q err=%v output=%s", panes, paneErr, terminal.String())
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	_ = attach.Process.Kill()
-	_ = attach.Wait()
+	stopAttach()
 
 	output := terminal.String()
 	plainOutput := ansi.Strip(output)

@@ -1272,6 +1272,37 @@ M  deploy/systemd/openagentx-user.service
   也没有继续 race、vet、剩余隔离场景、systemd analyze、detached 候选构建或 `rtx4090` 只读核验。
   当前 validation report 保持 `no-go`，Task 08 保持 `active/WAIT`；未修改产品代码或真实状态。
 
+### T08-02 / Task 06 Console PTY shutdown review-fix（append-only）
+
+- `2026-09-15T00:05:00Z`：监督授权只修 `T08-02`，归属 Task 06；Task 08 保持
+  `active/NO-GO`，本修复完成后不恢复 Task 08 其余候选矩阵。
+- 诊断确认产品 Update 路径在 Attach binding 完成时调用 `m.input.Focus()`，只在独立
+  `tea.KeyEnter` 上执行当前 draft，`/quit` 解析后直接返回 `tea.Quit`。失败 smoke 只等待 SSE
+  connected，随后固定等待 250ms、单次写入 `/quit\r` 并立即关闭 stdin；terminal 已显示 draft
+  但不能证明输入 focus 和 Enter 被作为独立 key 处理。测试还在 PTY 写入期间并发读取
+  `bytes.Buffer`，两个辅助 pane 使用仅 30 秒的进程。
+- `internal/cli/console/smoke_test.go` 改用 mutex 保护的 terminal recorder；SSE connected 后继续等待
+  `ansi.Strip` 输出出现 Attach 输入 placeholder `> /help`，证明输入画面 ready。测试逐字符写入
+  `/quit`，每键间隔 30ms，再等待 100ms 单独写 Enter；在 pane 0 被结构化证明为
+  `pane_dead=1/pane_dead_status=0` 前不关闭 stdin。没有 kill/respawn pane，也没有放宽 alt-screen、
+  正式临时 UDS/auth、OAX bind 或 pane 1/2 保留断言。
+- script cleanup 通过 `sync.Once` 在所有成功/失败路径关闭 stdin、终止并 wait 本测试创建的
+  `script` 进程；唯一 `tmux -L` server 仍由测试 cleanup 的 `kill-server` 回收。辅助 pane 改用
+  86400 秒 sentinel，仅依赖隔离 server cleanup，不再要求整套测试在 30 秒内完成。
+- 修复后 Ubuntu 验证：
+  - 单次 smoke + ANSI strip：`go test ./internal/cli/console -run
+    '^Test(IsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes|StripTerminalControlsPreservesRenderedTextAcrossANSI)$'
+    -count=1`，exit 0，package 1.171s；
+  - 真实 PTY smoke 连续十次：`go test ./internal/cli/console -run
+    '^TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes$' -count=10`，exit 0，package 11.706s；
+  - Console package 三轮：`go test ./internal/cli/console -count=3`，exit 0，package 3.578s；
+  - Console race：`go test -race ./internal/cli/console -count=1`，exit 0，package 3.326s；
+  - 全仓无缓存确认：`go test ./... -count=1`，exit 0，17.89s；所有 package 通过。
+- 真实键序下连续验证均正常退出，因此没有修改产品 TUI/Follow cancellation。`gofmt` 和
+  `git diff --check` 通过。validation report 继续为 `no-go`，`T08-02` 保持 open，Task 08 保持
+  `active/WAIT`，等待监督端 Termux 独立复核；未 push、安装、重启或操作真实 service/DB/socket/
+  default tmux/systemd/父仓。
+
 ## 7. Open Issues
 
 | ID | 首次发现时间 | Task | 严重度 | 问题 | Owner | 状态/处置 |
