@@ -125,6 +125,78 @@ func TestIsolatedTmuxCreatesOAXWithoutMigratingExistingAgentx(t *testing.T) {
 	}
 }
 
+func TestIsolatedTmuxPrependsManagedWindowsWithoutTakingOverExistingOAX(t *testing.T) {
+	ctx, runner := isolatedTmux(t)
+	firstOutput, err := runner.Run(ctx, "new-session", "-d", "-P", "-F", "#{window_id}", "-s", SessionName, "-n", "user-first")
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstID := strings.TrimSpace(firstOutput)
+	if _, err := runner.Run(ctx, "split-window", "-d", "-t", firstID); err != nil {
+		t.Fatal(err)
+	}
+	secondOutput, err := runner.Run(ctx, "new-window", "-d", "-P", "-F", "#{window_id}", "-t", "="+SessionName, "-n", "user-second")
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondID := strings.TrimSpace(secondOutput)
+	if _, err := runner.Run(ctx, "select-window", "-t", secondID); err != nil {
+		t.Fatal(err)
+	}
+
+	activeWindowID := func() string {
+		t.Helper()
+		output, err := runner.Run(ctx, "list-windows", "-t", "="+SessionName, "-F", "#{window_id} #{window_active}")
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, line := range strings.Split(strings.TrimSpace(output), "\n") {
+			fields := strings.Fields(line)
+			if len(fields) == 2 && fields[1] == "1" {
+				return fields[0]
+			}
+		}
+		t.Fatalf("active OAX window missing from %q", output)
+		return ""
+	}
+	if active := activeWindowID(); active != secondID {
+		t.Fatalf("failed to establish active user window: got %s want %s", active, secondID)
+	}
+
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
+	workspace := Workspace{Runner: runner, ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} }}
+	report, err := workspace.Reconcile(ctx, manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.SessionCreated || !reflect.DeepEqual(report.Created, []string{"overview", "quote"}) ||
+		!reflect.DeepEqual(report.Unmanaged, []string{"user-first", "user-second"}) {
+		t.Fatalf("unexpected report: %+v", report)
+	}
+	windows, err := workspace.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotNames := make([]string, 0, len(windows))
+	for _, window := range windows {
+		gotNames = append(gotNames, window.Name)
+	}
+	if !reflect.DeepEqual(gotNames, []string{"overview", "quote", "user-first", "user-second"}) {
+		t.Fatalf("unexpected OAX window order: %v", gotNames)
+	}
+	first, ok := windowByID(windows, firstID)
+	if !ok || first.Name != "user-first" || !reflect.DeepEqual(first.PaneIndices, []int{0, 1}) || first.Managed.Set || first.AgentID.Set {
+		t.Fatalf("first user window changed: %+v", first)
+	}
+	second, ok := windowByID(windows, secondID)
+	if !ok || second.Name != "user-second" || !reflect.DeepEqual(second.PaneIndices, []int{0}) || second.Managed.Set || second.AgentID.Set {
+		t.Fatalf("second user window changed: %+v", second)
+	}
+	if active := activeWindowID(); active != secondID {
+		t.Fatalf("Reconcile switched active user window: got %s want %s", active, secondID)
+	}
+}
+
 func TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified(t *testing.T) {
 	ctx, runner := isolatedTmux(t)
 	evidencePath := filepath.Join(t.TempDir(), "console-started.txt")

@@ -306,6 +306,10 @@ func (w Workspace) Reconcile(ctx context.Context, manifest Manifest) (WorkspaceR
 		return WorkspaceReport{}, err
 	}
 
+	insertBeforeWindowID := ""
+	if len(windows) > 0 {
+		insertBeforeWindowID = windows[0].ID
+	}
 	expected := expectedWindowNames(manifest)
 	byName := windowsByName(windows)
 	report := WorkspaceReport{}
@@ -326,7 +330,7 @@ func (w Workspace) Reconcile(ctx context.Context, manifest Manifest) (WorkspaceR
 			report.Reused = append(report.Reused, name)
 			continue
 		}
-		windowID, createErr := w.createWindow(ctx, name)
+		windowID, createErr := w.createWindow(ctx, name, insertBeforeWindowID)
 		if createErr != nil {
 			return report, createErr
 		}
@@ -397,7 +401,7 @@ func (w Workspace) createWorkspace(ctx context.Context, manifest Manifest) (Work
 	}
 	report.Created = append(report.Created, OverviewWindow)
 	for _, agent := range manifest.Agents {
-		windowID, createErr := w.createWindow(ctx, agent.AgentID)
+		windowID, createErr := w.createWindow(ctx, agent.AgentID, "")
 		if createErr != nil {
 			return report, createErr
 		}
@@ -409,8 +413,14 @@ func (w Workspace) createWorkspace(ctx context.Context, manifest Manifest) (Work
 	return report, nil
 }
 
-func (w Workspace) createWindow(ctx context.Context, name string) (string, error) {
-	args := []string{"new-window", "-d", "-P", "-F", windowIDFormat, "-t", "=" + SessionName, "-n", name}
+func (w Workspace) createWindow(ctx context.Context, name, insertBeforeWindowID string) (string, error) {
+	args := []string{"new-window", "-d", "-P", "-F", windowIDFormat}
+	if insertBeforeWindowID == "" {
+		args = append(args, "-t", "="+SessionName)
+	} else {
+		args = append(args, "-b", "-t", insertBeforeWindowID)
+	}
+	args = append(args, "-n", name)
 	if name != OverviewWindow {
 		args = append(args, provisioningCommand...)
 	}

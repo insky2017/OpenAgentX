@@ -112,6 +112,13 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 		r.currentID = window.id
 		return window.id + "\n", nil
 	case "new-window":
+		if containsArg(args, "-b") {
+			window, err := r.addWindowBefore(valueAfter(args, "-n"), []int{0}, valueAfter(args, "-t"))
+			if err != nil {
+				return "", err
+			}
+			return window.id + "\n", nil
+		}
 		window := r.addWindow(valueAfter(args, "-n"), []int{0})
 		return window.id + "\n", nil
 	case "set-option":
@@ -160,6 +167,21 @@ func (r *fakeRunner) addWindow(name string, panes []int) *fakeWindow {
 	window := &fakeWindow{id: "@" + strconv.Itoa(r.nextID), name: name, panes: append([]int(nil), panes...)}
 	r.windows = append(r.windows, window)
 	return window
+}
+
+func (r *fakeRunner) addWindowBefore(name string, panes []int, beforeID string) (*fakeWindow, error) {
+	for index, candidate := range r.windows {
+		if candidate.id != beforeID {
+			continue
+		}
+		r.nextID++
+		window := &fakeWindow{id: "@" + strconv.Itoa(r.nextID), name: name, panes: append([]int(nil), panes...)}
+		r.windows = append(r.windows, nil)
+		copy(r.windows[index+1:], r.windows[index:])
+		r.windows[index] = window
+		return window, nil
+	}
+	return nil, fmt.Errorf("insert-before window %q missing", beforeID)
 }
 
 func (r *fakeRunner) window(id string) *fakeWindow {
@@ -243,6 +265,51 @@ func TestWorkspaceCreatesMissingOAXSessionWithMarkers(t *testing.T) {
 	assertNoForbiddenTmux(t, runner.calls)
 }
 
+func TestWorkspaceReusesExistingOAXAndPrependsOnlyCreatedWindows(t *testing.T) {
+	userFirst := &fakeWindow{id: "@40", name: "user-first", panes: []int{0, 1}}
+	userSecond := &fakeWindow{id: "@41", name: "user-second", panes: []int{0}}
+	runner := &fakeRunner{
+		session: true,
+		windows: []*fakeWindow{userFirst, userSecond},
+		nextID:  41,
+	}
+
+	report, err := workspace(runner).Reconcile(context.Background(), workspaceManifest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.SessionCreated || !reflect.DeepEqual(report.Created, []string{"overview", "quote", "risk"}) ||
+		!reflect.DeepEqual(report.Unmanaged, []string{"user-first", "user-second"}) {
+		t.Fatalf("unexpected report: %+v", report)
+	}
+	gotNames := make([]string, 0, len(runner.windows))
+	for _, window := range runner.windows {
+		gotNames = append(gotNames, window.name)
+	}
+	if !reflect.DeepEqual(gotNames, []string{"overview", "quote", "risk", "user-first", "user-second"}) {
+		t.Fatalf("created windows were not prepended in manifest order: %v", gotNames)
+	}
+	if runner.windows[3] != userFirst || runner.windows[4] != userSecond ||
+		!reflect.DeepEqual(userFirst.panes, []int{0, 1}) || userFirst.managed.Set || userFirst.agent.Set ||
+		!reflect.DeepEqual(userSecond.panes, []int{0}) || userSecond.managed.Set || userSecond.agent.Set {
+		t.Fatalf("existing unmanaged windows were mutated: %+v", runner.windows)
+	}
+	joined := strings.Join(runner.calls, "\n")
+	for _, expected := range []string{
+		"new-window -d -P -F #{window_id} -b -t @40 -n overview",
+		"new-window -d -P -F #{window_id} -b -t @40 -n quote sh -c",
+		"new-window -d -P -F #{window_id} -b -t @40 -n risk sh -c",
+	} {
+		if !strings.Contains(joined, expected) {
+			t.Fatalf("missing prepend call %q: %v", expected, runner.calls)
+		}
+	}
+	if strings.Contains(joined, "new-session") || strings.Contains(joined, "move-window") || strings.Contains(joined, "rename-window") {
+		t.Fatalf("existing OAX or windows were taken over: %v", runner.calls)
+	}
+	assertNoForbiddenTmux(t, runner.calls)
+}
+
 func TestWorkspaceVerifiesCreatedAgentWindowBeforeStartingConsole(t *testing.T) {
 	runner := &fakeRunner{session: true, windows: []*fakeWindow{managedWindow("@1", OverviewWindow, 0)}, nextID: 1}
 	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", IdentityFile: "a", WorkerConfig: "b"}}}
@@ -253,7 +320,7 @@ func TestWorkspaceVerifiesCreatedAgentWindowBeforeStartingConsole(t *testing.T) 
 	if !reflect.DeepEqual(report.Created, []string{"quote"}) {
 		t.Fatalf("unexpected report: %+v", report)
 	}
-	newIndex := callIndex(runner.calls, "new-window -d -P -F #{window_id} -t =OAX -n quote sh -c")
+	newIndex := callIndex(runner.calls, "new-window -d -P -F #{window_id} -b -t @1 -n quote sh -c")
 	managedIndex := callIndex(runner.calls, "set-option -w -t @2 "+ManagedOption+" 1")
 	agentIndex := callIndex(runner.calls, "set-option -w -t @2 "+AgentIDOption+" quote")
 	verifyIndex := callIndexAfter(runner.calls, "list-panes -t @2 -F #{pane_index}", agentIndex)
