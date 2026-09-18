@@ -1,9 +1,11 @@
 # AGY Graft Deployment
 
-`agy-graft` is the only Runtime entrypoint for AGY Workers. Install the
-repository copy at `/usr/local/libexec/openagentx/agy-graft` and record its
-SHA-256 in the release manifest. Do not silently edit the machine-local copy
-under `/home/sky/tools/bin`.
+`agy-graft` is the only Runtime entrypoint for AGY Workers. For the canonical
+user-systemd installation, install the repository copy at
+`$HOME/.local/bin/agy-graft`. For a system-level service, install it at
+`/usr/local/libexec/openagentx/agy-graft`. Record its SHA-256 in the release
+manifest and use that installed absolute path in the Worker YAML. Do not
+silently edit or replace a machine-local copy under `/home/sky/tools/bin`.
 
 Mode and endpoint are resolved independently. Mode precedence is:
 
@@ -50,7 +52,7 @@ invalid explicitly configured file, an unsupported mode, a missing endpoint
 in the selected config mode, or an unavailable local default proxy is
 fail-closed.
 
-For production systemd instances, put host-specific absolute paths in the
+For system-level systemd instances, put host-specific absolute paths in the
 optional `/etc/openagentx/workers/%i.env` file. The unit template intentionally
 does not force a config file to exist and does not depend on `/home/sky`:
 
@@ -65,10 +67,21 @@ The `AGY_GRAFT_CONFIG` line is optional; omit it when the selected endpoint is
 provided by the environment. Interactive local use may continue to rely on
 the wrapper's existing `/home/sky` defaults.
 
+For the canonical user unit, install the tracked wrapper under the same
+user's home and set the Worker YAML to that absolute path. The unit's explicit
+`PATH` includes `$HOME/.local/bin`, but the YAML remains absolute so startup
+does not depend on shell initialization or command lookup.
+
 Install and verify the wrapper before starting the Worker:
 
 ```bash
-install -D -m 0755 deploy/agy/agy-graft /usr/local/libexec/openagentx/agy-graft
+# Canonical user-systemd installation.
+install -m 0755 deploy/agy/agy-graft "$HOME/.local/bin/agy-graft"
+sha256sum "$HOME/.local/bin/agy-graft"
+
+# System-level alternative, performed by an administrator.
+sudo install -D -m 0755 deploy/agy/agy-graft \
+  /usr/local/libexec/openagentx/agy-graft
 sha256sum /usr/local/libexec/openagentx/agy-graft
 stat -c '%a %U:%G' /etc/openagentx/agy-graft.conf
 ```

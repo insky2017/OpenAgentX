@@ -54,6 +54,7 @@ override。显式或环境 override 一旦为空、为相对路径或无法 cano
 
 ```text
 ~/.local/bin/openagentx
+~/.local/bin/agy-graft
 ~/.openagentx/
   openagentx.env
   release.txt
@@ -197,6 +198,7 @@ go test -race ./... -count=1
 go vet ./...
 go mod verify
 go build -buildvcs=true -o /tmp/openagentx-release ./cmd/openagentx
+install -m 0755 deploy/agy/agy-graft /tmp/openagentx-release-agy-graft
 
 cd web
 npm ci --no-audit --no-fund
@@ -204,7 +206,7 @@ npm run build
 cd ..
 
 git rev-parse HEAD
-sha256sum /tmp/openagentx-release
+sha256sum /tmp/openagentx-release /tmp/openagentx-release-agy-graft
 go version -m /tmp/openagentx-release
 ```
 
@@ -222,11 +224,13 @@ install -d -m 0700 ~/.openagentx/backups ~/.openagentx/workers
 install -d -m 0755 ~/.openagentx/web
 ```
 
-安装二进制、Web 资源和两个用户级 unit。归档复制会保留构建目录的 mode，因此复制后显式把 Web 目录
-规范为 `0755`、静态文件规范为 `0644`：
+安装二进制、tracked AGY wrapper、Web 资源和两个用户级 unit。wrapper 是 AGY Worker 的唯一 Runtime
+入口；必须记录其 SHA-256，并在 Worker YAML 中使用安装后的绝对路径，不得依赖交互 shell 的 `PATH`。
+归档复制会保留构建目录的 mode，因此复制后显式把 Web 目录规范为 `0755`、静态文件规范为 `0644`：
 
 ```bash
 install -m 0755 /tmp/openagentx-release ~/.local/bin/openagentx
+install -m 0755 /tmp/openagentx-release-agy-graft ~/.local/bin/agy-graft
 cp -a web/dist/. ~/.openagentx/web/
 find ~/.openagentx/web -type d -exec chmod 0755 {} +
 find ~/.openagentx/web -type f -exec chmod 0644 {} +
@@ -256,6 +260,11 @@ printf '%s\n' 'OPENAGENTX_HTTP_ADDR=127.0.0.1:18100' \
 chmod 0600 ~/.openagentx/openagentx.env
 ```
 
+使用 Cloudflare Tunnel 等本机 connector 时仍保持该回环绑定，并把 tunnel origin 配置为
+`http://localhost:18100`。外部客户端只访问 tunnel 的 HTTPS hostname；不要为了让本机 connector
+连接 origin 而改成 `0.0.0.0`。变更后同时验证 HTTPS hostname 可用、`ss` 只显示回环监听，并使用
+`curl --noproxy '*'` 确认主机的 LAN、VPN 和 bridge 地址都不能直连 `18100`。
+
 需要其他机器直接访问时，应改为监听所有 IPv4 接口，并通过主机防火墙只允许可信来源访问 TCP
 `18100`：
 
@@ -274,7 +283,7 @@ chmod 0600 ~/.openagentx/openagentx.env
 ```bash
 {
   git rev-parse HEAD
-  sha256sum ~/.local/bin/openagentx
+  sha256sum ~/.local/bin/openagentx ~/.local/bin/agy-graft
   go version -m ~/.local/bin/openagentx
   date --iso-8601=seconds
 } > ~/.openagentx/release.txt
@@ -362,11 +371,15 @@ runtime_backends:
   - backend_id: primary
     adapter_id: agy-batch
     options:
-      binary: /absolute/path/to/agy-graft
+      binary: /home/<user>/.local/bin/agy-graft
       working_dir: /absolute/path/to/workspace
       models:
         - model-name
 ```
+
+仓库 tracked wrapper 应安装到 `/home/<user>/.local/bin/agy-graft`，并在发布清单和
+`~/.openagentx/release.txt` 中记录摘要。不要把另一个交互式或 machine-local wrapper 的目录加入 unit
+`PATH` 来绕过安装，也不要静默覆盖 `/home/sky/tools/bin/agy-graft` 一类不同内容的本机副本。
 
 首次初始化使用 `--worker-config` 导入源文件。Fleet 会验证捕获的内容并以 `0600` 原子安装到
 `~/.openagentx/workers/quote-service.yaml`，同时以 `0600` 创建 `fleet.yaml`，不会静默覆盖冲突文件：
@@ -395,7 +408,9 @@ openagentx fleet status
 
 `fleet up` 会在 tmux 或 systemd 副作用前验证 canonical binary、Worker config，以及已加载用户 unit
 的 `ExecStart`、`WorkingDirectory` 和 `EnvironmentFiles`。所有 Worker `systemctl` 调用使用
-`--user`。Worker unit 只 `Wants` daemon；daemon stop/restart 不会通过依赖关系强停 Worker。
+`--user`。当前命令执行 `systemctl --user start`，不启用实例；因此运行中的 Worker 可以是
+`active/running` 且 `is-enabled=disabled`。Worker unit 只 `Wants` daemon；daemon stop/restart 不会通过
+依赖关系强停 Worker。
 
 ## 6. 使用 Console Attach
 
@@ -523,6 +538,7 @@ sqlite3 ~/.openagentx/data/openagentx.db \
 
 systemctl --user stop openagentx.service
 install -m 0755 /tmp/openagentx-release ~/.local/bin/openagentx
+install -m 0755 /tmp/openagentx-release-agy-graft ~/.local/bin/agy-graft
 cp -a web/dist/. ~/.openagentx/web/
 find ~/.openagentx/web -type d -exec chmod 0755 {} +
 find ~/.openagentx/web -type f -exec chmod 0644 {} +
@@ -559,8 +575,11 @@ kill 既有 tmux 窗口，也不要通过强停掩盖仍活动的 RunAttempt。
 
 ## 9. 回滚
 
-安装前保留上一版二进制、unit 和 SQLite 在线备份。启动失败时先停止 daemon，再恢复二进制和 unit；
-只有确认新版本改变了数据库且旧版本无法打开时，才在 daemon 停止状态下恢复数据库备份：
+安装前保留上一版二进制、unit 和 SQLite 在线备份。如果更新 wrapper 或 canonical Worker YAML，还要在启动
+Worker 前记录 wrapper 原路径是否存在，并备份旧 wrapper、Worker YAML 和 release evidence。启动失败时先
+精确停止受影响 Worker，再按记录恢复旧 wrapper/YAML；原路径此前不存在时删除新 wrapper。daemon 启动失败
+时先停止 daemon，再恢复二进制和 unit；只有确认新版本改变了数据库且旧版本无法打开时，才在 daemon 停止
+状态下恢复数据库备份：
 
 ```bash
 systemctl --user stop openagentx.service
@@ -597,6 +616,9 @@ loginctl show-user "$(id -un)" -p Linger
   Worker `.env`、credential 和 release evidence 不宽于 `0600`，且必须由当前用户持有。
 - Fleet 不扫描 Agent 目录，不从 tmux 猜 Agent，不生成虚构 Runtime 配置，也不静默覆盖冲突文件。
 - tmux 冲突只报告位置和修复提示；不得用 `send-keys`、`capture-pane` 或自动 kill/move 掩盖现场。
+- AGY Worker 的 `options.binary` 必须是已安装 tracked wrapper 的绝对路径。看到
+  `executable file not found in $PATH` 时，先精确停止失败实例、核对 wrapper provenance 和摘要，再修复
+  配置；不要扩展 unit `PATH` 去依赖未纳入 release 的 shell 工具目录。
 - credential 失效时重新执行 `openagentx console login`；不得把密码或 Token 写入 env、manifest、日志或
   argv。
 
@@ -863,7 +885,7 @@ mode 保留到了 installation。发现后停止后续 Fleet 操作；内容摘�
 尚未生效的 `allow 3389` 和 `allow 3000`。主机同时运行 SSH、RDP、Docker、ZeroTier 等入站/转发服务，
 因此没有擅自执行可能改变这些服务的 `ufw enable`。操作人员明确决定先打通主要 Fleet 流程，将
 `0.0.0.0:18100` 暂无已验证主机防火墙、HTTPS 反向代理或等效入站限制记录为后续安全事项。此前建议的
-UFW 规则均未执行；当前不能声称外部入口保护已经验证。
+UFW 规则均未执行；该时间点不能声称外部入口保护已经验证。
 
 操作人员在自己的 TTY 中使用数据库内唯一 active username `owner` 完成 `openagentx console login`；
 密码和 Token 未进入 argv、环境或执行记录。CLI credential 随后只核对元数据：owner 为 `sky`、mode 为
@@ -902,3 +924,170 @@ active window 当成 current，再把自己的 `quote-service` window 误报为�
 原 TTY smoke 通过（`1.154s`）、Console 全包通过（`1.892s`）、Console race 通过（`4.067s`），Fleet 与
 CLI Fleet 包分别以 `10.195s`、`0.176s` 通过。真实 `@67` dead pane 暂时保留用于诊断；完成新的 clean
 release 门禁和安装前不执行 respawn 或 Worker 启动。
+
+### 2026-09-18：Console 修复 release 安装与恢复
+
+最终修复 revision 为 `f49cec4ed31a0f63e82626f1de8d6332baca205d`。独立 clean checkout
+`/tmp/openagentx-adr008-standalone-f49cec4` 中，全仓普通/race 测试、vet、module verify、tracked shell
+语法、Worker template、legacy control path、隔离 user-systemd 以及 Web `npm ci`、observation/PWA 测试和
+production build 全部通过。`/tmp/openagentx-release-f49cec4/openagentx` 的 SHA-256 为
+`984bb0df415b18f49959eda474076f0c807d90e6b5392342083249e605771114`；build metadata 显示目标 revision、
+`vcs.modified=false` 和 `-trimpath=true`，provenance 记录 `source_clean=true`。
+
+覆盖前创建第二层回滚目录
+`/home/sky/.openagentx/backups/adr008-console-fix-20260918T212448+0800`，保存 binary、8 个 Web 文件、两个
+canonical unit、release evidence、env、Fleet/Worker 配置和 SQLite 在线备份，不复制 credential。17 个
+内容文件全部通过 `SHA256SUMS`，数据库快照 `quick_check=ok`。旧 daemon PID `151130` graceful stop 后，
+其进程和 `18100` 监听均消失，才原子安装新 release。
+
+新 daemon PID `309236` 为 active/running/enabled。release、安装 binary 和 `/proc/309236/exe` 摘要一致；
+schema v1、SQLite `quick_check=ok`、监听 socket inode 归属、loopback/LAN/Tailscale health、8 个 Web
+资源内容与 mode 均通过。只 respawn managed `@67/%226` 后，Console PID `313504` 正常运行目标 binary，
+不再出现 duplicate-binding 误报；attached client 的 active window 仍为 unmanaged `@63`。
+
+### 2026-09-18：Worker wrapper 缺失、修复与 Fleet 重跑
+
+首次真实 `openagentx fleet up` 启动了 `openagentx-worker@quote-service.service`，但 `fleet status` 显示
+Worker `activating/offline`。journal 给出真实错误：
+
+```text
+exec: "agy-graft": executable file not found in $PATH
+```
+
+Worker YAML 当时使用相对值 `binary: agy-graft`，canonical unit 的显式 `PATH` 为
+`%h/.local/bin:/usr/local/bin:/usr/bin:/bin`，而交互式副本只存在于 `/home/sky/tools/bin`。确认根因后只
+停止 exact Worker instance，使其保持 `inactive/dead`，没有修改旧 tools 副本，也没有未经授权重跑门禁。
+用户随后选择 user-systemd 方案并授权修复和重跑。
+
+tracked source `deploy/agy/agy-graft` 的 SHA-256 为
+`31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de`；它与
+`/home/sky/tools/bin/agy-graft` 的摘要
+`8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968` 不同。tracked wrapper fixture 全部
+通过；依赖 `/home/sky/.local/bin/agy`、`/home/sky/tools/bin/mgraftcp` 可执行，本地 `7897` 正在监听。
+
+release 新增 mode `0755` 的 `agy-graft`，`PROVENANCE` 记录 source path 和摘要，目录内 10 项
+`SHA256SUMS` 全部通过。变更前新增回滚层：
+
+```text
+/home/sky/.openagentx/backups/adr008-worker-runtime-20260918T220656+0800
+```
+
+该目录记录 wrapper 目标原先不存在，保存旧 Worker YAML 与 release evidence；根目录和 `workers/` 为
+`0700`，记录、清单和 Worker YAML 为 `0600`，相对摘要全部通过。随后原子安装
+`/home/sky/.local/bin/agy-graft`，将 Worker YAML 改为同一绝对路径并保持 `0600`，installed release
+证据也加入 wrapper 摘要。source、release 与 installed wrapper 字节一致，fixture 针对 installed path
+再次通过。
+
+重跑 `fleet up` 后，`quote-service` 在第一次轮询即达到 `active/running`；`fleet status` 报告
+`worker_status=online`、generation `49`。Worker PID `379492` 的 executable 为安装的 `openagentx`，摘要
+与 release 一致，`NRestarts=0`；Unix transport 配置指向 mode `0600` 的
+`~/.openagentx/run/openagentx.sock`。实例仍为 `disabled`，符合 `fleet up` 只调用 `systemctl --user start`
+的设计。重跑前后 attached client 始终位于 `@63`；所有 `OAX` window/pane ID、名称、pane 数、marker、
+active 状态和相对顺序完全一致。
+
+本阶段还纠正了五项无现场副作用的辅助操作错误：第一次 provenance 编辑把两个目标文件误放入单文件
+替换请求，工具拒绝整个请求且文件未变；一次 `systemctl is-active` 预期输出 `inactive` 但其退出码 `3`
+触发 `pipefail`，备份目录尚未创建；`install -d` 首次只收紧末级 `workers/`，随即在写清单前把回滚根目录
+修正为 `0700`；`env -i ... command -v` 把 shell builtin 当成外部程序，改用 `/bin/sh -c` 后 canonical
+PATH 精确解析到新 wrapper；最后一次辅助断言错误假设 Worker 必须 enabled，对照实现确认 `fleet up` 只
+start，随后以 active/running、online、PID/hash 和 restart count 完成正式验证。
+
+### 2026-09-18：最终只读复核
+
+`2026-09-18T22:25:54+08:00` 完成最终复核。复核没有执行 daemon/Worker restart、Console respawn、
+`fleet up/down`、tmux 控制命令或网络策略变更。
+
+发布与文档门禁结果：
+
+- tracked source、release 和 installed `agy-graft` 的 SHA-256 均为
+  `31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de`，三份 wrapper fixture 分别通过；
+  `/home/sky/tools/bin/agy-graft` 仍为不同摘要 `8ed1310c...`，未被修改。
+- release 目录内 binary、wrapper 和 8 个 Web 文件共 10 项摘要全部通过；`PROVENANCE` 与 installed
+  release evidence 均记录 revision `f49cec4...`、wrapper 摘要和 `vcs.modified=false`。
+- legacy release gate、全部 tracked shell 的 `bash -n`、`internal/fleet` 和 `internal/cli/fleet` 定向
+  Go 测试均通过；两个包用时分别为 `10.247s` 和 `0.189s`。
+- 三层回滚目录的相对 `SHA256SUMS` 全部通过，目录 mode 均为 `0700`、清单 mode 均为 `0600`；前两层
+  SQLite 快照 `quick_check=ok`。
+
+现场结果：
+
+- daemon PID `309236` 与 Worker PID `379492` 均为 `active/running`、`Result=success`、`NRestarts=0`；
+  daemon 为 enabled，Worker 为 disabled。`fleet status` 报告 `quote-service` online、generation `49`。
+- Console `@67/%226` PID `313504` 仍存活且 pane 非 dead。release、installed binary 和 daemon、Worker、
+  Console 三个 `/proc/<pid>/exe` 的 SHA-256 均为 `984bb0df415b18f49959eda474076f0c807d90e6b5392342083249e605771114`；
+  metadata 仍为 revision `f49cec4...`、`-trimpath=true`、`vcs.modified=false`。
+- schema v1 验证通过，当前数据库 `quick_check=ok`。Unix socket mode 为 `0600`，Worker YAML 使用 unix
+  transport 和 `/home/sky/.local/bin/agy-graft` 绝对路径；credential 仅核对 owner、mode `0600` 和 size，
+  未读取内容。
+- `18100` 监听由 daemon fd `12` 持有，socket inode 为 `312474539`。loopback、两个 LAN 地址和 Tailscale
+  地址的 health 都返回 `{"status":"ok"}`。8 个 Web 资源 mode 均为 `0644`，installed/release 字节一致，
+  HTTP 均返回 `200` 且响应字节一致。
+- 两个 installed unit 与 clean checkout source 字节一致，并通过最终安装名的 user-systemd 静态校验。
+  user manager 的 degraded 状态仍只来自既知的 `freetoken-ornith-api.service` 与
+  `org.freedesktop.IBus.session.GNOME.service`，OpenAgentX unit 不在 failed 列表中。
+- `/proc` 精确扫描只找到上述 daemon、Console 和 Worker 三个预期 OpenAgentX 进程，
+  `unexpected_candidate_count=0`。
+- 最终复核前后 OAX snapshots 分别保存在 `/tmp/oax-final-review-before-f49cec4.txt` 与
+  `/tmp/oax-final-review-after-f49cec4.txt`，二者逐字一致，SHA-256 均为
+  `a11fa5431950827971d9fe997cd8fd389501d05e2a1885178ee725f7445c1992`；attached client 和 active window
+  仍为 unmanaged `@63`，所有 window/pane ID、名称、marker、pane 数和相对顺序未变。
+
+最终复核还纠正两项无副作用的辅助查询错误。第一批文档校验误从 `/home/sky` 执行相对路径命令，因而
+报告目标不存在，并让一次 `git diff --check` 检查了 home 仓库中的无关既有变更；改用绝对路径和
+`git -C` 后正式检查通过。一次并行端口归属命令中的 `systemctl --user show` 返回
+`Transport endpoint is not connected`，该命令没有取得 PID，后续临时输出被判定为无效；串行重做并对
+PID、inode 和 fd 分段断言后，得到上述 PID `309236`、inode `312474539`、fd `12` 的有效归属证据。
+
+网络安全事项在该时间点仍未关闭：`OPENAGENTX_HTTP_ADDR=0.0.0.0:18100` 保持不变，
+`/etc/ufw/ufw.conf` 仍为 `ENABLED=no`，与此前特权 TTY 的 `ufw status verbose` 显示
+`Status: inactive` 一致。该轮没有启用 UFW、添加规则、部署 HTTPS 反向代理或更改 VPN/路由 ACL；
+因此当时不能声称外部 HTTP 入口已有已验证的访问控制或传输加密。该状态随后由下一节的 loopback origin
+与既有 Cloudflare Tunnel 方案取代。
+
+### 2026-09-18：Cloudflare Tunnel-only 网络边界
+
+操作人员随后确认不允许任何非 loopback 地址直接访问 OpenAgentX，只保留已经配置的
+`agentx.oneaxe.cn -> http://localhost:18100` Cloudflare Tunnel。变更前，域名 HTTPS health 返回 `200`
+且响应经过 Cloudflare；system-level `cloudflared.service` 为 `active/running/enabled`。本次没有读取或
+复制 `/etc/cloudflared/token`，也没有修改 Cloudflare Tunnel 或另一个既有 user `cf-proxy.service`。
+
+覆盖 env 前创建第四层回滚目录：
+
+```text
+/home/sky/.openagentx/backups/adr008-loopback-origin-20260918T224331+0800
+```
+
+目录 mode 为 `0700`；其中保存旧 `openagentx.env`、`release.txt`、installed daemon unit 和
+`ROLLBACK.txt`，文件与 `SHA256SUMS` mode 均为 `0600`，四项相对摘要全部通过。备份明确排除了
+`credentials.json` 和 Cloudflare token，并警告恢复旧 env 会重新开放所有 IPv4 接口上的 `18100`。
+
+将 env 原子修改为 `OPENAGENTX_HTTP_ADDR=127.0.0.1:18100` 后只执行了一次 daemon restart。新 daemon
+PID 为 `486159`，`active/running/enabled`、`Result=success`、`NRestarts=0`；旧 PID `309236` 已退出。
+`18100` 只监听 `127.0.0.1`，由新 daemon fd `13` 持有，对应 inode `313011772`。loopback origin 与
+`https://agentx.oneaxe.cn` health 均返回 `200`；Tunnel 上 8 个 Web 资源也全部返回 `200`，响应字节与
+release 一致。
+
+使用 `curl --noproxy '*'` 绕过所有代理环境后，下列地址直连 `18100` 均为 curl rc `7`、HTTP `000`：
+
+- LAN：`192.168.1.9`、`192.168.1.10`
+- Tailscale：`100.76.106.96`
+- ZeroTier：`10.242.50.160`
+- Docker bridge：`172.17.0.1`、`172.18.0.1`
+
+这次 daemon restart 暴露了一次真实的 Worker 暂态。旧 Worker PID `379492` 在 Unix socket 重启窗口收到
+`connection refused` 后退出；systemd 随后启动的四个进程在旧 registration 过期前收到
+`409 CONFLICT: logical Agent already has a valid Active Worker`。unit 的 `Restart=on-failure` 与
+`RestartSec=3s` 最终在第 5 次自动重启后恢复，当前 Worker PID 为 `486788`、`NRestarts=5`，Fleet 报告
+`quote-service` online/active、generation `50`。连续三次稳定性采样中 PID 和 restart count 未再变化，
+恢复后的日志没有新增 error。没有为了清零计数再次重启服务。
+
+当前 daemon、Worker、Console 三个进程仍运行 release SHA-256 为 `984bb0df...` 的同一 binary；schema
+v1 与数据库 `quick_check` 通过，非预期 OpenAgentX 进程数为 `0`。OAX 变更前后 snapshots 保存在
+`/tmp/oax-before-loopback-origin-f49cec4.txt` 和 `/tmp/oax-after-loopback-origin-f49cec4.txt`，二者逐字
+一致且 SHA-256 均为 `a11fa543...`；Console PID `313504`、attached client、active window 和所有
+window/pane identity 均未改变。
+
+origin 的直接网络暴露已经关闭，UFW inactive 不再使 TCP `18100` 可从其他本机接口直连。外部入口现在
+仅为 Cloudflare 提供的 HTTPS hostname，Cloudflare 到 origin 的 HTTP hop 限于本机 loopback。默认
+Tunnel 配置本身不等同于已验证的 Cloudflare Access 身份策略；若需要在 OpenAgentX 自身认证之外增加边缘
+访问控制，应另行配置并验证 Cloudflare Access policy。
