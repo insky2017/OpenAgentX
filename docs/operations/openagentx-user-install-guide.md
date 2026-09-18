@@ -108,9 +108,11 @@ Worker 目录和 credential 均使用默认 profile，不需要显式 path flag�
 ## 0. 安装或测试前预检
 
 每轮安装、迁移或集成测试开始前，都必须先记录时间、目标 commit、现有服务、监听端口、tmux 现场和
-profile 状态。执行中遇到非预期非零退出、超时或结果偏离本指南时立即停止；在同一文档的执行记录中写明
-预期、实际结果、诊断过程和解除证据后，才恢复后续步骤。记录不得包含密码、Token、Cookie、Runtime
-credential 或私钥。
+profile 状态。OpenAgentX 的代码、测试、构建、安装、服务、数据库、Fleet、网络或 tmux 验证出现非预期
+非零退出、超时或结果偏离本指南时，必须立即停止；在同一文档的执行记录中写明预期、实际结果、诊断过程
+和解除证据后，才恢复后续步骤。操作人员自己的辅助查询若仅因路径拼写、参数或工作目录错误而失败，且已
+确认没有改变 OpenAgentX 或系统现场，则纠正命令并记录后继续，不把它记作产品失败；若影响范围不能确认，
+仍按产品异常停止。记录不得包含密码、Token、Cookie、Runtime credential 或私钥。
 
 测试工具可能在 `/tmp/openagentx-*` 留下 daemon 或 TLS `socat` 代理。测试前必须主动枚举这些可识别的
 遗留测试进程：
@@ -722,3 +724,15 @@ OpenAgentX 临时参数的 `socat` 不会被误报。
   `user_version=0`。
 - 旧 manifest 仍为 mode `0600` 且 `session: agentx`；canonical Worker template 仍不存在。真实 `OAX`
   仍有原 5 个 unmanaged 窗口，window ID、相对顺序、pane 数、active 状态和空 marker 均未漂移。
+
+### 2026-09-16：standalone 发布检查的辅助路径错误
+
+目标 revision `053d530b3dbb3e7bb994f361295770b2eef350f0` 提交后，使用 `--no-local` clone 创建
+`/tmp/openagentx-adr008-standalone`，以 detached HEAD 检出该 revision；checkout 使用自身 `.git` 且
+状态 clean。发布门禁前查询 Web 构建约定时，一条只读 `rg` 命令把仓库中不存在的 `Makefile` 与实际存在
+的路径一起作为参数，因此 `rg` 报 `No such file or directory` 并退出 `2`。其余匹配输出不能改变该命令
+失败的事实，也没有据此形成发布门禁结论。
+
+这是辅助查询的路径假设错误，不是 OpenAgentX 代码、测试或构建失败。命令没有写文件、启动构建、修改
+正式安装或接触真实 tmux；当时 `npm ci`、Go/Web 发布门禁和 release build 均尚未运行。后续移除不存在的
+路径并继续，所有正式门禁只在 clean standalone checkout 中执行。
