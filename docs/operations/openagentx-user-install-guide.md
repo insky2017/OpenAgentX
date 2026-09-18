@@ -222,11 +222,14 @@ install -d -m 0700 ~/.openagentx/backups ~/.openagentx/workers
 install -d -m 0755 ~/.openagentx/web
 ```
 
-安装二进制、Web 资源和两个用户级 unit：
+安装二进制、Web 资源和两个用户级 unit。归档复制会保留构建目录的 mode，因此复制后显式把 Web 目录
+规范为 `0755`、静态文件规范为 `0644`：
 
 ```bash
 install -m 0755 /tmp/openagentx-release ~/.local/bin/openagentx
 cp -a web/dist/. ~/.openagentx/web/
+find ~/.openagentx/web -type d -exec chmod 0755 {} +
+find ~/.openagentx/web -type f -exec chmod 0644 {} +
 install -m 0644 deploy/systemd/openagentx-user.service \
   ~/.config/systemd/user/openagentx.service
 install -m 0644 deploy/systemd/openagentx-worker-user@.service \
@@ -521,6 +524,8 @@ sqlite3 ~/.openagentx/data/openagentx.db \
 systemctl --user stop openagentx.service
 install -m 0755 /tmp/openagentx-release ~/.local/bin/openagentx
 cp -a web/dist/. ~/.openagentx/web/
+find ~/.openagentx/web -type d -exec chmod 0755 {} +
+find ~/.openagentx/web -type f -exec chmod 0644 {} +
 install -m 0644 deploy/systemd/openagentx-user.service \
   ~/.config/systemd/user/openagentx.service
 install -m 0644 deploy/systemd/openagentx-worker-user@.service \
@@ -770,3 +775,130 @@ go -C /home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree test -race ./intern
 
 结果依次为 `1.175s`、`1.233s` 和 `3.419s`，全部退出 `0`。所有 tmux 操作均使用唯一隔离 socket，
 没有连接或修改默认 tmux server。
+
+### 2026-09-18：最终发布门禁与可追溯产物
+
+Console smoke 修复提交为 `315fc22a7ab431bbfa1c87f92356310172f15d13`。独立 checkout
+`/tmp/openagentx-adr008-standalone` detached 到该提交，使用独立 `.git`，tracked worktree clean；Web 的
+ignored `node_modules/` 不影响源码状态。所有最终门禁都在这个 checkout 中运行，普通测试与 race 套件
+分开执行：
+
+- `go test ./... -count=1`、`go test -race ./... -count=1` 和 `go vet ./...` 全部通过；普通测试中的
+  Console、Fleet 包分别约为 `1.583s`、`11.341s`，race 结果分别约为 `3.686s`、`12.268s`。
+- `go mod verify` 输出 `all modules verified`；tracked shell `bash -n`、Worker template assertions、
+  legacy control-path release check 和隔离 user-systemd verify 全部通过。
+- `npm ci --no-audit --no-fund` 安装 123 个 package；4 项 observation 测试、PWA install assertions 和
+  Vite production build 全部通过，生成 8 个 Web 文件。
+
+门禁期间有三项不改变产品现场的辅助命令错误。最初使用了不存在的
+`scripts/check-no-legacy-control-paths.sh`，纠正为 `scripts/check-legacy-control-paths.sh --release` 后结果
+全部 CLEAN；Web `package.json` 没有通用 `test` script，纠正为实际的 `test:observation`、`test:pwa` 和
+`build`；首次改写 Web checksum 路径时误删了哈希与路径之间的分隔空格，随即从 release 目录重新生成
+清单。这些错误均未修改源码或正式 installation，纠正后的正式门禁和清单检查全部退出 `0`。
+
+最终产物位于 `/tmp/openagentx-release`。binary SHA-256 为
+`3a6c14b14d6486de70582e328cff1edcb936d62059c647bdb464f2619fc3a52a`；`go version -m` 显示
+Go `1.22.4`、`-trimpath=true`、`vcs.revision=315fc22a7ab431bbfa1c87f92356310172f15d13` 和
+`vcs.modified=false`。binary 与 8 个 Web 文件均通过 `SHA256SUMS` 回验，`PROVENANCE` 记录同一 revision
+和 `source_clean=true`。
+
+### 2026-09-18：ADR-008 本机正式迁移
+
+`2026-09-18T20:09:25+08:00` 的最终只读预检确认没有现场漂移：遗留测试进程
+`candidate_count=0`；旧 daemon PID `1308083` 为 active/running/enabled，`18100` 的 inode
+`278467725` 由其 fd `12` 持有；数据库 SHA-256 仍为
+`4b1ed0b0be5f736124ac1694e2789a33010473e295a90b77ad7095ea9d4762ce`，且
+`quick_check=ok`。规范健康端点在 `127.0.0.1`、LAN 地址和 Tailscale 地址均返回
+`{"status":"ok"}`。真实 `OAX` 仍有 2 个 attached client 和原 5 个 unmanaged 窗口，active window 为
+`@63`，所有 window/pane ID、pane 数、marker 和相对顺序未变。
+
+预检中有两项只读辅助查询被纠正。tmux format 中的字面量 `\t` 被错误地当成真实 tab 交给 `rg`，导致
+过滤器退出 `1`；改用空格分隔后取得预期快照。对 `/healthz` 的请求命中了 SPA fallback 并返回 HTML；
+根据本指南改用 `/api/observe/v1/health` 后得到规范响应。两条错误命令都没有修改 OpenAgentX、systemd、
+数据库或 tmux。
+
+按迁移决策先直接删除旧 `~/.openagentx/fleet.yaml` 且不备份，并确认路径不存在。随后创建私有回滚目录：
+
+```text
+/home/sky/.openagentx/backups/adr008-migration-20260918T201312+0800
+```
+
+该目录保存旧 binary、SQLite 在线备份、daemon unit、旧 application-specific Worker unit、Web、env、
+identity、canonical Worker 配置、数据库 network secret 和旧 release evidence；同时记录迁移前不存在
+`openagentx-worker@.service`。SQLite 快照 `quick_check=ok`，目录 mode 为 `0700`，数据库与清单 mode 为
+`0600`，19 个文件全部通过目录内 `SHA256SUMS`。安装前在错误工作目录运行一次 `sha256sum -c`，因为清单
+使用相对路径而报告文件不存在；产物未改变，在 `/tmp/openagentx-release` 中纠正后 binary 和 8 个 Web
+文件全部通过，才开始删除和备份。
+
+旧 daemon graceful stop 后 PID `1308083` 和 `18100` 监听均消失。安装已核验 binary、Web、
+`openagentx.service` 和 `openagentx-worker@.service`，并在备份后删除 disabled/inactive 的旧
+`openagentx-quote-service-worker.service`。两个已安装 unit 按最终名称通过
+`systemd-analyze --user verify`；随后 daemon-reload 并 enable/start，新 daemon PID 为 `151130`。
+
+安装后验证结果：
+
+- 发布物、`~/.local/bin/openagentx` 和 `/proc/151130/exe` 的 SHA-256 三者一致；安装 binary 仍显示目标
+  revision、`vcs.modified=false` 和 `-trimpath=true`。
+- daemon 为 active/running/enabled、`Result=success`；启动日志只有预期 stop/start。新监听 inode
+  `312002431` 由 PID `151130` 的 fd `12` 持有，地址保持 `0.0.0.0:18100`。
+- `openagentx schema verify` 输出 `OpenAgentX schema v1 verified`，SQLite `quick_check=ok`。daemon 正常
+  写入后数据库文件 SHA-256 为 `82e6b0448191a0f4be6be97c11d37d46003bd475addd53bde58a35fedb6c621d`。
+- loopback、LAN 和 Tailscale 地址上的规范 health 均返回 `{"status":"ok"}`；Web 首页及 JS、CSS、
+  manifest、service worker 和三个 icon 均返回 HTTP 200，安装文件与 release 中 8 个文件逐项同摘要。
+- canonical Worker template 已加载但实例仍 disabled/inactive，符合登录和 `fleet up` 前状态；旧 Worker
+  unit 为 not-found。Linger 仍为 `yes`，profile 私有目录、socket、env 和 Worker 配置权限符合要求。
+- 安装过程前后真实 `OAX` 的两个 client、5 个既有窗口、所有 pane ID、active window 和空 marker 完全
+  一致；安装阶段没有创建、rename、move、kill 窗口或发送按键。迁移后遗留测试进程扫描仍为 `0`。
+- 回滚目录的完整 `SHA256SUMS` 和 SQLite `quick_check` 再次通过，旧 manifest、CLI credential 和旧
+  Worker unit 当前均不存在。
+
+首次权限复核发现，release Web 构建目录本身为 `0775`、文件为 `0664`，`cp -a` 将这些 group-writable
+mode 保留到了 installation。发现后停止后续 Fleet 操作；内容摘要、daemon 和 HTTP 当时均正常，偏差仅限
+权限位。根因是归档复制会保留构建环境 mode，而原安装步骤没有在复制后规范权限。随后将所有 Web 目录
+收紧为 `0755`、文件收紧为 `0644`；逐项 mode 断言、8 个文件摘要比较、首页和 7 个静态资源 HTTP 200
+全部通过。第 2 节和第 8 节的复制步骤已加入相同的显式权限规范，避免不同构建 umask 影响安装结果。
+
+操作人员随后在特权 TTY 中执行 `ufw status verbose`，实际结果是 `Status: inactive`；这说明
+`ufw.service` 的 active/exited 只代表启动脚本执行成功，不代表过滤规则已启用。`ufw show added` 仅列出
+尚未生效的 `allow 3389` 和 `allow 3000`。主机同时运行 SSH、RDP、Docker、ZeroTier 等入站/转发服务，
+因此没有擅自执行可能改变这些服务的 `ufw enable`。操作人员明确决定先打通主要 Fleet 流程，将
+`0.0.0.0:18100` 暂无已验证主机防火墙、HTTPS 反向代理或等效入站限制记录为后续安全事项。此前建议的
+UFW 规则均未执行；当前不能声称外部入口保护已经验证。
+
+操作人员在自己的 TTY 中使用数据库内唯一 active username `owner` 完成 `openagentx console login`；
+密码和 Token 未进入 argv、环境或执行记录。CLI credential 随后只核对元数据：owner 为 `sky`、mode 为
+`0600`，未读取文件内容。
+
+### 2026-09-18：首次真实 Fleet 初始化的 Console pane 定位失败
+
+用户登录期间真实 `OAX` 现场发生了用户侧变化，因此在 Fleet 前重新建立 baseline：1 个 attached client；
+5 个 unmanaged window 仍为 `@60,@61,@62,@63,@18`，active 为 `@63`；`@63` 新增用户 pane `%224`，共
+3 个 pane。其他既有 pane ID、窗口名称、空 marker 和相对顺序均记录并保留。
+
+`openagentx fleet init --agent quote-service` 成功创建 mode `0600` 的 canonical manifest，并报告只新增
+`overview` 与 `quote-service`。实际 managed windows 为 `@66 overview` 和 `@67 quote-service`，位于所有
+既有窗口之前；原 5 个 window 及所有 pane ID、pane 数、名称和相对顺序未改变。Worker 尚未启动。
+
+初始化返回后检查发现两项偏离 baseline，因此立即停止，没有执行 `fleet up` 或手动切窗掩盖现场：active
+window 显示为新建 `@66`；`@67.0` 已 dead，exit status 为 `1`，输出为：
+
+```text
+Workspace binding failed: Agent "quote-service" is already bound to another compatible OAX window; switch to OAX:quote-service.0.
+```
+
+唯一隔离 tmux socket 的 attached-client 探针复现了创建顺序，并证明 `new-window -d -b` 和
+`respawn-pane` 均保持原 active window；active 变化不能由这些 Fleet 命令复现，保留为 attached client
+并发选择的现场观察。该探针第一次把 pseudo-TTY stdin 接到 `/dev/null`，client 立即退出而使脚本在产生
+结果前退出 `1`；纠正为私有 FIFO 后得到上述结论，两次都没有连接默认 tmux server。
+
+同一隔离探针稳定复现了 Console 失败根因：目标进程的 `TMUX_PANE` 正确指向自己的 pane，但不带 `-t` 的
+`tmux display-message` 返回 session active pane。`ExecRunner` 已支持 `CurrentTarget`，而生产
+`DefaultDependencies` 没有把 `TMUX_PANE` 传入，导致在非 active managed window 中启动的 Console 把
+active window 当成 current，再把自己的 `quote-service` window 误报为“another compatible window”。
+
+修复仅将 `os.Getenv("TMUX_PANE")` 接入默认 `ExecRunner.CurrentTarget`，不改变 binding 规则或 fail-closed
+行为。新增真实 tmux 回归测试让 managed `quote` pane 与 session active `user-active` window 不同，断言
+默认 runner 仍解析到 `quote` 且不改变 active window。修复后结果：新测试连续 10 次通过（`6.524s`）、
+原 TTY smoke 通过（`1.154s`）、Console 全包通过（`1.892s`）、Console race 通过（`4.067s`），Fleet 与
+CLI Fleet 包分别以 `10.195s`、`0.176s` 通过。真实 `@67` dead pane 暂时保留用于诊断；完成新的 clean
+release 门禁和安装前不执行 respawn 或 Worker 启动。

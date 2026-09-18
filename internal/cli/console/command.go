@@ -67,7 +67,8 @@ type CredentialStore interface {
 
 func DefaultDependencies() Dependencies {
 	return Dependencies{
-		Out: os.Stdout, Err: os.Stderr, In: os.Stdin, Tmux: fleetmodel.ExecRunner{}, Now: time.Now,
+		Out: os.Stdout, Err: os.Stderr, In: os.Stdin,
+		Tmux: fleetmodel.ExecRunner{CurrentTarget: os.Getenv("TMUX_PANE")}, Now: time.Now,
 		IsInteractive: func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
 		NewClient:     func(socketPath string) (Client, error) { return consoleclient.NewUnixClient(socketPath) },
 		NewCredentialStore: func(path string) (CredentialStore, error) {

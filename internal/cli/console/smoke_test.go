@@ -22,10 +22,13 @@ import (
 	consoleapi "openagentx/internal/api/console"
 	"openagentx/internal/credentialstore"
 	"openagentx/internal/domain"
+	fleetmodel "openagentx/internal/fleet"
 )
 
 const consoleTTYHelperEnvironment = "OPENAGENTX_TASK06_TTY_HELPER"
 const consoleTTYExitFileEnvironment = "OPENAGENTX_TASK06_EXIT_FILE"
+const consoleTmuxTargetHelperEnvironment = "OPENAGENTX_CONSOLE_TMUX_TARGET_HELPER"
+const consoleTmuxTargetResultEnvironment = "OPENAGENTX_CONSOLE_TMUX_TARGET_RESULT"
 const consoleTTYFixtureSentinelSeconds = "86400"
 
 type synchronizedTerminal struct {
@@ -81,6 +84,94 @@ func TestConsoleTTYHelper(t *testing.T) {
 		os.Exit(4)
 	}
 	os.Exit(code)
+}
+
+func TestConsoleDefaultTmuxTargetHelper(t *testing.T) {
+	if os.Getenv(consoleTmuxTargetHelperEnvironment) != "1" {
+		return
+	}
+	location, err := (fleetmodel.Workspace{Runner: DefaultDependencies().Tmux}).PreflightAttach(context.Background())
+	errorText := ""
+	if err != nil {
+		errorText = err.Error()
+	}
+	result := fmt.Sprintf("window=%s\nagent=%s\nerror=%s\n", location.WindowName, location.BoundAgentID, errorText)
+	if err := os.WriteFile(os.Getenv(consoleTmuxTargetResultEnvironment), []byte(result), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDefaultDependenciesTargetsConsoleProcessPane(t *testing.T) {
+	if _, err := exec.LookPath("tmux"); err != nil {
+		t.Skip("tmux is required for isolated current-pane verification")
+	}
+	directory := t.TempDir()
+	resultPath := filepath.Join(directory, "result")
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	socketName := fmt.Sprintf("oax-console-target-%d-%d", os.Getpid(), time.Now().UnixNano())
+	tmux := func(args ...string) (string, error) {
+		command := exec.Command("tmux", append([]string{"-L", socketName}, args...)...)
+		output, err := command.CombinedOutput()
+		if err != nil {
+			return string(output), fmt.Errorf("tmux %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(output)))
+		}
+		return string(output), nil
+	}
+	t.Cleanup(func() { _, _ = tmux("kill-server") })
+
+	activeOutput, err := tmux("new-session", "-d", "-P", "-F", "#{window_id}", "-s", "OAX", "-n", "user-active",
+		"sleep", consoleTTYFixtureSentinelSeconds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	activeID := strings.TrimSpace(activeOutput)
+	quoteOutput, err := tmux("new-window", "-d", "-P", "-F", "#{window_id}", "-t", "=OAX", "-n", "quote",
+		"sleep", consoleTTYFixtureSentinelSeconds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	quoteID := strings.TrimSpace(quoteOutput)
+	for _, args := range [][]string{
+		{"set-option", "-w", "-t", quoteID, "pane-base-index", "0"},
+		{"set-option", "-w", "-t", quoteID, fleetmodel.ManagedOption, "1"},
+		{"set-option", "-w", "-t", quoteID, fleetmodel.AgentIDOption, "quote"},
+		{"select-window", "-t", activeID},
+	} {
+		if _, err := tmux(args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := tmux("respawn-pane", "-k", "-t", quoteID+".0", "--", "env",
+		consoleTmuxTargetHelperEnvironment+"=1", consoleTmuxTargetResultEnvironment+"="+resultPath,
+		executable, "-test.run=^TestConsoleDefaultTmuxTargetHelper$"); err != nil {
+		t.Fatal(err)
+	}
+
+	deadline := time.Now().Add(10 * time.Second)
+	var result []byte
+	for time.Now().Before(deadline) {
+		result, err = os.ReadFile(resultPath)
+		if err == nil {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatalf("Console current-pane helper did not finish: %v", err)
+	}
+	if got, want := string(result), "window=quote\nagent=quote\nerror=\n"; got != want {
+		t.Fatalf("default tmux runner inspected the session-active window instead of its process pane: got %q want %q", got, want)
+	}
+	activeAfter, err := tmux("list-windows", "-t", "=OAX", "-F", "#{window_id} #{window_active}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(activeAfter, activeID+" 1\n") {
+		t.Fatalf("current-pane verification changed the active user window: %q", activeAfter)
+	}
 }
 
 func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) {
