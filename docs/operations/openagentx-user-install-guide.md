@@ -736,3 +736,37 @@ OpenAgentX 临时参数的 `socat` 不会被误报。
 这是辅助查询的路径假设错误，不是 OpenAgentX 代码、测试或构建失败。命令没有写文件、启动构建、修改
 正式安装或接触真实 tmux；当时 `npm ci`、Go/Web 发布门禁和 release build 均尚未运行。后续移除不存在的
 路径并继续，所有正式门禁只在 clean standalone checkout 中执行。
+
+### 2026-09-18：Console TTY smoke 门禁失败与修复
+
+目标 revision `9da49840b6aa80979b15315e69ac4311f7393ad8` 的 standalone checkout 保持 clean。首次并行启动
+发布门禁时，执行器没有为六条命令指定 checkout：Go 在 `/home/sky` 报 module prefix 错误，shell 和
+systemd 检查找不到相对路径，`npm ci` 也因 `/home/sky` 没有 lockfile 退出。这些命令没有实际运行
+OpenAgentX 门禁，不构成产品失败；随后用 `go -C`、绝对路径和 `npm --prefix` 纠正。
+
+纠正后的 `go test ./... -count=1` 出现真实失败：
+`TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes` 在等待约 10 秒后报告 Console pane 0 未退出。
+按产品异常停止，未继续 Web test/build 或 binary build。同期已经启动的其他门禁执行完毕：全仓 race、
+`go vet`、`go mod verify`、tracked shell 语法、Worker template、legacy control-path release check 和隔离
+user-systemd verify 均通过；`npm ci --no-audit --no-fund` 成功安装 123 个包。这些成功结果不覆盖普通测试
+失败。
+
+失败消息中的实际 pane 数据为 `0:1:`、`1:0:`、`2:0:`，格式是
+`pane_index:pane_dead:pane_dead_status`。因此 pane 0 已经 dead，两个额外 pane 仍存活；测试只是因为
+`pane_dead_status` 为空，没有满足硬编码的 `0:1:0`。生产 `/quit` 路径仍明确返回 `tea.Quit`，终端输出
+也显示完整 `/quit` 和退出绘制。独立 tmux socket 探针确认 exit status 是与 `pane_dead` 分离的元数据；
+原测试把“pane 已退出”和“helper 返回 0”错误地绑定成一个 tmux 字符串条件。
+
+修复只修改 `internal/cli/console/smoke_test.go`，不改 Console 生产逻辑。helper 现在在 `Execute` 返回后、
+`os.Exit` 前把退出码写入私有临时文件；测试先用 `pane_dead=1` 判断 pane 生命周期结束，再读取该文件并
+要求内容为 `0`。`pane_dead_status` 和 `pane_dead_signal` 仅保留为诊断字段。修复后的无缓存验证均通过：
+
+```bash
+go -C /home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree test ./internal/cli/console \
+  -run '^TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes$' -count=1
+go -C /home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree test ./internal/cli/console -count=1
+go -C /home/sky/work/touzi/OneAxe/OpenAgentX-adr008-worktree test -race ./internal/cli/console -count=1
+```
+
+结果依次为 `1.175s`、`1.233s` 和 `3.419s`，全部退出 `0`。所有 tmux 操作均使用唯一隔离 socket，
+没有连接或修改默认 tmux server。

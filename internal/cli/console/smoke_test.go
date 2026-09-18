@@ -25,6 +25,7 @@ import (
 )
 
 const consoleTTYHelperEnvironment = "OPENAGENTX_TASK06_TTY_HELPER"
+const consoleTTYExitFileEnvironment = "OPENAGENTX_TASK06_EXIT_FILE"
 const consoleTTYFixtureSentinelSeconds = "86400"
 
 type synchronizedTerminal struct {
@@ -72,6 +73,13 @@ func TestConsoleTTYHelper(t *testing.T) {
 	}
 	code := Execute([]string{"attach", "--agent", "quote", "--socket", os.Getenv("OPENAGENTX_TASK06_SOCKET"),
 		"--credentials", os.Getenv("OPENAGENTX_TASK06_CREDENTIALS")}, DefaultDependencies())
+	exitPath := os.Getenv(consoleTTYExitFileEnvironment)
+	if exitPath == "" {
+		os.Exit(4)
+	}
+	if err := os.WriteFile(exitPath, []byte(fmt.Sprintf("%d\n", code)), 0o600); err != nil {
+		os.Exit(4)
+	}
 	os.Exit(code)
 }
 
@@ -89,6 +97,7 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	socketPath := filepath.Join(directory, "s")
 	credentialsPath := filepath.Join(directory, "credentials.json")
 	readyPath := filepath.Join(directory, "ready")
+	exitPath := filepath.Join(directory, "exit-code")
 	token := base64.RawURLEncoding.EncodeToString(bytes.Repeat([]byte{7}, 32))
 	expires := time.Now().UTC().Add(time.Hour).Truncate(time.Second)
 	store, err := credentialstore.New(credentialsPath, credentialstore.Options{})
@@ -162,7 +171,8 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	}
 	t.Cleanup(func() { _, _ = tmux("kill-server") })
 	windowOutput, err := tmux("new-session", "-d", "-P", "-F", "#{window_id}", "-s", "OAX", "-n", "scratch",
-		"env", consoleTTYHelperEnvironment+"=1", "OPENAGENTX_TASK06_READY_FILE="+readyPath,
+		"env", consoleTTYHelperEnvironment+"=1", consoleTTYExitFileEnvironment+"="+exitPath,
+		"OPENAGENTX_TASK06_READY_FILE="+readyPath,
 		"OPENAGENTX_TASK06_SOCKET="+socketPath, "OPENAGENTX_TASK06_CREDENTIALS="+credentialsPath,
 		"HOME="+directory, executable, "-test.run=^TestConsoleTTYHelper$")
 	if err != nil {
@@ -232,8 +242,16 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	}
 	deadline := time.Now().Add(10 * time.Second)
 	for {
-		panes, paneErr := tmux("list-panes", "-t", windowID, "-F", "#{pane_index}:#{pane_dead}:#{pane_dead_status}")
-		if paneErr == nil && strings.Contains(panes, "0:1:0") {
+		panes, paneErr := tmux("list-panes", "-t", windowID,
+			"-F", "#{pane_index}:#{pane_dead}:#{pane_dead_status}:#{pane_dead_signal}")
+		paneZeroDead := false
+		for _, pane := range strings.Split(strings.TrimSpace(panes), "\n") {
+			if strings.HasPrefix(pane, "0:1:") {
+				paneZeroDead = true
+				break
+			}
+		}
+		if paneErr == nil && paneZeroDead {
 			break
 		}
 		if time.Now().After(deadline) {
@@ -241,6 +259,11 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 			t.Fatalf("Console did not exit pane 0: panes=%q err=%v output=%s", panes, paneErr, terminal.String())
 		}
 		time.Sleep(20 * time.Millisecond)
+	}
+	exitCode, err := os.ReadFile(exitPath)
+	if err != nil || strings.TrimSpace(string(exitCode)) != "0" {
+		stopAttach()
+		t.Fatalf("Console helper exit result=%q err=%v output=%s", exitCode, err, terminal.String())
 	}
 	stopAttach()
 
