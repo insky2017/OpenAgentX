@@ -2,6 +2,7 @@ package workercli
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -102,6 +103,69 @@ func TestAssembleFakeAdapterScriptedResultsAndResumeCapability(t *testing.T) {
 	}
 }
 
+func TestAssembleFakeAdapterEmitsScriptedSafeOutputBeforeCompletion(t *testing.T) {
+	adapter, err := assembleM1Adapter(residentworker.RuntimeBackendConfig{
+		BackendID: "primary", AdapterID: "fake",
+		Options: map[string]any{
+			"result_status_sequence": []any{"waiting_input", "succeeded"},
+			"output_sequence":        []any{"phase one", "phase two"},
+		},
+	}, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var events []openruntime.RuntimeEvent
+	sink := openruntime.EventSinkFunc(func(_ context.Context, event openruntime.RuntimeEvent) error {
+		events = append(events, event)
+		return nil
+	})
+	for index, want := range []string{"phase one", "phase two"} {
+		handle, startErr := adapter.StartTurn(context.Background(), fakeAssemblyTurnRequest(domain.SessionModeNew, nil), sink)
+		if startErr != nil {
+			t.Fatal(startErr)
+		}
+		if _, waitErr := handle.Wait(context.Background()); waitErr != nil {
+			t.Fatal(waitErr)
+		}
+		if len(events) != index+1 || events[index].Type != "turn.output" || events[index].OccurredAt.IsZero() {
+			t.Fatalf("events=%+v", events)
+		}
+		var payload struct {
+			Stage     string `json:"stage"`
+			Status    string `json:"status"`
+			Text      string `json:"text"`
+			HasOutput bool   `json:"has_output"`
+		}
+		if decodeErr := json.Unmarshal(events[index].Payload, &payload); decodeErr != nil ||
+			payload.Stage != "fixture" || payload.Status != "running" || payload.Text != want || !payload.HasOutput {
+			t.Fatalf("payload=%+v err=%v", payload, decodeErr)
+		}
+	}
+}
+
+func TestAssembleFakeAdapterFailsTurnWhenScriptedOutputCannotPersist(t *testing.T) {
+	adapter, err := assembleM1Adapter(residentworker.RuntimeBackendConfig{
+		BackendID: "primary", AdapterID: "fake",
+		Options: map[string]any{
+			"result_status_sequence": []any{"succeeded"},
+			"output_sequence":        []any{"must persist"},
+		},
+	}, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantErr := errors.New("append rejected")
+	handle, err := adapter.StartTurn(context.Background(), fakeAssemblyTurnRequest(domain.SessionModeNew, nil),
+		openruntime.EventSinkFunc(func(context.Context, openruntime.RuntimeEvent) error { return wantErr }))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := handle.Wait(context.Background()); !errors.Is(err, wantErr) {
+		t.Fatalf("Wait error=%v want=%v", err, wantErr)
+	}
+}
+
 func TestAssembleFakeAdapterSupportsAllContractResultStatuses(t *testing.T) {
 	for _, status := range []openruntime.TurnResultStatus{
 		openruntime.TurnResultSucceeded,
@@ -131,6 +195,10 @@ func TestAssembleFakeAdapterSupportsAllContractResultStatuses(t *testing.T) {
 
 func TestAssembleFakeAdapterRejectsInvalidOptions(t *testing.T) {
 	validSequence := []any{"waiting_input", "succeeded"}
+	tooManyOutputs := make([]any, 257)
+	for index := range tooManyOutputs {
+		tooManyOutputs[index] = "safe"
+	}
 	cases := map[string]map[string]any{
 		"unknown option":             {"unexpected": true},
 		"model wrong type":           {"model": 7},
@@ -147,6 +215,17 @@ func TestAssembleFakeAdapterRejectsInvalidOptions(t *testing.T) {
 		"sequence invalid entry":     {"result_status_sequence": []any{"waiting_input", "running"}},
 		"sequence non string entry":  {"result_status_sequence": []any{"waiting_input", 7}},
 		"status sequence conflict":   {"result_status": "succeeded", "result_status_sequence": validSequence},
+		"output wrong type":          {"result_status_sequence": validSequence, "output_sequence": "safe"},
+		"output empty":               {"result_status_sequence": validSequence, "output_sequence": []any{}},
+		"output without statuses":    {"output_sequence": []any{"safe"}},
+		"output length mismatch":     {"result_status_sequence": validSequence, "output_sequence": []any{"safe"}},
+		"output blank entry":         {"result_status_sequence": []any{"succeeded"}, "output_sequence": []any{"  "}},
+		"output non string entry":    {"result_status_sequence": []any{"succeeded"}, "output_sequence": []any{7}},
+		"output oversized entry":     {"result_status_sequence": []any{"succeeded"}, "output_sequence": []any{strings.Repeat("x", 4097)}},
+		"too many outputs":           {"result_status_sequence": make([]any, 257), "output_sequence": tooManyOutputs},
+	}
+	for index := range cases["too many outputs"]["result_status_sequence"].([]any) {
+		cases["too many outputs"]["result_status_sequence"].([]any)[index] = "succeeded"
 	}
 	for name, options := range cases {
 		t.Run(name, func(t *testing.T) {

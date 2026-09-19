@@ -2,8 +2,10 @@ package fake
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sync"
+	"time"
 
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
@@ -17,6 +19,7 @@ type Adapter struct {
 	started   chan *Handle
 	auto      *openruntime.TurnResult
 	scripted  []openruntime.TurnResult
+	outputs   []string
 	nextAuto  int
 }
 
@@ -42,6 +45,10 @@ func NewAutoAdapter(descriptor openruntime.AdapterDescriptor, result openruntime
 // configured results are exhausted fails instead of silently reusing a prior
 // outcome.
 func NewScriptedAutoAdapter(descriptor openruntime.AdapterDescriptor, results []openruntime.TurnResult) (*Adapter, error) {
+	return NewScriptedAutoAdapterWithOutputs(descriptor, results, nil)
+}
+
+func NewScriptedAutoAdapterWithOutputs(descriptor openruntime.AdapterDescriptor, results []openruntime.TurnResult, outputs []string) (*Adapter, error) {
 	if err := descriptor.Validate(); err != nil {
 		return nil, err
 	}
@@ -53,9 +60,13 @@ func NewScriptedAutoAdapter(descriptor openruntime.AdapterDescriptor, results []
 			return nil, err
 		}
 	}
+	if len(outputs) != 0 && len(outputs) != len(results) {
+		return nil, domain.ErrInvalidInput("fake Runtime output script must match result script length")
+	}
 	return &Adapter{
 		descriptor: descriptor,
 		scripted:   append([]openruntime.TurnResult(nil), results...),
+		outputs:    append([]string(nil), outputs...),
 	}, nil
 }
 
@@ -124,7 +135,7 @@ func (a *Adapter) validateNetworkPolicy(policy domain.NetworkPolicy) error {
 }
 
 func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest, sink openruntime.EventSink) (openruntime.TurnHandle, error) {
-	result, scripted, err := a.nextScriptedResult()
+	result, output, scripted, err := a.nextScriptedResult()
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +152,24 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 		}
 	}
 	if scripted {
-		go handle.Complete(result)
+		go func() {
+			if output != "" {
+				payload, marshalErr := json.Marshal(map[string]any{
+					"stage": "fixture", "status": "running", "text": output, "has_output": true,
+				})
+				if marshalErr != nil {
+					handle.Crash(marshalErr)
+					return
+				}
+				if emitErr := handle.Emit(ctx, openruntime.RuntimeEvent{
+					Type: "turn.output", Payload: payload, OccurredAt: time.Now().UTC(),
+				}); emitErr != nil {
+					handle.Crash(emitErr)
+					return
+				}
+			}
+			handle.Complete(result)
+		}()
 	} else if a.auto != nil {
 		result := *a.auto
 		go handle.Complete(result)
@@ -149,18 +177,22 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	return handle, nil
 }
 
-func (a *Adapter) nextScriptedResult() (openruntime.TurnResult, bool, error) {
+func (a *Adapter) nextScriptedResult() (openruntime.TurnResult, string, bool, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	if a.scripted == nil {
-		return openruntime.TurnResult{}, false, nil
+		return openruntime.TurnResult{}, "", false, nil
 	}
 	if a.nextAuto >= len(a.scripted) {
-		return openruntime.TurnResult{}, false, errors.New("fake Runtime result script exhausted")
+		return openruntime.TurnResult{}, "", false, errors.New("fake Runtime result script exhausted")
 	}
 	result := a.scripted[a.nextAuto]
+	output := ""
+	if len(a.outputs) != 0 {
+		output = a.outputs[a.nextAuto]
+	}
 	a.nextAuto++
-	return result, true, nil
+	return result, output, true, nil
 }
 
 func (a *Adapter) NextHandle(ctx context.Context) (*Handle, error) {

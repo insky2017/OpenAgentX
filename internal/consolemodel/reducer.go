@@ -284,13 +284,15 @@ func (r *Reducer) applyTaskEvent(event openapi.JournalEventReadModel) (bool, err
 	secondaryChanged := false
 	switch event.AggregateType {
 	case "mailbox_item":
-		if record.WorkDelivery != nil && record.WorkDelivery.MailboxItemID != event.Mailbox.MailboxItemID {
-			return false, fmt.Errorf("Console Task work delivery identity changed")
-		}
-		if record.WorkDelivery == nil || !reflect.DeepEqual(*record.WorkDelivery, *event.Mailbox) {
-			record.WorkDelivery = cloneMailbox(event.Mailbox)
-			record.encodedSize = 0
-			secondaryChanged = true
+		if event.Mailbox.Kind == domain.MailboxKindTask && event.Mailbox.Lane == domain.MailboxLaneWork {
+			if record.WorkDelivery != nil && record.WorkDelivery.MailboxItemID != event.Mailbox.MailboxItemID {
+				return false, fmt.Errorf("Console Task work delivery identity changed")
+			}
+			if record.WorkDelivery == nil || !reflect.DeepEqual(*record.WorkDelivery, *event.Mailbox) {
+				record.WorkDelivery = cloneMailbox(event.Mailbox)
+				record.encodedSize = 0
+				secondaryChanged = true
+			}
 		}
 	case "message":
 		if record.LatestMessage == nil || event.Message.Sequence > record.LatestMessage.Sequence {

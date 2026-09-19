@@ -115,11 +115,23 @@ openagentx fleet up
 `openagentx console` 在 TTY 中启动全屏主菜单，可登录/替换登录、退出登录、选择 Normal 或 Diagnostic Attach。主菜单可在 tmux 外运行；Attach 按逻辑 `agent_id` 跟随当前 generation，展示安全投影后的状态和实时事件，并通过正式 Control API 执行 dispatch、steer、cancel 与 approval：
 
 ```bash
-./bin/openagentx console attach --socket run/openagentx.sock --agent quote-service
-./bin/openagentx console attach --socket run/openagentx.sock --agent quote-service --diagnostic
+openagentx console attach --agent quote-service
+openagentx console attach --agent quote-service --diagnostic
 ```
 
-全屏 Attach 包含状态栏、可滚动且有界的 Timeline、固定输入区以及 `/status`、`/help` overlay；命令支持 `/dispatch`、`/steer`、`/cancel`、`/approve`、`/reject`、`/diagnostic`、`/foreground` 和 `/quit`。所有写操作只调用 authenticated Control API，断线时禁用且不排队；`/foreground` 只返回规划中提示。Attach 无论是否显式提供 `--agent`，都必须从 `OAX` session 的 pane `0` 执行严格 preflight。Agent 依次来自显式 `--agent`、当前 compatible managed window、经认证控制面 selector，并在任何绑定前由完整分页 Agent list 验证。非 TTY Attach 固定返回 code `2` 且无副作用；自动化读取状态应使用 Observe API，不存在 `--once` 或 JSON fallback。
+全屏 Attach 是以当前关注 Task 为中心的工作台，包含状态栏、可滚动且有界的 Timeline、固定输入区以及
+`/status`、`/tasks`、`/help` overlay。`/dispatch <content>` 成功后自动关注新 Task；随后可直接用
+`/steer <content>` 或 `/cancel`，不需要手工抄写 Task ID/version。`/status` 展示完整 Task、RunAttempt、
+Worker/generation、Task outcome 和 Runtime reply；`PgUp`、`PgDown`、`Home`、`End` 浏览 Timeline。
+`/diagnostic` 与 `/normal` 在同一 pane 内切换授权视图。所有写操作只调用 authenticated Control API，
+断线时禁用且不排队；`/foreground` 只返回规划中提示，`/quit` 只退出 Console，不停止 Worker。
+
+`queued`、`task.created` 或 `dispatch succeeded` 只表示控制面已创建任务。只有后续 claimed/running、
+RunAttempt、safe output 和 terminal outcome/reply 才能证明执行进展；`uncertain` 不会伪装成成功。
+Attach 无论是否显式提供 `--agent`，都必须从 `OAX` session 的 pane `0` 执行严格 preflight。Agent 依次
+来自显式 `--agent`、当前 compatible managed window、经认证控制面 selector，并在任何绑定前由完整分页
+Agent list 验证。非 TTY Attach 固定返回 code `2` 且无副作用；自动化读取状态应使用 Observe API，
+不存在 `--once` 或 JSON fallback。默认 profile 下无需重复指定 DB、socket 或 credential 路径。
 
 普通停止是持久化 graceful drain-and-stop：先为全部在线目标提交停止意图，再持续显示 Agent、当前 RunAttempt、draining、elapsed、最近状态和“不会领取新任务”，直到全部 offline；终端中断只结束观察，不撤销意图。Worker 停止领取新工作，等待活动 RunAttempt 自然完成，idle 后释放 lease 并正常退出。强制停止是独立危险路径，必须显式确认且不显示为 graceful：
 

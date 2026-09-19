@@ -199,8 +199,8 @@ func (b *timelineBuffer) Add(value string) {
 }
 
 func (b *timelineBuffer) AddVariants(normal, diagnostic string) {
-	normal = boundedSafeText(normal, maxTimelineEntryBytes)
-	diagnostic = boundedSafeText(diagnostic, maxTimelineEntryBytes)
+	normal = boundedSafeMultiline(normal, maxTimelineEntryBytes)
+	diagnostic = boundedSafeMultiline(diagnostic, maxTimelineEntryBytes)
 	if normal == "" && diagnostic == "" {
 		return
 	}
@@ -1569,7 +1569,8 @@ func (m tuiModel) overlayView() string {
 			"/steer <content>", "/cancel", "/steer --task <task-id> --version <n> <content>",
 			"/cancel --task <task-id> --version <n>",
 			"/approve <approval-id> <expected-version>", "/reject <approval-id> <expected-version>",
-			"/diagnostic", "/normal", "/help", "/quit", "/foreground"}, "\n")
+			"/diagnostic", "/normal", "/help", "/quit", "/foreground",
+			"PgUp/PgDown/Home/End scroll Timeline"}, "\n")
 	case overlayDiagnostic:
 		if m.displayMode() != consoleapi.ModeDiagnostic {
 			content = "Diagnostic view requires Diagnostic mode"
@@ -1802,6 +1803,7 @@ func taskResultSummaries(task *consolemodel.TaskState) []string {
 
 func timelineItemSummary(item consolemodel.TimelineItem, mode string) string {
 	parts := []string{fmt.Sprintf("#%d %s", item.Sequence, boundedSafeText(item.EventType, 128))}
+	details := make([]string, 0, 4)
 	if item.Output != nil {
 		values := []string{item.Output.Stage, item.Output.Status, item.Output.Text}
 		if mode == consoleapi.ModeDiagnostic {
@@ -1824,7 +1826,7 @@ func timelineItemSummary(item consolemodel.TimelineItem, mode string) string {
 		parts = append(parts, "status "+string(item.TaskStatus))
 	}
 	if item.MailboxItemID != "" {
-		parts = append(parts, "work delivery "+string(item.MailboxState))
+		parts = append(parts, string(item.MailboxKind)+"/"+string(item.MailboxLane)+" delivery "+string(item.MailboxState))
 	}
 	if item.RunID != "" {
 		parts = append(parts, "Run "+shortID(item.RunID), fmt.Sprintf("run version %d", item.RunVersion),
@@ -1840,10 +1842,10 @@ func timelineItemSummary(item consolemodel.TimelineItem, mode string) string {
 		parts = append(parts, "no safe Task outcome recorded")
 	}
 	if item.TaskResult != "" {
-		parts = append(parts, "Task outcome result: "+boundedSafeText(item.TaskResult, maxTimelineEntryBytes/2))
+		details = append(details, "Task outcome result: "+boundedSafeText(item.TaskResult, maxTimelineEntryBytes/2))
 	}
 	if item.TaskError != "" {
-		parts = append(parts, "Task outcome error: "+boundedSafeText(item.TaskError, maxTimelineEntryBytes/2))
+		details = append(details, "Task outcome error: "+boundedSafeText(item.TaskError, maxTimelineEntryBytes/2))
 	}
 	if item.RuntimeReplyState != "" && item.RuntimeReplyState != "not_recorded" {
 		parts = append(parts, "Runtime reply state "+item.RuntimeReplyState)
@@ -1859,12 +1861,12 @@ func timelineItemSummary(item consolemodel.TimelineItem, mode string) string {
 		}
 	}
 	if item.RuntimeReply != "" {
-		parts = append(parts, "Runtime reply: "+boundedSafeText(item.RuntimeReply, maxTimelineEntryBytes/2))
+		details = append(details, "Runtime reply: "+boundedSafeText(item.RuntimeReply, maxTimelineEntryBytes/2))
 	}
 	if item.RuntimeError != "" {
-		parts = append(parts, "Runtime error: "+boundedSafeText(item.RuntimeError, maxTimelineEntryBytes/2))
+		details = append(details, "Runtime error: "+boundedSafeText(item.RuntimeError, maxTimelineEntryBytes/2))
 	}
-	return strings.Join(parts, " | ")
+	return strings.Join(append([]string{strings.Join(parts, " | ")}, details...), "\n")
 }
 
 func staleControlError(err error) bool {

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	workerclient "openagentx/internal/client/worker"
@@ -179,7 +180,7 @@ func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir str
 		for _, status := range fakeConfig.statusSequence {
 			results = append(results, fakeTurnResult(status, fakeConfig))
 		}
-		return fake.NewScriptedAutoAdapter(descriptor, results)
+		return fake.NewScriptedAutoAdapterWithOutputs(descriptor, results, fakeConfig.outputSequence)
 	}
 	return fake.NewAutoAdapter(descriptor, fakeTurnResult(fakeConfig.status, fakeConfig))
 }
@@ -190,11 +191,12 @@ type fakeAdapterConfig struct {
 	providerSessionID string
 	status            openruntime.TurnResultStatus
 	statusSequence    []openruntime.TurnResultStatus
+	outputSequence    []string
 }
 
 var fakeAdapterOptionKeys = map[string]struct{}{
 	"model": {}, "result": {}, "provider_session_id": {},
-	"result_status": {}, "result_status_sequence": {},
+	"result_status": {}, "result_status_sequence": {}, "output_sequence": {},
 }
 
 func fakeConfigFromOptions(options map[string]any) (fakeAdapterConfig, error) {
@@ -242,11 +244,21 @@ func fakeConfigFromOptions(options map[string]any) (fakeAdapterConfig, error) {
 	if hasStatus && hasSequence {
 		return fakeAdapterConfig{}, domain.ErrInvalidInput("fake Runtime options result_status and result_status_sequence are mutually exclusive")
 	}
+	outputSequence, hasOutputSequence, err := fakeOutputSequenceOption(options)
+	if err != nil {
+		return fakeAdapterConfig{}, err
+	}
+	if hasOutputSequence && (!hasSequence || len(outputSequence) != len(sequence)) {
+		return fakeAdapterConfig{}, domain.ErrInvalidInput("fake Runtime output_sequence must match result_status_sequence length")
+	}
 	if hasStatus {
 		config.status = status
 	}
 	if hasSequence {
 		config.statusSequence = sequence
+	}
+	if hasOutputSequence {
+		config.outputSequence = outputSequence
 	}
 	return config, nil
 }
@@ -283,6 +295,26 @@ func fakeResultStatusSequenceOption(options map[string]any) ([]openruntime.TurnR
 		sequence = append(sequence, status)
 	}
 	return sequence, true, nil
+}
+
+func fakeOutputSequenceOption(options map[string]any) ([]string, bool, error) {
+	value, exists := options["output_sequence"]
+	if !exists {
+		return nil, false, nil
+	}
+	entries, ok := value.([]any)
+	if !ok || len(entries) == 0 || len(entries) > 256 {
+		return nil, false, domain.ErrInvalidInput("fake Runtime option output_sequence must be a list of 1 to 256 safe output strings")
+	}
+	outputs := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		output, isString := entry.(string)
+		if !isString || strings.TrimSpace(output) == "" || len(output) > 4096 || !utf8.ValidString(output) {
+			return nil, false, domain.ErrInvalidInput("fake Runtime option output_sequence entries must be non-empty valid UTF-8 strings no longer than 4096 bytes")
+		}
+		outputs = append(outputs, output)
+	}
+	return outputs, true, nil
 }
 
 func fakeTurnResult(status openruntime.TurnResultStatus, config fakeAdapterConfig) openruntime.TurnResult {

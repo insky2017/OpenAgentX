@@ -1322,14 +1322,14 @@ func TestSSEModeAuthorizationAndValidation(t *testing.T) {
 
 func TestSSEModeSeparatesNormalAndDiagnosticSafeProjection(t *testing.T) {
 	state := &testPanelState{journal: []domain.JournalEvent{{
-		Sequence: 1, ID: "event-runtime", AggregateType: "runtime", AggregateID: "run-1", EventType: "runtime.turn.output",
+		Sequence: 1, ID: "event-runtime", AggregateType: "run_attempt", AggregateID: "run-1", EventType: "runtime.turn.output",
 		Payload: json.RawMessage(`{"payload":{"text":"safe progress","diagnostic":"stderr token=private-value"}}`),
-	}}}
+	}}, runs: []domain.RunAttempt{{ID: "run-1", AgentID: "quote"}}}
 	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
 	requestBody := func(mode string) string {
 		t.Helper()
 		ctx, cancel := context.WithCancel(context.Background())
-		request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode="+mode, nil).WithContext(ctx)
+		request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?agent_id=quote&mode="+mode, nil).WithContext(ctx)
 		request.AddCookie(panel.cookie)
 		response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 		panel.handler.ServeHTTP(response, request)
@@ -1339,12 +1339,13 @@ func TestSSEModeSeparatesNormalAndDiagnosticSafeProjection(t *testing.T) {
 		return response.Body.String()
 	}
 	normal := requestBody(consoleapi.ModeNormal)
-	if !strings.Contains(normal, `"text":"safe progress"`) || strings.Contains(normal, "diagnostic") ||
+	if !strings.Contains(normal, `"text":"safe progress"`) || !strings.Contains(normal, `"aggregate_type":"runtime"`) ||
+		strings.Contains(normal, `"run":`) || strings.Contains(normal, "diagnostic") ||
 		strings.Contains(normal, "private-value") || strings.Contains(normal, "stderr") {
 		t.Fatalf("normal stream leaked diagnostic projection: %s", normal)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath, nil).WithContext(ctx)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?agent_id=quote", nil).WithContext(ctx)
 	request.AddCookie(panel.cookie)
 	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 	panel.handler.ServeHTTP(response, request)

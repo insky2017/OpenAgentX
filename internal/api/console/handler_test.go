@@ -424,6 +424,7 @@ func TestConsoleTaskDetailIsOwnedConsistentAndSafe(t *testing.T) {
 		t.Fatalf("detail status=%d body=%s", response.Code, response.Body.String())
 	}
 	if snapshot.Task.TaskID != task.ID || snapshot.Task.Version != 4 || snapshot.WorkDelivery == nil ||
+		snapshot.WorkDelivery.Kind != domain.MailboxKindTask || snapshot.WorkDelivery.Lane != domain.MailboxLaneWork ||
 		snapshot.LatestRun == nil || snapshot.LatestRun.WorkerGeneration == nil || *snapshot.LatestRun.WorkerGeneration != 7 ||
 		snapshot.LatestMessage == nil || snapshot.PendingApproval == nil || snapshot.SnapshotSequence != 42 {
 		t.Fatalf("incomplete Task detail: %+v", snapshot)

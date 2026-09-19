@@ -88,6 +88,8 @@ type TimelineItem struct {
 	TaskError             string
 	TaskErrorTruncated    bool
 	MailboxItemID         string
+	MailboxKind           domain.MailboxKind
+	MailboxLane           domain.MailboxLane
 	MailboxState          domain.MailboxState
 	RunID                 string
 	RunVersion            int64
@@ -396,17 +398,20 @@ func timelineItem(event openapi.JournalEventReadModel) (*TimelineItem, error) {
 	if event.Task != nil {
 		item.TaskID, item.TaskVersion, item.TaskStatus = event.Task.TaskID, event.Task.Version, event.Task.Status
 		item.TaskOutcomeState = event.Task.OutcomeState
-		if event.Task.Result != nil {
-			item.TaskResult = boundedText(*event.Task.Result, maxTimelineTextBytes)
-			item.TaskResultTruncated = event.Task.ResultTruncated || item.TaskResult != *event.Task.Result
-		}
-		if event.Task.Error != nil {
-			item.TaskError = boundedText(*event.Task.Error, maxTimelineTextBytes)
-			item.TaskErrorTruncated = event.Task.ErrorTruncated || item.TaskError != *event.Task.Error
+		if event.Task.OutcomeState != "pending" {
+			if event.Task.Result != nil {
+				item.TaskResult = boundedText(*event.Task.Result, maxTimelineTextBytes)
+				item.TaskResultTruncated = event.Task.ResultTruncated || item.TaskResult != *event.Task.Result
+			}
+			if event.Task.Error != nil {
+				item.TaskError = boundedText(*event.Task.Error, maxTimelineTextBytes)
+				item.TaskErrorTruncated = event.Task.ErrorTruncated || item.TaskError != *event.Task.Error
+			}
 		}
 	}
 	if event.Mailbox != nil {
-		item.MailboxItemID, item.MailboxState = event.Mailbox.MailboxItemID, event.Mailbox.State
+		item.MailboxItemID, item.MailboxKind, item.MailboxLane, item.MailboxState =
+			event.Mailbox.MailboxItemID, event.Mailbox.Kind, event.Mailbox.Lane, event.Mailbox.State
 	}
 	if event.Run != nil {
 		item.TaskID = event.Run.TaskID
@@ -530,8 +535,9 @@ func validateTaskSnapshot(snapshot openapi.ConsoleTaskSnapshot, agentID string) 
 		return err
 	}
 	if snapshot.WorkDelivery != nil {
-		if err := validateMailboxProjection(*snapshot.WorkDelivery); err != nil {
-			return err
+		if err := validateMailboxProjection(*snapshot.WorkDelivery); err != nil ||
+			snapshot.WorkDelivery.Kind != domain.MailboxKindTask || snapshot.WorkDelivery.Lane != domain.MailboxLaneWork {
+			return fmt.Errorf("invalid Console Task work delivery projection")
 		}
 	}
 	if snapshot.LatestRun != nil {
@@ -613,9 +619,13 @@ func validateMailboxProjection(mailbox openapi.ConsoleMailboxReadModel) error {
 	if err := domain.ValidateOpaqueID("mailbox_item_id", mailbox.MailboxItemID); err != nil {
 		return err
 	}
-	if !mailbox.State.Valid() || mailbox.Attempts < 0 || mailbox.CreatedAt.IsZero() ||
+	if !mailbox.Kind.Valid() || !mailbox.Lane.Valid() || !mailbox.State.Valid() || mailbox.Attempts < 0 || mailbox.CreatedAt.IsZero() ||
 		mailbox.AcceptedAt != nil && mailbox.AcceptedAt.IsZero() || mailbox.LeaseUntil != nil && mailbox.LeaseUntil.IsZero() {
 		return fmt.Errorf("invalid Console Mailbox projection")
+	}
+	if mailbox.Kind == domain.MailboxKindTask && mailbox.Lane != domain.MailboxLaneWork ||
+		mailbox.Kind == domain.MailboxKindCancel && mailbox.Lane != domain.MailboxLaneControl {
+		return fmt.Errorf("invalid Console Mailbox kind or lane")
 	}
 	if mailbox.WorkerInstanceID == "" && mailbox.LeaseUntil != nil || mailbox.WorkerInstanceID != "" && domain.ValidateOpaqueID("worker_instance_id", mailbox.WorkerInstanceID) != nil {
 		return fmt.Errorf("invalid Console Mailbox Worker identity")

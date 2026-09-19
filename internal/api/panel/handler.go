@@ -503,6 +503,12 @@ func projectEvent(event domain.JournalEvent) (openapi.JournalEventReadModel, err
 		return openapi.JournalEventReadModel{}, err
 	}
 	model.Output = output
+	// Runtime output is persisted under its RunAttempt transaction aggregate.
+	// The Console transport exposes it as a runtime event so a frame never
+	// combines mutually exclusive Run and safe-output projections.
+	if strings.HasPrefix(event.EventType, "runtime.") {
+		model.AggregateType = "runtime"
+	}
 	return model, nil
 }
 
@@ -1174,39 +1180,39 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 			if mode == consoleapi.ModeNormal {
 				stripDiagnostic(&model)
 			}
-			if ev.AggregateType == "worker_instance" {
+			if model.AggregateType == "worker_instance" {
 				worker, projectionErr := h.workerEventSnapshot(streamContext, ev.AggregateID)
 				if projectionErr != nil {
 					return
 				}
 				model.Worker = worker
-			} else if ev.AggregateType == "run_attempt" {
+			} else if model.AggregateType == "run_attempt" {
 				run, projectionErr := h.runEventSnapshot(streamContext, ev.AggregateID)
 				if projectionErr != nil {
 					return
 				}
 				model.Run = run
-			} else if ev.AggregateType == "task" {
+			} else if model.AggregateType == "task" {
 				task, projectionErr := h.taskEventSnapshot(streamContext, ev.AggregateID)
 				if projectionErr != nil {
 					return
 				}
 				model.Task = task
-			} else if ev.AggregateType == "mailbox_item" {
+			} else if model.AggregateType == "mailbox_item" {
 				task, mailbox, projectionErr := h.mailboxEventSnapshot(streamContext, ev.AggregateID)
 				if projectionErr != nil {
 					return
 				}
 				model.Task = task
 				model.Mailbox = mailbox
-			} else if ev.AggregateType == "message" {
+			} else if model.AggregateType == "message" {
 				task, message, projectionErr := h.messageEventSnapshot(streamContext, ev.AggregateID)
 				if projectionErr != nil {
 					return
 				}
 				model.Task = task
 				model.Message = message
-			} else if ev.AggregateType == "approval_request" {
+			} else if model.AggregateType == "approval_request" {
 				task, approval, projectionErr := h.approvalEventSnapshot(streamContext, ev.AggregateID)
 				if projectionErr != nil {
 					return

@@ -55,7 +55,7 @@ push/merge/安装来“修正”差异。
 | 04 | Task-centric Console reducer | completed | `874a0e1` | GO |
 | 05 | Pane 0 任务 TUI 与控制易用性 | completed | `f1bf09a` | GO |
 | 06 | 同 pane Diagnostic 模式 | completed | `de7eb32` | GO |
-| 07 | 隔离用户闭环与操作文档 | pending | - | WAIT |
+| 07 | 隔离用户闭环与操作文档 | active | - | WAIT |
 | 08 | 集成审查与候选门禁 | pending | - | WAIT |
 
 ## 4. 冻结范围摘要
@@ -528,6 +528,81 @@ push/merge/安装来“修正”差异。
   Diagnostic 泄漏、权限 fallback 或 ADR-006/007 语义变化。
 - 主计划和 Task 06 front matter 在本 docs-only gate record 同步为 `completed`；Task 07 保持
   `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
+
+### Task 07：隔离用户闭环与操作文档
+
+- 开始时间：`2026-09-20`；baseline：`4c7fa48`；branch：`codex/adr009-task-console`；worktree：
+  `/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`。
+- 本轮用户结果：以默认 profile 从 PTY 初始化/login/Fleet/OAX Attach 到 dispatch、过程输出、focused steer、
+  最终 reply、Diagnostic 往返和 `/quit`；Console 退出后同一 resident Worker 继续领取并完成第二个 Task。
+- 状态/CAS/幂等：重复 init/up/workspace 不破坏；focused steer 只使用 reducer 最新完整 Task ID/version 且正式
+  API 只调用一次；Task/Run/cursor、Worker instance/generation 和 terminal result 由正式 API/持久化状态核对。
+- 失败/竞态：复用已有无 credential、scope、socket replacement、offline、CAS stale、Diagnostic forbidden、
+  无增量/无结果测试；新增 Console 退出与第二 Task 领取竞态，失败不得把 dispatch accepted 写成执行成功。
+- 资源/平台：测试仅用临时 HOME/DB/UDS/credential、fake user-systemd、唯一 `tmux -L`、长寿命 pane sentinel
+  和精确 PID cleanup；密码只走 PTY stdin，token 不进入 argv/log，文件权限核对 0700/0600。
+- 证据格式：真实进程 PID、Worker identity/generation、Task/Run/version/cursor、可见安全过程与 final reply、
+  pane 0 exit status 和 pane 1/2 保留；静态文档和 fixture 单测不冒充该闭环。
+- 范围边界：不操作真实 profile/default tmux/user-systemd/installed binary，不修改 Fleet lifecycle、ADR-006/007
+  或真实 Runtime 语义。主计划和 Task 07 front matter保持 `pending`，本 log 为 `active/WAIT`。
+
+#### 主要实现批次
+
+- fake Runtime 的隔离 fixture 新增与 `result_status_sequence` 等长的 `output_sequence`；每个 Turn 先通过正式
+  `EventSink` 持久化安全 `turn.output`，再完成 Turn，EventSink 失败时 fail closed。配置限制为 1-256 项、
+  每项非空合法 UTF-8 且不超过 4096 bytes。
+- Panel SSE 保留原始 Run aggregate 做 Agent ownership 查询，但把 `runtime.*` 安全 transport 归一为
+  `aggregate_type=runtime`，避免同一 frame 同时携带互斥的 Run 与 output projection；Normal 继续剥离
+  Diagnostic。
+- Mailbox 安全 DTO 增加 `kind/lane`。reducer 仅允许 `task/work` 更新 Task 的唯一 WorkDelivery；
+  `message/control` 等合法控制 Mailbox 只推进 cursor 和 Timeline，不覆盖任务领取状态。
+- Task outcome 与 Runtime reply 在 Timeline 中独立成行；pending Task 的暂存 result 不标为终态 outcome；
+  Timeline buffer 复用有界多行 sanitizer，保留结构化换行但剥离控制字符并维持总字节上限。
+- 新增默认 profile 隔离用户闭环：临时 HOME/DB/UDS/credential、正式 PTY login、fake user-systemd、唯一
+  `tmux -L`、真实 daemon/Worker 进程、正式 Network binding、Console Attach/dispatch/focused steer、
+  Normal/Diagnostic 往返和 `/quit`。正式 `Client.Follow` 独立确认三段持久化 safe output；退出后同一
+  Worker PID/instance/generation 继续完成第二个 Task。
+- README、安装指南和 `/help` 串联默认路径、`console attach`、focused control、Task/Run 状态、
+  Task outcome/Runtime reply、Timeline 滚动、Diagnostic/Normal 与 `/quit` 常用流程。
+
+#### 失败与纠正
+
+| 现象 | 根因与裁决 | 纠正及证据 |
+|---|---|---|
+| 首轮 PTY ready 文案匹配失败 | 实际状态使用小写 `connection connected`；测试断言与产品文案不一致 | 对齐真实状态文案；未改产品连接语义 |
+| 两次 dispatch 长期停在 queued | fresh DB 没有 Network binding，Worker 按正式策略拒绝执行；同因 fixture 连续两次后停止旧路径 | 通过 Web cookie/CSRF 正式 test/publish API 建立 `inherit` binding，并核对应用到当前 Worker/generation；未直接修改 SQLite |
+| `runtime.turn.output` 被 reducer 拒绝 | 持久化事件使用 Run aggregate，SSE 又附加 Run projection，形成 Run+Output 互斥 frame | transport 归一为 runtime，ownership 仍按原 Run 查询；Panel/Console 回归测试通过 |
+| 毫秒级 fake output 未稳定出现在 PTY recorder | tmux/ANSI 重绘不是可靠的每帧历史证据 | 按止损规则改用正式 Follow 确认精确 output/cursor/Normal 脱敏，纯 TUI model 证明同一 DTO 进入可滚动 Timeline；不降低真实 PTY 主流程 |
+| focused steer 后 Event 被拒绝 | 新 `message/control` Mailbox 被误当作唯一 `task/work` delivery | 安全投影增加 kind/lane 并 fencing WorkDelivery；控制 Mailbox 回归测试证明推进 cursor 但不覆盖领取状态 |
+| 非终态暂存 result 显示为 Task outcome；最终详情在窄 pane 横向截断 | Timeline 未按 outcome state 隔离结果，且多行 summary 又被单行 sanitizer 压平 | pending 不复制 result/error；终态 outcome/reply 独立行并穿过有界多行 buffer；真实 pane 0 已显示两条完整 final reply |
+| standalone E2E 两次在 Diagnostic 返回后误报未切回 Normal | fixture 从完整 recorder 历史匹配旧 `> /help`，随后又等待可能滚出 viewport 的提示；实时 header 已显示 `mode normal` | 从 Esc/命令前 offset 等待新输入帧，并以顶部 `mode normal | connection connected` 为权威证据；正式五包与三轮稳定性批次通过 |
+
+#### 独立验证批次
+
+- `go test ./internal/consolemodel ./internal/runtime/fake ./internal/cli/worker ./internal/api/console ./internal/api/panel -count=1`
+  退出码 0；最慢 package 16.859s。
+- `go test ./internal/cli/console ./internal/client/console ./internal/fleet ./internal/cli/fleet ./internal/worker -count=1`
+  退出码 0；Console 29.565s，Fleet 10.665s；包含完整默认路径用户闭环。
+- `go test -race ./internal/cli/console ./internal/client/console ./internal/fleet ./internal/worker -count=1`
+  退出码 0；Console 31.417s，Fleet 11.951s。
+- `go test ./internal/cli/console ./internal/fleet -run 'TTY|Tmux|Workspace|Workflow|Task' -count=3`
+  退出码 0；Console 83.693s，Fleet 31.770s。
+- `go test ./... -count=1` 退出码 0；全仓 package 通过，最慢 Console 28.570s。
+- `go vet ./...`、`bash -n scripts/*.sh deploy/scripts/*.sh deploy/systemd/*.sh`、
+  `bash scripts/check-legacy-control-paths.sh --release` 和
+  `go build -o /tmp/openagentx-adr009-task07 ./cmd/openagentx` 均退出码 0；构建 SHA-256
+  `22664527a459dfd150a37227d7882964b9a4ae8ad74e9f3fe56a7ebbe0c482c9`。
+- built binary 的 Console/Fleet help smoke、README/安装指南相对链接、Markdown bash fenced blocks、diff
+  secret-pattern scan 和 `git diff --check` 均退出码 0。
+- Web 源码未修改；Task 07 未重复运行无影响面的 Web build/test。ADR-009、主计划和 Task 07 front matter
+  未修改；Task 08 未开始。
+
+#### 外部状态与 open issues
+
+- 所有 DB/socket/credential/HOME、daemon/Worker、HTTP listener 和 tmux server 均为测试临时资源并由 fixture
+  cleanup；未操作真实 `~/.openagentx`、default tmux、user-systemd、installed binary、真实 DB/socket、
+  `steadyflow` 父仓，未 push/merge/install/restart。
+- 当前无 Task 07 P0/P1 open issue。阶段状态保持 `active/WAIT`，等待实现提交后的监督 gate。
 
 ## 7. 后续记录模板
 

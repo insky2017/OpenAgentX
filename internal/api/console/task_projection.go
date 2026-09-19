@@ -64,7 +64,7 @@ func ProjectConsoleMailbox(item domain.MailboxItem) (openapi.ConsoleMailboxReadM
 		return openapi.ConsoleMailboxReadModel{}, fmt.Errorf("invalid Mailbox Worker identity")
 	}
 	return openapi.ConsoleMailboxReadModel{
-		MailboxItemID: item.ID, State: item.State, Attempts: item.Attempts,
+		MailboxItemID: item.ID, Kind: item.Kind, Lane: item.Lane, State: item.State, Attempts: item.Attempts,
 		WorkerInstanceID: item.WorkerInstanceID, LeaseUntil: cloneTime(item.LeaseUntil),
 		CreatedAt: item.CreatedAt, AcceptedAt: cloneTime(item.AcceptedAt),
 	}, nil

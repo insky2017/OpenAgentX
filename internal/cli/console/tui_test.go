@@ -549,6 +549,7 @@ func TestTaskOverlayFocusAndTerminalResultsUseAuthoritativeProjection(t *testing
 	}
 	running := taskSnapshot("task-running-full-id", 4, domain.TaskStatusRunning)
 	running.WorkDelivery = &openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-running",
+		Kind: domain.MailboxKindTask, Lane: domain.MailboxLaneWork,
 		State: domain.MailboxStateAccepted, CreatedAt: fixedNow()}
 	m, _ = updateModel(t, m, taskSnapshotResultMsg{TaskID: running.Task.TaskID,
 		Snapshot: running, Purpose: taskSnapshotFocus})
@@ -662,7 +663,8 @@ func TestLiveTaskLifecycleShowsDeliveryRunOutcomeAndRuntimeReply(t *testing.T) {
 	m.input.SetValue("draft remains")
 	m.input.SetCursor(5)
 	claimedTask := taskProjection("task-live", 2, domain.TaskStatusDispatching)
-	mailbox := &openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-live", State: domain.MailboxStateClaimed,
+	mailbox := &openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-live", Kind: domain.MailboxKindTask,
+		Lane: domain.MailboxLaneWork, State: domain.MailboxStateClaimed,
 		WorkerInstanceID: "worker-current", CreatedAt: fixedNow(), LeaseUntil: timePointer(fixedNow().Add(time.Minute))}
 	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1205,
 		ID: "event-mailbox-live", AggregateType: "mailbox_item", AggregateID: mailbox.MailboxItemID,
@@ -703,6 +705,35 @@ func TestLiveTaskLifecycleShowsDeliveryRunOutcomeAndRuntimeReply(t *testing.T) {
 		if !strings.Contains(m.timeline.String(), expected) {
 			t.Fatalf("Timeline missing %q: %s", expected, m.timeline.String())
 		}
+	}
+}
+
+func TestTerminalTimelineSummaryKeepsOutcomeAndRuntimeReplyOnDedicatedLines(t *testing.T) {
+	summary := timelineItemSummary(consolemodel.TimelineItem{
+		Sequence:          1208,
+		EventType:         "task.succeeded",
+		TaskID:            "task-live",
+		TaskVersion:       3,
+		TaskStatus:        domain.TaskStatusSucceeded,
+		RunID:             "run-live",
+		RunVersion:        2,
+		RunStatus:         domain.RunAttemptSucceeded,
+		TaskOutcomeState:  "available",
+		TaskResult:        "live Task result",
+		RuntimeReplyState: "available",
+		RuntimeReply:      "live safe reply",
+	}, consoleapi.ModeNormal)
+	lines := strings.Split(summary, "\n")
+	if len(lines) != 3 || strings.Contains(lines[0], "live Task result") ||
+		strings.Contains(lines[0], "live safe reply") ||
+		lines[1] != "Task outcome result: live Task result" ||
+		lines[2] != "Runtime reply: live safe reply" {
+		t.Fatalf("terminal details were not rendered on dedicated lines: %#v", lines)
+	}
+	var timeline timelineBuffer
+	timeline.Add(summary)
+	if buffered := timeline.String(); buffered != summary {
+		t.Fatalf("Timeline buffer collapsed terminal detail lines: %q", buffered)
 	}
 }
 
@@ -1143,6 +1174,19 @@ func TestTimelineScrollAndHeartbeatBurstPreserveDraft(t *testing.T) {
 	}
 	if m.timeline.Len() != beforeTimeline || m.reducer.Cursor() != 1225 || m.input.Value() != "unfinished input" || m.input.LineInfo().CharOffset != 4 {
 		t.Fatalf("heartbeat burst timeline=%d/%d cursor=%d input=%q", m.timeline.Len(), beforeTimeline, m.reducer.Cursor(), m.input.Value())
+	}
+}
+
+func TestHelpOverlayIncludesFocusedControlsAndTimelineNavigation(t *testing.T) {
+	m := attachedModel(t, &fakeTUIActions{})
+	m.width, m.height = 100, 40
+	m.overlay = overlayHelp
+	view := ansi.Strip(m.overlayView())
+	for _, expected := range []string{"/steer <content>", "/cancel", "/diagnostic", "/normal",
+		"PgUp/PgDown/Home/End scroll Timeline"} {
+		if !strings.Contains(view, expected) {
+			t.Fatalf("help overlay missing %q: %s", expected, view)
+		}
 	}
 }
 

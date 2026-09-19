@@ -462,16 +462,52 @@ Attach 是全屏 TUI，包含实时状态、bounded Timeline、固定输入区�
 
 ```text
 /status
+/tasks
 /dispatch <content>
-/steer <task-id> <expected-version> <content>
-/cancel <task-id> <expected-version>
+/steer <content>
+/cancel
+/steer --task <task-id> --version <n> <content>
+/cancel --task <task-id> --version <n>
 /approve <approval-id> <expected-version>
 /reject <approval-id> <expected-version>
 /diagnostic
+/normal
 /help
 /quit
 /foreground
 ```
+
+一次日常任务可以直接按以下顺序操作：
+
+```text
+/dispatch 仅回复我，当前的时间。
+# 等待 queued -> claimed -> running -> terminal，并查看 safe output / final reply
+/steer 只保留北京时间，并说明时区。
+/status
+/diagnostic
+/normal
+/quit
+```
+
+`/dispatch` 成功后会自动把正式响应中的完整 Task ID/version 设为 focused Task，所以 focused
+`/steer <content>` 和 `/cancel` 不要求手工抄写短 ID。需要控制另一个明确 Task 时，才使用带
+`--task`、`--version` 的显式形式；CAS stale 会刷新权威状态并要求用户重新确认，不会静默重放写操作。
+`/tasks` 用于选择 active/recent Task，`/status` 显示完整 Task ID/version、Mailbox、RunAttempt、当前
+Worker/generation、Task outcome 与 Runtime reply。
+
+Timeline 只显示已经持久化的安全事实。`dispatch succeeded`、`status queued` 和 `task.created` 只证明任务
+创建成功，不代表 Worker 已领取或已经返回结果。后续应观察 `claimed`、`running`、`waiting_input` /
+`waiting_approval`、safe output 和 terminal 状态。在紧凑 pane 中使用 `PgUp`、`PgDown`、`Home`、`End`
+浏览有界历史；heartbeat 默认只更新状态栏，不刷满 Timeline。
+
+终态信息分为两层：`Task outcome` 是控制面持久化终态，`Runtime reply` 是 Runtime 返回的安全投影。
+两者都出现才分别按其含义阅读；`uncertain` 即使带自然语言回复也不是业务成功。终态没有安全可展示结果时，
+Console 会明确说明，而不是停在看似仍运行的空白界面。
+
+`/diagnostic` 会在当前 pane 内使用同一身份、cursor 和 reducer 切换到授权 Diagnostic Follow；它要求
+owner role 与 `console.diagnostic` scope，只增加限量、脱敏的诊断字段。`/normal` 切回普通视图。无需退出后
+重新执行 `console attach --diagnostic`，但后者仍可用于从一开始就进入 Diagnostic 模式。Diagnostic 不是
+Runtime TTY，也不显示原始 stderr、隐藏推理、Secret 或原始 Journal payload。
 
 所有写操作只调用 authenticated official API；断线或 CLI session 过期时禁用且不本地排队。
 `/foreground` 只显示“Foreground Takeover（规划中，暂不可用）”。`/quit` 仅退出 Console，不会

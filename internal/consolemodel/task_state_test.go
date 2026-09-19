@@ -165,8 +165,8 @@ func TestTaskReducerAppliesMailboxMessageApprovalAndRuntimeReply(t *testing.T) {
 		t.Fatal(err)
 	}
 	queued := taskModel("task-main", 1, domain.TaskStatusQueued)
-	mailbox := openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-1", State: domain.MailboxStatePending,
-		CreatedAt: taskTestTime}
+	mailbox := openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-1", Kind: domain.MailboxKindTask,
+		Lane: domain.MailboxLaneWork, State: domain.MailboxStatePending, CreatedAt: taskTestTime}
 	event := openapi.JournalEventReadModel{Sequence: 31, ID: "event-mailbox", AggregateType: "mailbox_item",
 		AggregateID: mailbox.MailboxItemID, EventType: "mailbox.pending", Task: &queued, Mailbox: &mailbox}
 	if _, err := reducer.Apply(event); err != nil {
@@ -216,6 +216,58 @@ func TestTaskReducerAppliesMailboxMessageApprovalAndRuntimeReply(t *testing.T) {
 	if state.ActiveTasks[0].LatestRun == nil || state.ActiveTasks[0].LatestRun.TurnResult == nil ||
 		state.ActiveTasks[0].LatestRun.TurnResult.Body != "safe runtime reply" || state.Console.ActiveRun != nil {
 		t.Fatalf("Runtime reply was not retained separately: %+v", state)
+	}
+}
+
+func TestTaskReducerControlMailboxDoesNotReplaceWorkDelivery(t *testing.T) {
+	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
+		WorkerInstanceID: "worker-48", Generation: 48, WorkerStatus: domain.WorkerStatusOnline,
+		SnapshotSequence: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	queued := taskModel("task-main", 1, domain.TaskStatusQueued)
+	work := openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-work", Kind: domain.MailboxKindTask,
+		Lane: domain.MailboxLaneWork, State: domain.MailboxStatePending, CreatedAt: taskTestTime}
+	if _, err := reducer.Apply(openapi.JournalEventReadModel{Sequence: 11, ID: "event-work",
+		AggregateType: "mailbox_item", AggregateID: work.MailboxItemID, EventType: "mailbox.pending",
+		Task: &queued, Mailbox: &work}); err != nil {
+		t.Fatal(err)
+	}
+	waiting := taskModel("task-main", 2, domain.TaskStatusWaitingInput)
+	control := openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-message", Kind: domain.MailboxKindMessage,
+		Lane: domain.MailboxLaneControl, State: domain.MailboxStatePending, CreatedAt: taskTestTime.Add(time.Second)}
+	result, err := reducer.Apply(openapi.JournalEventReadModel{Sequence: 12, ID: "event-control",
+		AggregateType: "mailbox_item", AggregateID: control.MailboxItemID, EventType: "mailbox.message_pending",
+		Task: &waiting, Mailbox: &control})
+	if err != nil || !result.CursorAdvanced || result.Timeline == nil {
+		t.Fatalf("control Mailbox result=%+v err=%v", result, err)
+	}
+	state := reducer.State()
+	if reducer.Cursor() != 12 || len(state.ActiveTasks) != 1 || state.ActiveTasks[0].WorkDelivery == nil ||
+		state.ActiveTasks[0].WorkDelivery.MailboxItemID != work.MailboxItemID ||
+		state.Timeline[len(state.Timeline)-1].MailboxKind != domain.MailboxKindMessage {
+		t.Fatalf("control Mailbox replaced work delivery: cursor=%d state=%+v", reducer.Cursor(), state)
+	}
+}
+
+func TestTaskReducerPendingOutcomeDoesNotEnterTimeline(t *testing.T) {
+	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
+		WorkerStatus: domain.WorkerStatusOffline, SnapshotSequence: 20})
+	if err != nil {
+		t.Fatal(err)
+	}
+	pending := taskModel("task-pending", 2, domain.TaskStatusWaitingInput)
+	temporary := "temporary runtime result"
+	pending.Result = &temporary
+	result, err := reducer.Apply(taskEventModel(21, pending))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := reducer.State()
+	if result.Timeline == nil || len(state.Timeline) != 1 || state.Timeline[0].TaskOutcomeState != "pending" ||
+		state.Timeline[0].TaskResult != "" || state.Timeline[0].TaskError != "" {
+		t.Fatalf("pending Task was presented as a terminal outcome: result=%+v timeline=%+v", result, state.Timeline)
 	}
 }
 

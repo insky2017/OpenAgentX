@@ -188,6 +188,8 @@ type ConsoleTaskReadModel struct {
 
 type ConsoleMailboxReadModel struct {
 	MailboxItemID    string              `json:"mailbox_item_id"`
+	Kind             domain.MailboxKind  `json:"kind"`
+	Lane             domain.MailboxLane  `json:"lane"`
 	State            domain.MailboxState `json:"state"`
 	Attempts         int                 `json:"attempts"`
 	WorkerInstanceID string              `json:"worker_instance_id,omitempty"`
