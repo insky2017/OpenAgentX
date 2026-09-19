@@ -369,6 +369,36 @@ func TestTaskReducerRejectsStaleStreamAndNormalDiagnosticWithoutAck(t *testing.T
 	}
 }
 
+func TestModeSwitchBeginsAndAbortsFromNormalSafeState(t *testing.T) {
+	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeDiagnostic,
+		WorkerInstanceID: "worker-48", Generation: 48, WorkerStatus: domain.WorkerStatusOnline,
+		Diagnostic:       &consoleapi.DiagnosticView{LastHeartbeatAt: taskTestTime, LeaseUntil: taskTestTime.Add(time.Minute)},
+		SnapshotSequence: 50})
+	if err != nil {
+		t.Fatal(err)
+	}
+	epoch, err := reducer.BeginStream(consoleapi.ModeDiagnostic)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := reducer.State()
+	if state.Console.Mode != consoleapi.ModeNormal || state.Console.Diagnostic != nil ||
+		state.PendingMode != consoleapi.ModeDiagnostic || state.Connection != ConnectionSwitching {
+		t.Fatalf("switch did not enter Normal-safe pending state: %+v", state)
+	}
+	if err := reducer.AbortStream(epoch); err != nil {
+		t.Fatal(err)
+	}
+	state = reducer.State()
+	if state.Console.Mode != consoleapi.ModeNormal || state.Console.Diagnostic != nil ||
+		state.PendingMode != "" || state.Connection != ConnectionDisconnected {
+		t.Fatalf("aborted switch retained privileged state: %+v", state)
+	}
+	if err := reducer.AbortStream(epoch - 1); err == nil {
+		t.Fatal("stale stream abort was accepted")
+	}
+}
+
 func TestTaskReducerRejectedSnapshotIsAtomic(t *testing.T) {
 	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
 		WorkerStatus: domain.WorkerStatusOffline, SnapshotSequence: 70})

@@ -57,11 +57,14 @@ type consoleApplication struct {
 	mu          sync.Mutex
 	nextPrepare uint64
 	prepared    map[uint64]preparedAttach
+	nextFollow  uint64
+	follows     map[uint64]context.CancelFunc
 }
 
 func newConsoleApplication(ctx context.Context, socket string, store CredentialStore, deps Dependencies) *consoleApplication {
 	return &consoleApplication{ctx: ctx, deps: deps, socket: socket, store: store,
-		workspace: fleetmodel.Workspace{Runner: deps.Tmux}, prepared: make(map[uint64]preparedAttach)}
+		workspace: fleetmodel.Workspace{Runner: deps.Tmux}, prepared: make(map[uint64]preparedAttach),
+		follows: make(map[uint64]context.CancelFunc)}
 }
 
 func (a *consoleApplication) session() (sessionStatus, error) {
@@ -277,8 +280,15 @@ func (a *consoleApplication) preparation(id uint64) (preparedAttach, bool) {
 
 func (a *consoleApplication) clearPreparations() {
 	a.mu.Lock()
-	defer a.mu.Unlock()
+	cancels := make([]context.CancelFunc, 0, len(a.follows))
+	for _, cancel := range a.follows {
+		cancels = append(cancels, cancel)
+	}
 	a.prepared = make(map[uint64]preparedAttach)
+	a.mu.Unlock()
+	for _, cancel := range cancels {
+		cancel()
+	}
 }
 
 func (a *consoleApplication) sessionCmd() tea.Cmd {
@@ -318,21 +328,50 @@ func (a *consoleApplication) bindCmd(preparationID uint64, agentID string, confi
 }
 
 func (a *consoleApplication) startFollowCmd(preparationID uint64, agentID string) tea.Cmd {
+	return a.startFollowModeCmd(preparationID, agentID, "")
+}
+
+func (a *consoleApplication) startFollowModeCmd(preparationID uint64, agentID, requestedMode string) tea.Cmd {
 	return func() tea.Msg {
-		prepared, ok := a.preparation(preparationID)
+		a.mu.Lock()
+		prepared, ok := a.prepared[preparationID]
 		if !ok {
+			a.mu.Unlock()
 			return followDoneMsg{Err: fmt.Errorf("Console Attach preparation expired")}
 		}
+		if _, authorized := prepared.agents[agentID]; !authorized {
+			a.mu.Unlock()
+			return followDoneMsg{Err: fmt.Errorf("Console Agent authorization expired")}
+		}
+		mode := requestedMode
+		if mode == "" {
+			mode = prepared.mode
+		}
+		if mode != consoleapi.ModeNormal && mode != consoleapi.ModeDiagnostic {
+			a.mu.Unlock()
+			return followDoneMsg{Mode: mode, Err: fmt.Errorf("unsupported Console Follow mode")}
+		}
+		if len(a.follows) != 0 {
+			a.mu.Unlock()
+			return followDoneMsg{Mode: mode, Err: fmt.Errorf("another Console Follow is still active")}
+		}
+		a.nextFollow++
+		followID := a.nextFollow
+		followContext, cancel := context.WithCancel(a.ctx)
+		a.follows[followID] = cancel
+		a.mu.Unlock()
+
 		updates := make(chan tea.Msg, 64)
 		send := func(msg tea.Msg) error {
 			select {
 			case updates <- msg:
 				return nil
-			case <-a.ctx.Done():
-				return a.ctx.Err()
+			case <-followContext.Done():
+				return followContext.Err()
 			}
 		}
 		go func() {
+			defer close(updates)
 			sendAndWait := func(message func(chan<- error) tea.Msg) error {
 				ack := make(chan error, 1)
 				if err := send(message(ack)); err != nil {
@@ -341,22 +380,45 @@ func (a *consoleApplication) startFollowCmd(preparationID uint64, agentID string
 				select {
 				case err := <-ack:
 					return err
-				case <-a.ctx.Done():
-					return a.ctx.Err()
+				case <-followContext.Done():
+					return followContext.Err()
 				}
 			}
-			err := prepared.client.Follow(a.ctx, agentID, prepared.mode,
+			err := prepared.client.Follow(followContext, agentID, mode,
 				func(snapshot consoleapi.AttachResponse) error {
-					return sendAndWait(func(ack chan<- error) tea.Msg { return followSnapshotMsg{Snapshot: snapshot, Ack: ack} })
+					return sendAndWait(func(ack chan<- error) tea.Msg {
+						return followSnapshotMsg{FollowID: followID, Snapshot: snapshot, Ack: ack}
+					})
 				},
 				func(event openapi.JournalEventReadModel) error {
-					return sendAndWait(func(ack chan<- error) tea.Msg { return followEventMsg{Event: event, Ack: ack} })
+					return sendAndWait(func(ack chan<- error) tea.Msg {
+						return followEventMsg{FollowID: followID, Event: event, Ack: ack}
+					})
 				},
-				func(state consoleclient.FollowState) error { return send(followConnectionMsg{State: state}) })
-			_ = send(followDoneMsg{Err: err})
-			close(updates)
+				func(state consoleclient.FollowState) error {
+					return send(followConnectionMsg{FollowID: followID, State: state})
+				})
+			a.mu.Lock()
+			delete(a.follows, followID)
+			a.mu.Unlock()
+			select {
+			case updates <- followDoneMsg{FollowID: followID, Mode: mode, Err: err}:
+			case <-a.ctx.Done():
+			}
 		}()
-		return followStartedMsg{Updates: updates}
+		return followStartedMsg{FollowID: followID, Mode: mode, Updates: updates}
+	}
+}
+
+func (a *consoleApplication) cancelFollowCmd(followID uint64) tea.Cmd {
+	return func() tea.Msg {
+		a.mu.Lock()
+		cancel, ok := a.follows[followID]
+		a.mu.Unlock()
+		if ok {
+			cancel()
+		}
+		return followCancelResultMsg{FollowID: followID, Found: ok}
 	}
 }
 
@@ -492,6 +554,8 @@ type tuiActions interface {
 	prepareAttachCmd(string, string) tea.Cmd
 	bindCmd(uint64, string, bool) tea.Cmd
 	startFollowCmd(uint64, string) tea.Cmd
+	startFollowModeCmd(uint64, string, string) tea.Cmd
+	cancelFollowCmd(uint64) tea.Cmd
 	taskOptionsCmd(uint64, string) tea.Cmd
 	taskSnapshotCmd(uint64, string, string, taskSnapshotPurpose) tea.Cmd
 	controlCmd(uint64, controlRequest) tea.Cmd

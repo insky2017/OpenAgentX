@@ -400,7 +400,8 @@ func TestFollowWaitsForReducerAckBeforeAdvancingClientCursor(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	application.ctx = ctx
-	application.prepared[17] = preparedAttach{client: client, mode: consoleapi.ModeNormal}
+	application.prepared[17] = preparedAttach{client: client, mode: consoleapi.ModeNormal,
+		agents: map[string]domain.ConsoleAgentOption{"quote": {AgentID: "quote"}}}
 	client.followFunc = func(_ context.Context, agentID, mode string,
 		onAttach func(consoleapi.AttachResponse) error, onEvent func(openapi.JournalEventReadModel) error,
 		onState func(consoleclient.FollowState) error) error {
@@ -438,6 +439,8 @@ func TestFollowWaitsForReducerAckBeforeAdvancingClientCursor(t *testing.T) {
 	m.selectedAgent = "quote"
 	m.session = sessionStatus{Authenticated: true, ExpiresAt: fixedNow().Add(time.Hour)}
 	m.follow = started.Updates
+	m.followID = started.FollowID
+	m.followEpoch = 1
 
 	receive := func() tea.Msg {
 		t.Helper()
@@ -475,6 +478,62 @@ func TestFollowWaitsForReducerAckBeforeAdvancingClientCursor(t *testing.T) {
 		}
 	case <-time.After(time.Second):
 		t.Fatal("Follow goroutine did not terminate after reducer rejection")
+	}
+}
+
+func TestFollowCancellationEndsOldStreamBeforeStartingNewMode(t *testing.T) {
+	application, client, _, _ := applicationFixture(t, true)
+	application.prepared[21] = preparedAttach{client: client, mode: consoleapi.ModeNormal,
+		agents: map[string]domain.ConsoleAgentOption{"quote": {AgentID: "quote"}}}
+	startedModes := make(chan string, 2)
+	client.followFunc = func(ctx context.Context, _, mode string, _ func(consoleapi.AttachResponse) error,
+		_ func(openapi.JournalEventReadModel) error, _ func(consoleclient.FollowState) error) error {
+		startedModes <- mode
+		<-ctx.Done()
+		return ctx.Err()
+	}
+
+	first := application.startFollowCmd(21, "quote")().(followStartedMsg)
+	if got := <-startedModes; got != consoleapi.ModeNormal || first.FollowID == 0 {
+		t.Fatalf("first Follow mode=%q id=%d", got, first.FollowID)
+	}
+	canceled := application.cancelFollowCmd(first.FollowID)().(followCancelResultMsg)
+	if !canceled.Found {
+		t.Fatal("active Follow was not found for cancellation")
+	}
+	select {
+	case message := <-first.Updates:
+		done, ok := message.(followDoneMsg)
+		if !ok || done.FollowID != first.FollowID || !errors.Is(done.Err, context.Canceled) {
+			t.Fatalf("old Follow terminal message=%+v", message)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("old Follow did not terminate after cancellation")
+	}
+	select {
+	case _, open := <-first.Updates:
+		if open {
+			t.Fatal("old Follow updates remained open")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("old Follow updates did not close")
+	}
+
+	second := application.startFollowModeCmd(21, "quote", consoleapi.ModeDiagnostic)().(followStartedMsg)
+	if got := <-startedModes; got != consoleapi.ModeDiagnostic || second.FollowID == first.FollowID {
+		t.Fatalf("second Follow mode=%q ids=%d/%d", got, first.FollowID, second.FollowID)
+	}
+	_ = application.cancelFollowCmd(second.FollowID)()
+	select {
+	case <-second.Updates:
+	case <-time.After(time.Second):
+		t.Fatal("second Follow did not terminate")
+	}
+	application.mu.Lock()
+	active := len(application.follows)
+	application.mu.Unlock()
+	if active != 0 {
+		t.Fatalf("Follow registry retained %d active entries", active)
 	}
 }
 

@@ -90,25 +90,37 @@ type bindResultMsg struct {
 }
 
 type followStartedMsg struct {
-	Updates <-chan tea.Msg
+	FollowID uint64
+	Mode     string
+	Updates  <-chan tea.Msg
 }
 
 type followSnapshotMsg struct {
+	FollowID uint64
 	Snapshot consoleapi.AttachResponse
 	Ack      chan<- error
 }
 
 type followEventMsg struct {
-	Event openapi.JournalEventReadModel
-	Ack   chan<- error
+	FollowID uint64
+	Event    openapi.JournalEventReadModel
+	Ack      chan<- error
 }
 
 type followConnectionMsg struct {
-	State consoleclient.FollowState
+	FollowID uint64
+	State    consoleclient.FollowState
 }
 
 type followDoneMsg struct {
-	Err error
+	FollowID uint64
+	Mode     string
+	Err      error
+}
+
+type followCancelResultMsg struct {
+	FollowID uint64
+	Found    bool
 }
 
 type taskOptionsResultMsg struct {
@@ -171,33 +183,69 @@ type controlOutcome struct {
 	Sequence       int64
 }
 
+type timelineEntry struct {
+	normal     string
+	diagnostic string
+}
+
 type timelineBuffer struct {
-	entries []string
-	bytes   int
+	entries         []timelineEntry
+	bytes           int
+	diagnosticBytes int
 }
 
 func (b *timelineBuffer) Add(value string) {
-	value = boundedSafeText(value, maxTimelineEntryBytes)
-	if value == "" {
+	b.AddVariants(value, value)
+}
+
+func (b *timelineBuffer) AddVariants(normal, diagnostic string) {
+	normal = boundedSafeText(normal, maxTimelineEntryBytes)
+	diagnostic = boundedSafeText(diagnostic, maxTimelineEntryBytes)
+	if normal == "" && diagnostic == "" {
 		return
+	}
+	if diagnostic == "" {
+		diagnostic = normal
 	}
 	if len(b.entries) > 0 {
 		b.bytes++
+		b.diagnosticBytes++
 	}
-	b.entries = append(b.entries, value)
-	b.bytes += len(value)
-	for len(b.entries) > maxTimelineEntries || b.bytes > maxTimelineBytes {
-		b.bytes -= len(b.entries[0])
+	b.entries = append(b.entries, timelineEntry{normal: normal, diagnostic: diagnostic})
+	b.bytes += len(normal)
+	b.diagnosticBytes += len(diagnostic)
+	for len(b.entries) > maxTimelineEntries || b.bytes > maxTimelineBytes || b.diagnosticBytes > maxTimelineBytes {
+		b.bytes -= len(b.entries[0].normal)
+		b.diagnosticBytes -= len(b.entries[0].diagnostic)
 		b.entries = b.entries[1:]
 		if len(b.entries) > 0 {
 			b.bytes--
+			b.diagnosticBytes--
 		}
 	}
 }
 
-func (b timelineBuffer) String() string { return strings.Join(b.entries, "\n") }
-func (b timelineBuffer) Len() int       { return len(b.entries) }
-func (b timelineBuffer) Bytes() int     { return b.bytes }
+func (b timelineBuffer) String() string { return b.StringForMode(consoleapi.ModeNormal) }
+func (b timelineBuffer) StringForMode(mode string) string {
+	values := make([]string, len(b.entries))
+	for index, entry := range b.entries {
+		values[index] = entry.normal
+		if mode == consoleapi.ModeDiagnostic {
+			values[index] = entry.diagnostic
+		}
+	}
+	return strings.Join(values, "\n")
+}
+func (b timelineBuffer) Len() int { return len(b.entries) }
+func (b timelineBuffer) Bytes() int {
+	return b.bytes
+}
+func (b timelineBuffer) BytesForMode(mode string) int {
+	if mode == consoleapi.ModeDiagnostic {
+		return b.diagnosticBytes
+	}
+	return b.bytes
+}
 
 type agentItem struct{ option domain.ConsoleAgentOption }
 
@@ -248,15 +296,20 @@ type tuiModel struct {
 	mode          string
 	confirmReturn screenKind
 
-	reducer      *consolemodel.Reducer
-	connection   consoleclient.ConnectionState
-	input        textarea.Model
-	viewport     viewport.Model
-	timeline     timelineBuffer
-	pending      bool
-	pendingDraft string
-	taskLoading  bool
-	follow       <-chan tea.Msg
+	reducer        *consolemodel.Reducer
+	connection     consoleclient.ConnectionState
+	input          textarea.Model
+	viewport       viewport.Model
+	timeline       timelineBuffer
+	pending        bool
+	pendingDraft   string
+	taskLoading    bool
+	follow         <-chan tea.Msg
+	followID       uint64
+	followEpoch    uint64
+	switching      bool
+	switchTarget   string
+	switchFallback bool
 }
 
 func newTUIModel(actions tuiActions, now func() time.Time, direct *initialAttach) tuiModel {
@@ -301,11 +354,11 @@ func tickCommand(now func() time.Time) tea.Cmd {
 	return tea.Tick(time.Second, func(time.Time) tea.Msg { return tickMsg{Now: now()} })
 }
 
-func waitFollow(updates <-chan tea.Msg) tea.Cmd {
+func waitFollow(followID uint64, updates <-chan tea.Msg) tea.Cmd {
 	return func() tea.Msg {
 		msg, ok := <-updates
 		if !ok {
-			return followDoneMsg{}
+			return followDoneMsg{FollowID: followID}
 		}
 		return msg
 	}
@@ -317,13 +370,22 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		m.resize(msg.Width, msg.Height)
 		return m, nil
 	case tickMsg:
+		commands := []tea.Cmd{tickCommand(m.now)}
 		if m.session.Authenticated && !msg.Now.UTC().Before(m.session.ExpiresAt.UTC()) {
 			socketPath := m.session.SocketPath
 			m.session = sessionStatus{SocketPath: socketPath}
 			m.connection = consoleclient.ConnectionDisconnected
 			if m.reducer != nil {
-				_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+				if m.switching || m.reducer.Snapshot().Mode == consoleapi.ModeDiagnostic {
+					_ = m.reducer.AbortStream(m.reducer.StreamEpoch())
+				} else {
+					_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+				}
 			}
+			m.mode = consoleapi.ModeNormal
+			m.switching = false
+			m.switchTarget = ""
+			m.switchFallback = false
 			m.pending = false
 			if m.input.Value() == "" && m.pendingDraft != "" {
 				m.input.SetValue(m.pendingDraft)
@@ -335,8 +397,11 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 				m.timeline.Add(m.notice)
 				m.syncTimeline(false)
 			}
+			if m.followID != 0 {
+				commands = append(commands, m.actions.cancelFollowCmd(m.followID))
+			}
 		}
-		return m, tickCommand(m.now)
+		return m, tea.Batch(commands...)
 	case sessionResultMsg:
 		m.busy = false
 		m.session = msg.Status
@@ -411,9 +476,25 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		m.syncTimeline(true)
 		return m, m.actions.startFollowCmd(m.preparationID, m.selectedAgent)
 	case followStartedMsg:
+		if m.switching && msg.Mode != m.switchTarget {
+			return m, m.actions.cancelFollowCmd(msg.FollowID)
+		}
 		m.follow = msg.Updates
-		return m, waitFollow(m.follow)
+		m.followID = msg.FollowID
+		m.followEpoch = 1
+		if m.reducer != nil {
+			m.followEpoch = m.reducer.StreamEpoch()
+		}
+		return m, waitFollow(m.followID, m.follow)
+	case followCancelResultMsg:
+		return m, nil
 	case followConnectionMsg:
+		if msg.FollowID != m.followID {
+			return m, nil
+		}
+		if m.reducer != nil && m.followEpoch != m.reducer.StreamEpoch() {
+			return m, waitFollow(m.followID, m.follow)
+		}
 		if m.session.Authenticated {
 			m.connection = msg.State.State
 		} else {
@@ -426,37 +507,64 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 				m.notice = "Connection state rejected: " + safeErrorSummary(err)
 			}
 		}
-		command := waitFollow(m.follow)
+		command := waitFollow(m.followID, m.follow)
 		if msg.State.State == consoleclient.ConnectionRetentionReattach {
 			m.timeline.Add("Event history expired; refreshing the authoritative snapshot")
 			m.syncTimeline(false)
 		}
 		return m, command
 	case followSnapshotMsg:
+		if msg.FollowID != m.followID || m.reducer != nil && m.followEpoch != m.reducer.StreamEpoch() {
+			ackFollow(msg.Ack, context.Canceled)
+			if msg.FollowID == m.followID {
+				return m, waitFollow(m.followID, m.follow)
+			}
+			return m, nil
+		}
 		if !m.session.Authenticated {
 			ackFollow(msg.Ack, errLoginRequired)
-			return m, waitFollow(m.follow)
+			return m, waitFollow(m.followID, m.follow)
 		}
 		var err error
 		if m.reducer == nil {
 			m.reducer, err = consolemodel.New(msg.Snapshot)
+			m.followEpoch = m.reducerEpoch()
 		} else {
-			err = m.reducer.ApplySnapshot(msg.Snapshot)
+			err = m.reducer.ApplySnapshotForStream(m.followEpoch, msg.Snapshot)
 		}
 		if err != nil {
 			ackFollow(msg.Ack, err)
+			if m.switching {
+				return m.failModeSwitch("Mode switch snapshot rejected: "+safeErrorSummary(err), true)
+			}
 			m.connection = consoleclient.ConnectionDisconnected
 			if m.reducer != nil {
 				_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
 			}
 			m.overlay = overlayError
 			m.notice = "Snapshot rejected: " + safeErrorSummary(err)
-			return m, waitFollow(m.follow)
+			return m, waitFollow(m.followID, m.follow)
 		}
 		ackFollow(msg.Ack, nil)
-		m.timeline.Add(fmt.Sprintf("Snapshot applied at cursor %d", m.reducer.Cursor()))
+		m.mode = msg.Snapshot.Mode
+		if m.mode == "" {
+			m.mode = consoleapi.ModeNormal
+		}
+		if m.switching {
+			m.timeline.Add("Console mode switched to " + m.mode)
+			m.switching = false
+			m.switchTarget = ""
+			m.switchFallback = false
+			if m.mode == consoleapi.ModeDiagnostic {
+				m.overlay = overlayDiagnostic
+			} else if m.overlay == overlayDiagnostic {
+				m.overlay = overlayNone
+			}
+		} else {
+			m.timeline.Add(fmt.Sprintf("Snapshot applied at cursor %d", m.reducer.Cursor()))
+		}
 		m.syncTimeline(false)
-		commands := []tea.Cmd{waitFollow(m.follow)}
+		commands := []tea.Cmd{waitFollow(m.followID, m.follow)}
 		state := m.reducer.State()
 		if state.FocusedTask != nil && state.FocusedTask.Detail == nil && !m.taskLoading {
 			m.taskLoading = true
@@ -465,39 +573,70 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, tea.Batch(commands...)
 	case followEventMsg:
+		if msg.FollowID != m.followID || m.reducer != nil && m.followEpoch != m.reducer.StreamEpoch() {
+			ackFollow(msg.Ack, context.Canceled)
+			if msg.FollowID == m.followID {
+				return m, waitFollow(m.followID, m.follow)
+			}
+			return m, nil
+		}
 		if !m.session.Authenticated {
 			ackFollow(msg.Ack, errLoginRequired)
-			return m, waitFollow(m.follow)
+			return m, waitFollow(m.followID, m.follow)
 		}
 		if m.reducer == nil {
 			err := fmt.Errorf("Event arrived before the authoritative snapshot")
 			ackFollow(msg.Ack, err)
 			m.overlay = overlayError
 			m.notice = err.Error()
-			return m, waitFollow(m.follow)
+			return m, waitFollow(m.followID, m.follow)
 		}
-		result, err := m.reducer.Apply(msg.Event)
+		result, err := m.reducer.ApplyForStream(m.followEpoch, msg.Event)
 		if err != nil {
 			ackFollow(msg.Ack, err)
 			m.connection = consoleclient.ConnectionDisconnected
 			_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
 			m.overlay = overlayError
 			m.notice = "Event rejected: " + safeErrorSummary(err)
-			return m, waitFollow(m.follow)
+			return m, waitFollow(m.followID, m.follow)
 		}
 		ackFollow(msg.Ack, nil)
 		if result.Timeline != nil {
 			state := m.reducer.State()
 			if len(state.Timeline) > 0 {
-				m.timeline.Add(timelineItemSummary(state.Timeline[len(state.Timeline)-1], m.mode))
+				item := state.Timeline[len(state.Timeline)-1]
+				m.timeline.AddVariants(timelineItemSummary(item, consoleapi.ModeNormal),
+					timelineItemSummary(item, consoleapi.ModeDiagnostic))
 			}
 			m.syncTimeline(false)
 		}
-		return m, waitFollow(m.follow)
+		return m, waitFollow(m.followID, m.follow)
 	case followDoneMsg:
+		if msg.FollowID == 0 && m.switching {
+			return m.failModeSwitch("Mode switch failed: "+safeErrorSummary(msg.Err), false)
+		}
+		if msg.FollowID != m.followID {
+			return m, nil
+		}
+		completedEpoch := m.followEpoch
+		m.follow = nil
+		m.followID = 0
 		m.connection = consoleclient.ConnectionDisconnected
+		if m.switching && m.reducer != nil && completedEpoch != m.reducer.StreamEpoch() {
+			return m, m.actions.startFollowModeCmd(m.preparationID, m.selectedAgent, m.switchTarget)
+		}
+		if m.switching {
+			return m.failModeSwitch("Mode switch failed: "+safeErrorSummary(msg.Err), false)
+		}
 		if m.reducer != nil {
-			_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+			if m.reducer.Snapshot().Mode == consoleapi.ModeDiagnostic {
+				_ = m.reducer.AbortStream(m.reducer.StreamEpoch())
+				m.mode = consoleapi.ModeNormal
+				m.timeline.Add("Diagnostic Follow stopped; using Normal-safe state")
+				m.syncTimeline(false)
+			} else {
+				_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+			}
 		}
 		if msg.Err != nil && !errors.Is(msg.Err, context.Canceled) {
 			m.timeline.Add("Connection stopped: " + safeErrorSummary(msg.Err))
@@ -859,10 +998,15 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 		m.overlay = overlayHelp
 		return m, nil
 	case errors.Is(err, errDiagnosticCommand):
-		m.input.Reset()
-		m.overlay = overlayDiagnostic
-		return m, nil
+		return m.beginModeSwitch(consoleapi.ModeDiagnostic)
+	case errors.Is(err, errNormalCommand):
+		return m.beginModeSwitch(consoleapi.ModeNormal)
 	case errors.Is(err, errTasksCommand):
+		if m.switching {
+			m.timeline.Add("Task list disabled while Console mode is switching")
+			m.syncTimeline(true)
+			return m, nil
+		}
 		if !m.session.Authenticated {
 			m.timeline.Add("Task list disabled because the CLI session expired; run openagentx console login")
 			m.syncTimeline(true)
@@ -897,6 +1041,11 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 		m.syncTimeline(true)
 		return m, nil
 	}
+	if m.switching {
+		m.timeline.Add("Command disabled while Console mode is switching")
+		m.syncTimeline(true)
+		return m, nil
+	}
 	if m.connection != consoleclient.ConnectionConnected || m.reducer == nil {
 		m.timeline.Add("Command disabled while Console is disconnected")
 		m.syncTimeline(true)
@@ -920,11 +1069,111 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 	return m, m.actions.controlCmd(m.preparationID, command)
 }
 
+func (m tuiModel) beginModeSwitch(target string) (tea.Model, tea.Cmd) {
+	if m.switching {
+		m.timeline.Add("Console mode switch is already in progress")
+		m.syncTimeline(true)
+		return m, nil
+	}
+	if !m.session.Authenticated {
+		m.timeline.Add("Mode switch disabled because the CLI session expired; run openagentx console login")
+		m.syncTimeline(true)
+		return m, nil
+	}
+	if m.connection != consoleclient.ConnectionConnected || m.reducer == nil {
+		m.timeline.Add("Mode switch disabled while Console is disconnected")
+		m.syncTimeline(true)
+		return m, nil
+	}
+	if m.pending {
+		m.timeline.Add("Mode switch disabled while a Console operation is pending")
+		m.syncTimeline(true)
+		return m, nil
+	}
+	current := m.reducer.Snapshot().Mode
+	if current == "" {
+		current = consoleapi.ModeNormal
+	}
+	if current == target {
+		m.input.Reset()
+		if target == consoleapi.ModeDiagnostic {
+			m.overlay = overlayDiagnostic
+		} else {
+			m.timeline.Add("Console is already in Normal mode")
+			m.syncTimeline(true)
+		}
+		return m, nil
+	}
+	if _, err := m.reducer.BeginStream(target); err != nil {
+		m.timeline.Add("Mode switch rejected: " + safeErrorSummary(err))
+		m.syncTimeline(true)
+		return m, nil
+	}
+	m.switching = true
+	m.switchTarget = target
+	m.switchFallback = false
+	m.mode = consoleapi.ModeNormal
+	m.overlay = overlayNone
+	m.input.Reset()
+	m.timeline.Add("Switching Console mode to " + target)
+	m.syncTimeline(false)
+	if m.followID == 0 {
+		return m, m.actions.startFollowModeCmd(m.preparationID, m.selectedAgent, target)
+	}
+	return m, m.actions.cancelFollowCmd(m.followID)
+}
+
+func (m tuiModel) failModeSwitch(message string, followActive bool) (tea.Model, tea.Cmd) {
+	failedTarget := m.switchTarget
+	wasFallback := m.switchFallback
+	if m.reducer != nil {
+		_ = m.reducer.AbortStream(m.reducer.StreamEpoch())
+	}
+	m.mode = consoleapi.ModeNormal
+	m.connection = consoleclient.ConnectionDisconnected
+	m.overlay = overlayNone
+	if strings.TrimSpace(message) == "Mode switch failed:" {
+		message = "Mode switch failed"
+	}
+	m.timeline.Add(message + "; using Normal-safe state")
+	m.syncTimeline(false)
+
+	if failedTarget == consoleapi.ModeDiagnostic && !wasFallback && m.session.Authenticated && m.reducer != nil {
+		if _, err := m.reducer.BeginStream(consoleapi.ModeNormal); err == nil {
+			m.switching = true
+			m.switchTarget = consoleapi.ModeNormal
+			m.switchFallback = true
+			m.timeline.Add("Restoring Normal Console Follow")
+			m.syncTimeline(false)
+			if followActive && m.followID != 0 {
+				return m, m.actions.cancelFollowCmd(m.followID)
+			}
+			return m, m.actions.startFollowModeCmd(m.preparationID, m.selectedAgent, consoleapi.ModeNormal)
+		}
+	}
+
+	m.switching = false
+	m.switchTarget = ""
+	m.switchFallback = false
+	if followActive && m.followID != 0 {
+		return m, tea.Batch(m.actions.cancelFollowCmd(m.followID), waitFollow(m.followID, m.follow))
+	}
+	return m, nil
+}
+
+func (m tuiModel) reducerEpoch() uint64 {
+	if m.reducer == nil {
+		return 1
+	}
+	return m.reducer.StreamEpoch()
+}
+
 var (
 	errQuitCommand       = errors.New("quit")
 	errStatusCommand     = errors.New("status")
 	errHelpCommand       = errors.New("help")
 	errDiagnosticCommand = errors.New("diagnostic")
+	errNormalCommand     = errors.New("normal")
 	errTasksCommand      = errors.New("tasks")
 	errForegroundCommand = errors.New("foreground")
 )
@@ -939,7 +1188,15 @@ func parseControlInput(line, agentID string, state consolemodel.State) (controlR
 	case "/help":
 		return controlRequest{}, errHelpCommand
 	case "/diagnostic":
+		if strings.TrimSpace(remainder) != "" {
+			return controlRequest{}, fmt.Errorf("usage: /diagnostic")
+		}
 		return controlRequest{}, errDiagnosticCommand
+	case "/normal":
+		if strings.TrimSpace(remainder) != "" {
+			return controlRequest{}, fmt.Errorf("usage: /normal")
+		}
+		return controlRequest{}, errNormalCommand
 	case "/tasks":
 		if strings.TrimSpace(remainder) != "" {
 			return controlRequest{}, fmt.Errorf("usage: /tasks")
@@ -1125,10 +1382,20 @@ func (m *tuiModel) resize(width, height int) {
 
 func (m *tuiModel) syncTimeline(forceBottom bool) {
 	wasBottom := m.viewport.AtBottom()
-	m.viewport.SetContent(m.timeline.String())
+	m.viewport.SetContent(m.timeline.StringForMode(m.displayMode()))
 	if forceBottom || wasBottom {
 		m.viewport.GotoBottom()
 	}
+}
+
+func (m tuiModel) displayMode() string {
+	if m.switching {
+		return consoleapi.ModeNormal
+	}
+	if m.mode == consoleapi.ModeDiagnostic {
+		return consoleapi.ModeDiagnostic
+	}
+	return consoleapi.ModeNormal
 }
 
 func (m *tuiModel) setTaskItems(state consolemodel.State) {
@@ -1262,7 +1529,8 @@ func (m tuiModel) attachView() string {
 	header := fmt.Sprintf("Agent %s | mode %s | connection %s | cursor %d",
 		snapshot.AgentID, snapshot.Mode, m.connection, cursor)
 	status := fmt.Sprintf("Task none | Worker %s gen %d %s | timeline %d/%d bytes",
-		shortID(snapshot.WorkerInstanceID), snapshot.Generation, snapshot.WorkerStatus, m.timeline.Len(), m.timeline.Bytes())
+		shortID(snapshot.WorkerInstanceID), snapshot.Generation, snapshot.WorkerStatus, m.timeline.Len(),
+		m.timeline.BytesForMode(m.displayMode()))
 	if state.FocusedTask != nil {
 		status = fmt.Sprintf("Task %s v%d %s (%s) | Worker %s gen %d %s",
 			shortID(state.FocusedTask.TaskID), state.FocusedTask.Version, state.FocusedTask.Status,
@@ -1270,6 +1538,11 @@ func (m tuiModel) attachView() string {
 	}
 	if m.pending {
 		status += " | command pending"
+	}
+	if m.switching {
+		header = fmt.Sprintf("Agent %s | mode switching to %s | connection switching | cursor %d",
+			snapshot.AgentID, m.switchTarget, cursor)
+		status += " | writes disabled"
 	}
 	header = boundedSafeText(header, width)
 	status = boundedSafeText(status, width)
@@ -1296,16 +1569,52 @@ func (m tuiModel) overlayView() string {
 			"/steer <content>", "/cancel", "/steer --task <task-id> --version <n> <content>",
 			"/cancel --task <task-id> --version <n>",
 			"/approve <approval-id> <expected-version>", "/reject <approval-id> <expected-version>",
-			"/diagnostic", "/help", "/quit", "/foreground"}, "\n")
+			"/diagnostic", "/normal", "/help", "/quit", "/foreground"}, "\n")
 	case overlayDiagnostic:
-		if m.mode != consoleapi.ModeDiagnostic {
-			content = "Diagnostic view requires Diagnostic Attach"
+		if m.displayMode() != consoleapi.ModeDiagnostic {
+			content = "Diagnostic view requires Diagnostic mode"
 		} else if m.reducer == nil || m.reducer.Snapshot().Diagnostic == nil {
 			content = "Diagnostic view is not available"
 		} else {
-			d := m.reducer.Snapshot().Diagnostic
-			content = fmt.Sprintf("Diagnostic\nheartbeat %s\nlease %s\ndraining %t",
-				d.LastHeartbeatAt.UTC().Format(time.RFC3339), d.LeaseUntil.UTC().Format(time.RFC3339), d.Draining)
+			state := m.reducer.State()
+			snapshot := state.Console
+			d := snapshot.Diagnostic
+			backends := make([]string, 0, len(snapshot.BackendHealth))
+			for backendID, health := range snapshot.BackendHealth {
+				backends = append(backends, backendID+"="+string(health))
+			}
+			sort.Strings(backends)
+			runStatus := "none"
+			if state.FocusedTask != nil && state.FocusedTask.LatestRun != nil {
+				runStatus = string(state.FocusedTask.LatestRun.Status)
+			} else if snapshot.ActiveRun != nil {
+				runStatus = string(snapshot.ActiveRun.Status)
+			}
+			stage, outputStatus, diagnostic := "none", "none", "none"
+			for index := len(state.Timeline) - 1; index >= 0; index-- {
+				output := state.Timeline[index].Output
+				if output == nil {
+					continue
+				}
+				stage = valueOr(output.Stage, "none")
+				outputStatus = valueOr(output.Status, "none")
+				diagnostic = valueOr(output.Diagnostic, "none")
+				break
+			}
+			content = strings.Join([]string{"Diagnostic", "mode diagnostic",
+				"Worker " + valueOr(snapshot.WorkerInstanceID, "none"),
+				fmt.Sprintf("generation %d", snapshot.Generation),
+				"Worker status " + string(snapshot.WorkerStatus),
+				"Backend health " + valueOr(strings.Join(backends, ", "), "none"),
+				"Run/wait category " + runStatus,
+				"Runtime stage " + stage,
+				"Runtime status " + outputStatus,
+				"heartbeat " + formatTimeOrNone(d.LastHeartbeatAt),
+				"lease " + formatTimeOrNone(d.LeaseUntil),
+				fmt.Sprintf("draining %t", d.Draining),
+				"started " + formatTimeOrNone(d.StartedAt),
+				"updated " + formatTimeOrNone(d.UpdatedAt),
+				"diagnostic " + diagnostic}, "\n")
 		}
 	case overlayTasks:
 		if m.taskLoading {

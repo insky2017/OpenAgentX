@@ -54,7 +54,7 @@ push/merge/安装来“修正”差异。
 | 03 | Runtime 安全输出与终态结果对齐 | completed | `e82ae37` | GO |
 | 04 | Task-centric Console reducer | completed | `874a0e1` | GO |
 | 05 | Pane 0 任务 TUI 与控制易用性 | completed | `f1bf09a` | GO |
-| 06 | 同 pane Diagnostic 模式 | pending | - | WAIT |
+| 06 | 同 pane Diagnostic 模式 | active | - | WAIT |
 | 07 | 隔离用户闭环与操作文档 | pending | - | WAIT |
 | 08 | 集成审查与候选门禁 | pending | - | WAIT |
 
@@ -445,6 +445,76 @@ push/merge/安装来“修正”差异。
   raw output、tmux 控制或 ADR-006/007 语义变化。
 - 主计划和 Task 05 front matter 在本 docs-only gate record 同步为 `completed`；Task 06 保持
   `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
+
+### Task 06：同 pane Diagnostic 模式
+
+- 开始时间：`2026-09-20`；baseline：`016a13f`；branch：`codex/adr009-task-console`；worktree：
+  `/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`。
+- 本轮用户结果：在当前 Attach TUI 内用 `/diagnostic` 和 `/normal` 原地往返，显示授权、脱敏、限量的
+  Diagnostic 状态；不退出/重启 pane，不影响 Worker、focused Task、draft 或 Normal 安全历史。
+- 状态/幂等：每个 Follow 使用独立 context、opaque ID 和 reducer stream epoch；先 cancel 并等待旧流从
+  active registry 移除，再启动目标 mode；同 mode 请求幂等，切换中重复请求明确拒绝。
+- 失败/竞态：403、网络、snapshot/reducer 拒绝、token expiry、旧 event/connection/followDone 迟到均不得
+  污染新状态或推进 cursor；Diagnostic 失败只允许一次 Normal 回退，回退失败保持 Normal/disconnected。
+- 安全/资源：切换开始即清除 Diagnostic 并进入 Normal-safe projection；Timeline 同一安全事件保存 Normal/
+  Diagnostic 两种 bounded render，Normal 永不回显历史 Diagnostic；不新增 API、协议、tmux 或 Worker 控制。
+- 证据格式：application Follow registry/cancel 完成、TUI before/msg/after、fake clock、API role+scope matrix、
+  race，以及唯一 `tmux -L` + PTY 的 Normal->Diagnostic->Normal->quit 小 pane 往返。
+- 范围边界：不修改 Fleet/workspace/user-systemd/default paths，不开始 Task 07 隔离 daemon/Worker E2E 或文档。
+  主计划和 Task 06 front matter 保持 `pending`，本 log 为 `active/WAIT`。
+
+#### Task 06 主要实现批次
+
+- Console application 为每个 Follow 建立独立 context、opaque Follow ID 和 active registry；snapshot/event callback
+  必须等待 TUI reducer ack，旧 Follow 从 registry 删除后才发送 terminal message，新 mode 只在旧流 terminal
+  message 被消费后启动，不存在同时 active 的双 Follow。
+- reducer 增加 stream epoch、`BeginStream`/`AbortStream` 和 `switching` connection；切换开始即删除 Diagnostic、
+  使用 Normal-safe projection。旧 epoch 的 event/snapshot 只以 `context.Canceled` ack，不 Apply、不推进 cursor；
+  focused Task、Task 列表和 bounded Timeline 状态保留。
+- TUI 新增 `/diagnostic` 与 `/normal` 原地切换、typed follow/cancel/connection Msg；Diagnostic 成功后显示结构化
+  Worker/generation/status、Backend health、Run/stage/wait/heartbeat/lease/drain 和脱敏 diagnostic。Normal Timeline
+  永不把 Diagnostic-only 文本作为 fallback，回切或 Diagnostic stream 终止立即清除 privileged state。
+- Diagnostic 403、网络或 snapshot/reducer 拒绝只允许一次 authenticated Normal Follow 回退；回退失败保持
+  Normal/disconnected，不循环。token 到期立即切断 Follow、删除 Diagnostic、禁用写操作，同时保留 draft/cursor。
+- 真实 PTY smoke 使用临时 HOME/DB/UDS/auth、唯一 `tmux -L` 和三个小 pane，完成 Normal Attach、
+  `/diagnostic`、Diagnostic snapshot/SSE/overlay、`/normal`、Normal snapshot/SSE 和 `/quit`，并断言 alt-screen、
+  OAX binding、pane 0 exit status 0 与 pane 1/2 保留。
+- 变更限于 Console application/TUI、共享 reducer 的代码与测试以及本 execution log，共 8 个路径；没有新增
+  API/schema/auth/Runtime/Fleet/workspace/systemd/default-path 行为，也没有修改 ADR-006/007。
+
+#### Task 06 失败与纠正
+
+| 日期 | 失败/发现 | 根因与影响 | 纠正与结果 |
+|---|---|---|---|
+| 2026-09-20 | 首轮四包定向测试中 4 个既有 TUI fixture 把合法 event 当作 stale，往返测试因 Task detail pending 未启动 `/normal` | fixture 未绑定新增 stream epoch；只读详情加载被过度当作 mode-switch 阻断 | fixture 显式使用 reducer epoch；只允许只读详情与切换并行，写操作仍禁用；四包重验通过 |
+| 2026-09-20 | 首次真实 PTY 往返已进入 Diagnostic，但第二次 Normal SSE 未建立 | 单独 `Esc` 后固定等待 150ms，随后 `/normal` 字节被 PTY 解析为同一转义序列；产品状态机未收到命令 | recorder 按新输出 offset 等待 overlay 关闭后的输入提示，再逐键发送；相同 smoke `-count=3` 通过 |
+| 2026-09-20 | 首次 Web observation 从仓库根运行返回 ENOENT | `package.json` 位于 `web/`，测试没有启动；无产品或外部副作用 | 在 `web/` 执行正式脚本，4/4 通过；不再重复错误路径 |
+| 2026-09-20 | 提交前审查发现 Diagnostic snapshot 被 reducer 拒绝后只 cancel、不继续读取旧流 terminal message | ack 已阻止 cursor 前进，但 Normal 回退可能因收不到旧 `followDone` 永远不启动 | cancel 与 `waitFollow` 同批执行，旧流结束后才启动唯一 Normal Follow；拒绝 snapshot 回归和 race 通过 |
+| 2026-09-20 | 提交前审查发现 timeline 容器在 Normal 文本为空时会复制 Diagnostic 文本 | 当前主调用通常有普通摘要，但容器安全不变量允许未来 Diagnostic-only 内容越界 | 删除 Diagnostic->Normal fallback，保留 Normal->Diagnostic 安全 fallback；专门回归证明 Normal 为空且 Diagnostic 可见 |
+
+#### Task 06 独立验证批次
+
+| 命令 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./internal/cli/console ./internal/client/console ./internal/api/console ./internal/api/panel ./internal/consolemodel -count=1` | 0 / max package 21.93s | Follow/TUI/client/API/reducer 五包普通测试通过 |
+| `go test -race ./internal/cli/console ./internal/client/console ./internal/api/console ./internal/api/panel ./internal/consolemodel -count=1` | 0 / max package 42.51s | 五包 race 通过 |
+| `go test ./internal/cli/console -run 'Diagnostic\|Mode\|Follow\|TTY' -count=3` | 0 / 9.04s | mode/Follow/TTY 状态测试三次通过 |
+| `go test ./internal/cli/console -run '^TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes$' -count=3` | 0 / 8.45s | 唯一隔离 tmux/PTY 完整往返三次通过；pane 1/2 保留 |
+| `go test ./... -count=1` | 0 / max package 21.56s | 全仓 Go 无缓存普通测试通过 |
+| `go vet ./internal/cli/console ./internal/client/console ./internal/api/... ./internal/consolemodel` | 0 / <1s | 无 vet 诊断 |
+| `go build -o /tmp/openagentx-adr009-task06 ./cmd/openagentx` | 0 / <5s | 独立临时产物构建成功，未覆盖 installed binary |
+| `npm run test:observation`（`web/`） | 0 / 0.53s | Web observation 4/4 通过 |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 / <1s | 全部 legacy/tmux control 类别 `CLEAN` |
+| `git diff --check` | 0 / <0.1s | 无 whitespace error |
+| `sha256sum docs/decisions/ADR-009-pane-zero-task-console-observability.md AGENTS.md` | 0 / <0.1s | ADR 为 `afb7473...32c69`；执行基线为 `b532645...a95b` |
+
+- 证据覆盖单一 active Follow、cancel/ack/registry 清理、旧 epoch 迟到输入、Diagnostic 403/网络/snapshot
+  拒绝与单次 Normal 回退、token expiry、Normal projection、bounded 双视图 Timeline、输入/滚动/focus 保持及真实
+  三 pane PTY 往返。
+- 外部状态：所有 UDS/DB/HOME/credential/tmux 均为测试临时资源；未操作真实服务、默认 tmux、user-systemd、
+  installed binary、父仓或运行数据库，未 push、merge、部署或重启。
+- Open issues：本阶段无 P0/P1；真实 daemon/Worker 的 dispatch->执行过程->final reply 与 Console 退出后继续领取
+  第二项 Task 归属 Task 07，未用本阶段 smoke 冒充。
 
 ## 7. 后续记录模板
 

@@ -152,7 +152,22 @@ func (r *Reducer) BeginStream(mode string) (uint64, error) {
 	r.streamEpoch++
 	r.pendingMode = mode
 	r.connection = ConnectionSwitching
+	// A stream transition is always rendered from the Normal-safe projection
+	// until the target snapshot has been validated and applied.
+	r.state.Mode = consoleapi.ModeNormal
+	r.state.Diagnostic = nil
 	return r.streamEpoch, nil
+}
+
+func (r *Reducer) AbortStream(epoch uint64) error {
+	if epoch != r.streamEpoch {
+		return fmt.Errorf("stale Console stream epoch")
+	}
+	r.pendingMode = ""
+	r.state.Mode = consoleapi.ModeNormal
+	r.state.Diagnostic = nil
+	r.connection = ConnectionDisconnected
+	return nil
 }
 
 func (r *Reducer) SetConnection(epoch uint64, state ConnectionState) error {

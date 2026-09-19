@@ -23,6 +23,7 @@ import (
 	"openagentx/internal/credentialstore"
 	"openagentx/internal/domain"
 	fleetmodel "openagentx/internal/fleet"
+	openruntime "openagentx/internal/runtime"
 )
 
 const consoleTTYHelperEnvironment = "OPENAGENTX_TASK06_TTY_HELPER"
@@ -49,14 +50,20 @@ func (terminal *synchronizedTerminal) String() string {
 }
 
 func waitForRenderedTerminalText(terminal *synchronizedTerminal, expected string, timeout time.Duration) bool {
+	return waitForRenderedTerminalTextAfter(terminal, 0, expected, timeout)
+}
+
+func waitForRenderedTerminalTextAfter(terminal *synchronizedTerminal, offset int, expected string, timeout time.Duration) bool {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		if strings.Contains(ansi.Strip(terminal.String()), expected) {
+		value := terminal.String()
+		if len(value) >= offset && strings.Contains(ansi.Strip(value[offset:]), expected) {
 			return true
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	return strings.Contains(ansi.Strip(terminal.String()), expected)
+	value := terminal.String()
+	return len(value) >= offset && strings.Contains(ansi.Strip(value[offset:]), expected)
 }
 
 func TestConsoleTTYHelper(t *testing.T) {
@@ -200,8 +207,7 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 		t.Fatal(err)
 	}
 
-	connected := make(chan struct{})
-	var connectedOnce sync.Once
+	streamModes := make(chan string, 8)
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
 		t.Fatal(err)
@@ -222,10 +228,25 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 			_ = json.NewEncoder(w).Encode(consoleapi.AgentOptionsPage{Agents: []domain.ConsoleAgentOption{{AgentID: "quote",
 				OrganizationID: "org-main", DisplayName: "Quote", WorkerStatus: domain.WorkerStatusOffline}}})
 		case consoleapi.AttachPath:
-			_ = json.NewEncoder(w).Encode(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
-				WorkerStatus: domain.WorkerStatusOffline, SnapshotSequence: 0})
+			mode := r.URL.Query().Get("mode")
+			if mode != consoleapi.ModeNormal && mode != consoleapi.ModeDiagnostic {
+				http.Error(w, "invalid mode", http.StatusBadRequest)
+				return
+			}
+			snapshot := consoleapi.AttachResponse{AgentID: "quote", Mode: mode,
+				WorkerInstanceID: "worker-smoke", Generation: 1, WorkerStatus: domain.WorkerStatusOnline,
+				LastHeartbeatAt: time.Now().UTC(), LeaseUntil: time.Now().UTC().Add(time.Minute),
+				BackendHealth: map[string]openruntime.BackendHealth{"local": openruntime.BackendHealthy}, SnapshotSequence: 0}
+			if mode == consoleapi.ModeDiagnostic {
+				snapshot.Diagnostic = &consoleapi.DiagnosticView{LastHeartbeatAt: snapshot.LastHeartbeatAt,
+					LeaseUntil: snapshot.LeaseUntil, StartedAt: time.Now().UTC().Add(-time.Hour),
+					UpdatedAt: time.Now().UTC(), Draining: false}
+			}
+			_ = json.NewEncoder(w).Encode(snapshot)
 		case openapi.ObserveEventsStreamPath:
-			if r.URL.Query().Get("agent_id") != "quote" || r.URL.Query().Get("mode") != consoleapi.ModeNormal ||
+			mode := r.URL.Query().Get("mode")
+			if r.URL.Query().Get("agent_id") != "quote" ||
+				(mode != consoleapi.ModeNormal && mode != consoleapi.ModeDiagnostic) ||
 				r.URL.Query().Get("after_sequence") != "0" {
 				http.Error(w, "invalid cursor", http.StatusBadRequest)
 				return
@@ -235,7 +256,7 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 			if flusher, ok := w.(http.Flusher); ok {
 				flusher.Flush()
 			}
-			connectedOnce.Do(func() { close(connected) })
+			streamModes <- mode
 			<-r.Context().Done()
 		default:
 			http.NotFound(w, r)
@@ -309,28 +330,62 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 	if err := os.WriteFile(readyPath, []byte("ready"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	select {
-	case <-connected:
-	case <-time.After(10 * time.Second):
-		stopAttach()
-		t.Fatalf("Console did not reach the fake event stream: %s", terminal.String())
+	waitMode := func(want string) {
+		t.Helper()
+		select {
+		case got := <-streamModes:
+			if got != want {
+				stopAttach()
+				t.Fatalf("Console stream mode=%q want=%q output=%s", got, want, terminal.String())
+			}
+		case <-time.After(10 * time.Second):
+			stopAttach()
+			t.Fatalf("Console did not reach the %s event stream: %s", want, terminal.String())
+		}
 	}
+	writeCommand := func(command string) {
+		t.Helper()
+		for _, key := range []byte(command) {
+			if _, writeErr := stdin.Write([]byte{key}); writeErr != nil {
+				stopAttach()
+				t.Fatalf("write Console key: %v; terminal output=%q", writeErr, terminal.String())
+			}
+			time.Sleep(30 * time.Millisecond)
+		}
+		time.Sleep(100 * time.Millisecond)
+		if _, writeErr := stdin.Write([]byte{'\r'}); writeErr != nil {
+			stopAttach()
+			t.Fatalf("write Console Enter: %v; terminal output=%q", writeErr, terminal.String())
+		}
+	}
+
+	waitMode(consoleapi.ModeNormal)
 	if !waitForRenderedTerminalText(&terminal, "> /help", 10*time.Second) {
 		stopAttach()
 		t.Fatalf("Console input was not ready: %q", terminal.String())
 	}
-	for _, key := range []byte("/quit") {
-		if _, err := stdin.Write([]byte{key}); err != nil {
-			stopAttach()
-			t.Fatalf("write Console key: %v; terminal output=%q", err, terminal.String())
-		}
-		time.Sleep(30 * time.Millisecond)
-	}
-	time.Sleep(100 * time.Millisecond)
-	if _, err := stdin.Write([]byte{'\r'}); err != nil {
+	writeCommand("/diagnostic")
+	waitMode(consoleapi.ModeDiagnostic)
+	if !waitForRenderedTerminalText(&terminal, "mode diagnostic", 10*time.Second) {
 		stopAttach()
-		t.Fatalf("write Console Enter: %v; terminal output=%q", err, terminal.String())
+		t.Fatalf("Console did not render Diagnostic mode: %q", terminal.String())
 	}
+	overlayOffset := len(terminal.String())
+	if _, err := stdin.Write([]byte{0x1b}); err != nil {
+		stopAttach()
+		t.Fatalf("close Diagnostic overlay: %v; terminal output=%q", err, terminal.String())
+	}
+	if !waitForRenderedTerminalTextAfter(&terminal, overlayOffset, "> /help", 10*time.Second) {
+		stopAttach()
+		t.Fatalf("Console input did not return after closing Diagnostic overlay: %q", terminal.String())
+	}
+	writeCommand("/normal")
+	waitMode(consoleapi.ModeNormal)
+	if !waitForRenderedTerminalText(&terminal, "Console mode switched to normal", 10*time.Second) {
+		stopAttach()
+		t.Fatalf("Console did not render restored Normal mode: %q", terminal.String())
+	}
+	writeCommand("/quit")
 	deadline := time.Now().Add(10 * time.Second)
 	for {
 		panes, paneErr := tmux("list-panes", "-t", windowID,

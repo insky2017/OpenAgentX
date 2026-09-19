@@ -1,6 +1,7 @@
 package console
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -28,6 +29,9 @@ type fakeTUIActions struct {
 		confirm bool
 	}
 	followCalls     int
+	nextFollowID    uint64
+	followModeCalls []string
+	cancelCalls     []uint64
 	controls        []controlRequest
 	taskListCalls   int
 	taskDetailCalls []struct {
@@ -62,7 +66,20 @@ func (a *fakeTUIActions) bindCmd(id uint64, agentID string, confirm bool) tea.Cm
 }
 func (a *fakeTUIActions) startFollowCmd(_ uint64, _ string) tea.Cmd {
 	a.followCalls++
-	return func() tea.Msg { return followStartedMsg{} }
+	a.nextFollowID++
+	id := a.nextFollowID
+	return func() tea.Msg { return followStartedMsg{FollowID: id, Mode: consoleapi.ModeNormal} }
+}
+func (a *fakeTUIActions) startFollowModeCmd(_ uint64, _, mode string) tea.Cmd {
+	a.followCalls++
+	a.followModeCalls = append(a.followModeCalls, mode)
+	a.nextFollowID++
+	id := a.nextFollowID
+	return func() tea.Msg { return followStartedMsg{FollowID: id, Mode: mode} }
+}
+func (a *fakeTUIActions) cancelFollowCmd(followID uint64) tea.Cmd {
+	a.cancelCalls = append(a.cancelCalls, followID)
+	return func() tea.Msg { return followCancelResultMsg{FollowID: followID, Found: true} }
 }
 func (a *fakeTUIActions) taskOptionsCmd(_ uint64, _ string) tea.Cmd {
 	a.taskListCalls++
@@ -129,6 +146,7 @@ func attachedModel(t *testing.T, actions *fakeTUIActions) tuiModel {
 	if err != nil {
 		t.Fatal(err)
 	}
+	m.followEpoch = m.reducer.StreamEpoch()
 	m.input.Focus()
 	m.resize(100, 30)
 	return m
@@ -732,7 +750,7 @@ func executeLine(t *testing.T, model tuiModel, line string) (tuiModel, tea.Cmd) 
 }
 
 func TestConsumedOverlayCommandsClearDraftButRejectedCommandsRemainEditable(t *testing.T) {
-	for _, line := range []string{"/status", "/help", "/diagnostic"} {
+	for _, line := range []string{"/status", "/help"} {
 		m := attachedModel(t, &fakeTUIActions{})
 		m, _ = executeLine(t, m, line)
 		if m.overlay == overlayNone || m.input.Value() != "" {
@@ -826,6 +844,215 @@ func TestTimelineRendersDiagnosticOnlyInDiagnosticMode(t *testing.T) {
 	diagnostic := eventSummary(event, consoleapi.ModeDiagnostic)
 	if strings.Contains(normal, "stderr") || !strings.Contains(diagnostic, "stderr=[REDACTED]") {
 		t.Fatalf("mode projection normal=%q diagnostic=%q", normal, diagnostic)
+	}
+}
+
+func TestTimelineNeverFallsBackFromDiagnosticToNormal(t *testing.T) {
+	var timeline timelineBuffer
+	timeline.AddVariants("", "diagnostic-only")
+	if normal := timeline.StringForMode(consoleapi.ModeNormal); normal != "" {
+		t.Fatalf("Normal timeline exposed Diagnostic-only text: %q", normal)
+	}
+	if diagnostic := timeline.StringForMode(consoleapi.ModeDiagnostic); diagnostic != "diagnostic-only" {
+		t.Fatalf("Diagnostic timeline=%q", diagnostic)
+	}
+}
+
+func TestInPlaceDiagnosticAndNormalModeSwitchUsesSingleFollowEpoch(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	m.followID = 41
+	m.followEpoch = m.reducer.StreamEpoch()
+	m.follow = make(chan tea.Msg)
+	if err := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{AgentID: "quote", TaskID: "task-focused",
+		Version: 7, Status: domain.TaskStatusRunning, Focus: true}); err != nil {
+		t.Fatal(err)
+	}
+
+	m, cancelCmd := executeLine(t, m, "/diagnostic")
+	if cancelCmd == nil || !m.switching || m.switchTarget != consoleapi.ModeDiagnostic ||
+		len(actions.cancelCalls) != 1 || actions.cancelCalls[0] != 41 ||
+		m.reducer.State().Console.Mode != consoleapi.ModeNormal || m.reducer.State().PendingMode != consoleapi.ModeDiagnostic {
+		t.Fatalf("diagnostic switch state=%+v cancels=%v cmd=%v", m.reducer.State(), actions.cancelCalls, cancelCmd)
+	}
+	staleAck := make(chan error, 1)
+	cursor := m.reducer.Cursor()
+	m, _ = updateModel(t, m, followEventMsg{FollowID: 41, Event: openapi.JournalEventReadModel{Sequence: cursor + 1,
+		ID: "event-old-mode", AggregateType: "runtime", AggregateID: "run-old", EventType: "runtime.output",
+		Output: &openapi.SafeOutputReadModel{Text: "safe", Diagnostic: "old diagnostic", HasOutput: true, HasError: true}},
+		Ack: staleAck})
+	if err := <-staleAck; !errors.Is(err, context.Canceled) || m.reducer.Cursor() != cursor {
+		t.Fatalf("old mode event ack=%v cursor=%d/%d", err, m.reducer.Cursor(), cursor)
+	}
+	m, startCmd := updateModel(t, m, followDoneMsg{FollowID: 41, Mode: consoleapi.ModeNormal, Err: context.Canceled})
+	if startCmd == nil || len(actions.followModeCalls) != 1 || actions.followModeCalls[0] != consoleapi.ModeDiagnostic {
+		t.Fatalf("new diagnostic Follow calls=%v cmd=%v", actions.followModeCalls, startCmd)
+	}
+	started := startCmd().(followStartedMsg)
+	m, _ = updateModel(t, m, started)
+	m, _ = updateModel(t, m, followConnectionMsg{FollowID: started.FollowID,
+		State: consoleclient.FollowState{State: consoleclient.ConnectionConnected, Cursor: cursor}})
+	diagnosticAck := make(chan error, 1)
+	diagnosticSnapshot := consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeDiagnostic,
+		WorkerInstanceID: "worker-current", Generation: 48, WorkerStatus: domain.WorkerStatusOnline,
+		BackendHealth: map[string]openruntime.BackendHealth{"local": openruntime.BackendHealthy},
+		Diagnostic: &consoleapi.DiagnosticView{LastHeartbeatAt: fixedNow(), LeaseUntil: fixedNow().Add(time.Minute),
+			StartedAt: fixedNow().Add(-time.Hour), UpdatedAt: fixedNow(), Draining: false}, SnapshotSequence: cursor}
+	m, _ = updateModel(t, m, followSnapshotMsg{FollowID: started.FollowID, Snapshot: diagnosticSnapshot, Ack: diagnosticAck})
+	if err := <-diagnosticAck; err != nil || m.switching || m.mode != consoleapi.ModeDiagnostic ||
+		m.reducer.State().FocusedTask == nil || m.reducer.State().FocusedTask.TaskID != "task-focused" {
+		t.Fatalf("diagnostic snapshot ack=%v switching=%v mode=%s focus=%+v",
+			err, m.switching, m.mode, m.reducer.State().FocusedTask)
+	}
+	eventAck := make(chan error, 1)
+	m, _ = updateModel(t, m, followEventMsg{FollowID: started.FollowID, Event: openapi.JournalEventReadModel{
+		Sequence: cursor + 1, ID: "event-diagnostic", AggregateType: "runtime", AggregateID: "run-current",
+		EventType: "runtime.output", Output: &openapi.SafeOutputReadModel{Stage: "tool", Status: "waiting",
+			Text: "safe output", Diagnostic: "stderr=[REDACTED]", HasOutput: true, HasError: true}}, Ack: eventAck})
+	if err := <-eventAck; err != nil || !strings.Contains(m.timeline.StringForMode(consoleapi.ModeDiagnostic), "stderr=[REDACTED]") ||
+		strings.Contains(m.timeline.StringForMode(consoleapi.ModeNormal), "stderr") {
+		t.Fatalf("diagnostic event ack=%v normal=%q diagnostic=%q", err,
+			m.timeline.StringForMode(consoleapi.ModeNormal), m.timeline.StringForMode(consoleapi.ModeDiagnostic))
+	}
+	if view := m.overlayView(); !strings.Contains(view, "Backend health local=healthy") ||
+		!strings.Contains(view, "diagnostic stderr=[REDACTED]") {
+		t.Fatalf("diagnostic overlay=%q", view)
+	}
+
+	m.overlay = overlayNone
+	m, cancelCmd = executeLine(t, m, "/normal")
+	if cancelCmd == nil || m.displayMode() != consoleapi.ModeNormal || strings.Contains(m.View(), "stderr=[REDACTED]") {
+		t.Fatalf("normal switch did not immediately hide Diagnostic: mode=%s view=%q", m.displayMode(), m.View())
+	}
+	m, startCmd = updateModel(t, m, followDoneMsg{FollowID: started.FollowID, Mode: consoleapi.ModeDiagnostic,
+		Err: context.Canceled})
+	normalStarted := startCmd().(followStartedMsg)
+	m, _ = updateModel(t, m, normalStarted)
+	normalAck := make(chan error, 1)
+	normalSnapshot := diagnosticSnapshot
+	normalSnapshot.Mode = consoleapi.ModeNormal
+	normalSnapshot.Diagnostic = nil
+	normalSnapshot.SnapshotSequence = cursor + 1
+	m, _ = updateModel(t, m, followSnapshotMsg{FollowID: normalStarted.FollowID, Snapshot: normalSnapshot, Ack: normalAck})
+	if err := <-normalAck; err != nil || m.mode != consoleapi.ModeNormal || m.switching ||
+		m.reducer.Snapshot().Diagnostic != nil || strings.Contains(m.timeline.StringForMode(consoleapi.ModeNormal), "stderr") {
+		t.Fatalf("normal result ack=%v mode=%s switching=%v snapshot=%+v timeline=%q", err, m.mode,
+			m.switching, m.reducer.Snapshot(), m.timeline.StringForMode(consoleapi.ModeNormal))
+	}
+}
+
+func TestDiagnosticFailureRestoresNormalWithoutRetryLoop(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	m.followID = 51
+	m.followEpoch = m.reducer.StreamEpoch()
+	m.follow = make(chan tea.Msg)
+	m, _ = executeLine(t, m, "/diagnostic")
+	m, startDiagnostic := updateModel(t, m, followDoneMsg{FollowID: 51, Mode: consoleapi.ModeNormal,
+		Err: context.Canceled})
+	diagnosticStarted := startDiagnostic().(followStartedMsg)
+	m, _ = updateModel(t, m, diagnosticStarted)
+	m, restoreCmd := updateModel(t, m, followDoneMsg{FollowID: diagnosticStarted.FollowID,
+		Mode: consoleapi.ModeDiagnostic, Err: &consoleclient.APIError{StatusCode: 403, Code: openapi.ErrorCLIForbidden}})
+	if restoreCmd == nil || !m.switching || m.switchTarget != consoleapi.ModeNormal || !m.switchFallback ||
+		m.reducer.State().Console.Mode != consoleapi.ModeNormal || m.reducer.State().Console.Diagnostic != nil {
+		t.Fatalf("diagnostic failure did not start safe fallback: switching=%v target=%s fallback=%v state=%+v",
+			m.switching, m.switchTarget, m.switchFallback, m.reducer.State())
+	}
+	normalStarted := restoreCmd().(followStartedMsg)
+	m, _ = updateModel(t, m, normalStarted)
+	ack := make(chan error, 1)
+	m, _ = updateModel(t, m, followSnapshotMsg{FollowID: normalStarted.FollowID, Snapshot: consoleapi.AttachResponse{
+		AgentID: "quote", Mode: consoleapi.ModeNormal, WorkerInstanceID: "worker-current", Generation: 48,
+		WorkerStatus: domain.WorkerStatusOnline, SnapshotSequence: 1204}, Ack: ack})
+	if err := <-ack; err != nil || m.switching || m.mode != consoleapi.ModeNormal || len(actions.followModeCalls) != 2 {
+		t.Fatalf("Normal fallback ack=%v switching=%v mode=%s calls=%v", err, m.switching, m.mode, actions.followModeCalls)
+	}
+}
+
+func TestRejectedDiagnosticSnapshotDrainsFollowBeforeNormalFallback(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	m.followID = 52
+	m.followEpoch = m.reducer.StreamEpoch()
+	m.follow = make(chan tea.Msg)
+	m, _ = executeLine(t, m, "/diagnostic")
+	m, startDiagnostic := updateModel(t, m, followDoneMsg{FollowID: 52, Mode: consoleapi.ModeNormal,
+		Err: context.Canceled})
+	diagnosticStarted := startDiagnostic().(followStartedMsg)
+	m, _ = updateModel(t, m, diagnosticStarted)
+
+	ack := make(chan error, 1)
+	m, drainCmd := updateModel(t, m, followSnapshotMsg{FollowID: diagnosticStarted.FollowID,
+		Snapshot: consoleapi.AttachResponse{AgentID: "another-agent", Mode: consoleapi.ModeDiagnostic,
+			WorkerInstanceID: "worker-current", Generation: 48, WorkerStatus: domain.WorkerStatusOnline,
+			SnapshotSequence: 1204}, Ack: ack})
+	if err := <-ack; err == nil || drainCmd == nil || !m.switching || m.switchTarget != consoleapi.ModeNormal ||
+		!m.switchFallback || len(actions.cancelCalls) != 2 {
+		t.Fatalf("rejected snapshot err=%v cmd=%v switching=%v target=%s fallback=%v cancels=%v",
+			err, drainCmd, m.switching, m.switchTarget, m.switchFallback, actions.cancelCalls)
+	}
+
+	m, startNormal := updateModel(t, m, followDoneMsg{FollowID: diagnosticStarted.FollowID,
+		Mode: consoleapi.ModeDiagnostic, Err: context.Canceled})
+	if startNormal == nil || len(actions.followModeCalls) != 2 || actions.followModeCalls[1] != consoleapi.ModeNormal {
+		t.Fatalf("Normal fallback calls=%v cmd=%v", actions.followModeCalls, startNormal)
+	}
+}
+
+func TestDiagnosticSessionExpiryClearsPrivilegedStateAndCancelsFollow(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	epoch, err := m.reducer.BeginStream(consoleapi.ModeDiagnostic)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := m.reducer.ApplySnapshotForStream(epoch, consoleapi.AttachResponse{AgentID: "quote",
+		Mode: consoleapi.ModeDiagnostic, WorkerInstanceID: "worker-current", Generation: 48,
+		WorkerStatus: domain.WorkerStatusOnline, Diagnostic: &consoleapi.DiagnosticView{
+			LastHeartbeatAt: fixedNow(), LeaseUntil: fixedNow().Add(time.Minute)}, SnapshotSequence: 1204}); err != nil {
+		t.Fatal(err)
+	}
+	m.mode = consoleapi.ModeDiagnostic
+	m.followID = 61
+	m.followEpoch = epoch
+	m.follow = make(chan tea.Msg)
+	m.input.SetValue("draft survives")
+	m.input.SetCursor(5)
+	m, cmd := updateModel(t, m, tickMsg{Now: m.session.ExpiresAt})
+	state := m.reducer.State()
+	if cmd == nil || m.session.Authenticated || m.mode != consoleapi.ModeNormal ||
+		state.Console.Mode != consoleapi.ModeNormal || state.Console.Diagnostic != nil ||
+		state.Connection != consolemodel.ConnectionDisconnected || m.input.Value() != "draft survives" ||
+		m.input.LineInfo().CharOffset != 5 || len(actions.cancelCalls) != 1 || actions.cancelCalls[0] != 61 {
+		t.Fatalf("expiry state auth=%v mode=%s reducer=%+v draft=%q cursor=%d cancels=%v cmd=%v",
+			m.session.Authenticated, m.mode, state, m.input.Value(), m.input.LineInfo().CharOffset,
+			actions.cancelCalls, cmd)
+	}
+}
+
+func TestEstablishedDiagnosticFollowTerminationClearsDiagnostic(t *testing.T) {
+	m := attachedModel(t, &fakeTUIActions{})
+	epoch, err := m.reducer.BeginStream(consoleapi.ModeDiagnostic)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := m.reducer.ApplySnapshotForStream(epoch, consoleapi.AttachResponse{AgentID: "quote",
+		Mode: consoleapi.ModeDiagnostic, WorkerInstanceID: "worker-current", Generation: 48,
+		WorkerStatus: domain.WorkerStatusOnline, Diagnostic: &consoleapi.DiagnosticView{
+			LastHeartbeatAt: fixedNow(), LeaseUntil: fixedNow().Add(time.Minute)}, SnapshotSequence: 1204}); err != nil {
+		t.Fatal(err)
+	}
+	m.mode = consoleapi.ModeDiagnostic
+	m.followID = 62
+	m.followEpoch = epoch
+	m.follow = make(chan tea.Msg)
+	m, _ = updateModel(t, m, followDoneMsg{FollowID: 62, Mode: consoleapi.ModeDiagnostic,
+		Err: errors.New("network stopped")})
+	state := m.reducer.State()
+	if m.mode != consoleapi.ModeNormal || state.Console.Mode != consoleapi.ModeNormal || state.Console.Diagnostic != nil ||
+		!strings.Contains(m.timeline.String(), "Normal-safe") {
+		t.Fatalf("terminated Diagnostic state mode=%s reducer=%+v timeline=%q", m.mode, state, m.timeline.String())
 	}
 }
 
