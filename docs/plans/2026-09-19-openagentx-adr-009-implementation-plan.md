@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_plan
-status: proposed
+status: active
 owner: openagentx
 updated_at: 2026-09-19
 ---
@@ -99,7 +99,7 @@ git status --short --branch
 
 ## 7. 状态维护规则
 
-- 本文件在 ADR 接受前保持 `proposed`；接受后、Task 01 开始前由独立 gate record 改为 `active`。
+- 本文件已在 ADR 接受和 P0 基线隔离后改为 `active`；Task 01 仍需按独立阶段门禁开始。
 - Task 实现提交后，Task 仍为 `active/WAIT`；监督 `GO` 后由下一次 docs-only gate record 改为
   `completed/GO`。
 - Task 08 候选通过不表示已部署。push、merge、安装、服务重启、真实 DB 迁移和现场验收必须有单独授权

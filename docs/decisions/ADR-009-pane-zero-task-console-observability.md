@@ -1,6 +1,6 @@
 ---
 doc_type: decision
-status: proposed
+status: accepted
 canonical: true
 owner: openagentx
 updated_at: 2026-09-19
@@ -10,7 +10,7 @@ updated_at: 2026-09-19
 
 ## 状态
 
-提议中 (Proposed)，待监督接受后实施。
+已接受 (Accepted)，按分阶段实施计划执行。
 
 ## 日期与决策者
 
@@ -270,6 +270,6 @@ Fleet 创建的 managed pane `0` 可以直接运行最后一条等价命令。�
 
 ## 实施状态
 
-本 ADR 当前只记录决策提案和验收边界。实施计划见
-[ADR-009 实施计划](../plans/2026-09-19-openagentx-adr-009-implementation-plan.md)。ADR 状态改为
-Accepted 且 P0 基线通过前，不得开始 Task 01 或修改产品行为。
+本 ADR 已由用户明确接受。实施计划见
+[ADR-009 实施计划](../plans/2026-09-19-openagentx-adr-009-implementation-plan.md)。P0 已选择并隔离
+ADR-008 权威基线；后续任务必须逐阶段保留实现、验证和 gate record 证据。
