@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-19
 ---
@@ -61,3 +61,13 @@ git diff --check
 - 未修改产品行为；
 - 冻结 ADR hash、命令、退出码、耗时、未覆盖项和外部状态已记录；
 - 创建一个 Task 01 docs/characterization 提交后停止等待监督 gate。
+
+## 完成记录
+
+- 实现提交：`5717506f4f0182b4472901fb596eb81775e6ae3a`。
+- 产物：[TASK-01-CONTRACT-FREEZE.md](TASK-01-CONTRACT-FREEZE.md)，冻结 AGY 1.2.7、CodeBuddy
+  2.143.0、Console Task API/DTO、单事务 snapshot、Task version/CAS、cursor、Diagnostic mode switch、
+  safeoutput 和 bounded Timeline 契约。
+- 定向 domain/API/Panel/Console、Worker/AGY/CodeBuddy/ACP、`agy-graft` fixture 和 release scanner 均
+  exit 0；读取错误文件名的失败及纠正已保留在 execution log。
+- 产品行为、schema、真实服务/DB/socket/tmux/installed binary 均未修改；Task 02 及以后未提前实现。

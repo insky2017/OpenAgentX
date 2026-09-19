@@ -49,7 +49,7 @@ push/merge/安装来“修正”差异。
 | 阶段 | 名称 | 状态 | 实现提交 | 监督门禁 |
 |---|---|---|---|---|
 | P0 | ADR-008 基线、状态和 Git lineage 收口 | completed | `dad6c40`, `484db18` | GO |
-| 01 | 基线、能力盘点与契约冻结 | active | - | WAIT |
+| 01 | 基线、能力盘点与契约冻结 | completed | `5717506` | GO |
 | 02 | 权威任务观察投影 | pending | - | WAIT |
 | 03 | Runtime 安全输出与终态结果对齐 | pending | - | WAIT |
 | 04 | Task-centric Console reducer | pending | - | WAIT |
@@ -119,6 +119,16 @@ push/merge/安装来“修正”差异。
 - 本批只验证冻结契约与既有行为一致，不是 ADR-009 产品 E2E；真实 dispatch->reply 闭环归属 Task 07/08。
 - Task 01 变更仅为任务文档、冻结契约和本 log；未运行 Web/部署测试，因为本阶段无产品/Web 行为变化。
 - 阶段提交前继续检查 frozen ADR hash、relative links、whitespace、staged path 和 clean external state。
+
+#### Task 01 gate record
+
+- 实现提交：`5717506f4f0182b4472901fb596eb81775e6ae3a`；3 files，292 insertions、3 deletions。
+- 提交后 worktree clean；相对 `origin/main@c3fc1bb` ahead 39。ADR-009 SHA-256 仍为
+  `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69`。
+- 监督结论：用户已授权连续执行；主代理按当前范围和证据复核为 `GO`。A09-02/A09-03 已关闭，
+  没有产品行为、权限或外部状态变更。
+- 主计划和 Task 01 front matter 在本 docs-only gate record 同步为 `completed`；Task 02 保持
+  `pending/WAIT`。
 
 ## 7. 后续记录模板
 
