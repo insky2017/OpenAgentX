@@ -41,6 +41,9 @@ Diagnostic 切换和测试契约，并确认实际 Runtime/Adapter 能提供哪�
 6. 冻结 Normal/Diagnostic mode switch 状态机、旧 Follow cancel/ack 和新 snapshot/cursor 顺序。
 7. 冻结安全输出、分页、Timeline 和 compact layout 上限，并建立后续 Task 的测试地图。
 
+冻结结果记录在 [TASK-01-CONTRACT-FREEZE.md](TASK-01-CONTRACT-FREEZE.md)。后续实现若需改变其中的
+API 字段、状态/CAS、cursor、容量或模式切换边界，必须先回开 Task 01 并说明用户影响。
+
 ## 验证
 
 ```bash

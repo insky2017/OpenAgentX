@@ -49,7 +49,7 @@ push/merge/安装来“修正”差异。
 | 阶段 | 名称 | 状态 | 实现提交 | 监督门禁 |
 |---|---|---|---|---|
 | P0 | ADR-008 基线、状态和 Git lineage 收口 | completed | `dad6c40`, `484db18` | GO |
-| 01 | 基线、能力盘点与契约冻结 | pending | - | WAIT |
+| 01 | 基线、能力盘点与契约冻结 | active | - | WAIT |
 | 02 | 权威任务观察投影 | pending | - | WAIT |
 | 03 | Runtime 安全输出与终态结果对齐 | pending | - | WAIT |
 | 04 | Task-centric Console reducer | pending | - | WAIT |
@@ -78,8 +78,8 @@ push/merge/安装来“修正”差异。
 | ID | 严重度 | 问题 | owner | 当前状态 |
 |---|---|---|---|---|
 | A09-01 | P0 | ADR-008 计划状态、35 提交 Git lineage、现场安装 revision 和后续 docs/code 提交尚未形成单一监督确认基线 | P0 | closed；选择 `008b2e0` 作为已复测 ADR-008 tip，以 `484db18` 引入本地 main 的最新治理规则；不改写历史计划状态 |
-| A09-02 | P1 | 各正式 Runtime/Adapter 是否提供增量输出、最终 body/error 及其解析边界尚需按实际版本冻结 | Task 01 | pending；阻塞超出实测能力的实现 |
-| A09-03 | P1 | Console Task projection 的精确 DTO、容量上限和 snapshot 事务字段尚未冻结 | Task 01 | pending；阻塞 Task 02 |
+| A09-02 | P1 | 各正式 Runtime/Adapter 是否提供增量输出、最终 body/error 及其解析边界尚需按实际版本冻结 | Task 01 | closed；AGY 1.2.7、CodeBuddy 2.143.0、ACP repository contract 与 Adapter fixture 已记录，未实测能力不进入契约 |
+| A09-03 | P1 | Console Task projection 的精确 DTO、容量上限和 snapshot 事务字段尚未冻结 | Task 01 | closed；Console Task list/detail/suggested snapshot、SSE DTO、单事务、4 KiB/256 event/Timeline 上限已冻结 |
 
 ## 6. 事件记录（append-only）
 
@@ -90,8 +90,49 @@ push/merge/安装来“修正”差异。
 | 2026-09-19 | 首次文档相对链接检查调用 `ruby` 失败（目标机未安装）；首次新文件 whitespace 脚本把多行路径合成一个参数 | 两项命令未产生有效检查结果，未修改文件或外部状态 | 改用仓库现有 Node 做只读链接检查，并用显式 zsh 数组逐文件执行 `git diff --no-index --check`；12 个文档链接和全部新文件 whitespace 检查通过 |
 | 2026-09-19 | 用户明确要求执行 ADR-009 直到完成，并要求中间证据和实际 E2E | ADR-009 获得接受与连续执行授权；仍保留逐阶段实现/验证/gate 提交 | ADR 状态改为 Accepted；不把全局授权扩大为 push、部署或真实状态变更 |
 | 2026-09-19 | P0 核验 ADR-008/主工作树/远端 lineage | ADR-008 worktree 为 clean `008b2e0`、相对 `origin/main@c3fc1bb` ahead 35；本地 main 为 clean `3723c77`、ahead 1，提交只修改 `AGENTS.md`；独立现场报告证明安装代码 `f49cec4` 和 `008b2e0` docs tip PASS | 在 `008b2e0` 创建 `codex/adr009-task-console`；`dad6c40` 保存 ADR/计划，`484db18` 引入最新治理；新 sibling worktree `/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`，原 ADR-008/main/远端/运行现场未修改 |
+| 2026-09-19 | Task 01 首轮代码定位读取了不存在的 `internal/domain/event.go` | 仅只读命令返回错误；Journal 模型是否存在尚未据此判断 | 用 `rg 'type JournalEvent'` 定位到 `internal/domain/journal_contract.go`，确认结构化 Journal contract 存在；停止使用猜测文件名 |
+
+#### Task 01 能力盘点与决策
+
+- 当前正式链路已覆盖 CreateTask 事务、work Mailbox claim/accept、BeginAttempt、Runtime EventSink、
+  FinishRun 和 Journal；缺口集中在 Console Task projection/reducer/TUI，不需要新 Worker 私有协议。
+- 已安装 `agy-graft --version/--help` 只读返回 `1.2.7`，支持 stream-json、conversation、model、effort 和
+  print timeout；`codebuddy --version/--help` 返回 `2.143.0`，支持 print、text/json/stream-json、partial
+  messages、model/effort/max-turns。命令未执行 turn、未读取 credential 或修改 Runtime 状态。
+- AGY Adapter 已用 stream-json，CodeBuddy Adapter 当前故意用 text stdout 并按完整行产生安全 event；
+  两者 `Streams=true`，但运行中 native steer/approval 均不承诺，UI 必须按 queued/preflight 事实表达。
+- 冻结 Console Task API、Task snapshot 单事务、SSE Task/Mailbox/Message/Approval 安全投影、Task version
+  reducer、focused CAS、Diagnostic mode-switch 和容量上限；详见
+  [TASK-01-CONTRACT-FREEZE.md](TASK-01-CONTRACT-FREEZE.md)。
+- Task 01 文档冻结没有修改 API/schema/reducer/TUI/Adapter 产品行为，也没有操作真实服务、DB/socket、
+  credential、tmux 或 installed binary。
+
+#### Task 01 验证批次
+
+| 命令 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./internal/domain ./internal/api/... ./internal/client/console ./internal/consolemodel ./internal/cli/console -count=1` | 0 / 19.17s | domain/API/admin/auth/console/panel/client/reducer/TUI 全部通过；Panel 15.887s |
+| `go test ./internal/worker/... ./internal/runtime/agy ./internal/runtime/codebuddy ./internal/runtime/acp -count=1` | 0 / 9.06s | Worker 1.533s、AGY 6.882s、CodeBuddy 2.117s、ACP 0.007s |
+| `bash deploy/agy/agy-graft_test.sh deploy/agy/agy-graft` | 0 / 0.54s | 7 组 proxy/config/permission/symlink fixture 全部通过；无真实 turn |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 / 0.15s | 全部类别 `CLEAN` |
+
+- 本批只验证冻结契约与既有行为一致，不是 ADR-009 产品 E2E；真实 dispatch->reply 闭环归属 Task 07/08。
+- Task 01 变更仅为任务文档、冻结契约和本 log；未运行 Web/部署测试，因为本阶段无产品/Web 行为变化。
+- 阶段提交前继续检查 frozen ADR hash、relative links、whitespace、staged path 和 clean external state。
 
 ## 7. 后续记录模板
+
+### Task 01：基线、能力盘点与契约冻结
+
+- 开始时间：`2026-09-19`
+- baseline：`3312d95` (`codex/adr009-task-console`)
+- worktree：`/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`
+- 状态：`active/WAIT`
+- 本轮结果：冻结 Task projection、Runtime 输出、focus/CAS、cursor、Diagnostic mode 和容量契约；只允许
+  文档、characterization tests 与无行为变化 test helper。
+- 非目标：不新增 API/schema，不改 reducer/TUI/Adapter 行为，不操作真实服务/DB/socket/default tmux。
+- 证据要求：代码入口、实际 Runtime/wrapper help 或 fixture、现有测试与新增 characterization test
+  逐项对应；未知能力标为不支持或待验证，不按设计猜测。
 
 每个 Task 开始后追加以下内容，不覆盖前文：
 
