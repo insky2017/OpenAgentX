@@ -50,7 +50,7 @@ push/merge/安装来“修正”差异。
 |---|---|---|---|---|
 | P0 | ADR-008 基线、状态和 Git lineage 收口 | completed | `dad6c40`, `484db18` | GO |
 | 01 | 基线、能力盘点与契约冻结 | completed | `5717506` | GO |
-| 02 | 权威任务观察投影 | active | - | WAIT |
+| 02 | 权威任务观察投影 | completed | `84a2c15` | GO |
 | 03 | Runtime 安全输出与终态结果对齐 | pending | - | WAIT |
 | 04 | Task-centric Console reducer | pending | - | WAIT |
 | 05 | Pane 0 任务 TUI 与控制易用性 | pending | - | WAIT |
@@ -187,6 +187,20 @@ push/merge/安装来“修正”差异。
 - 外部状态：未操作真实 HOME/DB/UDS/credential/default tmux/user-systemd/installed binary；未 push、merge
   或修改 `steadyflow` 父仓。Task 02 当前仍为 `active/WAIT`，主计划/front matter 保持 `pending`。
 - Open issues：当前 Task 02 无 P0/P1；Runtime 过程输出和终态结果对齐仍按计划归属 Task 03，未提前实现。
+
+#### Task 02 gate record
+
+- 实现提交：`84a2c15473455cf2ae5e052e9790fd851db7abda`；14 files，1599 insertions、22 deletions。
+- 提交后 worktree clean；相对 `origin/main@c3fc1bb` ahead 41。ADR-009 SHA-256 仍为
+  `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69`。
+- 主代理按冻结契约、全量普通测试、定向 race 和安全故障注入复核为 `GO`；无 P0/P1 或未归属兼容
+  fallback。任务说明中“仅挂 UDS CLI mux”的歧义已按 Task 01 契约纠正为：同一 Console handler，Web
+  cookie 与 UDS CLI bearer 分离，CLI 不开放广泛 Panel route。
+- 主计划和 Task 02 front matter 在本 docs-only gate record 同步为 `completed`；Task 03 保持
+  `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
+- Gate 检查首次在 zsh 中把三个路径误作为单一标量传给 `sed/git add`，命令在暂存前以路径不存在退出；
+  未产生 staging 或提交。随后改用显式路径数组并重新执行全部 whitespace、相对链接、状态一致性和
+  staged-path 检查。
 
 ## 7. 后续记录模板
 
