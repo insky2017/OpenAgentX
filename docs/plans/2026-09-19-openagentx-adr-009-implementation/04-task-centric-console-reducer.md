@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-19
 ---
@@ -57,3 +57,17 @@ git diff --check
 - 所有拒绝路径不推进 cursor，合法忽略路径不会无限重放；
 - reducer 无 I/O、无 raw payload、无无界集合；
 - 创建一个 Task 04 实现提交后停止等待监督 gate。
+
+## 完成记录
+
+- 实现提交：`874a0e12cbc2cb73d0ed403c8e562a6427a102e6`。
+- reducer 已统一 focused/active/recent Task、Task version/status、Mailbox、Run、Message、Approval、Task
+  outcome、Runtime reply、connection/mode epoch 与 Event cursor；dispatch、手工选择和 Attach suggestion 是
+  仅有 focus 来源。
+- Task/Run/Worker/stream fencing、same-version 幂等、terminal 冲突、旧 Worker 历史事件、snapshot/event ack
+  和 replacement/offline 清理均有回归测试；旧 active Run/native Approval 不污染当前状态，持久化 terminal
+  reply 保留。
+- active/recent Task、Task bytes、Timeline count/bytes 和单条 Timeline 均有上限；Normal 拒绝 Diagnostic，
+  reducer 只接受 Task 02/03 安全投影。
+- 定向普通/race、malformed projection fuzz seeds、全仓普通测试、vet、独立 build、release scanner、
+  whitespace、链接和冻结 ADR hash 检查通过；Task 05/06 行为、真实运行状态和 ADR-006/007 未修改。
