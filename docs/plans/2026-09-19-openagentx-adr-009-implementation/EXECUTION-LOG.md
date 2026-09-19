@@ -53,7 +53,7 @@ push/merge/安装来“修正”差异。
 | 02 | 权威任务观察投影 | completed | `84a2c15` | GO |
 | 03 | Runtime 安全输出与终态结果对齐 | completed | `e82ae37` | GO |
 | 04 | Task-centric Console reducer | completed | `874a0e1` | GO |
-| 05 | Pane 0 任务 TUI 与控制易用性 | active | - | WAIT |
+| 05 | Pane 0 任务 TUI 与控制易用性 | completed | `f1bf09a` | GO |
 | 06 | 同 pane Diagnostic 模式 | pending | - | WAIT |
 | 07 | 隔离用户闭环与操作文档 | pending | - | WAIT |
 | 08 | 集成审查与候选门禁 | pending | - | WAIT |
@@ -432,6 +432,19 @@ push/merge/安装来“修正”差异。
 - 外部状态：未操作真实 HOME/DB/UDS/credential/default tmux/user-systemd/installed binary 或父仓；未 push、
   merge、部署或重启。Task 05 保持 `active/WAIT`，主计划/front matter 继续 `pending`。
 - Open issues：本阶段无 P0/P1；同 pane Normal/Diagnostic mode switch 仍严格归属 Task 06，未提前实现。
+
+#### Task 05 gate record
+
+- 实现提交：`f1bf09ac455ea56cad71c940a8ae37bd565996cb`；6 files，1075 insertions、39 deletions。
+- 提交后 feature worktree clean；相对 `origin/main@c3fc1bb` ahead 47。主工作树仍为 clean
+  `main@3723c77`、相对 origin ahead 1；ADR-009 SHA-256 仍为
+  `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69`，新版 `AGENTS.md` 为
+  `b53264590ccb1ebace81668ae3c98f1e29ce8f61384a259f08a5e23b8b92a95b`。
+- 主代理按 focused Task/CAS、终态结果、输入/滚动不变量、控制字符边界、compact layout、定向 race、
+  唯一 `tmux -L` + PTY smoke、全仓普通测试和 release scanner 复核为 `GO`；没有 P0/P1、认证 fallback、
+  raw output、tmux 控制或 ADR-006/007 语义变化。
+- 主计划和 Task 05 front matter 在本 docs-only gate record 同步为 `completed`；Task 06 保持
+  `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
 
 ## 7. 后续记录模板
 

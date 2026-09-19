@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-19
 ---
@@ -56,3 +56,15 @@ git diff --check
 - pane 0 明确显示任务执行到哪一步及最终回复/无结果原因；
 - 输入、滚动、compact layout、terminal restore 和 Worker 独立生命周期有测试；
 - 创建一个 Task 05 实现提交后停止等待监督 gate。
+
+## 完成记录
+
+- 实现提交：`f1bf09ac455ea56cad71c940a8ae37bd565996cb`。
+- pane 0 TUI 已连续呈现 focused Task 的 queued、work delivery、Run、terminal outcome 和 Runtime reply；
+  `/tasks` 可从 bounded active/recent 列表加载权威详情并显式切换 focus，`/status` 显示完整 ID/version。
+- `/steer <content>` 与 `/cancel` 使用 reducer 最新 CAS；显式 `--task/--version` 和冻结的旧位置语法均有
+  exactly-once 测试。stale CAS 只读刷新、不自动重试，失败、断线、token expiry 和详情加载均保留 draft。
+- Task summary、Timeline、结果和 overlay 在终端渲染前清理控制字符并受限；后台事件保持 draft/cursor/
+  focus/scroll，`80x5`、`20x3`、`8x1` compact layout 通过。
+- 定向普通/race、十次状态重复、唯一 `tmux -L` + PTY alt-screen smoke、全仓普通测试、vet、独立 build、
+  release scanner、whitespace 和冻结哈希检查通过；Task 06 Diagnostic mode switch 与真实部署未实施。
