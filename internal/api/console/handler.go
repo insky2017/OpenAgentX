@@ -4,14 +4,19 @@
 package console
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
+	openapi "openagentx/internal/api"
 	requestauth "openagentx/internal/auth"
 	cliauth "openagentx/internal/auth/cli"
 	webauth "openagentx/internal/auth/web"
@@ -24,8 +29,12 @@ const (
 	ModeDiagnostic  = "diagnostic"
 	AttachPath      = "/api/console/v1/attach"
 	AgentsPath      = "/api/console/v1/agents"
+	AgentTasksPath  = "/api/console/v1/agents/{agentID}/tasks"
+	AgentTaskPath   = "/api/console/v1/agents/{agentID}/tasks/{taskID}"
 	diagnosticBurst = 10
 	agentPageSize   = 100
+	taskPageSize    = 50
+	taskPageMax     = 100
 )
 
 // ObserveState is intentionally narrow and does not expose repository handles
@@ -33,6 +42,8 @@ const (
 type ObserveState interface {
 	ConsoleSnapshot(context.Context, string) (domain.ConsoleSnapshot, error)
 	ListConsoleAgentOptions(context.Context, string, int) ([]domain.ConsoleAgentOption, error)
+	ListConsoleTasks(context.Context, string, domain.ConsoleTaskCursor, int) ([]domain.Task, error)
+	ConsoleTaskSnapshot(context.Context, string, string) (domain.ConsoleTaskSnapshot, error)
 }
 
 type Handler struct {
@@ -65,6 +76,8 @@ func newHandler(state ObserveState, authorizer requestauth.RequestAuthorizer) (*
 	h := &Handler{state: state, auth: authorizer, limiter: newLimiter(), mux: http.NewServeMux()}
 	h.mux.HandleFunc("GET "+AttachPath, h.attach)
 	h.mux.HandleFunc("GET "+AgentsPath, h.agents)
+	h.mux.HandleFunc("GET "+AgentTasksPath, h.tasks)
+	h.mux.HandleFunc("GET "+AgentTaskPath, h.task)
 	return h, nil
 }
 
@@ -131,6 +144,7 @@ type AttachResponse struct {
 	LeaseUntil       time.Time                            `json:"lease_until,omitempty"`
 	BackendHealth    map[string]openruntime.BackendHealth `json:"backend_health,omitempty"`
 	ActiveRun        *RunSnapshot                         `json:"active_run,omitempty"`
+	SuggestedTask    *openapi.ConsoleTaskOption           `json:"suggested_task,omitempty"`
 	ObserveBasePath  string                               `json:"observe_base_path"`
 	ControlBasePath  string                               `json:"control_base_path"`
 	Diagnostic       *DiagnosticView                      `json:"diagnostic,omitempty"`
@@ -225,6 +239,14 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 			WorkerInstanceID: run.WorkerInstanceID, WorkerGeneration: &generation,
 			StartedAt: run.StartedAt, UpdatedAt: run.UpdatedAt}
 	}
+	if snapshot.SuggestedTask != nil {
+		projected, projectionErr := projectConsoleTaskOption(*snapshot.SuggestedTask)
+		if projectionErr != nil {
+			http.Error(w, "invalid suggested Console Task", http.StatusInternalServerError)
+			return
+		}
+		response.SuggestedTask = &projected
+	}
 	writeJSON(w, response)
 }
 
@@ -238,6 +260,14 @@ func attachRequirement(mode string) requestauth.Requirement {
 func validateAttachSnapshot(snapshot domain.ConsoleSnapshot, agentID string) error {
 	if snapshot.SnapshotSequence < 0 || snapshot.Agent.ID != agentID || !snapshot.Agent.Status.Valid() {
 		return fmt.Errorf("invalid Agent snapshot identity or status")
+	}
+	if snapshot.SuggestedTask != nil {
+		if snapshot.SuggestedTask.TargetAgentID != agentID || snapshot.SuggestedTask.IsTerminal() {
+			return fmt.Errorf("invalid suggested Console Task")
+		}
+		if _, err := projectConsoleTaskOption(*snapshot.SuggestedTask); err != nil {
+			return err
+		}
 	}
 	worker := snapshot.Worker
 	if worker == nil {
@@ -287,6 +317,169 @@ func validateAttachSnapshot(snapshot domain.ConsoleSnapshot, agentID string) err
 		return fmt.Errorf("active RunAttempt is not fenced to the current Worker")
 	}
 	return nil
+}
+
+type consoleTaskCursorEnvelope struct {
+	Version   int    `json:"v"`
+	AgentID   string `json:"agent_id"`
+	UpdatedAt string `json:"updated_at"`
+	TaskID    string `json:"task_id"`
+	Checksum  string `json:"checksum"`
+}
+
+func (h *Handler) tasks(w http.ResponseWriter, r *http.Request) {
+	if _, err := h.auth.Authorize(r, requestauth.Requirement{Role: domain.WebRoleViewer, Scope: domain.CLIScopeConsoleRead}); err != nil {
+		h.auth.WriteFailure(w, err)
+		return
+	}
+	agentID := r.PathValue("agentID")
+	if err := domain.ValidateIdentifier("agent_id", agentID); err != nil {
+		http.Error(w, "invalid agent_id", http.StatusBadRequest)
+		return
+	}
+	cursor, limit, err := parseConsoleTaskListQuery(r, agentID)
+	if err != nil {
+		http.Error(w, "invalid Console Task pagination", http.StatusBadRequest)
+		return
+	}
+	tasks, err := h.state.ListConsoleTasks(r.Context(), agentID, cursor, limit+1)
+	if err != nil {
+		if errors.Is(err, domain.ErrAgentNotFound) || errors.Is(err, domain.ErrNotFound) {
+			http.Error(w, "Agent not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "failed to list Console Tasks", http.StatusInternalServerError)
+		}
+		return
+	}
+	projected := make([]openapi.ConsoleTaskOption, 0, len(tasks))
+	previous := cursor
+	for _, task := range tasks {
+		option, projectionErr := projectConsoleTaskOption(task)
+		if projectionErr != nil || task.TargetAgentID != agentID {
+			http.Error(w, "invalid Console Task projection", http.StatusInternalServerError)
+			return
+		}
+		updatedAt, parseErr := time.Parse(time.RFC3339Nano, option.UpdatedAt)
+		if parseErr != nil || (!previous.UpdatedAt.IsZero() &&
+			(updatedAt.After(previous.UpdatedAt) || updatedAt.Equal(previous.UpdatedAt) && option.TaskID >= previous.TaskID)) {
+			http.Error(w, "invalid Console Task ordering", http.StatusInternalServerError)
+			return
+		}
+		previous = domain.ConsoleTaskCursor{UpdatedAt: updatedAt, TaskID: option.TaskID}
+		projected = append(projected, option)
+	}
+	page := openapi.ConsoleTaskPage{Tasks: projected}
+	if len(page.Tasks) > limit {
+		page.HasMore = true
+		page.Tasks = page.Tasks[:limit]
+		last := page.Tasks[len(page.Tasks)-1]
+		page.NextCursor, err = encodeConsoleTaskCursor(agentID, last.UpdatedAt, last.TaskID)
+		if err != nil {
+			http.Error(w, "failed to encode Console Task cursor", http.StatusInternalServerError)
+			return
+		}
+	}
+	writeJSON(w, page)
+}
+
+func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
+	if _, err := h.auth.Authorize(r, requestauth.Requirement{Role: domain.WebRoleViewer, Scope: domain.CLIScopeConsoleRead}); err != nil {
+		h.auth.WriteFailure(w, err)
+		return
+	}
+	agentID, taskID := r.PathValue("agentID"), r.PathValue("taskID")
+	if domain.ValidateIdentifier("agent_id", agentID) != nil || domain.ValidateOpaqueID("task_id", taskID) != nil {
+		http.Error(w, "invalid Console Task identity", http.StatusBadRequest)
+		return
+	}
+	snapshot, err := h.state.ConsoleTaskSnapshot(r.Context(), agentID, taskID)
+	if err != nil {
+		if errors.Is(err, domain.ErrAgentNotFound) || errors.Is(err, domain.ErrTaskNotFound) || errors.Is(err, domain.ErrNotFound) {
+			http.Error(w, "Console Task not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "failed to resolve Console Task snapshot", http.StatusInternalServerError)
+		}
+		return
+	}
+	projected, err := projectConsoleTaskSnapshot(snapshot, agentID, taskID)
+	if err != nil {
+		http.Error(w, "invalid Console Task snapshot", http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, projected)
+}
+
+func parseConsoleTaskListQuery(r *http.Request, agentID string) (domain.ConsoleTaskCursor, int, error) {
+	query := r.URL.Query()
+	limit := taskPageSize
+	if values, exists := query["limit"]; exists {
+		if len(values) != 1 || values[0] == "" {
+			return domain.ConsoleTaskCursor{}, 0, fmt.Errorf("invalid limit")
+		}
+		parsed, err := strconv.Atoi(values[0])
+		if err != nil || parsed < 1 || parsed > taskPageMax {
+			return domain.ConsoleTaskCursor{}, 0, fmt.Errorf("invalid limit")
+		}
+		limit = parsed
+	}
+	values, exists := query["cursor"]
+	if !exists {
+		return domain.ConsoleTaskCursor{}, limit, nil
+	}
+	if len(values) != 1 || values[0] == "" {
+		return domain.ConsoleTaskCursor{}, 0, fmt.Errorf("invalid cursor")
+	}
+	cursor, err := decodeConsoleTaskCursor(values[0], agentID)
+	return cursor, limit, err
+}
+
+func encodeConsoleTaskCursor(agentID, updatedAt, taskID string) (string, error) {
+	if domain.ValidateIdentifier("agent_id", agentID) != nil || domain.ValidateOpaqueID("task_id", taskID) != nil {
+		return "", fmt.Errorf("invalid cursor identity")
+	}
+	parsed, err := time.Parse(time.RFC3339Nano, updatedAt)
+	if err != nil {
+		return "", err
+	}
+	envelope := consoleTaskCursorEnvelope{Version: 1, AgentID: agentID, UpdatedAt: parsed.UTC().Format(time.RFC3339Nano), TaskID: taskID}
+	envelope.Checksum = consoleTaskCursorChecksum(envelope)
+	encoded, err := json.Marshal(envelope)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(encoded), nil
+}
+
+func decodeConsoleTaskCursor(value, agentID string) (domain.ConsoleTaskCursor, error) {
+	decoded, err := base64.RawURLEncoding.DecodeString(value)
+	if err != nil {
+		return domain.ConsoleTaskCursor{}, err
+	}
+	var envelope consoleTaskCursorEnvelope
+	if err := json.Unmarshal(decoded, &envelope); err != nil {
+		return domain.ConsoleTaskCursor{}, err
+	}
+	canonical, err := json.Marshal(envelope)
+	if err != nil || !bytes.Equal(decoded, canonical) {
+		return domain.ConsoleTaskCursor{}, fmt.Errorf("non-canonical cursor envelope")
+	}
+	if envelope.Version != 1 || envelope.AgentID != agentID || envelope.Checksum == "" ||
+		envelope.Checksum != consoleTaskCursorChecksum(envelope) || domain.ValidateOpaqueID("task_id", envelope.TaskID) != nil {
+		return domain.ConsoleTaskCursor{}, fmt.Errorf("invalid cursor envelope")
+	}
+	updatedAt, err := time.Parse(time.RFC3339Nano, envelope.UpdatedAt)
+	if err != nil {
+		return domain.ConsoleTaskCursor{}, err
+	}
+	if updatedAt.UTC().Format(time.RFC3339Nano) != envelope.UpdatedAt {
+		return domain.ConsoleTaskCursor{}, fmt.Errorf("non-canonical cursor timestamp")
+	}
+	return domain.ConsoleTaskCursor{UpdatedAt: updatedAt.UTC(), TaskID: envelope.TaskID}, nil
+}
+
+func consoleTaskCursorChecksum(envelope consoleTaskCursorEnvelope) string {
+	digest := sha256.Sum256([]byte(fmt.Sprintf("%d\x00%s\x00%s\x00%s", envelope.Version, envelope.AgentID, envelope.UpdatedAt, envelope.TaskID)))
+	return base64.RawURLEncoding.EncodeToString(digest[:])
 }
 
 func writeJSON(w http.ResponseWriter, value any) {

@@ -37,6 +37,7 @@ type State interface {
 	ListMessages(context.Context, string) ([]domain.Message, error)
 	GetMessage(context.Context, string) (*domain.Message, error)
 	ListMailbox(context.Context, string, int64, int) ([]domain.MailboxItem, error)
+	GetMailboxItem(context.Context, string) (*domain.MailboxItem, error)
 	GetRunAttempt(context.Context, string) (*domain.RunAttempt, error)
 	GetWorkerInstance(context.Context, string) (*domain.WorkerInstance, error)
 	ListRunAttemptsForTask(context.Context, string, int) ([]domain.RunAttempt, error)
@@ -1181,6 +1182,33 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				model.Run = run
+			} else if ev.AggregateType == "task" {
+				task, projectionErr := h.taskEventSnapshot(streamContext, ev.AggregateID)
+				if projectionErr != nil {
+					return
+				}
+				model.Task = task
+			} else if ev.AggregateType == "mailbox_item" {
+				task, mailbox, projectionErr := h.mailboxEventSnapshot(streamContext, ev.AggregateID)
+				if projectionErr != nil {
+					return
+				}
+				model.Task = task
+				model.Mailbox = mailbox
+			} else if ev.AggregateType == "message" {
+				task, message, projectionErr := h.messageEventSnapshot(streamContext, ev.AggregateID)
+				if projectionErr != nil {
+					return
+				}
+				model.Task = task
+				model.Message = message
+			} else if ev.AggregateType == "approval_request" {
+				task, approval, projectionErr := h.approvalEventSnapshot(streamContext, ev.AggregateID)
+				if projectionErr != nil {
+					return
+				}
+				model.Task = task
+				model.Approval = approval
 			}
 			b, encodeErr := json.Marshal(model)
 			if encodeErr != nil {
@@ -1251,6 +1279,25 @@ func (h *Handler) eventMatchesAgent(ctx context.Context, event domain.JournalEve
 			return false, fmt.Errorf("invalid Worker event ownership projection")
 		}
 		return worker.AgentID == agentID, nil
+	case "mailbox_item":
+		item, err := h.state.GetMailboxItem(ctx, event.AggregateID)
+		if err != nil {
+			return false, fmt.Errorf("read Mailbox event ownership: %w", err)
+		}
+		if item == nil || item.ID != event.AggregateID || domain.ValidateOpaqueID("mailbox_item_id", item.ID) != nil ||
+			domain.ValidateOpaqueID("task_id", item.TaskID) != nil ||
+			domain.ValidateIdentifier("agent_id", item.TargetAgentID) != nil {
+			return false, fmt.Errorf("invalid Mailbox event ownership projection")
+		}
+		task, err := h.state.GetTask(ctx, item.TaskID)
+		if err != nil {
+			return false, fmt.Errorf("read Mailbox Task ownership: %w", err)
+		}
+		if task == nil || task.ID != item.TaskID || task.TargetAgentID != item.TargetAgentID ||
+			domain.ValidateIdentifier("agent_id", task.TargetAgentID) != nil {
+			return false, fmt.Errorf("invalid Mailbox Task ownership projection")
+		}
+		return task.TargetAgentID == agentID, nil
 	case "message":
 		message, err := h.state.GetMessage(ctx, event.AggregateID)
 		if err != nil {
@@ -1288,6 +1335,87 @@ func (h *Handler) eventMatchesAgent(ctx context.Context, event domain.JournalEve
 	default:
 		return false, nil
 	}
+}
+
+func (h *Handler) taskEventSnapshot(ctx context.Context, taskID string) (*openapi.ConsoleTaskReadModel, error) {
+	task, err := h.state.GetTask(ctx, taskID)
+	if err != nil {
+		return nil, fmt.Errorf("read Task projection: %w", err)
+	}
+	if task == nil || task.ID != taskID {
+		return nil, fmt.Errorf("invalid Task projection")
+	}
+	model, err := consoleapi.ProjectConsoleTask(*task)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Task projection: %w", err)
+	}
+	return &model, nil
+}
+
+func (h *Handler) mailboxEventSnapshot(ctx context.Context, itemID string) (*openapi.ConsoleTaskReadModel, *openapi.ConsoleMailboxReadModel, error) {
+	item, err := h.state.GetMailboxItem(ctx, itemID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("read Mailbox projection: %w", err)
+	}
+	if item == nil || item.ID != itemID {
+		return nil, nil, fmt.Errorf("invalid Mailbox projection")
+	}
+	mailbox, err := consoleapi.ProjectConsoleMailbox(*item)
+	if err != nil {
+		return nil, nil, fmt.Errorf("invalid Mailbox projection: %w", err)
+	}
+	task, err := h.taskEventSnapshot(ctx, item.TaskID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if task.AgentID != item.TargetAgentID || task.TaskID != item.TaskID {
+		return nil, nil, fmt.Errorf("invalid Mailbox Task projection ownership")
+	}
+	return task, &mailbox, nil
+}
+
+func (h *Handler) messageEventSnapshot(ctx context.Context, messageID string) (*openapi.ConsoleTaskReadModel, *openapi.ConsoleMessageReadModel, error) {
+	message, err := h.state.GetMessage(ctx, messageID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("read Message projection: %w", err)
+	}
+	if message == nil || message.ID != messageID {
+		return nil, nil, fmt.Errorf("invalid Message projection")
+	}
+	projected, err := consoleapi.ProjectConsoleMessage(*message)
+	if err != nil {
+		return nil, nil, fmt.Errorf("invalid Message projection: %w", err)
+	}
+	task, err := h.taskEventSnapshot(ctx, message.TaskID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if task.AgentID != message.TargetAgentID || task.TaskID != message.TaskID {
+		return nil, nil, fmt.Errorf("invalid Message Task projection ownership")
+	}
+	return task, &projected, nil
+}
+
+func (h *Handler) approvalEventSnapshot(ctx context.Context, approvalID string) (*openapi.ConsoleTaskReadModel, *openapi.ConsoleApprovalReadModel, error) {
+	approval, err := h.state.GetApprovalRequest(ctx, approvalID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("read Approval projection: %w", err)
+	}
+	if approval == nil || approval.ID != approvalID {
+		return nil, nil, fmt.Errorf("invalid Approval projection")
+	}
+	projected, err := consoleapi.ProjectConsoleApproval(*approval)
+	if err != nil {
+		return nil, nil, fmt.Errorf("invalid Approval projection: %w", err)
+	}
+	task, err := h.taskEventSnapshot(ctx, approval.TaskID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if task.TaskID != approval.TaskID {
+		return nil, nil, fmt.Errorf("invalid Approval Task projection ownership")
+	}
+	return task, &projected, nil
 }
 
 func (h *Handler) workerEventSnapshot(ctx context.Context, workerID string) (*openapi.WorkerReadModel, error) {
@@ -1353,7 +1481,7 @@ func (h *Handler) runEventSnapshot(ctx context.Context, runID string) (*openapi.
 
 func observableAggregate(aggregateType string) bool {
 	switch aggregateType {
-	case "", "task", "run_attempt", "runtime", "worker_instance", "message", "approval_request":
+	case "", "task", "run_attempt", "runtime", "worker_instance", "mailbox_item", "message", "approval_request":
 		return true
 	default:
 		return false

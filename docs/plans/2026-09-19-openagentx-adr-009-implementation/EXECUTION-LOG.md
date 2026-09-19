@@ -50,7 +50,7 @@ push/merge/安装来“修正”差异。
 |---|---|---|---|---|
 | P0 | ADR-008 基线、状态和 Git lineage 收口 | completed | `dad6c40`, `484db18` | GO |
 | 01 | 基线、能力盘点与契约冻结 | completed | `5717506` | GO |
-| 02 | 权威任务观察投影 | pending | - | WAIT |
+| 02 | 权威任务观察投影 | active | - | WAIT |
 | 03 | Runtime 安全输出与终态结果对齐 | pending | - | WAIT |
 | 04 | Task-centric Console reducer | pending | - | WAIT |
 | 05 | Pane 0 任务 TUI 与控制易用性 | pending | - | WAIT |
@@ -129,6 +129,64 @@ push/merge/安装来“修正”差异。
   没有产品行为、权限或外部状态变更。
 - 主计划和 Task 01 front matter 在本 docs-only gate record 同步为 `completed`；Task 02 保持
   `pending/WAIT`。
+
+### Task 02：权威任务观察投影
+
+- 开始时间：`2026-09-19`；baseline：`0e37e45309351e39790324f092e3b685b2fcf97e`；branch：
+  `codex/adr009-task-console`。
+- 本轮结果：交付 Agent-scoped Task list/detail、Attach suggested Task、单事务 Task snapshot 和
+  Task/Mailbox/Message/Approval SSE 安全投影。
+- 状态/CAS/竞态：Task version 与 Journal high-water 来自同一只读事务；分页按
+  `updated_at DESC, task_id DESC`；N/N+1 只能整体纳入快照或从 cursor 后重放。
+- 失败与权限：跨 Agent、坏 cursor、无效 identity/status、repository/projection/encode/write 失败均
+  fail closed，失败 frame 不推进 cursor；CLI viewer 仅通过 `console.read` 使用窄 Console route。
+- 非目标：不修改 Runtime adapter、Task 终态语义、reducer/TUI、Diagnostic 切换、schema、Web cookie/CSRF
+  或真实服务/DB/socket/tmux。
+- 证据预算：一个主要实现批次和一次独立验证批次；若同因测试夹具失败两次，按 `AGENTS.md` 停止原
+  验证路径并采用更小的等价证据，不扩大到 Task 03。
+
+#### Task 02 主要实现批次
+
+- Domain 增加 transport-neutral `ConsoleTaskCursor`/`ConsoleTaskSnapshot` aggregate；SQLite 新增稳定
+  keyset Task list 与单一 read transaction snapshot，不修改 schema。
+- Console 新增 Agent-scoped Task list/detail route，cursor 版本化、绑定 Agent/updated_at/task_id、带
+  checksum 且要求 canonical 编码；Attach 在原事务中增加最新非终态 `suggested_task`。
+- snapshot 同一事务读取 Task、原始 work Mailbox、latest Run 与精确 Worker generation、latest Message、
+  pending Approval 和 Journal high-water；跨 Agent统一 404。
+- Panel SSE 为 Task/Mailbox/Message/Approval 增加结构化安全投影；依赖对象同时携带所属 Task 投影以供
+  后续 reducer 关联。所有 repository、identity/status、safe projection、encode/write 错误在当前 frame
+  和 cursor 之前终止。
+- Console client 增加完整分页 Task options 与 detail snapshot 方法；总量 hard cap 10,000，继续只用
+  installation-bound CLI bearer。Web cookie/CSRF、CLI scope 白名单、Runtime、Task 终态和 TUI 未修改。
+- 变更共 14 个路径：10 个既有代码/测试文件、3 个新增代码/测试文件和本 execution log；无父仓、生成物、
+  credential 或真实运行状态变更。
+
+#### Task 02 失败与纠正
+
+| 日期 | 失败 | 根因/影响 | 纠正与结果 |
+|---|---|---|---|
+| 2026-09-19 | 首次编译型定向测试报 `internal/api/console/handler.go` 未使用 `strings` import | 纯编译错误，未产生运行或外部副作用 | 删除 import；四个受影响 package 编译通过 |
+| 2026-09-19 | 首次行为定向测试中 Panel SSE 的 agent filter/cursor recovery 用例失败 | 既有 fake Task/Message/Approval 只满足旧归属查询，缺 version/principal/time 等正式投影必需字段；新代码按设计 fail closed | 将 fixture 提升为合法持久化对象，增加 Mailbox fixture；产品校验未放宽，定向测试恢复通过 |
+| 2026-09-19 | 独立验证后审查发现 cursor decoder 接受等价非 canonical JSON，且 detail 尚未直接断言 latest Run/fencing 边界 | 不构成越权，但弱于冻结的 tamper fail-closed 与 Run snapshot 证据 | cursor 增加 canonical bytes/UTC 检查；detail 测试加入精确 generation 并断言 execution JSON/fencing 不泄漏；完整验证从头重跑通过 |
+
+#### Task 02 独立验证批次
+
+| 命令 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./... -count=1` | 0 / 20.91s | 全仓 Go 普通测试无缓存通过；Console 5.396s、Panel 18.413s、SQLite 12.301s |
+| `go test -race ./internal/api/console ./internal/api/panel ./internal/client/console ./internal/persistence/sqlite/... -count=1` | 0 / 41.33s | Task 02 全部受影响 package race 通过；Panel 38.634s |
+| `go vet ./internal/api/... ./internal/client/console ./internal/persistence/sqlite/...` | 0 / 0.51s | 无 vet 诊断 |
+| `go build -o /tmp/openagentx-adr009-task02 ./cmd/openagentx` | 0 / 2.95s | 独立临时产物构建成功；未覆盖 installed binary |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 / 0.15s | 全部类别 `CLEAN` |
+| `git diff --check` | 0 / <0.1s | 无 whitespace error |
+| `sha256sum docs/decisions/ADR-009-pane-zero-task-console-observability.md` | 0 / <0.1s | 仍为 `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69` |
+
+- 新测试覆盖：stable pagination/坏 cursor/跨 Agent、Attach suggestion、真实 CLI bearer role+scope、
+  snapshot N/N+1、Task/Run/Mailbox/Message/Approval 安全字段，以及 ownership/projection/encode/write 故障
+  不发送失败 event 或 N+1、下一请求从 last-applied 恢复。
+- 外部状态：未操作真实 HOME/DB/UDS/credential/default tmux/user-systemd/installed binary；未 push、merge
+  或修改 `steadyflow` 父仓。Task 02 当前仍为 `active/WAIT`，主计划/front matter 保持 `pending`。
+- Open issues：当前 Task 02 无 P0/P1；Runtime 过程输出和终态结果对齐仍按计划归属 Task 03，未提前实现。
 
 ## 7. 后续记录模板
 

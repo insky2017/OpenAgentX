@@ -191,6 +191,89 @@ func (c *Client) ListAgentOptions(ctx context.Context) ([]domain.ConsoleAgentOpt
 	}
 }
 
+func (c *Client) ListTaskOptions(ctx context.Context, agentID string) ([]openapi.ConsoleTaskOption, error) {
+	if err := domain.ValidateIdentifier("agent_id", agentID); err != nil {
+		return nil, err
+	}
+	const maxTaskOptions = 10000
+	path := strings.Replace(consoleapi.AgentTasksPath, "{agentID}", url.PathEscape(agentID), 1)
+	result := make([]openapi.ConsoleTaskOption, 0)
+	cursor := ""
+	var previous *openapi.ConsoleTaskOption
+	for {
+		query := url.Values{"limit": []string{"100"}}
+		if cursor != "" {
+			query.Set("cursor", cursor)
+		}
+		var page openapi.ConsoleTaskPage
+		if _, err := c.do(ctx, http.MethodGet, path, query, nil, &page, true, "", false); err != nil {
+			return nil, err
+		}
+		for index := range page.Tasks {
+			option := page.Tasks[index]
+			if err := validateTaskOption(option); err != nil || previous != nil && !taskOptionBefore(option, *previous) {
+				return nil, fmt.Errorf("Console Task list returned an invalid projection")
+			}
+			copy := option
+			previous = &copy
+			result = append(result, option)
+			if len(result) > maxTaskOptions {
+				return nil, fmt.Errorf("Console Task list exceeds the supported safe bound")
+			}
+		}
+		if !page.HasMore {
+			if page.NextCursor != "" {
+				return nil, fmt.Errorf("Console Task list returned an unexpected cursor")
+			}
+			return result, nil
+		}
+		if len(page.Tasks) == 0 || page.NextCursor == "" || page.NextCursor == cursor {
+			return nil, fmt.Errorf("Console Task list pagination did not advance")
+		}
+		cursor = page.NextCursor
+	}
+}
+
+func (c *Client) TaskSnapshot(ctx context.Context, agentID, taskID string) (openapi.ConsoleTaskSnapshot, error) {
+	if err := domain.ValidateIdentifier("agent_id", agentID); err != nil {
+		return openapi.ConsoleTaskSnapshot{}, err
+	}
+	if err := domain.ValidateOpaqueID("task_id", taskID); err != nil {
+		return openapi.ConsoleTaskSnapshot{}, err
+	}
+	path := strings.Replace(consoleapi.AgentTaskPath, "{agentID}", url.PathEscape(agentID), 1)
+	path = strings.Replace(path, "{taskID}", url.PathEscape(taskID), 1)
+	var result openapi.ConsoleTaskSnapshot
+	_, err := c.do(ctx, http.MethodGet, path, nil, nil, &result, true, "", false)
+	if err != nil {
+		return openapi.ConsoleTaskSnapshot{}, err
+	}
+	if result.Task.TaskID != taskID || result.Task.AgentID != agentID || result.SnapshotSequence < 0 {
+		return openapi.ConsoleTaskSnapshot{}, fmt.Errorf("Console Task snapshot returned an invalid identity or cursor")
+	}
+	return result, nil
+}
+
+func validateTaskOption(option openapi.ConsoleTaskOption) error {
+	if err := domain.ValidateOpaqueID("task_id", option.TaskID); err != nil {
+		return err
+	}
+	if option.Version <= 0 || !option.Status.Valid() || strings.TrimSpace(option.Summary) == "" {
+		return fmt.Errorf("invalid Task option status, version, or summary")
+	}
+	_, err := time.Parse(time.RFC3339Nano, option.UpdatedAt)
+	return err
+}
+
+func taskOptionBefore(current, previous openapi.ConsoleTaskOption) bool {
+	currentTime, currentErr := time.Parse(time.RFC3339Nano, current.UpdatedAt)
+	previousTime, previousErr := time.Parse(time.RFC3339Nano, previous.UpdatedAt)
+	if currentErr != nil || previousErr != nil {
+		return false
+	}
+	return currentTime.Before(previousTime) || currentTime.Equal(previousTime) && current.TaskID < previous.TaskID
+}
+
 func (c *Client) Dispatch(ctx context.Context, request openapi.CreateTaskRequest) (openapi.CreateTaskResponse, error) {
 	var result openapi.CreateTaskResponse
 	_, err := c.do(ctx, http.MethodPost, openapi.ControlCreateTaskPath, nil, request, &result, true, request.Meta.IdempotencyKey, false)

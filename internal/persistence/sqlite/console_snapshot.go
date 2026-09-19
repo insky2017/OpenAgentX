@@ -85,6 +85,10 @@ func (r *Repository) consoleSnapshot(ctx context.Context, agentID string, afterS
 			return snapshot, fmt.Errorf("read Console active RunAttempt Worker generation: %w", err)
 		}
 	}
+	snapshot.SuggestedTask, err = latestSuggestedConsoleTask(ctx, tx, agentID)
+	if err != nil {
+		return snapshot, err
+	}
 
 	if afterStateRead != nil {
 		afterStateRead()

@@ -26,6 +26,7 @@ type testPanelState struct {
 	workers           []domain.WorkerInstance
 	tasks             []domain.Task
 	messages          []domain.Message
+	mailboxes         []domain.MailboxItem
 	runs              []domain.RunAttempt
 	journal           []domain.JournalEvent
 	approvals         []domain.ApprovalRequest
@@ -84,6 +85,13 @@ func (s *faultingPanelState) GetMessage(ctx context.Context, id string) (*domain
 		return nil, err
 	}
 	return s.testPanelState.GetMessage(ctx, id)
+}
+
+func (s *faultingPanelState) GetMailboxItem(ctx context.Context, id string) (*domain.MailboxItem, error) {
+	if err := s.fault("GetMailboxItem"); err != nil {
+		return nil, err
+	}
+	return s.testPanelState.GetMailboxItem(ctx, id)
 }
 
 func (s *faultingPanelState) GetApprovalRequest(ctx context.Context, id string) (*domain.ApprovalRequest, error) {
@@ -175,6 +183,16 @@ func (s *testPanelState) GetWorkerInstance(_ context.Context, workerID string) (
 		if s.workers[index].ID == workerID {
 			worker := s.workers[index]
 			return &worker, nil
+		}
+	}
+	return nil, domain.ErrNotFound
+}
+
+func (s *testPanelState) GetMailboxItem(_ context.Context, itemID string) (*domain.MailboxItem, error) {
+	for index := range s.mailboxes {
+		if s.mailboxes[index].ID == itemID {
+			item := s.mailboxes[index]
+			return &item, nil
 		}
 	}
 	return nil, domain.ErrNotFound
@@ -808,6 +826,23 @@ type cancelingRecorder struct {
 	cancel context.CancelFunc
 }
 
+type failingSSEWriter struct {
+	header http.Header
+	status int
+}
+
+func (w *failingSSEWriter) Header() http.Header {
+	if w.header == nil {
+		w.header = make(http.Header)
+	}
+	return w.header
+}
+func (w *failingSSEWriter) WriteHeader(status int) { w.status = status }
+func (w *failingSSEWriter) Write([]byte) (int, error) {
+	return 0, errors.New("injected SSE write failure")
+}
+func (w *failingSSEWriter) Flush() {}
+
 func (r *cancelingRecorder) Flush() {
 	r.cancel()
 }
@@ -896,10 +931,10 @@ func TestSSERetentionBoundariesRemainReadable(t *testing.T) {
 
 func TestSSEAgentFilterIncludesOnlyMatchingSafeRuntimeEvents(t *testing.T) {
 	state := &testPanelState{
-		tasks:    []domain.Task{{ID: "task-quote", TargetAgentID: "quote"}, {ID: "task-risk", TargetAgentID: "risk"}},
-		messages: []domain.Message{{ID: "message-quote", TaskID: "task-quote"}, {ID: "message-risk", TaskID: "task-risk"}},
+		tasks:    []domain.Task{validSSETask("task-quote", "quote"), validSSETask("task-risk", "risk")},
+		messages: []domain.Message{validSSEMessage("message-quote", "task-quote", "quote"), validSSEMessage("message-risk", "task-risk", "risk")},
 		approvals: []domain.ApprovalRequest{
-			{ID: "approval-quote", TaskID: "task-quote"}, {ID: "approval-risk", TaskID: "task-risk"},
+			validSSEApproval("approval-quote", "task-quote"), validSSEApproval("approval-risk", "task-risk"),
 		},
 		runs: []domain.RunAttempt{{ID: "run-quote", AgentID: "quote"}, {ID: "run-risk", AgentID: "risk"}},
 		journal: []domain.JournalEvent{
@@ -986,6 +1021,8 @@ func TestSSEOwnershipLookupFailuresPreserveCursorAndRecover(t *testing.T) {
 		{name: "run", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "run_attempt", AggregateID: "run-fail", EventType: "run_attempt.started"}, failMethod: "GetRunAttempt", failErr: errors.New("injected Run ownership failure")},
 		{name: "runtime", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "runtime", AggregateID: "run-fail", EventType: "runtime.turn.output", Payload: json.RawMessage(`{"payload":{"text":"safe"}}`)}, failMethod: "GetRunAttempt", failErr: domain.ErrNotFound},
 		{name: "worker", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "worker_instance", AggregateID: "worker-fail", EventType: "worker.heartbeat"}, failMethod: "GetWorkerInstance", failErr: errors.New("injected Worker ownership failure")},
+		{name: "mailbox", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "mailbox_item", AggregateID: "mailbox-fail", EventType: "mailbox.claimed"}, failMethod: "GetMailboxItem", failErr: domain.ErrNotFound},
+		{name: "mailbox Task", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "mailbox_item", AggregateID: "mailbox-fail", EventType: "mailbox.claimed"}, failMethod: "GetTask", failErr: errors.New("injected Mailbox Task ownership failure")},
 		{name: "message", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "message", AggregateID: "message-fail", EventType: "message.created"}, failMethod: "GetMessage", failErr: domain.ErrNotFound},
 		{name: "message Task", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "message", AggregateID: "message-fail", EventType: "message.created"}, failMethod: "GetTask", failErr: errors.New("injected Message Task ownership failure")},
 		{name: "approval", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "approval_request", AggregateID: "approval-fail", EventType: "approval.requested"}, failMethod: "GetApprovalRequest", failErr: errors.New("injected Approval ownership failure")},
@@ -1015,6 +1052,10 @@ func TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover(t *testing.T) 
 		{name: "Run Worker generation query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "run_attempt", AggregateID: "run-fail", EventType: "run_attempt.started"}, failMethod: "GetWorkerInstance", failAtCall: 1},
 		{name: "Worker projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "worker_instance", AggregateID: "worker-fail", EventType: "worker.heartbeat"}, failMethod: "GetWorkerInstance", failAtCall: 2},
 		{name: "Worker Backend projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "worker_instance", AggregateID: "worker-fail", EventType: "worker.heartbeat"}, failMethod: "ListWorkerBackends", failAtCall: 1},
+		{name: "Task projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "task", AggregateID: "task-fail", EventType: "task.updated"}, failMethod: "GetTask", failAtCall: 2},
+		{name: "Mailbox projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "mailbox_item", AggregateID: "mailbox-fail", EventType: "mailbox.claimed"}, failMethod: "GetMailboxItem", failAtCall: 2},
+		{name: "Message projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "message", AggregateID: "message-fail", EventType: "message.created"}, failMethod: "GetMessage", failAtCall: 2},
+		{name: "Approval projection query", event: domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "approval_request", AggregateID: "approval-fail", EventType: "approval.requested"}, failMethod: "GetApprovalRequest", failAtCall: 2},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			state := newFaultingSSEState(testCase.event, testCase.failMethod, testCase.failAtCall, errors.New("injected projection failure"))
@@ -1024,6 +1065,48 @@ func TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover(t *testing.T) 
 		})
 	}
 }
+
+func TestSSEProjectsSafeTaskMailboxMessageAndApprovalState(t *testing.T) {
+	task := validSSETask("task-safe", "quote")
+	task.Content = "question token=private"
+	mailbox := domain.MailboxItem{Sequence: 1, ID: "mailbox-safe", TargetAgentID: "quote",
+		Kind: domain.MailboxKindTask, Lane: domain.MailboxLaneWork, TaskID: task.ID,
+		State: domain.MailboxStateClaimed, WorkerInstanceID: "worker-safe", FencingToken: 998877,
+		LeaseUntil: ptrTime(time.Date(2026, 9, 19, 1, 0, 0, 0, time.UTC)), CreatedAt: time.Date(2026, 9, 19, 0, 0, 0, 0, time.UTC)}
+	message := validSSEMessage("message-safe", task.ID, "quote")
+	message.Content = "answer password=private"
+	approval := validSSEApproval("approval-safe", task.ID)
+	approval.ScopeDigest = "private-scope-digest"
+	state := &testPanelState{
+		tasks: []domain.Task{task}, mailboxes: []domain.MailboxItem{mailbox}, messages: []domain.Message{message},
+		approvals: []domain.ApprovalRequest{approval}, journal: []domain.JournalEvent{
+			{Sequence: 1, ID: "event-task-safe", AggregateType: "task", AggregateID: task.ID, EventType: "task.created"},
+			{Sequence: 2, ID: "event-mailbox-safe", AggregateType: "mailbox_item", AggregateID: mailbox.ID, EventType: "mailbox.claimed"},
+			{Sequence: 3, ID: "event-message-safe", AggregateType: "message", AggregateID: message.ID, EventType: "message.created"},
+			{Sequence: 4, ID: "event-approval-safe", AggregateType: "approval_request", AggregateID: approval.ID, EventType: "approval.requested"},
+		},
+	}
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	ctx, cancel := context.WithCancel(context.Background())
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&agent_id=quote", nil).WithContext(ctx)
+	request.AddCookie(panel.cookie)
+	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
+	panel.handler.ServeHTTP(response, request)
+	body := response.Body.String()
+	for _, required := range []string{`"task":{"task_id":"task-safe"`, `"mailbox":{"mailbox_item_id":"mailbox-safe"`,
+		`"message":{"message_id":"message-safe"`, `"approval":{"approval_request_id":"approval-safe"`, "[REDACTED]"} {
+		if !strings.Contains(body, required) {
+			t.Fatalf("safe SSE projection omitted %q: %s", required, body)
+		}
+	}
+	for _, forbidden := range []string{"private", "998877", "scope_digest", "sender_principal", "idempotency", "fencing"} {
+		if strings.Contains(body, forbidden) {
+			t.Fatalf("safe SSE projection leaked %q: %s", forbidden, body)
+		}
+	}
+}
+
+func ptrTime(value time.Time) *time.Time { return &value }
 
 func TestRunEventSnapshotRejectsInvalidIdentityGenerationAndStatus(t *testing.T) {
 	for _, testCase := range []struct {
@@ -1071,14 +1154,28 @@ func TestSSEProjectionAndEncodingFailuresPreserveCursor(t *testing.T) {
 	})
 }
 
+func TestSSEWriteFailureDoesNotCrossTaskEvent(t *testing.T) {
+	event := domain.JournalEvent{Sequence: 1, ID: "event-fail", AggregateType: "task", AggregateID: "task-fail",
+		EventType: "task.updated", CreatedAt: time.Date(2026, 9, 19, 0, 0, 0, 0, time.UTC)}
+	state := newFaultingSSEState(event, "", 0, nil)
+	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
+	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&agent_id=quote&after_sequence=0", nil)
+	request.AddCookie(panel.cookie)
+	panel.handler.ServeHTTP(&failingSSEWriter{}, request)
+	assertSSERecoversEvents(t, panel, "0", 1, 2)
+}
+
 func newFaultingSSEState(event domain.JournalEvent, failMethod string, failAtCall int, failErr error) *faultingPanelState {
 	base := &testPanelState{
 		tasks: []domain.Task{
-			{ID: "task-fail", TargetAgentID: "quote"},
-			{ID: "task-after", TargetAgentID: "quote"},
+			validSSETask("task-fail", "quote"),
+			validSSETask("task-after", "quote"),
 		},
-		messages:  []domain.Message{{ID: "message-fail", TaskID: "task-fail"}},
-		approvals: []domain.ApprovalRequest{{ID: "approval-fail", TaskID: "task-fail"}},
+		mailboxes: []domain.MailboxItem{{Sequence: 1, ID: "mailbox-fail", TargetAgentID: "quote",
+			Kind: domain.MailboxKindTask, Lane: domain.MailboxLaneWork, TaskID: "task-fail", State: domain.MailboxStatePending,
+			CreatedAt: time.Date(2026, 9, 19, 0, 0, 0, 0, time.UTC)}},
+		messages:  []domain.Message{validSSEMessage("message-fail", "task-fail", "quote")},
+		approvals: []domain.ApprovalRequest{validSSEApproval("approval-fail", "task-fail")},
 		runs: []domain.RunAttempt{{ID: "run-fail", TaskID: "task-fail", AgentID: "quote", Version: 1,
 			Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-fail"}},
 		workers: []domain.WorkerInstance{{ID: "worker-fail", AgentID: "quote", Generation: 7, Status: domain.WorkerStatusOnline}},
@@ -1089,6 +1186,25 @@ func newFaultingSSEState(event domain.JournalEvent, failMethod string, failAtCal
 	return &faultingPanelState{backendPanelState: &backendPanelState{testPanelState: base,
 		backends: map[string][]openruntime.BackendRegistration{"worker-fail": {}}},
 		failMethod: failMethod, failAtCall: failAtCall, failErr: failErr}
+}
+
+func validSSETask(id, agentID string) domain.Task {
+	now := time.Date(2026, 9, 19, 0, 0, 0, 0, time.UTC).Format(time.RFC3339Nano)
+	return domain.Task{ID: id, Version: 1, SenderPrincipalID: "human-owner", TargetAgentID: agentID,
+		OrganizationID: "org-main", DispatchMode: domain.DispatchModeDirect, IdempotencyKey: "idem-" + id,
+		Content: "safe content", Status: domain.TaskStatusQueued, CreatedAt: now, UpdatedAt: now}
+}
+
+func validSSEMessage(id, taskID, agentID string) domain.Message {
+	return domain.Message{ID: id, Version: 1, Sequence: 1, TaskID: taskID, SenderPrincipalID: "human-owner",
+		TargetAgentID: agentID, Kind: domain.MessageKindInstruction, Content: "safe message",
+		CreatedAt: time.Date(2026, 9, 19, 0, 0, 0, 0, time.UTC).Format(time.RFC3339Nano)}
+}
+
+func validSSEApproval(id, taskID string) domain.ApprovalRequest {
+	return domain.ApprovalRequest{ID: id, TaskID: taskID, Mode: domain.ApprovalModePreflight,
+		ScopeDigest: "scope-" + id, State: domain.ApprovalRequestPending,
+		ExpiresAt: time.Date(2026, 9, 19, 1, 0, 0, 0, time.UTC), CreatedAt: time.Date(2026, 9, 19, 0, 0, 0, 0, time.UTC)}
 }
 
 func assertSSEStopsBeforeEvent(t *testing.T, panel authenticatedPanel, after string) {

@@ -128,15 +128,83 @@ type TurnResultReadModel struct {
 }
 
 type JournalEventReadModel struct {
-	Sequence      int64                `json:"sequence"`
-	ID            string               `json:"event_id"`
-	AggregateType string               `json:"aggregate_type"`
-	AggregateID   string               `json:"aggregate_id"`
-	EventType     string               `json:"event_type"`
-	CreatedAt     time.Time            `json:"created_at"`
-	Output        *SafeOutputReadModel `json:"output,omitempty"`
-	Worker        *WorkerReadModel     `json:"worker,omitempty"`
-	Run           *RunAttemptReadModel `json:"run,omitempty"`
+	Sequence      int64                     `json:"sequence"`
+	ID            string                    `json:"event_id"`
+	AggregateType string                    `json:"aggregate_type"`
+	AggregateID   string                    `json:"aggregate_id"`
+	EventType     string                    `json:"event_type"`
+	CreatedAt     time.Time                 `json:"created_at"`
+	Output        *SafeOutputReadModel      `json:"output,omitempty"`
+	Worker        *WorkerReadModel          `json:"worker,omitempty"`
+	Run           *RunAttemptReadModel      `json:"run,omitempty"`
+	Task          *ConsoleTaskReadModel     `json:"task,omitempty"`
+	Mailbox       *ConsoleMailboxReadModel  `json:"mailbox,omitempty"`
+	Message       *ConsoleMessageReadModel  `json:"message,omitempty"`
+	Approval      *ConsoleApprovalReadModel `json:"approval,omitempty"`
+}
+
+type ConsoleTaskOption struct {
+	TaskID    string            `json:"task_id"`
+	Version   int64             `json:"version"`
+	Status    domain.TaskStatus `json:"status"`
+	Summary   string            `json:"summary"`
+	UpdatedAt string            `json:"updated_at"`
+}
+
+type ConsoleTaskPage struct {
+	Tasks      []ConsoleTaskOption `json:"tasks"`
+	NextCursor string              `json:"next_cursor,omitempty"`
+	HasMore    bool                `json:"has_more"`
+}
+
+type ConsoleTaskSnapshot struct {
+	Task             ConsoleTaskReadModel      `json:"task"`
+	WorkDelivery     *ConsoleMailboxReadModel  `json:"work_delivery,omitempty"`
+	LatestRun        *RunAttemptReadModel      `json:"latest_run,omitempty"`
+	LatestMessage    *ConsoleMessageReadModel  `json:"latest_message,omitempty"`
+	PendingApproval  *ConsoleApprovalReadModel `json:"pending_approval,omitempty"`
+	SnapshotSequence int64                     `json:"snapshot_sequence"`
+}
+
+type ConsoleTaskReadModel struct {
+	TaskID    string            `json:"task_id"`
+	Version   int64             `json:"version"`
+	AgentID   string            `json:"agent_id"`
+	Status    domain.TaskStatus `json:"status"`
+	Content   string            `json:"content"`
+	Result    *string           `json:"result,omitempty"`
+	Error     *string           `json:"error,omitempty"`
+	CreatedAt string            `json:"created_at"`
+	UpdatedAt string            `json:"updated_at"`
+}
+
+type ConsoleMailboxReadModel struct {
+	MailboxItemID    string              `json:"mailbox_item_id"`
+	State            domain.MailboxState `json:"state"`
+	Attempts         int                 `json:"attempts"`
+	WorkerInstanceID string              `json:"worker_instance_id,omitempty"`
+	LeaseUntil       *time.Time          `json:"lease_until,omitempty"`
+	CreatedAt        time.Time           `json:"created_at"`
+	AcceptedAt       *time.Time          `json:"accepted_at,omitempty"`
+}
+
+type ConsoleMessageReadModel struct {
+	MessageID string             `json:"message_id"`
+	Version   int64              `json:"version"`
+	Sequence  int64              `json:"sequence"`
+	Kind      domain.MessageKind `json:"kind"`
+	Content   string             `json:"content"`
+	CreatedAt string             `json:"created_at"`
+}
+
+type ConsoleApprovalReadModel struct {
+	ApprovalRequestID  string                      `json:"approval_request_id"`
+	Mode               domain.ApprovalMode         `json:"mode"`
+	State              domain.ApprovalRequestState `json:"state"`
+	TargetRunID        string                      `json:"target_run_id,omitempty"`
+	ExpectedRunVersion int64                       `json:"expected_run_version,omitempty"`
+	ExpiresAt          time.Time                   `json:"expires_at"`
+	CreatedAt          time.Time                   `json:"created_at"`
 }
 
 type SafeOutputReadModel struct {

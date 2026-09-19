@@ -328,6 +328,68 @@ func TestListAgentOptionsUsesAuthenticatedPaginatedConsoleAPI(t *testing.T) {
 	}
 }
 
+func TestTaskOptionsAndSnapshotUseAuthenticatedConsoleAPIs(t *testing.T) {
+	var cursors []string
+	newer := time.Date(2026, 9, 19, 2, 0, 0, 0, time.UTC).Format(time.RFC3339Nano)
+	older := time.Date(2026, 9, 19, 1, 0, 0, 0, time.UTC).Format(time.RFC3339Nano)
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if cliAuthResponse(w, r) {
+			return
+		}
+		if r.Header.Get("Authorization") != "Bearer opaque-token-value" {
+			http.Error(w, "missing session", http.StatusUnauthorized)
+			return
+		}
+		switch r.URL.Path {
+		case "/api/console/v1/agents/quote/tasks":
+			cursor := r.URL.Query().Get("cursor")
+			cursors = append(cursors, cursor)
+			page := openapi.ConsoleTaskPage{}
+			if cursor == "" {
+				page.Tasks = []openapi.ConsoleTaskOption{
+					{TaskID: "task-b", Version: 2, Status: domain.TaskStatusRunning, Summary: "new", UpdatedAt: newer},
+					{TaskID: "task-a", Version: 1, Status: domain.TaskStatusQueued, Summary: "old", UpdatedAt: older},
+				}
+				page.HasMore = true
+				page.NextCursor = "opaque-next"
+			} else if cursor == "opaque-next" {
+				page.Tasks = []openapi.ConsoleTaskOption{
+					{TaskID: "task-0", Version: 3, Status: domain.TaskStatusSucceeded, Summary: "done", UpdatedAt: older},
+				}
+			} else {
+				http.Error(w, "bad cursor", http.StatusBadRequest)
+				return
+			}
+			_ = json.NewEncoder(w).Encode(page)
+		case "/api/console/v1/agents/quote/tasks/task-b":
+			_ = json.NewEncoder(w).Encode(openapi.ConsoleTaskSnapshot{
+				Task: openapi.ConsoleTaskReadModel{TaskID: "task-b", Version: 2, AgentID: "quote",
+					Status: domain.TaskStatusRunning, Content: "safe", CreatedAt: older, UpdatedAt: newer},
+				SnapshotSequence: 44,
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	})
+	client := newUnixTestClient(t, handler)
+	ctx := context.Background()
+	if _, err := client.LoginCredential(ctx, "owner", "password"); err != nil {
+		t.Fatal(err)
+	}
+	options, err := client.ListTaskOptions(ctx, "quote")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(options) != 3 || options[0].TaskID != "task-b" || options[2].TaskID != "task-0" ||
+		!reflect.DeepEqual(cursors, []string{"", "opaque-next"}) {
+		t.Fatalf("Task options=%+v cursors=%v", options, cursors)
+	}
+	snapshot, err := client.TaskSnapshot(ctx, "quote", "task-b")
+	if err != nil || snapshot.Task.Version != 2 || snapshot.SnapshotSequence != 44 {
+		t.Fatalf("Task snapshot=%+v err=%v", snapshot, err)
+	}
+}
+
 func TestStoredCredentialIsNotSentAfterSocketInstallationReplacement(t *testing.T) {
 	authenticatedRequests := 0
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
