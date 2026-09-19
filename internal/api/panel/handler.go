@@ -472,7 +472,7 @@ func decodeTaskCursor(value string) (taskCursor, error) {
 }
 
 func taskListItem(task domain.Task) openapi.TaskListItem {
-	summary := strings.TrimSpace(strings.SplitN(task.Content, "\n", 2)[0])
+	summary := strings.TrimSpace(strings.SplitN(safeoutput.RedactText(task.Content), "\n", 2)[0])
 	if summary == "" {
 		summary = task.ID
 	}
@@ -519,11 +519,11 @@ func projectRuntimeOutput(event domain.JournalEvent) (*openapi.SafeOutputReadMod
 	if len(envelope.Payload) == 0 {
 		return nil, nil
 	}
-	projected := safeoutput.ProjectRuntimePayload(envelope.Payload)
-	var output openapi.SafeOutputReadModel
-	if len(projected) == 0 {
-		return nil, fmt.Errorf("runtime event projection is invalid")
+	projected, err := safeoutput.ProjectRuntimePayload(envelope.Payload)
+	if err != nil {
+		return nil, err
 	}
+	var output openapi.SafeOutputReadModel
 	if err := json.Unmarshal(projected, &output); err != nil {
 		return nil, fmt.Errorf("decode safe runtime event projection: %w", err)
 	}
@@ -564,26 +564,30 @@ func runReadModel(run domain.RunAttempt, worker *domain.WorkerInstance) openapi.
 }
 
 func turnResultReadModel(resultJSON string) (*openapi.TurnResultReadModel, string) {
-	if strings.TrimSpace(resultJSON) == "" {
-		return nil, "not_recorded"
-	}
-	var result openruntime.TurnResult
-	if err := json.Unmarshal([]byte(resultJSON), &result); err != nil || !result.Status.Valid() {
-		return nil, "invalid"
+	result, state := safeoutput.DecodeTurnResult(resultJSON)
+	if result == nil {
+		return nil, state
 	}
 	source := "not_recorded"
 	if result.RuntimeSideEffectsKnown != nil {
 		source = "runtime_reported"
 	}
 	return &openapi.TurnResultReadModel{
-		RuntimeStatus: result.Status, Body: safeoutput.RedactText(result.Result), Error: safeoutput.RedactText(result.Error),
+		RuntimeStatus: result.Status, Body: result.Result, BodyTruncated: result.ResultTruncated,
+		Error: result.Error, ErrorTruncated: result.ErrorTruncated,
 		RuntimeSideEffectsKnown: result.RuntimeSideEffectsKnown, SideEffectsSource: source,
 		BusinessVerificationSource: "not_recorded",
-	}, "available"
+	}, state
 }
 
 func taskReadModel(task domain.Task) openapi.TaskReadModelTask {
-	return openapi.TaskReadModelTask{ID: task.ID, Version: task.Version, TargetAgentID: task.TargetAgentID, OrganizationID: task.OrganizationID, DispatchMode: task.DispatchMode, Content: task.Content, Status: task.Status, Result: task.Result, Error: task.Error, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
+	outcome := safeoutput.ProjectOutcome(task.IsTerminal(), task.Result, task.Error)
+	return openapi.TaskReadModelTask{ID: task.ID, Version: task.Version, TargetAgentID: task.TargetAgentID,
+		OrganizationID: task.OrganizationID, DispatchMode: task.DispatchMode,
+		Content: safeoutput.RedactText(task.Content), Status: task.Status,
+		Result: outcome.Result, ResultTruncated: outcome.ResultTruncated,
+		Error: outcome.Error, ErrorTruncated: outcome.ErrorTruncated, OutcomeState: outcome.State,
+		CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
 }
 
 func resolvedNetwork(run domain.RunAttempt) domain.NetworkPolicy {
@@ -1240,6 +1244,7 @@ func stripDiagnostic(event *openapi.JournalEventReadModel) {
 	}
 	output := *event.Output
 	output.Diagnostic = ""
+	output.DiagnosticTruncated = false
 	if output.Stage == "" && output.Status == "" && output.Text == "" && !output.HasOutput && !output.HasError {
 		event.Output = nil
 		return

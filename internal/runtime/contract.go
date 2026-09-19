@@ -17,6 +17,8 @@ var (
 	ErrBackendCrashed      = errors.New("runtime backend crashed")
 )
 
+const MaxPublicOutputEvents = 256
+
 type SteerMode string
 
 const (
@@ -230,7 +232,9 @@ type TurnResult struct {
 	Status                  TurnResultStatus `json:"status"`
 	ProviderSessionID       string           `json:"provider_session_id,omitempty"`
 	Result                  string           `json:"result,omitempty"`
+	ResultTruncated         bool             `json:"result_truncated,omitempty"`
 	Error                   string           `json:"error,omitempty"`
+	ErrorTruncated          bool             `json:"error_truncated,omitempty"`
 	UsageJSON               json.RawMessage  `json:"usage,omitempty"`
 	SideEffectsKnown        bool             `json:"side_effects_known"`
 	RuntimeSideEffectsKnown *bool            `json:"runtime_side_effects_known,omitempty"`
@@ -242,6 +246,12 @@ func (r TurnResult) Validate() error {
 	}
 	if len(r.UsageJSON) != 0 && !json.Valid(r.UsageJSON) {
 		return domain.ErrInvalidInput("turn usage must be valid JSON")
+	}
+	if r.ResultTruncated && r.Result == "" {
+		return domain.ErrInvalidInput("truncated turn result must include a safe result")
+	}
+	if r.ErrorTruncated && r.Error == "" {
+		return domain.ErrInvalidInput("truncated turn error must include a safe error")
 	}
 	return nil
 }

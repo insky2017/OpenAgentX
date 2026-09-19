@@ -454,6 +454,12 @@ func (r *Repository) AppendRunEvents(
 	if err != nil {
 		return err
 	}
+	var publicEventCount int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM event_journal
+		WHERE aggregate_type='run_attempt' AND aggregate_id=?
+		AND event_type LIKE 'runtime.%' AND event_type != 'runtime.approval.requested'`, runID).Scan(&publicEventCount); err != nil {
+		return fmt.Errorf("count persisted Runtime output events: %w", err)
+	}
 	approvalSeen := false
 	for _, event := range events {
 		var envelope struct {
@@ -524,6 +530,12 @@ func (r *Repository) AppendRunEvents(
 				return err
 			}
 			continue
+		}
+		if strings.HasPrefix(event.EventType, "runtime.") {
+			if publicEventCount >= openruntime.MaxPublicOutputEvents {
+				continue
+			}
+			publicEventCount++
 		}
 		if err := insertJournal(ctx, tx, event); err != nil {
 			return err

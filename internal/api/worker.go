@@ -462,6 +462,9 @@ func (r EventBatch) Validate() error {
 	if len(r.Events) == 0 {
 		return domain.ErrInvalidInput("event batch cannot be empty")
 	}
+	if len(r.Events) > runtime.MaxPublicOutputEvents {
+		return domain.ErrInvalidInput("event batch exceeds the public Runtime event limit")
+	}
 	for _, event := range r.Events {
 		if err := event.Validate(); err != nil {
 			return err

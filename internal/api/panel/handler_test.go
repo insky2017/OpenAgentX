@@ -1360,6 +1360,16 @@ func TestSSEModeSeparatesNormalAndDiagnosticSafeProjection(t *testing.T) {
 	}
 }
 
+func TestNormalProjectionClearsDiagnosticTruncationMetadata(t *testing.T) {
+	event := openapi.JournalEventReadModel{Output: &openapi.SafeOutputReadModel{
+		Text: "safe", HasOutput: true, Diagnostic: "redacted detail", DiagnosticTruncated: true, HasError: true,
+	}}
+	stripDiagnostic(&event)
+	if event.Output == nil || event.Output.Diagnostic != "" || event.Output.DiagnosticTruncated {
+		t.Fatalf("Normal projection retained Diagnostic metadata: %+v", event.Output)
+	}
+}
+
 func TestSSEClosesAtInjectedCLIAbsoluteExpiry(t *testing.T) {
 	handler, token := newCLIAuthenticatedPanel(t, domain.WebRoleOwner)
 	expired := make(chan time.Time, 1)

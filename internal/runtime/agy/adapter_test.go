@@ -17,6 +17,7 @@ import (
 
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/safeoutput"
 )
 
 func TestParseStreamJSONNormalizesEventsAndResult(t *testing.T) {
@@ -80,11 +81,54 @@ func TestParseStreamJSONDegradesUnknownEventType(t *testing.T) {
 	})
 	input := `{"event":"secret_session_dump","secret_session_dump":{"status":"running-token","text":"secret-value"}}
 {"event":"result","result":{"status":"SUCCESS","response":"done"}}`
-	if _, err := parseStreamJSON(strings.NewReader(input), sink); err != nil {
+	result, err := parseStreamJSON(strings.NewReader(input), sink)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if len(events) != 2 || events[0].Type != "agy.event" || strings.Contains(string(events[0].Payload), "secret") || strings.Contains(string(events[0].Payload), "running-token") {
 		t.Fatalf("unknown event was not safely degraded: %+v", events)
+	}
+	if result.Result != "done" || strings.Contains(result.Result, "secret-value") {
+		t.Fatalf("unknown event polluted terminal result")
+	}
+}
+
+func TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit(t *testing.T) {
+	var input strings.Builder
+	for index := 0; index < openruntime.MaxPublicOutputEvents+20; index++ {
+		input.WriteString(`{"event":"step_update","step_update":{"status":"running","text":"line"}}` + "\n")
+	}
+	input.WriteString(`{"event":"result","result":{"status":"SUCCESS","response":"done"}}` + "\n")
+	emitted := 0
+	result, err := parseStreamJSON(strings.NewReader(input.String()), openruntime.EventSinkFunc(func(context.Context, openruntime.RuntimeEvent) error {
+		emitted++
+		return nil
+	}))
+	if err != nil || result.Status != openruntime.TurnResultSucceeded || emitted != openruntime.MaxPublicOutputEvents {
+		t.Fatalf("result status=%s err=%v emitted=%d", result.Status, err, emitted)
+	}
+
+	sinkFailure := errors.New("persist output")
+	result, err = parseStreamJSON(strings.NewReader(`{"event":"step_update","step_update":{"status":"running","text":"safe"}}
+{"event":"result","result":{"status":"SUCCESS","response":"done"}}`), openruntime.EventSinkFunc(func(context.Context, openruntime.RuntimeEvent) error {
+		return sinkFailure
+	}))
+	if !errors.Is(err, sinkFailure) || result.Status != openruntime.TurnResultSucceeded || result.Result != "safedone" {
+		t.Fatalf("sink failure result status=%s body=%q err=%v", result.Status, result.Result, err)
+	}
+
+	oversized := `{"event":"result","result":{"status":"SUCCESS","response":"` + strings.Repeat("x", maxCapturedOutput+1) + `"}}`
+	result, err = parseStreamJSON(strings.NewReader(oversized), nil)
+	if err == nil || !strings.Contains(err.Error(), "exceeded the configured limit") || !result.ResultTruncated ||
+		len(result.Result) > safeoutput.MaxTextBytes+len(safeoutput.TruncatedMarker) {
+		t.Fatalf("oversized result len=%d truncated=%t err=%v", len(result.Result), result.ResultTruncated, err)
+	}
+}
+
+func TestParseStreamJSONRejectsContradictoryTerminal(t *testing.T) {
+	result, err := parseStreamJSON(strings.NewReader(`{"event":"result","result":{"status":"SUCCESS","response":"misleading","error":"failed"}}`), nil)
+	if err == nil || !strings.Contains(err.Error(), "contradicted") || result.Status != openruntime.TurnResultSucceeded {
+		t.Fatalf("result status=%s err=%v", result.Status, err)
 	}
 }
 

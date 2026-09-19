@@ -9,7 +9,6 @@ import (
 
 	openapi "openagentx/internal/api"
 	"openagentx/internal/domain"
-	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/safeoutput"
 )
 
@@ -25,10 +24,12 @@ func ProjectConsoleTask(task domain.Task) (openapi.ConsoleTaskReadModel, error) 
 	if _, err := time.Parse(time.RFC3339Nano, task.UpdatedAt); err != nil {
 		return openapi.ConsoleTaskReadModel{}, fmt.Errorf("invalid Task updated_at: %w", err)
 	}
+	outcome := safeoutput.ProjectOutcome(task.IsTerminal(), task.Result, task.Error)
 	return openapi.ConsoleTaskReadModel{
 		TaskID: task.ID, Version: task.Version, AgentID: task.TargetAgentID, Status: task.Status,
-		Content: safeoutput.RedactText(task.Content), Result: redactOptional(task.Result),
-		Error: redactOptional(task.Error), CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt,
+		Content: safeoutput.RedactText(task.Content), Result: outcome.Result, ResultTruncated: outcome.ResultTruncated,
+		Error: outcome.Error, ErrorTruncated: outcome.ErrorTruncated, OutcomeState: outcome.State,
+		CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt,
 	}, nil
 }
 
@@ -179,22 +180,19 @@ func projectConsoleTaskSnapshot(snapshot domain.ConsoleTaskSnapshot, agentID, ta
 }
 
 func consoleTurnResult(raw string) (*openapi.TurnResultReadModel, string) {
-	if strings.TrimSpace(raw) == "" {
-		return nil, "not_recorded"
-	}
-	var result openruntime.TurnResult
-	if json.Unmarshal([]byte(raw), &result) != nil || !result.Status.Valid() {
-		return nil, "invalid"
+	result, state := safeoutput.DecodeTurnResult(raw)
+	if result == nil {
+		return nil, state
 	}
 	source := "not_recorded"
 	if result.RuntimeSideEffectsKnown != nil {
 		source = "runtime_reported"
 	}
 	return &openapi.TurnResultReadModel{
-		RuntimeStatus: result.Status, Body: safeoutput.RedactText(result.Result),
-		Error: safeoutput.RedactText(result.Error), RuntimeSideEffectsKnown: result.RuntimeSideEffectsKnown,
+		RuntimeStatus: result.Status, Body: result.Result, BodyTruncated: result.ResultTruncated,
+		Error: result.Error, ErrorTruncated: result.ErrorTruncated, RuntimeSideEffectsKnown: result.RuntimeSideEffectsKnown,
 		SideEffectsSource: source, BusinessVerificationSource: "not_recorded",
-	}, "available"
+	}, state
 }
 
 func resolvedConsoleNetwork(run domain.RunAttempt) domain.NetworkPolicy {
@@ -203,14 +201,6 @@ func resolvedConsoleNetwork(run domain.RunAttempt) domain.NetworkPolicy {
 		return domain.NetworkPolicy{}
 	}
 	return resolved.Spec.Network
-}
-
-func redactOptional(value *string) *string {
-	if value == nil {
-		return nil
-	}
-	redacted := safeoutput.RedactText(*value)
-	return &redacted
 }
 
 func cloneTime(value *time.Time) *time.Time {

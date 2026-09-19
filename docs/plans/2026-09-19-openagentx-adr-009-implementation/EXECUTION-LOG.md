@@ -51,7 +51,7 @@ push/merge/安装来“修正”差异。
 | P0 | ADR-008 基线、状态和 Git lineage 收口 | completed | `dad6c40`, `484db18` | GO |
 | 01 | 基线、能力盘点与契约冻结 | completed | `5717506` | GO |
 | 02 | 权威任务观察投影 | completed | `84a2c15` | GO |
-| 03 | Runtime 安全输出与终态结果对齐 | pending | - | WAIT |
+| 03 | Runtime 安全输出与终态结果对齐 | active | - | WAIT |
 | 04 | Task-centric Console reducer | pending | - | WAIT |
 | 05 | Pane 0 任务 TUI 与控制易用性 | pending | - | WAIT |
 | 06 | 同 pane Diagnostic 模式 | pending | - | WAIT |
@@ -201,6 +201,80 @@ push/merge/安装来“修正”差异。
 - Gate 检查首次在 zsh 中把三个路径误作为单一标量传给 `sed/git add`，命令在暂存前以路径不存在退出；
   未产生 staging 或提交。随后改用显式路径数组并重新执行全部 whitespace、相对链接、状态一致性和
   staged-path 检查。
+
+### Task 03：Runtime 安全输出与终态结果对齐
+
+- 开始时间：`2026-09-20`；baseline：`be753ee1a1bb058799888199f385da900201263c`；branch：
+  `codex/adr009-task-console`；worktree：`/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`。
+- 本轮用户结果：支持增量的 Runtime 产生有界安全输出，所有正式 Adapter 都给出可验证的终态或明确
+  fail closed；Console/Web 共用投影并区分 Task outcome、Runtime reply、无结果、无效和截断。
+- 状态/CAS/幂等：`FinishRun` 的 Run、Task、Journal 原子关系不变；最终回复只记录一次；terminal 后的
+  迟到输出不能回退状态；每个 Run 最多持久化 256 条实时输出。
+- 失败/竞态：覆盖空流、畸形 envelope、无 terminal、仅 stderr、非零退出、sink 失败、超限、cancel/exit、
+  最后一条 output 与 finish 顺序、重复 finish 和事务回滚；失败不推断成功。
+- 安全/资源：公开文本单字段 4 KiB，Adapter authoritative buffer 有界；不输出或持久化 Secret、raw
+  stderr、hidden reasoning 和未知 JSON 字段。
+- 非目标：不修改 ADR-006/007 语义，不实现 reducer/TUI/Diagnostic 切换、Runtime TTY、tmux 控制或真实
+  部署；主计划和 Task 03 front matter 保持 `pending`。
+- 证据预算：一个主要实现批次和一次独立验证批次；同因夹具/验证工具失败两次即停止该路径，改用更小
+  等价证据或报告阻断，不扩大到 Task 04。
+
+#### Task 03 主要实现批次
+
+- `safeoutput` 增加幂等文本投影、截断元数据、Task outcome state 和 stored TurnResult 解码；AGY、
+  CodeBuddy、ACP 与 Worker service 在返回/持久化 TurnResult 前使用同一规则，服务端保留第二道校验。
+- TurnResult/API 增加 result/error truncation 标记；Task projection 增加 `pending/not_recorded/available/truncated`
+  outcome，Run projection 增加 `not_recorded/invalid/empty/available/truncated` reply state。Console 与 Web
+  均复用相同 projector，旧 v1 JSON 缺少新可选字段时仍可读取。
+- AGY 只采信已知 init/step/result/error 字段，未知事件不进入最终 reply；空流、畸形、无 terminal、矛盾
+  status、sink 失败和 1 MiB authoritative output 超限均返回 error，最终由 Worker 归类 `uncertain`。
+- CodeBuddy 保持 text stdout、完整行增量、1 MiB authoritative buffer 和 256 event 上限；最终 TurnResult
+  在 Adapter 返回前脱敏/限长。ACP 不再忽略 malformed/sink/stderr/process failure，也不再缺 terminal 默认
+  success；stderr 有界读取后仅进入脱敏诊断。
+- Worker API 单 batch 最大 256 event；SQLite 在同一受 fencing/lease 保护的事务内按 Run 持久化最多 256
+  条公开 Runtime event，超额片段安全 no-op，approval 与最终 Run/Task Journal 不受该上限影响。
+- `FinishRun` 原有 Run、Task、SessionBinding、Journal 单事务和重复 finish 幂等保持不变；新增测试证明最后
+  output sequence 早于 terminal event，最终安全 result 与 truncation metadata 同时提交。
+
+#### Task 03 失败与纠正
+
+| 日期 | 失败 | 根因/影响 | 纠正与结果 |
+|---|---|---|---|
+| 2026-09-20 | 首次定向测试拒绝未知 AGY event 携带的伪 status | 严格状态校验误把未知字段当正式能力；无外部副作用 | 未知 event 整体降级为空安全 event，不采信 status/text；terminal result 继续严格校验 |
+| 2026-09-20 | AGY event-cap fixture 的 `step_update.status=running` 被拒绝 | 过程状态与 terminal enum 未分开 | 明确接受 starting/running/pending/processing 为非终态且不写入最终 status；其余未知状态仍 fail closed |
+| 2026-09-20 | 既有 Worker UDS E2E 在 `turn.output` 缺 JSON payload 时返回 500 | 旧 fixture 依赖缺字段 event 被静默持久化 | fixture 改为合法空对象；产品保持非对象/缺失 projection fail closed |
+| 2026-09-20 | CodeBuddy 安全结果断言假定 `[REDACTED]` 外保留 JSON 引号 | 测试绑定了非协议格式，秘密已正确移除 | 改为断言原值均消失且存在 redaction marker；未放宽 projector |
+- 自审进一步修正：截断 marker 二次投影改为幂等；AGY terminal status 不再继承先前 step 状态；ACP
+  重复 terminal fail closed；三个正式 Adapter 均在返回 TurnResult 前执行共享安全投影。
+- 安全自审发现新增 `diagnostic_truncated` 若不随内容清空，会向 Normal 模式暴露诊断存在性的侧信号；
+  `stripDiagnostic` 已同时清除内容和 truncation metadata，并增加直接回归测试。
+
+#### Task 03 独立验证批次
+
+| 命令 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./internal/safeoutput ./internal/runtime/agy ./internal/runtime/codebuddy ./internal/runtime/acp ./internal/controlplane ./internal/api/console ./internal/api/panel ./internal/persistence/sqlite/... -count=1` | 0 / 约 18s | Task 03 Adapter、service、API、SQLite 定向普通测试通过 |
+| `go test -race ./internal/worker/... ./internal/safeoutput/... ./internal/runtime/agy ./internal/runtime/codebuddy ./internal/runtime/acp ./internal/controlplane ./internal/api/panel ./internal/api/console ./internal/persistence/sqlite/... -count=1` | 0 / 43.55s | 全部受影响链路 race 通过 |
+| `go test ./... -count=1` | 0 / 21.60s | 全仓无缓存普通测试通过 |
+| `go vet ./internal/worker/... ./internal/safeoutput/... ./internal/runtime/agy ./internal/runtime/codebuddy ./internal/runtime/acp ./internal/controlplane ./internal/api/... ./internal/persistence/sqlite/...` | 0 / 1.15s | 无 vet 诊断 |
+| `go build -o /tmp/openagentx-adr009-task03 ./cmd/openagentx` | 0 / 3.00s | 独立临时产物构建成功；未覆盖 installed binary |
+| `npm run test:observation` | 0 / 0.47s | Web observation 4/4 通过 |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 / 0.15s | 全部类别 `CLEAN` |
+| `git diff --check` | 0 / <0.1s | 无 whitespace error |
+| `sha256sum docs/decisions/ADR-009-pane-zero-task-console-observability.md` | 0 / <0.1s | 仍为 `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69` |
+
+- 最后只修改了 Panel Normal projection 的 Diagnostic truncation metadata 清理；影响范围复核后复用前述
+  全仓证据，并额外执行 `go test ./internal/api/panel -count=1`（0 / 18.60s）和
+  `go test -race ./internal/api/panel -count=1`（0 / 39.09s）。
+- 首次并行执行末次 Panel race 时未回传后台 session ID，结果通道不可恢复；确认原进程自然结束后，
+  单独重跑取得上述明确退出码。该编排失败未修改代码、fixture 或外部状态。
+- 新增证据覆盖：AGY/CodeBuddy/ACP 增量/仅终态能力、256 event cap、空/畸形/无 terminal/sink/stderr/
+  截断、Task/Runtime 结构化结果状态、Web/Console 同源脱敏、Normal Diagnostic metadata 清除，以及
+  output->terminal Journal 顺序和原子持久化。
+- 外部状态：未操作真实 HOME/DB/UDS/credential/default tmux/user-systemd/installed binary；未 push、merge
+  或修改 `steadyflow` 父仓。Task 03 保持 `active/WAIT`，主计划/front matter 继续 `pending`。
+- Open issues：当前 Task 03 无 P0/P1；focused Task reducer、TUI 最终回复渲染和控制易用性按冻结计划分别
+  归属 Task 04/05，未提前实现。
 
 ## 7. 后续记录模板
 

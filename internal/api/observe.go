@@ -76,17 +76,20 @@ type TaskListPage struct {
 // TaskReadModelTask is the browser-safe subset of a Task. Idempotency keys,
 // sender principals and cancellation actors remain control-plane data.
 type TaskReadModelTask struct {
-	ID             string              `json:"id"`
-	Version        int64               `json:"version"`
-	TargetAgentID  string              `json:"target_agent_id"`
-	OrganizationID string              `json:"organization_id,omitempty"`
-	DispatchMode   domain.DispatchMode `json:"dispatch_mode,omitempty"`
-	Content        string              `json:"content"`
-	Status         domain.TaskStatus   `json:"status"`
-	Result         *string             `json:"result,omitempty"`
-	Error          *string             `json:"error,omitempty"`
-	CreatedAt      string              `json:"created_at"`
-	UpdatedAt      string              `json:"updated_at"`
+	ID              string              `json:"id"`
+	Version         int64               `json:"version"`
+	TargetAgentID   string              `json:"target_agent_id"`
+	OrganizationID  string              `json:"organization_id,omitempty"`
+	DispatchMode    domain.DispatchMode `json:"dispatch_mode,omitempty"`
+	Content         string              `json:"content"`
+	Status          domain.TaskStatus   `json:"status"`
+	Result          *string             `json:"result,omitempty"`
+	ResultTruncated bool                `json:"result_truncated,omitempty"`
+	Error           *string             `json:"error,omitempty"`
+	ErrorTruncated  bool                `json:"error_truncated,omitempty"`
+	OutcomeState    string              `json:"outcome_state"`
+	CreatedAt       string              `json:"created_at"`
+	UpdatedAt       string              `json:"updated_at"`
 }
 
 // RunAttemptReadModel deliberately omits execution JSON and fencing material.
@@ -121,7 +124,9 @@ type RunAttemptReadModel struct {
 type TurnResultReadModel struct {
 	RuntimeStatus              openruntime.TurnResultStatus `json:"runtime_status"`
 	Body                       string                       `json:"body,omitempty"`
+	BodyTruncated              bool                         `json:"body_truncated,omitempty"`
 	Error                      string                       `json:"error,omitempty"`
+	ErrorTruncated             bool                         `json:"error_truncated,omitempty"`
 	RuntimeSideEffectsKnown    *bool                        `json:"runtime_side_effects_known,omitempty"`
 	SideEffectsSource          string                       `json:"side_effects_source"`
 	BusinessVerificationSource string                       `json:"business_verification_source"`
@@ -167,15 +172,18 @@ type ConsoleTaskSnapshot struct {
 }
 
 type ConsoleTaskReadModel struct {
-	TaskID    string            `json:"task_id"`
-	Version   int64             `json:"version"`
-	AgentID   string            `json:"agent_id"`
-	Status    domain.TaskStatus `json:"status"`
-	Content   string            `json:"content"`
-	Result    *string           `json:"result,omitempty"`
-	Error     *string           `json:"error,omitempty"`
-	CreatedAt string            `json:"created_at"`
-	UpdatedAt string            `json:"updated_at"`
+	TaskID          string            `json:"task_id"`
+	Version         int64             `json:"version"`
+	AgentID         string            `json:"agent_id"`
+	Status          domain.TaskStatus `json:"status"`
+	Content         string            `json:"content"`
+	Result          *string           `json:"result,omitempty"`
+	ResultTruncated bool              `json:"result_truncated,omitempty"`
+	Error           *string           `json:"error,omitempty"`
+	ErrorTruncated  bool              `json:"error_truncated,omitempty"`
+	OutcomeState    string            `json:"outcome_state"`
+	CreatedAt       string            `json:"created_at"`
+	UpdatedAt       string            `json:"updated_at"`
 }
 
 type ConsoleMailboxReadModel struct {
@@ -208,12 +216,14 @@ type ConsoleApprovalReadModel struct {
 }
 
 type SafeOutputReadModel struct {
-	Stage      string `json:"stage,omitempty"`
-	Status     string `json:"status,omitempty"`
-	Text       string `json:"text,omitempty"`
-	Diagnostic string `json:"diagnostic,omitempty"`
-	HasOutput  bool   `json:"has_output,omitempty"`
-	HasError   bool   `json:"has_error,omitempty"`
+	Stage               string `json:"stage,omitempty"`
+	Status              string `json:"status,omitempty"`
+	Text                string `json:"text,omitempty"`
+	TextTruncated       bool   `json:"text_truncated,omitempty"`
+	Diagnostic          string `json:"diagnostic,omitempty"`
+	DiagnosticTruncated bool   `json:"diagnostic_truncated,omitempty"`
+	HasOutput           bool   `json:"has_output,omitempty"`
+	HasError            bool   `json:"has_error,omitempty"`
 }
 
 type EventPage struct {

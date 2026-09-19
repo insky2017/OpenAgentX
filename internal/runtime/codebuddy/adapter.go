@@ -296,6 +296,7 @@ func (h *turnHandle) collect() {
 		result.Status = openruntime.TurnResultSucceeded
 		result.Result = strings.TrimSpace(h.stdout.String())
 	}
+	result = safeoutput.SanitizeTurnResult(result)
 	h.once.Do(func() {
 		h.result, h.err = result, resultErr
 		close(h.done)

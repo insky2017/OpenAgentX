@@ -140,7 +140,7 @@ func TestUnixHTTPWorkerAPIEndToEnd(t *testing.T) {
 	if err := client.AppendRunEvents(context.Background(), begin.Turn.RunAttempt.ID, api.EventBatch{
 		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
 		FencingToken: session.Worker.FencingToken, ExpectedRunVersion: begin.Turn.RunAttempt.Version,
-		Events: []openruntime.RuntimeEvent{{Type: "turn.output", OccurredAt: environment.clock.Now()}},
+		Events: []openruntime.RuntimeEvent{{Type: "turn.output", Payload: json.RawMessage(`{}`), OccurredAt: environment.clock.Now()}},
 	}); err != nil {
 		t.Fatal(err)
 	}

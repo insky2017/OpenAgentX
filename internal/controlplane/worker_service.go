@@ -546,7 +546,11 @@ func publicRuntimeEvent(event openruntime.RuntimeEvent, now time.Time) (string, 
 		case "agy.init", "agy.step_update", "agy.result", "agy.error", "agy.event",
 			"turn.output", "turn.heartbeat":
 			publicType = event.Type
-			publicPayload = safeoutput.ProjectRuntimePayload(event.Payload)
+			var err error
+			publicPayload, err = safeoutput.ProjectRuntimePayload(event.Payload)
+			if err != nil {
+				return "", nil, err
+			}
 		}
 	}
 	payload, err := json.Marshal(publicRuntimeEventEnvelope{
@@ -596,6 +600,10 @@ func decodeNativeApprovalPayload(raw json.RawMessage, now time.Time) (nativeAppr
 
 func (s *WorkerService) Finish(ctx context.Context, principalID string, token string, runID string, request api.FinishRunRequest) error {
 	if err := request.Validate(); err != nil {
+		return err
+	}
+	request.Result = safeoutput.SanitizeTurnResult(request.Result)
+	if err := request.Result.Validate(); err != nil {
 		return err
 	}
 	guard, err := s.guard(ctx, principalID, token, request.WorkerInstanceID, "", request.Generation, request.FencingToken)

@@ -2,8 +2,10 @@ package acp
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -16,6 +18,12 @@ import (
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
 	runtimenetwork "openagentx/internal/runtime/network"
+	"openagentx/internal/safeoutput"
+)
+
+const (
+	maxACPStreamLine = 1 << 20
+	maxACPStderr     = 64 << 10
 )
 
 type Config struct {
@@ -148,9 +156,8 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	if err != nil {
 		return nil, err
 	}
-	if _, err := cmd.StderrPipe(); err != nil {
-		return nil, err
-	}
+	stderr := &boundedBuffer{limit: maxACPStderr}
+	cmd.Stderr = stderr
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("start ACP process: %w", err)
 	}
@@ -158,7 +165,7 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	encoded, _ := json.Marshal(prompt)
 	_, _ = stdin.Write(append(encoded, '\n'))
 	_ = stdin.Close()
-	h := &turnHandle{cmd: cmd, stdout: stdout, sink: sink, done: make(chan struct{})}
+	h := &turnHandle{cmd: cmd, stdout: stdout, stderr: stderr, sink: sink, done: make(chan struct{})}
 	go h.collect()
 	return h, nil
 }
@@ -175,6 +182,7 @@ func (a *Adapter) environment(policy domain.NetworkPolicy) ([]string, error) {
 type turnHandle struct {
 	cmd    *exec.Cmd
 	stdout io.ReadCloser
+	stderr *boundedBuffer
 	sink   openruntime.EventSink
 	done   chan struct{}
 	once   sync.Once
@@ -185,47 +193,95 @@ type turnHandle struct {
 func (h *turnHandle) collect() {
 	result := openruntime.TurnResult{}
 	scanner := bufio.NewScanner(h.stdout)
+	scanner.Buffer(make([]byte, 64<<10), maxACPStreamLine)
 	var parseErr error
+	var sinkErr error
+	seen := false
+	terminal := false
+	emitted := 0
 	for scanner.Scan() {
+		line := bytes.TrimSpace(scanner.Bytes())
+		if len(line) == 0 {
+			continue
+		}
+		seen = true
 		var event struct {
 			Type              string          `json:"type"`
 			Status            string          `json:"status"`
 			Result            string          `json:"result"`
+			Error             string          `json:"error"`
 			ProviderSessionID string          `json:"provider_session_id"`
 			Payload           json.RawMessage `json:"payload"`
 		}
-		if err := json.Unmarshal(scanner.Bytes(), &event); err != nil {
-			parseErr = err
+		if err := json.Unmarshal(line, &event); err != nil {
+			if parseErr == nil {
+				parseErr = fmt.Errorf("decode ACP event: %w", err)
+			}
 			continue
 		}
 		if event.ProviderSessionID != "" {
 			result.ProviderSessionID = event.ProviderSessionID
 		}
 		if event.Result != "" {
-			result.Result = event.Result
+			projected := safeoutput.ProjectText(event.Result)
+			result.Result = projected.Text
+			result.ResultTruncated = result.ResultTruncated || projected.Truncated
+		}
+		if event.Error != "" {
+			projected := safeoutput.ProjectText(event.Error)
+			result.Error = projected.Text
+			result.ErrorTruncated = result.ErrorTruncated || projected.Truncated
 		}
 		if event.Status != "" {
-			result.Status = openruntime.TurnResultStatus(event.Status)
+			status := openruntime.TurnResultStatus(event.Status)
+			if status.Valid() {
+				if terminal && parseErr == nil {
+					parseErr = fmt.Errorf("ACP reported multiple terminal statuses")
+				}
+				result.Status = status
+				terminal = true
+			} else if event.Status != "starting" && event.Status != "running" && parseErr == nil {
+				parseErr = fmt.Errorf("ACP reported unsupported status %q", event.Status)
+			}
 		}
-		if event.Type != "" && h.sink != nil {
-			_ = h.sink.Emit(context.Background(), openruntime.RuntimeEvent{Type: event.Type, Payload: event.Payload, OccurredAt: time.Now().UTC()})
+		if event.Type != "" && h.sink != nil && sinkErr == nil && emitted < openruntime.MaxPublicOutputEvents {
+			payload := event.Payload
+			if len(payload) == 0 {
+				payload = json.RawMessage(`{}`)
+			}
+			if err := h.sink.Emit(context.Background(), openruntime.RuntimeEvent{Type: event.Type, Payload: payload, OccurredAt: time.Now().UTC()}); err != nil {
+				sinkErr = fmt.Errorf("emit ACP Runtime Event: %w", err)
+			}
+			emitted++
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		parseErr = err
+		parseErr = errors.Join(parseErr, fmt.Errorf("read ACP stream: %w", err))
 	}
-	if err := h.cmd.Wait(); err != nil {
-		parseErr = fmt.Errorf("ACP process exited: %w", err)
+	waitErr := h.cmd.Wait()
+	if !seen {
+		parseErr = errors.Join(parseErr, fmt.Errorf("ACP stream was empty"))
 	}
-	if parseErr != nil {
+	if !terminal {
+		parseErr = errors.Join(parseErr, fmt.Errorf("ACP stream ended without a terminal result"))
+	}
+	if waitErr != nil {
+		parseErr = errors.Join(parseErr, fmt.Errorf("ACP process exited: %w", waitErr))
+	}
+	runtimeErr := errors.Join(parseErr, sinkErr)
+	if runtimeErr != nil {
 		result.Status = openruntime.TurnResultUncertain
 		result.SideEffectsKnown = false
-		result.Error = parseErr.Error()
+		if result.Error == "" {
+			result.Error = "ACP Runtime ended without a verifiable result"
+		}
+		result.Error = safeoutput.RedactText(result.Error)
+		if diagnostic := strings.TrimSpace(safeoutput.RedactText(h.stderr.String())); diagnostic != "" {
+			result.Error = safeoutput.RedactText(result.Error + "; ACP stderr: " + diagnostic)
+		}
 	}
-	if result.Status == "" {
-		result.Status = openruntime.TurnResultSucceeded
-	}
-	h.once.Do(func() { h.result, h.err = result, parseErr; close(h.done) })
+	result = safeoutput.SanitizeTurnResult(result)
+	h.once.Do(func() { h.result, h.err = result, runtimeErr; close(h.done) })
 }
 func (h *turnHandle) Wait(ctx context.Context) (openruntime.TurnResult, error) {
 	select {
@@ -247,6 +303,29 @@ func (h *turnHandle) RequestCancel(_ context.Context) error {
 	}
 	return h.cmd.Process.Signal(syscall.SIGTERM)
 }
+
+type boundedBuffer struct {
+	buffer    bytes.Buffer
+	limit     int
+	truncated bool
+}
+
+func (b *boundedBuffer) Write(value []byte) (int, error) {
+	written := len(value)
+	remaining := b.limit - b.buffer.Len()
+	if remaining <= 0 {
+		b.truncated = true
+		return written, nil
+	}
+	if len(value) > remaining {
+		value = value[:remaining]
+		b.truncated = true
+	}
+	_, _ = b.buffer.Write(value)
+	return written, nil
+}
+
+func (b *boundedBuffer) String() string { return b.buffer.String() }
 
 var _ openruntime.AgentRuntimeAdapter = (*Adapter)(nil)
 var _ openruntime.TurnHandle = (*turnHandle)(nil)

@@ -107,7 +107,8 @@ printf '{"token":"json-secret","result":"done"}\n'
 		t.Fatal(err)
 	}
 	result, err := handle.Wait(context.Background())
-	if err != nil || result.Status != openruntime.TurnResultSucceeded {
+	if err != nil || result.Status != openruntime.TurnResultSucceeded || strings.Contains(result.Result, "json-secret") ||
+		strings.Contains(result.Result, "runtime-secret") || !strings.Contains(result.Result, "[REDACTED]") {
 		t.Fatalf("result=%+v err=%v", result, err)
 	}
 	second := <-events

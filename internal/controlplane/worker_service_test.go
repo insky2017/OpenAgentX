@@ -17,6 +17,7 @@ import (
 	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
 	openruntime "openagentx/internal/runtime"
+	"openagentx/internal/safeoutput"
 	"openagentx/internal/testkit"
 )
 
@@ -443,6 +444,90 @@ func TestWorkerServiceRegisterClaimBeginEventsAndFinish(t *testing.T) {
 	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken,
 		begin.Turn.RunAttempt.ID, finishRequest); err == nil {
 		t.Fatal("different terminal result must not be accepted as an idempotent retry")
+	}
+}
+
+func TestRuntimeOutputCapAndTurnResultAreSafeBeforeAtomicFinish(t *testing.T) {
+	environment := newWorkerTestEnvironment(t, nil)
+	session := environment.register(t, "worker-safe-output")
+	environment.heartbeat(t, session)
+	created := environment.createTask(t, "safe-output")
+	item, err := environment.service.ClaimMailbox(context.Background(), environment.workerID, session.SessionToken, claimRequest(session, 1))
+	if err != nil || item == nil {
+		t.Fatalf("claim item=%+v err=%v", item, err)
+	}
+	begin, err := environment.service.BeginAttempt(context.Background(), environment.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{
+		WorkerInstanceID: session.Worker.ID, AgentID: environment.agentID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := api.EventBatch{WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedRunVersion: begin.Turn.RunAttempt.Version}
+	request.Events = make([]openruntime.RuntimeEvent, openruntime.MaxPublicOutputEvents)
+	for index := range request.Events {
+		request.Events[index] = openruntime.RuntimeEvent{Type: "turn.output", Payload: json.RawMessage(`{"text":"safe"}`), OccurredAt: environment.clock.Now()}
+	}
+	if err := environment.service.AppendEvents(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, request); err != nil {
+		t.Fatal(err)
+	}
+	request.Events = []openruntime.RuntimeEvent{{Type: "turn.output", Payload: json.RawMessage(`{"text":"beyond-cap"}`), OccurredAt: environment.clock.Now()}}
+	if err := environment.service.AppendEvents(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, request); err != nil {
+		t.Fatalf("event beyond cap must be a safe no-op: %v", err)
+	}
+	unsafeResult := "token=runtime-secret " + strings.Repeat("x", safeoutput.MaxTextBytes+100)
+	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, api.FinishRunRequest{
+		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
+		FencingToken: session.Worker.FencingToken, ExpectedTaskVersion: begin.Turn.Task.Version,
+		ExpectedRunVersion: begin.Turn.RunAttempt.Version,
+		Result:             openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: unsafeResult, SideEffectsKnown: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	task, err := environment.repository.GetTask(context.Background(), created.Task.ID)
+	if err != nil || task.Result == nil || strings.Contains(*task.Result, "runtime-secret") || !strings.HasSuffix(*task.Result, safeoutput.TruncatedMarker) {
+		t.Fatalf("Task safe result invalid: err=%v present=%t redacted=%t truncated=%t", err, task.Result != nil,
+			task.Result != nil && !strings.Contains(*task.Result, "runtime-secret"), task.Result != nil && strings.HasSuffix(*task.Result, safeoutput.TruncatedMarker))
+	}
+	run, err := environment.repository.GetRunAttempt(context.Background(), begin.Turn.RunAttempt.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var result openruntime.TurnResult
+	if err := json.Unmarshal([]byte(run.ResultJSON), &result); err != nil || !result.ResultTruncated || strings.Contains(result.Result, "runtime-secret") {
+		t.Fatalf("persisted TurnResult metadata invalid: err=%v truncated=%t redacted=%t", err, result.ResultTruncated, !strings.Contains(result.Result, "runtime-secret"))
+	}
+	events, err := environment.repository.ListTaskJournal(context.Background(), created.Task.ID, 0, 500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputCount := 0
+	settled := false
+	var lastOutputSequence int64
+	var settledSequence int64
+	for _, event := range events {
+		if event.EventType == "runtime.turn.output" {
+			outputCount++
+			lastOutputSequence = event.Sequence
+		}
+		if event.EventType == "task.settled" {
+			settled = true
+			settledSequence = event.Sequence
+		}
+	}
+	if outputCount != openruntime.MaxPublicOutputEvents || !settled || lastOutputSequence >= settledSequence {
+		t.Fatalf("output events=%d settled=%t output_sequence=%d settled_sequence=%d", outputCount, settled,
+			lastOutputSequence, settledSequence)
+	}
+}
+
+func TestPublicRuntimeProjectionRejectsNonObjectBeforePersistence(t *testing.T) {
+	for _, payload := range []json.RawMessage{json.RawMessage(`"text"`), json.RawMessage(`[]`)} {
+		_, _, err := publicRuntimeEvent(openruntime.RuntimeEvent{Type: "turn.output", Payload: payload, OccurredAt: time.Now().UTC()}, time.Now().UTC())
+		if err == nil {
+			t.Fatalf("non-object Runtime payload %q was accepted", payload)
+		}
 	}
 }
 

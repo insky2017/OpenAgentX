@@ -1,13 +1,20 @@
 package safeoutput
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode/utf8"
+
+	openruntime "openagentx/internal/runtime"
 )
 
-const MaxTextBytes = 4 << 10
+const (
+	MaxTextBytes    = 4 << 10
+	TruncatedMarker = " [TRUNCATED]"
+)
 
 var (
 	urlCredentialPattern = regexp.MustCompile(`(?i)([a-z][a-z0-9+.-]*://)[^/@\s]+@`)
@@ -18,7 +25,24 @@ var (
 	privateKeyPattern    = regexp.MustCompile(`(?s)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----`)
 )
 
-func RedactText(value string) string {
+type TextProjection struct {
+	Text      string
+	Truncated bool
+}
+
+type OutcomeProjection struct {
+	Result          *string
+	Error           *string
+	State           string
+	ResultTruncated bool
+	ErrorTruncated  bool
+}
+
+func ProjectText(value string) TextProjection {
+	alreadyTruncated := strings.HasSuffix(value, TruncatedMarker)
+	if alreadyTruncated {
+		value = strings.TrimSuffix(value, TruncatedMarker)
+	}
 	value = strings.ToValidUTF8(value, "?")
 	value = privateKeyPattern.ReplaceAllString(value, "[REDACTED_PRIVATE_KEY]")
 	value = urlCredentialPattern.ReplaceAllString(value, `${1}[REDACTED]@`)
@@ -31,24 +55,90 @@ func RedactText(value string) string {
 		for limit > 0 && !utf8.RuneStart(value[limit]) {
 			limit--
 		}
-		value = value[:limit] + " [TRUNCATED]"
+		value = value[:limit] + TruncatedMarker
+		return TextProjection{Text: value, Truncated: true}
 	}
-	return value
+	if alreadyTruncated {
+		return TextProjection{Text: value + TruncatedMarker, Truncated: true}
+	}
+	return TextProjection{Text: value}
+}
+
+func RedactText(value string) string {
+	return ProjectText(value).Text
+}
+
+func ProjectOutcome(terminal bool, result *string, resultError *string) OutcomeProjection {
+	projection := OutcomeProjection{State: "pending"}
+	if result != nil {
+		value := ProjectText(*result)
+		projection.Result = &value.Text
+		projection.ResultTruncated = value.Truncated
+	}
+	if resultError != nil {
+		value := ProjectText(*resultError)
+		projection.Error = &value.Text
+		projection.ErrorTruncated = value.Truncated
+	}
+	if !terminal {
+		return projection
+	}
+	projection.State = "not_recorded"
+	if projection.ResultTruncated || projection.ErrorTruncated {
+		projection.State = "truncated"
+	} else if (projection.Result != nil && *projection.Result != "") || (projection.Error != nil && *projection.Error != "") {
+		projection.State = "available"
+	}
+	return projection
+}
+
+func SanitizeTurnResult(result openruntime.TurnResult) openruntime.TurnResult {
+	body := ProjectText(result.Result)
+	diagnostic := ProjectText(result.Error)
+	result.Result = body.Text
+	result.ResultTruncated = result.ResultTruncated || body.Truncated
+	result.Error = diagnostic.Text
+	result.ErrorTruncated = result.ErrorTruncated || diagnostic.Truncated
+	return result
+}
+
+func DecodeTurnResult(raw string) (*openruntime.TurnResult, string) {
+	if strings.TrimSpace(raw) == "" {
+		return nil, "not_recorded"
+	}
+	var result openruntime.TurnResult
+	if json.Unmarshal([]byte(raw), &result) != nil || result.Validate() != nil {
+		return nil, "invalid"
+	}
+	result = SanitizeTurnResult(result)
+	state := "available"
+	if result.Result == "" && result.Error == "" {
+		state = "empty"
+	} else if result.ResultTruncated || result.ErrorTruncated {
+		state = "truncated"
+	}
+	return &result, state
 }
 
 type RuntimeProjection struct {
-	Stage      string `json:"stage,omitempty"`
-	Status     string `json:"status,omitempty"`
-	Text       string `json:"text,omitempty"`
-	Diagnostic string `json:"diagnostic,omitempty"`
-	HasOutput  bool   `json:"has_output,omitempty"`
-	HasError   bool   `json:"has_error,omitempty"`
+	Stage               string `json:"stage,omitempty"`
+	Status              string `json:"status,omitempty"`
+	Text                string `json:"text,omitempty"`
+	TextTruncated       bool   `json:"text_truncated,omitempty"`
+	Diagnostic          string `json:"diagnostic,omitempty"`
+	DiagnosticTruncated bool   `json:"diagnostic_truncated,omitempty"`
+	HasOutput           bool   `json:"has_output,omitempty"`
+	HasError            bool   `json:"has_error,omitempty"`
 }
 
 // ProjectRuntimePayload accepts only documented public fields. Unknown keys,
 // raw stderr, environment, credentials, and hidden-reasoning fields are never
 // copied to the public event stream.
-func ProjectRuntimePayload(raw json.RawMessage) json.RawMessage {
+func ProjectRuntimePayload(raw json.RawMessage) (json.RawMessage, error) {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) < 2 || trimmed[0] != '{' || trimmed[len(trimmed)-1] != '}' {
+		return nil, fmt.Errorf("Runtime output payload must be a JSON object")
+	}
 	var input struct {
 		Stage      string `json:"stage"`
 		Status     string `json:"status"`
@@ -60,8 +150,8 @@ func ProjectRuntimePayload(raw json.RawMessage) json.RawMessage {
 		HasOutput  bool   `json:"has_output"`
 		HasError   bool   `json:"has_error"`
 	}
-	if json.Unmarshal(raw, &input) != nil {
-		return nil
+	if err := json.Unmarshal(trimmed, &input); err != nil {
+		return nil, fmt.Errorf("decode Runtime output payload: %w", err)
 	}
 	text := input.Text
 	if text == "" {
@@ -74,10 +164,18 @@ func ProjectRuntimePayload(raw json.RawMessage) json.RawMessage {
 	if diagnostic == "" {
 		diagnostic = input.Error
 	}
+	projectedText := ProjectText(text)
+	projectedDiagnostic := ProjectText(diagnostic)
 	projection := RuntimeProjection{
-		Stage: RedactText(input.Stage), Status: RedactText(input.Status), Text: RedactText(text), Diagnostic: RedactText(diagnostic),
-		HasOutput: input.HasOutput || text != "", HasError: input.HasError || diagnostic != "",
+		Stage: RedactText(input.Stage), Status: RedactText(input.Status), Text: projectedText.Text,
+		TextTruncated: projectedText.Truncated, Diagnostic: projectedDiagnostic.Text,
+		DiagnosticTruncated: projectedDiagnostic.Truncated,
+		HasOutput:           input.HasOutput || text != "",
+		HasError:            input.HasError || diagnostic != "",
 	}
-	encoded, _ := json.Marshal(projection)
-	return encoded
+	encoded, err := json.Marshal(projection)
+	if err != nil {
+		return nil, fmt.Errorf("encode Runtime output projection: %w", err)
+	}
+	return encoded, nil
 }

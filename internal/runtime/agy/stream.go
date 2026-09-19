@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -14,7 +15,10 @@ import (
 	"openagentx/internal/safeoutput"
 )
 
-const maxStreamLine = 4 << 20
+const (
+	maxStreamLine     = 4 << 20
+	maxCapturedOutput = 1 << 20
+)
 
 type streamRecord struct {
 	Type             string
@@ -32,9 +36,12 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 	scanner := bufio.NewScanner(reader)
 	scanner.Buffer(make([]byte, 64<<10), maxStreamLine)
 	var result openruntime.TurnResult
-	var output bytes.Buffer
+	output := &boundedCaptureWriter{limit: maxCapturedOutput}
 	seen := false
 	terminal := false
+	var parseErr error
+	var sinkErr error
+	emitted := 0
 	for scanner.Scan() {
 		line := bytes.TrimSpace(scanner.Bytes())
 		if len(line) == 0 {
@@ -42,7 +49,10 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 		}
 		var raw map[string]any
 		if err := json.Unmarshal(line, &raw); err != nil {
-			return openruntime.TurnResult{}, fmt.Errorf("decode AGY stream-json line: %w", err)
+			if parseErr == nil {
+				parseErr = fmt.Errorf("decode AGY stream-json line: %w", err)
+			}
+			continue
 		}
 		seen = true
 		record := decodeRecord(raw)
@@ -58,64 +68,84 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 			known := *record.SideEffectsKnown
 			result.RuntimeSideEffectsKnown = &known
 		}
-		text := record.Result
-		if text == "" {
-			text = record.Text
-		}
-		if text != "" {
-			output.WriteString(text)
-		}
-		if record.Status != "" {
-			switch strings.ToLower(record.Status) {
-			case "success", "succeeded", "completed", "done":
-				result.Status = openruntime.TurnResultSucceeded
-			case "cancelled", "canceled":
-				result.Status = openruntime.TurnResultCanceled
-			case "error", "failed", "failure":
-				result.Status = openruntime.TurnResultFailed
+		recordType := strings.ToLower(strings.TrimSpace(record.Type))
+		if recordType == "step_update" || recordType == "result" {
+			text := record.Result
+			if text == "" {
+				text = record.Text
+			}
+			if text != "" {
+				_, _ = output.Write([]byte(text))
 			}
 		}
-		recordType := strings.ToLower(record.Type)
+		knownStatusEvent := recordType == "init" || recordType == "step_update" || recordType == "result" ||
+			strings.Contains(recordType, "error")
+		if record.Status != "" && knownStatusEvent {
+			status := publicStatus(record.Status)
+			if status == "" {
+				if !nonTerminalStatus(record.Status) && parseErr == nil {
+					parseErr = fmt.Errorf("AGY stream-json reported unsupported status %q", record.Status)
+				}
+			} else {
+				result.Status = status
+			}
+		}
 		if recordType == "result" {
+			if terminal && parseErr == nil {
+				parseErr = fmt.Errorf("AGY stream-json reported multiple terminal events")
+			}
 			terminal = true
-			if result.Status == "" {
+			terminalStatus := publicStatus(record.Status)
+			if terminalStatus != "" {
+				result.Status = terminalStatus
+			} else {
 				if record.Error != "" {
 					result.Status = openruntime.TurnResultFailed
 				} else {
-					result.Status = openruntime.TurnResultSucceeded
+					if parseErr == nil {
+						parseErr = fmt.Errorf("AGY terminal result omitted status")
+					}
 				}
 			}
 		}
 		if record.Error != "" {
 			result.Error = record.Error
+			if result.Status == openruntime.TurnResultSucceeded && parseErr == nil {
+				parseErr = fmt.Errorf("AGY terminal result contradicted succeeded status with an error")
+			}
 		}
 		if recordType != "" && strings.Contains(recordType, "error") {
 			result.Status = openruntime.TurnResultFailed
 			terminal = true
 		}
-		if sink != nil {
+		if sink != nil && sinkErr == nil && emitted < openruntime.MaxPublicOutputEvents {
 			eventType, payload := publicStreamEvent(record)
 			if err := sink.Emit(nilContext(), openruntime.RuntimeEvent{
 				Type: eventType, Payload: payload, OccurredAt: time.Now().UTC(),
 			}); err != nil {
-				return openruntime.TurnResult{}, fmt.Errorf("emit AGY Runtime Event: %w", err)
+				sinkErr = fmt.Errorf("emit AGY Runtime Event: %w", err)
 			}
+			emitted++
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return openruntime.TurnResult{}, fmt.Errorf("read AGY stream-json: %w", err)
+		parseErr = errors.Join(parseErr, fmt.Errorf("read AGY stream-json: %w", err))
 	}
 	if !seen {
-		return openruntime.TurnResult{}, fmt.Errorf("AGY stream-json was empty")
+		parseErr = errors.Join(parseErr, fmt.Errorf("AGY stream-json was empty"))
 	}
-	result.Result = strings.TrimSpace(output.String())
+	result.Result = strings.TrimSpace(output.buffer.String())
+	if output.truncated {
+		parseErr = errors.Join(parseErr, fmt.Errorf("AGY output exceeded the configured limit"))
+	}
 	if !terminal {
-		return result, fmt.Errorf("AGY stream-json ended without a terminal event")
+		parseErr = errors.Join(parseErr, fmt.Errorf("AGY stream-json ended without a terminal event"))
 	}
 	if result.Result == "" && result.Error == "" && result.Status == openruntime.TurnResultFailed {
 		result.Error = "AGY reported a failed turn"
 	}
-	return result, nil
+	result = safeoutput.SanitizeTurnResult(result)
+	return result, errors.Join(parseErr, sinkErr)
 }
 
 func decodeRecord(raw map[string]any) streamRecord {
@@ -223,6 +253,15 @@ func publicStatus(value string) openruntime.TurnResultStatus {
 		return openruntime.TurnResultFailed
 	default:
 		return ""
+	}
+}
+
+func nonTerminalStatus(value string) bool {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "starting", "running", "pending", "processing":
+		return true
+	default:
+		return false
 	}
 }
 
