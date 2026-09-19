@@ -54,7 +54,7 @@ P0 只做基线收口和隔离，不夹带 Task 01 契约或产品改动。出�
 |---|---|---|---|---|
 | 01 | G0 | [基线、能力盘点与契约冻结](2026-09-19-openagentx-adr-009-implementation/01-baseline-and-contract-freeze.md) | P0、ADR-009 Accepted | completed |
 | 02 | G1 | [权威任务观察投影](2026-09-19-openagentx-adr-009-implementation/02-authoritative-task-observation-projection.md) | 01 | completed |
-| 03 | G2 | [Runtime 安全输出与终态结果对齐](2026-09-19-openagentx-adr-009-implementation/03-runtime-output-and-terminal-result-alignment.md) | 02 | pending |
+| 03 | G2 | [Runtime 安全输出与终态结果对齐](2026-09-19-openagentx-adr-009-implementation/03-runtime-output-and-terminal-result-alignment.md) | 02 | completed |
 | 04 | G3 | [Task-centric Console reducer](2026-09-19-openagentx-adr-009-implementation/04-task-centric-console-reducer.md) | 03 | pending |
 | 05 | G4 | [Pane 0 任务 TUI 与控制易用性](2026-09-19-openagentx-adr-009-implementation/05-pane-zero-task-tui-and-control-ergonomics.md) | 04 | pending |
 | 06 | G5 | [同 pane Diagnostic 模式](2026-09-19-openagentx-adr-009-implementation/06-in-place-diagnostic-mode.md) | 05 | pending |

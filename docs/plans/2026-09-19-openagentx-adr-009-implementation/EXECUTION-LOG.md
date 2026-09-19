@@ -51,7 +51,7 @@ push/merge/安装来“修正”差异。
 | P0 | ADR-008 基线、状态和 Git lineage 收口 | completed | `dad6c40`, `484db18` | GO |
 | 01 | 基线、能力盘点与契约冻结 | completed | `5717506` | GO |
 | 02 | 权威任务观察投影 | completed | `84a2c15` | GO |
-| 03 | Runtime 安全输出与终态结果对齐 | active | - | WAIT |
+| 03 | Runtime 安全输出与终态结果对齐 | completed | `e82ae37` | GO |
 | 04 | Task-centric Console reducer | pending | - | WAIT |
 | 05 | Pane 0 任务 TUI 与控制易用性 | pending | - | WAIT |
 | 06 | 同 pane Diagnostic 模式 | pending | - | WAIT |
@@ -275,6 +275,16 @@ push/merge/安装来“修正”差异。
   或修改 `steadyflow` 父仓。Task 03 保持 `active/WAIT`，主计划/front matter 继续 `pending`。
 - Open issues：当前 Task 03 无 P0/P1；focused Task reducer、TUI 最终回复渲染和控制易用性按冻结计划分别
   归属 Task 04/05，未提前实现。
+
+#### Task 03 gate record
+
+- 实现提交：`e82ae373fd9a3bbadb7a4bee16ef3c5a8fc52f00`；21 files，808 insertions、130 deletions。
+- 提交后 worktree clean；相对 `origin/main@c3fc1bb` ahead 43。ADR-009 SHA-256 仍为
+  `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69`。
+- 主代理按冻结契约、Adapter/事务/投影故障注入、定向 race、全仓普通测试、Web observation 和 release
+  scanner 复核为 `GO`；没有 P0/P1、权限 fallback 或 ADR-006/007 语义变化。
+- 主计划和 Task 03 front matter 在本 docs-only gate record 同步为 `completed`；Task 04 保持
+  `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
 
 ## 7. 后续记录模板
 

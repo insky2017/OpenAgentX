@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-19
 ---
@@ -56,3 +56,15 @@ git diff --check
 - 最终回复与 Task outcome 分层，`uncertain` 不伪装成功；
 - secret/raw stderr/hidden reasoning 和无界输出均有负向测试；
 - 创建一个 Task 03 实现提交后停止等待监督 gate。
+
+## 完成记录
+
+- 实现提交：`e82ae373fd9a3bbadb7a4bee16ef3c5a8fc52f00`。
+- AGY、CodeBuddy、ACP 与 Worker service 共用安全 TurnResult 投影；公开字段 4 KiB，Run 实时输出最多
+  256 条，Adapter authoritative buffer 保持有界。
+- Console/Web API 区分 Task outcome 与 Runtime reply，并结构化表示 pending、not recorded、invalid、empty、
+  available 和 truncated；Normal 强制清除 Diagnostic 内容及 truncation metadata。
+- `FinishRun` 原有 Run/Task/SessionBinding/Journal 单事务、CAS 和重复 finish 幂等未改变；ADR-006/007、
+  reducer/TUI 和真实部署未修改。
+- 定向普通/race、全仓普通测试、vet、build、Web observation、release scanner、whitespace 与 ADR hash
+  检查通过；Task 04 及以后未提前实现。
