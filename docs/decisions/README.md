@@ -3,7 +3,7 @@ doc_type: decision_index
 status: current
 canonical: true
 owner: openagentx
-updated_at: 2026-09-14
+updated_at: 2026-09-19
 ---
 
 # OpenAgentX 架构决策记录索引
@@ -18,3 +18,4 @@ updated_at: 2026-09-14
 - [ADR-006: Task intent 与可验证终态语义](ADR-006-task-intent-and-verifiable-terminal-semantics.md)
 - [ADR-007: Worker 网络绑定的代际连续性](ADR-007-worker-network-binding-generation-continuity.md)
 - [ADR-008: OAX Workspace 绑定、交互式 Console TUI 与可撤销 CLI 会话](ADR-008-oax-workspace-console-tui-and-cli-session.md)
+- [ADR-009: Pane 0 任务工作台、连续观察与最终回复](ADR-009-pane-zero-task-console-observability.md)
