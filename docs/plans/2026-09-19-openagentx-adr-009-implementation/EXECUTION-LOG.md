@@ -54,7 +54,7 @@ push/merge/安装来“修正”差异。
 | 03 | Runtime 安全输出与终态结果对齐 | completed | `e82ae37` | GO |
 | 04 | Task-centric Console reducer | completed | `874a0e1` | GO |
 | 05 | Pane 0 任务 TUI 与控制易用性 | completed | `f1bf09a` | GO |
-| 06 | 同 pane Diagnostic 模式 | active | - | WAIT |
+| 06 | 同 pane Diagnostic 模式 | completed | `de7eb32` | GO |
 | 07 | 隔离用户闭环与操作文档 | pending | - | WAIT |
 | 08 | 集成审查与候选门禁 | pending | - | WAIT |
 
@@ -515,6 +515,19 @@ push/merge/安装来“修正”差异。
   installed binary、父仓或运行数据库，未 push、merge、部署或重启。
 - Open issues：本阶段无 P0/P1；真实 daemon/Worker 的 dispatch->执行过程->final reply 与 Console 退出后继续领取
   第二项 Task 归属 Task 07，未用本阶段 smoke 冒充。
+
+#### Task 06 gate record
+
+- 实现提交：`de7eb3204132259e58f155c6ced9419d60c8f591`；8 files，924 insertions、95 deletions。
+- 提交后 feature worktree clean；相对 `origin/main@c3fc1bb` ahead 49。主工作树仍为 clean
+  `main@3723c77`、相对 origin ahead 1；ADR-009 SHA-256 仍为
+  `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69`，执行基线 `AGENTS.md` 为
+  `b53264590ccb1ebace81668ae3c98f1e29ce8f61384a259f08a5e23b8b92a95b`。
+- 主代理按单一 Follow/ack/cursor/epoch 状态机、Normal 安全投影、一次回退、token expiry、定向 race、三次
+  唯一 `tmux -L` + PTY 往返、全仓普通测试和 release scanner 复核为 `GO`；没有 P0/P1、双 Follow、
+  Diagnostic 泄漏、权限 fallback 或 ADR-006/007 语义变化。
+- 主计划和 Task 06 front matter 在本 docs-only gate record 同步为 `completed`；Task 07 保持
+  `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
 
 ## 7. 后续记录模板
 

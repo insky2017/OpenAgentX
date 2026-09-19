@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-19
 ---
@@ -55,3 +55,17 @@ git diff --check
 - 不存在双 Follow、旧 mode 污染、cursor 跨越或 goroutine 泄漏；
 - Diagnostic 内容继续满足 safeoutput、限流和容量上限；
 - 创建一个 Task 06 实现提交后停止等待监督 gate。
+
+## 完成记录
+
+- 实现提交：`de7eb3204132259e58f155c6ced9419d60c8f591`。
+- `/diagnostic` 与 `/normal` 已在同一 Attach TUI 内使用正式 authenticated client 切换；每个 Follow 有独立
+  context、opaque ID、registry 和 reducer stream epoch，旧流完成并移除后才启动新流。
+- snapshot/event 必须经 reducer ack 后才推进 cursor；旧 epoch 输入安全取消。Diagnostic 403、网络或投影
+  失败只进行一次 Normal-safe 回退，token 到期和 Diagnostic Follow 终止均立即清除 privileged state。
+- Normal/Diagnostic Timeline 使用独立 bounded render，Normal 不回显历史 Diagnostic；overlay 只显示结构化、
+  脱敏、限量的 Worker、Backend、Run、heartbeat/lease/drain 和 Runtime diagnostic。
+- 五包普通/race、mode/Follow 重复测试、三次唯一 `tmux -L` + PTY Normal->Diagnostic->Normal->quit、全仓
+  普通测试、vet、独立 build、Web observation、release scanner、whitespace 和冻结哈希检查通过。
+- 本任务未实现 Task 07 的真实 daemon/Worker 用户闭环，未修改 API/schema/Runtime/Fleet/systemd/default paths，
+  未 push、merge、安装、部署或操作真实状态。
