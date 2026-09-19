@@ -286,6 +286,9 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			socketPath := m.session.SocketPath
 			m.session = sessionStatus{SocketPath: socketPath}
 			m.connection = consoleclient.ConnectionDisconnected
+			if m.reducer != nil {
+				_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+			}
 			m.pending = false
 			m.notice = "CLI session expired; run openagentx console login"
 			if m.screen == screenAttach {
@@ -376,6 +379,13 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.connection = consoleclient.ConnectionDisconnected
 		}
+		if m.reducer != nil {
+			if err := m.reducer.SetConnection(m.reducer.StreamEpoch(), reducerConnectionState(m.connection)); err != nil {
+				m.connection = consoleclient.ConnectionDisconnected
+				m.overlay = overlayError
+				m.notice = "Connection state rejected: " + safeErrorSummary(err)
+			}
+		}
 		command := waitFollow(m.follow)
 		if msg.State.State == consoleclient.ConnectionRetentionReattach {
 			m.timeline.Add("Event history expired; refreshing the authoritative snapshot")
@@ -396,6 +406,9 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			ackFollow(msg.Ack, err)
 			m.connection = consoleclient.ConnectionDisconnected
+			if m.reducer != nil {
+				_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+			}
 			m.overlay = overlayError
 			m.notice = "Snapshot rejected: " + safeErrorSummary(err)
 			return m, waitFollow(m.follow)
@@ -420,6 +433,7 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			ackFollow(msg.Ack, err)
 			m.connection = consoleclient.ConnectionDisconnected
+			_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
 			m.overlay = overlayError
 			m.notice = "Event rejected: " + safeErrorSummary(err)
 			return m, waitFollow(m.follow)
@@ -432,6 +446,9 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		return m, waitFollow(m.follow)
 	case followDoneMsg:
 		m.connection = consoleclient.ConnectionDisconnected
+		if m.reducer != nil {
+			_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+		}
 		if msg.Err != nil && !errors.Is(msg.Err, context.Canceled) {
 			m.timeline.Add("Connection stopped: " + safeErrorSummary(msg.Err))
 			m.syncTimeline(false)
@@ -442,6 +459,19 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Err != nil {
 			m.timeline.Add(string(msg.Kind) + " failed: " + safeErrorSummary(msg.Err))
 		} else {
+			if m.reducer != nil && msg.Outcome.TaskID != "" {
+				applyErr := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{
+					AgentID: m.selectedAgent, TaskID: msg.Outcome.TaskID, Version: msg.Outcome.TaskVersion,
+					Status: msg.Outcome.TaskStatus, Focus: msg.Kind == controlDispatch,
+				})
+				if applyErr != nil {
+					m.connection = consoleclient.ConnectionDisconnected
+					_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+					m.timeline.Add(string(msg.Kind) + " state rejected: " + safeErrorSummary(applyErr))
+					m.syncTimeline(false)
+					return m, nil
+				}
+			}
 			m.timeline.Add(msg.Outcome.summary(msg.Kind))
 		}
 		m.syncTimeline(false)
@@ -469,6 +499,21 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateAttach(key)
 	default:
 		return m, nil
+	}
+}
+
+func reducerConnectionState(state consoleclient.ConnectionState) consolemodel.ConnectionState {
+	switch state {
+	case consoleclient.ConnectionConnecting:
+		return consolemodel.ConnectionConnecting
+	case consoleclient.ConnectionConnected:
+		return consolemodel.ConnectionConnected
+	case consoleclient.ConnectionReconnecting:
+		return consolemodel.ConnectionReconnecting
+	case consoleclient.ConnectionRetentionReattach:
+		return consolemodel.ConnectionRetentionReattach
+	default:
+		return consolemodel.ConnectionDisconnected
 	}
 }
 

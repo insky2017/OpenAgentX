@@ -24,10 +24,12 @@ func workerEvent(sequence, generation int64, workerID string, status domain.Work
 func generation(value int64) *int64 { return &value }
 
 func runEvent(sequence int64, runID, workerID string, workerGeneration int64, status domain.RunAttemptStatus) openapi.JournalEventReadModel {
+	now := time.Date(2026, 9, 20, 8, 0, 0, int(sequence), time.UTC)
 	return openapi.JournalEventReadModel{Sequence: sequence, ID: "event-" + runID,
 		AggregateType: "run_attempt", AggregateID: runID, EventType: "run_attempt.updated",
 		Run: &openapi.RunAttemptReadModel{ID: runID, TaskID: "task-" + runID, AgentID: "quote",
-			Status: status, WorkerInstanceID: workerID, WorkerGeneration: generation(workerGeneration)}}
+			Version: 1, Status: status, WorkerInstanceID: workerID, WorkerGeneration: generation(workerGeneration),
+			TurnResultState: "not_recorded", StartedAt: now, UpdatedAt: now}}
 }
 
 func TestReducerRejectsGenerationRollbackAndAdvancesIgnoredCursor(t *testing.T) {
@@ -137,8 +139,8 @@ func TestReducerSwitchesAndClearsActiveRunFromSafeProjection(t *testing.T) {
 		t.Fatal(err)
 	}
 	for sequence, run := range []openapi.RunAttemptReadModel{
-		{ID: "run-1", TaskID: "task-1", AgentID: "quote", Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), StartedAt: now, UpdatedAt: now},
-		{ID: "run-2", TaskID: "task-2", AgentID: "quote", Status: domain.RunAttemptWaitingApproval, WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), StartedAt: now, UpdatedAt: now.Add(time.Second)},
+		{ID: "run-1", TaskID: "task-1", AgentID: "quote", Version: 1, Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), TurnResultState: "not_recorded", StartedAt: now, UpdatedAt: now},
+		{ID: "run-2", TaskID: "task-2", AgentID: "quote", Version: 1, Status: domain.RunAttemptWaitingApproval, WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), TurnResultState: "not_recorded", StartedAt: now.Add(time.Second), UpdatedAt: now.Add(time.Second)},
 	} {
 		result, applyErr := reducer.Apply(openapi.JournalEventReadModel{Sequence: int64(51 + sequence), ID: run.ID,
 			AggregateType: "run_attempt", AggregateID: run.ID, EventType: "run_attempt.updated", Run: &run})
@@ -149,8 +151,9 @@ func TestReducerSwitchesAndClearsActiveRunFromSafeProjection(t *testing.T) {
 	if active := reducer.Snapshot().ActiveRun; active == nil || active.RunID != "run-2" || active.Status != domain.RunAttemptWaitingApproval {
 		t.Fatalf("active run did not switch: %+v", active)
 	}
-	finished := openapi.RunAttemptReadModel{ID: "run-2", TaskID: "task-2", AgentID: "quote", Status: domain.RunAttemptSucceeded,
-		WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), UpdatedAt: now.Add(2 * time.Second)}
+	finished := openapi.RunAttemptReadModel{ID: "run-2", TaskID: "task-2", AgentID: "quote", Version: 2, Status: domain.RunAttemptSucceeded,
+		WorkerInstanceID: "worker-1", WorkerGeneration: generation(1), TurnResultState: "not_recorded",
+		StartedAt: now.Add(time.Second), UpdatedAt: now.Add(2 * time.Second)}
 	if _, err := reducer.Apply(openapi.JournalEventReadModel{Sequence: 53, ID: "run-2-finished",
 		AggregateType: "run_attempt", AggregateID: "run-2", EventType: "run_attempt.finished", Run: &finished}); err != nil {
 		t.Fatal(err)
@@ -243,13 +246,15 @@ func TestReducerFailsClosedBeforeCursorAdvanceOnInvalidProjection(t *testing.T) 
 }
 
 func TestReducerTimelineCanOnlyContainSafeOutputProjection(t *testing.T) {
-	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", WorkerStatus: domain.WorkerStatusOffline, SnapshotSequence: 3})
+	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeDiagnostic,
+		WorkerStatus: domain.WorkerStatusOffline, SnapshotSequence: 3})
 	if err != nil {
 		t.Fatal(err)
 	}
 	result, err := reducer.Apply(openapi.JournalEventReadModel{Sequence: 4, ID: "runtime-safe",
 		AggregateType: "runtime", AggregateID: "run-1", EventType: "runtime.output",
-		Output: &openapi.SafeOutputReadModel{Text: "token=[REDACTED]", Diagnostic: "stderr=[REDACTED]"}})
+		Output: &openapi.SafeOutputReadModel{Text: "token=[REDACTED]", Diagnostic: "stderr=[REDACTED]",
+			HasOutput: true, HasError: true}})
 	if err != nil || result.Timeline == nil {
 		t.Fatalf("safe output result=%+v err=%v", result, err)
 	}

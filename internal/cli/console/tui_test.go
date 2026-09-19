@@ -78,6 +78,17 @@ func testControlOutcome(kind controlKind) controlOutcome {
 
 func fixedNow() time.Time { return time.Date(2026, 9, 15, 8, 0, 0, 0, time.UTC) }
 
+func taskProjection(taskID string, version int64, status domain.TaskStatus) *openapi.ConsoleTaskReadModel {
+	outcome := "pending"
+	if status == domain.TaskStatusSucceeded || status == domain.TaskStatusFailed ||
+		status == domain.TaskStatusCanceled || status == domain.TaskStatusUncertain {
+		outcome = "not_recorded"
+	}
+	return &openapi.ConsoleTaskReadModel{TaskID: taskID, Version: version, AgentID: "quote", Status: status,
+		Content: "safe task", OutcomeState: outcome, CreatedAt: fixedNow().Format(time.RFC3339Nano),
+		UpdatedAt: fixedNow().Add(time.Duration(version) * time.Second).Format(time.RFC3339Nano)}
+}
+
 func attachedModel(t *testing.T, actions *fakeTUIActions) tuiModel {
 	t.Helper()
 	m := newTUIModel(actions, fixedNow, nil)
@@ -266,7 +277,8 @@ func TestCompactAttachFitsActualWindowAndKeepsReducerResponsive(t *testing.T) {
 	}
 	eventAck := make(chan error, 1)
 	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1205,
-		ID: "event-task", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated"}, Ack: eventAck})
+		ID: "event-task", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated",
+		Task: taskProjection("task-1", 1, domain.TaskStatusQueued)}, Ack: eventAck})
 	if err := <-eventAck; err != nil {
 		t.Fatalf("compact event ack error=%v", err)
 	}
@@ -292,6 +304,27 @@ func TestCompactAttachFitsActualWindowAndKeepsReducerResponsive(t *testing.T) {
 		if m.input.Value() != "draft command" || !m.input.Focused() {
 			t.Fatalf("resize %dx%d changed input draft=%q focused=%v", size.width, size.height, m.input.Value(), m.input.Focused())
 		}
+	}
+}
+
+func TestTaskProjectionConflictIsRejectedBeforeFollowAck(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	validAck := make(chan error, 1)
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1205,
+		ID: "event-task-valid", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated",
+		Task: taskProjection("task-1", 1, domain.TaskStatusQueued)}, Ack: validAck})
+	if err := <-validAck; err != nil {
+		t.Fatalf("valid Task event ack=%v", err)
+	}
+	conflictAck := make(chan error, 1)
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1206,
+		ID: "event-task-conflict", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated",
+		Task: taskProjection("task-1", 1, domain.TaskStatusRunning)}, Ack: conflictAck})
+	if err := <-conflictAck; err == nil || m.reducer.Cursor() != 1205 ||
+		m.connection != consoleclient.ConnectionDisconnected || m.reducer.State().Connection != consolemodel.ConnectionDisconnected {
+		t.Fatalf("conflicting Task event ack=%v cursor=%d connection=%s reducer=%s",
+			err, m.reducer.Cursor(), m.connection, m.reducer.State().Connection)
 	}
 }
 
@@ -368,6 +401,11 @@ func TestControlCommandsAreExactlyOnceCASAndDisabledWhenDisconnected(t *testing.
 			t.Fatalf("%s request=%+v", testCase.line, request)
 		}
 		m, _ = updateModel(t, m, controlResultMsg{Kind: testCase.kind, Outcome: testControlOutcome(testCase.kind)})
+	}
+	state := m.reducer.State()
+	if state.FocusedTask == nil || state.FocusedTask.TaskID != "task-1" ||
+		state.FocusedTask.Version != 11 || state.FocusSource != consolemodel.FocusDispatch {
+		t.Fatalf("dispatch outcome did not become reducer focus: %+v source=%q", state.FocusedTask, state.FocusSource)
 	}
 	m.connection = consoleclient.ConnectionDisconnected
 	before := len(actions.controls)
@@ -493,8 +531,8 @@ func TestFollowConnectionAndRetentionMessages(t *testing.T) {
 	for _, state := range []consoleclient.ConnectionState{consoleclient.ConnectionConnecting, consoleclient.ConnectionConnected,
 		consoleclient.ConnectionDisconnected, consoleclient.ConnectionReconnecting, consoleclient.ConnectionRetentionReattach} {
 		m, _ = updateModel(t, m, followConnectionMsg{State: consoleclient.FollowState{State: state, Cursor: 1204}})
-		if m.connection != state {
-			t.Fatalf("connection=%s want=%s", m.connection, state)
+		if m.connection != state || string(m.reducer.State().Connection) != string(state) {
+			t.Fatalf("connection=%s reducer=%s want=%s", m.connection, m.reducer.State().Connection, state)
 		}
 	}
 	if !strings.Contains(m.timeline.String(), "history expired") {
@@ -519,7 +557,8 @@ func TestTimelineScrollAndHeartbeatBurstPreserveDraft(t *testing.T) {
 	beforeTimeline := m.timeline.Len()
 	wantOffset := m.viewport.YOffset
 	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1205,
-		ID: "event-task", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated"}})
+		ID: "event-task", AggregateType: "task", AggregateID: "task-1", EventType: "task.updated",
+		Task: taskProjection("task-1", 1, domain.TaskStatusQueued)}})
 	m, _ = updateModel(t, m, followConnectionMsg{State: consoleclient.FollowState{
 		State: consoleclient.ConnectionRetentionReattach, Cursor: 1205}})
 	m, _ = updateModel(t, m, controlResultMsg{Kind: controlDispatch, Outcome: testControlOutcome(controlDispatch)})

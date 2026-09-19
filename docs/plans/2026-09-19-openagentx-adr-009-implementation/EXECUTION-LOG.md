@@ -52,7 +52,7 @@ push/merge/安装来“修正”差异。
 | 01 | 基线、能力盘点与契约冻结 | completed | `5717506` | GO |
 | 02 | 权威任务观察投影 | completed | `84a2c15` | GO |
 | 03 | Runtime 安全输出与终态结果对齐 | completed | `e82ae37` | GO |
-| 04 | Task-centric Console reducer | pending | - | WAIT |
+| 04 | Task-centric Console reducer | active | - | WAIT |
 | 05 | Pane 0 任务 TUI 与控制易用性 | pending | - | WAIT |
 | 06 | 同 pane Diagnostic 模式 | pending | - | WAIT |
 | 07 | 隔离用户闭环与操作文档 | pending | - | WAIT |
@@ -285,6 +285,72 @@ push/merge/安装来“修正”差异。
   scanner 复核为 `GO`；没有 P0/P1、权限 fallback 或 ADR-006/007 语义变化。
 - 主计划和 Task 03 front matter 在本 docs-only gate record 同步为 `completed`；Task 04 保持
   `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
+
+### Task 04：Task-centric Console reducer
+
+- 开始时间：`2026-09-20`；baseline：`2de51b9354326635e659208411ab6f6756df8c37`；branch：
+  `codex/adr009-task-console`；worktree：`/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`。
+- 本轮用户结果：reducer 成为 focused Task、Task version/status、Mailbox/Run、最终 outcome/reply、
+  Message/Approval、Worker identity、mode/connection 和 Event cursor 的唯一状态来源；Task 05 只负责呈现
+  和命令体验。
+- 状态/CAS/幂等：focus 来源严格按 dispatch、手工选择、Attach suggestion；Task higher version 更新、same
+  version 完全一致幂等、lower version 合法忽略；terminal 冲突拒绝；Run 同时受 Task 与当前 Worker
+  instance/generation fencing。
+- 失败/竞态：覆盖跨 Agent/Task、无效安全投影、dispatch/event 乱序、旧 Worker/Run、snapshot/event ack、
+  mode epoch 迟到输入和 terminal 后冲突；拒绝路径不推进 cursor，合法忽略路径明确推进。
+- 资源/安全：active/recent Task、Timeline 和文本均同时受 count/byte cap；只保存 Task 02/03 安全 read
+  model，不接收 raw payload，不新增 I/O、schema、API、TUI 命令或 Diagnostic 切换。
+- 证据预算：一个主要实现批次和一次独立验证批次；同因 fixture/验证工具连续失败两次即停止原路径。
+  主计划和 Task 04 front matter 保持 `pending`，本 log 为 `active/WAIT`。
+
+#### Task 04 主要实现批次
+
+- reducer 新增 focused/active/recent Task、Mailbox、Run、Message、Approval、Task outcome、Runtime reply、
+  connection/mode epoch 和 bounded Timeline；dispatch 正式结果、手工选择与 Attach suggestion 是仅有 focus
+  来源，普通 SSE Task event 不抢占 focus。
+- Task version、terminal、Run `(started_at, run_id)`、Worker instance/generation 和 stream epoch 均 fail
+  closed；合法 lower-version/旧 Worker 历史事件推进 cursor，无效或冲突投影不 ack。Worker replacement/offline
+  清理无法证明的 active Run、backend、diagnostic 和 native pending Approval，但保留 terminal outcome/reply。
+- snapshot/event 通过 copy-on-write 提交 Task 状态；Task snapshot 中旧 Worker 的 active Run 与关联 native
+  Approval 被过滤，旧 Worker 已持久化 terminal reply 保留。Normal 模式拒绝 Diagnostic，安全文本及 truncation
+  metadata 在进入状态前校验。
+- active/recent Task 各最多 128 条、Task 总计 256 KiB；Timeline 最多 256 条、64 KiB、单条 2 KiB，长文本
+  再限为 512 bytes。TUI 本阶段只接入 connection、dispatch/steer/cancel outcome 和 reducer rejection，未修改
+  布局、公开命令语法或实现 Task 05/06 行为。
+- 变更限于 6 个 reducer/TUI 代码与测试文件、本 execution log，共 7 个路径；无 API/schema/persistence/
+  Runtime/tmux/systemd 变更。
+
+#### Task 04 失败与纠正
+
+| 日期 | 失败/发现 | 根因与影响 | 纠正与结果 |
+|---|---|---|---|
+| 2026-09-20 | 首次编译缺少本包 `cloneTime` helper | 新 clone 路径未包含时间指针复制；仅编译失败 | 增加本包私有 helper，未改变 transport/domain contract |
+| 2026-09-20 | 既有 Run/TUI fixture 被严格投影校验拒绝 | fixture 缺 Task 03 已冻结的 version/time/reply state 或 Task projection | 提升 fixture 为正式安全 DTO；未放宽产品校验 |
+| 2026-09-20 | 新测试曾假定普通 SSE Task 自动抢占 focus | 测试违背冻结 focus 优先级 | 先模拟 dispatch 正式结果；普通 SSE 继续只更新列表/Timeline |
+| 2026-09-20 | Task options 顺序修复时出现局部变量声明顺序编译错误 | 实现期编辑错误，无运行副作用 | 调整声明后定向测试通过 |
+| 2026-09-20 | 自审发现全量 Task 深拷贝、高频旧 Run/terminal Run、option 顺序和 Timeline truncation 边界 | 可造成额外复制、旧状态覆盖、排序反转或 metadata 不一致 | event 改为按相关 Task copy-on-write；补 Run fencing/terminal 清理、权威排序和 truncation 一致性测试 |
+| 2026-09-20 | 自审发现 Task outcome/reply/output truncation 与 Task snapshot 旧 Worker active Run 边界不足 | 无效安全投影可能污染状态，旧 active Run/native Approval 可能留存 | 入 reducer 前统一 fail closed；active Run 再按当前 Worker fencing，terminal reply 保留 |
+| 2026-09-20 | 独立验证首次使用 zsh `time -p`，7 条命令均以 127 退出且测试未启动 | zsh 将 `time` 解析为保留字并尝试执行 `-p`；无代码或外部副作用 | 不重复该路径，改用 `/usr/bin/time -p`；同一验证批次随后全部通过 |
+
+#### Task 04 独立验证批次
+
+| 命令 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./internal/consolemodel ./internal/client/console ./internal/cli/console -count=1` | 0 / 3.55s | reducer、Follow ack client 与最小 TUI 接线普通测试通过 |
+| `go test -race ./internal/consolemodel ./internal/client/console ./internal/cli/console -count=1` | 0 / 8.44s | Task 04 全部受影响 package race 通过 |
+| `go test ./internal/consolemodel -run 'Fuzz|Property' -count=1` | 0 / 1.42s | `FuzzTaskReducerMalformedProjectionDoesNotAdvanceCursor` seeds 实际执行通过 |
+| `go test ./... -count=1` | 0 / 21.30s | 全仓 Go 普通测试无缓存通过；Panel 19.098s、Fleet 11.973s、SQLite 12.383s |
+| `go vet ./internal/consolemodel ./internal/client/console ./internal/cli/console` | 0 / 0.69s | 无 vet 诊断 |
+| `go build -o /tmp/openagentx-adr009-task04 ./cmd/openagentx` | 0 / 4.73s | 独立临时产物构建成功，未覆盖 installed binary |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 / 0.16s | 全部 legacy/tmux control 类别 `CLEAN` |
+| `git diff --check` | 0 / <0.1s | 无 whitespace error |
+| `sha256sum docs/decisions/ADR-009-pane-zero-task-console-observability.md AGENTS.md` | 0 / <0.1s | ADR 仍为 `afb7473...32c69`；执行基线 `AGENTS.md` 为 `b532645...a95b` |
+
+- 覆盖证据包括 focus 三来源、dispatch/event 乱序、Task version/terminal matrix、Mailbox/Message/Approval/
+  Runtime reply、旧 Worker/旧 Run、replacement/offline、Task snapshot fencing、stream epoch/Normal Diagnostic、
+  atomic rejection、cursor 不跨越、bounded collection/Timeline 和 malformed projection fuzz seeds。
+- 外部状态：未操作真实 HOME/DB/UDS/credential/default tmux/user-systemd/installed binary 或父仓；未 push、
+  merge、部署或重启。Task 04 无新增 P0/P1；Task 05 TUI 呈现/快捷命令与 Task 06 Diagnostic 切换保持后置。
 
 ## 7. 后续记录模板
 
