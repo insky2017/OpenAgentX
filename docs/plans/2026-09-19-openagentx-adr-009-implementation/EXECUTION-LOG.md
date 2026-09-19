@@ -53,7 +53,7 @@ push/merge/安装来“修正”差异。
 | 02 | 权威任务观察投影 | completed | `84a2c15` | GO |
 | 03 | Runtime 安全输出与终态结果对齐 | completed | `e82ae37` | GO |
 | 04 | Task-centric Console reducer | completed | `874a0e1` | GO |
-| 05 | Pane 0 任务 TUI 与控制易用性 | pending | - | WAIT |
+| 05 | Pane 0 任务 TUI 与控制易用性 | active | - | WAIT |
 | 06 | 同 pane Diagnostic 模式 | pending | - | WAIT |
 | 07 | 隔离用户闭环与操作文档 | pending | - | WAIT |
 | 08 | 集成审查与候选门禁 | pending | - | WAIT |
@@ -363,6 +363,75 @@ push/merge/安装来“修正”差异。
   ADR-006/007 语义变化。
 - 主计划和 Task 04 front matter 在本 docs-only gate record 同步为 `completed`；Task 05 保持
   `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/tmux/父仓。
+
+### Task 05：Pane 0 任务 TUI 与控制易用性
+
+- 开始时间：`2026-09-20`；baseline：`4f88c29e56eda644fecc3638771984ae4837d880`；branch：
+  `codex/adr009-task-console`；worktree：`/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`。
+- 本轮用户结果：pane 0 连续呈现 Task 排队、领取、Run、等待、终态、安全输出和最终回复；用户无需抄写
+  Task ID/version 即可 steer/cancel focused Task，并可从 bounded active/recent 列表显式切换 focus。
+- 状态/CAS/幂等：View 只读 Task 04 reducer；快捷控制只使用最新 focused Task 的完整 ID/version；显式
+  flag 与经批准旧位置语法无歧义，每次用户确认只调用一次 authenticated official API。
+- 失败/竞态：无 focus、terminal、断线、token expiry、CAS stale、API 失败均不假成功或自动重试；事件、
+  resize、heartbeat、terminal 与 control response 不改变输入 draft/cursor/focus 或用户上滚位置。
+- 资源/平台：复用 bounded Task/Timeline/result；`80x5`、`20x3`、`8x1` 严格按实际高度渲染；退出只
+  detach Console，不停止 Task/Worker。
+- 范围边界：不实现 Task 06 同 pane Diagnostic 切换，不修改 API/schema/Runtime/Fleet/workspace/
+  user-systemd/default paths，不引入 TurnHandle、tmux 控制或 raw output。
+- 证据预算：一个主要实现批次和一次独立验证批次；同因 fixture/验证工具连续失败两次即停止原路径。
+  主计划和 Task 05 front matter 保持 `pending`，本 log 为 `active/WAIT`。
+
+#### Task 05 主要实现批次
+
+- Console application 复用既有 authenticated official client 的 `ListTaskOptions` 和 `TaskSnapshot`；没有新增
+  transport、控制协议、认证 fallback 或 tmux 业务控制。Attach suggested Task 自动加载权威详情，`/tasks`
+  展示 reducer 中 bounded active/recent 集合并支持显式 focus。
+- Attach header/status 显示 focused Task、version、status、stage、Worker/generation、connection/cursor；
+  `/status` 显示完整 Task/Run/Message/Approval ID/version、Task outcome、Runtime reply 和证据来源。Timeline
+  从 Task 04 reducer 的安全 `TimelineItem` 渲染 mailbox、Run、Task terminal 和 Runtime reply，不读取 raw
+  Journal、stderr 或 Runtime payload。
+- 新增 focused `/steer <content>`、`/cancel`，以及无歧义的 `--task/--version` 显式形式；保留冻结契约批准的
+  旧位置语法。快捷形式只使用 reducer 最新完整 Task ID/version；无 focus、terminal、断线、session expiry、
+  Task detail loading 和 pending control 均在 API 调用前拒绝，每次用户确认最多调用一次正式 API。
+- stale CAS 只恢复提交前 draft、读取一次权威 Task snapshot 并显示新 version，不自动重试写操作。API 失败、
+  reducer 拒绝和 pending 期间 token 绝对到期也恢复 draft；suggested Task 自动详情不会抢走用户当前 overlay。
+- Task 列表、状态、Timeline 和结果均在终端渲染前移除控制字符并保持既有限量；后台 event/control/resize
+  仅在用户原本位于底部时自动跟随，输入 draft/cursor/focus 不变。`80x5`、`20x3`、`8x1` 继续严格按
+  实际终端高度裁剪。
+- 变更限于 Console application/TUI 代码与测试、本 execution log，共 6 个路径；没有 API/schema/
+  persistence/Runtime/Fleet/workspace/user-systemd/default-path 或 Task 06 Diagnostic mode-switch 变更。
+
+#### Task 05 失败与纠正
+
+| 日期 | 失败/发现 | 根因与影响 | 纠正与结果 |
+|---|---|---|---|
+| 2026-09-20 | 无 focus/terminal 命令错误最初只显示 `operation failed` | user-visible error 未进入安全摘要分支，用户无法理解本地拒绝原因 | 增加有界 user-visible error，保持敏感错误不透传；回归测试通过 |
+| 2026-09-20 | 新 header 测试最初要求显示完整 Task ID | 紧凑 header 与详情职责混淆；长 ID 会破坏小 pane 可读性 | header 使用短 ID，`/status` 保留完整 ID/version；尺寸与详情测试通过 |
+| 2026-09-20 | 新测试一次编译失败：同一作用域误用 `:=` | 测试编辑错误，无产品或外部副作用 | 改为赋值后定向测试通过 |
+| 2026-09-20 | 只读审查尝试读取不存在的 `internal/domain/mailbox.go` | Mailbox contract 实际位于 `mailbox_contract.go` | 使用 `rg` 定位正式定义；未修改代码或 fixture |
+| 2026-09-20 | 提交前审查发现 Task summary 可把 ANSI 控制字符交给 Bubbles，Task detail loading 可与第二次写操作并发 | 安全 DTO 的长度/脱敏不等价于终端控制字符安全；stale refresh 期间可再次使用旧 CAS | list title/description/filter 在渲染前统一 `boundedSafeText`；权威 detail loading 期间禁用写并保留 draft；控制字符、expiry、overlay、终态原因和 loading 回归均通过 |
+
+#### Task 05 独立验证批次
+
+| 命令 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./internal/cli/console ./internal/client/console ./internal/consolemodel -count=1` | 0 / 3.3s | Task TUI、正式 client、reducer 接线普通测试通过 |
+| `go test -race ./internal/cli/console ./internal/client/console ./internal/consolemodel -count=1` | 0 / 6.88s | 受影响三包 race 通过 |
+| `go test ./internal/cli/console -run 'TTY\|Compact\|Task\|Control' -count=10` | 0 / 12.88s | 状态流、compact、控制和 TTY 相关测试连续十次通过 |
+| `go test ./internal/cli/console -run '^TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes$' -count=1` | 0 / 1.80s | 唯一 `tmux -L` + PTY：alt-screen、正式临时 UDS/auth、OAX bind、正常退出和 pane 1/2 保留通过 |
+| `go test ./... -count=1` | 0 / 20.81s | 全仓 Go 无缓存普通测试通过 |
+| `go vet ./internal/cli/console ./internal/client/console ./internal/consolemodel` | 0 / 0.46s | 无 vet 诊断 |
+| `go build -o /tmp/openagentx-adr009-task05 ./cmd/openagentx` | 0 / 4.38s | 独立临时产物构建成功，未覆盖 installed binary |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 / 0.14s | 全部 legacy/tmux control 类别 `CLEAN` |
+| `git diff --check` | 0 / <0.1s | 无 whitespace error |
+| `sha256sum docs/decisions/ADR-009-pane-zero-task-console-observability.md AGENTS.md` | 0 / <0.1s | ADR 为 `afb7473...32c69`；新版执行基线为 `b532645...a95b` |
+
+- 新增证据覆盖：Task focus/list/detail、完整 ID/version、queued->mailbox->Run->terminal/reply、focused 与显式
+  control exactly once、CAS stale 无重试、token expiry/API/reducer 失败 draft 恢复、ANSI 清理、overlay 保持、
+  heartbeat/后台事件输入与上滚稳定、bounded Timeline 和 compact layout。
+- 外部状态：未操作真实 HOME/DB/UDS/credential/default tmux/user-systemd/installed binary 或父仓；未 push、
+  merge、部署或重启。Task 05 保持 `active/WAIT`，主计划/front matter 继续 `pending`。
+- Open issues：本阶段无 P0/P1；同 pane Normal/Diagnostic mode switch 仍严格归属 Task 06，未提前实现。
 
 ## 7. 后续记录模板
 

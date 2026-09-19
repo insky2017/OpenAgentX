@@ -14,6 +14,7 @@ import (
 	consoleclient "openagentx/internal/client/console"
 	"openagentx/internal/consolemodel"
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 type fakeTUIActions struct {
@@ -26,8 +27,13 @@ type fakeTUIActions struct {
 		agentID string
 		confirm bool
 	}
-	followCalls int
-	controls    []controlRequest
+	followCalls     int
+	controls        []controlRequest
+	taskListCalls   int
+	taskDetailCalls []struct {
+		taskID  string
+		purpose taskSnapshotPurpose
+	}
 }
 
 func (a *fakeTUIActions) sessionCmd() tea.Cmd {
@@ -58,9 +64,22 @@ func (a *fakeTUIActions) startFollowCmd(_ uint64, _ string) tea.Cmd {
 	a.followCalls++
 	return func() tea.Msg { return followStartedMsg{} }
 }
+func (a *fakeTUIActions) taskOptionsCmd(_ uint64, _ string) tea.Cmd {
+	a.taskListCalls++
+	return func() tea.Msg { return taskOptionsResultMsg{} }
+}
+func (a *fakeTUIActions) taskSnapshotCmd(_ uint64, _, taskID string, purpose taskSnapshotPurpose) tea.Cmd {
+	a.taskDetailCalls = append(a.taskDetailCalls, struct {
+		taskID  string
+		purpose taskSnapshotPurpose
+	}{taskID: taskID, purpose: purpose})
+	return func() tea.Msg { return taskSnapshotResultMsg{TaskID: taskID, Purpose: purpose} }
+}
 func (a *fakeTUIActions) controlCmd(_ uint64, request controlRequest) tea.Cmd {
 	a.controls = append(a.controls, request)
-	return func() tea.Msg { return controlResultMsg{Kind: request.Kind, Outcome: testControlOutcome(request.Kind)} }
+	return func() tea.Msg {
+		return controlResultMsg{Kind: request.Kind, Request: request, Outcome: testControlOutcome(request.Kind)}
+	}
 }
 
 func testControlOutcome(kind controlKind) controlOutcome {
@@ -87,6 +106,10 @@ func taskProjection(taskID string, version int64, status domain.TaskStatus) *ope
 	return &openapi.ConsoleTaskReadModel{TaskID: taskID, Version: version, AgentID: "quote", Status: status,
 		Content: "safe task", OutcomeState: outcome, CreatedAt: fixedNow().Format(time.RFC3339Nano),
 		UpdatedAt: fixedNow().Add(time.Duration(version) * time.Second).Format(time.RFC3339Nano)}
+}
+
+func taskSnapshot(taskID string, version int64, status domain.TaskStatus) openapi.ConsoleTaskSnapshot {
+	return openapi.ConsoleTaskSnapshot{Task: *taskProjection(taskID, version, status), SnapshotSequence: 1204}
 }
 
 func attachedModel(t *testing.T, actions *fakeTUIActions) tuiModel {
@@ -418,6 +441,285 @@ func TestControlCommandsAreExactlyOnceCASAndDisabledWhenDisconnected(t *testing.
 	}
 }
 
+func TestFocusedTaskShortcutsUseReducerCASAndExplicitSyntax(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	if err := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{AgentID: "quote", TaskID: "task-focused",
+		Version: 7, Status: domain.TaskStatusRunning, Focus: true}); err != nil {
+		t.Fatal(err)
+	}
+	tests := []struct {
+		line    string
+		kind    controlKind
+		target  string
+		version int64
+		content string
+	}{
+		{line: "/steer only answer with the current time", kind: controlSteer, target: "task-focused", version: 7,
+			content: "only answer with the current time"},
+		{line: "/cancel", kind: controlCancel, target: "task-focused", version: 7},
+		{line: "/steer --task task-other --version 9 explicit content", kind: controlSteer,
+			target: "task-other", version: 9, content: "explicit content"},
+		{line: "/cancel --task task-other --version 10", kind: controlCancel, target: "task-other", version: 10},
+		{line: "/steer task-focused 7 legacy content", kind: controlSteer,
+			target: "task-focused", version: 7, content: "legacy content"},
+	}
+	for _, testCase := range tests {
+		m.pending = false
+		before := len(actions.controls)
+		var cmd tea.Cmd
+		m, cmd = executeLine(t, m, testCase.line)
+		if cmd == nil || len(actions.controls) != before+1 {
+			t.Fatalf("%q calls=%d cmd=%v", testCase.line, len(actions.controls)-before, cmd)
+		}
+		request := actions.controls[len(actions.controls)-1]
+		if request.Kind != testCase.kind || request.TargetID != testCase.target ||
+			request.ExpectedVersion != testCase.version || request.Content != testCase.content {
+			t.Fatalf("%q request=%+v", testCase.line, request)
+		}
+		m, _ = updateModel(t, m, controlResultMsg{Kind: request.Kind, Request: request,
+			Outcome: testControlOutcome(request.Kind)})
+	}
+
+	noFocusActions := &fakeTUIActions{}
+	noFocus := attachedModel(t, noFocusActions)
+	noFocus, cmd := executeLine(t, noFocus, "/steer task-untracked 3 legacy explicit")
+	if cmd == nil || len(noFocusActions.controls) != 1 {
+		t.Fatalf("legacy explicit control without focus cmd=%v", cmd)
+	}
+	noFocus.pending = false
+	noFocus, cmd = executeLine(t, noFocus, "/cancel")
+	if cmd != nil || !strings.Contains(noFocus.timeline.String(), "no focused Task") || noFocus.input.Value() != "/cancel" {
+		t.Fatalf("no-focus command cmd=%v draft=%q timeline=%q", cmd, noFocus.input.Value(), noFocus.timeline.String())
+	}
+	terminal := taskSnapshot("task-done", 3, domain.TaskStatusSucceeded)
+	if err := noFocus.reducer.ApplyTaskSnapshot(terminal, consolemodel.FocusManual); err != nil {
+		t.Fatal(err)
+	}
+	noFocus, cmd = executeLine(t, noFocus, "/steer retry")
+	if cmd != nil || !strings.Contains(noFocus.timeline.String(), "terminal") {
+		t.Fatalf("terminal shortcut cmd=%v timeline=%q", cmd, noFocus.timeline.String())
+	}
+}
+
+func TestTaskOverlayFocusAndTerminalResultsUseAuthoritativeProjection(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	m, listCmd := executeLine(t, m, "/tasks")
+	if listCmd == nil || actions.taskListCalls != 1 || m.overlay != overlayTasks || !m.taskLoading || m.input.Value() != "" {
+		t.Fatalf("Task list command calls=%d overlay=%v loading=%v draft=%q cmd=%v",
+			actions.taskListCalls, m.overlay, m.taskLoading, m.input.Value(), listCmd)
+	}
+	options := []openapi.ConsoleTaskOption{
+		{TaskID: "task-running-full-id", Version: 4, Status: domain.TaskStatusRunning,
+			Summary: "running task", UpdatedAt: fixedNow().Add(time.Minute).Format(time.RFC3339Nano)},
+		{TaskID: "task-terminal-full-id", Version: 5, Status: domain.TaskStatusSucceeded,
+			Summary: "terminal task", UpdatedAt: fixedNow().Format(time.RFC3339Nano)},
+	}
+	m, _ = updateModel(t, m, taskOptionsResultMsg{Options: options})
+	if m.overlay != overlayTasks || len(m.tasks.Items()) != 2 {
+		t.Fatalf("Task overlay=%v items=%d", m.overlay, len(m.tasks.Items()))
+	}
+	for _, size := range []struct{ width, height int }{{80, 5}, {20, 3}, {8, 1}} {
+		m.resize(size.width, size.height)
+		assertTerminalViewFits(t, m.View(), size.width, size.height)
+	}
+	m.resize(100, 30)
+	m, cmd := updateModel(t, m, key("enter"))
+	if cmd == nil || len(actions.taskDetailCalls) != 1 || actions.taskDetailCalls[0].taskID != "task-running-full-id" {
+		t.Fatalf("Task focus calls=%+v cmd=%v", actions.taskDetailCalls, cmd)
+	}
+	running := taskSnapshot("task-running-full-id", 4, domain.TaskStatusRunning)
+	running.WorkDelivery = &openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-running",
+		State: domain.MailboxStateAccepted, CreatedAt: fixedNow()}
+	m, _ = updateModel(t, m, taskSnapshotResultMsg{TaskID: running.Task.TaskID,
+		Snapshot: running, Purpose: taskSnapshotFocus})
+	if m.reducer.State().FocusedTask == nil || m.reducer.State().FocusedTask.TaskID != running.Task.TaskID ||
+		m.overlay != overlayNone || !strings.Contains(m.statusView(), "Task ID: task-running-full-id") {
+		t.Fatalf("focused state=%+v overlay=%v status=%q", m.reducer.State().FocusedTask, m.overlay, m.statusView())
+	}
+
+	terminal := taskSnapshot("task-terminal-full-id", 5, domain.TaskStatusSucceeded)
+	result := "safe Task outcome"
+	terminal.Task.Result, terminal.Task.OutcomeState = &result, "available"
+	generation := int64(48)
+	known := true
+	terminal.LatestRun = &openapi.RunAttemptReadModel{ID: "run-terminal-full-id", TaskID: terminal.Task.TaskID,
+		AgentID: "quote", Version: 2, Status: domain.RunAttemptSucceeded, WorkerInstanceID: "worker-current",
+		WorkerGeneration: &generation, TurnResultState: "available", StartedAt: fixedNow(), UpdatedAt: fixedNow().Add(time.Second),
+		TurnResult: &openapi.TurnResultReadModel{RuntimeStatus: openruntime.TurnResultSucceeded,
+			Body: "safe Runtime reply", RuntimeSideEffectsKnown: &known, SideEffectsSource: "runtime_reported",
+			BusinessVerificationSource: "not_recorded"}}
+	m, _ = updateModel(t, m, taskSnapshotResultMsg{TaskID: terminal.Task.TaskID,
+		Snapshot: terminal, Purpose: taskSnapshotFocus})
+	status := m.statusView()
+	for _, expected := range []string{"Task ID: task-terminal-full-id", "Task version: 5", "Task status: succeeded",
+		"Run ID: run-terminal-full-id", "Runtime reply: safe Runtime reply", "Task result: safe Task outcome"} {
+		if !strings.Contains(status, expected) {
+			t.Fatalf("status missing %q: %s", expected, status)
+		}
+	}
+	if !strings.Contains(m.timeline.String(), "Task outcome result: safe Task outcome") ||
+		!strings.Contains(m.timeline.String(), "Runtime reply: safe Runtime reply") {
+		t.Fatalf("terminal summaries missing: %q", m.timeline.String())
+	}
+}
+
+func TestTaskOverlaySanitizesTerminalControlSequences(t *testing.T) {
+	m := attachedModel(t, &fakeTUIActions{})
+	options := []openapi.ConsoleTaskOption{{TaskID: "task-safe-list", Version: 1,
+		Status: domain.TaskStatusRunning, Summary: "safe\x1b]8;;https://example.invalid\aunsafe\x1b]8;;\a summary",
+		UpdatedAt: fixedNow().Format(time.RFC3339Nano)}}
+	m, _ = updateModel(t, m, taskOptionsResultMsg{Options: options})
+	item, ok := m.tasks.Items()[0].(taskItem)
+	if !ok {
+		t.Fatalf("Task list item type=%T", m.tasks.Items()[0])
+	}
+	for _, rendered := range []string{item.Title(), item.Description(), item.FilterValue()} {
+		if strings.ContainsAny(rendered, "\x1b\a") {
+			t.Fatalf("Task item retained terminal control bytes: %q", rendered)
+		}
+	}
+	view := m.View()
+	if strings.Contains(view, "\x1b]8;;") || !strings.Contains(ansi.Strip(view), "unsafe") {
+		t.Fatalf("Task overlay did not safely render summary: %q", view)
+	}
+}
+
+func TestSuggestedTaskDetailKeepsCurrentOverlayAndFailureIsNonDisruptive(t *testing.T) {
+	m := attachedModel(t, &fakeTUIActions{})
+	m.overlay = overlayHelp
+	snapshot := taskSnapshot("task-suggested", 2, domain.TaskStatusRunning)
+	m.taskLoading = true
+	m, _ = updateModel(t, m, taskSnapshotResultMsg{TaskID: snapshot.Task.TaskID,
+		Snapshot: snapshot, Purpose: taskSnapshotInitial})
+	if m.overlay != overlayHelp || m.reducer.State().FocusedTask == nil ||
+		m.reducer.State().FocusedTask.TaskID != "task-suggested" {
+		t.Fatalf("suggested Task changed overlay=%v focus=%+v", m.overlay, m.reducer.State().FocusedTask)
+	}
+	m.taskLoading = true
+	m, _ = updateModel(t, m, taskSnapshotResultMsg{TaskID: "task-suggested",
+		Purpose: taskSnapshotInitial, Err: errors.New("temporary failure")})
+	if m.overlay != overlayHelp || !strings.Contains(m.timeline.String(), "Suggested Task detail failed") {
+		t.Fatalf("suggested Task failure changed overlay=%v timeline=%q", m.overlay, m.timeline.String())
+	}
+}
+
+func TestTerminalNoResultReasonsAreExplicit(t *testing.T) {
+	generation := int64(48)
+	tests := []struct {
+		name string
+		task *consolemodel.TaskState
+		want string
+	}{
+		{name: "task not recorded", task: &consolemodel.TaskState{TaskID: "task-one", Status: domain.TaskStatusSucceeded,
+			Detail: taskProjection("task-one", 2, domain.TaskStatusSucceeded)}, want: "no safe Task outcome was recorded"},
+		{name: "runtime not recorded", task: &consolemodel.TaskState{TaskID: "task-two", Status: domain.TaskStatusSucceeded,
+			LatestRun: &openapi.RunAttemptReadModel{TurnResultState: "not_recorded", WorkerGeneration: &generation}},
+			want: "Runtime reply was not recorded"},
+		{name: "runtime empty", task: &consolemodel.TaskState{TaskID: "task-three", Status: domain.TaskStatusSucceeded,
+			LatestRun: &openapi.RunAttemptReadModel{TurnResultState: "empty", WorkerGeneration: &generation}},
+			want: "without a safe displayable reply"},
+		{name: "runtime invalid", task: &consolemodel.TaskState{TaskID: "task-four", Status: domain.TaskStatusFailed,
+			LatestRun: &openapi.RunAttemptReadModel{TurnResultState: "invalid", WorkerGeneration: &generation}},
+			want: "rejected as invalid"},
+		{name: "uncertain", task: &consolemodel.TaskState{TaskID: "task-five", Status: domain.TaskStatusUncertain},
+			want: "remains uncertain"},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			if got := strings.Join(taskResultSummaries(testCase.task), "\n"); !strings.Contains(got, testCase.want) {
+				t.Fatalf("summary=%q want %q", got, testCase.want)
+			}
+		})
+	}
+}
+
+func TestLiveTaskLifecycleShowsDeliveryRunOutcomeAndRuntimeReply(t *testing.T) {
+	m := attachedModel(t, &fakeTUIActions{})
+	if err := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{AgentID: "quote", TaskID: "task-live",
+		Version: 1, Status: domain.TaskStatusQueued, Focus: true}); err != nil {
+		t.Fatal(err)
+	}
+	m.input.SetValue("draft remains")
+	m.input.SetCursor(5)
+	claimedTask := taskProjection("task-live", 2, domain.TaskStatusDispatching)
+	mailbox := &openapi.ConsoleMailboxReadModel{MailboxItemID: "mailbox-live", State: domain.MailboxStateClaimed,
+		WorkerInstanceID: "worker-current", CreatedAt: fixedNow(), LeaseUntil: timePointer(fixedNow().Add(time.Minute))}
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1205,
+		ID: "event-mailbox-live", AggregateType: "mailbox_item", AggregateID: mailbox.MailboxItemID,
+		EventType: "mailbox.claimed", Task: claimedTask, Mailbox: mailbox}})
+	generation := int64(48)
+	running := &openapi.RunAttemptReadModel{ID: "run-live", TaskID: "task-live", AgentID: "quote", Version: 1,
+		Status: domain.RunAttemptRunning, WorkerInstanceID: "worker-current", WorkerGeneration: &generation,
+		TurnResultState: "not_recorded", StartedAt: fixedNow(), UpdatedAt: fixedNow().Add(time.Second)}
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1206,
+		ID: "event-run-live", AggregateType: "run_attempt", AggregateID: running.ID,
+		EventType: "run_attempt.running", Run: running}})
+	terminalRun := *running
+	terminalRun.Version = 2
+	terminalRun.Status = domain.RunAttemptSucceeded
+	terminalRun.UpdatedAt = fixedNow().Add(2 * time.Second)
+	known := true
+	terminalRun.TurnResultState = "available"
+	terminalRun.TurnResult = &openapi.TurnResultReadModel{RuntimeStatus: openruntime.TurnResultSucceeded,
+		Body: "live safe reply", RuntimeSideEffectsKnown: &known, SideEffectsSource: "runtime_reported",
+		BusinessVerificationSource: "not_recorded"}
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1207,
+		ID: "event-run-live-terminal", AggregateType: "run_attempt", AggregateID: terminalRun.ID,
+		EventType: "run_attempt.succeeded", Run: &terminalRun}})
+	finished := taskProjection("task-live", 3, domain.TaskStatusSucceeded)
+	result := "live Task result"
+	finished.Result, finished.OutcomeState = &result, "available"
+	m, _ = updateModel(t, m, followEventMsg{Event: openapi.JournalEventReadModel{Sequence: 1208,
+		ID: "event-task-live-terminal", AggregateType: "task", AggregateID: finished.TaskID,
+		EventType: "task.succeeded", Task: finished}})
+
+	state := m.reducer.State()
+	if state.FocusedTask == nil || state.FocusedTask.Status != domain.TaskStatusSucceeded || state.FocusedTask.Version != 3 ||
+		m.input.Value() != "draft remains" || m.input.LineInfo().CharOffset != 5 {
+		t.Fatalf("live lifecycle state=%+v draft=%q cursor=%d", state.FocusedTask, m.input.Value(), m.input.LineInfo().CharOffset)
+	}
+	for _, expected := range []string{"work delivery claimed", "run status running", "Runtime reply: live safe reply",
+		"Task outcome result: live Task result"} {
+		if !strings.Contains(m.timeline.String(), expected) {
+			t.Fatalf("Timeline missing %q: %s", expected, m.timeline.String())
+		}
+	}
+}
+
+func timePointer(value time.Time) *time.Time { return &value }
+
+func TestStaleCASRefreshesWithoutRetryAndPreservesDraft(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	if err := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{AgentID: "quote", TaskID: "task-focused",
+		Version: 7, Status: domain.TaskStatusRunning, Focus: true}); err != nil {
+		t.Fatal(err)
+	}
+	line := "/steer corrected instruction"
+	m, cmd := executeLine(t, m, line)
+	if cmd == nil || len(actions.controls) != 1 || m.input.Value() != "" {
+		t.Fatalf("initial write calls=%d draft=%q cmd=%v", len(actions.controls), m.input.Value(), cmd)
+	}
+	request := actions.controls[0]
+	m, refresh := updateModel(t, m, controlResultMsg{Kind: controlSteer, Request: request,
+		Err: &consoleclient.APIError{StatusCode: 409, Code: openapi.ErrorStaleVersion}})
+	if refresh == nil || len(actions.controls) != 1 || len(actions.taskDetailCalls) != 1 ||
+		actions.taskDetailCalls[0].purpose != taskSnapshotStale || m.input.Value() != line {
+		t.Fatalf("stale refresh calls=%d details=%+v draft=%q cmd=%v",
+			len(actions.controls), actions.taskDetailCalls, m.input.Value(), refresh)
+	}
+	refreshed := taskSnapshot("task-focused", 8, domain.TaskStatusWaitingInput)
+	m, _ = updateModel(t, m, taskSnapshotResultMsg{TaskID: refreshed.Task.TaskID,
+		Snapshot: refreshed, Purpose: taskSnapshotStale})
+	if len(actions.controls) != 1 || m.reducer.State().FocusedTask.Version != 8 || m.input.Value() != line ||
+		m.overlay != overlayStatus || !strings.Contains(m.timeline.String(), "without retrying") {
+		t.Fatalf("stale result calls=%d focus=%+v draft=%q overlay=%v timeline=%q",
+			len(actions.controls), m.reducer.State().FocusedTask, m.input.Value(), m.overlay, m.timeline.String())
+	}
+}
+
 func executeLine(t *testing.T, model tuiModel, line string) (tuiModel, tea.Cmd) {
 	t.Helper()
 	model.input.SetValue(line)
@@ -476,6 +778,44 @@ func TestSessionExpiryDisconnectsAndDisablesWritesWithoutChangingDraft(t *testin
 	m, cmd := executeLine(t, m, "/dispatch retry after login")
 	if cmd != nil || len(actions.controls) != before || m.input.Value() != "/dispatch retry after login" {
 		t.Fatalf("expired write cmd=%v calls=%d draft=%q", cmd, len(actions.controls)-before, m.input.Value())
+	}
+}
+
+func TestSessionExpiryWhileControlPendingRestoresSubmittedDraft(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	if err := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{AgentID: "quote", TaskID: "task-focused",
+		Version: 7, Status: domain.TaskStatusRunning, Focus: true}); err != nil {
+		t.Fatal(err)
+	}
+	line := "/steer answer only with the current time"
+	m, cmd := executeLine(t, m, line)
+	if cmd == nil || !m.pending || m.input.Value() != "" || len(actions.controls) != 1 {
+		t.Fatalf("pending command state pending=%v draft=%q calls=%d cmd=%v",
+			m.pending, m.input.Value(), len(actions.controls), cmd)
+	}
+	m, _ = updateModel(t, m, tickMsg{Now: m.session.ExpiresAt})
+	if m.pending || m.pendingDraft != "" || m.input.Value() != line || m.session.Authenticated ||
+		m.connection != consoleclient.ConnectionDisconnected {
+		t.Fatalf("expiry did not restore pending draft pending=%v saved=%q draft=%q auth=%v connection=%s",
+			m.pending, m.pendingDraft, m.input.Value(), m.session.Authenticated, m.connection)
+	}
+}
+
+func TestControlIsDisabledDuringAuthoritativeTaskRefresh(t *testing.T) {
+	actions := &fakeTUIActions{}
+	m := attachedModel(t, actions)
+	if err := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{AgentID: "quote", TaskID: "task-focused",
+		Version: 7, Status: domain.TaskStatusRunning, Focus: true}); err != nil {
+		t.Fatal(err)
+	}
+	m.taskLoading = true
+	line := "/cancel"
+	m, cmd := executeLine(t, m, line)
+	if cmd != nil || len(actions.controls) != 0 || m.input.Value() != line ||
+		!strings.Contains(m.timeline.String(), "authoritative Task state is loading") {
+		t.Fatalf("control during Task refresh cmd=%v calls=%d draft=%q timeline=%q",
+			cmd, len(actions.controls), m.input.Value(), m.timeline.String())
 	}
 }
 

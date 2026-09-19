@@ -50,6 +50,7 @@ const (
 	overlayStatus
 	overlayHelp
 	overlayDiagnostic
+	overlayTasks
 	overlayConfirmation
 	overlayError
 )
@@ -110,6 +111,26 @@ type followDoneMsg struct {
 	Err error
 }
 
+type taskOptionsResultMsg struct {
+	Options []openapi.ConsoleTaskOption
+	Err     error
+}
+
+type taskSnapshotPurpose string
+
+const (
+	taskSnapshotInitial taskSnapshotPurpose = "initial"
+	taskSnapshotFocus   taskSnapshotPurpose = "focus"
+	taskSnapshotStale   taskSnapshotPurpose = "stale"
+)
+
+type taskSnapshotResultMsg struct {
+	TaskID   string
+	Snapshot openapi.ConsoleTaskSnapshot
+	Purpose  taskSnapshotPurpose
+	Err      error
+}
+
 type tickMsg struct{ Now time.Time }
 
 type controlKind string
@@ -132,6 +153,7 @@ type controlRequest struct {
 
 type controlResultMsg struct {
 	Kind    controlKind
+	Request controlRequest
 	Outcome controlOutcome
 	Err     error
 }
@@ -189,6 +211,16 @@ func (i agentItem) Description() string {
 }
 func (i agentItem) FilterValue() string { return i.option.AgentID + " " + i.option.DisplayName }
 
+type taskItem struct{ task consolemodel.TaskState }
+
+func (i taskItem) Title() string { return boundedSafeText(i.task.TaskID, 256) }
+func (i taskItem) Description() string {
+	return boundedSafeText(fmt.Sprintf("%s  version %d  %s", i.task.Status, i.task.Version, i.task.Summary), 2048)
+}
+func (i taskItem) FilterValue() string {
+	return boundedSafeText(i.task.TaskID+" "+i.task.Summary, 2304)
+}
+
 type tuiModel struct {
 	actions tuiActions
 	now     func() time.Time
@@ -209,19 +241,22 @@ type tuiModel struct {
 	password   textinput.Model
 	loginFocus int
 	agents     list.Model
+	tasks      list.Model
 
 	preparationID uint64
 	selectedAgent string
 	mode          string
 	confirmReturn screenKind
 
-	reducer    *consolemodel.Reducer
-	connection consoleclient.ConnectionState
-	input      textarea.Model
-	viewport   viewport.Model
-	timeline   timelineBuffer
-	pending    bool
-	follow     <-chan tea.Msg
+	reducer      *consolemodel.Reducer
+	connection   consoleclient.ConnectionState
+	input        textarea.Model
+	viewport     viewport.Model
+	timeline     timelineBuffer
+	pending      bool
+	pendingDraft string
+	taskLoading  bool
+	follow       <-chan tea.Msg
 }
 
 func newTUIModel(actions tuiActions, now func() time.Time, direct *initialAttach) tuiModel {
@@ -290,6 +325,11 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 				_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
 			}
 			m.pending = false
+			if m.input.Value() == "" && m.pendingDraft != "" {
+				m.input.SetValue(m.pendingDraft)
+				m.input.CursorEnd()
+			}
+			m.pendingDraft = ""
 			m.notice = "CLI session expired; run openagentx console login"
 			if m.screen == screenAttach {
 				m.timeline.Add(m.notice)
@@ -416,7 +456,14 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		ackFollow(msg.Ack, nil)
 		m.timeline.Add(fmt.Sprintf("Snapshot applied at cursor %d", m.reducer.Cursor()))
 		m.syncTimeline(false)
-		return m, waitFollow(m.follow)
+		commands := []tea.Cmd{waitFollow(m.follow)}
+		state := m.reducer.State()
+		if state.FocusedTask != nil && state.FocusedTask.Detail == nil && !m.taskLoading {
+			m.taskLoading = true
+			commands = append(commands, m.actions.taskSnapshotCmd(m.preparationID, m.selectedAgent,
+				state.FocusedTask.TaskID, taskSnapshotInitial))
+		}
+		return m, tea.Batch(commands...)
 	case followEventMsg:
 		if !m.session.Authenticated {
 			ackFollow(msg.Ack, errLoginRequired)
@@ -440,7 +487,10 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		ackFollow(msg.Ack, nil)
 		if result.Timeline != nil {
-			m.timeline.Add(eventSummary(*result.Timeline, m.mode))
+			state := m.reducer.State()
+			if len(state.Timeline) > 0 {
+				m.timeline.Add(timelineItemSummary(state.Timeline[len(state.Timeline)-1], m.mode))
+			}
 			m.syncTimeline(false)
 		}
 		return m, waitFollow(m.follow)
@@ -454,10 +504,87 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			m.syncTimeline(false)
 		}
 		return m, nil
+	case taskOptionsResultMsg:
+		m.taskLoading = false
+		if msg.Err != nil {
+			m.overlay = overlayError
+			m.notice = "Task list failed: " + safeErrorSummary(msg.Err)
+			return m, nil
+		}
+		if m.reducer == nil {
+			m.overlay = overlayError
+			m.notice = "Task list rejected: Console snapshot is unavailable"
+			return m, nil
+		}
+		if err := m.reducer.ReplaceTaskOptions(msg.Options); err != nil {
+			m.connection = consoleclient.ConnectionDisconnected
+			_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+			m.overlay = overlayError
+			m.notice = "Task list rejected: " + safeErrorSummary(err)
+			return m, nil
+		}
+		m.setTaskItems(m.reducer.State())
+		m.overlay = overlayTasks
+		return m, nil
+	case taskSnapshotResultMsg:
+		m.taskLoading = false
+		if msg.Err != nil {
+			if msg.Purpose == taskSnapshotStale {
+				m.timeline.Add("Task refresh after stale CAS failed: " + safeErrorSummary(msg.Err))
+				m.syncTimeline(false)
+				return m, nil
+			}
+			if msg.Purpose == taskSnapshotInitial {
+				m.timeline.Add("Suggested Task detail failed: " + safeErrorSummary(msg.Err))
+				m.syncTimeline(false)
+				return m, nil
+			}
+			m.overlay = overlayError
+			m.notice = "Task detail failed: " + safeErrorSummary(msg.Err)
+			return m, nil
+		}
+		if m.reducer == nil {
+			m.overlay = overlayError
+			m.notice = "Task detail rejected: Console snapshot is unavailable"
+			return m, nil
+		}
+		source := consolemodel.FocusAttachSuggestion
+		if msg.Purpose == taskSnapshotFocus || msg.Purpose == taskSnapshotStale {
+			source = consolemodel.FocusManual
+		}
+		if err := m.reducer.ApplyTaskSnapshot(msg.Snapshot, source); err != nil {
+			m.connection = consoleclient.ConnectionDisconnected
+			_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
+			m.overlay = overlayError
+			m.notice = "Task detail rejected: " + safeErrorSummary(err)
+			return m, nil
+		}
+		m.appendFocusedTaskSummary(msg.Purpose)
+		if msg.Purpose == taskSnapshotStale {
+			m.overlay = overlayStatus
+		} else if msg.Purpose == taskSnapshotFocus {
+			m.overlay = overlayNone
+		}
+		m.input.Focus()
+		m.syncTimeline(false)
+		return m, nil
 	case controlResultMsg:
 		m.pending = false
 		if msg.Err != nil {
 			m.timeline.Add(string(msg.Kind) + " failed: " + safeErrorSummary(msg.Err))
+			if m.input.Value() == "" && m.pendingDraft != "" {
+				m.input.SetValue(m.pendingDraft)
+				m.input.CursorEnd()
+			}
+			m.pendingDraft = ""
+			m.syncTimeline(false)
+			if staleControlError(msg.Err) && msg.Request.TargetID != "" {
+				m.taskLoading = true
+				m.timeline.Add("Task version is stale; refreshing authoritative state without retrying the command")
+				m.syncTimeline(false)
+				return m, m.actions.taskSnapshotCmd(m.preparationID, m.selectedAgent,
+					msg.Request.TargetID, taskSnapshotStale)
+			}
 		} else {
 			if m.reducer != nil && msg.Outcome.TaskID != "" {
 				applyErr := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{
@@ -468,11 +595,17 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 					m.connection = consoleclient.ConnectionDisconnected
 					_ = m.reducer.SetConnection(m.reducer.StreamEpoch(), consolemodel.ConnectionDisconnected)
 					m.timeline.Add(string(msg.Kind) + " state rejected: " + safeErrorSummary(applyErr))
+					if m.input.Value() == "" && m.pendingDraft != "" {
+						m.input.SetValue(m.pendingDraft)
+						m.input.CursorEnd()
+					}
+					m.pendingDraft = ""
 					m.syncTimeline(false)
 					return m, nil
 				}
 			}
 			m.timeline.Add(msg.Outcome.summary(msg.Kind))
+			m.pendingDraft = ""
 		}
 		m.syncTimeline(false)
 		return m, nil
@@ -635,6 +768,29 @@ func (m tuiModel) updateSelector(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m tuiModel) updateOverlay(key tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.overlay == overlayTasks {
+		if m.taskLoading {
+			return m, nil
+		}
+		if key.String() == "esc" && m.tasks.FilterState() != list.Filtering {
+			m.overlay = overlayNone
+			m.input.Focus()
+			return m, nil
+		}
+		if key.String() == "enter" && m.tasks.FilterState() != list.Filtering {
+			item, ok := m.tasks.SelectedItem().(taskItem)
+			if !ok {
+				m.notice = "Select a Task"
+				return m, nil
+			}
+			m.taskLoading = true
+			return m, m.actions.taskSnapshotCmd(m.preparationID, m.selectedAgent,
+				item.task.TaskID, taskSnapshotFocus)
+		}
+		var cmd tea.Cmd
+		m.tasks, cmd = m.tasks.Update(key)
+		return m, cmd
+	}
 	if m.overlay == overlayConfirmation {
 		switch key.String() {
 		case "y", "Y":
@@ -686,7 +842,11 @@ func (m tuiModel) updateAttach(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
-	command, err := parseControlInput(line, m.selectedAgent)
+	state := consolemodel.State{}
+	if m.reducer != nil {
+		state = m.reducer.State()
+	}
+	command, err := parseControlInput(line, m.selectedAgent, state)
 	switch {
 	case errors.Is(err, errQuitCommand):
 		return m, tea.Quit
@@ -702,6 +862,26 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 		m.input.Reset()
 		m.overlay = overlayDiagnostic
 		return m, nil
+	case errors.Is(err, errTasksCommand):
+		if !m.session.Authenticated {
+			m.timeline.Add("Task list disabled because the CLI session expired; run openagentx console login")
+			m.syncTimeline(true)
+			return m, nil
+		}
+		if m.connection != consoleclient.ConnectionConnected || m.reducer == nil {
+			m.timeline.Add("Task list disabled while Console is disconnected")
+			m.syncTimeline(true)
+			return m, nil
+		}
+		if m.taskLoading {
+			m.timeline.Add("A Task list or detail request is already pending")
+			m.syncTimeline(true)
+			return m, nil
+		}
+		m.input.Reset()
+		m.taskLoading = true
+		m.overlay = overlayTasks
+		return m, m.actions.taskOptionsCmd(m.preparationID, m.selectedAgent)
 	case errors.Is(err, errForegroundCommand):
 		m.timeline.Add(foregroundUnavailable)
 		m.input.Reset()
@@ -722,12 +902,18 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 		m.syncTimeline(true)
 		return m, nil
 	}
+	if m.taskLoading {
+		m.timeline.Add("Command disabled while authoritative Task state is loading")
+		m.syncTimeline(true)
+		return m, nil
+	}
 	if m.pending {
 		m.timeline.Add("A Console command is already pending")
 		m.syncTimeline(true)
 		return m, nil
 	}
 	m.pending = true
+	m.pendingDraft = line
 	m.input.Reset()
 	m.timeline.Add(string(command.Kind) + " pending")
 	m.syncTimeline(true)
@@ -739,10 +925,11 @@ var (
 	errStatusCommand     = errors.New("status")
 	errHelpCommand       = errors.New("help")
 	errDiagnosticCommand = errors.New("diagnostic")
+	errTasksCommand      = errors.New("tasks")
 	errForegroundCommand = errors.New("foreground")
 )
 
-func parseControlInput(line, agentID string) (controlRequest, error) {
+func parseControlInput(line, agentID string, state consolemodel.State) (controlRequest, error) {
 	command, remainder, _ := strings.Cut(strings.TrimSpace(line), " ")
 	switch command {
 	case "/quit":
@@ -753,6 +940,11 @@ func parseControlInput(line, agentID string) (controlRequest, error) {
 		return controlRequest{}, errHelpCommand
 	case "/diagnostic":
 		return controlRequest{}, errDiagnosticCommand
+	case "/tasks":
+		if strings.TrimSpace(remainder) != "" {
+			return controlRequest{}, fmt.Errorf("usage: /tasks")
+		}
+		return controlRequest{}, errTasksCommand
 	case "/foreground":
 		return controlRequest{}, errForegroundCommand
 	case "/dispatch":
@@ -762,16 +954,10 @@ func parseControlInput(line, agentID string) (controlRequest, error) {
 		}
 		return controlRequest{Kind: controlDispatch, AgentID: agentID, Content: content}, nil
 	case "/steer":
-		parts := strings.SplitN(strings.TrimSpace(remainder), " ", 3)
-		if len(parts) != 3 || strings.TrimSpace(parts[2]) == "" {
-			return controlRequest{}, fmt.Errorf("usage: /steer <task-id> <expected-version> <content>")
-		}
-		version, err := positiveVersion(parts[1])
-		if err != nil {
-			return controlRequest{}, err
-		}
-		return controlRequest{Kind: controlSteer, AgentID: agentID, TargetID: parts[0], ExpectedVersion: version, Content: strings.TrimSpace(parts[2])}, nil
-	case "/cancel", "/approve", "/reject":
+		return parseSteerRequest(strings.TrimSpace(remainder), agentID, state)
+	case "/cancel":
+		return parseCancelRequest(strings.TrimSpace(remainder), agentID, state)
+	case "/approve", "/reject":
 		parts := strings.Fields(remainder)
 		if len(parts) != 2 {
 			return controlRequest{}, fmt.Errorf("usage: %s <id> <expected-version>", command)
@@ -790,6 +976,123 @@ func parseControlInput(line, agentID string) (controlRequest, error) {
 	default:
 		return controlRequest{}, fmt.Errorf("unknown command; use /help")
 	}
+}
+
+func parseSteerRequest(remainder, agentID string, state consolemodel.State) (controlRequest, error) {
+	if remainder == "" {
+		return controlRequest{}, fmt.Errorf("usage: /steer <content> or /steer --task <task-id> --version <n> <content>")
+	}
+	fields := strings.Fields(remainder)
+	if fields[0] == "--task" {
+		if len(fields) < 5 || fields[2] != "--version" {
+			return controlRequest{}, fmt.Errorf("usage: /steer --task <task-id> --version <n> <content>")
+		}
+		version, err := positiveVersion(fields[3])
+		if err != nil {
+			return controlRequest{}, err
+		}
+		if err := validateExplicitTaskControl(state, fields[1]); err != nil {
+			return controlRequest{}, err
+		}
+		return controlRequest{Kind: controlSteer, AgentID: agentID, TargetID: fields[1],
+			ExpectedVersion: version, Content: strings.Join(fields[4:], " ")}, nil
+	}
+	if len(fields) >= 3 && (knownTask(state, fields[0]) || strings.HasPrefix(fields[0], "task-")) {
+		version, err := positiveVersion(fields[1])
+		if err != nil {
+			return controlRequest{}, err
+		}
+		if err := validateExplicitTaskControl(state, fields[0]); err != nil {
+			return controlRequest{}, err
+		}
+		return controlRequest{Kind: controlSteer, AgentID: agentID, TargetID: fields[0],
+			ExpectedVersion: version, Content: strings.Join(fields[2:], " ")}, nil
+	}
+	task, err := focusedTaskForControl(state)
+	if err != nil {
+		return controlRequest{}, err
+	}
+	return controlRequest{Kind: controlSteer, AgentID: agentID, TargetID: task.TaskID,
+		ExpectedVersion: task.Version, Content: remainder}, nil
+}
+
+func parseCancelRequest(remainder, agentID string, state consolemodel.State) (controlRequest, error) {
+	if remainder == "" {
+		task, err := focusedTaskForControl(state)
+		if err != nil {
+			return controlRequest{}, err
+		}
+		return controlRequest{Kind: controlCancel, AgentID: agentID, TargetID: task.TaskID,
+			ExpectedVersion: task.Version}, nil
+	}
+	fields := strings.Fields(remainder)
+	if len(fields) == 4 && fields[0] == "--task" && fields[2] == "--version" {
+		version, err := positiveVersion(fields[3])
+		if err != nil {
+			return controlRequest{}, err
+		}
+		if err := validateExplicitTaskControl(state, fields[1]); err != nil {
+			return controlRequest{}, err
+		}
+		return controlRequest{Kind: controlCancel, AgentID: agentID, TargetID: fields[1],
+			ExpectedVersion: version}, nil
+	}
+	if len(fields) == 2 {
+		version, err := positiveVersion(fields[1])
+		if err != nil {
+			return controlRequest{}, err
+		}
+		if err := validateExplicitTaskControl(state, fields[0]); err != nil {
+			return controlRequest{}, err
+		}
+		return controlRequest{Kind: controlCancel, AgentID: agentID, TargetID: fields[0],
+			ExpectedVersion: version}, nil
+	}
+	return controlRequest{}, fmt.Errorf("usage: /cancel or /cancel --task <task-id> --version <n>")
+}
+
+func focusedTaskForControl(state consolemodel.State) (*consolemodel.TaskState, error) {
+	if state.FocusedTask == nil {
+		return nil, userVisibleError{message: "no focused Task; use /tasks to select one"}
+	}
+	if state.FocusedTask.Version <= 0 || taskTerminal(state.FocusedTask.Status) {
+		return nil, userVisibleError{message: "focused Task is terminal or has no usable version"}
+	}
+	return state.FocusedTask, nil
+}
+
+func validateExplicitTaskControl(state consolemodel.State, taskID string) error {
+	if err := domain.ValidateOpaqueID("task_id", taskID); err != nil {
+		return fmt.Errorf("invalid Task ID")
+	}
+	for _, task := range append(append([]consolemodel.TaskState(nil), state.ActiveTasks...), state.RecentTasks...) {
+		if task.TaskID == taskID && taskTerminal(task.Status) {
+			return userVisibleError{message: "selected Task is terminal"}
+		}
+	}
+	return nil
+}
+
+func knownTask(state consolemodel.State, taskID string) bool {
+	if state.FocusedTask != nil && state.FocusedTask.TaskID == taskID {
+		return true
+	}
+	for _, task := range state.ActiveTasks {
+		if task.TaskID == taskID {
+			return true
+		}
+	}
+	for _, task := range state.RecentTasks {
+		if task.TaskID == taskID {
+			return true
+		}
+	}
+	return false
+}
+
+func taskTerminal(status domain.TaskStatus) bool {
+	return status == domain.TaskStatusSucceeded || status == domain.TaskStatusFailed ||
+		status == domain.TaskStatusCanceled || status == domain.TaskStatusUncertain
 }
 
 func positiveVersion(value string) (int64, error) {
@@ -815,6 +1118,9 @@ func (m *tuiModel) resize(width, height int) {
 	if m.screen == screenSelector {
 		m.agents.SetSize(m.width, m.height)
 	}
+	if m.overlay == overlayTasks {
+		m.tasks.SetSize(m.width, m.height)
+	}
 }
 
 func (m *tuiModel) syncTimeline(forceBottom bool) {
@@ -822,6 +1128,37 @@ func (m *tuiModel) syncTimeline(forceBottom bool) {
 	m.viewport.SetContent(m.timeline.String())
 	if forceBottom || wasBottom {
 		m.viewport.GotoBottom()
+	}
+}
+
+func (m *tuiModel) setTaskItems(state consolemodel.State) {
+	items := make([]list.Item, 0, len(state.ActiveTasks)+len(state.RecentTasks))
+	for _, task := range state.ActiveTasks {
+		items = append(items, taskItem{task: task})
+	}
+	for _, task := range state.RecentTasks {
+		items = append(items, taskItem{task: task})
+	}
+	m.tasks = list.New(items, list.NewDefaultDelegate(), max(1, m.width), max(1, m.height))
+	m.tasks.Title = fmt.Sprintf("Tasks: %d active, %d recent (bounded)", len(state.ActiveTasks), len(state.RecentTasks))
+	m.tasks.SetShowStatusBar(true)
+	m.tasks.SetFilteringEnabled(true)
+}
+
+func (m *tuiModel) appendFocusedTaskSummary(purpose taskSnapshotPurpose) {
+	state := m.reducer.State()
+	task := state.FocusedTask
+	if task == nil {
+		return
+	}
+	label := "Focused Task"
+	if purpose == taskSnapshotStale {
+		label = "Task refreshed after stale CAS; review before retry"
+	}
+	m.timeline.Add(fmt.Sprintf("%s %s | version %d | status %s | stage %s",
+		label, shortID(task.TaskID), task.Version, task.Status, taskStage(task)))
+	for _, summary := range taskResultSummaries(task) {
+		m.timeline.Add(summary)
 	}
 }
 
@@ -916,13 +1253,21 @@ func (m tuiModel) attachView() string {
 	width, height := m.renderDimensions()
 	snapshot := consoleapi.AttachResponse{AgentID: m.selectedAgent, Mode: m.mode, WorkerStatus: domain.WorkerStatusOffline}
 	cursor := int64(0)
+	state := consolemodel.State{}
 	if m.reducer != nil {
-		snapshot = m.reducer.Snapshot()
+		state = m.reducer.State()
+		snapshot = state.Console
 		cursor = m.reducer.Cursor()
 	}
-	header := fmt.Sprintf("Agent %s  Mode %s  Worker %s  Generation %d  Connection %s",
-		snapshot.AgentID, snapshot.Mode, shortID(snapshot.WorkerInstanceID), snapshot.Generation, m.connection)
-	status := fmt.Sprintf("%s | cursor %d | timeline %d/%d bytes", snapshot.WorkerStatus, cursor, m.timeline.Len(), m.timeline.Bytes())
+	header := fmt.Sprintf("Agent %s | mode %s | connection %s | cursor %d",
+		snapshot.AgentID, snapshot.Mode, m.connection, cursor)
+	status := fmt.Sprintf("Task none | Worker %s gen %d %s | timeline %d/%d bytes",
+		shortID(snapshot.WorkerInstanceID), snapshot.Generation, snapshot.WorkerStatus, m.timeline.Len(), m.timeline.Bytes())
+	if state.FocusedTask != nil {
+		status = fmt.Sprintf("Task %s v%d %s (%s) | Worker %s gen %d %s",
+			shortID(state.FocusedTask.TaskID), state.FocusedTask.Version, state.FocusedTask.Status,
+			taskStage(state.FocusedTask), shortID(snapshot.WorkerInstanceID), snapshot.Generation, snapshot.WorkerStatus)
+	}
 	if m.pending {
 		status += " | command pending"
 	}
@@ -941,13 +1286,15 @@ func (m tuiModel) attachView() string {
 }
 
 func (m tuiModel) overlayView() string {
+	width, height := m.renderDimensions()
 	content := ""
 	switch m.overlay {
 	case overlayStatus:
 		content = m.statusView()
 	case overlayHelp:
-		content = strings.Join([]string{"Console commands", "/status", "/dispatch <content>",
-			"/steer <task-id> <expected-version> <content>", "/cancel <task-id> <expected-version>",
+		content = strings.Join([]string{"Console commands", "/status", "/tasks", "/dispatch <content>",
+			"/steer <content>", "/cancel", "/steer --task <task-id> --version <n> <content>",
+			"/cancel --task <task-id> --version <n>",
 			"/approve <approval-id> <expected-version>", "/reject <approval-id> <expected-version>",
 			"/diagnostic", "/help", "/quit", "/foreground"}, "\n")
 	case overlayDiagnostic:
@@ -960,12 +1307,17 @@ func (m tuiModel) overlayView() string {
 			content = fmt.Sprintf("Diagnostic\nheartbeat %s\nlease %s\ndraining %t",
 				d.LastHeartbeatAt.UTC().Format(time.RFC3339), d.LeaseUntil.UTC().Format(time.RFC3339), d.Draining)
 		}
+	case overlayTasks:
+		if m.taskLoading {
+			content = "Loading authoritative Task state..."
+		} else {
+			return fitTerminalView(m.tasks.View(), width, height)
+		}
 	case overlayConfirmation:
 		content = fmt.Sprintf("Rebind current OAX window to Agent %s?\n\ny confirm  n cancel", m.selectedAgent)
 	case overlayError:
 		content = m.notice
 	}
-	width, height := m.renderDimensions()
 	content = boundedSafeMultiline(content, 8<<10)
 	if width < 20 || height < 6 {
 		return fitTerminalView(content, width, height)
@@ -978,8 +1330,10 @@ func (m tuiModel) overlayView() string {
 func (m tuiModel) statusView() string {
 	snapshot := consoleapi.AttachResponse{AgentID: m.selectedAgent, Mode: m.mode, WorkerStatus: domain.WorkerStatusOffline}
 	cursor := int64(0)
+	state := consolemodel.State{}
 	if m.reducer != nil {
-		snapshot = m.reducer.Snapshot()
+		state = m.reducer.State()
+		snapshot = state.Console
 		cursor = m.reducer.Cursor()
 	}
 	active := "none"
@@ -997,7 +1351,7 @@ func (m tuiModel) statusView() string {
 		lease = snapshot.LeaseUntil.UTC().Format(time.RFC3339)
 	}
 	drain := snapshot.WorkerStatus == domain.WorkerStatusDraining
-	return strings.Join([]string{"Status",
+	lines := []string{"Status",
 		"CLI username: " + valueOr(m.session.Username, "not logged in"),
 		"CLI expiry: " + formatTimeOrNone(m.session.ExpiresAt),
 		"Socket: " + valueOr(m.session.SocketPath, "unresolved"),
@@ -1012,7 +1366,201 @@ func (m tuiModel) statusView() string {
 		"Lease until: " + lease,
 		"Connection: " + string(m.connection),
 		fmt.Sprintf("Event cursor: %d", cursor),
-		"Mode: " + m.mode}, "\n")
+		"Mode: " + m.mode}
+	if state.FocusedTask == nil {
+		lines = append(lines, "", "Focused Task: none", "Use /tasks to select an active or recent Task")
+		return strings.Join(lines, "\n")
+	}
+	task := state.FocusedTask
+	lines = append(lines, "", "Focused Task",
+		"Task ID: "+task.TaskID,
+		fmt.Sprintf("Task version: %d", task.Version),
+		"Task status: "+string(task.Status),
+		"Task stage: "+taskStage(task))
+	if task.Detail != nil {
+		lines = append(lines, "Task request: "+task.Detail.Content,
+			"Task updated: "+task.Detail.UpdatedAt,
+			"Task outcome state: "+task.Detail.OutcomeState)
+		if task.Detail.Result != nil {
+			lines = append(lines, "Task result: "+*task.Detail.Result)
+		}
+		if task.Detail.Error != nil {
+			lines = append(lines, "Task error: "+*task.Detail.Error)
+		}
+	}
+	if task.WorkDelivery != nil {
+		lines = append(lines, "", "Work delivery",
+			"Mailbox ID: "+task.WorkDelivery.MailboxItemID,
+			"Mailbox state: "+string(task.WorkDelivery.State))
+	}
+	if task.LatestRun != nil {
+		run := task.LatestRun
+		generation := int64(0)
+		if run.WorkerGeneration != nil {
+			generation = *run.WorkerGeneration
+		}
+		lines = append(lines, "", "RunAttempt",
+			"Run ID: "+run.ID,
+			fmt.Sprintf("Run version: %d", run.Version),
+			"Run status: "+string(run.Status),
+			"Run Worker: "+run.WorkerInstanceID,
+			fmt.Sprintf("Run generation: %d", generation),
+			"Runtime reply state: "+run.TurnResultState)
+		if run.TurnResult != nil {
+			lines = append(lines, "Runtime status: "+string(run.TurnResult.RuntimeStatus))
+			if run.TurnResult.Body != "" {
+				lines = append(lines, "Runtime reply: "+run.TurnResult.Body)
+			}
+			if run.TurnResult.Error != "" {
+				lines = append(lines, "Runtime error: "+run.TurnResult.Error)
+			}
+			lines = append(lines, "Side effects source: "+run.TurnResult.SideEffectsSource,
+				"Business verification: "+run.TurnResult.BusinessVerificationSource)
+		}
+	}
+	if task.LatestMessage != nil {
+		lines = append(lines, "", "Latest Message",
+			"Message ID: "+task.LatestMessage.MessageID,
+			fmt.Sprintf("Message version: %d", task.LatestMessage.Version))
+	}
+	if task.PendingApproval != nil {
+		lines = append(lines, "", "Pending Approval",
+			"Approval ID: "+task.PendingApproval.ApprovalRequestID,
+			fmt.Sprintf("Expected Run version: %d", task.PendingApproval.ExpectedRunVersion))
+	}
+	return strings.Join(lines, "\n")
+}
+
+func taskStage(task *consolemodel.TaskState) string {
+	if task == nil {
+		return "none"
+	}
+	if task.LatestRun != nil {
+		return "run " + string(task.LatestRun.Status)
+	}
+	if task.WorkDelivery != nil {
+		return "mailbox " + string(task.WorkDelivery.State)
+	}
+	return string(task.Status)
+}
+
+func taskResultSummaries(task *consolemodel.TaskState) []string {
+	if task == nil || !taskTerminal(task.Status) {
+		return nil
+	}
+	result := make([]string, 0, 3)
+	if task.Detail == nil {
+		result = append(result, "Task is terminal, but authoritative outcome detail is not loaded")
+	} else {
+		switch task.Detail.OutcomeState {
+		case "available", "truncated":
+			if task.Detail.Result != nil && *task.Detail.Result != "" {
+				result = append(result, "Task outcome result: "+*task.Detail.Result)
+			}
+			if task.Detail.Error != nil && *task.Detail.Error != "" {
+				result = append(result, "Task outcome error: "+*task.Detail.Error)
+			}
+		case "not_recorded":
+			result = append(result, "Task is terminal, but no safe Task outcome was recorded")
+		default:
+			result = append(result, "Task outcome is not yet available")
+		}
+	}
+	if task.Status == domain.TaskStatusUncertain {
+		result = append(result, "Task outcome remains uncertain; a Runtime reply is not proof of business success")
+	}
+	if task.LatestRun == nil {
+		return result
+	}
+	run := task.LatestRun
+	switch run.TurnResultState {
+	case "available", "truncated":
+		if run.TurnResult != nil && run.TurnResult.Body != "" {
+			result = append(result, "Runtime reply: "+run.TurnResult.Body)
+		}
+		if run.TurnResult != nil && run.TurnResult.Error != "" {
+			result = append(result, "Runtime error: "+run.TurnResult.Error)
+		}
+	case "empty":
+		result = append(result, "Runtime completed without a safe displayable reply")
+	case "invalid":
+		result = append(result, "Runtime reply was rejected as invalid")
+	case "not_recorded":
+		result = append(result, "Runtime reply was not recorded")
+	}
+	return result
+}
+
+func timelineItemSummary(item consolemodel.TimelineItem, mode string) string {
+	parts := []string{fmt.Sprintf("#%d %s", item.Sequence, boundedSafeText(item.EventType, 128))}
+	if item.Output != nil {
+		values := []string{item.Output.Stage, item.Output.Status, item.Output.Text}
+		if mode == consoleapi.ModeDiagnostic {
+			values = append(values, item.Output.Diagnostic)
+		}
+		for _, value := range values {
+			if value != "" {
+				parts = append(parts, boundedSafeText(value, maxTimelineEntryBytes/2))
+			}
+		}
+		return strings.Join(parts, " | ")
+	}
+	if item.TaskID != "" {
+		parts = append(parts, "Task "+shortID(item.TaskID))
+	}
+	if item.TaskVersion > 0 {
+		parts = append(parts, fmt.Sprintf("version %d", item.TaskVersion))
+	}
+	if item.TaskStatus != "" {
+		parts = append(parts, "status "+string(item.TaskStatus))
+	}
+	if item.MailboxItemID != "" {
+		parts = append(parts, "work delivery "+string(item.MailboxState))
+	}
+	if item.RunID != "" {
+		parts = append(parts, "Run "+shortID(item.RunID), fmt.Sprintf("run version %d", item.RunVersion),
+			"run status "+string(item.RunStatus))
+	}
+	if item.MessageID != "" {
+		parts = append(parts, "Message "+shortID(item.MessageID), fmt.Sprintf("message version %d", item.MessageVersion))
+	}
+	if item.ApprovalID != "" {
+		parts = append(parts, "Approval "+shortID(item.ApprovalID), "approval "+string(item.ApprovalState))
+	}
+	if item.TaskOutcomeState == "not_recorded" && taskTerminal(item.TaskStatus) {
+		parts = append(parts, "no safe Task outcome recorded")
+	}
+	if item.TaskResult != "" {
+		parts = append(parts, "Task outcome result: "+boundedSafeText(item.TaskResult, maxTimelineEntryBytes/2))
+	}
+	if item.TaskError != "" {
+		parts = append(parts, "Task outcome error: "+boundedSafeText(item.TaskError, maxTimelineEntryBytes/2))
+	}
+	if item.RuntimeReplyState != "" && item.RuntimeReplyState != "not_recorded" {
+		parts = append(parts, "Runtime reply state "+item.RuntimeReplyState)
+	}
+	if !item.RunStatus.Active() {
+		switch item.RuntimeReplyState {
+		case "not_recorded":
+			parts = append(parts, "Runtime reply was not recorded")
+		case "empty":
+			parts = append(parts, "Runtime completed without a safe displayable reply")
+		case "invalid":
+			parts = append(parts, "Runtime reply was rejected as invalid")
+		}
+	}
+	if item.RuntimeReply != "" {
+		parts = append(parts, "Runtime reply: "+boundedSafeText(item.RuntimeReply, maxTimelineEntryBytes/2))
+	}
+	if item.RuntimeError != "" {
+		parts = append(parts, "Runtime error: "+boundedSafeText(item.RuntimeError, maxTimelineEntryBytes/2))
+	}
+	return strings.Join(parts, " | ")
+}
+
+func staleControlError(err error) bool {
+	var apiErr *consoleclient.APIError
+	return errors.As(err, &apiErr) && apiErr.Code == openapi.ErrorStaleVersion
 }
 
 func (m tuiModel) failAttach(message string) (tea.Model, tea.Cmd) {

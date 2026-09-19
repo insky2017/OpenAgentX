@@ -26,6 +26,8 @@ type fakeConsoleClient struct {
 	login       openapi.CLILoginResponse
 	session     openapi.CLISessionResponse
 	agents      []domain.ConsoleAgentOption
+	tasks       []openapi.ConsoleTaskOption
+	taskDetails map[string]openapi.ConsoleTaskSnapshot
 	sessionErr  error
 	dispatches  []openapi.CreateTaskRequest
 	steers      []openapi.CreateMessageRequest
@@ -69,6 +71,18 @@ func (c *fakeConsoleClient) Logout(context.Context) error {
 func (c *fakeConsoleClient) ListAgentOptions(context.Context) ([]domain.ConsoleAgentOption, error) {
 	c.record("agents")
 	return append([]domain.ConsoleAgentOption(nil), c.agents...), nil
+}
+func (c *fakeConsoleClient) ListTaskOptions(context.Context, string) ([]openapi.ConsoleTaskOption, error) {
+	c.record("tasks")
+	return append([]openapi.ConsoleTaskOption(nil), c.tasks...), nil
+}
+func (c *fakeConsoleClient) TaskSnapshot(_ context.Context, _, taskID string) (openapi.ConsoleTaskSnapshot, error) {
+	c.record("task:" + taskID)
+	snapshot, ok := c.taskDetails[taskID]
+	if !ok {
+		return openapi.ConsoleTaskSnapshot{}, fmt.Errorf("Task detail not found")
+	}
+	return snapshot, nil
 }
 func (c *fakeConsoleClient) Attach(context.Context, string, string) (consoleapi.AttachResponse, error) {
 	return consoleapi.AttachResponse{}, nil
@@ -216,7 +230,7 @@ func applicationFixture(t *testing.T, managed bool) (*consoleApplication, *fakeC
 		agents: []domain.ConsoleAgentOption{
 			{AgentID: "quote", OrganizationID: "org-main", DisplayName: "Quote", WorkerStatus: domain.WorkerStatusOnline, Generation: 4},
 			{AgentID: "risk", OrganizationID: "org-main", DisplayName: "Risk", WorkerStatus: domain.WorkerStatusOffline},
-		}}
+		}, taskDetails: make(map[string]openapi.ConsoleTaskSnapshot)}
 	store := &fakeCredentialStore{credential: credential}
 	runner := &applicationTmuxRunner{name: "scratch"}
 	if managed {
@@ -349,6 +363,35 @@ func TestControlCmdUsesOfficialClientExactlyOnceWithCAS(t *testing.T) {
 		len(client.decisions) != 2 || client.decisions[0].Meta.ExpectedVersion != 9 || client.decisions[1].Meta.ExpectedVersion != 10 ||
 		client.decisions[0].Decision != domain.ApprovalDecisionApprove || client.decisions[1].Decision != domain.ApprovalDecisionReject {
 		t.Fatalf("CAS controls steer=%+v cancel=%+v decisions=%+v", client.steers, client.cancels, client.decisions)
+	}
+}
+
+func TestTaskReadsUsePreparedAuthenticatedClient(t *testing.T) {
+	application, client, _, _ := applicationFixture(t, true)
+	client.tasks = []openapi.ConsoleTaskOption{{TaskID: "task-1", Version: 2, Status: domain.TaskStatusRunning,
+		Summary: "safe task", UpdatedAt: fixedNow().Format(time.RFC3339Nano)}}
+	client.taskDetails["task-1"] = taskSnapshot("task-1", 2, domain.TaskStatusRunning)
+	application.prepared[9] = preparedAttach{client: client, agents: map[string]domain.ConsoleAgentOption{
+		"quote": {AgentID: "quote", OrganizationID: "org-main", DisplayName: "Quote",
+			WorkerStatus: domain.WorkerStatusOnline, Generation: 4},
+	}}
+
+	listResult, ok := application.taskOptionsCmd(9, "quote")().(taskOptionsResultMsg)
+	if !ok || listResult.Err != nil || len(listResult.Options) != 1 || listResult.Options[0].TaskID != "task-1" {
+		t.Fatalf("Task list result=%+v", listResult)
+	}
+	detailResult, ok := application.taskSnapshotCmd(9, "quote", "task-1", taskSnapshotFocus)().(taskSnapshotResultMsg)
+	if !ok || detailResult.Err != nil || detailResult.Snapshot.Task.TaskID != "task-1" ||
+		detailResult.Purpose != taskSnapshotFocus {
+		t.Fatalf("Task detail result=%+v", detailResult)
+	}
+	if got := client.operations[len(client.operations)-2:]; !reflect.DeepEqual(got, []string{"tasks", "task:task-1"}) {
+		t.Fatalf("Task reads did not use prepared authenticated client: %v", client.operations)
+	}
+
+	unauthorized := application.taskOptionsCmd(9, "risk")().(taskOptionsResultMsg)
+	if unauthorized.Err == nil || len(client.operations) != 2 {
+		t.Fatalf("unauthorized Task read err=%v operations=%v", unauthorized.Err, client.operations)
 	}
 }
 

@@ -48,6 +48,8 @@ type Client interface {
 	Session(context.Context) (openapi.CLISessionResponse, error)
 	Logout(context.Context) error
 	ListAgentOptions(context.Context) ([]domain.ConsoleAgentOption, error)
+	ListTaskOptions(context.Context, string) ([]openapi.ConsoleTaskOption, error)
+	TaskSnapshot(context.Context, string, string) (openapi.ConsoleTaskSnapshot, error)
 	Attach(context.Context, string, string) (consoleapi.AttachResponse, error)
 	Follow(context.Context, string, string, func(consoleapi.AttachResponse) error,
 		func(openapi.JournalEventReadModel) error, func(consoleclient.FollowState) error) error

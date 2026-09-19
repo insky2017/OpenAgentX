@@ -360,15 +360,47 @@ func (a *consoleApplication) startFollowCmd(preparationID uint64, agentID string
 	}
 }
 
+func (a *consoleApplication) taskOptionsCmd(preparationID uint64, agentID string) tea.Cmd {
+	return func() tea.Msg {
+		prepared, ok := a.preparation(preparationID)
+		if !ok {
+			return taskOptionsResultMsg{Err: fmt.Errorf("Console Attach preparation expired")}
+		}
+		if _, ok := prepared.agents[agentID]; !ok {
+			return taskOptionsResultMsg{Err: fmt.Errorf("Console Agent authorization expired")}
+		}
+		options, err := prepared.client.ListTaskOptions(a.ctx, agentID)
+		return taskOptionsResultMsg{Options: options, Err: err}
+	}
+}
+
+func (a *consoleApplication) taskSnapshotCmd(preparationID uint64, agentID, taskID string, purpose taskSnapshotPurpose) tea.Cmd {
+	return func() tea.Msg {
+		prepared, ok := a.preparation(preparationID)
+		if !ok {
+			return taskSnapshotResultMsg{TaskID: taskID, Purpose: purpose,
+				Err: fmt.Errorf("Console Attach preparation expired")}
+		}
+		if _, ok := prepared.agents[agentID]; !ok {
+			return taskSnapshotResultMsg{TaskID: taskID, Purpose: purpose,
+				Err: fmt.Errorf("Console Agent authorization expired")}
+		}
+		snapshot, err := prepared.client.TaskSnapshot(a.ctx, agentID, taskID)
+		return taskSnapshotResultMsg{TaskID: taskID, Snapshot: snapshot, Purpose: purpose, Err: err}
+	}
+}
+
 func (a *consoleApplication) controlCmd(preparationID uint64, request controlRequest) tea.Cmd {
 	return func() tea.Msg {
 		prepared, ok := a.preparation(preparationID)
 		if !ok {
-			return controlResultMsg{Kind: request.Kind, Err: fmt.Errorf("Console Attach preparation expired")}
+			return controlResultMsg{Kind: request.Kind, Request: request,
+				Err: fmt.Errorf("Console Attach preparation expired")}
 		}
 		option, ok := prepared.agents[request.AgentID]
 		if !ok {
-			return controlResultMsg{Kind: request.Kind, Err: fmt.Errorf("Console Agent authorization expired")}
+			return controlResultMsg{Kind: request.Kind, Request: request,
+				Err: fmt.Errorf("Console Agent authorization expired")}
 		}
 		meta := openapi.CommandMeta{IdempotencyKey: consoleclient.IdempotencyKey("console-" + string(request.Kind)), ExpectedVersion: request.ExpectedVersion}
 		var outcome controlOutcome
@@ -409,7 +441,7 @@ func (a *consoleApplication) controlCmd(preparationID uint64, request controlReq
 		default:
 			err = fmt.Errorf("unsupported Console control command")
 		}
-		return controlResultMsg{Kind: request.Kind, Outcome: outcome, Err: err}
+		return controlResultMsg{Kind: request.Kind, Request: request, Outcome: outcome, Err: err}
 	}
 }
 
@@ -460,5 +492,7 @@ type tuiActions interface {
 	prepareAttachCmd(string, string) tea.Cmd
 	bindCmd(uint64, string, bool) tea.Cmd
 	startFollowCmd(uint64, string) tea.Cmd
+	taskOptionsCmd(uint64, string) tea.Cmd
+	taskSnapshotCmd(uint64, string, string, taskSnapshotPurpose) tea.Cmd
 	controlCmd(uint64, controlRequest) tea.Cmd
 }
