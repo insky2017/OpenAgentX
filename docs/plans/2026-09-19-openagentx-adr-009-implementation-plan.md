@@ -58,7 +58,7 @@ P0 只做基线收口和隔离，不夹带 Task 01 契约或产品改动。出�
 | 04 | G3 | [Task-centric Console reducer](2026-09-19-openagentx-adr-009-implementation/04-task-centric-console-reducer.md) | 03 | completed |
 | 05 | G4 | [Pane 0 任务 TUI 与控制易用性](2026-09-19-openagentx-adr-009-implementation/05-pane-zero-task-tui-and-control-ergonomics.md) | 04 | completed |
 | 06 | G5 | [同 pane Diagnostic 模式](2026-09-19-openagentx-adr-009-implementation/06-in-place-diagnostic-mode.md) | 05 | completed |
-| 07 | G6 | [隔离用户闭环与操作文档](2026-09-19-openagentx-adr-009-implementation/07-isolated-user-workflow-and-documentation.md) | 06 | pending |
+| 07 | G6 | [隔离用户闭环与操作文档](2026-09-19-openagentx-adr-009-implementation/07-isolated-user-workflow-and-documentation.md) | 06 | completed |
 | 08 | G7 | [集成审查与候选门禁](2026-09-19-openagentx-adr-009-implementation/08-integration-review-and-release-gate.md) | 07 | pending |
 
 持续记录：

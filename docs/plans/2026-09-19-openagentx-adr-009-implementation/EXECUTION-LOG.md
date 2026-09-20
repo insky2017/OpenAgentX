@@ -55,7 +55,7 @@ push/merge/安装来“修正”差异。
 | 04 | Task-centric Console reducer | completed | `874a0e1` | GO |
 | 05 | Pane 0 任务 TUI 与控制易用性 | completed | `f1bf09a` | GO |
 | 06 | 同 pane Diagnostic 模式 | completed | `de7eb32` | GO |
-| 07 | 隔离用户闭环与操作文档 | active | - | WAIT |
+| 07 | 隔离用户闭环与操作文档 | completed | `a5874d7` | GO |
 | 08 | 集成审查与候选门禁 | pending | - | WAIT |
 
 ## 4. 冻结范围摘要
@@ -603,6 +603,19 @@ push/merge/安装来“修正”差异。
   cleanup；未操作真实 `~/.openagentx`、default tmux、user-systemd、installed binary、真实 DB/socket、
   `steadyflow` 父仓，未 push/merge/install/restart。
 - 当前无 Task 07 P0/P1 open issue。阶段状态保持 `active/WAIT`，等待实现提交后的监督 gate。
+
+#### Task 07 gate record
+
+- 实现提交：`a5874d70c1209aed52da9b44f68336f04ea40f2c`；17 files，1411 insertions、56 deletions。
+- 提交后 feature worktree clean；相对 `origin/main@c3fc1bb` ahead 51。主工作树仍为 clean
+  `main@3723c77`、相对 origin ahead 1；`steadyflow` 父仓既有 dirty 现场未修改。
+- ADR-009 SHA-256 仍为 `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69`；执行基线
+  `AGENTS.md` 为 `b53264590ccb1ebace81668ae3c98f1e29ce8f61384a259f08a5e23b8b92a95b`。
+- 监督按默认路径真实用户闭环、正式 Network binding、Task/Run/cursor/Worker 身份、focused control、
+  Normal/Diagnostic、最终安全结果、Console 退出后 Worker 常驻与第二 Task、定向 race、三轮稳定性、全仓
+  普通测试和 release/secret 检查复核为 `GO`；无 P0/P1、误报成功、secret 泄漏或 ADR-006/007 混入。
+- 主计划和 Task 07 front matter 在本 docs-only gate record 同步为 `completed`；Task 08 保持
+  `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/default tmux/user-systemd/父仓。
 
 ## 7. 后续记录模板
 

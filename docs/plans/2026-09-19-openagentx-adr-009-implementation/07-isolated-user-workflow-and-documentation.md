@@ -1,6 +1,6 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
 updated_at: 2026-09-19
 ---
@@ -56,3 +56,18 @@ git diff --check
 - Console/tmux 退出不影响 Worker，完成后 Worker 可领取下一 Task；
 - 安装指南包含 `console attach`、focused control、Diagnostic 和状态解释；
 - 创建一个 Task 07 实现提交后停止等待监督 gate。
+
+## 完成记录
+
+- 实现提交：`a5874d70c1209aed52da9b44f68336f04ea40f2c`。
+- 默认 profile 隔离闭环已用临时 HOME/DB/UDS/credential、fake user-systemd、唯一 `tmux -L` 和真实
+  daemon/Worker 进程跑通：PTY login、重复 Fleet init/workspace/up、OAX pane 0 Attach、dispatch、领取、
+  safe output、focused steer、terminal outcome/reply、Diagnostic/Normal 往返和 `/quit`。
+- Console 退出后，同一 Worker PID、instance 和 generation 保持在线并完成第二个 Task；pane 1/2、workspace
+  marker、文件权限、systemctl argv 和 secret 边界均有断言。
+- Runtime output 通过正式 EventSink、Journal、SSE 与 `Client.Follow` 取证；Task outcome 和 Runtime reply
+  分层显示，pending result 不误标终态，窄 pane Timeline 保留有界安全多行结果。
+- README、用户安装指南和 Console `/help` 已串联默认路径、`console attach`、focused control、状态解释、
+  Timeline 滚动、Diagnostic/Normal 与 `/quit`。
+- 五包普通测试、四包 race、三轮 TTY/tmux/Workspace/Workflow/Task 稳定性、全仓 Go、vet、Shell、release
+  scanner、独立 build、CLI help、文档和 secret 检查均通过；未修改 Web 源码，未操作真实运行状态。
