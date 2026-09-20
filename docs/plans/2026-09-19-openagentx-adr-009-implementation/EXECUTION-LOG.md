@@ -56,7 +56,7 @@ push/merge/安装来“修正”差异。
 | 05 | Pane 0 任务 TUI 与控制易用性 | completed | `f1bf09a` | GO |
 | 06 | 同 pane Diagnostic 模式 | completed | `de7eb32` | GO |
 | 07 | 隔离用户闭环与操作文档 | completed | `a5874d7` | GO |
-| 08 | 集成审查与候选门禁 | pending | - | WAIT |
+| 08 | 集成审查与候选门禁 | active | - | WAIT |
 
 ## 4. 冻结范围摘要
 
@@ -616,6 +616,101 @@ push/merge/安装来“修正”差异。
   普通测试和 release/secret 检查复核为 `GO`；无 P0/P1、误报成功、secret 泄漏或 ADR-006/007 混入。
 - 主计划和 Task 07 front matter 在本 docs-only gate record 同步为 `completed`；Task 08 保持
   `pending/WAIT`。未 push、merge、安装、重启或操作真实 DB/socket/default tmux/user-systemd/父仓。
+
+### Task 08：集成审查与候选门禁
+
+- 开始时间：`2026-09-20`；baseline：`5bebf14`；branch：`codex/adr009-task-console`；worktree：
+  `/home/sky/work/touzi/OneAxe/OpenAgentX-adr009-worktree`。
+- 正向结果：从默认 profile login/Fleet/OAX Attach 到 dispatch、领取、运行、安全过程、focused control、
+  terminal outcome/reply、Diagnostic/Normal 和 `/quit` 的真实隔离闭环；Console 退出后 resident Worker 继续
+  完成第二项 Task。
+- 状态/CAS/幂等：逐条追踪 Task/Run/Worker/version/cursor、snapshot N/N+1、重复/重连、Follow ack/cancel、
+  mode-switch epoch、控制 exactly once 和 Worker replacement/offline fencing。
+- 失败/竞态：重跑 projection/ownership/encode/write、auth/scope/token、CAS stale、retention、socket replacement、
+  empty/malformed/truncated output、旧 stream 和 compact terminal 故障注入；失败不得跨 cursor 或误报成功。
+- 资源/平台：全量普通/race/vet/module/Web/Shell/systemd/release/secret/legacy 检查；所有动态验证只用临时
+  HOME/DB/UDS、唯一 `tmux -L`、隔离 daemon/Worker 和 fake user-systemd，不操作真实状态。
+- 证据格式：ADR 条款到代码/测试/文档 traceability、命令/退出码/耗时、clean detached 候选 SHA-256、
+  `go version -m` 的精确 Git revision 与 `vcs.modified=false`、失败历史和未执行的发布步骤。
+- 范围边界：Task 08 只审查、验证并生成 report/log；产品缺陷必须回开所属 Task 单独修复。主计划与
+  Task 08 front matter 保持 `pending`，本 log 为 `active/WAIT`；不 push/merge/install/restart/migrate/deploy。
+
+#### 完整审查与 traceability
+
+- 审查范围为 ADR-008 权威基线 `008b2e08923614182811023eddd652df69aa98a9` 到 Task 07 gate
+  `5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af`：17 commits、59 files、9100 insertions、353 deletions。
+  逐提交 `git show --check` 与完整 `git diff --check` 均退出码 0。
+- ADR-009 §1-10、验收矩阵和明确排除已逐项映射到 Task projection/transaction、Runtime/safeoutput、
+  reducer、TUI/focused CAS、Diagnostic mode-switch、default-profile E2E、测试和操作文档；矩阵写入
+  [Task 08 validation report](../../reports/validation/2026-09-20-openagentx-adr009-release-candidate.md)。
+- ADR-006/007 无 diff；`go.mod`/`go.sum` 无 ADR-009 修改；无生成物、credential/token 文件、父仓文件或
+  未归属 compatibility fallback。secret-pattern、Console `TurnHandle`、production 禁用 tmux 命令和
+  release scanner 均通过；`/foreground` 仍仅为禁用提示。
+- ADR-009 SHA-256 为 `afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69`；
+  AGENTS SHA-256 为 `b53264590ccb1ebace81668ae3c98f1e29ce8f61384a259f08a5e23b8b92a95b`。
+
+#### 无缓存与隔离验证
+
+| 命令/检查 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./... -count=1` | 0 / 31.55s | 全仓通过；Console 30.131s、Panel 19.923s、Fleet 12.191s、SQLite 12.766s |
+| `go test -race ./... -count=1` | 0 / 46.00s | 全仓 race 通过；Panel 41.590s、Console 32.148s、SQLite 17.554s |
+| `go vet ./...` | 0 / 0.72s | 全仓通过 |
+| `go mod verify` | 0 | `all modules verified` |
+| 受影响 Panel/Console/Fleet/Auth/Runtime/safeoutput 定向 race | 0 / 42.68s | 全部通过 |
+| `npm run test:observation` | 0 / 0.39s | 4/4 通过 |
+| `npm run test:pwa` | 0 / 0.29s | 通过 |
+| `npm run build` | 0 / 3.49s | 266 modules；production build 通过 |
+| Shell syntax + Worker template static test | 0 / <0.1s | system/user unit 静态约束通过 |
+| `systemd-analyze --user verify <temp>/openagentx.service <temp>/openagentx-worker@.service` | 0 / 0.08s | 按实际安装名通过；临时目录已清理 |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 / 0.14s | 全部类别 `CLEAN` |
+| changed Markdown relative links + README/install-guide bash fences | 0 | 通过 |
+
+- `TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident` 退出码 0、26.68s：临时
+  HOME/DB/UDS/credential、正式 PTY login、fake user-systemd、唯一 `tmux -L` 和真实隔离 daemon/Worker
+  完成 login/Fleet/OAX Attach/dispatch/领取/运行/safe output/focused steer/终态 reply/Diagnostic/Normal/
+  `/quit`；同一 Worker PID/instance/generation 随后完成第二项 Task。
+- `TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes` 退出码 0、2.52s：alt-screen、真实输入、
+  绑定、pane 0 exit 0 和 pane 1/2 保留均成立。
+- Task snapshot N/N+1 两项事务测试退出码 0；SSE ownership/projection/encode/write 故障组退出码 0、
+  8.916s，证明 Task/Run/runtime/Worker/Mailbox/Message/Approval 和 backend 查询失败不发送失败 frame、
+  不跨 cursor，并可从 last-applied 恢复。
+- CLI Token/schema/credential 五包退出码 0、4.26s；Runtime/safeoutput/Worker 包退出码 0、7.59s；
+  reducer/TUI focused CAS/Diagnostic/compact 定向退出码 0；Fleet/tmux/user-systemd/graceful 两包完整测试
+  退出码 0、11.11s。
+- candidate help smoke：Console/Fleet/Attach help 均 code 0；已删除 `console status`、`attach --once`、
+  `console dispatch` 均 code 2。所有测试资源均为隔离 fixture，未操作 default tmux 或真实服务。
+
+#### 失败与纠正
+
+| 现象 | 根因与裁决 | 纠正及证据 |
+|---|---|---|
+| 首次 Web build 为 `vite: not found` | worktree 未安装 lock 对应依赖，不是产品测试失败 | `npm ci --no-audit --no-fund` 安装 123 packages；只重跑 build 后 exit 0，保留首次失败 |
+| 首次 systemd 临时命令被执行安全策略拒绝 | cleanup 使用递归删除形式，unit 尚未复制或验证 | 改用唯一 `mktemp -d` 与精确 `unlink`/`rmdir`；verify exit 0 |
+| ad-hoc 禁用路径 scan 首次命中 `TurnHandle` | 错把 Worker/Runtime 正式接口纳入 Console 边界 | 收紧到 Console client/model 与 Fleet/Console tmux 协调；正式 release scanner 未放宽且 exit 0 |
+| submodule linked worktree 候选没有 `vcs.*` | 共享 Git 配置保留原 `core.worktree`，Go 1.22 未写 stamping | 删除两个无 provenance 产物；clean standalone clone 使用 `-buildvcs=true` 重建并通过 provenance |
+| `/tmp` 不支持 `gio trash` | internal mount 无 Trash | 核验 clone 精确路径、clean HEAD 后限定路径清理；无临时 candidate worktree/clone 残留 |
+
+#### 候选与外部状态
+
+- clean detached standalone clone at `5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af` 使用以下命令构建，
+  退出码 0、4.41s：
+
+  ```bash
+  go build -buildvcs=true -o /home/sky/.cache/openagentx-builds/openagentx-adr009-5bebf14 ./cmd/openagentx
+  ```
+- 最终候选为 19523320 bytes，SHA-256
+  `e482b113311ba618ac45512bf3098d431e739ab61bfc681ec3d2f90f483300c2`；cache directory/file 均为
+  `0700 sky:sky`。`go version -m` 为 Go 1.22.4、`vcs=git`、精确 revision `5bebf148...`、
+  `vcs.modified=false`。临时 linked worktree、standalone clone 和 probe binary 已清理。
+- feature 提交前为 `5bebf14`，相对 `origin/main@c3fc1bb` ahead 52，无 remote feature ref；OpenAgentX main
+  clean `3723c77`、ahead 1；ADR-008 worktree clean `008b2e0`。`steadyflow` 父仓 `d3fd774` 的既有大量
+  dirty/ahead 现场只读核验，未修改、暂存或提交。
+- 本轮未获 Task 08 所要求的单独真实主机只读核验授权，因此未读取或操作真实 service、installed binary、
+  DB、socket、credential、Linger、Worker unit 或 default `OAX`。此项不冒充已通过的现场验收。
+- validation report 结论为 `passed-candidate`；当前无 P0/P1 open issue。Task 08 继续 `active/WAIT`，
+  主计划与 front matter 继续 `pending`。本轮只提交 report + execution log；不 push/merge/install/restart/
+  migrate/deploy，等待最终监督 gate。
 
 ## 7. 后续记录模板
 
