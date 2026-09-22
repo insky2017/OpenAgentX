@@ -1,6 +1,6 @@
 ---
 doc_type: validation_report
-status: installed-runtime-validation-blocked
+status: installed-scoped-validation-passed
 owner: openagentx
 updated_at: 2026-09-22
 ---
@@ -8,6 +8,11 @@ updated_at: 2026-09-22
 # ADR-009 实机安装与 Console 验收
 
 ## 范围与结论
+
+**19:42更新：本轮重新安装、PC/手机发送区与一次真实Runtime执行验收通过。** 已安装`6d599ac`，
+包含主程序摘要漂移warning修复`8b621ce`；quote-service generation52的真实Run已succeeded并返回
+可核对的当前时间。Task仍按既有规则为`uncertain/business_effect_unverified`；`LIVE-02`仍独立待办，
+不宣称完整ADR现场验收通过。新的构建、安装与任务证据见文末。本节以下保留16–17时的原失败历史。
 
 用户在候选门禁后明确授权安装。已完成 `5bebf14` 候选安装、daemon/Worker 更新和默认 tmux server
 的真实 `OAX:quote-service.0` Console 验证。这次不再使用隔离 tmux 或 fake Runtime 冒充现场。
@@ -229,3 +234,68 @@ stderr或执行模型。除上述通过正式Console提交的唯一验证Task外
   大小后可完整观察，未修改用户tmux拓扑。源码定位若干不存在路径/glob返回非零，已纠正，无现场副作用。
 - 未覆盖：第二Task成功回复、在活动Task期间退出Console后完成的真实证明。早先idle `/quit`与恢复
   Worker不变证据仍成立；本次不以它替代活动执行验证。没有新增业务文件副作用，不宣称文件业务成功。
+
+## 19:20–19:43：warning版本重新安装、响应式发送区与真实Run
+
+用户再次明确授权重新安装，要求发送入口支持手机/PC，并证明quote-service能真实执行一次。本批不改
+Task业务核验、Diagnostic归属、ADR-006/007，也不自动重试旧uncertain任务。
+
+### 发送入口与验证
+
+- 桌面发送区从左侧列表末尾移到主内容顶部；手机列表中位于底部导航上方，进入详情后与详情使用flex
+  实际分配高度，不用估算输入区高度。只有一个输入框，沿用原正式API、draft、reply及CAS逻辑。
+- 真实Chromium加载生产build和隔离fixture，在1440x1000、390x844、320x568检查无横溢、回复焦点、
+  详情/输入区不重叠；SSE和offline/online切换保留草稿，offline/viewer禁写。一次create对应一次正式
+  Task路径请求，一次reply对应一次messages请求且携带expected_version。fixture不作为真实业务证据。
+- observation 4/4、network 7/7、PWA、production build、release scanner、Worker template和diff均通过。
+  Go源码未在UI批次改变，复用`8b621ce`无缓存全仓Go、定向race、vet/build通过的证据。
+- 浏览器缺少新session所需Chromium时，复用现有浏览器的自有标签页；`tab new`与`find nth`版本差异
+  改用显式open/DOM selector完成验证。手机详情首版估算高度已集中修正并重建复测。
+
+### 构建、备份和安装
+
+| 项目 | 证据 |
+|---|---|
+| 安装源码 | `6d599aca8ce7c32fe11f23244478b495a0a78e68`，包含`8b621ceeefc85662f1b44dd38e6eb5640490cc0d` |
+| 构建命令 | `go -C /home/sky/.cache/openagentx-builds/source-6d599ac.jR1tbo build -o /home/sky/.cache/openagentx-builds/openagentx-6d599ac ./cmd/openagentx` |
+| 来源 | 源仓库独立shared clone，detach精确commit，工作树clean；Go1.22.4，`vcs.revision=6d599aca8ce7c32fe11f23244478b495a0a78e68`、`vcs.modified=false` |
+| binary SHA-256 | `a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89` |
+| Web JS / CSS SHA-256 | `74399306f79b3fba474411a4b79a1ab7e4073e12dab50a71081c0aaf69cef11c` / `86ca0c644ae01048bfa7e2821862a687b722f4c2f16185ab34127c6e58323dc4` |
+| 私有备份 | `/home/sky/.openagentx/backups/runtime-warning-20260922.ZxKiri`，0700；旧binary/Web/release/Worker YAML和0600一致SQLite backup |
+| daemon / Worker / Console | PID1686100 / 1687781 / 1687481，三个`/proc/PID/exe`与候选、installed摘要一致 |
+| Worker身份 | `worker-e14b0b6d-5db6-443a-aa19-9edd21ed7be6` / generation52 |
+| schema/监听 | backup与真实库quick_check=ok；schema v1；仅127.0.0.1:18100 |
+| 权限 | binary0755、Web目录0755；socket/credential/Worker YAML/release为0600 |
+
+首次从原worktree执行Go build时，Go1.22向外找到OneAxe的`.git`目录，错误写入外层revision和
+modified=true；`go build -x`证明git查询cwd为OneAxe。该产物未安装，改用上述隔离clone重建并核对
+provenance后才部署。旧Worker通过正式`fleet down`持久stop intent约1s内graceful offline；旧Console
+经真实PTY输入`/quit`，pane保留且exit0。完成一致DB备份后停止daemon，同目录stage+校验+sync+rename
+安装binary/Web，再恢复daemon、`fleet workspace --respawn-dead`和`fleet up`。未改unit/config/wrapper。
+
+本机默认curl代理路径一次HTTPS握手失败；`--noproxy '*'`直连HTTPS health正常，JS/CSS与本地构建精确
+同hash；真实浏览器可打开公网登录页。未修改代理或网络暴露。用户在owner Web完成gen52测试/应用，
+19:37:57 Worker确认inherit / policy14 / binding7 applied，随后正式Attach显示primary healthy。
+
+### 新任务真实证据
+
+| 项目 | 结果 |
+|---|---|
+| 唯一提交入口 | 真实`OAX:quote-service.0` Console `/dispatch`，只提交一次只读date查询 |
+| Task | `task-43704170-fff1-48f8-a52a-1b1696bdbaa3`，version3 |
+| Run | `run-96a8fe19-5344-4105-bb77-41d5f8dd12fb`，version2，`succeeded` |
+| 执行时间 | 19:39:15–19:39:28 CST，约13s |
+| Runtime | `agy-batch` / `primary` / `gemini-3.7-flash-low`，inherit / policy14 / binding7 |
+| 回复 | `验收 OAX-20260922-1938：2026-09-22 19:39:24 +0800`，位于真实执行时间窗口内 |
+| 正式Follow | sequence197126–197145：created、claimed、running、Run started、accepted、agy init/step_update/result、Run finished、Task settled |
+| Console | Normal画面实际显示过程、Runtime succeeded和完整回复；没有controlled-turn错误 |
+| Task状态边界 | `uncertain/business_effect_unverified`；side effects/business verification均not_recorded，未提升为业务成功 |
+| 完成后 | 正式Attach：online、primary healthy、active_run=null；daemon/Worker仍原PID、NRestarts=0 |
+
+PTY只使用自己的tmux attach client，不send/paste/capture。结束前尝试查看`/status`时，共享session
+被切到其他window；立即停止输入并detach自己的client，没有在那里提交Enter或新任务。原quote-service
+Console保持运行，其他window/pane未kill/respawn；本次不声称清理了共享现场的所有输入draft。
+
+`LIVE-01`在本轮范围关闭：摘要漂移的源码warning矩阵已通过，新安装真实Run成功；不声称本次运行中
+人为替换了AGY。`LIVE-02`仍待独立Diagnostic修复。未新增业务文件副作用验收，未验证手机真机或所有
+浏览器内核；本轮采用真实Chromium手机viewport。未push/merge、未修改main或steadyflow父仓。

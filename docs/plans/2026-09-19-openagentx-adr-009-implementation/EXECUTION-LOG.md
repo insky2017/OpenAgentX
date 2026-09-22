@@ -1013,6 +1013,42 @@ push/merge/安装来“修正”差异。
 - 19:33前尚未安装/重启或发送真实任务；旧binary/Web/release/Worker配置已复制到0700备份目录
   `/home/sky/.openagentx/backups/runtime-warning-20260922.ZxKiri`，后续追加实际安装及Runtime证据。
 
+#### 19:43安装与真实执行收口
+
+- UI实现提交`6d599aca8ce7c32fe11f23244478b495a0a78e68`，包含warning提交`8b621ce`；干净源码
+  build SHA-256为`a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89`。
+  首次在worktree直接build虽然退出0，但provenance错误指向外层OneAxe revision/modified=true；
+  `go build -x`定位为Go1.22查询外层`.git`。错误产物未安装，改用私有独立shared clone精确detach
+  `6d599ac`后构建，`go version -m`确认同revision且modified=false。
+- 安装命令均退出0：正式`fleet down`约1s持久stop后offline；旧Console真实PTY `/quit` exit0；
+  SQLite `.backup`、0600/quick_check/schema v1验证；stop daemon；同目录stage/cmp/sync/rename
+  安装binary/Web；start daemon、schema verify、`fleet workspace --respawn-dead`、`fleet up`。
+  daemon/Worker/Console PID1686100/1687781/1687481的exe与candidate/installed同hash。
+- Web生产资源与installed逐文件一致，HTTPS JS/CSS同hash，公网登录页真实浏览器正常。默认curl
+  路径出现一次SSL_ERROR_SYSCALL；显式`--noproxy '*'`检查通过，未更改代理或监听。浏览器关闭
+  自有tab首次未传index导致工具参数错误，明确index后正常；fixture server与follow已结束。
+- 用户经owner Web测试并保存新generation52；只读query_only元数据和正式Attach共同确认19:37:57
+  inherit / policy14 / binding7 applied到`worker-e14b0b6d-5db6-443a-aa19-9edd21ed7be6`，primary healthy。
+  未用CLI scope绕过网络发布、未直接写DB；unit/Worker YAML/manifest/wrapper摘要保持不变。
+- 唯一新Task通过真实`OAX:quote-service.0`的`/dispatch`提交一次：
+  `task-43704170-fff1-48f8-a52a-1b1696bdbaa3`；Run
+  `run-96a8fe19-5344-4105-bb77-41d5f8dd12fb`于19:39:15–19:39:28真实succeeded。
+  回复`验收 OAX-20260922-1938：2026-09-22 19:39:24 +0800`；正式Follow sequence197126–197145
+  覆盖created/claimed/running/Run started/accepted/agy init/step_update/result/finished/settled，
+  Console Normal实际显示过程和回复。没有controlled-turn错误；未重试旧uncertain任务。
+- Task仍version3/uncertain、`business_effect_unverified`，side effects/business verification均
+  not_recorded；本轮成功是Runtime执行与准确时间回复，不伪称文件业务副作用已验证或改变ADR-006。
+- 真实PTY结束前，尝试查看`/status`期间共享session被切到其他window；停止后续输入并detach本次
+  client，未在那里提交Enter/新任务。不假称清空了所有共享draft；其他window/pane未kill/respawn。
+  19:43正式Attach仍同Worker/gen52、online/healthy、active_run=null；Worker累计CPU约2s/8m40s。
+  daemon/Worker active/running、NRestarts=0；Console仍原PID。最后只读核验不重启清零。
+- `LIVE-01`在本批关闭：warning源码矩阵与新安装真实Run均有证据；未在运行中人为替换AGY。
+  `LIVE-02`仍独立待办，不影响本批Normal/发送区验收；手机证据为真实Chromium viewport，未扩称
+  手机真机或全部内核通过。原失败记录全部保留，详见[安装报告](../../reports/validation/2026-09-22-openagentx-adr009-live-installation.md)。
+- 私有备份/release记录已更新；真实DB quick_check=ok/schema1，仍仅127.0.0.1:18100；socket/
+  credential/config/release为0600，binary/Web目录0755。main保持clean/ahead1于`3723c773`。
+  本批在60分钟预算内完成，只提交安装报告和本日志作为证据，不push/merge，不改父仓或冻结ADR。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结
