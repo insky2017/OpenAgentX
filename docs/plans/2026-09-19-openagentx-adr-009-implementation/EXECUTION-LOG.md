@@ -758,6 +758,58 @@ push/merge/安装来“修正”差异。
   与候选验证完成。完整用户现场交付仍未验证；保持未安装/未部署，不将整体目标谎报为现场可用。
   本 gate 只改主计划、Task 08、report 和 log 四个 Markdown 文件；保留全部历史失败，无源码变更。
 
+## 2026-09-22 授权安装与真实现场验收
+
+- 用户在候选门禁后明确回复“授权安装”，覆盖已提出的候选安装、当前任务自然结束后更新 daemon/Worker/Console、
+  真实 `OAX:quote-service.0` 验收。无需再次请求同一安装授权；仍不 push/merge 或改父仓。
+- 本批预算：60 分钟，一次安装批次和一次现场验证批次；异常先有界诊断，不自动重试业务任务或扩展 ADR-006/007。
+- 正向验收：已验证 `5bebf14` binary 原子安装；三个运行进程 hash/provenance 一致；正式 API 与真实 pane
+  共同证明低副作用 Task 的领取/运行/终态/最终回复，第二项任务证明 resident Worker 连续执行。
+- 不变量与失败边界：普通 stop 使用持久化 graceful intent；不强停活动 Run，不用 tmux send/paste/capture；
+  保留其他 window/pane/未知进程。先备份旧 binary 与一致 SQLite 备份，失败保留现场并使用已确认的回滚边界。
+- 资源证据：schema/quick_check、canonical 配置与 unit hash、Worker identity/generation（不记录 fencing）、
+  监听地址、权限及 Console 退出不影响 Worker。没有 Runtime 增量时只报告等待最终结果，不虚构过程。
+- 首轮预检：candidate SHA-256 与既有证据相符；CLI credential/session 有效；quote-service online generation 50，
+  systemd daemon/Worker active。SQLite quick_check=ok/schema_meta=1。
+- 辅助查询纠正：对可选 `quote-service.env` 执行 hash/stat 返回 1；unit 明确 `ignore_errors=yes`，该文件
+  不存在是现有合法配置，未创建。两次源码查询误把 Go import alias 当目录（`internal/api/openapi`、
+  `internal/console`），rg 返回 2；仅查询错误，无产品或现场修改，已按真实路径继续。
+- 发现既有网络 binding 的 applied generation=47，而当前 Worker generation=50；作为真实执行必要条件
+  有界核验，不能把 online/queued 写成执行成功，不直接改数据库或实现代际继承。
+
+### 安装结果与现场证据（2026-09-22 16:04–16:12 CST）
+
+- 已验证候选原子安装至 `/home/sky/.local/bin/openagentx`：revision `5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af`，
+  SHA-256 `e482b113311ba618ac45512bf3098d431e739ab61bfc681ec3d2f90f483300c2`，`vcs.modified=false`。
+  旧 binary、SQLite 一致备份、unit/config/manifest/release evidence 保留在私有目录
+  `/home/sky/.openagentx/backups/adr009-20260922-DTkpFj`，backup quick_check=ok/schema=1。
+- graceful `fleet down` exit 0，约 1s 从 stop pending 到 offline，Worker exit status=0。精确确认旧 Console
+  PID313504/installed hash 后 SIGTERM，只使该 pane 自身正常退出；不 kill pane/window/session。
+- daemon stop → 同目录临时 binary+hash/fsync+atomic rename → start → schema verify 全部 exit 0。
+  daemon 16:04:14 启动 PID830503；`fleet workspace --respawn-dead`、`fleet up` exit 0；Worker PID835790，
+  instance `worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb`、generation 51。三个运行进程 hash 与候选一致。
+- 默认 tmux server 的真实 `OAX:quote-service.0` 已通过 PTY tmux client 观察与输入：焦点原 Task、queued/
+  Mailbox 状态、`/status`、`/diagnostic` 原地切换及 `/normal` 成立。`/quit` 后 pane dead/status=0，Worker
+  同 PID/gen 继续在线；正式 workspace 命令恢复 Console PID870030。本次 client 以自身 C-b d 正常 detach。
+  未使用 tmux send/paste/capture，未修改其他 window/aux pane。
+- 真实原 Task `task-3abf6b7c-9b41-4238-b5b2-044f6627d70e` 仍 queued/version1，Attach primary=unavailable。
+  已有 applied generation47 与 current51 不符；升级前为 current50，说明这是既有运行条件。CLI Token
+  没有网络管理 scope，检查用 Web 未登录；向用户请求通过 owner Web 会话对现有 inherit 模式先测试再应用。
+  安装已完成，但尚不宣称真实 Runtime 回复/连续执行通过；不改 DB、不扩 CLI 权限、不实现 ADR-007。
+- health=ok、监听仍仅127.0.0.1:18100、SQLite quick_check=ok/schema1；Worker YAML/manifest/Wrapper hash
+  未变，unit/Web assets 未替换，release.txt 已更新且0600。未 push/merge、未改 main/父仓。
+- 临时 Go 验证器复用正式 credentialstore、installation probe、CLI Session 和 Console client，仅输出安全
+  白名单；源文件已从 feature 删除，私有 backup 保存可复现 source/binary。无密码/token/fencing进入证据。
+- [安装报告](../../reports/validation/2026-09-22-openagentx-adr009-live-installation.md) 记录命令、失败/纠正、
+  provenance、验收边界与待完成项。只增加本日志与报告，不重跑未受影响的全仓测试。
+- 一次独立只读验证确认 installed hash/provenance、三个进程相同 inode、daemon/Worker active/running 与
+  NRestarts=0、恢复后的 pane0/name/markers 正确；源码复核确认 generation fencing 与 CLI/Web 网络授权
+  边界。验证代理未读 DB 或调用 Runtime，未把部署版本证据扩大为业务闭环。5 个相对链接、diff check、
+  两文件边界与冻结 ADR/AGENTS hash 检查通过。
+- 外部 HTTPS 补验：首个 curl 继承 shell 代理且未限定超时，持续无返回；精确终止本次 PID893114。
+  显式 no-proxy/connect-timeout10/max-time20 的同 endpoint 请求约0.66s exit0、HTTP200/health ok；
+  真实浏览器同请求也HTTP200。记录探针环境限制，不改全局代理/Worker策略，不写代理值或凭据。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结
