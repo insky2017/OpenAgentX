@@ -1,6 +1,6 @@
 ---
 doc_type: validation_report
-status: installed-web-live-validation-pending
+status: installed-task-success-pending
 owner: openagentx
 updated_at: 2026-09-22
 ---
@@ -8,6 +8,19 @@ updated_at: 2026-09-22
 # ADR-009 实机安装与 Console 验收
 
 ## 范围与结论
+
+**22:34后用户复核：真实网页过程和回复已验证，Task成功终态仍未完成。** 用户指出最终仍显示
+`uncertain`，该反馈成立，不能把“回复已送达”扩大为用户要求的任务成功。现有
+`FinishRun`在Runtime succeeded且`SideEffectsKnown=false`时持久化Task uncertain及
+business_effect_unverified；AGY未提供独立核验证据，当前没有只读query的独立成功规则。
+此缺口已归属仍为Proposed的[ADR-006](../../decisions/ADR-006-task-intent-and-verifiable-terminal-semantics.md)，
+本轮不修改被冻结的Task领域语义。`LIVE-03`仅关闭网页发送/跟踪/回复故障，整体任务成功验收保持待完成。
+
+**22:34阶段事实：真实网页发送、Worker执行、过程更新和最终回复已确认。** 用户在
+真实页面先看到新Run starting，再看到同一Run succeeded及时间回复；正式Task/Run快照和Journal
+核对一致。同一generation52 Worker连续完成两条新任务，随后仍online/primary healthy、无重启。
+本结论仅覆盖本轮网页闭环；Task仍为`uncertain/business_effect_unverified`，`LIVE-02` Diagnostic
+跨Task显示问题仍待独立修复，不扩称完整ADR现场验收通过。下面保留此前待验和失败事实。
 
 **20:50更新：网页闭环修复`ee46038`已安装，真实owner Web发送与页面回复待验。** 用户继续测试后
 发现19:59 Task被默认发给offline orchestrator且一直queued。此前真实Console执行证据不覆盖网页
@@ -341,3 +354,65 @@ Console保持运行，其他window/pane未kill/respawn；本次不声称清理�
 - `LIVE-03`（Web真实闭环）保持待验：已给用户明确quote-service链接，等待既有owner会话的一次
   实际发送与页面结果反馈；主代理正式Follow已连接。验证浏览器无Web登录态，不读取密码/Cookie、
   不用CLI Token伪造Web登录，也不再以Console发送作为Web验收。`LIVE-02`仍独立待办。
+
+## 22:27–22:34：用户真实网页反馈与正式状态交叉验收
+
+20:50批次因等待用户Web操作而停止后，用户先贴出19:59旧任务，再连续提供新Run的starting和
+succeeded页面内容。本次恢复剩余验收，补证预算10分钟，仅只读核验、更新证据并收口；没有新增
+测试任务或重试历史任务。用户页面证据与主代理API核验分别标明，不将隔离fixture替代真实操作。
+
+| 项目 | 第一条新Task | 用户确认页面回复的第二条新Task |
+|---|---|---|
+| Task ID | `task-01ec8ae3-0895-4984-9e59-11ebf593e75a` | `task-adb0f396-ffee-41f5-9664-3c44e9b7669e` |
+| Run ID | `run-61b7ec14-b8db-4d8c-b091-9b26cf5d5505` | `run-d064705f-0e18-4c01-93c4-0be47414700a` |
+| Agent | quote-service | quote-service |
+| Run窗口（CST） | 22:27:38.028–22:27:51.851，约13.8秒 | 22:28:53.837–22:29:06.225，约12.4秒 |
+| Run / Task | succeeded / version3 uncertain | succeeded / version3 uncertain |
+| 安全回复中的时间 | `2026-09-22 22:27:48 CST` | `验收 OAX-20260922-1938：2026-09-22 22:29:01 +0800` |
+| Work delivery | accepted，attempts=1 | accepted，attempts=1 |
+| Worker | `worker-e14b0b6d-5db6-443a-aa19-9edd21ed7be6` / generation52 | 同一Worker / generation52 |
+| Runtime / 网络 | agy-batch / primary / gemini-3.7-flash-low；inherit / policy14 / binding7 | 相同 |
+
+- 真实浏览器证据由用户当前Web会话提供：第二条Task先显示`task.created`、`task.running`、
+  `run_attempt.started`及阶段starting，随后同一详情显示`runtime.agy.init`、8条step_update、
+  `runtime.agy.result`、`run_attempt.finished`、`task.settled`和上述完整回复。用户可见的Run ID、
+  Worker/generation及时间与正式安全投影一致。没有获取用户密码/Cookie或模拟Web登录。
+- 以只读`query_only`查询Journal的sequence/type/aggregate ID/time，第二条链为#198181 created、
+  #198182 claimed、#198183 running、#198184 started、#198185 accepted、#198187 init、
+  #198188–198195 step_update、#198196 result、#198198 finished、#198199 settled。未读取原始
+  payload或stderr。页面早先的19:59:30/#197266属于旧orchestrator任务，不能当成新Task状态。
+- 两条Task均保留`business_effect_unverified`；Run的`side_effects_source`和
+  `business_verification_source`均为`not_recorded`。本次证明执行链、时间回复和网页可观察性，
+  不证明文件/工具副作用已独立核验，不自动把Task改为succeeded，不自动重发。
+- 22:32正式Attach摘要cursor198223、heartbeat22:32:56、lease22:33:26，Worker仍online、
+  primary healthy、无active Run。daemon/Worker PID1686100/1687781、active/running、NRestarts均0，
+  与20:50相同；连续两条任务无需重启或人工驱动Worker领取。
+
+| 本次命令/证据 | 退出码与结果 |
+|---|---|
+| 私有`verify-api task <上述各Task ID>` | 均0；正式credential/session验证后读取安全快照，两个Run succeeded，回复存在 |
+| 私有`verify-api snapshot` | 0；online/healthy/gen52，无active Run |
+| `sqlite3 -json 'file:/home/sky/.openagentx/data/openagentx.db?mode=ro'`，`PRAGMA query_only=ON`后查询上述Journal元数据 | 0；与用户页面事件一致，无DB写入 |
+| `systemctl --user show openagentx.service openagentx-worker@quote-service.service -p Id -p ActiveState -p SubState -p MainPID -p NRestarts` | 0；进程和重启次数不变 |
+| `sha256sum` installed binary、两个`/proc/<pid>/exe`及installed Web JS/CSS | 0；均与19:43 binary / 20:47 Web安装摘要一致 |
+
+`LIVE-03`关闭，Web源码仍为`ee46038102ebd44d387e26ab912001f26b89ade5`，binary仍为`6d599ac`。
+当前批次只追加本报告、执行日志及0600私有release验收事实；不重建、安装、重启、改网络或产品代码。
+一次辅助`jq`误以为snapshot摘要使用DTO的`snapshot_sequence`字段而得到null，改读实际`cursor`
+字段确认198223；不是产品cursor故障。既有Web/独立浏览器测试经影响核对复用，不重复全仓长测试。
+whitespace、相对链接、状态/提交路径和冻结ADR检查随本次文档提交核验。`LIVE-02`仍待独立修复；
+手机真机、其他浏览器内核和独立业务副作用核验不在本次新增证据中。旧queued任务保持原状。
+
+### 用户指出uncertain后的终态边界复核
+
+- 用户已确认页面最终回复，同时明确指出Task仍uncertain。主代理纠正此前“闭环跑通”的宽泛表述：
+  发送/执行/观察/回复可用，不代表Task已判定成功，报告状态改为`installed-task-success-pending`。
+- 根因位于`internal/persistence/sqlite/worker_execution_repository.go`的`FinishRun`：
+  Runtime succeeded且`!turnResult.SideEffectsKnown`时将Task置uncertain并设置
+  business_effect_unverified。`internal/runtime/agy/stream.go`只将Runtime声明保存在
+  `RuntimeSideEffectsKnown`，没有升级为独立证据。不是SSE延迟或仍在等待Runtime。
+- ADR-006已明确记录只读问答的这一缺口，但仍Proposed/未授权实施；ADR-009明确排除改变intent和
+  成功判定。下一项应单独裁决query/mutation、调用者声明权限和可持久化成功证据，不能因提示词写了
+  “只读”或模型回复成功就放宽判定。本批只做根因核实，不修改代码、旧Task或冻结ADR。
+- 源码定位两次包含不存在的`internal/service`或`internal/runtime/types.go`导致rg退出2；改为已存在
+  的实际package/全仓符号搜索定位，未产生产品或现场变更。

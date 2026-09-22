@@ -1107,6 +1107,56 @@ push/merge/安装来“修正”差异。
   仅缺owner真实Web会话提交与页面回复反馈，安全收尾停止观察，等待用户该操作后继续同一验收。
   文档链接8项、staged diff、冻结摘要通过；只提交报告/日志，不push；main仍clean/ahead1。
 
+### 2026-09-22 22:34：真实网页闭环完成，LIVE-03关闭
+
+- 从20:50等待用户Web操作的安全停止点恢复剩余验收；补证预算10分钟，基线feature clean
+  `a56683fa299d46614884d4af0b48bc893e039e7f`、相对origin/main ahead64，main clean/ahead1。
+  用户先贴出19:59旧记录，随后贴出新Run starting和最终succeeded/回复；本批只核对、记录和收口，
+  不重开实现、重复全量测试或发送新Task。
+- 正式安全API确认两条新Task均属于quote-service：
+  `task-01ec8ae3-0895-4984-9e59-11ebf593e75a` / `run-61b7ec14-b8db-4d8c-b091-9b26cf5d5505`
+  于22:27:38–22:27:51完成，回复时间22:27:48；
+  `task-adb0f396-ffee-41f5-9664-3c44e9b7669e` / `run-d064705f-0e18-4c01-93c4-0be47414700a`
+  于22:28:53–22:29:06完成，回复`验收 OAX-20260922-1938：2026-09-22 22:29:01 +0800`。
+  两个Run均succeeded，Mailbox accepted/attempts1；同一Worker e14b0b6d/gen52，agy-batch/primary、
+  gemini-3.7-flash-low，inherit/policy14/binding7。
+- 用户真实网页显示第二Run从starting到succeeded，含init/8条step_update/result/finished/settled和
+  完整回复。只读Journal元数据独立核对#198181–198199，Task/Run/事件与用户页面一致；不读取原始
+  payload、stderr或Web凭据。旧19:59:30/#197266仍是offline orchestrator任务，不迁移/取消/重发。
+- Task仍version3 uncertain/business_effect_unverified；安全结果副作用来源/业务核验均not_recorded。
+  本批通过的是用户要求的真实网页执行/过程/回复闭环，不以Runtime成功冒充独立业务副作用核验。
+- 22:32正式Attach cursor198223、online/primary healthy、无active Run，heartbeat22:32:56；
+  daemon/Worker仍PID1686100/1687781、active/running/NRestarts0。完成第一条后持续领取第二条且未
+  重启；当前installed binary/两个运行进程hash及Web JS/CSS hash与既有安装记录一致。
+- 验证命令均退出0：私有`verify-api task <两个Task ID>`、`verify-api snapshot`，只读SQLite
+  `query_only`的Journal元数据查询，`systemctl --user show`指定上述两个unit的状态/PID/NRestarts，
+  installed与`/proc/<pid>/exe`/Web资源`sha256sum`。全部是读取，不修改Task/DB/config/unit/tmux。
+  一次辅助jq误用DTO字段snapshot_sequence读取helper摘要得到null；改读其cursor字段确认198223，
+  无产品故障。既有失败与独立验证记录保留，本批无产品改动，复用此前Web/浏览器测试。
+- [安装报告](../../reports/validation/2026-09-22-openagentx-adr009-live-installation.md)记录网页真实回复
+  已验证，只关闭`LIVE-03`的发送/跟踪/回复故障。`LIVE-01`维持本轮已关闭，`LIVE-02` Diagnostic
+  跨Task output归属仍待独立修复，完整ADR现场验收不因此扩称全部通过。手机真机/其他浏览器内核和
+  独立业务副作用核验不新增通过结论。0600私有release同步实际Web验收事实。
+- 本次仅提交报告/日志；冻结ADR-006/007/009及AGENTS不变，提交前检查whitespace、相对链接、
+  当前结论/issue状态和staged两文件边界。不push/merge，不改main或父仓；用户无需再次重复验收任务。
+
+#### 用户指出最终uncertain：Task成功目标仍待完成
+
+- 用户在看到完整回复后指出“最后还是显示uncertain”。主代理明确纠正“闭环跑通”表述，只确认
+  真实网页执行/回复，不能把这项局部结果当成Task成功。报告最终状态为
+  `installed-task-success-pending`，私有release同时记录Task成功尚待完成。
+- 只读源码核实`FinishRun`在Runtime succeeded且SideEffectsKnown=false时持久化Task uncertain/
+  business_effect_unverified。AGY的Runtime自报字段独立保存，没有独立业务核验，不会因自然语言
+  “只读”自动成为成功任务。这不是后台还在运行或页面未刷新。
+- 此为仍Proposed/未授权实施的ADR-006已知只读终态问题，ADR-009明确排除其语义修改；当前只记
+  用户目标缺口和后续需独立裁决的query/mutation/成功证据，不借本次验收改领域代码或历史Task。
+  `LIVE-03`关闭仅指网页发送/跟踪/回复故障；用户期待的Task成功结果仍待后续实施，不能写整体通过。
+- 两次源码定位含不存在的internal/service或internal/runtime/types.go使rg退出2；随后使用实际
+  package及全仓符号搜索定位成功。这是定位命令失败，无产品失败或现场副作用。
+- 文档收口检查：`git diff --check`退出0；Node相对链接/状态/path/frozen校验退出0，10个相对链接
+  有效、仅报告/日志两文件、4个冻结文件hash不变。关键结算/AGY代码相对installed source `6d599ac`
+  的`git diff --exit-code`为0，说明上述根因适用于当前安装；私有release仍0600 sky:sky。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结
