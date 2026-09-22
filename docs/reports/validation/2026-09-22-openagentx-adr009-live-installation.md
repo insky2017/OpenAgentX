@@ -12,17 +12,17 @@ updated_at: 2026-09-22
 用户在候选门禁后明确授权安装。已完成 `5bebf14` 候选安装、daemon/Worker 更新和默认 tmux server
 的真实 `OAX:quote-service.0` Console 验证。这次不再使用隔离 tmux 或 fake Runtime 冒充现场。
 
-**安装通过，外部 Runtime 任务闭环仍受阻。** 原网络 binding 的 applied generation=47，更新前 Worker
-已为 generation 50、更新后为 51。正式 Backend 解析拒绝沿用旧 Worker 绑定，`primary=unavailable`。
-这解释了原请求一直 queued；在线 Worker 不等于存在可调度 Backend。未通过直接改 DB 或扩展 CLI scope
-绕过它，也没有实现 ADR-007 代际继承。
+**安装、网络恢复和原任务真实回复已验证；连续第二项 Runtime 执行仍受阻，整体现场验收未通过。**
+17:37:59 用户经正式 Web 发布的 inherit binding version6 已由当前 Worker generation51 应用，Backend
+恢复healthy；原Task于17:38:10完成Run并返回时间，真实pane0能显示过程、Task终态和Runtime回复。
+Task仍为uncertain/business_effect_unverified，按ADR-009如实保留，不改变ADR-006语义。
 
-17:15 后补充：已修复并安装 Web 对旧 generation 回执误报当前生效的问题，源码 `77ae678`；本地及
-公网 HTTPS 资源摘要一致，daemon/Worker 未重启。当前网络发布仍未落地，真实 Runtime 验收仍 blocked。
+连续第二项无副作用任务被同一Worker领取，但因外部AGY二进制从已固定的1.2.7变为1.2.8而无法建立
+controlled turn。当前文件mtime17:38:07，实际摘要与网络策略固化摘要不同，身份校验正确拒绝；
+更新主体/机制尚未确认。不自动重试uncertain任务、不绕过校验、不重复要求用户配置网络。
 
-现有 CLI owner Token 验证通过，但网络管理不属于其冻结 scope；检查用 Web 页面未登录。需要 Web owner
-在网络设置选中 `quote-service / primary` 当前 generation 51，保持 `系统默认 (inherit)`，先执行
-`测试连接`，成功后 `保存并应用`。完成正式测试/发布后才能继续真实回复与第二项任务验收。
+先前gen47回执误报已由Web修复`77ae678`安装解决，本地及公网资源hash一致。另有真实Diagnostic摘要
+跨Task取旧output的显示缺口待修复，见末节；不能把单任务回复通过写成全部ADR现场验收完成。
 
 来源：[候选报告](2026-09-20-openagentx-adr009-release-candidate.md)、
 [执行记录](../../plans/2026-09-19-openagentx-adr-009-implementation/EXECUTION-LOG.md)。
@@ -177,3 +177,55 @@ Worker instance/generation/binding revision/mode 及 policy/profile；历史回�
 不能代用CLI credential或提取Web session发布。需要用户整页刷新加载新资源，在现有owner会话确认
 `quote-service / primary · gen51`、inherit及“测试成功，可保存并应用”，然后保存一次并核对完整提示。
 页面内刷新仅更新数据，不替换已载入JS。没有再创建测试或业务Task；后续以真实Worker回执/Run/回复收口。
+
+## 2026-09-22 17:38–17:48 真实回复与连续执行
+
+用户在新版页面收到发布等待回执及活动Task提示后恢复剩余现场验收；本次最多15分钟、不改产品代码。
+只读正式API和受限query_only查询确认：17:37:55 mode_publish接受，17:37:59 inherit binding version6 /
+policy13 applied到`worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb` / gen51，primary healthy。
+
+| 项目 | 原Task | 连续验证Task |
+|---|---|---|
+| Task ID | `task-3abf6b7c-9b41-4238-b5b2-044f6627d70e` | `task-39e79f4e-d4c3-40ef-9aa4-db72e6057383` |
+| Run ID | `run-dcb09adc-5a36-4662-b1a6-2350bdbb35c6` | `run-05734f10-cc53-4bf6-929e-84ea59fb5260` |
+| Worker/gen | `worker-cf83eb66...` / 51 | 同一Worker / 51 |
+| Runtime | succeeded | uncertain，未建立controlled turn |
+| Task | version3 / uncertain | version3 / uncertain |
+| 安全回复 | `2026-09-22 17:38:06 (UTC+8)` | 无回复 |
+| 错误 | `business_effect_unverified` | `Runtime Backend could not establish a controlled turn` |
+| Run时间 | 17:38:00–17:38:10 | 17:42:27–17:42:28 |
+| 网络快照 | inherit / policy13 / binding6 | 相同 |
+
+连续Task只通过真实Console `/dispatch`提交一次，内容要求精确回复唯一marker、不调用工具、不读取或
+修改任何文件；未重试原Task，也未因失败重新dispatch。60s正式Follow证明新Task经过created、claimed、
+running、run started、mailbox accepted、run finished、settled（sequence196415–196421），没有
+runtime.agy事件。它证明resident Worker继续领取，不证明连续Runtime成功。
+
+真实PTY使用自己的tmux attach client（ignore-size，终端大小对齐现有203x52 pane），不使用send/paste/
+capture。原Console PID870030保持运行，实际可见原Task的run started、agy init/step_update/result、
+Runtime reply、Task outcome result/error；`/status`显示完整Task/Run/Worker身份及上述回复。
+`/tasks`方向键选择已恢复原Task focus，Normal模式、空输入draft保留，最后只detach本次client。
+原pane和Worker不被重启；17:47 daemon/Worker仍PID830503/835790、active/running、NRestarts=0。
+
+独立验证代理复核了安全TaskSnapshot、Journal类型链、服务状态与二进制漂移；没有读取原始payload/
+stderr或执行模型。除上述通过正式Console提交的唯一验证Task外，没有直接修改业务状态、配置、binary
+或网络发布，未接触父仓。
+
+### 当前阻断与最小后续范围
+
+- `LIVE-01`：连续Runtime执行受AGY identity drift阻断。两Run及binding固定AGY SHA-256为
+  `9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0`；当前文件为
+  `c20434f0b9278196498069dac5a0a2e72bc0b5f8aebdf17c5d535b5369b76f67`，native/wrapper `--version`
+  均报告1.2.8，mtime为17:38:07.954。wrapper/helper摘要未变。`PrepareRunNetwork`与
+  `VerifyRuntimeIdentity`在StartTurn前要求精确匹配，此差异足以确定拒绝原因；尚不认定具体更新主体。
+  下一步先核实更新来源和固定Runtime版本，再按正式注册/测试/发布刷新身份，最后新建低影响任务验证；
+  不自动接受新hash，不假定重测网络本身就能修复Worker注册的旧身份。
+- `LIVE-02`：Diagnostic显示最近Timeline output时未按focused Task/Run筛选。第二Task没有Runtime
+  output时，overlay把它的`Run/wait category uncertain`与上一Task的`Runtime status succeeded`并列。
+  Normal Task outcome与`/status`均准确，但此组合可能误导，必须在Diagnostic范围独立修复并定向验证；
+  本次仅记录，不借安装验证扩大代码批次。保持整体现场验收blocked。
+- 非阻断UI观察：本次End键没有跳底、`/tasks`过滤输入未收敛，PgDown与方向键选择可用；不影响实际
+  回复/权威Task选择，后续键盘交互批次有界复核。首次PTY为80x24显示既有大pane的局部，调整自己的PTY
+  大小后可完整观察，未修改用户tmux拓扑。源码定位若干不存在路径/glob返回非零，已纠正，无现场副作用。
+- 未覆盖：第二Task成功回复、在活动Task期间退出Console后完成的真实证明。早先idle `/quit`与恢复
+  Worker不变证据仍成立；本次不以它替代活动执行验证。没有新增业务文件副作用，不宣称文件业务成功。

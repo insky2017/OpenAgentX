@@ -889,6 +889,42 @@ push/merge/安装来“修正”差异。
   检查通过。已关闭本次fixture浏览器页和localhost服务，截图/fixture保留在唯一临时目录供复核。
   main仍clean/ahead1于3723c773，未操作父仓；源码修复已提交，安装记录另作docs提交，不push。
 
+### 2026-09-22 17:38 网络回执恢复后继续原现场验收
+
+- 用户报告“已提交应用”及原Task开始运行，恢复先前安装批次剩余验收；本次仅有界完成真实pane与连续
+  第二项任务，最多15分钟，不重开全仓测试，不扩ADR-006/007，不自动重试原Task或引入文件副作用任务。
+- 正式Attach已确认primary healthy、同Worker/gen51；只读回执为version6/applied gen51、policy13，
+  mode_publish于17:37:55接受，17:37:59回执落地。先前网络阻断已解除，无需再让用户测试/保存。
+- 原Task version3/uncertain，Runtime Run succeeded，回复为`2026-09-22 17:38:06 (UTC+8)`；原因
+  `business_effect_unverified`。按冻结ADR-009只展示事实，不能因只读回复而重写Task成功语义。
+- 余下证据：真实pane0显示Task终态与Runtime回复；一次唯一标记、无工具/文件副作用的新Task证明同Worker
+  连续执行；Console正常退出不停止Worker/活动Task；恢复pane留给用户。真实任务仍走正式Console API。
+
+#### 现场验收结果：原回复通过，连续Runtime阻断（2026-09-22 17:38–17:48）
+
+- 原Task的正式投影和真实pane0一致：Run succeeded，Task uncertain，回复`2026-09-22 17:38:06 (UTC+8)`。
+  可见init/step_update/result、完整`/status`、Task outcome与Runtime reply分层；未虚构隐藏过程。
+- 一次真实Console `/dispatch`新建`task-39e79f4e-d4c3-40ef-9aa4-db72e6057383`，仅要求回复唯一marker，
+  禁止工具/文件副作用。相同Worker/gen51领取，Run `run-05734f10-cc53-4bf6-929e-84ea59fb5260`在约0.57s
+  内uncertain：`Runtime Backend could not establish a controlled turn`；不重试、不写成连续执行通过。
+- 独立只读验证与主代理核对发现AGY已从既有1.2.7变为1.2.8，mtime17:38:07（原任务运行期间）。固化
+  executable SHA为`9991515b...ea8b0`，实际为`c20434f0...b76f67`，wrapper/helper不变；身份精确校验
+  在StartTurn前必然拒绝。只确认外部binary漂移，不推断更新主体，不自动接受新hash/重启/回退。
+- 新Task的60s正式Follow和Journal元数据证明196415–196421的领取/Run/终态链，无runtime.agy事件；
+  Task API/版本、network snapshot均一致。daemon/Worker PID、NRestarts=0和Console PID均保持不变。
+- 新问题裁决：`LIVE-01`为本轮必需连续执行的实际部署阻断，最小下一步为查更新来源/固定已验证Runtime
+  版本再正式刷新身份；`LIVE-02`为Diagnostic把旧Task output配到新focused Run的显示缺口，需独立
+  定向修复。二者证据和未覆盖项加入[安装报告](../../reports/validation/2026-09-22-openagentx-adr009-live-installation.md)，
+  不修改ADR-006/007，不把当前现场写成完整通过。End/filter交互观察有可用替代键，列为后续有界复核。
+- 本次只操作自己创建的PTY tmux client；已将Normal Console重新focus原时间Task，回复可见、输入空，
+  随后正常detach。不删除/respawn pane，不停止Worker，不读取raw stderr/payload，不操作其他window。
+  初始PTY尺寸与现场不符通过调整自身stty解决；少量源码路径查询错误已纠正，没有重复运行长测试。
+- 本批仅更新本日志、安装报告及私有release事实；产品代码不变，预算内停止扩展。独立验证已结束，
+  保留网络恢复与原回复证据，持续运行的Worker/Console交还用户；无需再次操作原网络测试。
+- 文档收尾检查：`git diff --check`退出0，7个相对链接均存在；冻结ADR-009与AGENTS摘要未变，
+  私有release记录仍为0600。main仍为3723c773、clean/ahead1；只暂存本日志和安装报告，不push。
+  本批无产品代码变更，未重复Go/Web测试；真实连续Runtime验收保持blocked。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结
