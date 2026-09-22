@@ -5,7 +5,7 @@ CREATE TABLE schema_meta (
 );
 
 INSERT INTO schema_meta (singleton, version, applied_at)
-VALUES (1, 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+VALUES (1, 2, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
 
 CREATE TABLE principals (
     principal_id TEXT PRIMARY KEY,
@@ -178,6 +178,7 @@ CREATE TABLE tasks (
     target_agent_id TEXT NOT NULL REFERENCES agents(agent_id),
     dispatch_mode TEXT NOT NULL CHECK (dispatch_mode IN ('coordinated', 'direct')),
     intent TEXT NOT NULL DEFAULT 'mutation' CHECK (intent IN ('mutation', 'query')),
+    completion_basis TEXT NOT NULL DEFAULT '' CHECK (completion_basis IN ('', 'query_result_delivered', 'mutation_effects_known')) CHECK (completion_basis = '' OR (status = 'succeeded' AND ((intent = 'query' AND completion_basis = 'query_result_delivered') OR (intent = 'mutation' AND completion_basis = 'mutation_effects_known')))),
     parent_task_id TEXT REFERENCES tasks(task_id),
     organization_id TEXT NOT NULL REFERENCES organizations(organization_id),
     idempotency_key TEXT NOT NULL,

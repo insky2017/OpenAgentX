@@ -77,21 +77,22 @@ type TaskListPage struct {
 // TaskReadModelTask is the browser-safe subset of a Task. Idempotency keys,
 // sender principals and cancellation actors remain control-plane data.
 type TaskReadModelTask struct {
-	ID              string              `json:"id"`
-	Version         int64               `json:"version"`
-	TargetAgentID   string              `json:"target_agent_id"`
-	OrganizationID  string              `json:"organization_id,omitempty"`
-	DispatchMode    domain.DispatchMode `json:"dispatch_mode,omitempty"`
-	Intent          domain.TaskIntent   `json:"intent"`
-	Content         string              `json:"content"`
-	Status          domain.TaskStatus   `json:"status"`
-	Result          *string             `json:"result,omitempty"`
-	ResultTruncated bool                `json:"result_truncated,omitempty"`
-	Error           *string             `json:"error,omitempty"`
-	ErrorTruncated  bool                `json:"error_truncated,omitempty"`
-	OutcomeState    string              `json:"outcome_state"`
-	CreatedAt       string              `json:"created_at"`
-	UpdatedAt       string              `json:"updated_at"`
+	CompletionBasis domain.TaskCompletionBasis `json:"completion_basis"`
+	ID              string                     `json:"id"`
+	Version         int64                      `json:"version"`
+	TargetAgentID   string                     `json:"target_agent_id"`
+	OrganizationID  string                     `json:"organization_id,omitempty"`
+	DispatchMode    domain.DispatchMode        `json:"dispatch_mode,omitempty"`
+	Intent          domain.TaskIntent          `json:"intent"`
+	Content         string                     `json:"content"`
+	Status          domain.TaskStatus          `json:"status"`
+	Result          *string                    `json:"result,omitempty"`
+	ResultTruncated bool                       `json:"result_truncated,omitempty"`
+	Error           *string                    `json:"error,omitempty"`
+	ErrorTruncated  bool                       `json:"error_truncated,omitempty"`
+	OutcomeState    string                     `json:"outcome_state"`
+	CreatedAt       string                     `json:"created_at"`
+	UpdatedAt       string                     `json:"updated_at"`
 }
 
 // RunAttemptReadModel deliberately omits execution JSON and fencing material.
@@ -124,6 +125,7 @@ type RunAttemptReadModel struct {
 }
 
 type TurnResultReadModel struct {
+	FinalReply                 bool                         `json:"final_reply"`
 	RuntimeStatus              openruntime.TurnResultStatus `json:"runtime_status"`
 	Body                       string                       `json:"body,omitempty"`
 	BodyTruncated              bool                         `json:"body_truncated,omitempty"`
@@ -175,19 +177,20 @@ type ConsoleTaskSnapshot struct {
 }
 
 type ConsoleTaskReadModel struct {
-	TaskID          string            `json:"task_id"`
-	Version         int64             `json:"version"`
-	AgentID         string            `json:"agent_id"`
-	Status          domain.TaskStatus `json:"status"`
-	Intent          domain.TaskIntent `json:"intent"`
-	Content         string            `json:"content"`
-	Result          *string           `json:"result,omitempty"`
-	ResultTruncated bool              `json:"result_truncated,omitempty"`
-	Error           *string           `json:"error,omitempty"`
-	ErrorTruncated  bool              `json:"error_truncated,omitempty"`
-	OutcomeState    string            `json:"outcome_state"`
-	CreatedAt       string            `json:"created_at"`
-	UpdatedAt       string            `json:"updated_at"`
+	CompletionBasis domain.TaskCompletionBasis `json:"completion_basis"`
+	TaskID          string                     `json:"task_id"`
+	Version         int64                      `json:"version"`
+	AgentID         string                     `json:"agent_id"`
+	Status          domain.TaskStatus          `json:"status"`
+	Intent          domain.TaskIntent          `json:"intent"`
+	Content         string                     `json:"content"`
+	Result          *string                    `json:"result,omitempty"`
+	ResultTruncated bool                       `json:"result_truncated,omitempty"`
+	Error           *string                    `json:"error,omitempty"`
+	ErrorTruncated  bool                       `json:"error_truncated,omitempty"`
+	OutcomeState    string                     `json:"outcome_state"`
+	CreatedAt       string                     `json:"created_at"`
+	UpdatedAt       string                     `json:"updated_at"`
 }
 
 type ConsoleMailboxReadModel struct {

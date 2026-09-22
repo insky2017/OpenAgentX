@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"openagentx/internal/domain"
@@ -229,15 +230,18 @@ func (s TurnResultStatus) Valid() bool {
 }
 
 type TurnResult struct {
-	Status                  TurnResultStatus `json:"status"`
-	ProviderSessionID       string           `json:"provider_session_id,omitempty"`
-	Result                  string           `json:"result,omitempty"`
-	ResultTruncated         bool             `json:"result_truncated,omitempty"`
-	Error                   string           `json:"error,omitempty"`
-	ErrorTruncated          bool             `json:"error_truncated,omitempty"`
-	UsageJSON               json.RawMessage  `json:"usage,omitempty"`
-	SideEffectsKnown        bool             `json:"side_effects_known"`
-	RuntimeSideEffectsKnown *bool            `json:"runtime_side_effects_known,omitempty"`
+	Status            TurnResultStatus `json:"status"`
+	ProviderSessionID string           `json:"provider_session_id,omitempty"`
+	Result            string           `json:"result,omitempty"`
+	ResultTruncated   bool             `json:"result_truncated,omitempty"`
+	// FinalReply is Adapter evidence of a complete terminal reply, not a
+	// declaration that the answer is true or that execution was read-only.
+	FinalReply              bool            `json:"final_reply"`
+	Error                   string          `json:"error,omitempty"`
+	ErrorTruncated          bool            `json:"error_truncated,omitempty"`
+	UsageJSON               json.RawMessage `json:"usage,omitempty"`
+	SideEffectsKnown        bool            `json:"side_effects_known"`
+	RuntimeSideEffectsKnown *bool           `json:"runtime_side_effects_known,omitempty"`
 }
 
 func (r TurnResult) Validate() error {
@@ -252,6 +256,9 @@ func (r TurnResult) Validate() error {
 	}
 	if r.ErrorTruncated && r.Error == "" {
 		return domain.ErrInvalidInput("truncated turn error must include a safe error")
+	}
+	if r.FinalReply && (r.Status != TurnResultSucceeded || strings.TrimSpace(r.Result) == "" || r.ResultTruncated || r.Error != "" || r.ErrorTruncated) {
+		return domain.ErrInvalidInput("final reply requires a complete successful result")
 	}
 	return nil
 }

@@ -26,7 +26,8 @@ func ProjectConsoleTask(task domain.Task) (openapi.ConsoleTaskReadModel, error) 
 	}
 	outcome := safeoutput.ProjectOutcome(task.IsTerminal(), task.Result, task.Error)
 	return openapi.ConsoleTaskReadModel{
-		TaskID: task.ID, Version: task.Version, AgentID: task.TargetAgentID, Status: task.Status, Intent: task.Intent,
+		CompletionBasis: task.CompletionBasis,
+		TaskID:          task.ID, Version: task.Version, AgentID: task.TargetAgentID, Status: task.Status, Intent: task.Intent,
 		Content: safeoutput.RedactText(task.Content), Result: outcome.Result, ResultTruncated: outcome.ResultTruncated,
 		Error: outcome.Error, ErrorTruncated: outcome.ErrorTruncated, OutcomeState: outcome.State,
 		CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt,
@@ -189,6 +190,7 @@ func consoleTurnResult(raw string) (*openapi.TurnResultReadModel, string) {
 		source = "runtime_reported"
 	}
 	return &openapi.TurnResultReadModel{
+		FinalReply:    result.FinalReply,
 		RuntimeStatus: result.Status, Body: result.Result, BodyTruncated: result.ResultTruncated,
 		Error: result.Error, ErrorTruncated: result.ErrorTruncated, RuntimeSideEffectsKnown: result.RuntimeSideEffectsKnown,
 		SideEffectsSource: source, BusinessVerificationSource: "not_recorded",

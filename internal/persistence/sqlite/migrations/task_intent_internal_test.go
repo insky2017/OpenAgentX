@@ -24,10 +24,22 @@ func openIntentMigrationDB(t *testing.T) *sql.DB {
 
 func applyLegacyV1WithoutTaskIntent(t *testing.T, ctx context.Context, db *sql.DB) {
 	t.Helper()
+	if strings.Count(targetSchema, "    intent TEXT NOT NULL DEFAULT 'mutation' CHECK (intent IN ('mutation', 'query')),\n") != 1 || strings.Count(targetSchema, "CREATE TRIGGER tasks_reject_intent_update") != 1 {
+		t.Fatal("v1 fixture requires exactly one intent column and trigger")
+	}
 	legacy := strings.Replace(targetSchema, "    intent TEXT NOT NULL DEFAULT 'mutation' CHECK (intent IN ('mutation', 'query')),\n", "", 1)
 	legacy = strings.Replace(legacy, "CREATE TRIGGER tasks_reject_intent_update BEFORE UPDATE OF intent ON tasks\nWHEN OLD.intent <> NEW.intent\nBEGIN\n    SELECT RAISE(ABORT, 'task intent is immutable');\nEND;\n\n", "", 1)
+	completionLine := "    " + taskCompletionColumnSQL + ",\n"
+	if strings.Count(legacy, completionLine) != 1 || strings.Count(legacy, "VALUES (1, 2,") != 1 {
+		t.Fatal("v1 fixture cannot remove exactly the v2 completion column and version")
+	}
+	legacy = strings.Replace(legacy, completionLine, "", 1)
+	legacy = strings.Replace(legacy, "VALUES (1, 2,", "VALUES (1, 1,", 1)
 	if _, err := db.ExecContext(ctx, legacy); err != nil {
 		t.Fatalf("apply old complete v1 schema: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, "INSERT INTO installation_metadata VALUES(1, 'installation-v1', '2026-09-22T00:00:00Z')"); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -63,11 +75,22 @@ func TestApplyUpgradesCompleteV1TaskIntentAtomically(t *testing.T) {
 	if _, err := db.ExecContext(ctx, `INSERT INTO tasks(task_id,version,status,sender_principal_id,target_agent_id,dispatch_mode,organization_id,idempotency_key,content,result,error,created_at,updated_at) VALUES ('task-old',7,'uncertain','human-1','quote','direct','org-1','old','work','historical reply','business_effect_unverified',?,?)`, now, now); err != nil {
 		t.Fatal(err)
 	}
-	if err := apply(ctx, db, migrationOptions{beforeTaskIntentCommit: func() error { return errors.New("stop intent migration") }}); err == nil {
+	if err := apply(ctx, db, migrationOptions{beforeV2Commit: func() error { return errors.New("stop intent migration") }}); err == nil {
 		t.Fatal("faulted Task intent migration succeeded")
 	}
 	if hasTaskIntentColumn(t, ctx, db) {
-		t.Fatal("faulted Task intent migration left a column")
+		t.Fatal("faulted migration left intent")
+	}
+	var completionCount, triggerCount int
+	if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM pragma_table_info('tasks') WHERE name='completion_basis'").Scan(&completionCount); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM sqlite_master WHERE name='tasks_reject_intent_update'").Scan(&triggerCount); err != nil {
+		t.Fatal(err)
+	}
+	versionBefore, err := Version(ctx, db)
+	if err != nil || versionBefore != 1 || completionCount != 0 || triggerCount != 0 {
+		t.Fatalf("half upgrade: v=%d columns=%d triggers=%d err=%v", versionBefore, completionCount, triggerCount, err)
 	}
 	if err := Apply(ctx, db); err != nil {
 		t.Fatalf("upgrade complete v1 schema: %v", err)
@@ -78,13 +101,51 @@ func TestApplyUpgradesCompleteV1TaskIntentAtomically(t *testing.T) {
 	if !hasTaskIntentColumn(t, ctx, db) {
 		t.Fatal("upgraded schema has no intent column")
 	}
-	var intent, status, result, taskError, createdAt, updatedAt string
+	v, err := Version(ctx, db)
+	if err != nil || v != 2 {
+		t.Fatalf("upgraded version=%d err=%v", v, err)
+	}
+	var installation string
+	if err := db.QueryRowContext(ctx, "SELECT installation_id FROM installation_metadata").Scan(&installation); err != nil || installation != "installation-v1" {
+		t.Fatalf("installation changed: %v", err)
+	}
+	var intent, basis, status, result, taskError, createdAt, updatedAt string
 	var version int64
-	if err := db.QueryRowContext(ctx, `SELECT intent,version,status,result,error,created_at,updated_at FROM tasks WHERE task_id='task-old'`).Scan(&intent, &version, &status, &result, &taskError, &createdAt, &updatedAt); err != nil {
+	if err := db.QueryRowContext(ctx, `SELECT intent,completion_basis,version,status,result,error,created_at,updated_at FROM tasks WHERE task_id='task-old'`).Scan(&intent, &basis, &version, &status, &result, &taskError, &createdAt, &updatedAt); err != nil {
 		t.Fatal(err)
 	}
-	if intent != "mutation" || version != 7 || status != "uncertain" || result != "historical reply" || taskError != "business_effect_unverified" || createdAt != now || updatedAt != now {
+	if intent != "mutation" || basis != "" || version != 7 || status != "uncertain" || result != "historical reply" || taskError != "business_effect_unverified" || createdAt != now || updatedAt != now {
 		t.Fatal("migration changed historical Task state or lost the mutation default")
+	}
+	for _, statement := range []string{
+		"UPDATE tasks SET completion_basis='unknown' WHERE task_id='task-old'",
+		"UPDATE tasks SET status='succeeded',completion_basis='query_result_delivered' WHERE task_id='task-old'",
+		"UPDATE tasks SET completion_basis='mutation_effects_known' WHERE task_id='task-old'",
+		"UPDATE tasks SET intent='query' WHERE task_id='task-old'",
+	} {
+		if _, err := db.ExecContext(ctx, statement); err == nil {
+			t.Fatalf("invalid completion contract accepted: %s", statement)
+		}
+	}
+	// Reopen the actual migrated database to prove the durable version and
+	// historical evidence, independently of the connection used for migration.
+	var databasePath string
+	if err := db.QueryRowContext(ctx, "SELECT file FROM pragma_database_list WHERE name='main'").Scan(&databasePath); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := sql.Open("sqlite3", databasePath+"?_foreign_keys=ON")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	if err := Apply(ctx, reopened); err != nil {
+		t.Fatalf("reopen migrated v2: %v", err)
+	}
+	if err := reopened.QueryRowContext(ctx, "SELECT intent,completion_basis,status,result FROM tasks WHERE task_id='task-old'").Scan(&intent, &basis, &status, &result); err != nil || intent != "mutation" || basis != "" || status != "uncertain" || result != "historical reply" {
+		t.Fatalf("reopened historical state changed: %v", err)
 	}
 }
 

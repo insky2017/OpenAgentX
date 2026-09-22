@@ -32,7 +32,7 @@ func TestParseStreamJSONNormalizesEventsAndResult(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Status != openruntime.TurnResultSucceeded || result.ProviderSessionID != "conv-1" || result.Result != "hellodone" || result.SideEffectsKnown || result.RuntimeSideEffectsKnown != nil {
+	if result.Status != openruntime.TurnResultSucceeded || result.ProviderSessionID != "conv-1" || result.Result != "done" || !result.FinalReply || result.SideEffectsKnown || result.RuntimeSideEffectsKnown != nil {
 		t.Fatalf("unexpected result: %+v", result)
 	}
 	if len(events) != 3 || events[0].Type != "agy.init" || events[1].Type != "agy.step_update" || events[2].Type != "agy.result" {
@@ -113,7 +113,7 @@ func TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit(t *testing
 {"event":"result","result":{"status":"SUCCESS","response":"done"}}`), openruntime.EventSinkFunc(func(context.Context, openruntime.RuntimeEvent) error {
 		return sinkFailure
 	}))
-	if !errors.Is(err, sinkFailure) || result.Status != openruntime.TurnResultSucceeded || result.Result != "safedone" {
+	if !errors.Is(err, sinkFailure) || result.Status != openruntime.TurnResultSucceeded || result.Result != "done" || result.FinalReply {
 		t.Fatalf("sink failure result status=%s body=%q err=%v", result.Status, result.Result, err)
 	}
 
@@ -157,7 +157,7 @@ func TestAgyBatchAdapterUsesDirectArgvConversationAndClassifiesExit(t *testing.T
 		t.Fatal(err)
 	}
 	result, waitErr := handle.Wait(context.Background())
-	if waitErr != nil || result.Status != openruntime.TurnResultSucceeded || result.ProviderSessionID != "conv-fixture" {
+	if waitErr != nil || result.Status != openruntime.TurnResultSucceeded || result.ProviderSessionID != "conv-fixture" || !result.FinalReply {
 		t.Fatalf("result=%+v err=%v", result, waitErr)
 	}
 	argv, err := os.ReadFile(logPath)
@@ -264,7 +264,7 @@ func TestAgyBatchAdapterEnforcesExecutionTimeout(t *testing.T) {
 		t.Fatal(err)
 	}
 	result, waitErr := handle.Wait(context.Background())
-	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || time.Since(started) > time.Second {
+	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.FinalReply || time.Since(started) > time.Second {
 		t.Fatalf("result=%+v err=%v elapsed=%s", result, waitErr, time.Since(started))
 	}
 }
@@ -286,7 +286,7 @@ func TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	result, waitErr := handle.Wait(context.Background())
-	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown {
+	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown || result.FinalReply {
 		t.Fatalf("non-zero AGY result=%+v err=%v", result, waitErr)
 	}
 	if !strings.Contains(result.Error, "provider rejected request") || strings.Contains(result.Error, "do work") || strings.Contains(result.Error, "top-secret") || strings.Contains(result.Error, "user:pass") {

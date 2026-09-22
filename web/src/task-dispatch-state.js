@@ -43,6 +43,10 @@ export const createdTaskID = (response) => {
 
 export const taskProgress = (task, run, worker) => {
   if (!task) return ''
+  if (task.status === 'succeeded' && task.intent === 'query' && task.completion_basis === 'query_result_delivered') {
+    return '查询回复已完整交付；不代表答案真实性或副作用已核验'
+  }
+  if (task.error === 'query_result_unverified') return '查询最终回复证据不完整，请查看结果与诊断'
   if (run?.turn_result?.runtime_status === 'succeeded' || run?.status === 'succeeded') {
     return task.status === 'uncertain'
       ? 'Runtime 已执行并返回；任务业务核验尚未完成'

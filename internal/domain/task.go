@@ -106,24 +106,25 @@ func (m DispatchMode) Valid() bool {
 }
 
 type Task struct {
-	ID                string       `json:"id"`
-	Version           int64        `json:"version"`
-	SenderAgentID     string       `json:"sender_agent_id"`
-	SenderPrincipalID string       `json:"sender_principal_id,omitempty"`
-	TargetAgentID     string       `json:"target_agent_id"`
-	OrganizationID    string       `json:"organization_id,omitempty"`
-	DispatchMode      DispatchMode `json:"dispatch_mode,omitempty"`
-	Intent            TaskIntent   `json:"intent"`
-	ParentTaskID      *string      `json:"parent_task_id,omitempty"`
-	IdempotencyKey    string       `json:"idempotency_key"`
-	Content           string       `json:"content"`
-	Status            TaskStatus   `json:"status"`
-	Result            *string      `json:"result,omitempty"`
-	Error             *string      `json:"error,omitempty"`
-	CancelRequestedBy *string      `json:"cancel_requested_by,omitempty"`
-	CancelRequestedAt *string      `json:"cancel_requested_at,omitempty"`
-	CreatedAt         string       `json:"created_at"`
-	UpdatedAt         string       `json:"updated_at"`
+	ID                string              `json:"id"`
+	Version           int64               `json:"version"`
+	SenderAgentID     string              `json:"sender_agent_id"`
+	SenderPrincipalID string              `json:"sender_principal_id,omitempty"`
+	TargetAgentID     string              `json:"target_agent_id"`
+	OrganizationID    string              `json:"organization_id,omitempty"`
+	DispatchMode      DispatchMode        `json:"dispatch_mode,omitempty"`
+	Intent            TaskIntent          `json:"intent"`
+	CompletionBasis   TaskCompletionBasis `json:"completion_basis"`
+	ParentTaskID      *string             `json:"parent_task_id,omitempty"`
+	IdempotencyKey    string              `json:"idempotency_key"`
+	Content           string              `json:"content"`
+	Status            TaskStatus          `json:"status"`
+	Result            *string             `json:"result,omitempty"`
+	Error             *string             `json:"error,omitempty"`
+	CancelRequestedBy *string             `json:"cancel_requested_by,omitempty"`
+	CancelRequestedAt *string             `json:"cancel_requested_at,omitempty"`
+	CreatedAt         string              `json:"created_at"`
+	UpdatedAt         string              `json:"updated_at"`
 }
 
 func (t *Task) IsTerminal() bool {
@@ -228,6 +229,13 @@ func (t *Task) ValidateTarget() error {
 		return err
 	}
 	t.Intent = intent
+	if !t.CompletionBasis.Valid() || (t.CompletionBasis != "" && t.Status != TaskStatusSucceeded) {
+		return ErrInvalidInput("invalid task completion basis")
+	}
+	if (t.CompletionBasis == TaskCompletionQueryResultDelivered && t.Intent != TaskIntentQuery) ||
+		(t.CompletionBasis == TaskCompletionMutationEffectsKnown && t.Intent != TaskIntentMutation) {
+		return ErrInvalidInput("task completion basis does not match intent")
+	}
 	if !t.Status.Valid() {
 		return ErrInvalidInput("unsupported task status")
 	}

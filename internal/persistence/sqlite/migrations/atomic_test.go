@@ -35,7 +35,7 @@ func TestTargetSchemaTransactionRollsBackOnMigrationFailure(t *testing.T) {
 	}
 }
 
-func TestCLITokenEnsureFailureRollsBackWithoutHalfTables(t *testing.T) {
+func TestDamagedInstallationObjectsAreRejectedWithoutRepair(t *testing.T) {
 	ctx := context.Background()
 	db, err := sql.Open("sqlite3", filepath.Join(t.TempDir(), "upgrade.db")+"?_foreign_keys=ON")
 	if err != nil {
@@ -52,7 +52,7 @@ func TestCLITokenEnsureFailureRollsBackWithoutHalfTables(t *testing.T) {
 	}
 	injected := errors.New("stop before CLI schema commit")
 	err = apply(ctx, db, migrationOptions{newInstallationID: func() (string, error) { return "installation-test", nil }, beforeCLICommit: func() error { return injected }})
-	if !errors.Is(err, injected) {
+	if !errors.Is(err, ErrIncompleteSchema) {
 		t.Fatalf("migration error=%v", err)
 	}
 	for _, table := range []string{"installation_metadata", "cli_tokens"} {

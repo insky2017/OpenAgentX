@@ -146,7 +146,7 @@ func TestTargetSQLiteHelper(t *testing.T) {
 	if err := db.QueryRow("SELECT version FROM schema_meta WHERE singleton=1").Scan(&version); err != nil {
 		t.Fatal(err)
 	}
-	if version != 1 {
+	if version != 2 {
 		t.Fatalf("schema version = %d", version)
 	}
 }

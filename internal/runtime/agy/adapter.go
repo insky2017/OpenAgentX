@@ -353,6 +353,10 @@ func (h *turnHandle) collect() {
 	waitErr := h.command.Wait()
 	cancelErr := h.cancelController.wait()
 	stderrDetail := sanitizeDiagnostic(stderr.output, h.stderrLimit, h.prompt)
+	if len(bytes.TrimSpace(stderr.output)) != 0 || stderr.truncated {
+		result.FinalReply = false
+		result.Error = joinDiagnostic(result.Error, nil, nil, nil, nil, stderrDetail, stderr.truncated)
+	}
 	if waitErr != nil {
 		if result.Status == openruntime.TurnResultSucceeded {
 			result.Status = openruntime.TurnResultUncertain
@@ -363,6 +367,7 @@ func (h *turnHandle) collect() {
 	if runtimeErr != nil {
 		result.Status = openruntime.TurnResultUncertain
 		result.SideEffectsKnown = false
+		result.FinalReply = false
 	}
 	if runtimeErr != nil || result.Status == openruntime.TurnResultFailed || result.Status == openruntime.TurnResultUncertain {
 		result.Error = joinDiagnostic(result.Error, parseErr, stderr.err, waitErr, cancelErr, stderrDetail, stderr.truncated)

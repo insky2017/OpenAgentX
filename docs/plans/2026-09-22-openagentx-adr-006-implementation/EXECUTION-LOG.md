@@ -15,16 +15,16 @@ updated_at: 2026-09-23
 
 | 阶段 | 状态 | 提交/证据 |
 |---|---|---|
-| Task01 契约冻结 | blocked | 契约审查与独立边界复核完成；A06-01需要用户确定成功与副作用边界 |
-| Task02 实现 | active | 显式intent/schema/API/Console/Web基础接线已独立验证，query结算仍待A06-01 |
-| Task03 独立验证/候选 | pending | 基础接线独立验证已通过；完整query闭环及clean候选未开始 |
+| Task01 契约冻结 | completed | 用户已接受结果交付合同，A06-01关闭 |
+| Task02 实现 | completed | 基础接线dcd8fd62d0db86097318728721e5c6e550e78a3b；最终回复/结算/schema2完成且独立问题已纠正 |
+| Task03 独立验证/候选 | active | 源码独立复核/定向及race/Web/浏览器完成；完整query闭环及clean候选待继续 |
 | Task04 安装/真实验收 | pending | 未开始 |
 
 ## Open issues
 
 | ID | 范围 | 状态与处置 |
 |---|---|---|
-| A06-01 | query成功证据与工具副作用 | decision-required；AGY无法证明完整只读限制；保留原边界或明确修改结果交付合同须确定 |
+| A06-01 | query成功证据与工具副作用 | closed；用户接受query_result_delivered合同，明确无只读或副作用已核验保证 |
 | LIVE-02 | ADR-009 Diagnostic跨Task output归属 | 后置原独立任务；本轮不扩大修复 |
 
 ## 2026-09-22 22:50 开始与基线
@@ -166,3 +166,82 @@ updated_at: 2026-09-23
   临时截图与开发二进制留在本批唯一`/tmp/oax-adr006-browser.ziR4gr/`供复查，不加入Git或安装路径。
 - 提交前3份文档、6个相对链接和阶段状态一致性检查exit0；冻结ADR/AGENTS及Runtime/Worker/FinishRun
   的限定diff为零。仅暂存本批24个明确路径，随后检查staged whitespace和路径边界；生成物不进入提交。
+
+## 2026-09-23 用户接受结果交付合同与终态实施
+
+- 用户明确要求“按照架构最优方式执行，注意补充文档。不需要考虑什么兼容”，接受此前推荐的 B 合同。
+  A06-01关闭，Task01 completed；ADR-006改为Accepted，Task02继续同一批预算（截至00:50 CST）。
+  上轮基础接线精确提交为 `dcd8fd62d0db86097318728721e5c6e550e78a3b`，并非终态实现。
+- 本轮最小结果：显式query按完整最终回复结算；mutation保守结算不变。query不保证答案真实、只读
+  隔离或副作用已核验，不增加权限或绕过审批。新增domain纯策略统一计算status/basis/reason；
+  FinishRun在Task/Run/Journal同一事务持久化completion_basis，cancel/message优先且非成功清basis，
+  新结果清除旧error。旧任务不重算，不自动重发。
+- Runtime新增final_reply证据。AGY仅以正式最终result正文作为Result，step_update仅进安全Timeline；
+  空/截断/缺终态/多终态/矛盾/非零退出/取消/事件sink失败不构成完整回复。脱敏导致截断同样清除证据。
+  其他Adapter未提供final_reply，query保守结算，未增加隐式兼容成功路径。
+- 采用schema2：空库目标结构，当前完整部署v1单事务前向迁移，重复Apply/重开幂等；移除旧同版本ensure。
+  旧Task默认mutation、basis空且状态/result/error保留，installation ID不变；部分结构或约束损坏拒绝。
+  新Console安全投影要求明确intent，不再将缺字段当旧mutation；服务端创建省略intent仍是产品安全默认。
+- API/Console/Web呈现持久化basis和最终回复证据，reducer拒绝错误intent/status/basis组合及同版本改写。
+  Web结果区与Console/status明确“完整回复交付”不等于副作用核验。安装指南补充query dispatch用法、
+  默认mutation、不可改类型、schema2和未升级现场的边界。未修改ADR-007/009或AGENTS。
+
+### 本轮验证与失败记录
+
+| 命令或场景 | 结果与范围 |
+|---|---|
+| `go test ./internal/runtime/agy ./internal/runtime ./internal/safeoutput ./internal/consolemodel -count=1` | exit0；7.213s/0.005s/0.014s/0.231s，包含最终正文与增量分离、失败及basis fencing；后续严格intent变更由独立批次覆盖 |
+| `npm run test:observation` | exit0；11项，约0.126s；query交付只读Task依据，不能由Run succeeded推断 |
+| `npm run test:network` | exit0；7项，约0.115s |
+| `npm run test:pwa` | exit0；PWA源断言通过 |
+| `npm run build` | exit0；268模块，0.639s；只写被忽略dist |
+| `go mod verify` | exit0；all modules verified |
+| `go build -o /tmp/oax-adr006-browser.ziR4gr/openagentx-completion-dev ./cmd/openagentx` | exit0；仅开发构建，不是clean候选或installed artifact |
+| `bash scripts/check-legacy-control-paths.sh --release` | exit0；全部CLEAN |
+| `git diff --check` | exit0；最终staged检查另记 |
+
+- 结算测试首次5项失败：夹具把FinalReply=true与空正文/截断/错误/failed/waiting组合，新Runtime校验按合同
+  拒绝。纠正为先断言拒绝且Task未改变，再清除不成立的FinalReply验证保守结算；没有放宽产品校验。
+- 真实Chromium使用agent-browser技能，独立tab1与临时127.0.0.1:33315 fixture，原tab0保留。
+  1440×1000、390×844、320×568实际渲染均显示query succeeded/交付依据/副作用未核验说明；
+  320和390的scrollWidth等于viewport，无横向溢出。隔离offline事件后发送disabled且草稿保留；
+  online后草稿仍保留，fixture lease过期时继续禁写属预期，未冒称恢复后真实业务已执行。
+  JS errors为空；两张query-completion截图仅保存在原唯一临时目录，不进入Git。
+- 浏览器首次`tab close`不带index导致exit1（本机协议要求number），根据实际tab列表改为
+  `tab close 1`，关闭本轮tab；fixture收到SIGINT正常exit0。没有读取真实Web认证或改原tab。
+- 真实服务、DB、socket、tmux、installed binary均未操作；本轮尚无正式部署E2E或生产迁移证据。
+  副作用/真实Runtime连续领取、clean候选和安装验收仍须完成，不能把fixture结果当作完整ADR通过。
+- 收尾只读检查：main HEAD仍为`e8d7ea9de87e6459d299859aab67a27285a26d91`、ahead2；其他工作新增
+  `docs/design/CURRENT_ARCHITECTURE.md`、`docs/design/current-architecture.html`修改与未跟踪
+  `docs/reports/assessment/`，全部保留。本feature提交前相对origin/main为ahead66/behind0。
+  决策文档diff只涉及已授权ADR-006，AGENTS与ADR-007/009没有修改。
+- 5份本批文档的9个相对链接校验exit0；截图SHA256：320px
+  `5d4a2292c32b78cc1654ed03ec8a14f03cf787ca5c815244bd3c28615892736b`；390px
+  `6ff30977f96730cf21a20a6f8e5059dd49d70f606a14e3de5e7f25c4997f3285`。
+- 收尾源码搜索误引用不存在的`web/embed.go`，rg exit2；实际Web由serve的web-dir提供。
+  查找临时测试记录时宽扫/tmp遇其他用户systemd临时目录权限拒绝；不访问这些目录，不将其计为测试失败。
+
+### 独立验证、集中纠正与预算安全点
+
+- 独立批次实际执行：`go test ./... -count=1` exit1、31.78s；失败仅Panel SSE固定JSON字段顺序断言
+  与testkit固定schema1。受影响race exit1、47.06s，失败仅相同Panel断言，无race报告；
+  `go vet ./...` exit0、1.36s。不得把这两次失败记为全仓通过。
+  race命令为`go test -race ./internal/domain ./internal/runtime/... ./internal/safeoutput ./internal/controlplane ./internal/api/... ./internal/persistence/sqlite ./internal/persistence/sqlite/migrations ./internal/consolemodel ./internal/cli/console -count=1`。
+- 独立代码审查发现三处本轮阻断并集中修正：终态后的execution event显式报解析错误，不能反向改变
+  FinalReply；exit0但存在stderr诊断或capture截断时不确认完整交付并保留安全诊断；Panel正式Run投影
+  补传FinalReply。增加终态后SUCCESS及stderr-only失败回归。SSE断言改为不依赖字段顺序，testkit更新v2。
+- 修正后`go test ./internal/runtime/agy ./internal/api/panel ./internal/testkit -count=1` exit0，
+  包耗时7.175s/18.274s/0.095s。`go vet ./internal/runtime/agy ./internal/api/panel ./internal/testkit`、
+  独立路径go build、release scanner、diff check均exit0。最终三包race启动于截止前，结果在安全收尾记录。
+- 00:50 CST原定预算已到，停止新增实施、候选构建、部署和真实Runtime验收，仅收尾已启动检查与阶段
+  Git记录；不通过更换代理或会话续期。完整Task03/04未通过；本轮不宣称完整ADR完成。
+- 最后三包`go test -race ./internal/runtime/agy ./internal/api/panel ./internal/testkit -count=1` exit0，
+  13.907s/41.049s/1.150s，无race报告；执行在截止前启动，00:50后仅回收结果。独立验证者对三处
+  集中修正再次只读复核通过，原产品阻断关闭，没有重复全仓长测。Task02源码实施completed；Task03
+  active（clean候选与完整Adapter→Worker→正式Task闭环仍缺），Task04 pending。
+- 实施代理隔离定向精确命令：临时`validation_home=$(mktemp -d /tmp/adr006-validation.XXXXXX)`后，
+  `env HOME="$validation_home" GOMODCACHE=/home/sky/go/pkg/mod GOCACHE=/home/sky/.cache/go-build GOPROXY=off go test -count=1 -timeout=90s ./internal/domain ./internal/persistence/sqlite ./internal/persistence/sqlite/migrations`。
+  首轮上述五项fixture失败exit1；纠正后exit0，包耗时0.005s/13.235s/3.958s。补充迁移重开测试后同环境
+  `go test -count=1 -timeout=45s ./internal/persistence/sqlite/migrations` exit0、2.898s。
+- 本阶段独立提交`feat: settle ADR-006 query reply delivery`，不amend/push/merge；实现SHA由提交后核验。
+  保留失败历史，未安装，未自动重试旧任务；LIVE-02继续后置。已启动验证进程与浏览器fixture均已结束。

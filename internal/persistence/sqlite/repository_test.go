@@ -146,7 +146,7 @@ func TestOpenConfiguresTargetSQLiteAndReopensCurrentState(t *testing.T) {
 		t.Fatalf("reopened Agent/Profile = %+v / %+v, err=%v", agent, profile, err)
 	}
 	version, err := reopened.SchemaVersion(ctx)
-	if err != nil || version != 1 {
+	if err != nil || version != 2 {
 		t.Fatalf("schema version=%d err=%v", version, err)
 	}
 }

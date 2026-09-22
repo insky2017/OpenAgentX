@@ -9,10 +9,13 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
+
+	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
 
-const CurrentVersion = 1
+const CurrentVersion = 2
 
 var (
 	ErrIncompatibleLegacySchema = errors.New("database contains a legacy schema without OpenAgentX schema metadata")
@@ -46,8 +49,8 @@ var requiredDefinitionFragments = map[string][]string{
 	"cli_tokens":            {"token_id text primary key", "token_digest text not null unique", "references web_users(web_user_id)", "references principals(principal_id)", "references installation_metadata(installation_id)"},
 }
 
-var requiredTaskIntentColumns = []string{"intent"}
-var requiredTaskIntentDefinitionFragments = []string{"intent text not null default 'mutation'", "check (intent in ('mutation', 'query'))"}
+var requiredTaskIntentColumns = []string{"intent", "completion_basis"}
+var requiredTaskIntentDefinitionFragments = []string{"intent text not null default 'mutation'", "check (intent in ('mutation', 'query'))", taskCompletionColumnSQL}
 
 //go:embed 001_target_schema.sql
 var targetSchema string
@@ -57,9 +60,9 @@ func Apply(ctx context.Context, db *sql.DB) error {
 }
 
 type migrationOptions struct {
-	newInstallationID      func() (string, error)
-	beforeCLICommit        func() error
-	beforeTaskIntentCommit func() error
+	newInstallationID func() (string, error)
+	beforeCLICommit   func() error
+	beforeV2Commit    func() error
 }
 
 func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -79,25 +82,14 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 		if err != nil {
 			return err
 		}
-		if version != CurrentVersion {
-			return fmt.Errorf("%w: got %d, want %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
+		switch version {
+		case CurrentVersion:
+			return ValidateCurrent(ctx, db)
+		case 1:
+			return migrateV1ToV2(ctx, db, options)
+		default:
+			return fmt.Errorf("%w: got %d, want 1 or %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
 		}
-		// ADR-002 adds these tables without invalidating existing v1 databases.
-		// Apply them transactionally before validating the current schema so an
-		// upgrade from an already deployed v1 remains usable.
-		if err := ensureNetworkTables(ctx, db); err != nil {
-			return err
-		}
-		if err := ensureWorkerCommandKinds(ctx, db); err != nil {
-			return err
-		}
-		if err := ensureCLITokenTables(ctx, db, options); err != nil {
-			return err
-		}
-		if err := ensureTaskIntentSchema(ctx, db, options); err != nil {
-			return err
-		}
-		return ValidateCurrent(ctx, db)
 	}
 
 	nonSystemTables, err := countNonSystemTables(ctx, db)
@@ -116,7 +108,7 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	if _, err := tx.ExecContext(ctx, targetSchema); err != nil {
 		return fmt.Errorf("apply target schema v%d: %w", CurrentVersion, err)
 	}
-	if err := applyCLITokenSchema(ctx, tx, options); err != nil {
+	if err := initializeInstallation(ctx, tx, options); err != nil {
 		return err
 	}
 	if err := validateObjects(ctx, tx); err != nil {
@@ -133,99 +125,51 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	return nil
 }
 
-// ensureTaskIntentSchema keeps the public schema version at v1 while adding
-// the ADR-006-compatible Task column to complete older v1 databases.
-func ensureTaskIntentSchema(ctx context.Context, db *sql.DB, options migrationOptions) error {
+// migrateV1ToV2 accepts only the complete deployed v1 schema, before ADR-006.
+// All validation, DDL, and metadata changes share the same transaction.
+func migrateV1ToV2(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("begin Task intent schema upgrade: %w", err)
+		return fmt.Errorf("begin v1 to v2 migration: %w", err)
 	}
 	defer tx.Rollback()
-	// Reject damaged older v1 objects before adding anything. The complete
-	// post-upgrade schema is checked again before this transaction commits.
+	var sourceVersion int
+	if err := tx.QueryRowContext(ctx, "SELECT version FROM schema_meta WHERE singleton=1").Scan(&sourceVersion); err != nil {
+		return fmt.Errorf("read migration source version: %w", err)
+	}
+	if sourceVersion != 1 {
+		return fmt.Errorf("%w: migration source version %d", ErrUnsupportedSchemaVersion, sourceVersion)
+	}
+	if err := validateSchemaShape(ctx, tx, 1); err != nil {
+		return err
+	}
 	if err := validateObjectsWithoutTaskIntent(ctx, tx); err != nil {
 		return err
 	}
-	columns, err := tableColumns(ctx, tx, "tasks")
-	if err != nil {
-		return fmt.Errorf("inspect Task schema: %w", err)
-	}
-	if len(columns) == 0 {
-		return fmt.Errorf("%w: missing table tasks", ErrIncompleteSchema)
-	}
-	if !columns["intent"] {
-		if _, err := tx.ExecContext(ctx, `ALTER TABLE tasks ADD COLUMN intent TEXT NOT NULL DEFAULT 'mutation' CHECK (intent IN ('mutation', 'query'))`); err != nil {
-			return fmt.Errorf("add Task intent column: %w", err)
-		}
-		if _, err := tx.ExecContext(ctx, taskIntentTriggerSQL); err != nil {
-			return fmt.Errorf("create Task intent immutability trigger: %w", err)
+	for _, statement := range []string{
+		"ALTER TABLE tasks ADD COLUMN intent TEXT NOT NULL DEFAULT 'mutation' CHECK (intent IN ('mutation', 'query'))",
+		"ALTER TABLE tasks ADD COLUMN " + taskCompletionColumnSQL,
+		taskIntentTriggerSQL,
+		"UPDATE schema_meta SET version=2, applied_at=strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE singleton=1 AND version=1",
+	} {
+		if _, err := tx.ExecContext(ctx, statement); err != nil {
+			return fmt.Errorf("migrate v1 to v2: %w", err)
 		}
 	}
 	if err := validateObjects(ctx, tx); err != nil {
 		return err
 	}
-	if options.beforeTaskIntentCommit != nil {
-		if err := options.beforeTaskIntentCommit(); err != nil {
-			return fmt.Errorf("Task intent schema pre-commit: %w", err)
+	if options.beforeV2Commit != nil {
+		if err := options.beforeV2Commit(); err != nil {
+			return fmt.Errorf("v2 pre-commit: %w", err)
 		}
 	}
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit Task intent schema upgrade: %w", err)
-	}
-	return nil
+	return tx.Commit()
 }
 
-func ensureCLITokenTables(ctx context.Context, db *sql.DB, options migrationOptions) error {
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("begin CLI Token schema upgrade: %w", err)
-	}
-	defer tx.Rollback()
-	if err := applyCLITokenSchema(ctx, tx, options); err != nil {
-		return err
-	}
-	if err := validateCLIObjects(ctx, tx); err != nil {
-		return err
-	}
-	if options.beforeCLICommit != nil {
-		if err := options.beforeCLICommit(); err != nil {
-			return fmt.Errorf("CLI Token schema pre-commit: %w", err)
-		}
-	}
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit CLI Token schema upgrade: %w", err)
-	}
-	return nil
-}
+const taskCompletionColumnSQL = "completion_basis TEXT NOT NULL DEFAULT '' CHECK (completion_basis IN ('', 'query_result_delivered', 'mutation_effects_known')) CHECK (completion_basis = '' OR (status = 'succeeded' AND ((intent = 'query' AND completion_basis = 'query_result_delivered') OR (intent = 'mutation' AND completion_basis = 'mutation_effects_known'))))"
 
-func applyCLITokenSchema(ctx context.Context, tx *sql.Tx, options migrationOptions) error {
-	statements := []string{
-		`CREATE TABLE IF NOT EXISTS installation_metadata (
-			singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
-			installation_id TEXT NOT NULL UNIQUE,
-			created_at TEXT NOT NULL
-		)`,
-		`CREATE TABLE IF NOT EXISTS cli_tokens (
-			token_id TEXT PRIMARY KEY,
-			token_digest TEXT NOT NULL UNIQUE,
-			web_user_id TEXT NOT NULL REFERENCES web_users(web_user_id) ON DELETE CASCADE,
-			principal_id TEXT NOT NULL REFERENCES principals(principal_id),
-			scopes_json TEXT NOT NULL,
-			installation_id TEXT NOT NULL,
-			created_at TEXT NOT NULL,
-			last_used_at TEXT NOT NULL,
-			absolute_expires_at TEXT NOT NULL,
-			revoked_at TEXT,
-			FOREIGN KEY (installation_id) REFERENCES installation_metadata(installation_id)
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_cli_tokens_expiry ON cli_tokens(absolute_expires_at, revoked_at)`,
-		`CREATE INDEX IF NOT EXISTS idx_cli_tokens_user ON cli_tokens(web_user_id, installation_id, revoked_at)`,
-	}
-	for _, statement := range statements {
-		if _, err := tx.ExecContext(ctx, statement); err != nil {
-			return fmt.Errorf("apply CLI Token schema upgrade: %w", err)
-		}
-	}
+func initializeInstallation(ctx context.Context, tx *sql.Tx, options migrationOptions) error {
 	var count int
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM installation_metadata WHERE singleton=1`).Scan(&count); err != nil {
 		return fmt.Errorf("inspect installation identity: %w", err)
@@ -257,297 +201,8 @@ func randomInstallationID() (string, error) {
 	return base64.RawURLEncoding.EncodeToString(raw), nil
 }
 
-func ensureWorkerCommandKinds(ctx context.Context, db *sql.DB) error {
-	var definition string
-	if err := db.QueryRowContext(ctx, `SELECT sql FROM sqlite_master WHERE type='table' AND name='worker_commands'`).Scan(&definition); errors.Is(err, sql.ErrNoRows) {
-		return nil
-	} else if err != nil {
-		return fmt.Errorf("inspect Worker command schema: %w", err)
-	}
-	if strings.Contains(definition, "'force_stop'") {
-		return nil
-	}
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("begin Worker command schema upgrade: %w", err)
-	}
-	defer tx.Rollback()
-	statements := []string{
-		`ALTER TABLE worker_commands RENAME TO worker_commands_legacy`,
-		`CREATE TABLE worker_commands (
-			worker_command_id TEXT PRIMARY KEY,
-			worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id) ON DELETE CASCADE,
-			generation INTEGER NOT NULL CHECK (generation > 0),
-			kind TEXT NOT NULL CHECK (kind IN ('drain', 'stop', 'force_stop', 'health_check')),
-			state TEXT NOT NULL CHECK (state IN ('pending', 'claimed', 'applied', 'failed')),
-			requested_by TEXT NOT NULL REFERENCES principals(principal_id),
-			idempotency_key TEXT NOT NULL, lease_until TEXT,
-			attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0),
-			created_at TEXT NOT NULL, claimed_at TEXT, applied_at TEXT, result TEXT,
-			UNIQUE (requested_by, idempotency_key)
-		)`,
-		`INSERT INTO worker_commands SELECT worker_command_id,worker_instance_id,generation,kind,state,requested_by,idempotency_key,lease_until,attempts,created_at,claimed_at,applied_at,result FROM worker_commands_legacy`,
-		`DROP TABLE worker_commands_legacy`,
-		`CREATE INDEX idx_worker_commands_claim ON worker_commands(worker_instance_id, generation, state, created_at)`,
-	}
-	for _, statement := range statements {
-		if _, err := tx.ExecContext(ctx, statement); err != nil {
-			return fmt.Errorf("upgrade Worker command schema: %w", err)
-		}
-	}
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit Worker command schema upgrade: %w", err)
-	}
-	return nil
-}
-
-func ensureNetworkTables(ctx context.Context, db *sql.DB) error {
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("begin network schema upgrade: %w", err)
-	}
-	defer tx.Rollback()
-	statements := []string{
-		`CREATE TABLE IF NOT EXISTS network_profiles (
-			profile_id TEXT NOT NULL, version INTEGER NOT NULL CHECK (version > 0),
-			status TEXT NOT NULL CHECK (status IN ('draft', 'published')),
-			mode TEXT NOT NULL CHECK (mode IN ('only_http_proxy', 'only_socks5')),
-			host TEXT NOT NULL, port INTEGER NOT NULL CHECK (port BETWEEN 1 AND 65535),
-			config_file TEXT, secret_ref TEXT, created_by TEXT NOT NULL REFERENCES principals(principal_id),
-			created_at TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (profile_id, version)
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_network_profiles_latest ON network_profiles(profile_id, version DESC)`,
-		`CREATE TABLE IF NOT EXISTS network_profile_bindings (
-			agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
-			mode TEXT NOT NULL CHECK(mode IN ('inherit','direct','named_profile')), profile_id TEXT, profile_version INTEGER, policy_version INTEGER, test_id TEXT,
-			version INTEGER NOT NULL CHECK (version > 0), desired_status TEXT NOT NULL CHECK (desired_status IN ('pending', 'applied', 'failed')),
-			applied_worker_id TEXT, applied_generation INTEGER, applied_mode TEXT, applied_profile_id TEXT, applied_profile_version INTEGER, applied_policy_version INTEGER,
-			applied_binding_revision INTEGER, diagnostic TEXT, manifest_digest TEXT, secret_version TEXT, runtime_identity_json TEXT, updated_at TEXT NOT NULL,
-			PRIMARY KEY (agent_id, backend_id), FOREIGN KEY (profile_id, profile_version) REFERENCES network_profiles(profile_id, version),
-			CHECK((mode='named_profile' AND profile_id IS NOT NULL AND profile_version IS NOT NULL AND policy_version IS NULL) OR (mode IN ('inherit','direct') AND profile_id IS NULL AND profile_version IS NULL AND policy_version IS NOT NULL))
-		)`,
-		`CREATE TABLE IF NOT EXISTS network_profile_heads (profile_id TEXT PRIMARY KEY, current_content_version INTEGER NOT NULL CHECK(current_content_version>0), state TEXT NOT NULL CHECK(state IN ('draft','testing','ready','published','stale')), state_revision INTEGER NOT NULL CHECK(state_revision>0), ready_test_id TEXT, published_content_version INTEGER, updated_at TEXT NOT NULL, FOREIGN KEY(profile_id,current_content_version) REFERENCES network_profiles(profile_id,version))`,
-		`CREATE TABLE IF NOT EXISTS network_tests (test_id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, content_version INTEGER NOT NULL, secret_version TEXT, worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL CHECK(generation>0), backend_id TEXT NOT NULL, runtime_identity_json TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('pending','claimed','succeeded','failed','stale')), diagnostic_code TEXT, duration_ms INTEGER, probe_results_json TEXT NOT NULL DEFAULT '[]', created_by TEXT NOT NULL REFERENCES principals(principal_id), created_at TEXT NOT NULL, finished_at TEXT, FOREIGN KEY(profile_id,content_version) REFERENCES network_profiles(profile_id,version))`,
-		`CREATE TABLE IF NOT EXISTS network_work_items (work_id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('test','apply','import')), profile_id TEXT, content_version INTEGER, secret_version TEXT, agent_id TEXT NOT NULL REFERENCES agents(agent_id), backend_id TEXT NOT NULL, worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL CHECK(generation>0), binding_revision INTEGER, network_mode TEXT, policy_version INTEGER, manifest_digest TEXT, runtime_identity_json TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('pending','claimed','succeeded','failed','stale')), diagnostic_code TEXT, created_at TEXT NOT NULL, finished_at TEXT)`,
-		`CREATE INDEX IF NOT EXISTS idx_network_work_claim ON network_work_items(worker_instance_id,generation,state,created_at)`,
-		`CREATE TABLE IF NOT EXISTS network_workflow_commands (actor_principal_id TEXT NOT NULL REFERENCES principals(principal_id), operation TEXT NOT NULL, idempotency_key TEXT NOT NULL, request_digest TEXT NOT NULL, result_json TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(actor_principal_id,operation,idempotency_key))`,
-		`CREATE TABLE IF NOT EXISTS network_imports (worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL, backend_id TEXT NOT NULL, source_identity TEXT NOT NULL, work_id TEXT NOT NULL UNIQUE REFERENCES network_work_items(work_id), profile_id TEXT, content_version INTEGER, state TEXT NOT NULL CHECK(state IN ('pending','succeeded','failed')), created_at TEXT NOT NULL, finished_at TEXT, PRIMARY KEY(worker_instance_id,generation,backend_id,source_identity))`,
-		`CREATE TABLE IF NOT EXISTS network_profile_publications (profile_id TEXT NOT NULL, content_version INTEGER NOT NULL, test_id TEXT NOT NULL REFERENCES network_tests(test_id), runtime_identity_json TEXT NOT NULL, published_by TEXT NOT NULL REFERENCES principals(principal_id), published_at TEXT NOT NULL, PRIMARY KEY(profile_id,content_version), FOREIGN KEY(profile_id,content_version) REFERENCES network_profiles(profile_id,version))`,
-		`CREATE TABLE IF NOT EXISTS network_mode_policies (agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL, policy_version INTEGER NOT NULL CHECK(policy_version>0), mode TEXT NOT NULL CHECK(mode IN ('inherit','direct')), manifest_digest TEXT NOT NULL, created_by TEXT NOT NULL REFERENCES principals(principal_id), created_at TEXT NOT NULL, PRIMARY KEY(agent_id,backend_id,policy_version))`,
-		`CREATE TABLE IF NOT EXISTS network_mode_tests (test_id TEXT PRIMARY KEY, agent_id TEXT NOT NULL, backend_id TEXT NOT NULL, policy_version INTEGER NOT NULL, mode TEXT NOT NULL CHECK(mode IN ('inherit','direct')), manifest_digest TEXT NOT NULL, worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id), generation INTEGER NOT NULL CHECK(generation>0), runtime_identity_json TEXT NOT NULL, binding_revision INTEGER NOT NULL CHECK(binding_revision>=0), state TEXT NOT NULL CHECK(state IN ('pending','claimed','succeeded','failed','stale')), diagnostic_code TEXT, duration_ms INTEGER, probe_results_json TEXT NOT NULL DEFAULT '[]', created_by TEXT NOT NULL REFERENCES principals(principal_id), created_at TEXT NOT NULL, finished_at TEXT, FOREIGN KEY(agent_id,backend_id,policy_version) REFERENCES network_mode_policies(agent_id,backend_id,policy_version))`,
-		`CREATE TRIGGER IF NOT EXISTS network_profiles_reject_update BEFORE UPDATE ON network_profiles BEGIN SELECT RAISE(ABORT, 'network profile content is immutable'); END`,
-		`CREATE TRIGGER IF NOT EXISTS network_profiles_reject_delete BEFORE DELETE ON network_profiles BEGIN SELECT RAISE(ABORT, 'network profile content is immutable'); END`,
-		`CREATE TRIGGER IF NOT EXISTS network_mode_policies_reject_update BEFORE UPDATE ON network_mode_policies BEGIN SELECT RAISE(ABORT, 'network mode policy is immutable'); END`,
-		`CREATE TRIGGER IF NOT EXISTS network_mode_policies_reject_delete BEFORE DELETE ON network_mode_policies BEGIN SELECT RAISE(ABORT, 'network mode policy is immutable'); END`,
-	}
-	for _, statement := range statements {
-		if _, err := tx.ExecContext(ctx, statement); err != nil {
-			return fmt.Errorf("apply network schema upgrade: %w", err)
-		}
-	}
-	// v1 databases may already contain network_profile_bindings created before
-	// the diagnostic field was introduced. CREATE TABLE IF NOT EXISTS does not
-	// alter that table, so add the nullable column explicitly when absent.
-	columns := map[string]bool{}
-	columnNotNull := map[string]bool{}
-	rows, err := tx.QueryContext(ctx, `PRAGMA table_info(network_profile_bindings)`)
-	if err != nil {
-		return fmt.Errorf("inspect network binding schema: %w", err)
-	}
-	for rows.Next() {
-		var cid int
-		var name, columnType string
-		var notNull, primaryKey int
-		var defaultValue any
-		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
-			rows.Close()
-			return fmt.Errorf("scan network binding schema: %w", err)
-		}
-		columns[name] = true
-		columnNotNull[name] = notNull != 0
-	}
-	if err := rows.Err(); err != nil {
-		rows.Close()
-		return fmt.Errorf("read network binding schema: %w", err)
-	}
-	rows.Close()
-	requiredBindingColumns := []string{"mode", "policy_version", "test_id", "applied_mode", "applied_profile_id", "applied_policy_version", "manifest_digest", "secret_version", "runtime_identity_json", "diagnostic", "applied_binding_revision"}
-	needsBindingRebuild := columnNotNull["profile_id"] || columnNotNull["profile_version"]
-	for _, name := range requiredBindingColumns {
-		needsBindingRebuild = needsBindingRebuild || !columns[name]
-	}
-	if needsBindingRebuild {
-		if err := rebuildNetworkBindings(ctx, tx, columns); err != nil {
-			return err
-		}
-	}
-	workColumns, err := tableColumns(ctx, tx, "network_work_items")
-	if err != nil {
-		return err
-	}
-	for name, definition := range map[string]string{"network_mode": "TEXT", "policy_version": "INTEGER", "manifest_digest": "TEXT"} {
-		if !workColumns[name] {
-			if _, err := tx.ExecContext(ctx, `ALTER TABLE network_work_items ADD COLUMN `+name+` `+definition); err != nil {
-				return fmt.Errorf("add network work %s column: %w", name, err)
-			}
-		}
-	}
-	for _, table := range []string{"network_tests", "network_mode_tests"} {
-		testColumns, err := tableColumns(ctx, tx, table)
-		if err != nil {
-			return err
-		}
-		if !testColumns["probe_results_json"] {
-			if _, err := tx.ExecContext(ctx, `ALTER TABLE `+table+` ADD COLUMN probe_results_json TEXT NOT NULL DEFAULT '[]'`); err != nil {
-				return fmt.Errorf("add %s probe results column: %w", table, err)
-			}
-		}
-	}
-	profileColumns := map[string]bool{}
-	profileRows, err := tx.QueryContext(ctx, `PRAGMA table_info(network_profiles)`)
-	if err != nil {
-		return fmt.Errorf("inspect network profile schema: %w", err)
-	}
-	for profileRows.Next() {
-		var cid int
-		var name, columnType string
-		var notNull, primaryKey int
-		var defaultValue any
-		if err := profileRows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
-			profileRows.Close()
-			return err
-		}
-		profileColumns[name] = true
-	}
-	if err := profileRows.Close(); err != nil {
-		return err
-	}
-	for name, definition := range map[string]string{"direct_ips_json": "TEXT NOT NULL DEFAULT '[]'", "manifest_digest": "TEXT"} {
-		if !profileColumns[name] {
-			if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profiles ADD COLUMN `+name+` `+definition); err != nil {
-				return fmt.Errorf("add network profile %s column: %w", name, err)
-			}
-		}
-	}
-	// Existing path-based rows are visible only as stale migration candidates.
-	if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO network_profile_heads(profile_id,current_content_version,state,state_revision,published_content_version,updated_at)
-		SELECT p.profile_id,p.version,'stale',1,CASE WHEN p.status='published' THEN p.version END,p.updated_at FROM network_profiles p
-		JOIN (SELECT profile_id,MAX(version) version FROM network_profiles GROUP BY profile_id) latest ON latest.profile_id=p.profile_id AND latest.version=p.version`); err != nil {
-		return fmt.Errorf("mark legacy network profiles stale: %w", err)
-	}
-	var hasBackendTable, hasBackendNetwork bool
-	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='runtime_backend_registrations'`).Scan(&hasBackendTable); err != nil {
-		return fmt.Errorf("inspect Backend registration table: %w", err)
-	}
-	backendRows, err := tx.QueryContext(ctx, `PRAGMA table_info(runtime_backend_registrations)`)
-	if err != nil {
-		return fmt.Errorf("inspect Backend registration schema: %w", err)
-	}
-	for backendRows.Next() {
-		var cid int
-		var name, columnType string
-		var notNull, primaryKey int
-		var defaultValue any
-		if err := backendRows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
-			backendRows.Close()
-			return fmt.Errorf("scan Backend registration schema: %w", err)
-		}
-		if name == "network_json" {
-			hasBackendNetwork = true
-		}
-	}
-	if err := backendRows.Err(); err != nil {
-		backendRows.Close()
-		return fmt.Errorf("read Backend registration schema: %w", err)
-	}
-	backendRows.Close()
-	if hasBackendTable && !hasBackendNetwork {
-		if _, err := tx.ExecContext(ctx, `ALTER TABLE runtime_backend_registrations ADD COLUMN network_json TEXT NOT NULL DEFAULT '{}'`); err != nil {
-			return fmt.Errorf("add Backend network policy column: %w", err)
-		}
-	}
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit network schema upgrade: %w", err)
-	}
-	return nil
-}
-
-func tableColumns(ctx context.Context, tx *sql.Tx, table string) (map[string]bool, error) {
-	rows, err := tx.QueryContext(ctx, `PRAGMA table_info(`+table+`)`)
-	if err != nil {
-		return nil, fmt.Errorf("inspect %s schema: %w", table, err)
-	}
-	defer rows.Close()
-	columns := map[string]bool{}
-	for rows.Next() {
-		var cid, notNull, primaryKey int
-		var name, columnType string
-		var defaultValue any
-		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
-			return nil, err
-		}
-		columns[name] = true
-	}
-	return columns, rows.Err()
-}
-
-func rebuildNetworkBindings(ctx context.Context, tx *sql.Tx, columns map[string]bool) error {
-	column := func(name, fallback string) string {
-		if columns[name] {
-			return name
-		}
-		return fallback
-	}
-	legacy := !columns["mode"]
-	mode := column("mode", "'named_profile'")
-	appliedMode := column("applied_mode", "NULL")
-	appliedProfileID := column("applied_profile_id", "NULL")
-	appliedProfileVersion := column("applied_profile_version", "NULL")
-	if legacy {
-		match := "applied_binding_revision=version AND applied_profile_version IS NOT NULL"
-		if !columns["applied_binding_revision"] {
-			match = "0"
-		}
-		appliedMode = "CASE WHEN " + match + " THEN 'named_profile' END"
-		appliedProfileID = "CASE WHEN " + match + " THEN profile_id END"
-		appliedProfileVersion = "CASE WHEN " + match + " THEN applied_profile_version END"
-	}
-	if _, err := tx.ExecContext(ctx, `CREATE TABLE network_profile_bindings_next (
-		agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
-		mode TEXT NOT NULL CHECK(mode IN ('inherit','direct','named_profile')), profile_id TEXT, profile_version INTEGER, policy_version INTEGER, test_id TEXT,
-		version INTEGER NOT NULL CHECK(version>0), desired_status TEXT NOT NULL CHECK(desired_status IN ('pending','applied','failed')),
-		applied_worker_id TEXT, applied_generation INTEGER, applied_mode TEXT CHECK(applied_mode IS NULL OR applied_mode IN ('inherit','direct','named_profile')),
-		applied_profile_id TEXT, applied_profile_version INTEGER, applied_policy_version INTEGER, applied_binding_revision INTEGER,
-		diagnostic TEXT, manifest_digest TEXT, secret_version TEXT, runtime_identity_json TEXT, updated_at TEXT NOT NULL,
-		PRIMARY KEY(agent_id,backend_id), FOREIGN KEY(profile_id,profile_version) REFERENCES network_profiles(profile_id,version),
-		CHECK((mode='named_profile' AND profile_id IS NOT NULL AND profile_version IS NOT NULL AND policy_version IS NULL) OR
-			(mode IN ('inherit','direct') AND profile_id IS NULL AND profile_version IS NULL AND policy_version IS NOT NULL))
-	)`); err != nil {
-		return fmt.Errorf("create upgraded network bindings: %w", err)
-	}
-	query := fmt.Sprintf(`INSERT INTO network_profile_bindings_next(
-		agent_id,backend_id,mode,profile_id,profile_version,policy_version,test_id,version,desired_status,
-		applied_worker_id,applied_generation,applied_mode,applied_profile_id,applied_profile_version,applied_policy_version,
-		applied_binding_revision,diagnostic,manifest_digest,secret_version,runtime_identity_json,updated_at)
-		SELECT agent_id,backend_id,%s,profile_id,profile_version,%s,%s,version,desired_status,
-		%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,updated_at FROM network_profile_bindings`,
-		mode, column("policy_version", "NULL"), column("test_id", "NULL"),
-		column("applied_worker_id", "NULL"), column("applied_generation", "NULL"), appliedMode, appliedProfileID,
-		appliedProfileVersion, column("applied_policy_version", "NULL"), column("applied_binding_revision", "NULL"),
-		column("diagnostic", "NULL"), column("manifest_digest", "NULL"), column("secret_version", "NULL"), column("runtime_identity_json", "NULL"))
-	if _, err := tx.ExecContext(ctx, query); err != nil {
-		return fmt.Errorf("copy upgraded network bindings: %w", err)
-	}
-	if _, err := tx.ExecContext(ctx, `DROP TABLE network_profile_bindings`); err != nil {
-		return fmt.Errorf("drop legacy network bindings: %w", err)
-	}
-	if _, err := tx.ExecContext(ctx, `ALTER TABLE network_profile_bindings_next RENAME TO network_profile_bindings`); err != nil {
-		return fmt.Errorf("install upgraded network bindings: %w", err)
-	}
-	return nil
-}
-
 type schemaQueryer interface {
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
 	QueryRowContext(context.Context, string, ...any) *sql.Row
 }
 
@@ -566,6 +221,9 @@ func ValidateCurrent(ctx context.Context, db *sql.DB) error {
 }
 
 func validateObjects(ctx context.Context, queryer schemaQueryer) error {
+	if err := validateSchemaShape(ctx, queryer, CurrentVersion); err != nil {
+		return err
+	}
 	if err := validateObjectsWithoutTaskIntent(ctx, queryer); err != nil {
 		return err
 	}
@@ -607,7 +265,7 @@ func validateTaskIntentObjects(ctx context.Context, queryer schemaQueryer) error
 	}
 	normalized := strings.ToLower(strings.Join(strings.Fields(definition), " "))
 	for _, fragment := range requiredTaskIntentDefinitionFragments {
-		if !strings.Contains(normalized, fragment) {
+		if !strings.Contains(normalized, strings.ToLower(fragment)) {
 			return fmt.Errorf("%w: invalid definition for table tasks", ErrIncompleteSchema)
 		}
 	}
@@ -705,4 +363,128 @@ func countNonSystemTables(ctx context.Context, db *sql.DB) (int, error) {
 		return 0, fmt.Errorf("count existing tables: %w", err)
 	}
 	return count, nil
+}
+
+type schemaColumn struct {
+	Name, Type, Default string
+	NotNull, PrimaryKey int
+}
+type schemaObject struct{ Kind, Name, SQL string }
+
+var schemaShapeOnce sync.Once
+var schemaShapeErr error
+var schemaShapeColumns map[string][]schemaColumn
+var schemaShapeObjects []schemaObject
+
+func readSchemaColumns(ctx context.Context, q schemaQueryer, table string) ([]schemaColumn, error) {
+	rows, err := q.QueryContext(ctx, "SELECT name,type,COALESCE(dflt_value,''),\"notnull\",pk FROM pragma_table_info(?) ORDER BY name", table)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var columns []schemaColumn
+	for rows.Next() {
+		var column schemaColumn
+		if err := rows.Scan(&column.Name, &column.Type, &column.Default, &column.NotNull, &column.PrimaryKey); err != nil {
+			return nil, err
+		}
+		columns = append(columns, column)
+	}
+	return columns, rows.Err()
+}
+
+// The target DDL supplies the complete required column/index/trigger inventory.
+// Column order may differ after ALTER TABLE, but missing or extra columns,
+// weakened types/defaults, and missing or ineffective triggers are rejected.
+func validateSchemaShape(ctx context.Context, q schemaQueryer, version int) error {
+	schemaShapeOnce.Do(func() {
+		db, err := sql.Open("sqlite3", ":memory:")
+		if err != nil {
+			schemaShapeErr = err
+			return
+		}
+		defer db.Close()
+		if _, err := db.Exec(targetSchema); err != nil {
+			schemaShapeErr = err
+			return
+		}
+		schemaShapeColumns = make(map[string][]schemaColumn)
+		for _, table := range requiredTables {
+			columns, err := readSchemaColumns(context.Background(), db, table)
+			if err != nil {
+				schemaShapeErr = err
+				return
+			}
+			schemaShapeColumns[table] = columns
+		}
+		rows, err := db.Query("SELECT type,name,sql FROM sqlite_master WHERE type IN ('index','trigger') AND sql IS NOT NULL ORDER BY name")
+		if err != nil {
+			schemaShapeErr = err
+			return
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var object schemaObject
+			if err := rows.Scan(&object.Kind, &object.Name, &object.SQL); err != nil {
+				schemaShapeErr = err
+				return
+			}
+			schemaShapeObjects = append(schemaShapeObjects, object)
+		}
+		schemaShapeErr = rows.Err()
+	})
+	if schemaShapeErr != nil {
+		return fmt.Errorf("load target schema contract: %w", schemaShapeErr)
+	}
+	for table, expected := range schemaShapeColumns {
+		actual, err := readSchemaColumns(ctx, q, table)
+		if err != nil {
+			return fmt.Errorf("%w: inspect %s: %v", ErrIncompleteSchema, table, err)
+		}
+		want := make([]schemaColumn, 0, len(expected))
+		for _, column := range expected {
+			if version == 1 && table == "tasks" && (column.Name == "intent" || column.Name == "completion_basis") {
+				continue
+			}
+			want = append(want, column)
+		}
+		if fmt.Sprint(actual) != fmt.Sprint(want) {
+			return fmt.Errorf("%w: unsupported column contract for %s", ErrIncompleteSchema, table)
+		}
+	}
+	for _, object := range schemaShapeObjects {
+		if version == 1 && object.Name == "tasks_reject_intent_update" {
+			continue
+		}
+		var definition string
+		if err := q.QueryRowContext(ctx, "SELECT sql FROM sqlite_master WHERE type=? AND name=?", object.Kind, object.Name).Scan(&definition); err != nil {
+			return fmt.Errorf("%w: missing %s %s", ErrIncompleteSchema, object.Kind, object.Name)
+		}
+		if compactSQL(definition) != compactSQL(object.SQL) {
+			return fmt.Errorf("%w: invalid %s %s", ErrIncompleteSchema, object.Kind, object.Name)
+		}
+	}
+	if version == 1 {
+		var count int
+		if err := q.QueryRowContext(ctx, "SELECT COUNT(*) FROM sqlite_master WHERE name='tasks_reject_intent_update'").Scan(&count); err != nil {
+			return err
+		}
+		if count != 0 {
+			return fmt.Errorf("%w: partial ADR-006 objects on v1", ErrIncompleteSchema)
+		}
+	}
+	// Deployed v1 already supports these domain constraints; old pre-force-stop
+	// and proxy-only network schemas are intentionally not upgraded here.
+	var commands string
+	if err := q.QueryRowContext(ctx, "SELECT sql FROM sqlite_master WHERE name='worker_commands'").Scan(&commands); err != nil {
+		return err
+	}
+	if !strings.Contains(commands, "'force_stop'") {
+		return fmt.Errorf("%w: unsupported worker command schema", ErrIncompleteSchema)
+	}
+	return nil
+}
+
+func compactSQL(value string) string {
+	return strings.ToLower(strings.ReplaceAll(strings.Join(strings.Fields(strings.TrimSuffix(strings.TrimSpace(value), ";")), ""), "\"", ""))
 }

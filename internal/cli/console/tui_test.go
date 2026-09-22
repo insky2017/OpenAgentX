@@ -123,7 +123,7 @@ func taskProjection(taskID string, version int64, status domain.TaskStatus) *ope
 		status == domain.TaskStatusCanceled || status == domain.TaskStatusUncertain {
 		outcome = "not_recorded"
 	}
-	return &openapi.ConsoleTaskReadModel{TaskID: taskID, Version: version, AgentID: "quote", Status: status,
+	return &openapi.ConsoleTaskReadModel{Intent: domain.TaskIntentMutation, TaskID: taskID, Version: version, AgentID: "quote", Status: status,
 		Content: "safe task", OutcomeState: outcome, CreatedAt: fixedNow().Format(time.RFC3339Nano),
 		UpdatedAt: fixedNow().Add(time.Duration(version) * time.Second).Format(time.RFC3339Nano)}
 }
@@ -532,9 +532,9 @@ func TestTaskOverlayFocusAndTerminalResultsUseAuthoritativeProjection(t *testing
 			actions.taskListCalls, m.overlay, m.taskLoading, m.input.Value(), listCmd)
 	}
 	options := []openapi.ConsoleTaskOption{
-		{TaskID: "task-running-full-id", Version: 4, Status: domain.TaskStatusRunning,
+		{Intent: domain.TaskIntentMutation, TaskID: "task-running-full-id", Version: 4, Status: domain.TaskStatusRunning,
 			Summary: "running task", UpdatedAt: fixedNow().Add(time.Minute).Format(time.RFC3339Nano)},
-		{TaskID: "task-terminal-full-id", Version: 5, Status: domain.TaskStatusSucceeded,
+		{Intent: domain.TaskIntentMutation, TaskID: "task-terminal-full-id", Version: 5, Status: domain.TaskStatusSucceeded,
 			Summary: "terminal task", UpdatedAt: fixedNow().Format(time.RFC3339Nano)},
 	}
 	m, _ = updateModel(t, m, taskOptionsResultMsg{Options: options})
@@ -589,7 +589,7 @@ func TestTaskOverlayFocusAndTerminalResultsUseAuthoritativeProjection(t *testing
 
 func TestTaskOverlaySanitizesTerminalControlSequences(t *testing.T) {
 	m := attachedModel(t, &fakeTUIActions{})
-	options := []openapi.ConsoleTaskOption{{TaskID: "task-safe-list", Version: 1,
+	options := []openapi.ConsoleTaskOption{{Intent: domain.TaskIntentMutation, TaskID: "task-safe-list", Version: 1,
 		Status: domain.TaskStatusRunning, Summary: "safe\x1b]8;;https://example.invalid\aunsafe\x1b]8;;\a summary",
 		UpdatedAt: fixedNow().Format(time.RFC3339Nano)}}
 	m, _ = updateModel(t, m, taskOptionsResultMsg{Options: options})

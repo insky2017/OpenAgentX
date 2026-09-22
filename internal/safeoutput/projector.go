@@ -99,6 +99,10 @@ func SanitizeTurnResult(result openruntime.TurnResult) openruntime.TurnResult {
 	result.ResultTruncated = result.ResultTruncated || body.Truncated
 	result.Error = diagnostic.Text
 	result.ErrorTruncated = result.ErrorTruncated || diagnostic.Truncated
+	if result.Status != openruntime.TurnResultSucceeded || strings.TrimSpace(result.Result) == "" ||
+		result.ResultTruncated || result.Error != "" || result.ErrorTruncated {
+		result.FinalReply = false
+	}
 	return result
 }
 

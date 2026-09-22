@@ -40,20 +40,25 @@ func TestTaskIntentCannotChangeAcrossControlAndEventUpdates(t *testing.T) {
 	}
 }
 
-func TestLegacyTaskIntentIsMutationAndExplicitDuplicateIsIdempotent(t *testing.T) {
+func TestTaskIntentRequiresExplicitProjectionAndDuplicateIsIdempotent(t *testing.T) {
 	r, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
 		WorkerStatus: domain.WorkerStatusOffline, SnapshotSequence: 10})
 	if err != nil {
 		t.Fatal(err)
 	}
-	task := taskModel("task-legacy-intent", 1, domain.TaskStatusQueued)
+	task := taskModel("task-declared-intent", 1, domain.TaskStatusQueued)
+	task.Intent = ""
+	if err := r.ApplyTaskSnapshot(openapi.ConsoleTaskSnapshot{Task: task, SnapshotSequence: 10}, FocusManual); err == nil {
+		t.Fatal("missing intent was accepted")
+	}
+	task.Intent = domain.TaskIntentMutation
 	if err := r.ApplyTaskSnapshot(openapi.ConsoleTaskSnapshot{Task: task, SnapshotSequence: 10}, FocusManual); err != nil {
 		t.Fatal(err)
 	}
 	task.Intent = domain.TaskIntentMutation
 	result, err := r.Apply(taskEventModel(11, task))
 	if err != nil || result.Timeline != nil || r.State().FocusedTask.Intent != domain.TaskIntentMutation {
-		t.Fatal("legacy intent did not preserve mutation semantics")
+		t.Fatal("explicit duplicate was not idempotent")
 	}
 }
 

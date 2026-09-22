@@ -13,7 +13,7 @@ import (
 	openruntime "openagentx/internal/runtime"
 )
 
-const taskColumns = `task_id, version, status, sender_principal_id, target_agent_id, dispatch_mode, intent,
+const taskColumns = `task_id, version, status, sender_principal_id, target_agent_id, dispatch_mode, intent, completion_basis,
 	parent_task_id, organization_id, idempotency_key, content, result, error,
 	cancel_requested_by, cancel_requested_at, created_at, updated_at`
 
@@ -118,8 +118,8 @@ func (r *Repository) CreateTask(
 	}
 
 	if _, err := tx.ExecContext(ctx, `INSERT INTO tasks (`+taskColumns+`) VALUES (
-		?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		task.ID, task.Version, task.Status, task.SenderPrincipalID, task.TargetAgentID, task.DispatchMode, task.Intent,
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		task.ID, task.Version, task.Status, task.SenderPrincipalID, task.TargetAgentID, task.DispatchMode, task.Intent, task.CompletionBasis,
 		nullableString(task.ParentTaskID), task.OrganizationID, task.IdempotencyKey, task.Content,
 		nullableString(task.Result), nullableString(task.Error), nullableString(task.CancelRequestedBy),
 		nullableString(task.CancelRequestedAt), task.CreatedAt, task.UpdatedAt); err != nil {
@@ -209,10 +209,16 @@ func scanTask(scanner rowScanner) (*domain.Task, error) {
 	var task domain.Task
 	var parentTaskID, result, taskError, cancelBy, cancelAt sql.NullString
 	if err := scanner.Scan(&task.ID, &task.Version, &task.Status, &task.SenderPrincipalID,
-		&task.TargetAgentID, &task.DispatchMode, &task.Intent, &parentTaskID, &task.OrganizationID,
+		&task.TargetAgentID, &task.DispatchMode, &task.Intent, &task.CompletionBasis, &parentTaskID, &task.OrganizationID,
 		&task.IdempotencyKey, &task.Content, &result, &taskError, &cancelBy, &cancelAt,
 		&task.CreatedAt, &task.UpdatedAt); err != nil {
 		return nil, err
+	}
+	if !task.Intent.Valid() || !task.CompletionBasis.Valid() ||
+		(task.CompletionBasis != "" && task.Status != domain.TaskStatusSucceeded) ||
+		(task.CompletionBasis == domain.TaskCompletionQueryResultDelivered && task.Intent != domain.TaskIntentQuery) ||
+		(task.CompletionBasis == domain.TaskCompletionMutationEffectsKnown && task.Intent != domain.TaskIntentMutation) {
+		return nil, domain.ErrInvalidInput("invalid persisted Task completion contract")
 	}
 	if parentTaskID.Valid {
 		task.ParentTaskID = &parentTaskID.String

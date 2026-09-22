@@ -485,7 +485,7 @@ Attach 是全屏 TUI，包含实时状态、bounded Timeline、固定输入区�
 一次日常任务可以直接按以下顺序操作：
 
 ```text
-/dispatch 仅回复我，当前的时间。
+/dispatch --intent query 仅回复我，当前的时间。
 # 等待 queued -> claimed -> running -> terminal，并查看 safe output / final reply
 /steer 只保留北京时间，并说明时区。
 /status
@@ -506,7 +506,14 @@ Timeline 只显示已经持久化的安全事实。`dispatch succeeded`、`statu
 浏览有界历史；heartbeat 默认只更新状态栏，不刷满 Timeline。
 
 终态信息分为两层：`Task outcome` 是控制面持久化终态，`Runtime reply` 是 Runtime 返回的安全投影。
-两者都出现才分别按其含义阅读；`uncertain` 即使带自然语言回复也不是业务成功。终态没有安全可展示结果时，
+创建时显式选择任务合同：问答使用 `/dispatch --intent query <内容>`，变更使用默认
+`/dispatch <内容>` 或 `--intent mutation`；网页指挥台使用“任务类型”选择。类型创建后不可修改。
+query 的 succeeded 和 `query_result_delivered` 只表示完整最终回复已交付，不保证答案真实、全程只读
+或副作用已核验；它不会增加权限或取消审批。mutation 保留业务效果保守结算，未核验时仍为 uncertain。
+当前 AGY Adapter 可提供最终回复证据；其他 Adapter 未提供该证据时 query 保守结算。
+`/status` 和网页结果区显示服务端完成依据；历史任务不会自动改类型、重算或重试。
+新语义需安装含 ADR-006 的候选并完成 schema2 前向升级，本阶段文档不表示现场已经升级。
+`uncertain` 即使带自然语言回复也不是按所选合同验收成功。终态没有安全可展示结果时，
 Console 会明确说明，而不是停在看似仍运行的空白界面。
 
 `/diagnostic` 会在当前 pane 内使用同一身份、cursor 和 reducer 切换到授权 Diagnostic Follow；它要求

@@ -69,7 +69,12 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 			result.RuntimeSideEffectsKnown = &known
 		}
 		recordType := strings.ToLower(strings.TrimSpace(record.Type))
-		if recordType == "step_update" || recordType == "result" {
+		if terminal && (recordType == "init" || recordType == "step_update" || recordType == "result" || strings.Contains(recordType, "error")) {
+			parseErr = errors.Join(parseErr, fmt.Errorf("AGY reported an execution event after its terminal result"))
+		}
+		// Incremental output belongs to the Event Journal. Only the terminal
+		// result body can serve as durable reply-delivery evidence.
+		if recordType == "result" {
 			text := record.Result
 			if text == "" {
 				text = record.Text
@@ -135,6 +140,7 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 		parseErr = errors.Join(parseErr, fmt.Errorf("AGY stream-json was empty"))
 	}
 	result.Result = strings.TrimSpace(output.buffer.String())
+	result.ResultTruncated = output.truncated
 	if output.truncated {
 		parseErr = errors.Join(parseErr, fmt.Errorf("AGY output exceeded the configured limit"))
 	}
@@ -145,6 +151,9 @@ func parseStreamJSON(reader io.Reader, sink openruntime.EventSink) (openruntime.
 		result.Error = "AGY reported a failed turn"
 	}
 	result = safeoutput.SanitizeTurnResult(result)
+	result.FinalReply = terminal && parseErr == nil && sinkErr == nil &&
+		result.Status == openruntime.TurnResultSucceeded && result.Result != "" &&
+		!result.ResultTruncated && result.Error == ""
 	return result, errors.Join(parseErr, sinkErr)
 }
 

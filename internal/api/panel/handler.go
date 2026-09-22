@@ -579,6 +579,7 @@ func turnResultReadModel(resultJSON string) (*openapi.TurnResultReadModel, strin
 		source = "runtime_reported"
 	}
 	return &openapi.TurnResultReadModel{
+		FinalReply:    result.FinalReply,
 		RuntimeStatus: result.Status, Body: result.Result, BodyTruncated: result.ResultTruncated,
 		Error: result.Error, ErrorTruncated: result.ErrorTruncated,
 		RuntimeSideEffectsKnown: result.RuntimeSideEffectsKnown, SideEffectsSource: source,
@@ -589,7 +590,8 @@ func turnResultReadModel(resultJSON string) (*openapi.TurnResultReadModel, strin
 func taskReadModel(task domain.Task) openapi.TaskReadModelTask {
 	outcome := safeoutput.ProjectOutcome(task.IsTerminal(), task.Result, task.Error)
 	return openapi.TaskReadModelTask{ID: task.ID, Version: task.Version, TargetAgentID: task.TargetAgentID,
-		OrganizationID: task.OrganizationID, DispatchMode: task.DispatchMode, Intent: task.Intent,
+		CompletionBasis: task.CompletionBasis,
+		OrganizationID:  task.OrganizationID, DispatchMode: task.DispatchMode, Intent: task.Intent,
 		Content: safeoutput.RedactText(task.Content), Status: task.Status,
 		Result: outcome.Result, ResultTruncated: outcome.ResultTruncated,
 		Error: outcome.Error, ErrorTruncated: outcome.ErrorTruncated, OutcomeState: outcome.State,

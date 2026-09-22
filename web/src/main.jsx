@@ -1084,6 +1084,12 @@ function App() {
                             </div>
                           )
                         )}
+                        {taskDetail.task.status === 'succeeded' && taskDetail.task.intent === 'query' && taskDetail.task.completion_basis === 'query_result_delivered' && (
+                          <p className="result-evidence">查询回复已完整交付。不代表答案真实性、全程只读或副作用已核验。</p>
+                        )}
+                        {taskDetail.task.completion_basis === 'mutation_effects_known' && (
+                          <p className="result-evidence">完成依据：执行副作用已知；不代表独立业务核验。</p>
+                        )}
                         {latestRun?.turn_result && (
                           <p className="result-evidence">
                             副作用来源：{latestRun.turn_result.side_effects_source === 'runtime_reported' ? `Runtime 自报${latestRun.turn_result.runtime_side_effects_known ? '已知' : '未知'}` : '未记录'} · 业务核验：未记录

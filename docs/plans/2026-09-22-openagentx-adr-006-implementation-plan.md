@@ -10,7 +10,7 @@ updated_at: 2026-09-23
 ## 用户结果、授权和边界
 
 用户在真实网页收到时间回复后指出Task仍为uncertain，并于2026-09-22明确授权“好，执行006”。
-本轮结果是：用户能显式创建预期只读的query任务，系统依据完整、持久化且符合该任务契约的结果证据判定
+本轮结果是：用户能显式创建以回复为交付物的query任务，系统依据完整、持久化且符合该任务契约的结果证据判定
 成功；mutation保持既有业务效果核验要求。既有任务不自动改为query，不重算终态，不自动重试。
 
 默认intent为mutation；不得从自然语言、模型自报、Agent名称或页面筛选猜测query。query不能提高
@@ -33,18 +33,18 @@ updated_at: 2026-09-23
 
 | Task | 结果 | 状态 | 关键证据 |
 |---|---|---|---|
-| 01 | 冻结intent/API/schema/终态/Runtime证据合同，记录授权与受支持范围 | blocked | [契约审查](2026-09-22-openagentx-adr-006-implementation/TASK-01-CONTRACT-REVIEW.md)已完成；A06-01需要确定成功与副作用边界 |
-| 02 | 正式API到DB/Worker结算再到Console/Web显示的完整实现 | active | 类型/持久化/API/Console-Web基础接线独立验证通过；query终态待A06-01决定 |
-| 03 | 独立验证、浏览器和隔离Runtime闭环、候选构建 | pending | 基础接线已有全仓/race/vet/build/release/Web/浏览器证据；完整query Runtime闭环及候选未开始 |
+| 01 | 冻结intent/API/schema/终态/Runtime证据合同，记录授权与受支持范围 | completed | [契约审查](2026-09-22-openagentx-adr-006-implementation/TASK-01-CONTRACT-REVIEW.md)；用户接受结果交付合同，A06-01 closed |
+| 02 | 正式API到DB/Worker结算再到Console/Web显示的完整实现 | completed | 最终回复证据、schema2、query结算和安全呈现完成；独立发现已集中纠正并定向复验 |
+| 03 | 独立验证、浏览器和隔离Runtime闭环、候选构建 | active | 源码独立复核/定向及race/Web/浏览器完成；完整query Runtime闭环及clean候选待继续 |
 | 04 | 已授权范围内安装和低副作用真实验收、文档收口 | pending | 新query Task succeeded且有回复、正式Task/Run/Journal、连续领取、进程与产物一致 |
 
 阶段状态必须与[执行日志](2026-09-22-openagentx-adr-006-implementation/EXECUTION-LOG.md)一致。
 实现提交不能自包含自身SHA；后续证据提交记录精确SHA。候选、已安装、真实用户确认和未完成项分开报告。
 
-当前范围：用户再次要求继续实施后，先贯通不依赖A06-01选择的显式intent、存储、API、Console和Web。
-query成功的安全语义仍待确定；现有AGY没有可验证的只读执行边界，Worker结算保持现状。本轮这部分
-可独立验证并提交，但不是完整ADR交付，不能安装为query成功已实现。不能将普通实施授权当作对安全
-语义调整的默认同意。
+当前范围：用户于2026-09-23接受主代理推荐并授权按目标架构实现；A06-01关闭。query成功证明完整
+回复交付，不提供只读保证；副作用审计独立保留。AGY增量只进入Timeline，正式最终正文才是成功证据。
+采用schema2及当前完整v1的事务化前向升级；不保留旧协议推断成功的兼容分支，不删除历史数据。
+本批验收包括domain结算矩阵、AGY缺失/截断/矛盾/进程/事件失败、事务升级/回滚、正式投影和真实浏览器。
 
 本批基础接线的最小验收：正式创建请求保留显式intent；省略为mutation；非法值、不同intent幂等重放
 及修改intent均拒绝；v1迁移不改旧Task结果；Console/Web传递用户选择并展示持久化值；原结算未改。
@@ -57,7 +57,7 @@ query成功的安全语义仍待确定；现有AGY没有可验证的只读执行
 | 声明与权限 | 正式创建API显式query/mutation；缺省mutation；无效值拒绝；viewer禁写；查询不提升现有role/scope |
 | 持久化 | 空库与完整v1升级、重复Apply、损坏对象拒绝、故障回滚；历史Task默认mutation且状态/result不改 |
 | 意图不变量 | 创建后不可变；幂等比较包含intent；相同key不同intent冲突；消息、审批与重连不改变intent |
-| query结算 | 完整成功结果按冻结证据进入succeeded；空/截断/错误/不完整证据/工具变更不伪成功 |
+| query结算 | 完整成功结果按冻结证据进入succeeded；空/截断/错误/不完整证据不伪成功；不将工具副作用描述为已核验 |
 | mutation结算 | 已有SideEffectsKnown与保守终态不弱化；Runtime自报和query声明不得代替业务核验 |
 | 竞态 | Task/Run版本与fencing；finish/cancel、finish/message、重复finish、事务故障及等待状态 |
 | 呈现 | Console与PC/手机Web可显式选intent；详情显示持久化intent/判定依据/结果；旧Task仍如实uncertain |

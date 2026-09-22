@@ -368,7 +368,7 @@ func TestControlCmdUsesOfficialClientExactlyOnceWithCAS(t *testing.T) {
 
 func TestTaskReadsUsePreparedAuthenticatedClient(t *testing.T) {
 	application, client, _, _ := applicationFixture(t, true)
-	client.tasks = []openapi.ConsoleTaskOption{{TaskID: "task-1", Version: 2, Status: domain.TaskStatusRunning,
+	client.tasks = []openapi.ConsoleTaskOption{{Intent: domain.TaskIntentMutation, TaskID: "task-1", Version: 2, Status: domain.TaskStatusRunning,
 		Summary: "safe task", UpdatedAt: fixedNow().Format(time.RFC3339Nano)}}
 	client.taskDetails["task-1"] = taskSnapshot("task-1", 2, domain.TaskStatusRunning)
 	application.prepared[9] = preparedAttach{client: client, agents: map[string]domain.ConsoleAgentOption{

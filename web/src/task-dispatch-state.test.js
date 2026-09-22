@@ -58,3 +58,14 @@ test('progress distinguishes not started, actual Runtime reply and unverified bu
   assert.match(taskProgress({ status: 'running' }, { status: 'starting' }, quote), /正在启动 Runtime/)
   assert.match(taskProgress({ status: 'uncertain' }, { status: 'succeeded' }, quote), /业务核验尚未完成/)
 })
+
+test('query delivery comes only from authoritative Task completion evidence', () => {
+  const delivered = { status: 'succeeded', intent: 'query', completion_basis: 'query_result_delivered' }
+  assert.match(taskProgress(delivered, null, quote), /查询回复已完整交付/)
+  assert.match(taskProgress(delivered, null, quote), /不代表答案真实性或副作用已核验/)
+  for (const task of [{ ...delivered, status: 'uncertain' }, { ...delivered, completion_basis: '' },
+    { ...delivered, intent: 'mutation' }]) {
+    assert.doesNotMatch(taskProgress(task, { status: 'succeeded' }, quote), /查询回复已完整交付/)
+  }
+  assert.match(taskProgress({ status: 'uncertain', intent: 'query', error: 'query_result_unverified' }, null, quote), /证据不完整/)
+})

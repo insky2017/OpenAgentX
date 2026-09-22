@@ -626,9 +626,14 @@ func (r *Repository) FinishRun(
 		hasPendingMessage = pending == 1
 	}
 	runStatus, taskStatus := terminalStatuses(turnResult.Status)
-	businessEffectUnverified := turnResult.Status == openruntime.TurnResultSucceeded && !turnResult.SideEffectsKnown
-	if businessEffectUnverified {
-		taskStatus = domain.TaskStatusUncertain
+	var basis domain.TaskCompletionBasis
+	var reason string
+	if turnResult.Status == openruntime.TurnResultSucceeded {
+		taskStatus, basis, reason = domain.AssessTaskSuccess(task.Intent, domain.TaskCompletionEvidence{
+			FinalReply: turnResult.FinalReply, HasResult: strings.TrimSpace(turnResult.Result) != "",
+			Truncated: turnResult.ResultTruncated, HasError: turnResult.Error != "" || turnResult.ErrorTruncated,
+			SideEffectsKnown: turnResult.SideEffectsKnown,
+		})
 	}
 	// A cancellation intent must not hide an uncertain physical outcome. Other
 	// determinate finish/cancel ordering semantics remain unchanged.
@@ -647,15 +652,19 @@ func (r *Repository) FinishRun(
 	run.UpdatedAt = guard.CheckedAt
 	task.Version++
 	task.Status = taskStatus
+	task.CompletionBasis = ""
+	if taskStatus == domain.TaskStatusSucceeded {
+		task.CompletionBasis = basis
+	}
 	task.UpdatedAt = formatTime(guard.CheckedAt)
 	if turnResult.Result != "" {
 		task.Result = &turnResult.Result
 	}
-	if turnResult.Error != "" {
-		task.Error = &turnResult.Error
-	} else if businessEffectUnverified {
-		reason := "business_effect_unverified"
+	task.Error = nil
+	if reason != "" {
 		task.Error = &reason
+	} else if turnResult.Error != "" {
+		task.Error = &turnResult.Error
 	}
 	if binding != nil {
 		var resolved domain.ResolvedExecutionSpec
@@ -713,6 +722,19 @@ func (r *Repository) FinishRun(
 	if err := validateJournalForAggregate(taskEvent, "task", task.ID, guard.CheckedAt); err != nil {
 		return err
 	}
+	var taskPayload map[string]json.RawMessage
+	if err := json.Unmarshal(taskEvent.Payload, &taskPayload); err != nil {
+		return fmt.Errorf("decode Task settlement journal payload: %w", err)
+	}
+	if taskPayload == nil {
+		taskPayload = make(map[string]json.RawMessage)
+	}
+	taskPayload["intent"], _ = json.Marshal(task.Intent)
+	taskPayload["completion_basis"], _ = json.Marshal(task.CompletionBasis)
+	taskEvent.Payload, err = json.Marshal(taskPayload)
+	if err != nil {
+		return fmt.Errorf("encode Task settlement journal payload: %w", err)
+	}
 	if err := validateJournalForAggregate(runEvent, "run_attempt", run.ID, guard.CheckedAt); err != nil {
 		return err
 	}
@@ -731,9 +753,9 @@ func (r *Repository) FinishRun(
 	if cancelVersionDelta || messageVersionDelta {
 		currentTaskVersion = task.Version - 1
 	}
-	result, err = tx.ExecContext(ctx, `UPDATE tasks SET version=?, status=?, result=?, error=?, updated_at=?
+	result, err = tx.ExecContext(ctx, `UPDATE tasks SET version=?, status=?, result=?, error=?, completion_basis=?, updated_at=?
 		WHERE task_id=? AND version=?`, task.Version, task.Status, nullableString(task.Result), nullableString(task.Error),
-		task.UpdatedAt, task.ID, currentTaskVersion)
+		task.CompletionBasis, task.UpdatedAt, task.ID, currentTaskVersion)
 	if err != nil {
 		return fmt.Errorf("settle Task from RunAttempt: %w", err)
 	}

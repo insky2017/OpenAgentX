@@ -1716,6 +1716,12 @@ func (m tuiModel) statusView() string {
 		lines = append(lines, "Task request: "+task.Detail.Content,
 			"Task updated: "+task.Detail.UpdatedAt,
 			"Task outcome state: "+task.Detail.OutcomeState)
+		if task.Detail.CompletionBasis != "" {
+			lines = append(lines, "Completion basis: "+string(task.Detail.CompletionBasis))
+			if task.Detail.CompletionBasis == domain.TaskCompletionQueryResultDelivered {
+				lines = append(lines, "Complete reply delivered; side effects are not independently verified")
+			}
+		}
 		if task.Detail.Result != nil {
 			lines = append(lines, "Task result: "+*task.Detail.Result)
 		}

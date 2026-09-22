@@ -241,7 +241,7 @@ func (r *Reducer) ReplaceTaskOptions(options []openapi.ConsoleTaskOption) error 
 			return err
 		}
 		if record.Version == option.Version {
-			intent, _ := domain.NormalizeTaskIntent(option.Intent) // validated above
+			intent := option.Intent
 			if record.Intent != "" && record.Intent != intent {
 				return fmt.Errorf("Console Task option intent cannot change")
 			}
@@ -506,9 +506,6 @@ func applyTaskProjection(record *taskRecord, task openapi.ConsoleTaskReadModel) 
 		return false, true, nil
 	}
 	intent := task.Intent
-	if intent == "" {
-		intent = domain.TaskIntentMutation
-	}
 	if record.Intent != "" && record.Intent != intent {
 		return false, false, fmt.Errorf("Console Task intent cannot change")
 	}
@@ -518,7 +515,6 @@ func applyTaskProjection(record *taskRecord, task openapi.ConsoleTaskReadModel) 
 		}
 		if record.Detail != nil {
 			previous, incoming := *record.Detail, task
-			previous.Intent, incoming.Intent = intent, intent
 			if !reflect.DeepEqual(previous, incoming) {
 				return false, false, fmt.Errorf("Console Task projection changed within version %d", task.Version)
 			}
@@ -578,7 +574,7 @@ func validateTaskOption(option openapi.ConsoleTaskOption) error {
 	if err := domain.ValidateOpaqueID("task_id", option.TaskID); err != nil {
 		return err
 	}
-	if option.Intent != "" && !option.Intent.Valid() {
+	if !option.Intent.Valid() {
 		return fmt.Errorf("invalid Console Task option intent")
 	}
 	if option.Version <= 0 || !option.Status.Valid() || strings.TrimSpace(option.Summary) == "" ||
@@ -598,8 +594,14 @@ func validateTaskProjection(task openapi.ConsoleTaskReadModel, agentID string) e
 	if task.AgentID != agentID || domain.ValidateIdentifier("agent_id", task.AgentID) != nil || task.Version <= 0 || !task.Status.Valid() {
 		return fmt.Errorf("invalid Console Task identity, version, or status")
 	}
-	if task.Intent != "" && !task.Intent.Valid() {
+	if !task.Intent.Valid() {
 		return fmt.Errorf("invalid Console Task intent")
+	}
+	if !task.CompletionBasis.Valid() || task.CompletionBasis != "" &&
+		(task.Status != domain.TaskStatusSucceeded ||
+			task.CompletionBasis == domain.TaskCompletionQueryResultDelivered && task.Intent != domain.TaskIntentQuery ||
+			task.CompletionBasis == domain.TaskCompletionMutationEffectsKnown && task.Intent != domain.TaskIntentMutation) {
+		return fmt.Errorf("invalid Console Task completion basis")
 	}
 	if strings.TrimSpace(task.Content) == "" || !safeText(task.Content) || !safeOptionalText(task.Result) || !safeOptionalText(task.Error) {
 		return fmt.Errorf("invalid Console Task safe text")
@@ -717,6 +719,11 @@ func validateRun(run openapi.RunAttemptReadModel, agentID string) error {
 		if !validTruncatedValue(run.TurnResult.Body, run.TurnResult.BodyTruncated) ||
 			!validTruncatedValue(run.TurnResult.Error, run.TurnResult.ErrorTruncated) {
 			return fmt.Errorf("invalid Console Runtime reply truncation metadata")
+		}
+		if run.TurnResult.FinalReply && (run.TurnResult.RuntimeStatus != "succeeded" ||
+			strings.TrimSpace(run.TurnResult.Body) == "" || run.TurnResult.BodyTruncated ||
+			run.TurnResult.Error != "" || run.TurnResult.ErrorTruncated) {
+			return fmt.Errorf("invalid Console final reply evidence")
 		}
 		if run.TurnResult.SideEffectsSource != "not_recorded" && run.TurnResult.SideEffectsSource != "runtime_reported" ||
 			run.TurnResult.BusinessVerificationSource != "not_recorded" {

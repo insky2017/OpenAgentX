@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -68,37 +67,19 @@ func TestApplyCreatesTargetSchemaAndIsRepeatable(t *testing.T) {
 	}
 }
 
-func TestExistingV1ReopenEnsuresCLITokenSchemaAndStableInstallation(t *testing.T) {
+func TestCurrentSchemaRejectsMissingInstallationObjects(t *testing.T) {
 	ctx := context.Background()
 	db := openDB(t)
 	if err := migrations.Apply(ctx, db); err != nil {
 		t.Fatal(err)
 	}
-	var original string
-	if err := db.QueryRowContext(ctx, `SELECT installation_id FROM installation_metadata WHERE singleton=1`).Scan(&original); err != nil {
-		t.Fatal(err)
-	}
-	for _, statement := range []string{`DROP TABLE cli_tokens`, `DROP TABLE installation_metadata`} {
+	for _, statement := range []string{"DROP TABLE cli_tokens", "DROP TABLE installation_metadata"} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
-	var restored string
-	if err := db.QueryRowContext(ctx, `SELECT installation_id FROM installation_metadata WHERE singleton=1`).Scan(&restored); err != nil {
-		t.Fatal(err)
-	}
-	if restored == "" || restored == original {
-		t.Fatalf("recreated installation identity original=%q restored=%q", original, restored)
-	}
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
-	var repeated string
-	if err := db.QueryRowContext(ctx, `SELECT installation_id FROM installation_metadata WHERE singleton=1`).Scan(&repeated); err != nil || repeated != restored {
-		t.Fatalf("installation identity changed on repeat: got=%q want=%q err=%v", repeated, restored, err)
+	if err := migrations.Apply(ctx, db); !errors.Is(err, migrations.ErrIncompleteSchema) {
+		t.Fatalf("missing installation objects accepted: %v", err)
 	}
 }
 
@@ -119,131 +100,27 @@ func TestExistingV1RejectsMalformedCLITokenObject(t *testing.T) {
 	}
 }
 
-func TestApplyUpgradesWorkerCommandKindsForForceStop(t *testing.T) {
-	ctx := context.Background()
-	db := openDB(t)
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
+func TestApplyRejectsOlderUnsupportedSchemaShapes(t *testing.T) {
 	for _, statement := range []string{
-		`DROP TABLE worker_commands`,
-		`CREATE TABLE worker_commands (
-			worker_command_id TEXT PRIMARY KEY,
-			worker_instance_id TEXT NOT NULL REFERENCES worker_instances(worker_instance_id) ON DELETE CASCADE,
-			generation INTEGER NOT NULL CHECK (generation > 0),
-			kind TEXT NOT NULL CHECK (kind IN ('drain', 'stop', 'health_check')),
-			state TEXT NOT NULL CHECK (state IN ('pending', 'claimed', 'applied', 'failed')),
-			requested_by TEXT NOT NULL REFERENCES principals(principal_id), idempotency_key TEXT NOT NULL,
-			lease_until TEXT, attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0), created_at TEXT NOT NULL,
-			claimed_at TEXT, applied_at TEXT, result TEXT, UNIQUE (requested_by, idempotency_key))`,
-		`CREATE INDEX idx_worker_commands_claim ON worker_commands(worker_instance_id, generation, state, created_at)`,
-	} {
-		if _, err := db.ExecContext(ctx, statement); err != nil {
-			t.Fatal(err)
-		}
-	}
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
-	var definition string
-	if err := db.QueryRowContext(ctx, `SELECT sql FROM sqlite_master WHERE type='table' AND name='worker_commands'`).Scan(&definition); err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(definition, "'force_stop'") {
-		t.Fatalf("force_stop was not added to Worker command schema: %s", definition)
-	}
-}
-
-func TestApplyUpgradesN1WorkerNetworkColumns(t *testing.T) {
-	ctx := context.Background()
-	db := openDB(t)
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.ExecContext(ctx, "ALTER TABLE network_profile_bindings DROP COLUMN diagnostic"); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.ExecContext(ctx, "ALTER TABLE network_profile_bindings DROP COLUMN applied_binding_revision"); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.ExecContext(ctx, "ALTER TABLE runtime_backend_registrations DROP COLUMN network_json"); err != nil {
-		t.Fatal(err)
-	}
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
-	var count int
-	if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM pragma_table_info('network_profile_bindings') WHERE name='diagnostic'").Scan(&count); err != nil {
-		t.Fatal(err)
-	}
-	if count != 1 {
-		t.Fatalf("diagnostic column count=%d", count)
-	}
-	for table, column := range map[string]string{
-		"network_profile_bindings":      "applied_binding_revision",
-		"runtime_backend_registrations": "network_json",
-	} {
-		if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM pragma_table_info(?) WHERE name=?", table, column).Scan(&count); err != nil {
-			t.Fatal(err)
-		}
-		if count != 1 {
-			t.Fatalf("%s.%s column count=%d", table, column, count)
-		}
-	}
-}
-
-func TestApplyRebuildsLegacyNetworkBindingsWithoutGuessingStaleAppliedProfile(t *testing.T) {
-	ctx := context.Background()
-	db := openDB(t)
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
-	now := time.Now().UTC().Format(time.RFC3339Nano)
-	for _, statement := range []string{
-		fmt.Sprintf("INSERT INTO principals VALUES ('owner','human','Owner','active','%s','%s')", now, now),
-		fmt.Sprintf("INSERT INTO principals VALUES ('agent-principal','agent','Agent','active','%s','%s')", now, now),
-		fmt.Sprintf("INSERT INTO organizations VALUES ('org','Org','active','%s','%s')", now, now),
-		fmt.Sprintf("INSERT INTO agents VALUES ('agent','agent-principal','org','Agent','active',1,'%s','%s')", now, now),
-		fmt.Sprintf("INSERT INTO network_profiles(profile_id,version,status,mode,host,port,config_file,created_by,created_at,updated_at) VALUES('proxy',1,'published','only_http_proxy','proxy.internal',8080,'/tmp/proxy','owner','%s','%s')", now, now),
+		"ALTER TABLE network_profile_bindings DROP COLUMN diagnostic",
+		"ALTER TABLE network_profile_bindings DROP COLUMN applied_binding_revision",
+		"ALTER TABLE runtime_backend_registrations DROP COLUMN network_json",
+		"DROP TABLE worker_commands",
 		"DROP TABLE network_profile_bindings",
-		`CREATE TABLE network_profile_bindings (
-			agent_id TEXT NOT NULL REFERENCES agents(agent_id) ON DELETE CASCADE, backend_id TEXT NOT NULL,
-			profile_id TEXT NOT NULL, profile_version INTEGER NOT NULL, version INTEGER NOT NULL,
-			desired_status TEXT NOT NULL, applied_worker_id TEXT, applied_generation INTEGER,
-			applied_profile_version INTEGER, applied_binding_revision INTEGER, diagnostic TEXT, updated_at TEXT NOT NULL,
-			PRIMARY KEY(agent_id,backend_id), FOREIGN KEY(profile_id,profile_version) REFERENCES network_profiles(profile_id,version)
-		)`,
-		fmt.Sprintf("INSERT INTO network_profile_bindings VALUES('agent','current','proxy',1,1,'applied','worker',3,1,1,NULL,'%s')", now),
-		fmt.Sprintf("INSERT INTO network_profile_bindings VALUES('agent','stale','proxy',1,2,'pending','worker',3,1,1,NULL,'%s')", now),
 	} {
-		if _, err := db.ExecContext(ctx, statement); err != nil {
-			t.Fatalf("legacy fixture failed: %v\n%s", err, statement)
-		}
-	}
-	if err := migrations.Apply(ctx, db); err != nil {
-		t.Fatal(err)
-	}
-	var mode, appliedMode, appliedProfileID string
-	var appliedProfileVersion int64
-	if err := db.QueryRowContext(ctx, `SELECT mode,COALESCE(applied_mode,''),COALESCE(applied_profile_id,''),COALESCE(applied_profile_version,0) FROM network_profile_bindings WHERE backend_id='current'`).
-		Scan(&mode, &appliedMode, &appliedProfileID, &appliedProfileVersion); err != nil {
-		t.Fatal(err)
-	}
-	if mode != "named_profile" || appliedMode != "named_profile" || appliedProfileID != "proxy" || appliedProfileVersion != 1 {
-		t.Fatalf("current legacy applied fact mode=%q applied_mode=%q profile=%q version=%d", mode, appliedMode, appliedProfileID, appliedProfileVersion)
-	}
-	if err := db.QueryRowContext(ctx, `SELECT COALESCE(applied_mode,''),COALESCE(applied_profile_id,''),COALESCE(applied_profile_version,0) FROM network_profile_bindings WHERE backend_id='stale'`).
-		Scan(&appliedMode, &appliedProfileID, &appliedProfileVersion); err != nil {
-		t.Fatal(err)
-	}
-	if appliedMode != "" || appliedProfileID != "" || appliedProfileVersion != 0 {
-		t.Fatalf("stale legacy applied target was guessed: mode=%q profile=%q version=%d", appliedMode, appliedProfileID, appliedProfileVersion)
-	}
-	if _, err := db.ExecContext(ctx, `INSERT INTO network_mode_policies(agent_id,backend_id,policy_version,mode,manifest_digest,created_by,created_at) VALUES('agent','direct',1,'direct',?, 'owner', ?)`, strings.Repeat("a", 64), now); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.ExecContext(ctx, `INSERT INTO network_profile_bindings(agent_id,backend_id,mode,policy_version,version,desired_status,manifest_digest,updated_at) VALUES('agent','direct','direct',1,1,'pending',?,?)`, strings.Repeat("a", 64), now); err != nil {
-		t.Fatalf("rebuilt binding still requires a proxy profile: %v", err)
+		t.Run(statement, func(t *testing.T) {
+			ctx := context.Background()
+			db := openDB(t)
+			if err := migrations.Apply(ctx, db); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.ExecContext(ctx, statement); err != nil {
+				t.Fatal(err)
+			}
+			if err := migrations.Apply(ctx, db); !errors.Is(err, migrations.ErrIncompleteSchema) {
+				t.Fatalf("unsupported schema accepted: %v", err)
+			}
+		})
 	}
 }
 

@@ -16,6 +16,7 @@ var taskTestTime = time.Date(2026, 9, 20, 9, 0, 0, 0, time.UTC)
 
 func taskModel(id string, version int64, status domain.TaskStatus) openapi.ConsoleTaskReadModel {
 	model := openapi.ConsoleTaskReadModel{
+		Intent: domain.TaskIntentMutation,
 		TaskID: id, Version: version, AgentID: "quote", Status: status, Content: "safe " + id,
 		OutcomeState: "pending", CreatedAt: taskTestTime.Format(time.RFC3339Nano),
 		UpdatedAt: taskTestTime.Add(time.Duration(version) * time.Second).Format(time.RFC3339Nano),
@@ -39,7 +40,7 @@ func runModel(id, taskID, workerID string, generation, version int64, status dom
 }
 
 func TestTaskReducerFocusSourcesAndDispatchEventOrdering(t *testing.T) {
-	suggested := openapi.ConsoleTaskOption{TaskID: "task-suggested", Version: 2, Status: domain.TaskStatusRunning,
+	suggested := openapi.ConsoleTaskOption{Intent: domain.TaskIntentMutation, TaskID: "task-suggested", Version: 2, Status: domain.TaskStatusRunning,
 		Summary: "suggested", UpdatedAt: taskTestTime.Format(time.RFC3339Nano)}
 	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
 		WorkerStatus: domain.WorkerStatusOffline, SuggestedTask: &suggested, SnapshotSequence: 10})
@@ -140,11 +141,11 @@ func TestTaskReducerPreservesAuthoritativeTaskOptionOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := []openapi.ConsoleTaskOption{
-		{TaskID: "task-newest", Version: 3, Status: domain.TaskStatusRunning, Summary: "newest",
+		{Intent: domain.TaskIntentMutation, TaskID: "task-newest", Version: 3, Status: domain.TaskStatusRunning, Summary: "newest",
 			UpdatedAt: taskTestTime.Add(3 * time.Minute).Format(time.RFC3339Nano)},
-		{TaskID: "task-middle", Version: 2, Status: domain.TaskStatusWaitingInput, Summary: "middle",
+		{Intent: domain.TaskIntentMutation, TaskID: "task-middle", Version: 2, Status: domain.TaskStatusWaitingInput, Summary: "middle",
 			UpdatedAt: taskTestTime.Add(2 * time.Minute).Format(time.RFC3339Nano)},
-		{TaskID: "task-oldest", Version: 1, Status: domain.TaskStatusQueued, Summary: "oldest",
+		{Intent: domain.TaskIntentMutation, TaskID: "task-oldest", Version: 1, Status: domain.TaskStatusQueued, Summary: "oldest",
 			UpdatedAt: taskTestTime.Add(time.Minute).Format(time.RFC3339Nano)},
 	}
 	if err := reducer.ReplaceTaskOptions(options); err != nil {
@@ -465,7 +466,7 @@ func TestTaskReducerRejectedSnapshotIsAtomic(t *testing.T) {
 	if _, err := reducer.Apply(taskEventModel(71, terminal)); err != nil {
 		t.Fatal(err)
 	}
-	conflict := openapi.ConsoleTaskOption{TaskID: "task-terminal", Version: 3, Status: domain.TaskStatusRunning,
+	conflict := openapi.ConsoleTaskOption{Intent: domain.TaskIntentMutation, TaskID: "task-terminal", Version: 3, Status: domain.TaskStatusRunning,
 		Summary: "conflict", UpdatedAt: taskTestTime.Add(time.Hour).Format(time.RFC3339Nano)}
 	if err := reducer.ApplySnapshot(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
 		WorkerStatus: domain.WorkerStatusOffline, SuggestedTask: &conflict, SnapshotSequence: 72}); err == nil {
@@ -520,7 +521,7 @@ func TestTaskReducerRejectsInvalidSafeResultBeforeCursorAdvance(t *testing.T) {
 }
 
 func TestTaskReducerCollectionsAndTimelineRemainBounded(t *testing.T) {
-	suggested := openapi.ConsoleTaskOption{TaskID: "task-focus", Version: 1, Status: domain.TaskStatusQueued,
+	suggested := openapi.ConsoleTaskOption{Intent: domain.TaskIntentMutation, TaskID: "task-focus", Version: 1, Status: domain.TaskStatusQueued,
 		Summary: "focus", UpdatedAt: taskTestTime.Format(time.RFC3339Nano)}
 	reducer, err := New(consoleapi.AttachResponse{AgentID: "quote", Mode: consoleapi.ModeNormal,
 		WorkerStatus: domain.WorkerStatusOffline, SuggestedTask: &suggested})

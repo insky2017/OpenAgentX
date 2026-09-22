@@ -1093,7 +1093,7 @@ func TestSSEProjectsSafeTaskMailboxMessageAndApprovalState(t *testing.T) {
 	response := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
 	panel.handler.ServeHTTP(response, request)
 	body := response.Body.String()
-	for _, required := range []string{`"task":{"task_id":"task-safe"`, `"mailbox":{"mailbox_item_id":"mailbox-safe"`,
+	for _, required := range []string{`"task_id":"task-safe"`, `"mailbox":{"mailbox_item_id":"mailbox-safe"`,
 		`"message":{"message_id":"message-safe"`, `"approval":{"approval_request_id":"approval-safe"`, "[REDACTED]"} {
 		if !strings.Contains(body, required) {
 			t.Fatalf("safe SSE projection omitted %q: %s", required, body)

@@ -1,13 +1,20 @@
 ---
 doc_type: contract_review
-status: decision-required
+status: completed
 owner: openagentx
 updated_at: 2026-09-23
 ---
 
 # Task01：ADR-006 契约审查与待决安全语义
 
-## 审查结果
+## 最终决定（2026-09-23）
+
+用户已接受下文推荐的 B 合同，授权“按照架构最优方式执行，补充文档，不需要考虑兼容”。A06-01关闭。
+query成功只证明完整回复交付，mutation保留原结算；权限/审批/审计不弱化。使用schema2和当前完整v1
+事务化前向迁移，保留历史事实但不实现旧协议fallback。下文保留决定前的审查历史，待决定措辞不再是当前门禁。
+正式合同以已接受的[ADR-006](../../decisions/ADR-006-task-intent-and-verifiable-terminal-semantics.md)为准。
+
+## 初次审查结果（历史）
 
 用户已授权实施ADR-006，但现有[ADR-006](../../decisions/ADR-006-task-intent-and-verifiable-terminal-semantics.md)
 同时要求query基于结果证据成功、且query不能绕过副作用审计。当前AGY路径不能证明工具执行是只读。
