@@ -381,6 +381,11 @@ runtime_backends:
 `~/.openagentx/release.txt` 中记录摘要。不要把另一个交互式或 machine-local wrapper 的目录加入 unit
 `PATH` 来绕过安装，也不要静默覆盖 `/home/sky/tools/bin/agy-graft` 一类不同内容的本机副本。
 
+Runtime 主程序升级后，如果只有可执行文件 SHA-256 与注册时不同，新的 Run 会在普通 Console Timeline
+显示 `Runtime executable changed` warning，并继续使用当前程序。Worker 日志记录原/现摘要，原 Run
+网络快照保留不变；告警不表示任务成功，结果仍按实际 Runtime 输出与业务核验展示。Adapter 协议、
+wrapper 或网络 helper 变化，以及程序缺失、非法文件、网络配置或鉴权错误仍会拒绝执行。
+
 首次初始化使用 `--worker-config` 导入源文件。Fleet 会验证捕获的内容并以 `0600` 原子安装到
 `~/.openagentx/workers/quote-service.yaml`，同时以 `0600` 创建 `fleet.yaml`，不会静默覆盖冲突文件：
 

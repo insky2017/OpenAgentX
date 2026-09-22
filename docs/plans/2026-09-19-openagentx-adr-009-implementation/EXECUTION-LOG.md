@@ -925,6 +925,54 @@ push/merge/安装来“修正”差异。
   私有release记录仍为0600。main仍为3723c773、clean/ahead1；只暂存本日志和安装报告，不push。
   本批无产品代码变更，未重复Go/Web测试；真实连续Runtime验收保持blocked。
 
+### 2026-09-22 Runtime 主程序变化改为 warning（用户授权）
+
+- 用户明确要求本次AGY程序更新只报warning、不拒绝任务；覆盖此前LIVE-01要求固定旧程序摘要的处置。
+  本批以当前feature `f504beb`为基线，限35分钟（18:20–18:55），一个实现批次和一次独立验证。
+- 范围：Worker预检、正式Adapter启动前检查和安全warning事件。主程序SHA变化允许继续；Adapter协议、
+  wrapper/helper变化、无法读取/缺失/非法文件、网络配置及鉴权失败保留拒绝。冻结Run网络快照不改写。
+- 非目标：LIVE-02 Diagnostic归属、ADR-006/007、自动重试旧uncertain Task、真实部署/服务重启和网络发布。
+  本轮先交付可测试源码与独立提交，不以fixture通过声称现场已更新。
+
+| 验收 | 必需证据 |
+|---|---|
+| 主程序更新仍执行 | 捕获旧身份后替换临时可执行文件，经Worker预检及真实Adapter进程运行，返回预期结果 |
+| 告警可见且有界 | 每次Run一个固定安全warning，经现有safeoutput/Normal Console渲染；不携带路径/凭据/原始诊断 |
+| 不变量 | 原Run网络快照不被改成新摘要；未变化时不发warning；结果与业务核验规则保持原样 |
+| 负向 | wrapper/helper/协议不匹配、无效身份/缺失文件仍拒绝；warning持久化失败不能启动无审计执行 |
+| 验证 | Runtime/network/Worker/safeoutput/Console定向测试与race、全仓Go、vet/build/release/diff |
+
+#### 实现与验证结果
+
+- `RuntimeIdentityVerifier`明确返回主程序变化标记及真正错误；`CompareRuntimeIdentity`只把完整合法
+  executable SHA差异视为advisory。相同身份不告警，wrapper/helper/Adapter协议差异及无效证据仍拒绝。
+- Worker网络work/Run预检均接受advisory；AGY、CodeBuddy和ACP在实际StartTurn前各发一次
+  `identity.warning`。沿既有正式EventSink、safeoutput和Normal Timeline展示固定安全文案，保留原Run
+  policy/identity。Worker日志记录expected/actual SHA，无路径、凭据或原始Runtime输出。
+- 新增三Adapter真实临时进程矩阵：旧身份下替换程序后确实执行一次并返回结果；未替换不发warning；
+  warning写入失败不启动进程；替换后的进程真实失败不被warning升级成成功。界面投影测试确认普通
+  Console无需Diagnostic权限即可显示warning；原有256条持久化Runtime事件上限保持不变。
+- 首次新增定向测试退出1：fixture通过`IDENTITY_*`环境传递native路径和launch marker，而正式网络
+  环境白名单正确过滤它们，导致AGY exit126、marker缺失。改为显式临时WorkingDir下的`./native`和
+  `launches`后通过；未放宽环境白名单。若干只读源码定位的未存在路径/glob返回非零，随后改用确定
+  路径读取；它们不构成产品或测试通过证据。
+
+| 命令/检查 | 退出码/耗时 | 结果 |
+|---|---:|---|
+| `go test ./internal/runtime/network ./internal/worker ./internal/cli/console -run 'Test(CompareRuntimeIdentity\|VerifyRuntimeIdentity\|InspectAgyRuntimeIdentity\|RuntimeExecutable)' -count=1` | 0 / 0.79s | 修正fixture后：network 0.032s、Worker 0.091s、Console 0.007s |
+| 独立验证：`go test -race ./internal/runtime/... ./internal/worker/... ./internal/safeoutput ./internal/cli/console -count=1` | 0 / 约34s | 独立审查无阻断；仅临时fixture/隔离tmux，非真实Runtime验收 |
+| `go test ./... -count=1` | 0 / 35.35s | 全仓通过，含正式API/persistence/Console/Fleet隔离测试 |
+| `go vet ./...` | 0 / 3.41s | 通过 |
+| `go build ./...` | 0 / 6.35s | 全包编译通过，未覆盖installed binary |
+| `bash scripts/check-legacy-control-paths.sh --release` | 0 | 全部CLEAN |
+| `git diff --check`、文档链接、冻结摘要 | 0 | 5个相对链接存在；ADR-009与AGENTS摘要未变 |
+
+- Web代码、API/schema、Task终态和UI产品代码未修改；复用全仓中的既有safe projection路径验证，未
+  重跑Web build/browser验收。安装指南追加warning语义，原安装报告中的失败历史保留。
+- `LIVE-01`的源码拒绝原因已修正，但现场仍运行旧构建，不能关闭安装阻断或声称真实任务已恢复；
+  `LIVE-02`不在本批范围。未重试旧Task、未安装/重启/发布网络、未操作真实DB/socket/tmux或父仓。
+- 独立验证已结束；只提交本批源码、测试、安装指南和本日志，不push。main仍clean/ahead1于3723c773。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结

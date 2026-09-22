@@ -53,12 +53,15 @@ func (p *BackendPool) ProcessNetworkWork(ctx context.Context, envelope *openapi.
 		return failNetworkProbe(ack, domain.NetworkProbeConfiguration, domain.NetworkDiagnosticUnsupported, started)
 	}
 	if verifier, ok := backend.Adapter.(openruntime.RuntimeIdentityVerifier); ok {
-		if err := verifier.VerifyRuntimeIdentity(ctx, work.RuntimeIdentity); err != nil {
+		if _, err := verifier.VerifyRuntimeIdentity(ctx, work.RuntimeIdentity); err != nil {
 			return failNetworkProbe(ack, domain.NetworkProbeConfiguration, domain.NetworkDiagnosticIdentity, started)
 		}
 	}
 	descriptor, err := backend.Adapter.Descriptor(ctx)
-	if err != nil || descriptor.RuntimeIdentity != work.RuntimeIdentity {
+	if err != nil {
+		return failNetworkProbe(ack, domain.NetworkProbeConfiguration, domain.NetworkDiagnosticIdentity, started)
+	}
+	if _, err := runtimenetwork.CompareRuntimeIdentity(work.RuntimeIdentity, descriptor.RuntimeIdentity); err != nil {
 		return failNetworkProbe(ack, domain.NetworkProbeConfiguration, domain.NetworkDiagnosticIdentity, started)
 	}
 	wantedMode := work.Mode
@@ -252,11 +255,13 @@ func (p *BackendPool) PrepareRunNetwork(ctx context.Context, request openruntime
 	if request.Execution.Spec.Network.Mode == domain.NetworkNamedProfile && expected.IsZero() {
 		return request, nil, domain.ErrConflict("runtime identity is missing")
 	}
-	if !expected.IsZero() && descriptor.RuntimeIdentity != expected {
-		return request, nil, domain.ErrConflict("runtime identity changed")
+	if !expected.IsZero() {
+		if _, err := runtimenetwork.CompareRuntimeIdentity(expected, descriptor.RuntimeIdentity); err != nil {
+			return request, nil, err
+		}
 	}
 	if verifier, ok := backend.Adapter.(openruntime.RuntimeIdentityVerifier); ok {
-		if err := verifier.VerifyRuntimeIdentity(ctx, expected); err != nil {
+		if _, err := verifier.VerifyRuntimeIdentity(ctx, expected); err != nil {
 			return request, nil, domain.ErrConflict("runtime identity changed")
 		}
 	}

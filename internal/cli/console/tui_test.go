@@ -2,6 +2,7 @@ package console
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -16,6 +17,8 @@ import (
 	"openagentx/internal/consolemodel"
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
+	runtimenetwork "openagentx/internal/runtime/network"
+	"openagentx/internal/safeoutput"
 )
 
 type fakeTUIActions struct {
@@ -875,6 +878,27 @@ func TestTimelineRendersDiagnosticOnlyInDiagnosticMode(t *testing.T) {
 	diagnostic := eventSummary(event, consoleapi.ModeDiagnostic)
 	if strings.Contains(normal, "stderr") || !strings.Contains(diagnostic, "stderr=[REDACTED]") {
 		t.Fatalf("mode projection normal=%q diagnostic=%q", normal, diagnostic)
+	}
+}
+
+func TestRuntimeExecutableWarningIsVisibleInNormalConsole(t *testing.T) {
+	err := runtimenetwork.EmitExecutableChangeWarning(context.Background(), openruntime.EventSinkFunc(func(_ context.Context, event openruntime.RuntimeEvent) error {
+		payload, err := safeoutput.ProjectRuntimePayload(event.Payload)
+		if err != nil {
+			return err
+		}
+		var output openapi.SafeOutputReadModel
+		if err := json.Unmarshal(payload, &output); err != nil {
+			return err
+		}
+		summary := timelineItemSummary(consolemodel.TimelineItem{Sequence: 12, EventType: "runtime." + event.Type, Output: &output}, consoleapi.ModeNormal)
+		if !strings.Contains(summary, "warning") || !strings.Contains(summary, "Runtime executable changed") || !strings.Contains(summary, "continuing") {
+			t.Fatalf("normal Console did not render warning: %q", summary)
+		}
+		return nil
+	}))
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -271,7 +271,9 @@ type NetworkPolicyApplier interface {
 }
 
 type RuntimeIdentityVerifier interface {
-	VerifyRuntimeIdentity(context.Context, domain.RuntimeIdentity) error
+	// The boolean reports a changed executable digest, which is advisory.
+	// Invalid identities and changes to the Adapter/wrapper/helper remain errors.
+	VerifyRuntimeIdentity(context.Context, domain.RuntimeIdentity) (bool, error)
 }
 
 // NetworkProbeCloner creates an isolated Adapter for candidate diagnostics.

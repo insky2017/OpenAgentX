@@ -42,9 +42,9 @@ type Adapter struct {
 	networkMu sync.RWMutex
 }
 
-func (a *Adapter) VerifyRuntimeIdentity(ctx context.Context, expected domain.RuntimeIdentity) error {
+func (a *Adapter) VerifyRuntimeIdentity(ctx context.Context, expected domain.RuntimeIdentity) (bool, error) {
 	if expected.IsZero() && a.config.RuntimeIdentity.IsZero() {
-		return nil
+		return false, nil
 	}
 	return runtimenetwork.VerifyRuntimeIdentity(ctx, expected, a.config.Binary, "")
 }
@@ -136,11 +136,17 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	if expectedIdentity.IsZero() {
 		expectedIdentity = a.config.RuntimeIdentity
 	}
-	if err := a.VerifyRuntimeIdentity(ctx, expectedIdentity); err != nil {
+	changed, err := a.VerifyRuntimeIdentity(ctx, expectedIdentity)
+	if err != nil {
 		return nil, err
 	}
 	if err := a.Validate(ctx, request.Execution.Spec); err != nil {
 		return nil, err
+	}
+	if changed {
+		if err := runtimenetwork.EmitExecutableChangeWarning(ctx, sink); err != nil {
+			return nil, err
+		}
 	}
 	cmd := exec.CommandContext(ctx, a.config.Binary, a.config.Args...)
 	env, err := a.environment(request.Execution.Spec.Network)

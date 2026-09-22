@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
 )
 
 func InspectRuntimeIdentity(ctx context.Context, adapterID, adapterVersion, binary, helper string, native ...string) (domain.RuntimeIdentity, error) {
@@ -71,15 +73,53 @@ func InspectRuntimeIdentity(ctx context.Context, adapterID, adapterVersion, bina
 	}
 	return identity, identity.Validate()
 }
-func VerifyRuntimeIdentity(ctx context.Context, expected domain.RuntimeIdentity, binary, helper string, native ...string) error {
+func VerifyRuntimeIdentity(ctx context.Context, expected domain.RuntimeIdentity, binary, helper string, native ...string) (bool, error) {
+	if err := expected.Validate(); err != nil {
+		return false, err
+	}
 	actual, err := InspectRuntimeIdentity(ctx, expected.AdapterID, expected.AdapterVersion, binary, helper, native...)
 	if err != nil {
-		return err
+		return false, err
 	}
+	changed, err := CompareRuntimeIdentity(expected, actual)
+	if changed && err == nil {
+		slog.WarnContext(ctx, "Runtime executable changed; continuing with current executable",
+			"adapter_id", expected.AdapterID, "expected_sha256", expected.ExecutableSHA256,
+			"actual_sha256", actual.ExecutableSHA256)
+	}
+	return changed, err
+}
+
+// CompareRuntimeIdentity treats executable updates as advisory without accepting
+// a different protocol or network wrapper/helper, or incomplete digest evidence.
+func CompareRuntimeIdentity(expected, actual domain.RuntimeIdentity) (bool, error) {
+	if err := expected.Validate(); err != nil {
+		return false, err
+	}
+	if err := actual.Validate(); err != nil {
+		return false, err
+	}
+	changed := actual.ExecutableSHA256 != expected.ExecutableSHA256
+	if changed && (actual.ExecutableSHA256 == "" || expected.ExecutableSHA256 == "") {
+		return false, domain.ErrConflict("runtime executable identity is missing")
+	}
+	actual.ExecutableSHA256 = expected.ExecutableSHA256
 	if actual != expected {
-		return domain.ErrConflict("runtime identity changed")
+		return false, domain.ErrConflict("runtime identity changed")
 	}
-	return nil
+	return changed, nil
+}
+
+// EmitExecutableChangeWarning uses the same public event projection as Runtime
+// output. No host paths, process environment or external diagnostics are copied.
+func EmitExecutableChangeWarning(ctx context.Context, sink openruntime.EventSink) error {
+	if sink == nil {
+		return nil // VerifyRuntimeIdentity already recorded a server-side warning.
+	}
+	return sink.Emit(ctx, openruntime.RuntimeEvent{
+		Type: "identity.warning", OccurredAt: time.Now().UTC(),
+		Payload: []byte(`{"stage":"preflight","status":"warning","text":"Warning: Runtime executable changed since registration; continuing with the current executable."}`),
+	})
 }
 
 func validHelperVersion(value string) bool {
