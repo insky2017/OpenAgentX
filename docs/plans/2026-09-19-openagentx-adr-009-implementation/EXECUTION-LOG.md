@@ -810,6 +810,23 @@ push/merge/安装来“修正”差异。
   显式 no-proxy/connect-timeout10/max-time20 的同 endpoint 请求约0.66s exit0、HTTP200/health ok；
   真实浏览器同请求也HTTP200。记录探针环境限制，不改全局代理/Worker策略，不写代理值或凭据。
 
+### 2026-09-22 16:48 恢复现场验收：保存提示不等于应用回执
+
+- 用户报告“保存成功”后恢复必要核验，产品代码/安装 binary 未变；正式 Attach 仍显示 gen51 online、
+  primary unavailable、旧 Task queued。只读 binding 仍为 version5/applied gen47。
+- 新 inherit 测试于16:48:09成功（gen51/binding revision5），但正式命令记录和 Event Journal 中只有
+  mode_test，无本次 mode_publish / binding pending / apply。没有将用户看到的提示写成后台应用成功。
+- 有界源码审查定位 `NetworkSettings.handleSaveAndApply` 的旧 fallback：当最新匹配测试尚未成功时，
+  仅检查 mode 和 desired_status=applied 就提示“当前 Runtime 已经生效”，缺少 applied Worker/generation
+  对齐。这是误导性成功提示；现有严格服务端 fencing 没有被绕过。
+- 当前最小处置为：核实最新测试已成功后，请用户在其现有 owner Web 会话刷新数据，仅重发一次保存/应用；
+  主代理以正式 API/Worker 回执判定，保留原绑定，不扩 CLI scope、不改 DB、不自动实现 ADR-007。
+  如果同一路径仍失败，停止让用户重复尝试，记录实际阻断并另行收敛页面修正。
+- 已恢复真实 pane0 观察和一次60s正式 Follow，等待网络绑定恢复后再创建低影响验收 Task，避免再堆积 queued。
+- 16:55预定检查点仍为 binding version5/applied gen47，最近 mode_publish 仍在9月11日；正式 Follow
+  只观察到旧 Task 的 Mailbox claim，未观察到 Run 创建，不标记 E2E 通过。已向用户说明实际未应用并给出
+  一次刷新后保存的纠正步骤；当前验证器没有可用 Web owner session，不能通过 CLI 越权执行网络发布。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结

@@ -118,3 +118,18 @@ Pane is dead (status 0, Tue Sep 22 16:10:18 2026)
   正确写成完整 E2E。原请求仅查询时间，不需要文件副作用；后续使用唯一标记、无文件写入的低影响任务。
 - 原候选普通/race/Web/systemd/隔离 E2E 证据有效，产品代码和候选未变，本批不重复全仓长测试。
 - 未 push/merge、未修改 main 或 steadyflow 父仓，未修改冻结 ADR。安装授权不扩大为 ADR-006/007 实现。
+
+## 2026-09-22 16:48–16:55 保存提示与实际应用复核
+
+用户报告保存成功后，正式 Attach 仍为 gen51 online / primary unavailable，原 Task 仍 queued/version1。
+只读核对确认：16:48:09 最新 inherit 测试已成功，目标 gen51、binding revision5；但本轮没有 mode_publish
+命令、binding pending event 或 apply work，实际 binding 仍为9月11日的 version5/applied gen47。
+
+前端存在明确的误报分支：`NetworkSettings.handleSaveAndApply` 在最新匹配测试尚未成功时，只检查旧
+binding 的 mode 和 desired_status=applied，便提示“当前 Runtime 已经生效”，没有校验 applied Worker /
+generation。该分支可以解释成功提示而无发布请求；未取得用户浏览器的请求记录，不将推断写成已复现的点击轨迹。
+
+最小恢复路径是先确认最新测试成功，再在用户现有 Web owner 会话刷新数据并仅保存一次，以实际 Worker
+回执为准。已经给出该操作提示；若仍不能发送正式发布请求，不再让用户循环测试/保存，应单独修复页面。
+16:55检查点仍未应用，真实 pane 和60s正式 Follow 仅显示旧 Task 的 Mailbox claim。本轮没有新增业务 Task、
+改产品代码或真实配置，继续保持 `installed-runtime-validation-blocked`，不宣称完整现场 E2E 通过。
