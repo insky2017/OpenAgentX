@@ -1049,6 +1049,50 @@ push/merge/安装来“修正”差异。
   credential/config/release为0600，binary/Web目录0755。main保持clean/ahead1于`3723c773`。
   本批在60分钟预算内完成，只提交安装报告和本日志作为证据，不push/merge，不改父仓或冻结ADR。
 
+### 2026-09-22 20:28：修复真实网页发送与回复闭环（用户继续要求）
+
+- 用户指出指挥台仍不能完成Worker/Backend回复闭环。本批60分钟（20:28–21:28），一个实现批次和
+  一次独立验证；预算到限报告真实阻断，不扩大到ADR-006/007、Diagnostic归属或自动重试旧任务。
+- 基线feature clean `bad2d6a`；运行binary仍`6d599ac`，daemon/Worker PID1686100/1687781、gen52、
+  online/primary healthy/NRestarts0。19:59新Task `task-17beccd5-0c86-4a26-b699-85294132a0e7`
+  目标为offline的orchestrator、queued且无Run。Web默认`selectedAgent || agents[0]`、刷新不保存
+  选择、筛选器不控制发送目标；create响应被丢弃，发送后未自动打开新Task。均裁定为本轮主链路修复。
+- 本轮结果：网页明确选择目标，刷新/直接入口不静默发给离线首项；提交后自动跟踪新Task的领取、
+  Runtime过程和回复。保留PC/手机发送布局、Web Cookie/CSRF、正式API和Task真实uncertain语义。
+- 正反证据：多Agent（offline orchestrator+online quote-service）、刷新与显式选择、无/多online
+  Agent、未知/离线目标禁发、一次请求/准确新Task焦点、发送成功后读取失败不得提示重新发送、
+  SSE/重连/草稿/移动布局、viewer/offline禁写。Go与服务无变化时只更新Web资源，保持gen52网络绑定。
+- 真实验收必须经正式Web创建低影响时间查询并核对Task/Run/Journal/页面回复；不以Console或CLI
+  创建替代Web发送证据。无可用owner Web登录时由用户在既有会话完成发送并反馈，清楚区分用户操作
+  与隔离浏览器证据；不获取密码/Cookie、不伪造Web登录。旧orchestrator任务只读保留，不迁移/重发。
+
+#### 20:45 Web实现与独立验证
+
+- 新`task-dispatch-state`沿正式agents/workers投影选择目标：只有唯一有效online Worker可自动选中；
+  显式/URL目标不回退，最新generation offline不借用旧online Worker。发送区有实际执行Agent
+  selector和Worker状态，URL保存选择；无目标/离线/lease过期/draining/连接未恢复均禁发，草稿保留。
+- `write`保留正式平铺CreateTaskResponse，发送确认与后续Observe读取分开；收到有效task_id后自动
+  打开该Task、清除旧筛选，执行过程默认展开。读取失败不能将已接受命令降为失败或诱导重发；
+  响应异常保留已接受提示，不使用伪造的Task快照fallback。reply继续正式messages与CAS。
+- 结果和回复优先于原指令展示；Runtime succeeded且error恰为business_effect_unverified时改为
+  核验提示，原Task status/error、Run事实和副作用来源仍完整保留。没有修改ADR-006终态语义。
+- 主代理`npm run test:observation`退出0（10/10），`npm run build`退出0；独立验证代理复核API字段/
+  目标/发送确认边界，无阻断；`test:network`退出0（7/7）、`test:pwa`退出0、diff退出0。展示顺序
+  集中修正后再build通过，复用未受影响测试；Go源码/服务配置未改，不重复Go全量/race。
+- 真实Chromium生产build+多Agent隔离fixture：桌面一次发送自动追踪task-created-1并显示回复；
+  手机一次发送自动追踪task-created-2；刷新保存quote-service及准确Task。显式orchestrator离线
+  禁发且刷新不改为quote-service。POST成功后注入overview503，task-created-3仍显示回复、draft
+  清空，三次操作合计只三次正式create路径请求。offline/online保留draft，viewer禁写。
+- 1440x1000、390x844、320x568无横溢；手机详情与composer实际高度相接。集中修正后390px回复
+  位于y350–414，composer从y596开始，回复首屏可见；320px详情保持可滚动区域。截图和fixture
+  在`/tmp/oax-composer-review.8PhydV/`，仅证明UI，不冒充真实鉴权/Runtime。
+- 失败保留：两次大块apply_patch分别因package.json和未匹配JSX上下文拒绝，均未部分写入；改为
+  基于现有上下文的局部patch。独立核对及时指出CreateTaskResponse为平铺receipt，正式实现/测试
+  使用task_id/task_version/task_status/sequence，不沿用旧单Agent fixture的嵌套Task假设。
+  agent-browser select存在版本参数错误，改为原生下拉框Home/方向键/Enter完成同一检查。
+- release scanner和冻结ADR/AGENTS摘要通过；即将仅安装新Web资源，binary仍6d599ac，保持当前
+  daemon/Worker/网络generation52。真实Web业务验收尚未完成，待后续追加；旧orchestrator任务保留。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结

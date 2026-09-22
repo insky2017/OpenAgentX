@@ -8,6 +8,7 @@ import {
   mergeLiveTaskDetail,
   sseResumeAfter,
 } from './task-observation-state.js'
+import { createdTaskID, dispatchTarget, taskProgress } from './task-dispatch-state.js'
 import NetworkSettings from './NetworkSettings.jsx'
 import './styles.css'
 
@@ -204,7 +205,7 @@ function App() {
   const [browserOnline, setBrowserOnline] = useState(navigator.onLine)
   const [streamState, setStreamState] = useState('connecting')
   const [draft, setDraft] = useState('')
-  const [selectedAgent, setSelectedAgent] = useState('')
+  const [selectedAgent, setSelectedAgent] = useState(() => new URLSearchParams(window.location.search).get('agent') || '')
   const [replyTask, setReplyTask] = useState(null)
   const [error, setError] = useState('')
   const [writing, setWriting] = useState(false)
@@ -222,7 +223,7 @@ function App() {
   const [loadingMoreTasks, setLoadingMoreTasks] = useState(false)
   const [taskRefreshTick, setTaskRefreshTick] = useState(0)
   const [taskView, setTaskView] = useState('content')
-  const [showRunLog, setShowRunLog] = useState(false)
+  const [showRunLog, setShowRunLog] = useState(() => new URLSearchParams(window.location.search).has('task'))
   const [newOutput, setNewOutput] = useState(false)
   const [loadingMoreEvents, setLoadingMoreEvents] = useState(false)
   const lastSequenceRef = useRef(0)
@@ -401,8 +402,13 @@ function App() {
     return byAgent
   }, [workers, now])
 
-  const targetAgent = selectedAgent || agentID(agents[0])
-  const organizationID = agents.find((agent) => agentID(agent) === targetAgent)?.organization_id || agents[0]?.organization_id || ''
+  const target = dispatchTarget(agents, workers, replyTask?.target_agent_id || selectedAgent, now)
+  const targetAgent = target.id
+  const organizationID = target.agent?.organization_id || ''
+  const canSubmit = canWrite && streamState === 'online' && target.ready
+  useEffect(() => {
+    if (!selectedAgent && !replyTask && target.ready) setSelectedAgent(target.id)
+  }, [selectedAgent, replyTask, target.id, target.ready])
   const attentionTasks = overviewTasks.filter((task) => ['waiting_input', 'waiting_approval'].includes(task.status))
   const onlineAgents = agents.filter((agent) => activeWorkers.get(agentID(agent))?.status === 'online').length
   const tasks = taskPage.tasks || []
@@ -428,7 +434,7 @@ function App() {
     setTaskDetail(null)
     setReplyTask(null)
     setTaskView('content')
-    setShowRunLog(false)
+    setShowRunLog(true)
     setNewOutput(false)
   }
 
@@ -601,9 +607,11 @@ function App() {
     else params.delete('task')
     if (tab === 'tasks') params.set('view', 'tasks')
     else params.delete('view')
+    if (selectedAgent) params.set('agent', selectedAgent)
+    else params.delete('agent')
     const query = params.toString()
     window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
-  }, [selectedTaskID, tab])
+  }, [selectedTaskID, tab, selectedAgent])
 
   useEffect(() => {
     if (selectedTaskID) loadTaskDetail(selectedTaskID)
@@ -720,7 +728,7 @@ function App() {
     setWriting(true)
     setError('')
     try {
-      await api(path, {
+      const receipt = await api(path, {
         method: 'POST',
         headers: {
           'X-CSRF-Token': session.csrf_token,
@@ -728,10 +736,12 @@ function App() {
         },
         body: JSON.stringify(body),
       })
-      await refreshOverview()
       taskListRefreshRef.current()
-      if (selectedTaskRef.current) await catchUpTaskDetail()
-      return true
+      // The command is already accepted. An observation failure must not turn
+      // this into a failed send or invite a duplicate submission.
+      refreshOverview().catch(() => setError('操作已被服务端接受，但状态刷新失败；请查看任务列表，不要重复发送。'))
+      if (selectedTaskRef.current) catchUpTaskDetail()
+      return { receipt }
     } catch (requestError) {
       setError(requestError.message)
       return false
@@ -757,7 +767,7 @@ function App() {
 
   const sendInstruction = async () => {
     const content = draft.trim()
-    if (!content || !targetAgent) return
+    if (!content || !targetAgent || !canSubmit) return
     if (replyTask) {
       const key = newCommandKey('message')
       const sent = await write(
@@ -783,7 +793,19 @@ function App() {
       },
       key,
     )
-    if (sent) setDraft('')
+    if (sent) {
+      setDraft('')
+      const id = createdTaskID(sent.receipt)
+      if (!id) {
+        setError('指令已被服务端接受，但返回的任务信息异常；请查看任务列表确认，不要重复发送。')
+        return
+      }
+      setTaskAgentFilter(targetAgent)
+      setTaskStatusFilter('')
+      setTaskTimeFilter('')
+      setTaskQuery('')
+      selectTask(id)
+    }
   }
 
   const cancelTask = async (task) => {
@@ -980,13 +1002,28 @@ function App() {
             </div>
             <div className={`workbench-main ${selectedTaskID ? 'has-selection' : ''}`}>
               <div className="composer">
+                <div className="composer-target">
+                  <label htmlFor="dispatch-agent">执行 Agent</label>
+                  <select id="dispatch-agent" value={replyTask?.target_agent_id || selectedAgent} disabled={writing || !!replyTask} onChange={(event) => setSelectedAgent(event.target.value)}>
+                    <option value="">请选择执行 Agent</option>
+                    {selectedAgent && !agents.some((agent) => agentID(agent) === selectedAgent) && <option value={selectedAgent}>所选 Agent 不存在</option>}
+                    {agents.map((agent) => {
+                      const id = agentID(agent)
+                      const state = dispatchTarget(agents, workers, id, now)
+                      return <option key={id} value={id}>{agent.display_name || id} ({id}) · {state.ready ? 'online' : state.worker?.status || 'offline'}</option>
+                    })}
+                  </select>
+                </div>
+                <p className={`composer-readiness ${target.ready ? '' : 'unavailable'}`} role="status">
+                  {streamState !== 'online' ? '连接未恢复，暂不能发送' : target.reason}
+                </p>
                 <div className="composer-label">
                   <label htmlFor="command">{replyTask ? `回复任务 ${taskID(replyTask)}` : `向 ${targetAgent || 'Agent'} 发送业务指令`}</label>
                   {replyTask && <button className="text-button" type="button" onClick={() => setReplyTask(null)}>改为新任务</button>}
                 </div>
                 <div>
-                  <textarea id="command" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="输入业务指令..." disabled={!canWrite || !targetAgent} rows={2} />
-                  <button className="send" type="button" disabled={!canWrite || !draft.trim() || !targetAgent} onClick={sendInstruction} aria-label="发送">↑</button>
+                  <textarea id="command" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="输入业务指令..." disabled={!canWrite} rows={2} />
+                  <button className="send" type="button" disabled={!canSubmit || !draft.trim()} onClick={sendInstruction} aria-label="发送">↑</button>
                 </div>
               </div>
               <div className={`detail-pane ${selectedTaskID ? 'open' : ''}`} aria-live="polite">
@@ -1004,11 +1041,12 @@ function App() {
                       <span className="eyebrow">{taskDetail.task.target_agent_id}</span>
                       <h2>{taskDetail.task.content?.split('\n')[0] || taskDetail.task.id}</h2>
                       <p>{taskDetail.task.id} · 更新于 {formatAge(taskDetail.task.updated_at)}</p>
+                      <p className="execution-progress" role="status">{taskProgress(taskDetail.task, latestRun, activeWorkers.get(taskDetail.task.target_agent_id))}</p>
                     </div>
                     <span className={`pill status-${taskDetail.task.status}`}>{taskDetail.task.status}</span>
                   </div>
                   <div className="detail-actions">
-                    {taskDetail.task.status === 'waiting_input' && <button className="outline" type="button" disabled={!canWrite} onClick={() => { setReplyTask(taskDetail.task); setDraft(''); document.getElementById('command')?.focus() }}>回复</button>}
+                    {taskDetail.task.status === 'waiting_input' && <button className="outline" type="button" disabled={!canWrite} onClick={() => { setSelectedAgent(taskDetail.task.target_agent_id); setReplyTask(taskDetail.task); setDraft(''); document.getElementById('command')?.focus() }}>回复</button>}
                     {!terminalTask(taskDetail.task.status) && taskDetail.task.status !== 'cancel_requested' && <button className="outline danger" type="button" disabled={!canWrite} onClick={() => cancelTask(taskDetail.task)}>取消任务</button>}
                     <button className={`outline ${showRunLog ? 'active' : ''}`} type="button" onClick={() => setShowRunLog((prev) => !prev)}>
                       {showRunLog ? '收起运行日志' : '查看运行日志'}
@@ -1018,12 +1056,6 @@ function App() {
                   {taskDetailState === 'replay_error' && <div className="replay-error" role="alert"><span>事件回放失败，当前内容可能不是最新。</span><button className="outline" type="button" onClick={() => replayRetryRef.current()}>重试</button></div>}
                   <div className="detail-scroll" ref={detailScrollRef} onScroll={(event) => { const node = event.currentTarget; readingLatestRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 48; if (readingLatestRef.current) setNewOutput(false) }}>
                     <div className="task-content-view">
-                      <div className="task-section">
-                        <div className="task-section-head">
-                          <h3 className="section-title">任务指令</h3>
-                        </div>
-                        <MarkdownContent value={taskDetail.task.content} />
-                      </div>
                       <div className="task-section task-result-section">
                         <div className="task-section-head">
                           <h3 className="section-title">执行结果</h3>
@@ -1033,26 +1065,32 @@ function App() {
                             </span>
                           )}
                         </div>
+                        {resultBody ? (
+                          <MarkdownContent value={resultBody} />
+                        ) : (
+                          !taskDetail.task.error && (
+                            <div className="empty-state">
+                              {terminalTask(taskDetail.task.status) ? '任务尚未产生最终结果' : taskProgress(taskDetail.task, latestRun, activeWorkers.get(taskDetail.task.target_agent_id))}
+                            </div>
+                          )
+                        )}
                         {latestRun?.turn_result && (
                           <p className="result-evidence">
                             副作用来源：{latestRun.turn_result.side_effects_source === 'runtime_reported' ? `Runtime 自报${latestRun.turn_result.runtime_side_effects_known ? '已知' : '未知'}` : '未记录'} · 业务核验：未记录
                           </p>
                         )}
                         {taskDetail.task.error && (
-                          <div className="diagnostic">
-                            <strong>执行诊断</strong>
+                          <div className={`diagnostic ${taskDetail.task.error === 'business_effect_unverified' && latestRun?.status === 'succeeded' ? 'verification-note' : ''}`}>
+                            <strong>{taskDetail.task.error === 'business_effect_unverified' && latestRun?.status === 'succeeded' ? 'Runtime 已返回，业务效果尚未独立核验' : '执行诊断'}</strong>
                             <pre>{taskDetail.task.error}</pre>
                           </div>
                         )}
-                        {resultBody ? (
-                          <MarkdownContent value={resultBody} />
-                        ) : (
-                          !taskDetail.task.error && (
-                            <div className="empty-state">
-                              {terminalTask(taskDetail.task.status) ? '任务尚未产生最终结果' : '任务正在执行中，尚未产生最终结果...'}
-                            </div>
-                          )
-                        )}
+                      </div>
+                      <div className="task-section">
+                        <div className="task-section-head">
+                          <h3 className="section-title">任务指令</h3>
+                        </div>
+                        <MarkdownContent value={taskDetail.task.content} />
                       </div>
                       {followUpMessages.length > 0 && (
                         <div className="task-section task-conversation-section">
@@ -1075,7 +1113,7 @@ function App() {
                       {showRunLog && (
                         <div className="task-section task-runlog-section">
                           <div className="task-section-head">
-                            <h3 className="section-title">底层运行事件流水 (Run Timeline)</h3>
+                            <h3 className="section-title">执行过程</h3>
                             <button className="mini-close" type="button" onClick={() => setShowRunLog(false)} aria-label="收起日志">×</button>
                           </div>
                           <RunTimeline detail={taskDetail} onLoadMore={loadMoreEvents} loadingMore={loadingMoreEvents} />
