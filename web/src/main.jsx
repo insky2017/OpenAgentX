@@ -977,6 +977,8 @@ function App() {
                 {taskListState === 'loading' && tasks.length > 0 && <div className="inline-loading" role="status">正在更新任务列表...</div>}
               </div>
               {taskPage.has_more && <button className="load-more" type="button" disabled={loadingMoreTasks} onClick={() => loadTaskPage(taskPage.next_cursor, true)}>{loadingMoreTasks ? '加载中...' : '加载更多任务'}</button>}
+            </div>
+            <div className={`workbench-main ${selectedTaskID ? 'has-selection' : ''}`}>
               <div className="composer">
                 <div className="composer-label">
                   <label htmlFor="command">{replyTask ? `回复任务 ${taskID(replyTask)}` : `向 ${targetAgent || 'Agent'} 发送业务指令`}</label>
@@ -987,8 +989,7 @@ function App() {
                   <button className="send" type="button" disabled={!canWrite || !draft.trim() || !targetAgent} onClick={sendInstruction} aria-label="发送">↑</button>
                 </div>
               </div>
-            </div>
-            <div className={`detail-pane ${selectedTaskID ? 'open' : ''}`} aria-live="polite">
+              <div className={`detail-pane ${selectedTaskID ? 'open' : ''}`} aria-live="polite">
               {!selectedTaskID && <div className="detail-empty"><span className="detail-icon">◎</span><h3>选择一个任务</h3><p>从左侧列表打开详情，查看运行事实与结果。</p></div>}
               {selectedTaskID && taskDetailState === 'loading' && <div className="detail-empty" role="status"><p>正在加载任务详情...</p></div>}
               {selectedTaskID && taskDetailState === 'missing' && <div className="detail-empty"><h3>任务不存在</h3><p>任务已删除或该链接已失效。</p><button className="outline" type="button" onClick={closeTaskDetail}>返回列表</button></div>}
@@ -1084,6 +1085,7 @@ function App() {
                   </div>
                 </>
               )}
+              </div>
             </div>
           </section>
         )}

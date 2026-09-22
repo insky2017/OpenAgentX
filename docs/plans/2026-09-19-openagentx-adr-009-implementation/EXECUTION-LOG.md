@@ -973,6 +973,46 @@ push/merge/安装来“修正”差异。
   `LIVE-02`不在本批范围。未重试旧Task、未安装/重启/发布网络、未操作真实DB/socket/tmux或父仓。
 - 独立验证已结束；只提交本批源码、测试、安装指南和本日志，不push。main仍clean/ahead1于3723c773。
 
+### 2026-09-22 重新安装、发送入口布局与真实任务（用户授权）
+
+- 用户明确要求安装包含`8b621ce`的构建、把左侧末尾发送指令入口移到合适位置，支持手机/PC，并确保
+  quote-service真实执行一次。本批预算60分钟（19:20–20:20），一实现批次、一次独立验证；不自动重试
+  原uncertain任务、不改ADR-006/007或Diagnostic归属，不push/merge/修改父仓。
+- 开始时feature clean `8b621ce`，main clean `3723c773`/ahead1；installed仍为`5bebf14`，daemon
+  PID830503、Worker PID835790/gen51、Console为旧构建。正式Attach：primary healthy、无active Run。
+- 执行：实现共享发送区移到主内容顶部；真实浏览器检查桌面/手机列表及详情/输入/离线禁写；提交后从
+  clean源码构建与备份，graceful drain，原子安装binary/Web，恢复daemon/Worker/Console，正式入口
+  新建一次只读时间查询并核对Run/回复/Journal。网络绑定必须走当前generation的正式测试/应用回执。
+
+| 验收 | 证据 |
+|---|---|
+| 更易找到发送入口 | 桌面主内容区顶部；320/390px手机列表和详情都能输入/发送，单一draft不丢，无横向溢出 |
+| 交互/权限不变 | 发送仅调用原正式API一次；reply focus、SSE更新、offline/viewer禁写仍成立 |
+| 安装可追溯 | 源码SHA、clean build、binary/Web摘要、备份与release记录、运行进程exe一致 |
+| 真实quote-service | 当前Worker/network回执healthy；新Task真实Runtime succeeded且时间回复可核对；不把既有Task uncertain语义伪称业务成功 |
+| 生命周期 | Task完成后Worker继续online/idle，退出/更新Console不停止Worker，保留其他pane现场 |
+
+#### 发送入口实现与独立浏览器验证
+
+- `web/src/main.jsx`仅将唯一composer移入主区；桌面在详情上方，手机列表固定在底部导航之上，详情
+  与composer用同一flex容器分配实际高度。沿用原draft、正式Control API、reply/CAS及权限逻辑。
+- 首版手机详情估算composer高度，独立复核后集中改为实际flex高度，避免回复标题换行遮挡详情；
+  320px长元信息可换行，发送/返回触控目标至少44px。未扩展Task/Runtime产品语义。
+- 独立真实Chromium验证生产build（隔离fixture，非真实业务E2E）：1440x1000、390x844、320x568
+  均无页面横向溢出且只有一个输入框；手机详情底部与composer顶部精确相接，回复输入获得焦点；
+  列表到详情保留draft，SSE及offline/online切换保留已输入内容，offline和viewer均禁写。
+- 桌面create只产生一次`POST /api/control/v1/tasks`；手机reply只产生一次正式messages请求并带
+  `expected_version=3`。真实浏览器无console/page error。截图及fixture证据在
+  `/tmp/oax-composer-review.8PhydV/`；不将模拟鉴权/任务作为真实Runtime证据。
+- 命令退出0：`npm run test:observation`（4/4）、`npm run test:network`（7/7）、
+  `npm run test:pwa`、`npm run build`（修正后重建）、release scanner、Worker template静态检查、
+  `git diff --check`。Go源码未再变动，复用上节`8b621ce`全仓Go/race/vet证据。
+- 工具失败保留：新agent-browser session缺少本机Chromium executable，改用既有运行浏览器的自有
+  标签页；`tab new URL`仅打开blank，随后显式open；该版本`find nth`返回参数错误，改用已知DOM
+  selector完成同一点击。未下载浏览器、未影响原登录标签页。
+- 19:33前尚未安装/重启或发送真实任务；旧binary/Web/release/Worker配置已复制到0700备份目录
+  `/home/sky/.openagentx/backups/runtime-warning-20260922.ZxKiri`，后续追加实际安装及Runtime证据。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结
