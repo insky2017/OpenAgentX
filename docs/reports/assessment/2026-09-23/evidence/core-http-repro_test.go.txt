@@ -1,0 +1,159 @@
+package panel
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	openapi "openagentx/internal/api"
+	"openagentx/internal/auth/web"
+	"openagentx/internal/domain"
+	openruntime "openagentx/internal/runtime"
+)
+
+// Assessment-only characterization tests. A PASS confirms the observed defect,
+// not acceptance of this behavior. All identities/databases are temporary fixtures.
+func TestAssessmentOperatorCrossOrganizationAccepted(t *testing.T) {
+	f := newPanelIntegrationFixture(t, false)
+	ctx := context.Background()
+	if err := f.repository.CreateOrganization(ctx, &domain.Organization{ID: "org-other", Name: "Other", Status: domain.IdentityActive}, panelEvent("assessment-org", "organization.created", "organization", "org-other", "human-owner")); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.repository.CreatePrincipal(ctx, &domain.Principal{ID: "assessment-operator", Kind: domain.PrincipalHuman, DisplayName: "Operator", Status: domain.IdentityActive}, panelEvent("assessment-principal", "principal.created", "principal", "assessment-operator", "human-owner")); err != nil {
+		t.Fatal(err)
+	}
+	password := "isolated assessment password"
+	digest, err := web.HashPassword(password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = f.manager.AddUser(web.User{ID: "assessment-operator", WebUserID: "assessment-web-operator", Username: "assessment-operator", Roles: []web.Role{web.RoleOperator}, PasswordDigest: digest}); err != nil {
+		t.Fatal(err)
+	}
+	session, err := f.manager.Login("assessment-operator", password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cookieRecorder := httptest.NewRecorder()
+	web.SetSessionCookie(cookieRecorder, session)
+	server := httptest.NewServer(panelIntegrationHandler(t, f))
+	defer server.Close()
+	var out openapi.CreateTaskResponse
+	response := panelPOST(t, server.Client(), server.URL+"/api/control/v1/tasks", cookieRecorder.Result().Cookies()[0], session.CSRFToken, "assessment-cross-org", openapi.CreateTaskRequest{Meta: openapi.CommandMeta{IdempotencyKey: "assessment-cross-org"}, TargetAgentID: "quote", OrganizationID: "org-other", DispatchMode: domain.DispatchModeDirect, Content: "isolation only"}, &out)
+	got, err := f.repository.GetTask(ctx, out.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	agent, _, err := f.repository.GetAgent(ctx, got.TargetAgentID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != 200 || got.OrganizationID == agent.OrganizationID {
+		t.Fatalf("unexpected behavior status=%d", response.StatusCode)
+	}
+	t.Logf("DEFECT authenticated operator HTTP=%d Task.organization=%s target Agent.organization=%s dispatch=%s; no organization/direct assignment provisioned", response.StatusCode, got.OrganizationID, agent.OrganizationID, got.DispatchMode)
+}
+
+func TestAssessmentWaitingInputCancelHasNoTerminalPath(t *testing.T) {
+	f := newPanelIntegrationFixture(t, false)
+	ctx := context.Background()
+	if err := f.repository.FinishRun(ctx, f.guard, f.run.ID, 2, f.run.Version, openruntime.TurnResult{Status: openruntime.TurnResultWaitingInput, Result: "need input", SideEffectsKnown: true}, nil, 0, nil, panelEvent("assessment-task-wait", "task.waiting_input", "task", f.task.ID, "agent-principal"), panelEvent("assessment-run-finish", "run_attempt.finished", "run_attempt", f.run.ID, "agent-principal")); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.repository.CreatePrincipal(ctx, &domain.Principal{ID: "assessment-daemon", Kind: domain.PrincipalSystem, DisplayName: "Daemon", Status: domain.IdentityActive}, panelEvent("assessment-daemon-create", "principal.created", "principal", "assessment-daemon", "human-owner")); err != nil {
+		t.Fatal(err)
+	}
+	task, err := f.repository.GetTask(ctx, f.task.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := httptest.NewServer(panelIntegrationHandler(t, f))
+	defer server.Close()
+	response := panelPOST(t, server.Client(), server.URL+"/api/control/v1/tasks/"+task.ID+"/cancel", f.cookie, f.session.CSRFToken, "assessment-wait-cancel", openapi.CancelTaskRequest{Meta: openapi.CommandMeta{IdempotencyKey: "assessment-wait-cancel", ExpectedVersion: task.Version}}, nil)
+	cancelBody, _ := io.ReadAll(response.Body)
+	response.Body.Close()
+	if response.StatusCode != 400 || !strings.Contains(string(cancelBody), "find active run for cancel: resource not found") {
+		t.Fatalf("unexpected response status=%d body=%s", response.StatusCode, cancelBody)
+	}
+	if err = f.repository.ReconcileExpired(ctx); err != nil {
+		t.Fatal(err)
+	}
+	got, err := f.repository.GetTask(ctx, task.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Status != domain.TaskStatusWaitingInput || got.Version != task.Version {
+		t.Fatalf("cancel failed to roll back: status=%s version=%d", got.Status, got.Version)
+	}
+	t.Logf("DEFECT waiting_input cancel HTTP=%d error=%s; task remains %s version=%d", response.StatusCode, strings.TrimSpace(string(cancelBody)), got.Status, got.Version)
+
+}
+
+func TestAssessmentExecutionOverrideAcceptedAndReplayIgnoresChange(t *testing.T) {
+	f := newPanelIntegrationFixture(t, false)
+	server := httptest.NewServer(panelIntegrationHandler(t, f))
+	defer server.Close()
+	// Obtain the supported shape from the registered worker planner contract.
+	req := openapi.CreateTaskRequest{Meta: openapi.CommandMeta{IdempotencyKey: "assessment-execution"}, TargetAgentID: "quote", OrganizationID: "org-main", DispatchMode: domain.DispatchModeDirect, Content: "same content"}
+	var first openapi.CreateTaskResponse
+	response := panelPOST(t, server.Client(), server.URL+"/api/control/v1/tasks", f.cookie, f.session.CSRFToken, req.Meta.IdempotencyKey, req, &first)
+	if response.StatusCode != 200 {
+		t.Fatal(response.StatusCode)
+	}
+	// JSON form is used to deliberately pass a valid request field across the HTTP boundary.
+	var body map[string]any
+	raw, _ := json.Marshal(req)
+	if err := json.Unmarshal(raw, &body); err != nil {
+		t.Fatal(err)
+	}
+	body["execution"] = map[string]any{"adapter_id": "agy", "backend_id": "must-not-be-selected", "model": "explicit-user-model", "reasoning": map[string]any{"mode": "backend_default"}, "timeout": 60000000000, "session": map[string]any{"mode": "new", "context_id": "assessment-context"}}
+	payload, _ := json.Marshal(body)
+	request, _ := http.NewRequest("POST", server.URL+"/api/control/v1/tasks", bytes.NewReader(payload))
+	request.AddCookie(f.cookie)
+	request.Header.Set("X-CSRF-Token", f.session.CSRFToken)
+	request.Header.Set("Idempotency-Key", req.Meta.IdempotencyKey)
+	result, err := server.Client().Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer result.Body.Close()
+	b, _ := io.ReadAll(result.Body)
+	if result.StatusCode != 200 {
+		t.Fatalf("shape requires adjustment: status=%d body=%s", result.StatusCode, b)
+	}
+	var second openapi.CreateTaskResponse
+	if err = json.Unmarshal(b, &second); err != nil {
+		t.Fatal(err)
+	}
+	if first.TaskID != second.TaskID {
+		t.Fatal("expected replay")
+	}
+	t.Logf("DEFECT same key without execution then explicit differing execution: both HTTP=200 and same Task; execution silently absent from durable Task/idempotency")
+}
+
+func TestAssessmentQueuedTaskCancelRejected(t *testing.T) {
+	f := newPanelIntegrationFixture(t, false)
+	server := httptest.NewServer(panelIntegrationHandler(t, f))
+	defer server.Close()
+	var created openapi.CreateTaskResponse
+	res := panelPOST(t, server.Client(), server.URL+"/api/control/v1/tasks", f.cookie, f.session.CSRFToken, "assessment-queued", openapi.CreateTaskRequest{Meta: openapi.CommandMeta{IdempotencyKey: "assessment-queued"}, TargetAgentID: "quote", OrganizationID: "org-main", DispatchMode: domain.DispatchModeDirect, Content: "queued isolation only"}, &created)
+	if res.StatusCode != 200 {
+		t.Fatal(res.StatusCode)
+	}
+	response := panelPOST(t, server.Client(), server.URL+"/api/control/v1/tasks/"+created.TaskID+"/cancel", f.cookie, f.session.CSRFToken, "assessment-queued-cancel", openapi.CancelTaskRequest{Meta: openapi.CommandMeta{IdempotencyKey: "assessment-queued-cancel", ExpectedVersion: created.TaskVersion}}, nil)
+	defer response.Body.Close()
+	b, _ := io.ReadAll(response.Body)
+	got, err := f.repository.GetTask(context.Background(), created.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != 400 || got.Status != domain.TaskStatusQueued {
+		t.Fatalf("unexpected cancel behavior status=%d task=%s body=%s", response.StatusCode, got.Status, b)
+	}
+	t.Logf("DEFECT newly queued task cancel HTTP=%d error=%s; Task remains queued and runnable", response.StatusCode, strings.TrimSpace(string(b)))
+}

@@ -1,0 +1,107 @@
+--- a/internal/cli/console/workflow_integration_test.go
++++ b/internal/cli/console/workflow_integration_test.go
+@@ -34,7 +34,7 @@
+ 	input  string
+ }
+ 
+-func TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident(t *testing.T) {
++func TestAssessmentConsoleJourney(t *testing.T) {
+ 	for _, binary := range []string{"go", "script", "tmux", "sh", "sleep"} {
+ 		if _, err := exec.LookPath(binary); err != nil {
+ 			t.Skipf("%s is required for the isolated workflow", binary)
+@@ -166,7 +166,8 @@
+ 	}
+ 
+ 	initCommand := "openagentx fleet init --agent quote-service --worker-config quote-service=" + shellQuote(workerSource)
+-	runWorkflowCommand(t, environment, initCommand)
++	runWorkflowPTY(t, environment, "openagentx fleet init --worker-config quote-service="+shellQuote(workerSource), []workflowDialogStep{{prompt: "Agents:", input: "quote-service"}})
++	t.Log("ONBOARDING real PTY owner init, Agent apply, Console login, Fleet Agent selection and manifest import completed")
+ 	runWorkflowCommand(t, environment, initCommand)
+ 	runWorkflowCommand(t, environment, "openagentx fleet workspace")
+ 	runWorkflowCommand(t, environment, "openagentx fleet workspace")
+@@ -189,7 +190,7 @@
+ 	if initialAttach.WorkerInstanceID == "" || initialAttach.Generation <= 0 {
+ 		t.Fatalf("invalid initial Worker identity: %+v", initialAttach)
+ 	}
+-	bootstrapWorkflowNetworkBinding(t, httpBaseURL, initialAttach, filepath.Join(stateDir, "worker.log"))
++	t.Log("NETWORK deliberately not configured to reproduce first-use Console behavior")
+ 	observedOutput, stopObserver := startWorkflowOutputObserver(t, client, "quote-service")
+ 	t.Cleanup(stopObserver)
+ 
+@@ -206,7 +207,8 @@
+ 		command := exec.Command(tmuxBinary, "-L", tmuxSocket, "kill-server")
+ 		_ = command.Run()
+ 	})
+-	tmux("select-window", "-t", "=OAX:=quote-service")
++	t.Logf("WORKSPACE_INITIAL %s", strings.TrimSpace(tmux("list-panes", "-a", "-F", "#{session_name}:#{window_name}.#{pane_index} current_command=#{pane_current_command} dead=#{pane_dead} active_window=#{window_active}")))
++    tmux("select-window", "-t", "=OAX:=quote-service")
+ 	for range 2 {
+ 		tmux("split-window", "-d", "-t", "=OAX:=quote-service", "sleep", consoleTTYFixtureSentinelSeconds)
+ 	}
+@@ -226,6 +228,23 @@
+ 		t.Fatalf("dispatch outcome not visible: %s", ansi.Strip(terminal.String()))
+ 	}
+ 	firstTask := waitForWorkflowTaskCount(t, client, "quote-service", 1)[0]
++    time.Sleep(3*time.Second)
++    snapshot, snapshotErr := client.TaskSnapshot(context.Background(), "quote-service", firstTask.TaskID)
++    if snapshotErr != nil { t.Fatal(snapshotErr) }
++    t.Logf("NO_NETWORK_UI status=%s latest_run_present=%t",snapshot.Task.Status,snapshot.LatestRun!=nil)
++    t.Logf("SCREEN_NO_NETWORK\n%s",tmux("capture-pane","-p","-t","=OAX:=quote-service.0"))
++    writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, "/status")
++    if !waitForRenderedTerminalText(terminal,"Status",5*time.Second) {t.Fatal("status title missing")}
++    time.Sleep(200*time.Millisecond)
++    t.Logf("SCREEN_NO_NETWORK_STATUS_SMALL\n%s",tmux("capture-pane","-p","-t","=OAX:=quote-service.0"))
++    tmux("resize-pane","-Z","-t","=OAX:=quote-service.0")
++    time.Sleep(200*time.Millisecond)
++    t.Logf("SCREEN_NO_NETWORK_STATUS_ZOOMED\n%s",tmux("capture-pane","-p","-t","=OAX:=quote-service.0"))
++    _, _ = stdin.Write([]byte("\x1b[6~"))
++    time.Sleep(200*time.Millisecond)
++    t.Logf("SCREEN_NO_NETWORK_STATUS_AFTER_PAGEDOWN\n%s",tmux("capture-pane","-p","-t","=OAX:=quote-service.0"))
++    return
++
+ 	firstWaiting := waitForWorkflowTaskStatus(t, client, "quote-service", firstTask.TaskID, domain.TaskStatusWaitingInput,
+ 		filepath.Join(stateDir, "worker.log"))
+ 	if firstWaiting.LatestRun == nil || firstWaiting.LatestRun.WorkerInstanceID != initialAttach.WorkerInstanceID ||
+@@ -255,7 +274,9 @@
+ 		}
+ 	}
+ 
+-	writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, "/diagnostic")
++	t.Log("TASK first dispatch -> waiting_input -> focused steer -> succeeded; TUI showed both Task outcome and Runtime reply")
++    t.Logf("SCREEN_TASK_REPLY\n%s", tmux("capture-pane", "-p", "-t", "=OAX:=quote-service.0"))
++    writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, "/diagnostic")
+ 	if !waitForRenderedTerminalText(terminal, "mode diagnostic", 15*time.Second) {
+ 		stopAttach()
+ 		t.Fatalf("Diagnostic mode did not open: %s", ansi.Strip(terminal.String()))
+@@ -276,7 +297,8 @@
+ 		t.Fatalf("Normal mode did not resume: %s", ansi.Strip(terminal.String()))
+ 	}
+ 
+-	writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, "/quit")
++	t.Log("TUI diagnostic -> normal succeeded")
++    writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, "/quit")
+ 	waitForWorkflowPaneExit(t, tmux, terminal, stopAttach)
+ 	stopAttach()
+ 	_ = attach
+@@ -301,6 +323,21 @@
+ 	}
+ 
+ 	assertWorkflowFilesAndCalls(t, home, stateDir)
++    t.Log("RESIDENT second task succeeded after Console quit with same Worker PID/instance/generation")
++    duplicate, duplicateErr := client.Dispatch(context.Background(), openapi.CreateTaskRequest{
++        Meta: openapi.CommandMeta{IdempotencyKey: "workflow-second-task"}, TargetAgentID: "quote-service",
++        OrganizationID: "default", DispatchMode: domain.DispatchModeDirect, Content: "second resident Worker task",
++    })
++    if duplicateErr != nil || duplicate.TaskID != second.TaskID { t.Fatalf("duplicate idempotency failure: err=%v", duplicateErr) }
++    tasks, tasksErr := client.ListTaskOptions(context.Background(), "quote-service")
++    if tasksErr != nil || len(tasks) != 2 { t.Fatalf("duplicate task count=%d err=%v",len(tasks),tasksErr) }
++    t.Log("REPEAT same dispatch idempotency key returned same Task ID, still exactly 2 tasks")
++    t.Logf("REENTRY workspace=%s",runWorkflowCommand(t, environment,"openagentx fleet workspace"))
++    t.Logf("REENTRY up=%s",runWorkflowCommand(t, environment,"openagentx fleet up"))
++    t.Logf("REENTRY before_explicit_recovery=%s",strings.TrimSpace(tmux("list-panes", "-t", "=OAX:=quote-service", "-F", "index=#{pane_index} dead=#{pane_dead} current_command=#{pane_current_command}")))
++    t.Logf("REENTRY recovery=%s",runWorkflowCommand(t, environment,"openagentx fleet workspace --respawn-dead"))
++    t.Logf("STOP result=%s",runWorkflowCommand(t, environment,"openagentx fleet down"))
++    t.Logf("STOP status=%s",runWorkflowCommand(t, environment,"openagentx fleet status"))
+ }
+ 
+ func reserveWorkflowHTTPAddress(t *testing.T) string {

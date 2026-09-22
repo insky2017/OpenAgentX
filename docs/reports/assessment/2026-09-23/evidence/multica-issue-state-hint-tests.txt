@@ -1,0 +1,55 @@
+start=2026-09-23T00:48:42.864557+08:00
+command=go test -race -count=1 -v /tmp/oax-multica-pure-checks-20260923/issue-state-hint/issue_state_instructions.go /tmp/oax-multica-pure-checks-20260923/issue-state-hint/issue_state_instructions_test.go
+boundary=unchanged named files and their upstream tests, standard library only, not full package/runtime integration
+=== RUN   TestBuildIssueStateHintUnchangedReplacesTheRead
+=== PAUSE TestBuildIssueStateHintUnchangedReplacesTheRead
+=== RUN   TestBuildIssueStateHintNamesChangedFields
+=== PAUSE TestBuildIssueStateHintNamesChangedFields
+=== RUN   TestBuildIssueStateHintFallsBackToTheRead
+=== PAUSE TestBuildIssueStateHintFallsBackToTheRead
+=== RUN   TestBuildIssueStateHintRendersUnassigned
+=== PAUSE TestBuildIssueStateHintRendersUnassigned
+=== CONT  TestBuildIssueStateHintUnchangedReplacesTheRead
+=== CONT  TestBuildIssueStateHintNamesChangedFields
+--- PASS: TestBuildIssueStateHintUnchangedReplacesTheRead (0.00s)
+=== CONT  TestBuildIssueStateHintFallsBackToTheRead
+--- PASS: TestBuildIssueStateHintNamesChangedFields (0.00s)
+=== RUN   TestBuildIssueStateHintFallsBackToTheRead/cold_start
+=== CONT  TestBuildIssueStateHintRendersUnassigned
+=== RUN   TestBuildIssueStateHintRendersUnassigned/both_empty
+=== PAUSE TestBuildIssueStateHintFallsBackToTheRead/cold_start
+=== PAUSE TestBuildIssueStateHintRendersUnassigned/both_empty
+=== RUN   TestBuildIssueStateHintFallsBackToTheRead/resumed_but_delta_unknown
+=== PAUSE TestBuildIssueStateHintFallsBackToTheRead/resumed_but_delta_unknown
+=== RUN   TestBuildIssueStateHintRendersUnassigned/type_without_id
+=== RUN   TestBuildIssueStateHintFallsBackToTheRead/compared_but_resume_dropped
+=== PAUSE TestBuildIssueStateHintRendersUnassigned/type_without_id
+=== PAUSE TestBuildIssueStateHintFallsBackToTheRead/compared_but_resume_dropped
+=== RUN   TestBuildIssueStateHintRendersUnassigned/id_without_type
+=== RUN   TestBuildIssueStateHintFallsBackToTheRead/known_flag_without_issue_state
+=== PAUSE TestBuildIssueStateHintFallsBackToTheRead/known_flag_without_issue_state
+=== PAUSE TestBuildIssueStateHintRendersUnassigned/id_without_type
+=== CONT  TestBuildIssueStateHintRendersUnassigned/type_without_id
+=== CONT  TestBuildIssueStateHintRendersUnassigned/id_without_type
+=== CONT  TestBuildIssueStateHintRendersUnassigned/both_empty
+=== RUN   TestBuildIssueStateHintFallsBackToTheRead/changed_fields_without_a_real_resume
+--- PASS: TestBuildIssueStateHintRendersUnassigned (0.00s)
+    --- PASS: TestBuildIssueStateHintRendersUnassigned/type_without_id (0.00s)
+    --- PASS: TestBuildIssueStateHintRendersUnassigned/id_without_type (0.00s)
+    --- PASS: TestBuildIssueStateHintRendersUnassigned/both_empty (0.00s)
+=== PAUSE TestBuildIssueStateHintFallsBackToTheRead/changed_fields_without_a_real_resume
+=== CONT  TestBuildIssueStateHintFallsBackToTheRead/cold_start
+=== CONT  TestBuildIssueStateHintFallsBackToTheRead/known_flag_without_issue_state
+=== CONT  TestBuildIssueStateHintFallsBackToTheRead/compared_but_resume_dropped
+=== CONT  TestBuildIssueStateHintFallsBackToTheRead/resumed_but_delta_unknown
+=== CONT  TestBuildIssueStateHintFallsBackToTheRead/changed_fields_without_a_real_resume
+--- PASS: TestBuildIssueStateHintFallsBackToTheRead (0.00s)
+    --- PASS: TestBuildIssueStateHintFallsBackToTheRead/cold_start (0.00s)
+    --- PASS: TestBuildIssueStateHintFallsBackToTheRead/compared_but_resume_dropped (0.00s)
+    --- PASS: TestBuildIssueStateHintFallsBackToTheRead/known_flag_without_issue_state (0.00s)
+    --- PASS: TestBuildIssueStateHintFallsBackToTheRead/resumed_but_delta_unknown (0.00s)
+    --- PASS: TestBuildIssueStateHintFallsBackToTheRead/changed_fields_without_a_real_resume (0.00s)
+PASS
+ok  	command-line-arguments	1.028s
+
+exit_code=0 duration_seconds=1.466

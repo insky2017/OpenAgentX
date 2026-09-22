@@ -1,0 +1,17 @@
+{
+  "raw_evidence_preserved": true,
+  "full_staged_check_exit": 2,
+  "finding_counts_by_file": {
+    "docs/reports/assessment/2026-09-23/evidence/console-journey-fixture.patch": 39,
+    "docs/reports/assessment/2026-09-23/evidence/console-no-network-ui-fixture.patch": 45,
+    "docs/reports/assessment/2026-09-23/evidence/console-no-network-ui-r2.txt": 8,
+    "docs/reports/assessment/2026-09-23/evidence/console-terminal-followup-fixture.patch": 39,
+    "docs/reports/assessment/2026-09-23/evidence/core-source-excerpts.txt": 25,
+    "docs/reports/assessment/2026-09-23/evidence/multica-source-evidence.txt": 120,
+    "docs/reports/assessment/2026-09-23/evidence/paseo-source-excerpts.txt": 213,
+    "docs/reports/assessment/2026-09-23/evidence/paseo-unit-tests.txt": 1
+  },
+  "non_evidence_findings": [],
+  "authored_document_check_exit": 0,
+  "reason": "原样patch的上下文前缀与制表符、终端布局空格、源码行号摘录和原始测试日志空行保留；不为消除格式告警改写证据。"
+}

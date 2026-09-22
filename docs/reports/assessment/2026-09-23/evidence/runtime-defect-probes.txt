@@ -1,0 +1,23 @@
+COMMAND go test -overlay=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/assessment/2026-09-23/evidence/runtime-probes-overlay.json -count=1 -v ./internal/runtime/codebuddy ./internal/runtime/acp -run ^TestAssessment
+=== RUN   TestAssessmentCodeBuddyEmptyOutputAndTimeout
+=== RUN   TestAssessmentCodeBuddyEmptyOutputAndTimeout/empty_exit_zero
+    adapter_test.go:392: empty_exit_zero status=succeeded result_bytes=0 error_nil=true side_effects_known=false
+    adapter_test.go:393: fail-closed contract violated: empty output classified succeeded
+=== RUN   TestAssessmentCodeBuddyEmptyOutputAndTimeout/resolved_timeout
+    adapter_test.go:402: declared_timeout_ms=40 elapsed_ms=255 status=succeeded error_nil=true
+    adapter_test.go:403: resolved execution timeout not enforced
+--- FAIL: TestAssessmentCodeBuddyEmptyOutputAndTimeout (0.26s)
+    --- FAIL: TestAssessmentCodeBuddyEmptyOutputAndTimeout/empty_exit_zero (0.00s)
+    --- FAIL: TestAssessmentCodeBuddyEmptyOutputAndTimeout/resolved_timeout (0.26s)
+FAIL
+FAIL	openagentx/internal/runtime/codebuddy	0.268s
+=== RUN   TestAssessmentACPContradictoryTerminal
+    adapter_test.go:95: contradictory_terminal status=succeeded error_field="actual execution failed" wait_error_nil=true
+    adapter_test.go:96: contradictory terminal accepted
+--- FAIL: TestAssessmentACPContradictoryTerminal (0.00s)
+FAIL
+FAIL	openagentx/internal/runtime/acp	0.010s
+FAIL
+
+{"exit_code": 1, "duration_seconds": 0.836}
+Fixture note: initial cancellation probe had a compile-only invalid struct field and was removed; control-plane agent owns cancellation reproduction.

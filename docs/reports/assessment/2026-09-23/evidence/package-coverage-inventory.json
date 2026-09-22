@@ -1,0 +1,208 @@
+{
+  "source": "34053c0",
+  "go_packages": 40,
+  "covered_packages": 40,
+  "missing": [],
+  "packages": {
+    "openagentx/internal/domain": {
+      "result": "ok",
+      "detail": "1.029s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/auth": {
+      "result": "ok",
+      "detail": "1.862s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/auth/cli": {
+      "result": "ok",
+      "detail": "10.521s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/auth/web": {
+      "result": "ok",
+      "detail": "3.495s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/api": {
+      "result": "ok",
+      "detail": "1.029s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/api/admin": {
+      "result": "ok",
+      "detail": "3.560s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/api/auth": {
+      "result": "ok",
+      "detail": "3.374s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/api/console": {
+      "result": "ok",
+      "detail": "10.577s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/api/panel": {
+      "result": "ok",
+      "detail": "40.268s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/api/workerapi": {
+      "result": "ok",
+      "detail": "1.038s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/controlplane": {
+      "result": "ok",
+      "detail": "10.540s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/persistence/sqlite": {
+      "result": "ok",
+      "detail": "17.105s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/persistence/sqlite/migrations": {
+      "result": "ok",
+      "detail": "2.337s",
+      "evidence": "core-package-tests.log"
+    },
+    "openagentx/internal/runtime/conformance": {
+      "result": "?",
+      "detail": "[no test files]",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/descriptors": {
+      "result": "?",
+      "detail": "[no test files]",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/fake": {
+      "result": "?",
+      "detail": "[no test files]",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/registry": {
+      "result": "?",
+      "detail": "[no test files]",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/worker": {
+      "result": "ok",
+      "detail": "1.636s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime": {
+      "result": "ok",
+      "detail": "0.005s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/acp": {
+      "result": "ok",
+      "detail": "0.031s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/agy": {
+      "result": "ok",
+      "detail": "7.265s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/codebuddy": {
+      "result": "ok",
+      "detail": "2.113s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/network": {
+      "result": "ok",
+      "detail": "0.320s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/runtime/spec": {
+      "result": "ok",
+      "detail": "0.004s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/client/worker": {
+      "result": "ok",
+      "detail": "0.009s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/cli/worker": {
+      "result": "ok",
+      "detail": "0.844s",
+      "evidence": "runtime-package-tests.txt"
+    },
+    "openagentx/internal/cli/console": {
+      "result": "ok",
+      "detail": "29.978s",
+      "evidence": "console-package-tests.txt"
+    },
+    "openagentx/internal/cli/fleet": {
+      "result": "ok",
+      "detail": "0.243s",
+      "evidence": "console-package-tests.txt"
+    },
+    "openagentx/internal/fleet": {
+      "result": "ok",
+      "detail": "11.045s",
+      "evidence": "console-package-tests.txt"
+    },
+    "openagentx/internal/consolemodel": {
+      "result": "ok",
+      "detail": "0.158s",
+      "evidence": "console-package-tests.txt"
+    },
+    "openagentx/internal/client/console": {
+      "result": "ok",
+      "detail": "0.025s",
+      "evidence": "console-package-tests.txt"
+    },
+    "openagentx/internal/localprofile": {
+      "result": "ok",
+      "detail": "0.007s",
+      "evidence": "console-package-tests.txt"
+    },
+    "openagentx/internal/credentialstore": {
+      "result": "ok",
+      "detail": "0.373s",
+      "evidence": "console-package-tests.txt"
+    },
+    "openagentx/internal/network/secretstore": {
+      "result": "ok",
+      "detail": "0.427s",
+      "evidence": "deployment-network-tests.log"
+    },
+    "openagentx/internal/transport/remotehttps": {
+      "result": "ok",
+      "detail": "0.280s",
+      "evidence": "deployment-network-tests.log"
+    },
+    "openagentx/internal/transport/unixhttp": {
+      "result": "ok",
+      "detail": "0.030s",
+      "evidence": "deployment-network-tests.log"
+    },
+    "openagentx/internal/safeoutput": {
+      "result": "ok",
+      "detail": "0.010s",
+      "evidence": "deployment-network-tests.log"
+    },
+    "openagentx/internal/testkit": {
+      "result": "ok",
+      "detail": "0.087s",
+      "evidence": "deployment-network-tests.log"
+    },
+    "openagentx/internal/cli/admin": {
+      "result": "ok",
+      "detail": "1.394s",
+      "evidence": "deployment-network-tests.log"
+    },
+    "openagentx/cmd/openagentx": {
+      "result": "ok",
+      "detail": "0.469s",
+      "evidence": "deployment-network-tests.log"
+    }
+  }
+}

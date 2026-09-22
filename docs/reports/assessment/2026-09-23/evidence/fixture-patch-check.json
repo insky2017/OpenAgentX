@@ -1,0 +1,17 @@
+[
+  {
+    "file": "console-journey-fixture.patch",
+    "exit": 0,
+    "stderr": ""
+  },
+  {
+    "file": "console-no-network-ui-fixture.patch",
+    "exit": 0,
+    "stderr": ""
+  },
+  {
+    "file": "console-terminal-followup-fixture.patch",
+    "exit": 0,
+    "stderr": ""
+  }
+]

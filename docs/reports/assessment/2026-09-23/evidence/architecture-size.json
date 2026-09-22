@@ -1,0 +1,110 @@
+{
+  "internal/credentialstore": {
+    "files": 1,
+    "lines": 504,
+    "tests": 1,
+    "test_lines": 371
+  },
+  "internal/api": {
+    "files": 13,
+    "lines": 4547,
+    "tests": 10,
+    "test_lines": 3140
+  },
+  "internal/consolemodel": {
+    "files": 2,
+    "lines": 1551,
+    "tests": 2,
+    "test_lines": 862
+  },
+  "internal/auth": {
+    "files": 4,
+    "lines": 779,
+    "tests": 3,
+    "test_lines": 430
+  },
+  "internal/fleet": {
+    "files": 4,
+    "lines": 1288,
+    "tests": 5,
+    "test_lines": 1556
+  },
+  "internal/runtime": {
+    "files": 14,
+    "lines": 3829,
+    "tests": 9,
+    "test_lines": 1803
+  },
+  "internal/domain": {
+    "files": 23,
+    "lines": 2668,
+    "tests": 2,
+    "test_lines": 207
+  },
+  "internal/safeoutput": {
+    "files": 1,
+    "lines": 181,
+    "tests": 1,
+    "test_lines": 95
+  },
+  "internal/localprofile": {
+    "files": 1,
+    "lines": 225,
+    "tests": 1,
+    "test_lines": 170
+  },
+  "internal/testkit": {
+    "files": 5,
+    "lines": 359,
+    "tests": 1,
+    "test_lines": 152
+  },
+  "internal/controlplane": {
+    "files": 6,
+    "lines": 1856,
+    "tests": 5,
+    "test_lines": 2115
+  },
+  "internal/worker": {
+    "files": 5,
+    "lines": 1476,
+    "tests": 4,
+    "test_lines": 1704
+  },
+  "internal/network": {
+    "files": 1,
+    "lines": 419,
+    "tests": 1,
+    "test_lines": 253
+  },
+  "internal/persistence": {
+    "files": 23,
+    "lines": 7361,
+    "tests": 20,
+    "test_lines": 4873
+  },
+  "internal/transport": {
+    "files": 5,
+    "lines": 476,
+    "tests": 2,
+    "test_lines": 375
+  },
+  "internal/client": {
+    "files": 2,
+    "lines": 854,
+    "tests": 2,
+    "test_lines": 595
+  },
+  "internal/cli": {
+    "files": 7,
+    "lines": 4729,
+    "tests": 12,
+    "test_lines": 5707
+  },
+  "web/src": {
+    "files": 7,
+    "lines": 3035,
+    "tests": 3,
+    "test_lines": 258
+  }
+}

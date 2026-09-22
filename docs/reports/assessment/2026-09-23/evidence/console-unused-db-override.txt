@@ -1,0 +1,6 @@
+time=2026-09-23T00:38:46.481163+08:00
+command=/tmp/oax-assessment-20260923-openagentx fleet status
+env: isolated OPENAGENTX_HOME; OPENAGENTX_DATABASE_PATH=relative-unused-db
+resolve Fleet paths: OpenAgentX path override must be absolute: OPENAGENTX_DATABASE_PATH is relative
+
+exit_code=2

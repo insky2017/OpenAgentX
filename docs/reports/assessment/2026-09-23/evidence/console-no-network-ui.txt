@@ -1,0 +1,21 @@
+start=2026-09-23T00:34:24.436851+08:00
+command=go test -overlay=/tmp/oax-console-assessment/no-network-ui.json -count=1 -v ./internal/cli/console -run ^TestAssessmentConsoleJourney$ -timeout 120s
+=== RUN   TestAssessmentConsoleJourney
+    workflow_integration_test.go:170: ONBOARDING real PTY owner init, Agent apply, Console login, Fleet Agent selection and manifest import completed
+    workflow_integration_test.go:193: NETWORK deliberately not configured to reproduce first-use Console behavior
+    workflow_integration_test.go:210: WORKSPACE_INITIAL OAX:overview.0 current_command=zsh dead=0 active_window=1
+        OAX:quote-service.0 current_command=openagentx dead=0 active_window=0
+    workflow_integration_test.go:234: NO_NETWORK_UI status=queued latest_run_present=false
+    workflow_integration_test.go:235: SCREEN_NO_NETWORK
+        Agent quote-service | mode normal | connection connected | cursor 43
+        #19 task.created | Task task-19a9c0d4-4... | version 1 | status queued
+        #20 mailbox.claimed | Task task-19a9c0d4-4... | version 1 | status queued |
+        Task task-19a9c0d4-4... v1 queued (mailbox claimed) | Worker worker-808aeaab....
+        > /help
+    workflow_integration_test.go:237: status overlay missing
+--- FAIL: TestAssessmentConsoleJourney (34.43s)
+FAIL
+FAIL	openagentx/internal/cli/console	34.439s
+FAIL
+
+exit_code=1 duration_seconds=36.007

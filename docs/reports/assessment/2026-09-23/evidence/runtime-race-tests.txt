@@ -1,0 +1,7 @@
+COMMAND go test -race -count=1 ./internal/worker ./internal/cli/worker ./internal/runtime/agy ./internal/runtime/codebuddy
+ok  	openagentx/internal/worker	2.747s
+ok  	openagentx/internal/cli/worker	1.986s
+ok  	openagentx/internal/runtime/agy	13.756s
+ok  	openagentx/internal/runtime/codebuddy	3.162s
+
+{"exit_code": 0, "duration_seconds": 16.312}

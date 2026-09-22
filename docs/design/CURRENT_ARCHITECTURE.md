@@ -2,12 +2,14 @@
 doc_type: architecture_snapshot
 status: current_snapshot
 owner: openagentx
-updated_at: 2026-09-22
+updated_at: 2026-09-23
 ---
 
 # OpenAgentX 当前系统架构
 
 > 快照时间：2026-09-22 22:42–22:46（Asia/Shanghai）。本文件按**实际部署与对应源码**整理；ADR 表示决策，不能单凭 Accepted 判断功能已经上线。配套图：[离线 HTML 架构图](current-architecture.html)。
+
+> 2026-09-23 评估补充：部署版本未变，新增真实测试与源码核对见[全面评估](../reports/assessment/2026-09-23/README.md)。确认组织 AuthorityPolicy 尚未接入业务命令、注册的 ROLE.md 没有确定性 Runtime 注入链路；ADR-006 已有 `dcd8fd6` 开发旁支，尚未安装。本图表示模块连接，不能当作每项功能均已兑现。
 
 ## 1. 本轮范围与验收
 
@@ -33,7 +35,7 @@ updated_at: 2026-09-22
 
 ## 3. 总体架构
 
-OpenAgentX 是组织协作控制面：以逻辑 `agent_id` 寻址，统一保存组织权限、任务、消息、执行尝试和事件。独立常驻 Worker 领取持久工作，再通过 Runtime Adapter 启动一次 turn。Web 与 Console 都是正式 API 的客户端；tmux 的布局不参与业务路由、Worker 身份或执行权判定。
+OpenAgentX 的目标是组织协作控制面；当前已贯通的核心是以逻辑 `agent_id` 寻址的任务投递与执行。组织/岗位模型已保存，但完整业务授权与自主委派尚未接线。独立常驻 Worker 领取持久工作，再通过 Runtime Adapter 启动一次 turn。Web 与 Console 都是正式 API 的客户端；tmux 的布局不参与业务路由、Worker 身份或执行权判定。
 
 ```mermaid
 flowchart TB
@@ -87,13 +89,13 @@ flowchart TB
 | Web PWA | 登录、选择 Agent、发任务、跟踪过程、回复/审批/取消、网络设置 | 浏览器不直接访问 DB 或 Runtime；断线/离线写入不排队、不重放 |
 | Console TUI | 当前关注 Task、Timeline、输入区、`/tasks`、`/status`、Normal/Diagnostic | Attach 要求 `OAX` 的 pane `0`；附加 pane 保留；退出 Console 不停止 Worker |
 | Fleet CLI | manifest 管理、workspace 协调、user-systemd 启停、drain 观察 | 通过正式 API 获取身份；tmux 仅是 UI 宿主；不以键盘注入控制 Runtime |
-| CommandService | dispatch、steer/message、cancel、approval | 权限、版本 CAS、幂等键；领域状态和 Mailbox/Journal 在事务内一致提交 |
+| CommandService | dispatch、steer/message、cancel、approval | 入口有 Web/CLI RBAC、版本 CAS、幂等键；完整组织 AuthorityPolicy 未接入；领域状态和 Mailbox/Journal 在事务内一致提交 |
 | WorkerService | 注册、心跳、claim、begin attempt、事件与 finish、过期恢复 | principal、Worker instance、generation、lease 与 fencing 共同约束执行权 |
 | WorkerAdminService | drain、stop、force-stop、健康检查、lease revoke | 持久化 WorkerCommand；graceful 与强停语义分开 |
 | NetworkWorkflowService | 配置草稿、测试、发布、绑定、应用回执 | 内容版本、测试对象和当前 Worker generation 必须匹配 |
 | SQLite | 组织、身份、Task、Mailbox、RunAttempt、SessionBinding、Journal 等 | 单一权威状态库；终态、审计、session 等按各事务方法一起提交/回滚 |
 | Resident Worker | 独立的心跳、健康、网络工作、Mailbox、控制命令与执行循环 | 完成 Task 后继续在线；活动 Run 不阻断心跳与取消通道 |
-| BackendPool / Runtime Adapter | 能力、模型、推理强度、session、网络快照校验；启动/观察一次 turn | 解析结果 fail closed；Runtime 输出先作安全投影 |
+| BackendPool / Runtime Adapter | 能力、模型、推理强度、session、网络快照校验；启动/观察一次 turn | AGY 有结构化终态校验；本次发现 CodeBuddy 空成功/timeout 缺口；输出作安全投影，不能概括所有 Adapter 均已 fail closed |
 
 ## 4. 一次任务如何执行
 
@@ -136,7 +138,7 @@ sequenceDiagram
 | Runtime / RunAttempt 结果 | `succeeded` 且存在回复 | 本次 Runtime turn 有终态与回复，不自动证明业务任务成功 |
 | Task outcome / 业务证据 | `succeeded` 或 `uncertain` | 按领域规则判断任务结果；当前缺少独立副作用证据可进入 `uncertain` |
 
-当前 `FinishRun` 的规则是：Runtime `succeeded` 且 `SideEffectsKnown=false` 时，RunAttempt 可以是 `succeeded`，Task 则为 `uncertain / business_effect_unverified`，回复仍保留。模型自报字段 `RuntimeSideEffectsKnown` 不会自动升级成独立验证证据。ADR-006 的 query/change intent 分流尚未实施；本次现场报告中的只读问答也因此没有达到用户要求的 Task 成功终态。[S4][S8]
+当前 `FinishRun` 的规则是：Runtime `succeeded` 且 `SideEffectsKnown=false` 时，RunAttempt 可以是 `succeeded`，Task 则为 `uncertain / business_effect_unverified`，回复仍保留。模型自报字段 `RuntimeSideEffectsKnown` 不会自动升级成独立验证证据。ADR-006 的 query/change intent 分流尚未安装，已有 `dcd8fd6` 开发旁支；当前只读问答仍未达到用户要求的 Task 成功终态。2026-09-23 浏览器直达真实 AGY 的两项任务再次复现此差异。[S4][S8]
 
 ## 5. 网络配置是另一条控制闭环
 
@@ -165,8 +167,8 @@ flowchart LR
 
 | 身份/对象 | 生命周期与用途 |
 |---|---|
-| Organization / Principal / Role / Position / AuthorityPolicy | 组织归属与授权，区分 owner/operator/viewer 及业务权限 |
-| AgentIdentity / AgentProfile | 稳定逻辑 `agent_id`、能力与 workspace；不随终端布局变动 |
+| Organization / Principal / Role / Position / AuthorityPolicy | 组织归属与授权模型；owner/operator/viewer 已用于入口，岗位/汇报链业务授权未贯通 |
+| AgentIdentity / AgentProfile | 稳定逻辑 `agent_id`、能力与 workspace；不随终端布局变动；注册 instructions_path 未形成确定性 Runtime 注入 |
 | WorkerInstance / generation / lease / fencing | 一次常驻 Worker 注册与其当前执行权；重启后的代际变化不能被旧回执掩盖 |
 | Task / Message / MailboxItem | 用户工作、补充输入与持久投递分别建模 |
 | RunAttempt / ExecutionSpec / SessionBinding | 一次执行尝试、不可变执行选择及 Runtime 会话关系 |
@@ -230,12 +232,12 @@ systemd 托管 Worker 生命周期；Console/SSH 退出不等于 Worker 退出�
 
 | ADR | 内容 | 本快照中的实际状态 |
 |---|---|---|
-| 001 | 组织控制面、Resident Worker、Runtime、移动指挥台 | 当前基础架构；早期 T01–T10 验收报告只证明各自历史版本 |
+| 001 | 组织控制面、Resident Worker、Runtime、移动指挥台 | 执行基础已贯通；组织授权/角色注入/结果收口仍有缺口；早期 T01–T10 只证明各自边界 |
 | 002 | Runtime 网络配置、测试、发布、应用与诊断 | 已实现；按当前 Worker/Backend 验证，不等于保存即生效 |
-| 003 | 任务详情、运行观察、安全内容呈现 | 已实现并被后续 Web/Console 任务体验继续扩展 |
-| 004 | 简化网络配置交互 | 已实现；当前 Web 另补了严格的当代应用回执检查 |
+| 003 | 任务详情、运行观察、安全内容呈现 | 主要页面存在；本批发现最新 Run 选择、详情审批与重连缺口 |
+| 004 | 简化网络配置交互 | 主要流程存在；首次就绪引导、探测解释及加密承诺尚有差距 |
 | 005 | Fleet、Console Attach、Worker 生命周期 | 首轮已实现；后续 workspace/TUI 体验由 008/009 演进 |
-| 006 | Task intent 与可验证终态语义 | **Proposed，未授权实施**；只读任务成功语义缺口仍在 |
+| 006 | Task intent 与可验证终态语义 | 固定部署基线文档为 Proposed；另有 `dcd8fd6` 实施旁支，**尚未安装**；当前缺口仍在 |
 | 007 | 网络绑定跨 Worker generation 的连续性 | **Proposed，未授权实施**；当前仍按代际隔离 |
 | 008 | OAX、路径、可撤销 CLI Token、一致快照、全屏 TUI | 功能已存在于已安装候选分支；main 的 pending 文档落后；不据此宣称完整 ADR 最终验收 |
 | 009 | pane 0 任务工作台、Task 投影、Timeline、原位诊断 | 已安装实现；真实网页回复链路有记录，整体 Task 成功验收未完成，Diagnostic 跨 Task 旧输出问题仍待修复 |
@@ -267,10 +269,12 @@ Foreground Takeover 仍是禁用规划项；自动任务规划/跨 Agent 自主�
 ## 10. 后续维护
 
 - 部署、ADR 实施或 Runtime 装配发生变化时，先更新版本表与证据，再同步 Markdown 图和 HTML；不能只更新某个 ADR 的状态标签。
-- 重点重评触发条件：ADR-006/007 获准实施、ADR-008/009 合入主线/最终验收、ACP 正式装配、远程 Worker 启用、部署入口变更。
+- 重点重评触发条件：ADR-006 实施旁支安装并验收、ADR-007 获准实施、ADR-008/009 合入主线/最终验收、ACP 正式装配、远程 Worker 启用、部署入口变更。
 - 本次交付检查结果如下；不回写历史关卡结论。
 
 ### 本次交付验证（2026-09-22）
+
+2026-09-23 事实修订另经真实 Chrome 离线检查：1440/390 像素 × 4 视图无横向溢出；组织授权/ADR-006 修订可见；零页面异常及外部请求。证据见评估目录 `evidence/architecture-revised-browser.json` 与移动截图。以下保留原图首次交付记录。
 
 | 检查 | 结果与边界 |
 |---|---|

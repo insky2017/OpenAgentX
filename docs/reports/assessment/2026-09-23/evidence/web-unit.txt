@@ -1,0 +1,95 @@
+TAP version 13
+# Subtest: historical gen 47 receipt is not current for gen 51
+ok 1 - historical gen 47 receipt is not current for gen 51
+  ---
+  duration_ms: 2.509864
+  ...
+# Subtest: same generation receipt from another Worker is not current
+ok 2 - same generation receipt from another Worker is not current
+  ---
+  duration_ms: 0.279235
+  ...
+# Subtest: receipt revision and mode-specific policy must match the current binding
+ok 3 - receipt revision and mode-specific policy must match the current binding
+  ---
+  duration_ms: 0.270947
+  ...
+# Subtest: pending and failed bindings do not claim current application
+ok 4 - pending and failed bindings do not claim current application
+  ---
+  duration_ms: 0.235509
+  ...
+# Subtest: a current successful mode test remains publishable with its CAS revision
+ok 5 - a current successful mode test remains publishable with its CAS revision
+  ---
+  duration_ms: 0.408041
+  ...
+# Subtest: only a complete exact receipt is current applied
+ok 6 - only a complete exact receipt is current applied
+  ---
+  duration_ms: 0.407102
+  ...
+# Subtest: named profile application requires the exact profile receipt
+ok 7 - named profile application requires the exact profile receipt
+  ---
+  duration_ms: 0.302308
+  ...
+# Subtest: direct entry chooses the sole online Worker, never the offline first Agent
+ok 8 - direct entry chooses the sole online Worker, never the offline first Agent
+  ---
+  duration_ms: 2.607188
+  ...
+# Subtest: explicit and restored URL targets are authoritative and never silently replaced
+ok 9 - explicit and restored URL targets are authoritative and never silently replaced
+  ---
+  duration_ms: 0.385511
+  ...
+# Subtest: no Worker, multiple ready Workers, draining and expired leases require a choice or recovery
+ok 10 - no Worker, multiple ready Workers, draining and expired leases require a choice or recovery
+  ---
+  duration_ms: 0.574211
+  ...
+# Subtest: an offline replacement never falls back to an older online generation
+ok 11 - an offline replacement never falls back to an older online generation
+  ---
+  duration_ms: 0.472142
+  ...
+# Subtest: only the official create receipt can open the accepted Task
+ok 12 - only the official create receipt can open the accepted Task
+  ---
+  duration_ms: 2.004465
+  ...
+# Subtest: progress distinguishes not started, actual Runtime reply and unverified business outcome
+ok 13 - progress distinguishes not started, actual Runtime reply and unverified business outcome
+  ---
+  duration_ms: 0.638051
+  ...
+# Subtest: live response merges against history that completed after live was sent
+ok 14 - live response merges against history that completed after live was sent
+  ---
+  duration_ms: 5.73423
+  ...
+# Subtest: SSE resume ignores an overview watermark that may cover stale projections
+ok 15 - SSE resume ignores an overview watermark that may cover stale projections
+  ---
+  duration_ms: 0.33593
+  ...
+# Subtest: deferred UI work rejects a changed task, request, or view
+ok 16 - deferred UI work rejects a changed task, request, or view
+  ---
+  duration_ms: 0.326809
+  ...
+# Subtest: deferred close focus rejects a task reopened before the next frame
+ok 17 - deferred close focus rejects a task reopened before the next frame
+  ---
+  duration_ms: 0.253909
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 131.955574

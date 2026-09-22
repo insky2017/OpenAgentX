@@ -1,0 +1,16 @@
+COMMAND: go test -count=1 ./internal/worker/... ./internal/runtime/... ./internal/client/worker/... ./internal/cli/worker/...
+?   	openagentx/internal/runtime/conformance	[no test files]
+?   	openagentx/internal/runtime/descriptors	[no test files]
+?   	openagentx/internal/runtime/fake	[no test files]
+?   	openagentx/internal/runtime/registry	[no test files]
+ok  	openagentx/internal/worker	1.636s
+ok  	openagentx/internal/runtime	0.005s
+ok  	openagentx/internal/runtime/acp	0.031s
+ok  	openagentx/internal/runtime/agy	7.265s
+ok  	openagentx/internal/runtime/codebuddy	2.113s
+ok  	openagentx/internal/runtime/network	0.320s
+ok  	openagentx/internal/runtime/spec	0.004s
+ok  	openagentx/internal/client/worker	0.009s
+ok  	openagentx/internal/cli/worker	0.844s
+
+{"exit_code": 0, "duration_seconds": 9.324}

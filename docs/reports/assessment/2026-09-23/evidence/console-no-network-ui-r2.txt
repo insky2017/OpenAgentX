@@ -1,0 +1,73 @@
+start=2026-09-23T00:35:53.478108+08:00
+command=go test -overlay=/tmp/oax-console-assessment/no-network-ui.json -count=1 -v ./internal/cli/console -run ^TestAssessmentConsoleJourney$ -timeout 120s
+=== RUN   TestAssessmentConsoleJourney
+    workflow_integration_test.go:170: ONBOARDING real PTY owner init, Agent apply, Console login, Fleet Agent selection and manifest import completed
+    workflow_integration_test.go:193: NETWORK deliberately not configured to reproduce first-use Console behavior
+    workflow_integration_test.go:210: WORKSPACE_INITIAL OAX:overview.0 current_command=zsh dead=0 active_window=1
+        OAX:quote-service.0 current_command=openagentx dead=0 active_window=0
+    workflow_integration_test.go:234: NO_NETWORK_UI status=queued latest_run_present=false
+    workflow_integration_test.go:235: SCREEN_NO_NETWORK
+        Agent quote-service | mode normal | connection connected | cursor 43
+        #19 task.created | Task task-c93064d4-4... | version 1 | status queued
+        #20 mailbox.claimed | Task task-c93064d4-4... | version 1 | status queued |
+        Task task-c93064d4-4... v1 queued (mailbox claimed) | Worker worker-0d18e15a....
+        > /help
+    workflow_integration_test.go:239: SCREEN_NO_NETWORK_STATUS_SMALL
+        Status
+        CLI username: owner
+        CLI expiry: 2026-10-22T16:36:13Z
+        Socket: /tmp/oax9-38009118/home/.openagentx/run/openagentx.sock
+        Agent: quote-service
+    workflow_integration_test.go:242: SCREEN_NO_NETWORK_STATUS_ZOOMED
+        
+        
+          ╭──────────────────────────────────────────────────────────────────────────╮
+          │                                                                          │
+          │  Status                                                                  │
+          │  CLI username: owner                                                     │
+          │  CLI expiry: 2026-10-22T16:36:13Z                                        │
+          │  Socket: /tmp/oax9-38009118/home/.openagentx/run/openagentx.sock         │
+          │  Agent: quote-service                                                    │
+          │  Worker: worker-0d18e15a-f546-4319-923a-8e86b9382654                     │
+          │  Generation: 1                                                           │
+          │  Worker status: online                                                   │
+          │  Backend health: local=unavailable                                       │
+          │  Active run: none                                                        │
+          │  Draining: false                                                         │
+          │  Heartbeat age: 0s                                                       │
+          │  Lease until: 2026-09-22T16:36:54Z                                       │
+          │  Connection: connected                                                   │
+          │  Event cursor: 53                                                        │
+          │  Mode: normal                                                            │
+          │                                                                          │
+        
+        
+    workflow_integration_test.go:245: SCREEN_NO_NETWORK_STATUS_AFTER_PAGEDOWN
+        
+        
+          ╭──────────────────────────────────────────────────────────────────────────╮
+          │                                                                          │
+          │  Status                                                                  │
+          │  CLI username: owner                                                     │
+          │  CLI expiry: 2026-10-22T16:36:13Z                                        │
+          │  Socket: /tmp/oax9-38009118/home/.openagentx/run/openagentx.sock         │
+          │  Agent: quote-service                                                    │
+          │  Worker: worker-0d18e15a-f546-4319-923a-8e86b9382654                     │
+          │  Generation: 1                                                           │
+          │  Worker status: online                                                   │
+          │  Backend health: local=unavailable                                       │
+          │  Active run: none                                                        │
+          │  Draining: false                                                         │
+          │  Heartbeat age: 0s                                                       │
+          │  Lease until: 2026-09-22T16:36:54Z                                       │
+          │  Connection: connected                                                   │
+          │  Event cursor: 53                                                        │
+          │  Mode: normal                                                            │
+          │                                                                          │
+        
+        
+--- PASS: TestAssessmentConsoleJourney (30.07s)
+PASS
+ok  	openagentx/internal/cli/console	30.081s
+
+exit_code=0 duration_seconds=31.685

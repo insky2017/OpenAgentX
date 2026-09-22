@@ -1,0 +1,26 @@
+BASELINE 34053c0; isolated copy /tmp/oax-assessment-core-repro; assessment-only tests
+COMMAND go test -race -count=1 -run ^TestAssessment -v ./internal/api/panel ./internal/persistence/sqlite
+START 2026-09-23T00:34:05.274910+08:00
+=== RUN   TestAssessmentOperatorCrossOrganizationAccepted
+    assessment_repro_test.go:59: DEFECT authenticated operator HTTP=200 Task.organization=org-other target Agent.organization=org-main dispatch=direct; no organization/direct assignment provisioned
+--- PASS: TestAssessmentOperatorCrossOrganizationAccepted (1.51s)
+=== RUN   TestAssessmentWaitingInputCancelHasNoTerminalPath
+    assessment_repro_test.go:93: DEFECT waiting_input cancel HTTP=400 error=find active run for cancel: resource not found; task remains waiting_input version=3
+--- PASS: TestAssessmentWaitingInputCancelHasNoTerminalPath (0.70s)
+=== RUN   TestAssessmentExecutionOverrideAcceptedAndReplayIgnoresChange
+    assessment_repro_test.go:136: DEFECT same key without execution then explicit differing execution: both HTTP=200 and same Task; execution silently absent from durable Task/idempotency
+--- PASS: TestAssessmentExecutionOverrideAcceptedAndReplayIgnoresChange (0.79s)
+=== RUN   TestAssessmentQueuedTaskCancelRejected
+    assessment_repro_test.go:158: DEFECT newly queued task cancel HTTP=400 error=find active run for cancel: resource not found; Task remains queued and runnable
+--- PASS: TestAssessmentQueuedTaskCancelRejected (0.69s)
+PASS
+ok  	openagentx/internal/api/panel	4.788s
+=== RUN   TestAssessmentCanceledRecoveryHidesUnknownPhysicalOutcome
+    assessment_repro_test.go:45: DEFECT cancellation only requested; no runtime cancellation acknowledgement or physical result; after expired-lease recovery Task=canceled Run=uncertain
+--- PASS: TestAssessmentCanceledRecoveryHidesUnknownPhysicalOutcome (0.07s)
+PASS
+ok  	openagentx/internal/persistence/sqlite	1.102s
+
+EXIT 0
+DURATION_SECONDS 10.246
+END 2026-09-23T00:34:15.520722+08:00

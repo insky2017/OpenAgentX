@@ -1,0 +1,25 @@
+start=2026-09-23T00:38:05.699970+08:00
+command=go test -overlay=/tmp/oax-console-assessment/terminal-followup.json -count=1 -v ./internal/cli/console -run ^TestAssessmentConsoleJourney$ -timeout 120s
+=== RUN   TestAssessmentConsoleJourney
+    workflow_integration_test.go:170: ONBOARDING real PTY owner init, Agent apply, Console login, Fleet Agent selection and manifest import completed
+    workflow_integration_test.go:209: NETWORK prerequisite completed via authenticated Web test/publish/apply APIs, outside Fleet/Console UX
+    workflow_integration_test.go:226: WORKSPACE_INITIAL OAX:overview.0 current_command=zsh dead=0 active_window=1
+        OAX:quote-service.0 current_command=openagentx dead=0 active_window=0
+    workflow_integration_test.go:276: TASK first dispatch -> waiting_input -> focused steer -> succeeded; TUI showed both Task outcome and Runtime reply
+    workflow_integration_test.go:277: SCREEN_TASK_REPLY
+        Agent quote-service | mode normal | connection connected | cursor 73
+        #29 run_attempt.started | Task task-c9b0a744-7... | Run run-e870b9a2-77... |
+        run version 2 | run status succeeded | Runtime reply state available
+        Task task-c9b0a744-7... v6 succeeded (run succeeded) | Worker worker-3f9b9623...
+        > /help
+    workflow_integration_test.go:280: SCREEN_TERMINAL_FOLLOWUP
+        Agent quote-service | mode normal | connection connected | cursor 73
+        #55 runtime.turn.output | fixture | running | phase-two-safe-output
+        Command rejected: focused Task is terminal or has no usable version
+        Task task-c9b0a744-7... v6 succeeded (run succeeded) | Worker worker-3f9b9623...
+        > /steer follow-up after terminal
+--- PASS: TestAssessmentConsoleJourney (30.05s)
+PASS
+ok  	openagentx/internal/cli/console	30.063s
+
+exit_code=0 duration_seconds=31.609

@@ -1,0 +1,40 @@
+{
+  "observed_at": "2026-09-22T16:33:49.612900+00:00",
+  "services": [
+    {
+      "MainPID": "1686100",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "FragmentPath": "/home/sky/.config/systemd/user/openagentx.service",
+      "unit": "openagentx.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89"
+    },
+    {
+      "MainPID": "1687781",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "FragmentPath": "/home/sky/.config/systemd/user/openagentx-worker@.service",
+      "unit": "openagentx-worker@quote-service.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89"
+    }
+  ],
+  "web": {
+    "assets/app.js": "2e173b5064a89c61ca6a5a57f3e9ea1cc3fe8479b7695c81735edeb2053b1e7c",
+    "assets/app.css": "c7e9b0f8d223ff14ab76c2280ded37613bd4c06918f002c1627e9133a89b548f",
+    "index.html": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38"
+  },
+  "installed_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+  "installed_build": [
+    "build\tvcs.revision=6d599aca8ce7c32fe11f23244478b495a0a78e68",
+    "build\tvcs.time=2026-09-22T11:32:10Z",
+    "build\tvcs.modified=false"
+  ],
+  "health": {
+    "status": 200,
+    "body": {
+      "status": "ok"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+initialOverviewFailureAfter6s {"overviews":1,"sse":0,"text":"OPENAGENTX\n指挥台\n连接中\n退\nisolated transient unavailable\nx\n←\n\n观察窗口\n\n任务\n4 项\n搜索任务\n全部 Agent\n全部状态\nqueued\ndispatching\nrunning\nwaiting_input\nwaiting_approval\ncancel_requested\nsucceeded\nfailed\ncanceled\nuncertain\n全部时间\n最近 1 小时\n最近 24 小时\n最近 7 天\nWEB-EVAL-04 取消隔离排队任务\ntask-2c9b9067-5d4f-4e3c-97bd-9185ae890564 · web-eval-b\nqueued\n1 分钟前\nWEB-EVAL-03 安全渲染\ntask-c19c753f-fd06-4033-ac52-09d2d213fd46 · web-eval-a\nsucceeded\n1 分钟前\nWEB-EVAL-02 第二项任务\ntask-f6fa5ad7-9c2a-4dec-9f8d-11d2effa4b67 · web-eval-a\nsucceeded\n2 分钟前\nWEB-EVAL-01 首次任务，无网络绑定\ntask-c898db01-05be-4b99-b57c-d746616eaacb · web-eval-a\nsucceeded\n2 分钟前\n执行 Agent\n请选择执行 Agent\n\n连接未恢复，暂不能发送\n\n向 Agent 发送业务指令\n↑\n◎\n选择一个任务\n\n从左侧列表打开详情，查看运行事实与结果。\n\n⌂\n指挥\n▣\n任务\n⌘\n组织\n⚙\nRuntime"}
+reloadRecovery {"overviews":3,"sse":1,"text":"在线\n退"}
+multiTurnAPI {"task":{"id":"task-c898db01-05be-4b99-b57c-d746616eaacb","status":"succeeded","result":"隔离浏览器验证结果：fake Runtime，无业务副作用。"},"runs":[{"id":"run-d92e6031-0912-41c2-b1d2-8aff2db672ff","status":"succeeded","started_at":"2026-09-22T16:32:57.672176353Z","runtime_status":"succeeded","body":"隔离浏览器验证结果：fake Runtime，无业务副作用。"},{"id":"run-c07d22ce-02ad-4950-a55f-4a64c22c6391","status":"succeeded","started_at":"2026-09-22T16:32:33.401798897Z","runtime_status":"waiting_input","body":"隔离浏览器验证结果：fake Runtime，无业务副作用。"}]}
+renderedRunMeta run-c07d22ce-02ad-4950-a55f-4a64c22c6391 · Runtime waiting_input
+login503 OPENAGENTX
+
+指挥台
+用户名
+密码
+
+用户名或密码错误
+
+登录

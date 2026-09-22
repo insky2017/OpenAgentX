@@ -1,0 +1,591 @@
+BASELINE 34053c0; source read-only assessment excerpts
+
+internal/api/panel/handler.go
+140: func (h *Handler) session(w http.ResponseWriter, r *http.Request, write bool) (*requestauth.Principal, bool) {
+141: 	requirement := panelRequirement(r, write)
+142: 	s, err := h.auth.Authorize(r, requirement)
+143: 	if err != nil {
+144: 		h.auth.WriteFailure(w, err)
+145: 		return nil, false
+146: 	}
+147: 	return &s, true
+148: }
+149: 
+150: func panelRequirement(r *http.Request, write bool) requestauth.Requirement {
+151: 	requirement := requestauth.Requirement{Role: domain.WebRoleViewer, Write: write}
+152: 	if write {
+153: 		switch {
+154: 		case r.URL.Path == "/api/control/v1/tasks",
+155: 			strings.HasPrefix(r.URL.Path, "/api/control/v1/tasks/"),
+156: 			strings.HasPrefix(r.URL.Path, "/api/control/v1/approvals/"):
+157: 			requirement.Role = domain.WebRoleOperator
+158: 			requirement.Scope = domain.CLIScopeConsoleControl
+159: 		default:
+160: 			requirement.Role = domain.WebRoleOwner
+161: 			requirement.Scope = ""
+162: 		}
+163: 		return requirement
+164: 	}
+165: 	switch r.URL.Path {
+166: 	case "/api/observe/v1/agents":
+167: 		requirement.Scope = domain.CLIScopeConsoleRead
+168: 	case openapi.ObserveEventsStreamPath:
+169: 		if r.URL.Query().Get("mode") == consoleapi.ModeDiagnostic {
+
+internal/api/panel/handler.go
+1501: func (h *Handler) createTask(w http.ResponseWriter, r *http.Request) {
+1502: 	s, ok := h.session(w, r, true)
+1503: 	if !ok {
+1504: 		return
+1505: 	}
+1506: 	var req openapi.CreateTaskRequest
+1507: 	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+1508: 		http.Error(w, "invalid request", 400)
+1509: 		return
+1510: 	}
+1511: 	if !requireIdempotencyHeader(w, r, req.Meta) {
+1512: 		return
+1513: 	}
+1514: 	req.SenderPrincipalID = s.ID
+1515: 	v, e := h.commands.CreateTask(r.Context(), s.ID, req)
+1516: 	if e != nil {
+1517: 		http.Error(w, e.Error(), 400)
+1518: 		return
+1519: 	}
+1520: 	writeJSON(w, v)
+1521: }
+1522: func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
+1523: 	s, ok := h.session(w, r, true)
+1524: 	if !ok {
+1525: 		return
+1526: 	}
+1527: 	var req openapi.CreateMessageRequest
+1528: 	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+1529: 		http.Error(w, "invalid request", 400)
+1530: 		return
+1531: 	}
+1532: 	if !requireIdempotencyHeader(w, r, req.Meta) {
+1533: 		return
+1534: 	}
+1535: 	req.SenderPrincipalID = s.ID
+1536: 	v, e := h.commands.CreateMessage(r.Context(), s.ID, r.PathValue("taskID"), req)
+1537: 	if e != nil {
+1538: 		http.Error(w, e.Error(), 400)
+1539: 		return
+1540: 	}
+1541: 	writeJSON(w, v)
+1542: }
+1543: func (h *Handler) cancelTask(w http.ResponseWriter, r *http.Request) {
+1544: 	s, ok := h.session(w, r, true)
+1545: 	if !ok {
+1546: 		return
+1547: 	}
+1548: 	var req openapi.CancelTaskRequest
+1549: 	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+1550: 		http.Error(w, "invalid request", 400)
+1551: 		return
+1552: 	}
+1553: 	if !requireIdempotencyHeader(w, r, req.Meta) {
+1554: 		return
+1555: 	}
+1556: 	req.RequestedBy = s.ID
+1557: 	v, e := h.commands.CancelTask(r.Context(), s.ID, r.PathValue("taskID"), req)
+1558: 	if e != nil {
+1559: 		status := 400
+1560: 		if errors.Is(e, domain.ErrTerminalState) {
+1561: 			status = 409
+1562: 		}
+1563: 		http.Error(w, e.Error(), status)
+1564: 		return
+1565: 	}
+1566: 	writeJSON(w, v)
+1567: }
+1568: 
+1569: func (h *Handler) decideApproval(w http.ResponseWriter, r *http.Request) {
+1570: 	s, ok := h.session(w, r, true)
+1571: 	if !ok {
+1572: 		return
+1573: 	}
+1574: 	var req openapi.DecideApprovalRequest
+1575: 	if openapi.DecodeStrictJSON(r.Body, &req) != nil {
+1576: 		http.Error(w, "invalid request", http.StatusBadRequest)
+1577: 		return
+1578: 	}
+1579: 	if !requireIdempotencyHeader(w, r, req.Meta) {
+1580: 		return
+1581: 	}
+1582: 	req.DecidedBy = s.ID
+1583: 	result, err := h.commands.DecideApproval(r.Context(), s.ID, r.PathValue("approvalID"), req)
+1584: 	if err != nil {
+1585: 		http.Error(w, err.Error(), http.StatusConflict)
+1586: 		return
+1587: 	}
+1588: 	writeJSON(w, result)
+
+internal/controlplane/command_service.go
+52: func (s *CommandService) CreateTask(ctx context.Context, principal string, req api.CreateTaskRequest) (*api.CreateTaskResponse, error) {
+53: 	if err := req.Validate(); err != nil {
+54: 		return nil, err
+55: 	}
+56: 	now := s.now().UTC()
+57: 	taskID := commandID("task")
+58: 	msgID := commandID("message")
+59: 	itemID := commandID("mailbox")
+60: 	task := &domain.Task{ID: taskID, Version: 1, SenderAgentID: "command-center", SenderPrincipalID: principal, TargetAgentID: req.TargetAgentID, OrganizationID: req.OrganizationID, DispatchMode: req.DispatchMode, Content: req.Content, IdempotencyKey: req.Meta.IdempotencyKey, Status: domain.TaskStatusQueued, CreatedAt: now.Format(time.RFC3339Nano), UpdatedAt: now.Format(time.RFC3339Nano)}
+61: 	if req.ParentTaskID != "" {
+62: 		task.ParentTaskID = &req.ParentTaskID
+63: 	}
+64: 	message := &domain.Message{ID: msgID, Version: 1, Sequence: 1, TaskID: taskID, SenderAgentID: "command-center", SenderPrincipalID: principal, TargetAgentID: req.TargetAgentID, Kind: domain.MessageKindInstruction, Content: req.Content, CreatedAt: now.Format(time.RFC3339Nano)}
+65: 	item := &domain.MailboxItem{ID: itemID, TargetAgentID: req.TargetAgentID, Kind: domain.MailboxKindTask, Lane: domain.MailboxLaneWork, TaskID: taskID, State: domain.MailboxStatePending, CreatedAt: now}
+66: 	result, err := s.state.CreateTask(ctx, task, message, item, commandEvent(taskID, "task.created", principal, "task", map[string]any{"target_agent_id": req.TargetAgentID}, now))
+67: 	if err != nil {
+68: 		return nil, err
+69: 	}
+70: 	s.broker.Publish(AgentMailboxTopic(req.TargetAgentID))
+71: 	return &api.CreateTaskResponse{TaskID: result.Task.ID, TaskVersion: result.Task.Version,
+72: 		TaskStatus: result.Task.Status, Sequence: result.MailboxItem.Sequence}, nil
+73: }
+74: 
+75: func (s *CommandService) CreateMessage(ctx context.Context, principal, taskID string, req api.CreateMessageRequest) (*api.CreateMessageResponse, error) {
+76: 	if err := req.Validate(); err != nil {
+
+internal/controlplane/command_service.go
+95: 
+96: func (s *CommandService) CancelTask(ctx context.Context, principal, taskID string, req api.CancelTaskRequest) (*api.CancelTaskResponse, error) {
+97: 	if err := req.Validate(); err != nil {
+98: 		return nil, err
+99: 	}
+100: 	task, err := s.state.GetTask(ctx, taskID)
+101: 	if err != nil {
+102: 		return nil, err
+103: 	}
+104: 	item := &domain.MailboxItem{ID: commandID("mailbox")}
+105: 	updated, createdItem, err := s.state.RequestTaskCancel(ctx, taskID, req.Meta.ExpectedVersion, principal, item, commandEvent(taskID, "task.cancel_requested", principal, "task", nil, s.now()), commandEvent(item.ID, "mailbox.cancel_created", principal, "mailbox_item", nil, s.now()))
+106: 	if err != nil {
+107: 		return nil, err
+108: 	}
+109: 	s.broker.Publish(AgentMailboxTopic(task.TargetAgentID))
+110: 	response := &api.CancelTaskResponse{Task: *updated}
+111: 	if createdItem != nil {
+112: 		response.Sequence = createdItem.Sequence
+113: 	}
+114: 	return response, nil
+115: }
+116: 
+117: func (s *CommandService) DecideApproval(ctx context.Context, principal, requestID string, req api.DecideApprovalRequest) (*api.DecideApprovalResponse, error) {
+118: 	if err := req.Validate(); err != nil {
+119: 		return nil, err
+120: 	}
+121: 	request, err := s.state.GetApprovalRequest(ctx, requestID)
+122: 	if err != nil {
+123: 		return nil, err
+124: 	}
+125: 	now := s.now().UTC()
+126: 	decision := &domain.ApprovalDecision{ID: commandID("approval-decision"), ApprovalRequestID: requestID, DecidedBy: principal, Decision: req.Decision, IdempotencyKey: req.Meta.IdempotencyKey}
+127: 	item := &domain.MailboxItem{ID: commandID("mailbox"), State: domain.MailboxStatePending, CreatedAt: now}
+128: 	result, createdItem, err := s.state.DecideApproval(ctx, requestID, decision, item, commandEvent(requestID, "approval.decided", principal, "approval_request", nil, now), commandEvent(item.ID, "mailbox.approval_created", principal, "mailbox_item", nil, now))
+129: 	if err != nil {
+130: 		return nil, err
+131: 	}
+132: 	if task, taskErr := s.state.GetTask(ctx, request.TaskID); taskErr == nil {
+133: 		s.broker.Publish(AgentMailboxTopic(task.TargetAgentID))
+134: 	}
+135: 	response := &api.DecideApprovalResponse{Decision: *result}
+136: 	if createdItem != nil {
+137: 		response.Sequence = createdItem.Sequence
+138: 	}
+139: 	return response, nil
+140: }
+
+internal/api/control.go
+292: func (r CreateTaskRequest) Validate() error {
+293: 	if err := r.Meta.Validate(false); err != nil {
+294: 		return err
+295: 	}
+296: 	if err := domain.ValidateOpaqueID("sender_principal_id", r.SenderPrincipalID); err != nil {
+297: 		return err
+298: 	}
+299: 	if err := domain.ValidateIdentifier("target_agent_id", r.TargetAgentID); err != nil {
+300: 		return err
+301: 	}
+302: 	if err := domain.ValidateOpaqueID("organization_id", r.OrganizationID); err != nil {
+303: 		return err
+304: 	}
+305: 	if !r.DispatchMode.Valid() {
+306: 		return domain.ErrInvalidInput("unsupported dispatch_mode")
+307: 	}
+308: 	if strings.TrimSpace(r.Content) == "" {
+309: 		return domain.ErrInvalidInput("task content cannot be empty")
+310: 	}
+311: 	if r.ParentTaskID != "" {
+312: 		if err := domain.ValidateOpaqueID("parent_task_id", r.ParentTaskID); err != nil {
+313: 			return err
+314: 		}
+315: 	}
+316: 	if r.Execution != nil {
+317: 		if err := r.Execution.ValidateShape(); err != nil {
+318: 			return err
+319: 		}
+320: 		// CreateTask does not yet persist a requested execution override. In
+321: 		// particular, accepting a network policy here would make the API claim
+322: 		// a profile was selected while M1 planning still uses the registered
+323: 		// Backend policy. Reject it fail-closed until a transactional profile
+324: 		// binding is available.
+325: 		if !r.Execution.Network.IsZero() {
+326: 			return domain.ErrForbidden("network policy must be selected from the registered Backend profile")
+327: 		}
+328: 	}
+329: 	return nil
+330: }
+
+internal/domain/organization_contract.go
+52: // AuthorityPolicy is intentionally deterministic and side-effect free. The
+53: // Command Service supplies the stable principal/action/resource/context tuple.
+54: type AuthorityPolicy struct {
+55: 	OrganizationID              string
+56: 	DefaultPrincipalID          string
+57: 	PrincipalIDs                []string
+58: 	DirectDispatchPrincipals    []string
+59: 	ExecutionOverridePrincipals []string
+60: }
+61: 
+62: func (p AuthorityPolicy) Authorize(input AuthorityInput) error {
+63: 	if input.PrincipalID == "" || input.OrganizationID == "" || input.Action == "" {
+64: 		return ErrInvalidInput("authority input is incomplete")
+65: 	}
+66: 	if p.OrganizationID != "" && input.OrganizationID != p.OrganizationID {
+67: 		return ErrForbidden("principal is outside organization")
+68: 	}
+69: 	if len(p.PrincipalIDs) > 0 && !containsPrincipal(p.PrincipalIDs, input.PrincipalID) {
+70: 		return ErrForbidden("principal is not assigned to organization")
+71: 	}
+72: 	if input.DispatchMode == DispatchModeDirect && !containsPrincipal(p.DirectDispatchPrincipals, input.PrincipalID) {
+73: 		return ErrForbidden("direct dispatch is not authorized")
+74: 	}
+75: 	if input.Action == AuthorityExecutionOverride && !containsPrincipal(p.ExecutionOverridePrincipals, input.PrincipalID) {
+76: 		return ErrForbidden("execution override is not authorized")
+77: 	}
+78: 	return nil
+79: }
+80: 
+81: func containsPrincipal(values []string, target string) bool {
+82: 	for _, value := range values {
+
+internal/persistence/sqlite/control_input_repository.go
+129: func (r *Repository) RequestTaskCancel(ctx context.Context, taskID string, expectedVersion int64, requestedBy string,
+130: 	item *domain.MailboxItem, taskEvent *domain.JournalEvent, mailboxEvent *domain.JournalEvent) (*domain.Task, *domain.MailboxItem, error) {
+131: 	if expectedVersion <= 0 {
+132: 		return nil, nil, domain.ErrInvalidInput("expected task version is required")
+133: 	}
+134: 	now := r.now().UTC()
+135: 	tx, err := r.begin(ctx)
+136: 	if err != nil {
+137: 		return nil, nil, err
+138: 	}
+139: 	defer tx.Rollback()
+140: 	task, err := scanTask(tx.QueryRowContext(ctx, `SELECT `+taskColumns+` FROM tasks WHERE task_id=?`, taskID))
+141: 	if errors.Is(err, sql.ErrNoRows) {
+142: 		return nil, nil, domain.ErrTaskNotFound
+143: 	}
+144: 	if err != nil {
+145: 		return nil, nil, err
+146: 	}
+147: 	if task.Status == domain.TaskStatusCancelRequested {
+148: 		if task.CancelRequestedBy != nil && *task.CancelRequestedBy == requestedBy {
+149: 			return task, nil, nil
+150: 		}
+151: 		return nil, nil, domain.ErrConflict("task cancellation already requested by another principal")
+152: 	}
+153: 	if task.Version != expectedVersion {
+154: 		return nil, nil, domain.ErrStaleVersion
+155: 	}
+156: 	if task.IsTerminal() {
+157: 		return nil, nil, domain.ErrTerminalState
+158: 	}
+159: 	if taskEvent == nil {
+160: 		return nil, nil, domain.ErrInvalidInput("cancel task event is required")
+161: 	}
+162: 	task.Version++
+163: 	task.Status = domain.TaskStatusCancelRequested
+164: 	task.CancelRequestedBy = &requestedBy
+165: 	at := formatTime(now)
+166: 	task.CancelRequestedAt = &at
+167: 	task.UpdatedAt = at
+168: 	result, err := tx.ExecContext(ctx, `UPDATE tasks SET version=?, status=?, cancel_requested_by=?, cancel_requested_at=?, updated_at=? WHERE task_id=? AND version=?`,
+169: 		task.Version, task.Status, requestedBy, at, at, task.ID, expectedVersion)
+170: 	if err != nil {
+171: 		return nil, nil, fmt.Errorf("request task cancel: %w", err)
+172: 	}
+173: 	if affected, _ := result.RowsAffected(); affected != 1 {
+174: 		return nil, nil, domain.ErrStaleVersion
+175: 	}
+176: 	if err := validateJournalForAggregate(taskEvent, "task", task.ID, now); err != nil {
+177: 		return nil, nil, err
+178: 	}
+179: 	if err := insertJournal(ctx, tx, taskEvent); err != nil {
+180: 		return nil, nil, err
+181: 	}
+182: 	var active *domain.RunAttempt
+183: 	var createdItem *domain.MailboxItem
+184: 	active, err = scanRunAttempt(tx.QueryRowContext(ctx, `SELECT run_id, task_id, agent_id, version, status, worker_instance_id, fencing_token, lease_until,
+185: 		execution_spec_version, requested_execution_json, resolved_execution_json, adapter_id, backend_id, model, reasoning_mode, reasoning_value,
+186: 		started_at, finished_at, result_json, created_at, updated_at FROM run_attempts WHERE task_id=? AND status IN ('starting','running','waiting_approval','finishing') LIMIT 1`, task.ID))
+187: 	if err == nil && item != nil {
+188: 		item.TargetAgentID = task.TargetAgentID
+189: 		item.TaskID = task.ID
+190: 		item.Kind = domain.MailboxKindCancel
+191: 		item.Lane = domain.MailboxLaneControl
+192: 		item.TargetRunID = active.ID
+193: 		item.ExpectedRunVersion = active.Version
+194: 		item.State = domain.MailboxStatePending
+195: 		item.CreatedAt = now
+196: 		if err := item.ValidateForInsert(); err != nil {
+197: 			return nil, nil, err
+198: 		}
+199: 		if mailboxEvent == nil {
+200: 			return nil, nil, domain.ErrInvalidInput("cancel mailbox event is required")
+201: 		}
+202: 		if err := insertMailbox(ctx, tx, item); err != nil {
+203: 			return nil, nil, err
+204: 		}
+205: 		if err := validateJournalForAggregate(mailboxEvent, "mailbox_item", item.ID, now); err != nil {
+206: 			return nil, nil, err
+207: 		}
+208: 		if err := insertJournal(ctx, tx, mailboxEvent); err != nil {
+209: 			return nil, nil, err
+210: 		}
+211: 		createdItem = item
+212: 	} else if err != nil && !errors.Is(err, sql.ErrNoRows) {
+213: 		return nil, nil, fmt.Errorf("find active run for cancel: %w", err)
+214: 	}
+215: 	if err := r.inject(FaultBeforeCommit); err != nil {
+216: 		return nil, nil, err
+217: 	}
+218: 	if err := commit(tx); err != nil {
+219: 		return nil, nil, err
+220: 	}
+221: 	return task, createdItem, nil
+222: }
+
+internal/persistence/sqlite/execution_repository.go
+252: func scanRunAttempt(scanner rowScanner) (*domain.RunAttempt, error) {
+253: 	var run domain.RunAttempt
+254: 	var leaseUntil, startedAt, createdAt, updatedAt string
+255: 	var finishedAt, resultJSON sql.NullString
+256: 	err := scanner.Scan(&run.ID, &run.TaskID, &run.AgentID, &run.Version, &run.Status,
+257: 		&run.WorkerInstanceID, &run.FencingToken, &leaseUntil, &run.ExecutionSpecVersion,
+258: 		&run.RequestedExecutionJSON, &run.ResolvedExecutionJSON, &run.AdapterID, &run.BackendID,
+259: 		&run.Model, &run.ReasoningMode, &run.ReasoningValue, &startedAt, &finishedAt,
+260: 		&resultJSON, &createdAt, &updatedAt)
+261: 	if errors.Is(err, sql.ErrNoRows) {
+262: 		return nil, domain.ErrNotFound
+263: 	}
+264: 	if err != nil {
+265: 		return nil, fmt.Errorf("scan RunAttempt: %w", err)
+266: 	}
+
+internal/persistence/sqlite/recovery_repository.go
+68: 
+69: 	runRows, err := queryExpiredRuns(ctx, tx, nowText)
+70: 	if err != nil {
+71: 		return err
+72: 	}
+73: 	for _, row := range runRows {
+74: 		result, err := tx.ExecContext(ctx, `UPDATE run_attempts SET status='uncertain', version=version+1, finished_at=?, result_json=?, updated_at=?
+75: 			WHERE run_id=? AND status IN ('starting','running','waiting_approval','finishing') AND lease_until<=?`,
+76: 			nowText, `{"status":"uncertain","side_effects_known":false,"error":"RunAttempt lease expired during recovery"}`, nowText, row.id, nowText)
+77: 		if err != nil {
+78: 			return fmt.Errorf("mark expired RunAttempt %s uncertain: %w", row.id, err)
+79: 		}
+80: 		if changed, _ := result.RowsAffected(); changed == 1 {
+81: 			if err := appendRecoveryEvent(ctx, tx, actor, row.organizationID, "run_attempt", row.id,
+82: 				"run_attempt.uncertain", map[string]any{"from_state": row.status, "to_state": "uncertain", "task_id": row.taskID, "reason": "lease_expired"}, now); err != nil {
+83: 				return err
+84: 			}
+85: 		}
+86: 	}
+87: 
+88: 	for _, row := range runRows {
+89: 		var status domain.TaskStatus
+90: 		if err := tx.QueryRowContext(ctx, `SELECT status FROM tasks WHERE task_id=?`, row.taskID).Scan(&status); err != nil {
+91: 			if err == sql.ErrNoRows {
+92: 				continue
+93: 			}
+94: 			return fmt.Errorf("load task %s during recovery: %w", row.taskID, err)
+95: 		}
+96: 		if status != domain.TaskStatusRunning && status != domain.TaskStatusWaitingApproval && status != domain.TaskStatusCancelRequested {
+97: 			continue
+98: 		}
+99: 		toState := domain.TaskStatusUncertain
+100: 		if status == domain.TaskStatusCancelRequested {
+101: 			toState = domain.TaskStatusCanceled
+102: 		}
+103: 		result, err := tx.ExecContext(ctx, `UPDATE tasks SET status=?, version=version+1, updated_at=?
+104: 			WHERE task_id=? AND status=?`, toState, nowText, row.taskID, status)
+105: 		if err != nil {
+106: 			return fmt.Errorf("settle task %s for expired RunAttempt: %w", row.taskID, err)
+107: 		}
+108: 		if changed, _ := result.RowsAffected(); changed == 1 {
+109: 			eventType := "task.uncertain"
+110: 			if toState == domain.TaskStatusCanceled {
+111: 				eventType = "task.canceled"
+112: 			}
+113: 			if err := appendRecoveryEvent(ctx, tx, actor, row.organizationID, "task", row.taskID,
+114: 				eventType, map[string]any{"from_state": status, "to_state": toState, "run_id": row.id, "reason": "run_lease_expired"}, now); err != nil {
+115: 				return err
+116: 			}
+117: 		}
+118: 	}
+119: 	if err := r.inject(FaultBeforeCommit); err != nil {
+120: 		return err
+121: 	}
+122: 	return commit(tx)
+
+internal/persistence/sqlite/worker_execution_repository.go
+625: 		}
+626: 		hasPendingMessage = pending == 1
+627: 	}
+628: 	runStatus, taskStatus := terminalStatuses(turnResult.Status)
+629: 	businessEffectUnverified := turnResult.Status == openruntime.TurnResultSucceeded && !turnResult.SideEffectsKnown
+630: 	if businessEffectUnverified {
+631: 		taskStatus = domain.TaskStatusUncertain
+632: 	}
+633: 	// A cancellation intent must not hide an uncertain physical outcome. Other
+634: 	// determinate finish/cancel ordering semantics remain unchanged.
+635: 	if task.Status == domain.TaskStatusCancelRequested && taskStatus != domain.TaskStatusUncertain {
+636: 		taskStatus = domain.TaskStatusCanceled
+637: 	} else if hasPendingMessage && (taskStatus == domain.TaskStatusSucceeded || taskStatus == domain.TaskStatusFailed) {
+638: 		// A message committed before finish is a durable follow-up. Keep the
+639: 		// Task open so the queued message can be consumed by the next turn.
+640: 		taskStatus = domain.TaskStatusWaitingInput
+641: 	}
+
+internal/persistence/sqlite/task_repository.go
+99: 	existing, err := getTaskByIdempotency(ctx, tx, task.SenderPrincipalID, task.IdempotencyKey)
+100: 	if err == nil {
+101: 		if !sameTaskCommand(existing, task) {
+102: 			return nil, domain.ErrIdempotencyConflict
+103: 		}
+104: 		existingMailbox, err := scanMailbox(tx.QueryRowContext(ctx, `SELECT `+mailboxColumns+`
+105: 			FROM mailbox_items WHERE task_id = ? AND kind = 'task' ORDER BY sequence ASC LIMIT 1`, existing.ID))
+106: 		if err != nil {
+107: 			return nil, fmt.Errorf("load idempotent task mailbox: %w", err)
+108: 		}
+109: 		return &CreateTaskResult{Task: *existing, MailboxItem: *existingMailbox, Replay: true}, nil
+110: 	}
+111: 	if !errors.Is(err, sql.ErrNoRows) {
+112: 		return nil, fmt.Errorf("check task idempotency: %w", err)
+113: 	}
+114: 
+115: 	if _, err := tx.ExecContext(ctx, `INSERT INTO tasks (`+taskColumns+`) VALUES (
+116: 		?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+117: 		task.ID, task.Version, task.Status, task.SenderPrincipalID, task.TargetAgentID, task.DispatchMode,
+118: 		nullableString(task.ParentTaskID), task.OrganizationID, task.IdempotencyKey, task.Content,
+119: 		nullableString(task.Result), nullableString(task.Error), nullableString(task.CancelRequestedBy),
+120: 		nullableString(task.CancelRequestedAt), task.CreatedAt, task.UpdatedAt); err != nil {
+121: 		if isUniqueConstraint(err, "") {
+122: 			return nil, domain.ErrIdempotencyConflict
+123: 		}
+124: 		return nil, fmt.Errorf("insert task: %w", err)
+125: 	}
+126: 	if initialMessage != nil {
+127: 		if err := insertMessage(ctx, tx, initialMessage); err != nil {
+128: 			return nil, err
+
+internal/persistence/sqlite/task_repository.go
+159: func sameTaskCommand(left *domain.Task, right *domain.Task) bool {
+160: 	leftParent := nullableValue(left.ParentTaskID)
+161: 	rightParent := nullableValue(right.ParentTaskID)
+162: 	return left.TargetAgentID == right.TargetAgentID &&
+163: 		left.OrganizationID == right.OrganizationID &&
+164: 		left.DispatchMode == right.DispatchMode &&
+165: 		leftParent == rightParent && left.Content == right.Content
+166: }
+
+internal/persistence/sqlite/recovery_repository_test.go
+83: 		}
+84: 	}
+85: 
+86: 	// A cancellation intent remains authoritative when the expired run is
+87: 	// reconciled; the task transition is journaled as canceled.
+88: 	cancelTask := createTask(t, repository, fixture, "recovery-cancel")
+89: 	cancelWorker := &domain.WorkerInstance{ID: "worker-recovery-cancel", AgentID: fixture.agentID, Generation: 2,
+90: 		Transport: domain.WorkerTransportUnix, AuthenticatedPrincipal: fixture.ownerPrincipal, Status: domain.WorkerStatusOnline,
+91: 		Capabilities: []string{"coding"}, LeaseUntil: repositoryTestTime.Add(-time.Minute), FencingToken: 2}
+92: 	if err := repository.CreateWorkerInstance(context.Background(), cancelWorker, journalEvent("event-worker-recovery-cancel", "worker.registered", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+93: 		t.Fatal(err)
+94: 	}
+95: 	cancelRun := &domain.RunAttempt{ID: "run-recovery-cancel", TaskID: cancelTask.Task.ID, AgentID: fixture.agentID, Version: 1,
+96: 		Status: domain.RunAttemptRunning, WorkerInstanceID: cancelWorker.ID, FencingToken: 2, LeaseUntil: repositoryTestTime.Add(-time.Minute),
+97: 		ExecutionSpecVersion: 1, RequestedExecutionJSON: `{}`, ResolvedExecutionJSON: `{}`, AdapterID: "fake", BackendID: "local", Model: "model-1", ReasoningMode: domain.ReasoningBackendDefault}
+98: 	if _, err := repository.BeginRunAttempt(context.Background(), cancelTask.Task.Version, cancelRun,
+99: 		journalEvent("event-task-recovery-cancel-running", "task.running", fixture.ownerPrincipal, fixture.organizationID),
+100: 		journalEvent("event-run-recovery-cancel", "run_attempt.started", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+101: 		t.Fatal(err)
+102: 	}
+103: 	if _, err := repository.db.Exec(`UPDATE tasks SET status='cancel_requested' WHERE task_id=?`, cancelTask.Task.ID); err != nil {
+104: 		t.Fatal(err)
+105: 	}
+106: 	if err := repository.ReconcileExpired(context.Background()); err != nil {
+107: 		t.Fatal(err)
+108: 	}
+109: 	canceled, err := repository.GetTask(context.Background(), cancelTask.Task.ID)
+110: 	if err != nil || canceled.Status != domain.TaskStatusCanceled {
+111: 		t.Fatalf("canceled recovery task=%+v err=%v", canceled, err)
+112: 	}
+113: 	var canceledEvents int
+114: 	if err := repository.db.QueryRow(`SELECT COUNT(*) FROM event_journal WHERE aggregate_type='task' AND aggregate_id=? AND event_type='task.canceled'`, cancelTask.Task.ID).Scan(&canceledEvents); err != nil || canceledEvents != 1 {
+115: 		t.Fatalf("canceled recovery event count=%d err=%v", canceledEvents, err)
+116: 	}
+117: }
+118: 
+119: func TestReconcileExpiredRollsBackStateAndJournalTogether(t *testing.T) {
+120: 	trigger := false
+121: 	fault := func(point FaultPoint) error {
+122: 		if trigger && point == FaultBeforeCommit {
+
+docs/plans/2026-08-30-openagentx-adr-001-implementation/12-organization-authority-policy.md
+10: ## 目标
+11: 
+12: 实现组织、岗位、角色、汇报链和权限策略，使默认 coordinated dispatch 与显式 direct dispatch 具有稳定业务寻址、授权和审计语义。
+13: 
+14: ## 依赖与入口
+15: 
+16: - 依赖：任务 11 / G3；
+17: - 入口：Task/Message/Approval/Cancel Command Service 和 Agent Profile；
+18: - Worker Instance 不能成为组织成员或业务接收者。
+19: 
+20: ## 实施范围
+21: 
+22: - 实现 Organization、OrgUnit、Position、Role、PositionAssignment 和 ReportingLine；
+23: - 实现 AuthorityPolicy 的 Task、Message、Approval、Cancel、direct dispatch 和 ExecutionSpec override 权限；
+24: - 实现默认主指挥者解析和 `dispatch_mode=coordinated`；
+25: - 实现授权后的 Domain Agent direct dispatch；
+26: - 组织变更、委派和拒绝结果追加 Event Journal；
+27: - 提供组织树、Agent responsibility 和合法接收者 read model；
+28: - 首版支持一个默认 Organization，但 schema/API 不写死全局单例。
+29: 
+30: ## 质量与验证
+31: 
+32: - 跨组织、越级 direct dispatch、越权取消/审批/override 全部拒绝；
+33: - Task/Message 以 `worker_instance_id` 为目标时拒绝；
+34: - Worker 重启、迁移或 Backend 切换不改变岗位、权限和任务目标；
+35: - ReportingLine 变更不追溯改写历史审计事实；
+36: - policy evaluation 使用稳定 principal/action/resource/context 输入。
+37: 
+38: ## 实施结果
+39: 
+40: - 新增组织契约类型：`OrgUnit`、`Position`、`Role`、`PositionAssignment` 和 `ReportingLine`。
+41: - 新增纯函数 `AuthorityPolicy`，以稳定 principal/action/resource/context 输入校验组织边界、direct dispatch 和 ExecutionSpec override 权限。
+42: - 明确 Worker Instance 不是组织成员，也不能作为业务目标；coordinated/direct dispatch 的越权和跨组织请求 fail closed。
+43: 
+44: ## 退出条件
+45: 
+46: - coordinated/direct dispatch 正负向测试完整；
+47: - 组织 read model 能回答谁负责什么、谁可以指挥谁；
+48: - Command Service 成为 CLI/MCP/Web 唯一业务写入入口；
+49: - Worker API 和 Admin API 不能携带业务 prompt。
+50: 
+51: ## 验证
+52: 
+53: 详见 [Task 12 验证报告](../../reports/validation/2026-08-30-openagentx-task12-organization-authority.md)。

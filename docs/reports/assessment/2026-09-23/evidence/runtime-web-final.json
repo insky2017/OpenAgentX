@@ -1,0 +1,102 @@
+{
+  "checked_at_utc": "2026-09-22T16:44:08.213921+00:00",
+  "agent_id": "web-real-agy",
+  "artifact_exists": true,
+  "artifact_bytes": 21,
+  "artifact_sha256": "7459efc1414b18e032060b711f8fd712bb6ffa6321c36bed2f1fe38656a06e06",
+  "artifact_exact": true,
+  "workers": [
+    {
+      "worker_instance_id": "worker-ebf9cff7-2ee5-4fa1-9670-4b3ca003db7d",
+      "generation": 1,
+      "status": "online",
+      "last_heartbeat_at": "2026-09-22T16:44:07.300900918Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task-bb2dbeeb-f297-40b8-97ed-0e4f97c08f16",
+      "status": "uncertain",
+      "error": "business_effect_unverified",
+      "runs": [
+        {
+          "run_id": "run-47294afb-2cb0-4a1f-a540-9a3124bca575",
+          "status": "succeeded",
+          "worker_instance_id": "worker-ebf9cff7-2ee5-4fa1-9670-4b3ca003db7d",
+          "adapter_id": "agy-batch",
+          "backend_id": "primary",
+          "model": "gemini-3.7-flash-low",
+          "runtime_status": "succeeded",
+          "side_effects_known": false,
+          "reply_bytes": 420,
+          "reply_has_marker": true,
+          "reply_sha256": "4051203f9b8790a26e888a6e2a813509b2cb6a6790e22685a03967ff88a8f9ad",
+          "provider_session_recorded": true,
+          "runtime_event_counts": {
+            "run_attempt.finished": 1,
+            "run_attempt.started": 1,
+            "runtime.agy.init": 1,
+            "runtime.agy.result": 1,
+            "runtime.agy.step_update": 29
+          }
+        }
+      ],
+      "task_event_counts": {
+        "task.created": 1,
+        "task.running": 1,
+        "task.settled": 1
+      },
+      "mailbox": [
+        {
+          "kind": "task",
+          "lane": "work",
+          "state": "accepted",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "task_id": "task-9434387d-3d34-4b0b-beb8-54769a773747",
+      "status": "uncertain",
+      "error": "business_effect_unverified",
+      "runs": [
+        {
+          "run_id": "run-ebc767ac-0a97-4f63-956d-93569fcb2771",
+          "status": "succeeded",
+          "worker_instance_id": "worker-ebf9cff7-2ee5-4fa1-9670-4b3ca003db7d",
+          "adapter_id": "agy-batch",
+          "backend_id": "primary",
+          "model": "gemini-3.7-flash-low",
+          "runtime_status": "succeeded",
+          "side_effects_known": false,
+          "reply_bytes": 360,
+          "reply_has_marker": true,
+          "reply_sha256": "df6a56db2afa3a2b7715d936b9f018fd91daa1c608e27205b2d03d246ecc4971",
+          "provider_session_recorded": true,
+          "runtime_event_counts": {
+            "run_attempt.finished": 1,
+            "run_attempt.started": 1,
+            "runtime.agy.init": 1,
+            "runtime.agy.result": 1,
+            "runtime.agy.step_update": 22
+          }
+        }
+      ],
+      "task_event_counts": {
+        "task.created": 1,
+        "task.running": 1,
+        "task.settled": 1
+      },
+      "mailbox": [
+        {
+          "kind": "task",
+          "lane": "work",
+          "state": "accepted",
+          "attempts": 1
+        }
+      ]
+    }
+  ],
+  "production_e2e": false,
+  "browser_chain": "see web-real-e2e.json and web-real-e2e-run.txt"
+}

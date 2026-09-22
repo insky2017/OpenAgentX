@@ -1,0 +1,10 @@
+command: go test -count=1 ./internal/network/... ./internal/transport/... ./internal/safeoutput/... ./internal/testkit/... ./internal/cli/admin/... ./cmd/openagentx
+elapsed_seconds: 2.485
+exit: 0
+ok  	openagentx/internal/network/secretstore	0.427s
+ok  	openagentx/internal/transport/remotehttps	0.280s
+ok  	openagentx/internal/transport/unixhttp	0.030s
+ok  	openagentx/internal/safeoutput	0.010s
+ok  	openagentx/internal/testkit	0.087s
+ok  	openagentx/internal/cli/admin	1.394s
+ok  	openagentx/cmd/openagentx	0.469s
