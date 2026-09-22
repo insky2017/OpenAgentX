@@ -17,6 +17,9 @@ updated_at: 2026-09-22
 这解释了原请求一直 queued；在线 Worker 不等于存在可调度 Backend。未通过直接改 DB 或扩展 CLI scope
 绕过它，也没有实现 ADR-007 代际继承。
 
+17:15 后补充：已修复并安装 Web 对旧 generation 回执误报当前生效的问题，源码 `77ae678`；本地及
+公网 HTTPS 资源摘要一致，daemon/Worker 未重启。当前网络发布仍未落地，真实 Runtime 验收仍 blocked。
+
 现有 CLI owner Token 验证通过，但网络管理不属于其冻结 scope；检查用 Web 页面未登录。需要 Web owner
 在网络设置选中 `quote-service / primary` 当前 generation 51，保持 `系统默认 (inherit)`，先执行
 `测试连接`，成功后 `保存并应用`。完成正式测试/发布后才能继续真实回复与第二项任务验收。
@@ -46,7 +49,8 @@ updated_at: 2026-09-22
 `984bb0df415b18f49959eda474076f0c807d90e6b5392342083249e605771114`。
 本批没有恢复数据库；回滚时仍必须先 graceful drain，并只在服务停止且确认需要时恢复 DB。
 
-沿用 Worker YAML、Fleet manifest、两个 unit、Wrapper、Web assets 和网络策略。相关摘要未变：
+16:04 安装批次沿用 Worker YAML、Fleet manifest、两个 unit、Wrapper、Web assets 和网络策略。
+17:15 单独更新的 Web assets 见下方补充记录，其余相关摘要未变：
 
 | 对象 | SHA-256 |
 | --- | --- |
@@ -133,3 +137,43 @@ generation。该分支可以解释成功提示而无发布请求；未取得用�
 回执为准。已经给出该操作提示；若仍不能发送正式发布请求，不再让用户循环测试/保存，应单独修复页面。
 16:55检查点仍未应用，真实 pane 和60s正式 Follow 仅显示旧 Task 的 Mailbox claim。本轮没有新增业务 Task、
 改产品代码或真实配置，继续保持 `installed-runtime-validation-blocked`，不宣称完整现场 E2E 通过。
+
+## 2026-09-22 17:15 Web 误报修复安装
+
+用户再次刷新保存后仍无本轮已接受的 mode_publish，binding version5/applied gen47 未变。已按执行日志
+裁决完成最小 Web 修复、一次独立验证与静态资源安装；不修改 Go/权限/fencing/代际继承。
+
+修复提交：`77ae6785eb33e30b29155dcc580a083fd79e5cf2`。当前 Worker 是否已应用统一校验 agent/backend/
+Worker instance/generation/binding revision/mode 及 policy/profile；历史回执明确标为当前未应用。
+测试进行中提示等待，当前成功测试提示可保存，发布提交与实际回执分开展示。附带5行CSS使目标和长回执
+在390px屏幕内可读。未改后端和用户网络模式。
+
+| 证据 | 结果 |
+|---|---|
+| 原组件真实 Chrome 复现 | pending test + gen47 applied 在 gen51 上保存误报“无需重复保存”，0请求 |
+| 修复组件真实 Chrome | 同条件不再误报；成功test后保存一次，正式publish路径、gen51、CAS5；回执前警示、精确回执后绿色 |
+| 失败/竞态 | offline/无写权限禁写；409不报成功，显式重试复用Idempotency-Key；进行中测试不会自动重试 |
+| 桌面/窄屏 | 1280px与390px实际渲染；390px原521px横向溢出已消除 |
+| Node / PWA | network 7/7、observation 4/4、PWA通过，退出0 |
+| 独立生产构建 | `npm run build`退出0；最后提示边界微调后仅重建，无Go改动 |
+| release / whitespace /冻结 | scanner、diff check通过；ADR-009/AGENTS hash未变 |
+| local/public/browser assets | 均HTTP200，JS/CSS SHA-256与已验证dist相同 |
+| 运行服务 | daemon PID830503、Worker PID835790，active/running，NRestarts均0，gen51不变 |
+
+| 安装产物 | SHA-256 |
+|---|---|
+| `/home/sky/.openagentx/web/assets/app.js` | `56d5dedce662f81a0c5197b1d4cf70b199fbac7e1886df98d99bf6126feae767` |
+| `/home/sky/.openagentx/web/assets/app.css` | `76f34cdd88c2df1f079bc49d97ab2b68eea1e955ecaaa117396a6c9556227e8f` |
+
+原Web目录保留在 `/home/sky/.openagentx/backups/adr009-20260922-DTkpFj/web-77ae678-9I5u5B/web`，
+备份父目录0700；只替换JS/CSS，采用同目录唯一临时文件、0644、cmp、fsync与rename。`release.txt`
+分别记录Go binary和Web source revision。`staticHandler`逐请求读取文件，因此无需重启服务或引入新代次。
+
+临时UI fixture在`/tmp/oax-network-ui-zKSFFg`，仅监听loopback，实际API回调由fixture控制；它证明组件
+行为，不证明真实owner鉴权/Worker执行。原组件在成功test刷新后能正确发送publish，用户本次浏览器的
+具体请求轨迹仍未知；真实DB无mode_publish不等于证明从未发过被拒绝的HTTP请求。
+
+17:16正式安全Attach仍为gen51/primary unavailable，原Task仍queued。检查用公网浏览器仍显示登录页，
+不能代用CLI credential或提取Web session发布。需要用户整页刷新加载新资源，在现有owner会话确认
+`quote-service / primary · gen51`、inherit及“测试成功，可保存并应用”，然后保存一次并核对完整提示。
+页面内刷新仅更新数据，不替换已载入JS。没有再创建测试或业务Task；后续以真实Worker回执/Run/回复收口。

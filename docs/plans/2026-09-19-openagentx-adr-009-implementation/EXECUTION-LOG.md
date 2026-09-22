@@ -870,6 +870,25 @@ push/merge/安装来“修正”差异。
 - 证据措辞澄清：真实DB中没有本轮已接受的mode_publish记录，只能证明发布未落地；未取得用户浏览器
   network trace，不能排除请求曾被服务端拒绝。“0请求”严格指上述隔离浏览器复现，不外推到用户点击。
 
+#### Web修复提交与安装（2026-09-22 17:15–17:17）
+
+- 实现提交 `77ae6785eb33e30b29155dcc580a083fd79e5cf2`；精确6文件：Web组件/helper/test/CSS/package与
+  本日志。提交后feature clean；无Go/schema/auth/网络代际规则修改，不push/merge。
+- 最后将“测试成功，可保存”文案限定到精确当前inherit/direct测试，未扩大named_profile成功判定。
+  仅重做最终Web build；dist晚于最后源码修改。JS SHA-256
+  `56d5dedce662f81a0c5197b1d4cf70b199fbac7e1886df98d99bf6126feae767`，CSS SHA-256
+  `76f34cdd88c2df1f079bc49d97ab2b68eea1e955ecaaa117396a6c9556227e8f`。
+- 按现有安装授权备份原Web到私有`web-77ae678-9I5u5B/web`，只以同目录唯一临时文件、0644、cmp、
+  fsync+rename更新两静态资源。正式staticHandler逐请求读取文件，未修改服务配置/二进制，不需要重启；
+  daemon/Worker PID及NRestarts=0、gen51保持原值。release.txt保留Go provenance，另记Web revision/hash。
+- 本地HTTP、公网HTTPS curl及真实Chrome分别取得200资源并核对上述两hash一致；无缓存旧包冒充更新。
+  页面内刷新只更新API数据，用户需整页刷新加载新JS。检查用真实Web仍未登录，不能越权代发发布。
+- 17:16正式Attach primary仍unavailable，原Task仍queued，保持Runtime验收blocked。完整失败/证据与
+  回滚路径见[安装报告](../../reports/validation/2026-09-22-openagentx-adr009-live-installation.md)。
+- 收尾：独立验证确认最终dist两hash与其build产物完全一致；6个相对链接、whitespace和两文档路径边界
+  检查通过。已关闭本次fixture浏览器页和localhost服务，截图/fixture保留在唯一临时目录供复核。
+  main仍clean/ahead1于3723c773，未操作父仓；源码修复已提交，安装记录另作docs提交，不push。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结
