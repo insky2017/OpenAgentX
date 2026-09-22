@@ -1093,6 +1093,20 @@ push/merge/安装来“修正”差异。
 - release scanner和冻结ADR/AGENTS摘要通过；即将仅安装新Web资源，binary仍6d599ac，保持当前
   daemon/Worker/网络generation52。真实Web业务验收尚未完成，待后续追加；旧orchestrator任务保留。
 
+#### 20:50 Web安装与最后真实验收边界
+
+- 实现提交`ee46038102ebd44d387e26ab912001f26b89ade5`已完成，feature clean后仅安装Web；备份
+  `/home/sky/.openagentx/backups/web-task-flow-20260922.t8ovjm`为0700。逐文件同目录临时文件0644、
+  cmp/sync/rename，无目录消失窗口；HTTPS JS/CSS与build/installed同hash，release元数据已更新。
+- daemon/Worker仍PID1686100/1687781、NRestarts0，binary仍6d599ac；正式Attach gen52 online/
+  primary healthy、无active Run。没有重启或重新发布网络，没有改DB/父仓/原queued Task。
+- 公网浏览器导航超10s，随后同一tab已加载真实登录表单；没有现成owner Web会话，不能用CLI
+  credential创建Web Cookie。用户获知准确入口及一次只读时间指令；正式Follow继续观察真实Task。
+  `LIVE-03`保持待验，报告不把隔离fixture或此前Console执行扩大为Web真实闭环通过。
+- 180s正式Follow正常结束，窗口内没有新Task事件。所有自主可完成的实现/安装/隔离验证已完成；
+  仅缺owner真实Web会话提交与页面回复反馈，安全收尾停止观察，等待用户该操作后继续同一验收。
+  文档链接8项、staged diff、冻结摘要通过；只提交报告/日志，不push；main仍clean/ahead1。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结

@@ -1,6 +1,6 @@
 ---
 doc_type: validation_report
-status: installed-scoped-validation-passed
+status: installed-web-live-validation-pending
 owner: openagentx
 updated_at: 2026-09-22
 ---
@@ -8,6 +8,11 @@ updated_at: 2026-09-22
 # ADR-009 实机安装与 Console 验收
 
 ## 范围与结论
+
+**20:50更新：网页闭环修复`ee46038`已安装，真实owner Web发送与页面回复待验。** 用户继续测试后
+发现19:59 Task被默认发给offline orchestrator且一直queued。此前真实Console执行证据不覆盖网页
+默认目标，现已明确执行Agent、保存选择、发送后自动追踪准确Task，并把回复置于详情前部。隔离
+浏览器多Agent/手机/失败流程已通过，不能将其扩大为真实网页发送验收；本节以下保留原阶段事实。
 
 **19:42更新：本轮重新安装、PC/手机发送区与一次真实Runtime执行验收通过。** 已安装`6d599ac`，
 包含主程序摘要漂移warning修复`8b621ce`；quote-service generation52的真实Run已succeeded并返回
@@ -299,3 +304,40 @@ Console保持运行，其他window/pane未kill/respawn；本次不声称清理�
 `LIVE-01`在本轮范围关闭：摘要漂移的源码warning矩阵已通过，新安装真实Run成功；不声称本次运行中
 人为替换了AGY。`LIVE-02`仍待独立Diagnostic修复。未新增业务文件副作用验收，未验证手机真机或所有
 浏览器内核；本轮采用真实Chromium手机viewport。未push/merge、未修改main或steadyflow父仓。
+
+## 20:28–20:50：网页执行目标与回复跟踪修复
+
+### 根因与最小修复
+
+- `task-17beccd5-0c86-4a26-b699-85294132a0e7`于19:59:30发给offline orchestrator，queued且无
+  Run；同期quote-service仍online/primary healthy、gen52网络binding7 applied。本例尚未进入
+  Runtime/代理网络阶段。根因为Web默认`selectedAgent || agents[0]`，刷新不保存目标，列表筛选
+  不改变发送对象；上批单Agent UI fixture和Console真实执行漏掉了多Agent网页入口。
+- 提交`ee46038102ebd44d387e26ab912001f26b89ade5`新增明确执行Agent selector和Worker状态；
+  唯一有效online Worker可默认选中，显式/URL离线或未知目标禁发且不静默替换。目标写入URL。
+- 严格使用正式平铺CreateTaskResponse的task_id/task_version/task_status/sequence；接受后清除
+  旧筛选并打开准确Task，展开执行过程。后续读取失败仍保留已接受事实，防止用户误重发。
+- 回复优先展示；业务核验提示保留原`uncertain/business_effect_unverified`，不把Runtime succeeded
+  改成业务已核验。权限/Cookie/CSRF/正式API、Runtime/网络/Task领域语义均未改变。
+
+### 验证与安装证据
+
+- `test:observation`10/10，独立`test:network`7/7、`test:pwa`，production build、release scanner、
+  diff和冻结摘要全部通过。Go源码未变，不重复无关全量Go/race；独立代码复核无阻断。
+- 真实Chromium多Agent隔离fixture，desktop与mobile分别点击一次，准确打开task-created-1/2，
+  从queued/Run starting更新至succeeded回复；刷新保留Agent/Task。显式offline orchestrator禁发。
+  第三次POST接受后注入overview503，仍显示task-created-3回复，合计三次create无重复。
+  offline保留draft且禁发，viewer禁发；1440x1000、390x844、320x568无页面横溢；390px回复首屏
+  y350–414可见，底部composer从y596开始。fixture不作为真实鉴权/Runtime证据。
+- 20:47只更新Web资源，同目录临时文件0644/cmp/sync/rename逐文件替换，Web目录无消失窗口；
+  私有备份`/home/sky/.openagentx/backups/web-task-flow-20260922.t8ovjm`为0700，保留旧Web/release。
+  JS SHA-256 `2e173b5064a89c61ca6a5a57f3e9ea1cc3fe8479b7695c81735edeb2053b1e7c`；CSS
+  `c7e9b0f8d223ff14ab76c2280ded37613bd4c06918f002c1627e9133a89b548f`。HTTPS与installed/构建相同。
+- binary仍6d599ac，daemon/Worker PID1686100/1687781、NRestarts0，gen52/primary healthy；
+  未安装binary、未重启、未改网络/config/unit/DB。旧orchestrator任务只读保留，未迁移/重发。
+- 工具失败：两次大块patch因上下文不匹配拒绝，无部分写入；改为局部patch。agent-browser select
+  参数版本不一致，改用原生键盘选择；公网导航曾超10s，随后同一tab已显示真实登录表单，未重复
+  请求或把超时忽略为鉴权成功。独立代码核对纠正旧fixture的嵌套Task假设，正式测试使用平铺receipt。
+- `LIVE-03`（Web真实闭环）保持待验：已给用户明确quote-service链接，等待既有owner会话的一次
+  实际发送与页面结果反馈；主代理正式Follow已连接。验证浏览器无Web登录态，不读取密码/Cookie、
+  不用CLI Token伪造Web登录，也不再以Console发送作为Web验收。`LIVE-02`仍独立待办。
