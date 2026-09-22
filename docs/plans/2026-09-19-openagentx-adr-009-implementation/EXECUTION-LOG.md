@@ -827,6 +827,49 @@ push/merge/安装来“修正”差异。
   只观察到旧 Task 的 Mailbox claim，未观察到 Run 创建，不标记 E2E 通过。已向用户说明实际未应用并给出
   一次刷新后保存的纠正步骤；当前验证器没有可用 Web owner session，不能通过 CLI 越权执行网络发布。
 
+### 2026-09-22 17:04 保存误报的最小页面修复
+
+- 用户再次确认刷新并保存后，只读检查仍是 binding version5/applied gen47、current gen51，最近成功
+  inherit test 为16:57:09；没有本轮 mode_publish。正式 Attach 仍 primary unavailable，原 Task 未运行。
+- 按 AGENTS 第3条将此裁定为本轮主流程阻断/误报成功的最小修复：只修 Web 的目标身份、应用回执显示与
+  测试/发布判断，不改 Go 授权、Worker fencing、网络继承或 ADR-006/007。不再要求用户无依据重复点击。
+- 验收矩阵：正向为当前目标成功测试产生一次正式 publish/CAS；不变量为 applied 必须匹配
+  agent/backend/Worker/generation/binding revision；失败覆盖旧代回执、pending/failed/stale 测试、
+  离线/无写权限和版本冲突；浏览器覆盖实际组件、刷新与桌面/窄屏。隔离 UI 证据不冒充真实 Runtime E2E。
+- 本批预算45分钟，一次主要实施与一次独立验证；真实 Web owner 会话仍由用户持有，不提取 Cookie，
+  不扩大 CLI scope。部署仅使用既有安装授权范围内、验证后的 Web 静态产物；若仍需用户确认发布，
+  在已修复页面提供可核对证据后再说明，不能绕过正式 API。
+- 查询纠正：首次只读 SQLite 使用错误路径 `.openagentx/openagentx.db` 返回1，未创建/修改数据库；
+  已从真实 ExecStart 确认 `.openagentx/data/openagentx.db` 后以 readonly/query_only 查询。源码定位中
+  错误的 ADR 文件名和 `internal/service` 路径返回非零，已按 rg 文件清单纠正，无产品副作用。
+
+#### 页面修复与独立验证（2026-09-22 17:04 起）
+
+- 真实 Chrome、原版本组件（`087aeb3`）与临时 localhost fixture 复现：gen51 + gen47 applied + pending
+  test 时点击保存，出现“当前 Runtime 已经生效”，请求计数0。切换为同目标成功测试并刷新后，原版本
+  本身能够发送一次 `network-bindings/mode/publish`；因此未取得用户浏览器请求记录前，不声称完全还原
+  用户再次保存的具体操作/数据时序，不把 fixture 当生产发布。
+- 实现新增纯 `network-binding-state.js`：只有精确 agent/backend/Worker/generation/binding revision、
+  mode 与 policy/profile 回执才视为当前应用。旧回执以历史 Worker/gen 明示并用警示色；提交成功只说明
+  等待回执。进行中测试提示等待完成，当前成功测试明确可保存；不自动重测/发布，不修改服务端规则。
+- 同一浏览器验证修复后：pending 保存0请求且不再误报；刷新取得成功测试后一次正式路径请求，携带
+  test/Worker/gen51/expected_version5；应用前保持警示，精确当前回执后才为绿色；再次保存可幂等提示。
+  离线与无写权限禁用写按钮；注入409提示刷新、不报成功，显式重试复用原 Idempotency-Key。
+- 窄屏390px发现原目标 select 的 min-content 导致页面521px横向溢出；裁定为本次回执/目标可读性的
+  最小伴随修正，仅加 select 收缩与状态换行5行CSS，修复后 bodyWidth=390，真实截图检查可读。桌面
+  与窄屏使用同一组件，没有用静态源码检查代替浏览器。SSE/auth/Go/Console不受本次Web修复影响。
+- 独立验证代理：`npm run test:network` exit0/0.43s（7/7），`npm run test:observation` exit0/0.45s
+  （4/4），`npm run test:pwa` exit0/0.29s，`npm run build` exit0/1.59s，`git diff --check` exit0/0.01s；
+  正式 Observe/Publish/Worker receipt JSON字段与helper匹配，未发现本轮阻断。release scanner exit0。
+- 工具失败保留：临时Vite首次因系统watch资源不足EMFILE退出，改为仅该fixture禁用watch；虚拟JSX的
+  两次导入/解析失败后停止该路径，改用apply_patch复制原组件到唯一临时目录成功。watch关闭后需要重启
+  本次fixture才能加载新源码，已执行；没有更改系统watch限制或真实Web。若干rg不存在路径/Makefile仅
+  查询失败，已按文件清单纠正。测试数据无密码/token，临时服务只监听127.0.0.1。
+- 真实现场尚未发布/应用gen51；仍保持安装通过、Runtime闭环blocked。后续仅按授权安装本次可追溯
+  Web产物，正式发布继续由已有owner Web会话执行；CLI Token没有网络权限，不绕过该边界。
+- 证据措辞澄清：真实DB中没有本轮已接受的mode_publish记录，只能证明发布未落地；未取得用户浏览器
+  network trace，不能排除请求曾被服务端拒绝。“0请求”严格指上述隔离浏览器复现，不外推到用户点击。
+
 ## 7. 后续记录模板
 
 ### Task 01：基线、能力盘点与契约冻结

@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import './network-settings.css'
+import {
+  isCurrentExactBindingApplication,
+  isCurrentModeTestPublishable,
+} from './network-binding-state.js'
 
 const EMPTY_FORM = {
   mode: 'only_http_proxy',
@@ -288,21 +292,7 @@ export default function NetworkSettings({
 
   const latestProfileTest = profileTestsOnTarget[0] || null
 
-  const isModeTestPublishable = (test) => Boolean(selectedTarget
-    && test?.state === 'succeeded'
-    && test.agent_id === selectedTarget.agent_id
-    && test.backend_id === selectedTarget.backend?.backend_id
-    && test.mode === modeDraft
-    && test.worker_instance_id === selectedTarget.worker_id
-    && test.generation === selectedTarget.generation
-    && test.binding_revision === bindingRevision)
-
-  const appliedToSelected = selectedBinding?.desired_status === 'applied'
-    && selectedBinding.applied_mode === 'named_profile'
-    && selectedBinding.applied_profile_id === selectedProfile?.profile_id
-    && selectedBinding.applied_profile_version === selectedProfile?.published_content_version
-    && selectedBinding.applied_worker_id === selectedTarget?.worker_id
-    && selectedBinding.applied_generation === selectedTarget?.generation
+  const currentExactApplied = isCurrentExactBindingApplication(selectedTarget, selectedBinding)
 
   // Sync target selection (prefer active target)
   useEffect(() => {
@@ -446,15 +436,17 @@ export default function NetworkSettings({
     }
 
     if (modeDraft === 'inherit' || modeDraft === 'direct') {
-      if (isModeTestPublishable(latestMatchingModeTest)) {
+      if (isCurrentModeTestPublishable(selectedTarget, selectedBinding, modeDraft, latestMatchingModeTest)) {
         await execute(`mode-publish:${selectedTargetKey}:${latestMatchingModeTest.test_id}`, '/api/control/v1/network-bindings/mode/publish', {
           test_id: latestMatchingModeTest.test_id,
           worker_instance_id: selectedTarget.worker_id,
           generation: selectedTarget.generation,
           meta: { expected_version: latestMatchingModeTest.binding_revision },
-        }, `【${modeLabels[modeDraft]}】已保存并下发应用。`)
-      } else if (selectedBinding?.mode === modeDraft && selectedBinding?.desired_status === 'applied') {
+        }, `【${modeLabels[modeDraft]}】已提交应用，等待 Worker 回执确认实际生效。`)
+      } else if (selectedBinding?.mode === modeDraft && currentExactApplied) {
         setNotice(`当前 Runtime 已经生效为【${modeLabels[modeDraft]}】，无需重复保存。`)
+      } else if (['pending', 'claimed'].includes(latestMatchingModeTest?.state)) {
+        setError('连通性测试正在进行中，请等待 Worker 完成后刷新，再保存应用。')
       } else {
         setError(`尚未完成连通测试，请先点击【⚡ 测试连接】，确认通畅后再保存应用。`)
       }
@@ -478,7 +470,7 @@ export default function NetworkSettings({
           worker_instance_id: selectedTarget.worker_id,
           generation: selectedTarget.generation,
           meta: { expected_version: selectedBinding?.version || 0 },
-        }, `代理【${selectedProfile.profile_id}】已成功绑定到当前 Runtime。`)
+        }, `代理【${selectedProfile.profile_id}】已提交绑定，等待 Worker 回执确认实际生效。`)
       } else if (selectedProfile.state === 'ready' && selectedProfile.ready_test_id) {
         // Auto-publish then bind!
         const pubResult = await execute(`publish:${selectedProfile.profile_id}`, `/api/control/v1/network-profiles/${encodeURIComponent(selectedProfile.profile_id)}/publish`, {
@@ -493,7 +485,7 @@ export default function NetworkSettings({
             worker_instance_id: selectedTarget.worker_id,
             generation: selectedTarget.generation,
             meta: { expected_version: selectedBinding?.version || 0 },
-          }, `代理【${selectedProfile.profile_id}】已发布并成功绑定到当前 Runtime。`)
+          }, `代理【${selectedProfile.profile_id}】已发布并提交绑定，等待 Worker 回执确认实际生效。`)
         }
       } else {
         setError(`代理尚未通过目标连通测试，请先点击【⚡ 测试连接】，确认通畅后再保存。`)
@@ -538,14 +530,19 @@ export default function NetworkSettings({
 
   // Applied text summary
   const appliedSummary = useMemo(() => {
-    if (!selectedBinding?.applied_mode) {
-      return selectedBinding ? `${displayState(selectedBinding.desired_status)} (等待应用)` : '未绑定'
+    if (!selectedBinding) return '未绑定'
+    if (!currentExactApplied) {
+      if (selectedBinding.applied_mode) {
+        const receipt = `Worker ${selectedBinding.applied_worker_id || '未知'} · gen ${selectedBinding.applied_generation || '未知'}`
+        return `历史应用回执 (${receipt})；当前 Worker 尚未应用`
+      }
+      return `${displayState(selectedBinding.desired_status)} (等待当前 Worker 应用)`
     }
     if (selectedBinding.applied_mode === 'named_profile') {
       return `代理: ${selectedBinding.applied_profile_id || '未知'} (v${selectedBinding.applied_profile_version || '1'})`
     }
     return modeLabels[selectedBinding.applied_mode] || selectedBinding.applied_mode
-  }, [selectedBinding])
+  }, [currentExactApplied, selectedBinding])
 
   // Current active test result
   const currentTest = modeDraft === 'named_profile' ? latestProfileTest : latestMatchingModeTest
@@ -689,7 +686,7 @@ export default function NetworkSettings({
             <div className="status-brief-row">
               <div className="brief-item">
                 <span className="brief-label">实际生效:</span>
-                <strong className={selectedBinding?.desired_status === 'applied' ? 'text-ok' : 'text-warn'}>
+                <strong className={currentExactApplied ? 'text-ok' : 'text-warn'}>
                   {appliedSummary}
                 </strong>
               </div>
@@ -697,7 +694,9 @@ export default function NetworkSettings({
                 <div className="brief-item">
                   <span className="brief-label">测试结果:</span>
                   <span className={`test-badge state-${currentTest.state}`}>
-                    ● {displayState(currentTest.state)}
+                    ● {modeDraft !== 'named_profile' && isCurrentModeTestPublishable(selectedTarget, selectedBinding, modeDraft, currentTest)
+                      ? '测试成功，可保存并应用'
+                      : displayState(currentTest.state)}
                     {currentTest.duration_ms ? ` (${currentTest.duration_ms}ms)` : ''}
                     {currentTest.diagnostic_code ? ` · ${displayDiagnostic(currentTest.diagnostic_code)}` : ''}
                   </span>
