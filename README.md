@@ -4,6 +4,10 @@ OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持�
 
 ## 架构
 
+最新部署与 ADR 演进见 [当前系统架构（Markdown）](docs/design/CURRENT_ARCHITECTURE.md)
+和 [离线 HTML 架构图](docs/design/current-architecture.html)。该快照区分当前主线、
+ADR-008/009 实施分支与实际安装版本；下面的简图仅说明基础控制面关系。
+
 ```text
 OpenAgentX daemon
   ├─ Transactional SQLite + Event Journal
