@@ -1,8 +1,8 @@
 ---
 doc_type: execution_log
-status: active
+status: completed
 owner: openagentx
-updated_at: 2026-09-19
+updated_at: 2026-09-22
 ---
 
 # ADR-009 持续执行记录
@@ -56,7 +56,7 @@ push/merge/安装来“修正”差异。
 | 05 | Pane 0 任务 TUI 与控制易用性 | completed | `f1bf09a` | GO |
 | 06 | 同 pane Diagnostic 模式 | completed | `de7eb32` | GO |
 | 07 | 隔离用户闭环与操作文档 | completed | `a5874d7` | GO |
-| 08 | 集成审查与候选门禁 | active | - | WAIT |
+| 08 | 集成审查与候选门禁 | completed | `8e62f8c` | GO |
 
 ## 4. 冻结范围摘要
 
@@ -711,6 +711,52 @@ push/merge/安装来“修正”差异。
 - validation report 结论为 `passed-candidate`；当前无 P0/P1 open issue。Task 08 继续 `active/WAIT`，
   主计划与 front matter 继续 `pending`。本轮只提交 report + execution log；不 push/merge/install/restart/
   migrate/deploy，等待最终监督 gate。
+
+#### Task 08 最终门禁复核批次（2026-09-22）
+
+- 前一目标轮次分类为 progress：提交了 `8e62f8c390743b660db2d0a9f07dce37a75da2f4`，交付候选验证报告。
+  本次从当前 clean feature HEAD 继续；用户已明确授权 ADR-009 连续执行到完成，新版 AGENTS 第 4/5 条
+  要求复用未受影响证据并由主代理裁定收口。门禁复核据实际证据作出，不冒称外部监督者另发 GO。
+- 本批预算：20 分钟、一次有界复核。只核对 Task 08 验收覆盖、独立验证代理的 E2E 断言审阅、候选
+  provenance、文档/状态/链接/路径及必要补验；不重跑未受影响的全量测试、不扩大产品范围。
+- 验收：`5bebf14..8e62f8c` 仅 report/log，既有普通/race/E2E 证据可复用；候选 hash/revision/权限与报告
+  相符；Task 01-07 均已 gate；复核通过后以 docs-only Task 08 gate 记录精确 validation SHA 和实际状态。
+- 用户询问为何没有在日常 `OAX:quote-service.0` 看见测试。已说明：隔离测试使用独立 `tmux -L` server，
+  其中也有 `OAX:quote-service.0`，但不属于默认 tmux；daemon/Worker 为真实隔离进程，Runtime 使用受控
+  fake Adapter。该证据不覆盖生产 `quote-service`/外部 AGY 的现场回复，也不表示候选已安装。
+- 现场部署/验收仍是单独的外部操作阶段。保留用户原始任务工作台目标，完成候选门禁时明确列出这一
+  未执行项，不将其写成真实现场 PASS。
+
+#### Task 08 gate record（2026-09-22）
+
+- validation 提交精确 SHA：`8e62f8c390743b660db2d0a9f07dce37a75da2f4`，2 files、262 insertions、
+  1 deletion；复核前 feature clean、相对本地 `origin/main@c3fc1bb` ahead 53。该提交只有 report/log，
+  不改变已验证候选 `5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af` 的任何产品、测试或依赖文件。
+- 唯一独立验证代理完成只读证据复核：真实隔离 daemon/Worker/Unix control plane/tmux/PTY 与 fake
+  Runtime/systemctl 的边界准确；dispatch、waiting_input、同 Worker Run、安全输出、focused steer、
+  最终回复、Diagnostic/Normal、quit 与第二 Task 断言成立；snapshot/reducer/CAS/Diagnostic 映射成立。
+  未复跑测试或启动真实资源。该结论只用于候选裁定，不代表生产或外部 Runtime PASS。
+- 主代理依据用户连续执行授权、新 AGENTS 第 4/5 条及以上证据裁定 `GO`。复用 2026-09-20 全仓普通/race、
+  vet/module、Web、systemd、release 和隔离 E2E 结果；补充逐文件 `bash -n` 全部 exit 0。
+  原 `bash -n scripts/*.sh ...` 只解析第一个参数所指脚本，本次以循环逐文件补齐语法证据。
+- 候选实测 hash 仍为 `e482b113311ba618ac45512bf3098d431e739ab61bfc681ec3d2f90f483300c2`；
+  `go version -m` 确认 `vcs.revision=5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af`、
+  `vcs.modified=false`；大小 19523320 bytes，目录/file 权限 `0700 sky:sky`。ADR/AGENTS hash 未变。
+- 为回答用户为何没有在日常 pane 看到测试，新增一次只读现场版本核验：
+  `systemctl --user show ... --property=Id,ActiveState,SubState,MainPID,NRestarts`、安装文件和三进程
+  `/proc/<pid>/exe` 的 SHA-256/Go metadata、对精确 `OAX:quote-service.0` 的只读 `tmux display-message`。
+  所有命令 exit 0，未读取 pane 内容、凭据或真实 DB，也未注入输入/改变服务。
+- 实际 daemon PID `486159` active/running、NRestarts `0`；Worker PID `486788` active/running、
+  NRestarts `5`；Console pane 0 PID `313504`、`pane_dead=0`。安装文件与这三个运行进程均为
+  `f49cec4ed31a0f63e82626f1de8d6332baca205d`、`vcs.modified=false`，hash 均为
+  `984bb0df415b18f49959eda474076f0c807d90e6b5392342083249e605771114`。这证明现场尚未运行 ADR-009，
+  不证明生产任务流程通过。本条是新一次只读核验，不追改前轮“未进行现场检查”的历史记录。
+- 非阻断覆盖边界：CAS conflict、Diagnostic forbidden/旧流主要以模型/handler 测试注入，没有把它们
+  扩大为本轮生产故障注入；当后续改动跨越这些边界时重新评估。外部 Runtime 与默认 OAX 的现场验收
+  是下一次发布授权后的验收内容，不能用 fake Runtime 代替。
+- 主计划与 Task 08 front matter、本 log 总体状态同步为 `completed/GO`，含义限定为开发、隔离 E2E
+  与候选验证完成。完整用户现场交付仍未验证；保持未安装/未部署，不将整体目标谎报为现场可用。
+  本 gate 只改主计划、Task 08、report 和 log 四个 Markdown 文件；保留全部历史失败，无源码变更。
 
 ## 7. 后续记录模板
 

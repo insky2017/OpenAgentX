@@ -1,8 +1,8 @@
 ---
 doc_type: implementation_task
-status: pending
+status: completed
 owner: openagentx
-updated_at: 2026-09-19
+updated_at: 2026-09-22
 ---
 
 # 任务 08：集成审查与候选门禁
@@ -64,3 +64,18 @@ git status --short --branch
 - 候选 provenance 完整，feature worktree clean，真实运行状态未改变；
 - 创建一个 docs-only Task 08 validation 提交后停止等待最终监督 gate；
 - push/merge/install/restart/migrate/现场发布均需下一次明确授权。
+
+## 完成记录（2026-09-22）
+
+- validation 提交：`8e62f8c390743b660db2d0a9f07dce37a75da2f4`，仅 report + execution log；
+  [验证报告](../../reports/validation/2026-09-20-openagentx-adr009-release-candidate.md) 结论为 `passed-candidate`。
+- 本批门禁预算为 20 分钟/一次有界复核。独立验证代理确认 E2E 断言与 observation/reducer/CAS/Diagnostic
+  证据映射成立，未发现新增阻断；主代理完成候选、范围、状态和文档检查后裁定 `GO`，不冒称外部监督 GO。
+- 产品与测试源码自 `5bebf14` 未变，因此复用先前无缓存普通/race、Web、systemd、release、安全检查及
+  临时 HOME/DB/UDS、独立 `tmux -L` + PTY 完整用户闭环。补验对每一个 Shell 文件分别执行 `bash -n`。
+- 候选仍为 `/home/sky/.cache/openagentx-builds/openagentx-adr009-5bebf14`，SHA-256
+  `e482b113311ba618ac45512bf3098d431e739ab61bfc681ec3d2f90f483300c2`；源码 revision 精确为
+  `5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af`，`vcs.modified=false`，目录/文件 `0700`。
+- 候选阶段没有 P0/P1 open issue。此前 E2E 使用 fake Runtime，不代表外部 AGY/真实业务效果已通过。
+  用户日常 `OAX:quote-service.0` 未做现场测试；2026-09-22 只读确认 daemon、Worker、Console 仍为
+  `f49cec4`。当前源码、候选与生产运行版本的差异已明确记录，未部署、push、merge 或重启。

@@ -164,3 +164,41 @@ owner/group 为 `sky:sky`。临时 linked worktree、standalone clone 和无 pro
   记录源码 commit、binary SHA-256、schema、Worker identity/generation 和服务状态。
 - ADR-009 不承诺 Adapter 不具备的 token/tool 细粒度过程；无持久化增量时，Console 正确显示运行状态并
   等待最终结果，不制造隐藏推理或伪进度。
+
+## 2026-09-22 候选门禁复核与现场边界澄清
+
+以上内容是 2026-09-20 的验证记录，失败历史和当时的 `active/WAIT` 均保留。本次复核的 validation
+提交为 `8e62f8c390743b660db2d0a9f07dce37a75da2f4`，复核前 clean、相对本地 `origin/main` ahead 53。
+它与候选源码 `5bebf14` 之间仅有报告和日志修改，产品/测试/依赖完全一致，所以复用已通过的全量与
+隔离测试，不以重复测试消耗代替完成门禁。Task 08 本次由主代理在持续执行授权下裁定 `GO`。
+
+独立验证代理逐项审阅 `workflow_integration_test.go`、snapshot/reducer/CAS/Diagnostic 测试的断言，
+没有发现新的候选阻断。主代理重新核对候选 hash/provenance/权限及冻结 ADR hash，均与本报告相符；
+并纠正此前 Shell 检查命令的覆盖歧义：`bash -n` 后列多个文件只会解析首个脚本，本次执行
+`for task08_script in scripts/*.sh deploy/scripts/*.sh deploy/systemd/*.sh; do bash -n "$task08_script"; done`
+逐个校验 3 个脚本，全部 exit 0。
+
+用户指出日常 `OAX:quote-service.0` 没有可见测试，这一观察是正确的。此前测试创建了另外一个
+`tmux -L <test-name>` server，其中同样存在名为 `OAX:quote-service.0` 的 pane；它使用临时 profile、
+真实隔离 daemon/Worker/PTY、fake systemctl 和 **fake Runtime Adapter**。它验证产品控制面与终端
+闭环，不验证真实 `quote-service` 外部 Runtime 的回复、工具执行或业务副作用。
+
+为回答该问题，2026-09-22 做了以下只读比对（未向 pane 输入、未重启/替换服务）：
+
+| 对象 | 实际证据 |
+| --- | --- |
+| 安装 binary | revision `f49cec4ed31a0f63e82626f1de8d6332baca205d`，`vcs.modified=false` |
+| daemon | PID `486159`，active/running，NRestarts `0` |
+| `quote-service` Worker | PID `486788`，active/running，NRestarts `5` |
+| 默认 `OAX:quote-service.0` | Console PID `313504`，进程名 `openagentx`，`pane_dead=0` |
+| 三个 `/proc/<pid>/exe` | 都与安装 binary 同 revision/hash；hash `984bb0df415b18f49959eda474076f0c807d90e6b5392342083249e605771114` |
+| ADR-009 候选 | revision `5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af`；hash `e482b113311ba618ac45512bf3098d431e739ab61bfc681ec3d2f90f483300c2` |
+
+所用命令为安装文件及三个 `/proc/<pid>/exe` 的 `sha256sum`/`go version -m`、只选非秘密服务状态属性的
+`systemctl --user show`、对精确 pane 的只读 `tmux display-message -p`，全部 exit 0。未读取 credential
+或真实 DB，也未进行 production dispatch；这次核验只证明真实现场仍是 ADR-008，不能写成生产 E2E。
+
+候选门禁已收口；生产安装、受控服务切换与默认 `OAX:quote-service.0` 的可见任务验收仍未执行。后续
+发布验收应以实际外部 Runtime 展示任务状态、安全过程和最终回复，并核对 Task/Run/Journal 与必要
+业务效果；未提供增量的 Runtime 必须明确等待结果。CAS/Diagnostic 故障的模型测试证据不能冒充生产
+故障注入；涉及这些边界的后续变更需要重新评估。此处不新增部署授权、不宣称完整现场交付已完成。

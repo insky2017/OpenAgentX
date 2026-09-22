@@ -1,8 +1,8 @@
 ---
 doc_type: implementation_plan
-status: active
+status: completed
 owner: openagentx
-updated_at: 2026-09-19
+updated_at: 2026-09-22
 ---
 
 # OpenAgentX ADR-009 实施计划
@@ -59,7 +59,7 @@ P0 只做基线收口和隔离，不夹带 Task 01 契约或产品改动。出�
 | 05 | G4 | [Pane 0 任务 TUI 与控制易用性](2026-09-19-openagentx-adr-009-implementation/05-pane-zero-task-tui-and-control-ergonomics.md) | 04 | completed |
 | 06 | G5 | [同 pane Diagnostic 模式](2026-09-19-openagentx-adr-009-implementation/06-in-place-diagnostic-mode.md) | 05 | completed |
 | 07 | G6 | [隔离用户闭环与操作文档](2026-09-19-openagentx-adr-009-implementation/07-isolated-user-workflow-and-documentation.md) | 06 | completed |
-| 08 | G7 | [集成审查与候选门禁](2026-09-19-openagentx-adr-009-implementation/08-integration-review-and-release-gate.md) | 07 | pending |
+| 08 | G7 | [集成审查与候选门禁](2026-09-19-openagentx-adr-009-implementation/08-integration-review-and-release-gate.md) | 07 | completed |
 
 持续记录：
 [EXECUTION-LOG.md](2026-09-19-openagentx-adr-009-implementation/EXECUTION-LOG.md)。
@@ -99,8 +99,20 @@ git status --short --branch
 
 ## 7. 状态维护规则
 
-- 本文件已在 ADR 接受和 P0 基线隔离后改为 `active`；Task 01 仍需按独立阶段门禁开始。
+- 本文件在 ADR 接受和 P0 基线隔离后进入 `active`；2026-09-22 Task 01-08 全部 gate 后改为
+  `completed`，表示开发、隔离验收和候选验证完成，未表示部署/生产现场验收完成。
 - Task 实现提交后，Task 仍为 `active/WAIT`；监督 `GO` 后由下一次 docs-only gate record 改为
   `completed/GO`。
 - Task 08 候选通过不表示已部署。push、merge、安装、服务重启、真实 DB 迁移和现场验收必须有单独授权
   与 provenance 记录。
+
+## 8. 候选阶段完成记录
+
+- Task 08 validation 提交：`8e62f8c390743b660db2d0a9f07dce37a75da2f4`；产品候选源码为
+  `5bebf148c414c2ca8bd8d2e6367f3e828b2ec2af`，二者之间仅有 report/log 变化。
+- 用户持续执行授权下，主代理依据独立证据复核、候选 hash/provenance 与状态检查裁定 Task 08 `GO`；
+  既有全仓普通/race 和隔离 E2E 证据经影响核对复用，不重复运行无变化测试。
+- [候选报告](../reports/validation/2026-09-20-openagentx-adr009-release-candidate.md) 保留完整 traceability、
+  失败/纠正、测试结果、候选和现场边界。冻结 ADR 未修改。
+- 本阶段 E2E 在测试专用 tmux server 和临时 profile 中执行，使用真实隔离 daemon/Worker 与 fake Runtime。
+  日常 `OAX:quote-service.0` 的外部 Runtime/现场验收尚未执行；安装候选与真实服务切换仍需另行授权。
