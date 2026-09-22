@@ -66,6 +66,7 @@ type TaskState struct {
 	TaskID          string
 	Version         int64
 	Status          domain.TaskStatus
+	Intent          domain.TaskIntent
 	Summary         string
 	UpdatedAt       string
 	Detail          *openapi.ConsoleTaskReadModel
@@ -240,6 +241,10 @@ func (r *Reducer) ReplaceTaskOptions(options []openapi.ConsoleTaskOption) error 
 			return err
 		}
 		if record.Version == option.Version {
+			intent, _ := domain.NormalizeTaskIntent(option.Intent) // validated above
+			if record.Intent != "" && record.Intent != intent {
+				return fmt.Errorf("Console Task option intent cannot change")
+			}
 			if record.Summary != "" && record.Summary != option.Summary {
 				return fmt.Errorf("Console Task option changed within version %d", option.Version)
 			}
@@ -247,6 +252,7 @@ func (r *Reducer) ReplaceTaskOptions(options []openapi.ConsoleTaskOption) error 
 				return fmt.Errorf("Console Task option timestamp changed within version %d", option.Version)
 			}
 			record.Summary = option.Summary
+			record.Intent = intent
 			record.UpdatedAt = option.UpdatedAt
 			record.encodedSize = 0
 			record.order = lastOrder - int64(index)
@@ -499,12 +505,21 @@ func applyTaskProjection(record *taskRecord, task openapi.ConsoleTaskReadModel) 
 	if record.Version > task.Version {
 		return false, true, nil
 	}
+	intent := task.Intent
+	if intent == "" {
+		intent = domain.TaskIntentMutation
+	}
+	if record.Intent != "" && record.Intent != intent {
+		return false, false, fmt.Errorf("Console Task intent cannot change")
+	}
 	if record.Version == task.Version {
 		if record.Status != "" && record.Status != task.Status {
 			return false, false, fmt.Errorf("Console Task status changed within version %d", task.Version)
 		}
 		if record.Detail != nil {
-			if !reflect.DeepEqual(*record.Detail, task) {
+			previous, incoming := *record.Detail, task
+			previous.Intent, incoming.Intent = intent, intent
+			if !reflect.DeepEqual(previous, incoming) {
 				return false, false, fmt.Errorf("Console Task projection changed within version %d", task.Version)
 			}
 			return false, false, nil
@@ -514,6 +529,7 @@ func applyTaskProjection(record *taskRecord, task openapi.ConsoleTaskReadModel) 
 	}
 	copy := cloneTask(&task)
 	record.TaskID, record.Version, record.Status = task.TaskID, task.Version, task.Status
+	record.Intent = intent
 	record.UpdatedAt = task.UpdatedAt
 	record.Summary = taskSummary(task)
 	record.Detail = copy
@@ -562,6 +578,9 @@ func validateTaskOption(option openapi.ConsoleTaskOption) error {
 	if err := domain.ValidateOpaqueID("task_id", option.TaskID); err != nil {
 		return err
 	}
+	if option.Intent != "" && !option.Intent.Valid() {
+		return fmt.Errorf("invalid Console Task option intent")
+	}
 	if option.Version <= 0 || !option.Status.Valid() || strings.TrimSpace(option.Summary) == "" ||
 		len(option.Summary) > 1<<10 || !utf8.ValidString(option.Summary) {
 		return fmt.Errorf("invalid Console Task option")
@@ -578,6 +597,9 @@ func validateTaskProjection(task openapi.ConsoleTaskReadModel, agentID string) e
 	}
 	if task.AgentID != agentID || domain.ValidateIdentifier("agent_id", task.AgentID) != nil || task.Version <= 0 || !task.Status.Valid() {
 		return fmt.Errorf("invalid Console Task identity, version, or status")
+	}
+	if task.Intent != "" && !task.Intent.Valid() {
+		return fmt.Errorf("invalid Console Task intent")
 	}
 	if strings.TrimSpace(task.Content) == "" || !safeText(task.Content) || !safeOptionalText(task.Result) || !safeOptionalText(task.Error) {
 		return fmt.Errorf("invalid Console Task safe text")

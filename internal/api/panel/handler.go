@@ -480,7 +480,7 @@ func taskListItem(task domain.Task) openapi.TaskListItem {
 	if len(runes) > 160 {
 		summary = string(runes[:159]) + "…"
 	}
-	return openapi.TaskListItem{ID: task.ID, TargetAgentID: task.TargetAgentID, Status: task.Status, Summary: summary, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
+	return openapi.TaskListItem{ID: task.ID, TargetAgentID: task.TargetAgentID, Intent: task.Intent, Status: task.Status, Summary: summary, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
 }
 
 func projectEvents(events []domain.JournalEvent) ([]openapi.JournalEventReadModel, error) {
@@ -589,7 +589,7 @@ func turnResultReadModel(resultJSON string) (*openapi.TurnResultReadModel, strin
 func taskReadModel(task domain.Task) openapi.TaskReadModelTask {
 	outcome := safeoutput.ProjectOutcome(task.IsTerminal(), task.Result, task.Error)
 	return openapi.TaskReadModelTask{ID: task.ID, Version: task.Version, TargetAgentID: task.TargetAgentID,
-		OrganizationID: task.OrganizationID, DispatchMode: task.DispatchMode,
+		OrganizationID: task.OrganizationID, DispatchMode: task.DispatchMode, Intent: task.Intent,
 		Content: safeoutput.RedactText(task.Content), Status: task.Status,
 		Result: outcome.Result, ResultTruncated: outcome.ResultTruncated,
 		Error: outcome.Error, ErrorTruncated: outcome.ErrorTruncated, OutcomeState: outcome.State,

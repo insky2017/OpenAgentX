@@ -61,6 +61,7 @@ type TaskReadModel struct {
 type TaskListItem struct {
 	ID            string            `json:"id"`
 	TargetAgentID string            `json:"target_agent_id"`
+	Intent        domain.TaskIntent `json:"intent"`
 	Status        domain.TaskStatus `json:"status"`
 	Summary       string            `json:"summary"`
 	CreatedAt     string            `json:"created_at"`
@@ -81,6 +82,7 @@ type TaskReadModelTask struct {
 	TargetAgentID   string              `json:"target_agent_id"`
 	OrganizationID  string              `json:"organization_id,omitempty"`
 	DispatchMode    domain.DispatchMode `json:"dispatch_mode,omitempty"`
+	Intent          domain.TaskIntent   `json:"intent"`
 	Content         string              `json:"content"`
 	Status          domain.TaskStatus   `json:"status"`
 	Result          *string             `json:"result,omitempty"`
@@ -152,6 +154,7 @@ type ConsoleTaskOption struct {
 	TaskID    string            `json:"task_id"`
 	Version   int64             `json:"version"`
 	Status    domain.TaskStatus `json:"status"`
+	Intent    domain.TaskIntent `json:"intent"`
 	Summary   string            `json:"summary"`
 	UpdatedAt string            `json:"updated_at"`
 }
@@ -176,6 +179,7 @@ type ConsoleTaskReadModel struct {
 	Version         int64             `json:"version"`
 	AgentID         string            `json:"agent_id"`
 	Status          domain.TaskStatus `json:"status"`
+	Intent          domain.TaskIntent `json:"intent"`
 	Content         string            `json:"content"`
 	Result          *string           `json:"result,omitempty"`
 	ResultTruncated bool              `json:"result_truncated,omitempty"`

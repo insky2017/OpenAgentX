@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -46,6 +48,59 @@ func (s TaskStatus) Valid() bool {
 	}
 }
 
+// TaskIntent is declared by the authenticated task creator. It describes the
+// requested contract, not a Runtime capability or terminal-state shortcut.
+type TaskIntent string
+
+const (
+	TaskIntentMutation TaskIntent = "mutation"
+	TaskIntentQuery    TaskIntent = "query"
+)
+
+func (i TaskIntent) Valid() bool {
+	return i == TaskIntentMutation || i == TaskIntentQuery
+}
+
+// NormalizeTaskIntent preserves compatibility for Go fixtures and legacy
+// callers that did not have an intent field. HTTP JSON uses UnmarshalJSON,
+// which rejects an explicit null, empty, or unknown value.
+func NormalizeTaskIntent(intent TaskIntent) (TaskIntent, error) {
+	if intent == "" {
+		return TaskIntentMutation, nil
+	}
+	if !intent.Valid() {
+		return "", ErrInvalidInput("task intent must be query or mutation")
+	}
+	return intent, nil
+}
+
+func (i *TaskIntent) UnmarshalJSON(data []byte) error {
+	if bytes.Equal(data, []byte("null")) {
+		return ErrInvalidInput("task intent cannot be null")
+	}
+	var value string
+	if err := json.Unmarshal(data, &value); err != nil {
+		return ErrInvalidInput("task intent must be query or mutation")
+	}
+	parsed := TaskIntent(value)
+	if !parsed.Valid() {
+		return ErrInvalidInput("task intent must be query or mutation")
+	}
+	*i = parsed
+	return nil
+}
+
+// MarshalJSON makes a zero-valued Go request equivalent to an omitted intent.
+// It does not weaken decoding: clients that explicitly send null or "" are
+// still rejected by UnmarshalJSON.
+func (i TaskIntent) MarshalJSON() ([]byte, error) {
+	normalized, err := NormalizeTaskIntent(i)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(string(normalized))
+}
+
 func (m DispatchMode) Valid() bool {
 	return m == DispatchModeCoordinated || m == DispatchModeDirect
 }
@@ -58,6 +113,7 @@ type Task struct {
 	TargetAgentID     string       `json:"target_agent_id"`
 	OrganizationID    string       `json:"organization_id,omitempty"`
 	DispatchMode      DispatchMode `json:"dispatch_mode,omitempty"`
+	Intent            TaskIntent   `json:"intent"`
 	ParentTaskID      *string      `json:"parent_task_id,omitempty"`
 	IdempotencyKey    string       `json:"idempotency_key"`
 	Content           string       `json:"content"`
@@ -167,6 +223,11 @@ func (t *Task) ValidateTarget() error {
 	if !t.DispatchMode.Valid() {
 		return ErrInvalidInput("unsupported dispatch_mode")
 	}
+	intent, err := NormalizeTaskIntent(t.Intent)
+	if err != nil {
+		return err
+	}
+	t.Intent = intent
 	if !t.Status.Valid() {
 		return ErrInvalidInput("unsupported task status")
 	}

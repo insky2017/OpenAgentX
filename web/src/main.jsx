@@ -205,6 +205,7 @@ function App() {
   const [browserOnline, setBrowserOnline] = useState(navigator.onLine)
   const [streamState, setStreamState] = useState('connecting')
   const [draft, setDraft] = useState('')
+  const [dispatchIntent, setDispatchIntent] = useState('mutation')
   const [selectedAgent, setSelectedAgent] = useState(() => new URLSearchParams(window.location.search).get('agent') || '')
   const [replyTask, setReplyTask] = useState(null)
   const [error, setError] = useState('')
@@ -789,6 +790,7 @@ function App() {
         target_agent_id: targetAgent,
         organization_id: organizationID,
         dispatch_mode: 'direct',
+        intent: dispatchIntent,
         content,
       },
       key,
@@ -1017,6 +1019,13 @@ function App() {
                 <p className={`composer-readiness ${target.ready ? '' : 'unavailable'}`} role="status">
                   {streamState !== 'online' ? '连接未恢复，暂不能发送' : target.reason}
                 </p>
+                <div className="composer-target">
+                  <label htmlFor="dispatch-intent">任务类型</label>
+                  <select id="dispatch-intent" value={replyTask?.intent || (replyTask ? 'mutation' : dispatchIntent)} disabled={!canWrite || writing || !!replyTask} onChange={(event) => setDispatchIntent(event.target.value)}>
+                    <option value="mutation">变更任务（默认）</option>
+                    <option value="query">查询任务</option>
+                  </select>
+                </div>
                 <div className="composer-label">
                   <label htmlFor="command">{replyTask ? `回复任务 ${taskID(replyTask)}` : `向 ${targetAgent || 'Agent'} 发送业务指令`}</label>
                   {replyTask && <button className="text-button" type="button" onClick={() => setReplyTask(null)}>改为新任务</button>}
@@ -1041,6 +1050,7 @@ function App() {
                       <span className="eyebrow">{taskDetail.task.target_agent_id}</span>
                       <h2>{taskDetail.task.content?.split('\n')[0] || taskDetail.task.id}</h2>
                       <p>{taskDetail.task.id} · 更新于 {formatAge(taskDetail.task.updated_at)}</p>
+                      <p>任务类型：{taskDetail.task.intent === 'query' ? '查询任务' : taskDetail.task.intent && taskDetail.task.intent !== 'mutation' ? '未知类型' : '变更任务'}</p>
                       <p className="execution-progress" role="status">{taskProgress(taskDetail.task, latestRun, activeWorkers.get(taskDetail.task.target_agent_id))}</p>
                     </div>
                     <span className={`pill status-${taskDetail.task.status}`}>{taskDetail.task.status}</span>

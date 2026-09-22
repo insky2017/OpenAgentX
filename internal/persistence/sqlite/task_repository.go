@@ -13,7 +13,7 @@ import (
 	openruntime "openagentx/internal/runtime"
 )
 
-const taskColumns = `task_id, version, status, sender_principal_id, target_agent_id, dispatch_mode,
+const taskColumns = `task_id, version, status, sender_principal_id, target_agent_id, dispatch_mode, intent,
 	parent_task_id, organization_id, idempotency_key, content, result, error,
 	cancel_requested_by, cancel_requested_at, created_at, updated_at`
 
@@ -39,6 +39,11 @@ func (r *Repository) CreateTask(
 	if task.DispatchMode == "" {
 		task.DispatchMode = domain.DispatchModeCoordinated
 	}
+	intent, err := domain.NormalizeTaskIntent(task.Intent)
+	if err != nil {
+		return nil, err
+	}
+	task.Intent = intent
 	task.CreatedAt = normalizeStringTime(task.CreatedAt, now)
 	task.UpdatedAt = normalizeStringTime(task.UpdatedAt, now)
 	if err := task.ValidateTarget(); err != nil {
@@ -113,8 +118,8 @@ func (r *Repository) CreateTask(
 	}
 
 	if _, err := tx.ExecContext(ctx, `INSERT INTO tasks (`+taskColumns+`) VALUES (
-		?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		task.ID, task.Version, task.Status, task.SenderPrincipalID, task.TargetAgentID, task.DispatchMode,
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		task.ID, task.Version, task.Status, task.SenderPrincipalID, task.TargetAgentID, task.DispatchMode, task.Intent,
 		nullableString(task.ParentTaskID), task.OrganizationID, task.IdempotencyKey, task.Content,
 		nullableString(task.Result), nullableString(task.Error), nullableString(task.CancelRequestedBy),
 		nullableString(task.CancelRequestedAt), task.CreatedAt, task.UpdatedAt); err != nil {
@@ -162,6 +167,7 @@ func sameTaskCommand(left *domain.Task, right *domain.Task) bool {
 	return left.TargetAgentID == right.TargetAgentID &&
 		left.OrganizationID == right.OrganizationID &&
 		left.DispatchMode == right.DispatchMode &&
+		left.Intent == right.Intent &&
 		leftParent == rightParent && left.Content == right.Content
 }
 
@@ -203,7 +209,7 @@ func scanTask(scanner rowScanner) (*domain.Task, error) {
 	var task domain.Task
 	var parentTaskID, result, taskError, cancelBy, cancelAt sql.NullString
 	if err := scanner.Scan(&task.ID, &task.Version, &task.Status, &task.SenderPrincipalID,
-		&task.TargetAgentID, &task.DispatchMode, &parentTaskID, &task.OrganizationID,
+		&task.TargetAgentID, &task.DispatchMode, &task.Intent, &parentTaskID, &task.OrganizationID,
 		&task.IdempotencyKey, &task.Content, &result, &taskError, &cancelBy, &cancelAt,
 		&task.CreatedAt, &task.UpdatedAt); err != nil {
 		return nil, err

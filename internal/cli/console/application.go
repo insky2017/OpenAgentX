@@ -472,7 +472,7 @@ func (a *consoleApplication) controlCmd(preparationID uint64, request controlReq
 			var response openapi.CreateTaskResponse
 			response, err = prepared.client.Dispatch(a.ctx, openapi.CreateTaskRequest{Meta: meta,
 				TargetAgentID: request.AgentID, OrganizationID: option.OrganizationID,
-				DispatchMode: domain.DispatchModeDirect, Content: request.Content})
+				DispatchMode: domain.DispatchModeDirect, Intent: request.Intent, Content: request.Content})
 			if err == nil {
 				outcome, err = dispatchOutcome(response)
 			}

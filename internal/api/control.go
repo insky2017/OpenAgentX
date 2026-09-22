@@ -31,6 +31,7 @@ type CreateTaskRequest struct {
 	TargetAgentID     string                `json:"target_agent_id"`
 	OrganizationID    string                `json:"organization_id"`
 	DispatchMode      domain.DispatchMode   `json:"dispatch_mode"`
+	Intent            domain.TaskIntent     `json:"intent"`
 	ParentTaskID      string                `json:"parent_task_id,omitempty"`
 	Content           string                `json:"content"`
 	Execution         *domain.ExecutionSpec `json:"execution,omitempty"`
@@ -304,6 +305,9 @@ func (r CreateTaskRequest) Validate() error {
 	}
 	if !r.DispatchMode.Valid() {
 		return domain.ErrInvalidInput("unsupported dispatch_mode")
+	}
+	if _, err := domain.NormalizeTaskIntent(r.Intent); err != nil {
+		return err
 	}
 	if strings.TrimSpace(r.Content) == "" {
 		return domain.ErrInvalidInput("task content cannot be empty")

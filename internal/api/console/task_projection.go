@@ -26,7 +26,7 @@ func ProjectConsoleTask(task domain.Task) (openapi.ConsoleTaskReadModel, error) 
 	}
 	outcome := safeoutput.ProjectOutcome(task.IsTerminal(), task.Result, task.Error)
 	return openapi.ConsoleTaskReadModel{
-		TaskID: task.ID, Version: task.Version, AgentID: task.TargetAgentID, Status: task.Status,
+		TaskID: task.ID, Version: task.Version, AgentID: task.TargetAgentID, Status: task.Status, Intent: task.Intent,
 		Content: safeoutput.RedactText(task.Content), Result: outcome.Result, ResultTruncated: outcome.ResultTruncated,
 		Error: outcome.Error, ErrorTruncated: outcome.ErrorTruncated, OutcomeState: outcome.State,
 		CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt,
@@ -43,7 +43,7 @@ func projectConsoleTaskOption(task domain.Task) (openapi.ConsoleTaskOption, erro
 		summary = projected.TaskID
 	}
 	return openapi.ConsoleTaskOption{
-		TaskID: projected.TaskID, Version: projected.Version, Status: projected.Status,
+		TaskID: projected.TaskID, Version: projected.Version, Status: projected.Status, Intent: projected.Intent,
 		Summary: truncateUTF8(summary, consoleTaskSummaryMaxBytes), UpdatedAt: projected.UpdatedAt,
 	}, nil
 }

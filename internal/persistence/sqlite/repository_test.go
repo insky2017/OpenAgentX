@@ -217,6 +217,28 @@ func TestCreateTaskRollbackAndIdempotency(t *testing.T) {
 	}
 }
 
+func TestTaskIntentDefaultsIsImmutableAndScopesIdempotency(t *testing.T) {
+	repository, _ := openTestRepository(t, nil)
+	fixture := seedRepository(t, repository)
+	created := createTask(t, repository, fixture, "intent")
+	if created.Task.Intent != domain.TaskIntentMutation {
+		t.Fatalf("default intent=%q", created.Task.Intent)
+	}
+	if _, err := repository.db.Exec(`UPDATE tasks SET intent='query' WHERE task_id=?`, created.Task.ID); err == nil {
+		t.Fatal("Task intent update was accepted")
+	}
+	replayTask, replayMessage, replayMailbox, replayEvent := newTaskDelivery(fixture, "intent")
+	replayTask.ID = "task-intent-query"
+	replayTask.Intent = domain.TaskIntentQuery
+	replayMessage.ID = "message-intent-query"
+	replayMessage.TaskID = replayTask.ID
+	replayMailbox.ID = "mailbox-intent-query"
+	replayEvent.ID = "event-intent-query"
+	if _, err := repository.CreateTask(context.Background(), replayTask, replayMessage, replayMailbox, replayEvent); !errors.Is(err, domain.ErrIdempotencyConflict) {
+		t.Fatalf("different intent idempotency result=%v", err)
+	}
+}
+
 func TestConcurrentTaskIdempotencyReturnsOneCreationAndOneReplay(t *testing.T) {
 	repository, _ := openTestRepository(t, nil)
 	fixture := seedRepository(t, repository)

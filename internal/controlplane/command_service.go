@@ -54,16 +54,20 @@ func (s *CommandService) CreateTask(ctx context.Context, principal string, req a
 		return nil, err
 	}
 	now := s.now().UTC()
+	intent, err := domain.NormalizeTaskIntent(req.Intent)
+	if err != nil {
+		return nil, err
+	}
 	taskID := commandID("task")
 	msgID := commandID("message")
 	itemID := commandID("mailbox")
-	task := &domain.Task{ID: taskID, Version: 1, SenderAgentID: "command-center", SenderPrincipalID: principal, TargetAgentID: req.TargetAgentID, OrganizationID: req.OrganizationID, DispatchMode: req.DispatchMode, Content: req.Content, IdempotencyKey: req.Meta.IdempotencyKey, Status: domain.TaskStatusQueued, CreatedAt: now.Format(time.RFC3339Nano), UpdatedAt: now.Format(time.RFC3339Nano)}
+	task := &domain.Task{ID: taskID, Version: 1, SenderAgentID: "command-center", SenderPrincipalID: principal, TargetAgentID: req.TargetAgentID, OrganizationID: req.OrganizationID, DispatchMode: req.DispatchMode, Intent: intent, Content: req.Content, IdempotencyKey: req.Meta.IdempotencyKey, Status: domain.TaskStatusQueued, CreatedAt: now.Format(time.RFC3339Nano), UpdatedAt: now.Format(time.RFC3339Nano)}
 	if req.ParentTaskID != "" {
 		task.ParentTaskID = &req.ParentTaskID
 	}
 	message := &domain.Message{ID: msgID, Version: 1, Sequence: 1, TaskID: taskID, SenderAgentID: "command-center", SenderPrincipalID: principal, TargetAgentID: req.TargetAgentID, Kind: domain.MessageKindInstruction, Content: req.Content, CreatedAt: now.Format(time.RFC3339Nano)}
 	item := &domain.MailboxItem{ID: itemID, TargetAgentID: req.TargetAgentID, Kind: domain.MailboxKindTask, Lane: domain.MailboxLaneWork, TaskID: taskID, State: domain.MailboxStatePending, CreatedAt: now}
-	result, err := s.state.CreateTask(ctx, task, message, item, commandEvent(taskID, "task.created", principal, "task", map[string]any{"target_agent_id": req.TargetAgentID}, now))
+	result, err := s.state.CreateTask(ctx, task, message, item, commandEvent(taskID, "task.created", principal, "task", map[string]any{"target_agent_id": req.TargetAgentID, "intent": intent}, now))
 	if err != nil {
 		return nil, err
 	}

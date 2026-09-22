@@ -177,6 +177,7 @@ CREATE TABLE tasks (
     sender_principal_id TEXT NOT NULL REFERENCES principals(principal_id),
     target_agent_id TEXT NOT NULL REFERENCES agents(agent_id),
     dispatch_mode TEXT NOT NULL CHECK (dispatch_mode IN ('coordinated', 'direct')),
+    intent TEXT NOT NULL DEFAULT 'mutation' CHECK (intent IN ('mutation', 'query')),
     parent_task_id TEXT REFERENCES tasks(task_id),
     organization_id TEXT NOT NULL REFERENCES organizations(organization_id),
     idempotency_key TEXT NOT NULL,
@@ -192,6 +193,12 @@ CREATE TABLE tasks (
 
 CREATE INDEX idx_tasks_target_status ON tasks(target_agent_id, status, created_at);
 CREATE INDEX idx_tasks_organization ON tasks(organization_id, created_at);
+
+CREATE TRIGGER tasks_reject_intent_update BEFORE UPDATE OF intent ON tasks
+WHEN OLD.intent <> NEW.intent
+BEGIN
+    SELECT RAISE(ABORT, 'task intent is immutable');
+END;
 
 CREATE TABLE messages (
     message_id TEXT PRIMARY KEY,

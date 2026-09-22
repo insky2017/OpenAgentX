@@ -32,7 +32,7 @@ var requiredTables = []string{
 	"network_profile_publications", "network_mode_policies", "network_mode_tests",
 }
 
-var requiredTriggers = []string{"event_journal_reject_update", "event_journal_reject_delete", "network_profiles_reject_update", "network_profiles_reject_delete", "network_mode_policies_reject_update", "network_mode_policies_reject_delete"}
+var requiredTriggers = []string{"event_journal_reject_update", "event_journal_reject_delete", "tasks_reject_intent_update", "network_profiles_reject_update", "network_profiles_reject_delete", "network_mode_policies_reject_update", "network_mode_policies_reject_delete"}
 
 var requiredIndexes = []string{"idx_cli_tokens_expiry", "idx_cli_tokens_user"}
 
@@ -46,6 +46,9 @@ var requiredDefinitionFragments = map[string][]string{
 	"cli_tokens":            {"token_id text primary key", "token_digest text not null unique", "references web_users(web_user_id)", "references principals(principal_id)", "references installation_metadata(installation_id)"},
 }
 
+var requiredTaskIntentColumns = []string{"intent"}
+var requiredTaskIntentDefinitionFragments = []string{"intent text not null default 'mutation'", "check (intent in ('mutation', 'query'))"}
+
 //go:embed 001_target_schema.sql
 var targetSchema string
 
@@ -54,8 +57,9 @@ func Apply(ctx context.Context, db *sql.DB) error {
 }
 
 type migrationOptions struct {
-	newInstallationID func() (string, error)
-	beforeCLICommit   func() error
+	newInstallationID      func() (string, error)
+	beforeCLICommit        func() error
+	beforeTaskIntentCommit func() error
 }
 
 func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -90,6 +94,9 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 		if err := ensureCLITokenTables(ctx, db, options); err != nil {
 			return err
 		}
+		if err := ensureTaskIntentSchema(ctx, db, options); err != nil {
+			return err
+		}
 		return ValidateCurrent(ctx, db)
 	}
 
@@ -122,6 +129,48 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	}
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit target schema v%d: %w", CurrentVersion, err)
+	}
+	return nil
+}
+
+// ensureTaskIntentSchema keeps the public schema version at v1 while adding
+// the ADR-006-compatible Task column to complete older v1 databases.
+func ensureTaskIntentSchema(ctx context.Context, db *sql.DB, options migrationOptions) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin Task intent schema upgrade: %w", err)
+	}
+	defer tx.Rollback()
+	// Reject damaged older v1 objects before adding anything. The complete
+	// post-upgrade schema is checked again before this transaction commits.
+	if err := validateObjectsWithoutTaskIntent(ctx, tx); err != nil {
+		return err
+	}
+	columns, err := tableColumns(ctx, tx, "tasks")
+	if err != nil {
+		return fmt.Errorf("inspect Task schema: %w", err)
+	}
+	if len(columns) == 0 {
+		return fmt.Errorf("%w: missing table tasks", ErrIncompleteSchema)
+	}
+	if !columns["intent"] {
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE tasks ADD COLUMN intent TEXT NOT NULL DEFAULT 'mutation' CHECK (intent IN ('mutation', 'query'))`); err != nil {
+			return fmt.Errorf("add Task intent column: %w", err)
+		}
+		if _, err := tx.ExecContext(ctx, taskIntentTriggerSQL); err != nil {
+			return fmt.Errorf("create Task intent immutability trigger: %w", err)
+		}
+	}
+	if err := validateObjects(ctx, tx); err != nil {
+		return err
+	}
+	if options.beforeTaskIntentCommit != nil {
+		if err := options.beforeTaskIntentCommit(); err != nil {
+			return fmt.Errorf("Task intent schema pre-commit: %w", err)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit Task intent schema upgrade: %w", err)
 	}
 	return nil
 }
@@ -517,17 +566,64 @@ func ValidateCurrent(ctx context.Context, db *sql.DB) error {
 }
 
 func validateObjects(ctx context.Context, queryer schemaQueryer) error {
+	if err := validateObjectsWithoutTaskIntent(ctx, queryer); err != nil {
+		return err
+	}
+	return validateTaskIntentObjects(ctx, queryer)
+}
+
+func validateObjectsWithoutTaskIntent(ctx context.Context, queryer schemaQueryer) error {
 	for _, table := range requiredTables {
 		if err := requireSchemaObject(ctx, queryer, "table", table); err != nil {
 			return err
 		}
 	}
 	for _, trigger := range requiredTriggers {
+		if trigger == "tasks_reject_intent_update" {
+			continue
+		}
 		if err := requireSchemaObject(ctx, queryer, "trigger", trigger); err != nil {
 			return err
 		}
 	}
 	return validateCLIObjects(ctx, queryer)
+}
+
+const taskIntentTriggerSQL = `CREATE TRIGGER tasks_reject_intent_update BEFORE UPDATE OF intent ON tasks WHEN OLD.intent <> NEW.intent BEGIN SELECT RAISE(ABORT, 'task intent is immutable'); END`
+
+func validateTaskIntentObjects(ctx context.Context, queryer schemaQueryer) error {
+	for _, column := range requiredTaskIntentColumns {
+		var count int
+		if err := queryer.QueryRowContext(ctx, `SELECT COUNT(*) FROM pragma_table_info('tasks') WHERE name=?`, column).Scan(&count); err != nil {
+			return fmt.Errorf("inspect Task intent column: %w", err)
+		}
+		if count != 1 {
+			return fmt.Errorf("%w: missing column tasks.%s", ErrIncompleteSchema, column)
+		}
+	}
+	var definition string
+	if err := queryer.QueryRowContext(ctx, `SELECT sql FROM sqlite_master WHERE type='table' AND name='tasks'`).Scan(&definition); err != nil {
+		return fmt.Errorf("inspect Task intent schema definition: %w", err)
+	}
+	normalized := strings.ToLower(strings.Join(strings.Fields(definition), " "))
+	for _, fragment := range requiredTaskIntentDefinitionFragments {
+		if !strings.Contains(normalized, fragment) {
+			return fmt.Errorf("%w: invalid definition for table tasks", ErrIncompleteSchema)
+		}
+	}
+	if err := requireSchemaObject(ctx, queryer, "trigger", "tasks_reject_intent_update"); err != nil {
+		return err
+	}
+	if err := queryer.QueryRowContext(ctx, `SELECT sql FROM sqlite_master WHERE type='trigger' AND name='tasks_reject_intent_update'`).Scan(&definition); err != nil {
+		return fmt.Errorf("inspect Task intent immutability definition: %w", err)
+	}
+	normalizeSQL := func(sql string) string {
+		return strings.ToLower(strings.Join(strings.Fields(strings.TrimSuffix(strings.TrimSpace(sql), ";")), " "))
+	}
+	if normalizeSQL(definition) != normalizeSQL(taskIntentTriggerSQL) {
+		return fmt.Errorf("%w: invalid Task intent immutability trigger", ErrIncompleteSchema)
+	}
+	return nil
 }
 
 func validateCLIObjects(ctx context.Context, queryer schemaQueryer) error {

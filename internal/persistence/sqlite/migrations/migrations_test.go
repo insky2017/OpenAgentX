@@ -32,6 +32,16 @@ func TestApplyCreatesTargetSchemaAndIsRepeatable(t *testing.T) {
 	if err := migrations.Apply(ctx, db); err != nil {
 		t.Fatalf("first migration apply failed: %v", err)
 	}
+	var intentColumn, intentTrigger int
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM pragma_table_info('tasks') WHERE name='intent'`).Scan(&intentColumn); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name='tasks_reject_intent_update'`).Scan(&intentTrigger); err != nil {
+		t.Fatal(err)
+	}
+	if intentColumn != 1 || intentTrigger != 1 {
+		t.Fatalf("Task intent schema column=%d trigger=%d", intentColumn, intentTrigger)
+	}
 	if err := migrations.Apply(ctx, db); err != nil {
 		t.Fatalf("second migration apply failed: %v", err)
 	}

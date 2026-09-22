@@ -158,6 +158,7 @@ const (
 type controlRequest struct {
 	Kind            controlKind
 	AgentID         string
+	Intent          domain.TaskIntent
 	TargetID        string
 	ExpectedVersion int64
 	Content         string
@@ -1205,11 +1206,7 @@ func parseControlInput(line, agentID string, state consolemodel.State) (controlR
 	case "/foreground":
 		return controlRequest{}, errForegroundCommand
 	case "/dispatch":
-		content := strings.TrimSpace(remainder)
-		if content == "" {
-			return controlRequest{}, fmt.Errorf("usage: /dispatch <content>")
-		}
-		return controlRequest{Kind: controlDispatch, AgentID: agentID, Content: content}, nil
+		return parseDispatchRequest(remainder, agentID)
 	case "/steer":
 		return parseSteerRequest(strings.TrimSpace(remainder), agentID, state)
 	case "/cancel":
@@ -1233,6 +1230,31 @@ func parseControlInput(line, agentID string, state consolemodel.State) (controlR
 	default:
 		return controlRequest{}, fmt.Errorf("unknown command; use /help")
 	}
+}
+
+func parseDispatchRequest(remainder, agentID string) (controlRequest, error) {
+	const usage = "usage: /dispatch [--intent query|mutation] [--] <content>"
+	content := strings.TrimSpace(remainder)
+	intent := domain.TaskIntentMutation
+	first, rest, _ := strings.Cut(content, " ")
+	if first == "--intent" {
+		value, body, _ := strings.Cut(strings.TrimSpace(rest), " ")
+		intent = domain.TaskIntent(value)
+		if !intent.Valid() {
+			return controlRequest{}, fmt.Errorf("%s", usage)
+		}
+		content = strings.TrimSpace(body)
+		first, rest, _ = strings.Cut(content, " ")
+	}
+	if first == "--" {
+		content = strings.TrimSpace(rest)
+	} else if strings.HasPrefix(first, "--") {
+		return controlRequest{}, fmt.Errorf("%s", usage)
+	}
+	if content == "" {
+		return controlRequest{}, fmt.Errorf("%s", usage)
+	}
+	return controlRequest{Kind: controlDispatch, AgentID: agentID, Intent: intent, Content: content}, nil
 }
 
 func parseSteerRequest(remainder, agentID string, state consolemodel.State) (controlRequest, error) {
@@ -1565,7 +1587,7 @@ func (m tuiModel) overlayView() string {
 	case overlayStatus:
 		content = m.statusView()
 	case overlayHelp:
-		content = strings.Join([]string{"Console commands", "/status", "/tasks", "/dispatch <content>",
+		content = strings.Join([]string{"Console commands", "/status", "/tasks", "/dispatch [--intent query|mutation] <content>",
 			"/steer <content>", "/cancel", "/steer --task <task-id> --version <n> <content>",
 			"/cancel --task <task-id> --version <n>",
 			"/approve <approval-id> <expected-version>", "/reject <approval-id> <expected-version>",
@@ -1687,6 +1709,9 @@ func (m tuiModel) statusView() string {
 		fmt.Sprintf("Task version: %d", task.Version),
 		"Task status: "+string(task.Status),
 		"Task stage: "+taskStage(task))
+	if task.Intent != "" {
+		lines = append(lines, "Task intent: "+string(task.Intent))
+	}
 	if task.Detail != nil {
 		lines = append(lines, "Task request: "+task.Detail.Content,
 			"Task updated: "+task.Detail.UpdatedAt,
