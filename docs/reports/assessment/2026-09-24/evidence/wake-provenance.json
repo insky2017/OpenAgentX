@@ -1,0 +1,14 @@
+{
+  "repository": "https://github.com/iAmCorey/Wake",
+  "commit": "269c50b466b023a0f38cc14e34105ab27b983dd2",
+  "clone": "/tmp/oax-wake-assessment-20260924",
+  "test_copy": "/tmp/oax-wake-core-tests-20260924",
+  "rustc": "rustc 1.89.0 (29483883e 2025-08-04)",
+  "cargo": "cargo 1.89.0 (c24e10642 2025-06-23)",
+  "clean_before": "",
+  "test_boundary": "Only original db_roundtrip integration suite in copied wake-core; root workspace excludes GPUI app. No source/test edits. No scans, provider calls, GUI, SSH or trash.",
+  "test_copy_removed_after_verification": true,
+  "test_commands_finished": true,
+  "research_services_started": false,
+  "cleanup_at": "2026-09-25T00:13:21.241090+08:00"
+}

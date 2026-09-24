@@ -1,0 +1,11 @@
+{
+  "report": "docs/reports/assessment/2026-09-24/10-wake-reference.md",
+  "source_commit": "269c50b466b023a0f38cc14e34105ab27b983dd2",
+  "source_clean": true,
+  "missing_links": [],
+  "invalid_source_anchors": [],
+  "all_test_source_files_match": true,
+  "test_total_passed": 136,
+  "no_live_gui_provider_ssh_system_trash": true,
+  "reference_definitions_missing": []
+}

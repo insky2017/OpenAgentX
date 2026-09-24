@@ -1,0 +1,10 @@
+{
+  "fixed_links": 27,
+  "local_links_valid": true,
+  "source_hashes_match": true,
+  "clone_tracked_status_clean": true,
+  "diff_check": true,
+  "report_bytes": 29603,
+  "test_scope": "119 distinct existing tests; initial 118 pass/1 fixture permission failure; service rerun 46 pass under umask077",
+  "no_services_started": true
+}

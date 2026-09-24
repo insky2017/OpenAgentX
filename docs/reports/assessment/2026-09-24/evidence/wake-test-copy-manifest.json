@@ -1,0 +1,467 @@
+[
+  {
+    "path": "crates/wake-core/Cargo.toml",
+    "source_sha256": "67317540d19f574989fa00a053f7d2f77c06f20bfa256431a99fd7c48f2ca0eb",
+    "copy_sha256": "67317540d19f574989fa00a053f7d2f77c06f20bfa256431a99fd7c48f2ca0eb"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/antigravity.rs",
+    "source_sha256": "5579d8fad20d7ea166267b63bd039619e516f50650ebf4dd23ba1bcd8b3ac111",
+    "copy_sha256": "5579d8fad20d7ea166267b63bd039619e516f50650ebf4dd23ba1bcd8b3ac111"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/claude.rs",
+    "source_sha256": "f27517ccb04c510a7b0225079dcbf350bbd4913779cb0b4cf9cf3dacb166b3d5",
+    "copy_sha256": "f27517ccb04c510a7b0225079dcbf350bbd4913779cb0b4cf9cf3dacb166b3d5"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/codebuddy.rs",
+    "source_sha256": "e6b84f9059c07121baf136655e8f16020fdef5675e413918e3d4c0929e2cbe06",
+    "copy_sha256": "e6b84f9059c07121baf136655e8f16020fdef5675e413918e3d4c0929e2cbe06"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/codex.rs",
+    "source_sha256": "93b0c77e021d12b6dd5fd9f1a3ef4348ab4c9cce3c8d2321a08d367d478f7bb9",
+    "copy_sha256": "93b0c77e021d12b6dd5fd9f1a3ef4348ab4c9cce3c8d2321a08d367d478f7bb9"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/copilot.rs",
+    "source_sha256": "b59a0efc27b53ab3bd65a5c3f79fac934e3903301cd8cbeebd44e95150e09781",
+    "copy_sha256": "b59a0efc27b53ab3bd65a5c3f79fac934e3903301cd8cbeebd44e95150e09781"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/cursor.rs",
+    "source_sha256": "5d9dccebdaf7a3584cb595772d9af89d76ead7c4e366de35ca041c39f0cb0cbb",
+    "copy_sha256": "5d9dccebdaf7a3584cb595772d9af89d76ead7c4e366de35ca041c39f0cb0cbb"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/cursor_ide.rs",
+    "source_sha256": "01d86530d4a7da678ac099316dfd5e90846c82a276a18fad15924642936f1157",
+    "copy_sha256": "01d86530d4a7da678ac099316dfd5e90846c82a276a18fad15924642936f1157"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/dsh.rs",
+    "source_sha256": "30fa4674c5466dff47188054d4e060223e8397f833e0867f0507c613bdef0628",
+    "copy_sha256": "30fa4674c5466dff47188054d4e060223e8397f833e0867f0507c613bdef0628"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/gemini.rs",
+    "source_sha256": "2479f054e77b371b92c88450a85888c4b2491e814fb8c42954a3e1e16ed12778",
+    "copy_sha256": "2479f054e77b371b92c88450a85888c4b2491e814fb8c42954a3e1e16ed12778"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/grok.rs",
+    "source_sha256": "45e295139637174560deaf287f38b9e2951d82c93da4b08acd23d6ed8787153a",
+    "copy_sha256": "45e295139637174560deaf287f38b9e2951d82c93da4b08acd23d6ed8787153a"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/grok_group.rs",
+    "source_sha256": "fbfd1df009314c33a5c4cd3a32b7021e9ca7bf1059f7e44ab140eb0400444298",
+    "copy_sha256": "fbfd1df009314c33a5c4cd3a32b7021e9ca7bf1059f7e44ab140eb0400444298"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/hermes.rs",
+    "source_sha256": "44924e8226a4c3d0bf7b90d04259343c3c2b07d79b2fe79dbf82a511abe6ea53",
+    "copy_sha256": "44924e8226a4c3d0bf7b90d04259343c3c2b07d79b2fe79dbf82a511abe6ea53"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/kimi.rs",
+    "source_sha256": "3bbccd9210323254c564aca98f29703d07527e9ac4076f73097dcc3cb13f2338",
+    "copy_sha256": "3bbccd9210323254c564aca98f29703d07527e9ac4076f73097dcc3cb13f2338"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/kiro.rs",
+    "source_sha256": "e4af0ad3c3f58ffe75de9bc92770dfbd97b2ed7d2797c84c50eb58380755075c",
+    "copy_sha256": "e4af0ad3c3f58ffe75de9bc92770dfbd97b2ed7d2797c84c50eb58380755075c"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/mod.rs",
+    "source_sha256": "15b76bce9caab7312f8de14754e61eaab729b0500ad935995cba38eb1f661e4d",
+    "copy_sha256": "15b76bce9caab7312f8de14754e61eaab729b0500ad935995cba38eb1f661e4d"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/openclaw.rs",
+    "source_sha256": "2133d2c304cc44668393294c33d0889fd3f1ebe1a62d7abbf6d871ce3c6b5155",
+    "copy_sha256": "2133d2c304cc44668393294c33d0889fd3f1ebe1a62d7abbf6d871ce3c6b5155"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/opencode.rs",
+    "source_sha256": "cc1e9402294b79a5b2a4c20263de8b4a311552290de64e003dbf1c534412e025",
+    "copy_sha256": "cc1e9402294b79a5b2a4c20263de8b4a311552290de64e003dbf1c534412e025"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/parse_utils.rs",
+    "source_sha256": "7c150dfbf7737037a86d8f24abf736182e8db0bac744ace55fbc0c4b3c08c768",
+    "copy_sha256": "7c150dfbf7737037a86d8f24abf736182e8db0bac744ace55fbc0c4b3c08c768"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/pi.rs",
+    "source_sha256": "d98c142d1eb20c17d80da61fbd14193839e49c4b4565f081bf59372fa2d82906",
+    "copy_sha256": "d98c142d1eb20c17d80da61fbd14193839e49c4b4565f081bf59372fa2d82906"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/pi_format.rs",
+    "source_sha256": "f9811a292617ced0568759db88e61245f1b02e684d3fb7bf977d450be7a186e7",
+    "copy_sha256": "f9811a292617ced0568759db88e61245f1b02e684d3fb7bf977d450be7a186e7"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/qoder.rs",
+    "source_sha256": "00a03d0722608704cd6beebb6de09cd6237983f45f2982038eade2cce73eec01",
+    "copy_sha256": "00a03d0722608704cd6beebb6de09cd6237983f45f2982038eade2cce73eec01"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/remote.rs",
+    "source_sha256": "bad9a0a415d9adaa6771605b714099a1b06121acf4ad46acc1e4adb5b4476552",
+    "copy_sha256": "bad9a0a415d9adaa6771605b714099a1b06121acf4ad46acc1e4adb5b4476552"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/sqlite_ro.rs",
+    "source_sha256": "a5c2349bb86f5ad327e4e9719ef6a6e1805c9275c993b39181f919eb31611672",
+    "copy_sha256": "a5c2349bb86f5ad327e4e9719ef6a6e1805c9275c993b39181f919eb31611672"
+  },
+  {
+    "path": "crates/wake-core/src/adapters/zcode.rs",
+    "source_sha256": "c75522794a2d213d4d4f0a9a39e0c2669931e474305f9254bb634e9a5483e2ed",
+    "copy_sha256": "c75522794a2d213d4d4f0a9a39e0c2669931e474305f9254bb634e9a5483e2ed"
+  },
+  {
+    "path": "crates/wake-core/src/bin/scan.rs",
+    "source_sha256": "7a078e76035d7aad9ae657b33ff3f0979411533d92c038283fd5d059bedc9c33",
+    "copy_sha256": "7a078e76035d7aad9ae657b33ff3f0979411533d92c038283fd5d059bedc9c33"
+  },
+  {
+    "path": "crates/wake-core/src/bin/wake_cli.rs",
+    "source_sha256": "971f1f890c337e5b8b657c6ba32d9df684830cc15458bf983e66898e78c252a5",
+    "copy_sha256": "971f1f890c337e5b8b657c6ba32d9df684830cc15458bf983e66898e78c252a5"
+  },
+  {
+    "path": "crates/wake-core/src/bin/wake_mcp.rs",
+    "source_sha256": "481cf993655127926b046fb33af1fe44c651fea441d09b5a16e73ec4f49a4cfb",
+    "copy_sha256": "481cf993655127926b046fb33af1fe44c651fea441d09b5a16e73ec4f49a4cfb"
+  },
+  {
+    "path": "crates/wake-core/src/cleanup.rs",
+    "source_sha256": "3ec29b435d7f2865d24720fa8645f4a793c0e2877e78661d81831e451ea56a1e",
+    "copy_sha256": "3ec29b435d7f2865d24720fa8645f4a793c0e2877e78661d81831e451ea56a1e"
+  },
+  {
+    "path": "crates/wake-core/src/cli.rs",
+    "source_sha256": "e7ccea2a9c1cf42d39393777bf950f59f26e981f141ad904d76863f890eb2b11",
+    "copy_sha256": "e7ccea2a9c1cf42d39393777bf950f59f26e981f141ad904d76863f890eb2b11"
+  },
+  {
+    "path": "crates/wake-core/src/db.rs",
+    "source_sha256": "4666043df27986743a921f98d83367caaa7c4a5db7f98e4d9c5a89a91a489b5d",
+    "copy_sha256": "4666043df27986743a921f98d83367caaa7c4a5db7f98e4d9c5a89a91a489b5d"
+  },
+  {
+    "path": "crates/wake-core/src/lib.rs",
+    "source_sha256": "5c6bf98c7c475a6dac70d8d4a07236a6375d71bd871ea16e1982dcde6fcb7206",
+    "copy_sha256": "5c6bf98c7c475a6dac70d8d4a07236a6375d71bd871ea16e1982dcde6fcb7206"
+  },
+  {
+    "path": "crates/wake-core/src/mcp/mod.rs",
+    "source_sha256": "c100749196e186f9a63ccf4c7a6218c837ba31ce1b5407add23c17abb51d2c33",
+    "copy_sha256": "c100749196e186f9a63ccf4c7a6218c837ba31ce1b5407add23c17abb51d2c33"
+  },
+  {
+    "path": "crates/wake-core/src/mcp/tools.rs",
+    "source_sha256": "b4c2479a02ef2ea4c3a5275e6bf393bf845ac903f3c6423067eca55e0e64e981",
+    "copy_sha256": "b4c2479a02ef2ea4c3a5275e6bf393bf845ac903f3c6423067eca55e0e64e981"
+  },
+  {
+    "path": "crates/wake-core/src/models.rs",
+    "source_sha256": "7e78555f28f5fa22fd9b487a4a19bce5aa4e67ca2eb8e9f52c30543eb50a28af",
+    "copy_sha256": "7e78555f28f5fa22fd9b487a4a19bce5aa4e67ca2eb8e9f52c30543eb50a28af"
+  },
+  {
+    "path": "crates/wake-core/src/remote.rs",
+    "source_sha256": "b118d1b5d16359933b2b9f0f1c6ffce7766017b34daaf6f8bfa8414e86477461",
+    "copy_sha256": "b118d1b5d16359933b2b9f0f1c6ffce7766017b34daaf6f8bfa8414e86477461"
+  },
+  {
+    "path": "crates/wake-core/src/scanner.rs",
+    "source_sha256": "6c2655ee28ce4db9065ff158fe5c03037411dea46f75565c2278580bd6d5f4d0",
+    "copy_sha256": "6c2655ee28ce4db9065ff158fe5c03037411dea46f75565c2278580bd6d5f4d0"
+  },
+  {
+    "path": "crates/wake-core/src/services/context.rs",
+    "source_sha256": "cb91312d4d9a632d9a56deab6727f9e26f0f5db01eb6ecde0f974a8db81f8315",
+    "copy_sha256": "cb91312d4d9a632d9a56deab6727f9e26f0f5db01eb6ecde0f974a8db81f8315"
+  },
+  {
+    "path": "crates/wake-core/src/services/exporter.rs",
+    "source_sha256": "f1ef7b62af13152bca9cf2e387840b54ae3e8bc7d667e41e4b29b0ca82a9ca90",
+    "copy_sha256": "f1ef7b62af13152bca9cf2e387840b54ae3e8bc7d667e41e4b29b0ca82a9ca90"
+  },
+  {
+    "path": "crates/wake-core/src/services/mod.rs",
+    "source_sha256": "63039bb991ed707a9bdf29c31350797cbb6e715445efd162fbd02c5357374235",
+    "copy_sha256": "63039bb991ed707a9bdf29c31350797cbb6e715445efd162fbd02c5357374235"
+  },
+  {
+    "path": "crates/wake-core/src/services/terminal/linux.rs",
+    "source_sha256": "8973a2a62f88b2571fd77f21f9467fea2b078155126224cdecf14350ca1f51ed",
+    "copy_sha256": "8973a2a62f88b2571fd77f21f9467fea2b078155126224cdecf14350ca1f51ed"
+  },
+  {
+    "path": "crates/wake-core/src/services/terminal/macos.rs",
+    "source_sha256": "23c72b193bc3046162072599289eedce7a305533ccf35361aa378ee1c729ac58",
+    "copy_sha256": "23c72b193bc3046162072599289eedce7a305533ccf35361aa378ee1c729ac58"
+  },
+  {
+    "path": "crates/wake-core/src/services/terminal/mod.rs",
+    "source_sha256": "4db66ecd69e9b6418519180fc9662cc449eb21dd5fd31c6c6884ad6b0a74152b",
+    "copy_sha256": "4db66ecd69e9b6418519180fc9662cc449eb21dd5fd31c6c6884ad6b0a74152b"
+  },
+  {
+    "path": "crates/wake-core/src/services/terminal/posix.rs",
+    "source_sha256": "757ca2832e981f0af94cfb45be1f5e66fbeab9941761a5f57dda843d88588ecb",
+    "copy_sha256": "757ca2832e981f0af94cfb45be1f5e66fbeab9941761a5f57dda843d88588ecb"
+  },
+  {
+    "path": "crates/wake-core/src/services/terminal/windows.rs",
+    "source_sha256": "2c9cd5fe8ab2cdb3c85d41c78876d0faece032f56c0653283638a9ec2a31d0de",
+    "copy_sha256": "2c9cd5fe8ab2cdb3c85d41c78876d0faece032f56c0653283638a9ec2a31d0de"
+  },
+  {
+    "path": "crates/wake-core/src/services/windows_fs.rs",
+    "source_sha256": "c6915c8229a4c8d5a7bee6986cf307664e1648b49205676a3b318953b683b343",
+    "copy_sha256": "c6915c8229a4c8d5a7bee6986cf307664e1648b49205676a3b318953b683b343"
+  },
+  {
+    "path": "crates/wake-core/src/text.rs",
+    "source_sha256": "970ad58bfc684cccf1c28fd9f561643edffc5e11c95e15dfceabd418dc757b6a",
+    "copy_sha256": "970ad58bfc684cccf1c28fd9f561643edffc5e11c95e15dfceabd418dc757b6a"
+  },
+  {
+    "path": "crates/wake-core/src/watcher.rs",
+    "source_sha256": "e1499721df3ab56baec5fa4ad26375f30a710553df22d8b89e9a645a1bf59c3f",
+    "copy_sha256": "e1499721df3ab56baec5fa4ad26375f30a710553df22d8b89e9a645a1bf59c3f"
+  },
+  {
+    "path": "crates/wake-core/tests/adapter_contracts.rs",
+    "source_sha256": "04506af19c0434fd44f788db2741357e41e9d8be2c4ce2f220d5f9d722bf66f6",
+    "copy_sha256": "04506af19c0434fd44f788db2741357e41e9d8be2c4ce2f220d5f9d722bf66f6"
+  },
+  {
+    "path": "crates/wake-core/tests/cli.rs",
+    "source_sha256": "4142f7d7b78220c561698d9644cacae842f00fcac13ae3ec6ef1bb3147b1a366",
+    "copy_sha256": "4142f7d7b78220c561698d9644cacae842f00fcac13ae3ec6ef1bb3147b1a366"
+  },
+  {
+    "path": "crates/wake-core/tests/common/mod.rs",
+    "source_sha256": "8fa31a926d7985956b7a2ac48091ab522e690b57bfe882e84c8d2a6013730afe",
+    "copy_sha256": "8fa31a926d7985956b7a2ac48091ab522e690b57bfe882e84c8d2a6013730afe"
+  },
+  {
+    "path": "crates/wake-core/tests/db_roundtrip.rs",
+    "source_sha256": "d9efb0fd1f24439729ecae0385fd2ba7af9c82364f04a359d1d0d859aabd8765",
+    "copy_sha256": "d9efb0fd1f24439729ecae0385fd2ba7af9c82364f04a359d1d0d859aabd8765"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/claude/projects/-Users-tester-Github-wakefx/11111111-aaaa-bbbb-cccc-000000000001/subagents/agent-fixture01.jsonl",
+    "source_sha256": "2434af2945236c891e0d33ffed57a9224dd0b39b97f8c9b76aea278fc2fdd80e",
+    "copy_sha256": "2434af2945236c891e0d33ffed57a9224dd0b39b97f8c9b76aea278fc2fdd80e"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/claude/projects/-Users-tester-Github-wakefx/11111111-aaaa-bbbb-cccc-000000000001/subagents/agent-fixture01.meta.json",
+    "source_sha256": "4adf8e5eaffee0c0a9ba413d797e7c6bd9463431f943681aba19ad562cc12f77",
+    "copy_sha256": "4adf8e5eaffee0c0a9ba413d797e7c6bd9463431f943681aba19ad562cc12f77"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/claude/projects/-Users-tester-Github-wakefx/11111111-aaaa-bbbb-cccc-000000000001.jsonl",
+    "source_sha256": "6a8a499a4a0bc5b57029340edf91f87a182af8ffe4016f6816477553453d61c9",
+    "copy_sha256": "6a8a499a4a0bc5b57029340edf91f87a182af8ffe4016f6816477553453d61c9"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/claude/projects/-Users-tester-Github-wakefx/44444444-aaaa-bbbb-cccc-000000000004.jsonl",
+    "source_sha256": "c2ae955408a053e5ee6c81e4e701b6f55bb0320e58b5a9a4b5374d9e5b6f2301",
+    "copy_sha256": "c2ae955408a053e5ee6c81e4e701b6f55bb0320e58b5a9a4b5374d9e5b6f2301"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/claude/projects/-Users-tester-Github-wakefx/aaaaaaaa-0000-4000-8000-00000000000a.jsonl",
+    "source_sha256": "cbc260fd58497afff8128c1964638e9ef8c1ab9bd732d1fcc0506a27bca91488",
+    "copy_sha256": "cbc260fd58497afff8128c1964638e9ef8c1ab9bd732d1fcc0506a27bca91488"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/claude/projects/-Users-tester-Github-wakefx/memory/MEMORY.md",
+    "source_sha256": "c818e9b1b78608d82cfd1a9144de46ce7bfcad2a1458e60bd802d9f7c29e2de7",
+    "copy_sha256": "c818e9b1b78608d82cfd1a9144de46ce7bfcad2a1458e60bd802d9f7c29e2de7"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/claude/projects/-Users-tester-Github-wakefx/memory/wake-testing.md",
+    "source_sha256": "8dd3aac6dc711403b9f9d2a137ca2e62ba6acffd6a434f880e41c62ef08c4418",
+    "copy_sha256": "8dd3aac6dc711403b9f9d2a137ca2e62ba6acffd6a434f880e41c62ef08c4418"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codebuddy/projects/Users-fixture-src-wakefx/cb000001-aaaa-bbbb-cccc-000000000001/subagents/agent-deadbeef.jsonl",
+    "source_sha256": "d01e4564ab681440ba9e4d17f6288a1b816419c77a184be564ef2c71df20e37e",
+    "copy_sha256": "d01e4564ab681440ba9e4d17f6288a1b816419c77a184be564ef2c71df20e37e"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codebuddy/projects/Users-fixture-src-wakefx/cb000001-aaaa-bbbb-cccc-000000000001.jsonl",
+    "source_sha256": "236ff3322857cf07c649e6249601ee243e05a4882d47b918fd4b09a23704ef0d",
+    "copy_sha256": "236ff3322857cf07c649e6249601ee243e05a4882d47b918fd4b09a23704ef0d"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codebuddy/projects/Users-fixture-src-wakefx/cb000001-aaaa-bbbb-cccc-000000000001.meta.json",
+    "source_sha256": "803d432a3c38cbf59f8b5c9cbe4f0084c44e83a2348ce5fa697c589f1521bcfc",
+    "copy_sha256": "803d432a3c38cbf59f8b5c9cbe4f0084c44e83a2348ce5fa697c589f1521bcfc"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codebuddy/projects/Users-fixture-src-wakefx/cb000002-aaaa-bbbb-cccc-000000000002.jsonl",
+    "source_sha256": "9846e71790e698c20462a9a1a0605369c44fe2d8bd253e07e6987b9693239740",
+    "copy_sha256": "9846e71790e698c20462a9a1a0605369c44fe2d8bd253e07e6987b9693239740"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codex/memories/user-preferences.md",
+    "source_sha256": "7e5cac26344ec24dd2d342a6002603d12230b89c27a65417553843e404dfca80",
+    "copy_sha256": "7e5cac26344ec24dd2d342a6002603d12230b89c27a65417553843e404dfca80"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codex/sessions/2026/08/02/rollout-2026-08-02T09-15-00-22222222-aaaa-bbbb-cccc-000000000002.jsonl",
+    "source_sha256": "a9dbf3de20ad5056eae236b7fb92300ab57418bf3ac8d5b7d022f7574ce6482c",
+    "copy_sha256": "a9dbf3de20ad5056eae236b7fb92300ab57418bf3ac8d5b7d022f7574ce6482c"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codex/sessions/2026/08/07/rollout-2026-08-07T12-44-01-33333333-aaaa-bbbb-cccc-000000000003.jsonl",
+    "source_sha256": "b59e1151c8ef1ec6e210563ec34a67e893da99b0c185d61a24cf4296b4a8412e",
+    "copy_sha256": "b59e1151c8ef1ec6e210563ec34a67e893da99b0c185d61a24cf4296b4a8412e"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codex/sessions/2026/08/08/rollout-2026-08-08T09-00-00-55555555-aaaa-bbbb-cccc-000000000005.jsonl",
+    "source_sha256": "bfde6327faf1554f032e99c86a30d96e897fdce823e203979cad02f760afa303",
+    "copy_sha256": "bfde6327faf1554f032e99c86a30d96e897fdce823e203979cad02f760afa303"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/codex/sessions/2026/08/09/rollout-2026-08-09T10-30-00-44444444-aaaa-bbbb-cccc-000000000004.jsonl",
+    "source_sha256": "2229b5948cd8152be0c0982f2c54c804c95df51279b6deae523c66567e85954c",
+    "copy_sha256": "2229b5948cd8152be0c0982f2c54c804c95df51279b6deae523c66567e85954c"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/cursor/projects/wakefx-cursor-proj/agent-transcripts/33333333-aaaa-bbbb-cccc-000000000003/33333333-aaaa-bbbb-cccc-000000000003.jsonl",
+    "source_sha256": "975bf98e097eea9e877fa29ac0c267cbfecf452b3e71cdf1ee5adca7b7a0793c",
+    "copy_sha256": "975bf98e097eea9e877fa29ac0c267cbfecf452b3e71cdf1ee5adca7b7a0793c"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/cursor/projects/wakefx-cursor-proj/agent-transcripts/44444444-aaaa-bbbb-cccc-000000000004/44444444-aaaa-bbbb-cccc-000000000004.jsonl",
+    "source_sha256": "cb828eeac0363793e36cb72b0ecd0027a93af873394108bdbbe9bdba78802c89",
+    "copy_sha256": "cb828eeac0363793e36cb72b0ecd0027a93af873394108bdbbe9bdba78802c89"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/dsh/session.jsonl",
+    "source_sha256": "8f28036d8c3784b326028f395fec2292ea6cb3fff9045108dc20050b6e3be5bf",
+    "copy_sha256": "8f28036d8c3784b326028f395fec2292ea6cb3fff9045108dc20050b6e3be5bf"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/gemini/tmp/wakefx-gem/chats/session-2026-08-04T12-00-00.jsonl",
+    "source_sha256": "f2e696b0c00e45c327381be7e92fd446c14ebb2e2f1b8f5810fe0c558b9b89ef",
+    "copy_sha256": "f2e696b0c00e45c327381be7e92fd446c14ebb2e2f1b8f5810fe0c558b9b89ef"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/grok/sessions/%2FUsers%2Ftester%2FGithub%2Fwakefx/77777777-aaaa-bbbb-cccc-000000000007/subagents/child-fixture/meta.json",
+    "source_sha256": "a24310ad826b6a5c793f8e246fcfc7d275207634bfc52478fd1ac67ccd3ed18d",
+    "copy_sha256": "a24310ad826b6a5c793f8e246fcfc7d275207634bfc52478fd1ac67ccd3ed18d"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/grok/sessions/%2FUsers%2Ftester%2FGithub%2Fwakefx/77777777-aaaa-bbbb-cccc-000000000007/summary.json",
+    "source_sha256": "f9e511505d6c6b3009735546ea7c3bc0a7accbe4894807bd3c0813155a19babf",
+    "copy_sha256": "f9e511505d6c6b3009735546ea7c3bc0a7accbe4894807bd3c0813155a19babf"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/grok/sessions/%2FUsers%2Ftester%2FGithub%2Fwakefx/77777777-aaaa-bbbb-cccc-000000000007/updates.jsonl",
+    "source_sha256": "7f3d4ced371897125667bdd63d36b3b85a1f288d945ce1c517d3a54b67d9ed72",
+    "copy_sha256": "7f3d4ced371897125667bdd63d36b3b85a1f288d945ce1c517d3a54b67d9ed72"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/image_content_shapes.json",
+    "source_sha256": "8908835b48f6976cc0865105323a099c94e1b80699b59d509b2b6e67bcd4dbf7",
+    "copy_sha256": "8908835b48f6976cc0865105323a099c94e1b80699b59d509b2b6e67bcd4dbf7"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/kimi/sessions/wd_wakefx_abc123/session_88888888-aaaa-bbbb-cccc-000000000008/agents/main/wire.jsonl",
+    "source_sha256": "407d5a00223dcbf728aae0e436cdfc10e0a4b6f1f82bb10ae5c5662486d768fe",
+    "copy_sha256": "407d5a00223dcbf728aae0e436cdfc10e0a4b6f1f82bb10ae5c5662486d768fe"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/kimi/sessions/wd_wakefx_abc123/session_88888888-aaaa-bbbb-cccc-000000000008/state.json",
+    "source_sha256": "2695cf735afdb1e1e29e5f71a1c31398d5a6ca693def8c0da2b852845f2ac3af",
+    "copy_sha256": "2695cf735afdb1e1e29e5f71a1c31398d5a6ca693def8c0da2b852845f2ac3af"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/kimi/sessions/wd_wakefx_abc123/session_99999999-aaaa-bbbb-cccc-000000000009/agents/main/wire.jsonl",
+    "source_sha256": "238927f86d85b283c2b686918cd94c5ce0f655c4ae20affb5e1b2754563cf298",
+    "copy_sha256": "238927f86d85b283c2b686918cd94c5ce0f655c4ae20affb5e1b2754563cf298"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/kimi/sessions/wd_wakefx_abc123/session_99999999-aaaa-bbbb-cccc-000000000009/state.json",
+    "source_sha256": "35057d36651174310b0fd56a5ff1d214000b68ca5a2ccb1ad9a4ff86641ab4e1",
+    "copy_sha256": "35057d36651174310b0fd56a5ff1d214000b68ca5a2ccb1ad9a4ff86641ab4e1"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/kiro/sessions/cli/44444444-aaaa-bbbb-cccc-000000000004.json",
+    "source_sha256": "c76cf6569aa64bd58bd922f2054640be1196d787d2a2c00c3a42f519cb8e8876",
+    "copy_sha256": "c76cf6569aa64bd58bd922f2054640be1196d787d2a2c00c3a42f519cb8e8876"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/kiro/sessions/cli/44444444-aaaa-bbbb-cccc-000000000004.jsonl",
+    "source_sha256": "b7b23d16b3d4a8860a20d30d3ddbbb1d4b43c67cdda3d0e60587a38a21852d88",
+    "copy_sha256": "b7b23d16b3d4a8860a20d30d3ddbbb1d4b43c67cdda3d0e60587a38a21852d88"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/openclaw/agents/main/sessions/cccccccc-aaaa-bbbb-cccc-000000000017.checkpoint.1.jsonl",
+    "source_sha256": "afc26e797b5159a2a535742da21c8d3ba40b2c577c73d80f820ead65669ad6a1",
+    "copy_sha256": "afc26e797b5159a2a535742da21c8d3ba40b2c577c73d80f820ead65669ad6a1"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/openclaw/agents/main/sessions/cccccccc-aaaa-bbbb-cccc-000000000017.jsonl",
+    "source_sha256": "d2e3ef59f75785df547866aed100acf40f78a0acab76d887ce49e6d3bad54eab",
+    "copy_sha256": "d2e3ef59f75785df547866aed100acf40f78a0acab76d887ce49e6d3bad54eab"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/openclaw/agents/main/sessions/dddddddd-aaaa-bbbb-cccc-000000000018.jsonl",
+    "source_sha256": "16d608f39116d5ca4bd419d2bfc279b22f4782b0b3483be9b467c0face4cb69a",
+    "copy_sha256": "16d608f39116d5ca4bd419d2bfc279b22f4782b0b3483be9b467c0face4cb69a"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/openclaw/agents/main/sessions/sessions.json",
+    "source_sha256": "d75600075f53c8eedd4bbe0a9f7d9a1d699fb3f381b7e6d0360487bf834169fc",
+    "copy_sha256": "d75600075f53c8eedd4bbe0a9f7d9a1d699fb3f381b7e6d0360487bf834169fc"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/pi/agent/sessions/--Users-tester-Github-wakefx--/2026-08-06T10-00-00-000Z_66666666-aaaa-bbbb-cccc-000000000006.jsonl",
+    "source_sha256": "dd941eb867046ef8b3ea59dba983d8463936195857a5da317ad43bdb2491e664",
+    "copy_sha256": "dd941eb867046ef8b3ea59dba983d8463936195857a5da317ad43bdb2491e664"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/qoder/projects/-Users-tester-Github-wakefx/abababab-aaaa-bbbb-cccc-000000000014/subagents/agent-child.jsonl",
+    "source_sha256": "d5e7efe10acfbf3dc402e15409d42c2116d5899ff4294b38f3d4595cf499d106",
+    "copy_sha256": "d5e7efe10acfbf3dc402e15409d42c2116d5899ff4294b38f3d4595cf499d106"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/qoder/projects/-Users-tester-Github-wakefx/abababab-aaaa-bbbb-cccc-000000000014.jsonl",
+    "source_sha256": "a81e53b3a8728f611b6623cf154fe11a333c450e00de2cffed542a22207d78c8",
+    "copy_sha256": "a81e53b3a8728f611b6623cf154fe11a333c450e00de2cffed542a22207d78c8"
+  },
+  {
+    "path": "crates/wake-core/tests/fixtures/qoder/projects/-Users-tester-Github-wakefx/cdcdcdcd-aaaa-bbbb-cccc-000000000015.jsonl",
+    "source_sha256": "3b34404a1965415aad2d6aebd3337ddaacd455d66a72eaaf243d98735b7e2dc1",
+    "copy_sha256": "3b34404a1965415aad2d6aebd3337ddaacd455d66a72eaaf243d98735b7e2dc1"
+  },
+  {
+    "path": "crates/wake-core/tests/mcp_stdio.rs",
+    "source_sha256": "1ef28146cc7a6d4c6f9f48353d39d98abc5e590962df62f26a28af5b3476b4d7",
+    "copy_sha256": "1ef28146cc7a6d4c6f9f48353d39d98abc5e590962df62f26a28af5b3476b4d7"
+  },
+  {
+    "path": "crates/wake-core/tests/remote_sync.rs",
+    "source_sha256": "ac930e93f0b21b0afd4442075cd4572ebcd59be7374e4379f2edaf6b52ba3136",
+    "copy_sha256": "ac930e93f0b21b0afd4442075cd4572ebcd59be7374e4379f2edaf6b52ba3136"
+  },
+  {
+    "path": "crates/wake-core/tests/scanner_finale.rs",
+    "source_sha256": "d55a45a646380ed955486e1417d96e7c8d45fc7d314257146fd1bd63a6b82939",
+    "copy_sha256": "d55a45a646380ed955486e1417d96e7c8d45fc7d314257146fd1bd63a6b82939"
+  }
+]

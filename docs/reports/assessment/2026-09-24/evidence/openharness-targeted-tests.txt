@@ -1,0 +1,150 @@
+
+ RUN  v4.1.10 /tmp/oax-openharness-assessment-20260924/cli
+
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > starts once, preserves permissions, and rejects a conflicting creation retry 34ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > validates every dependency and harness before launching any task 16ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > fans out and joins different harnesses using pinned, checksummed copies 221ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > names each agent's role: specialists are never news, the Director only once nothing is left to run 65ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > limits parallelism and treats a repeated plan as the same work 115ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > blocks dependencies after failure and retries in a new workspace 173ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not mistake idle for success or complete unfinished work 59ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > rejects path traversal, outside symlinks, directories, and missing artifacts 80ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > stops only this project, ignores late results, and never kills sessions on close 61ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > cancels an agent that finishes launching after cancellation 56ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > refuses blind retry of an uncertain process spawn 58ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > persists transcript and reattaches without launching duplicate agents 71ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > handles lost chat acknowledgments without sending twice 7ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > tracks real delivery receipts and does not silently resend after restart 11ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > recovers a result notification saved before dispatch without rerunning work 63ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > keeps assistant turns separate even when a user message arrives mid-stream 6ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > steers the current worker once and rejects stale or finished attempts 70ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > revokes only this project’s queued receipts when stopped 7ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not race a retry against a worker still being created 109ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > reports invalid folders as an editable request refusal 5ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > exposes actionable wire errors without throwing or weakening validation 6ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > deduplicates simultaneous creation after asynchronous folder validation 5ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > lists recent projects in order without exposing their full briefs 8ms
+ × src/orchestrator/service.spec.ts > durable orchestrator lifecycle > preserves corrupt state and refuses to overwrite its identity 25ms
+   → state directory /tmp/orchestrator-spec-gXHuHc/state is group/world writable, so its contents cannot be trusted. If you did not set that mode yourself, delete it; otherwise: chmod 700 /tmp/orchestrator-spec-gXHuHc/state
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > recovers interrupted director and worker launches conservatively 61ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > records a director creation failure without hiding it: Error: Engine not authenticated 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > records a director creation failure without hiding it: unknown process refusal 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > never overwrites an existing workspace, even without a saved run 3ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > refuses unsupported engines and invalid folder forms before creation 5ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not start cancelled work while its folder is being prepared 38ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > handles a removed harness without mistaking it for an uncertain spawn 58ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > can run general-purpose work, resume, and add a new revision after completion 122ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > reports the same failure only once and rejects overlapping result commits 64ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > retains uncertain guidance instead of resending: Error: Input route disappeared 7ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > retains uncertain guidance instead of resending: unknown dispatch failure 7ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > leaves a recovered pending receipt pending when no director was recorded 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > flushes coalesced transcript changes and bounds retained messages 220ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > pauses after a real background storage failure without duplicating the agent 57ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > keeps cancellation authoritative when director creation later rejects 56ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > keeps cancellation authoritative when worker creation later rejects 79ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not downgrade a very fast worker result while creation is returning 59ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > normalizes non-Error worker failures and explicit input rejection 66ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > preserves orphaned worker results without inventing a director 74ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not lose a committed result if staging cleanup itself fails 81ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > normalizes untyped private-state and background notification failures 73ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > finishes a 64-task mixed-engine graph with bounded parallelism and verified fan-in 866ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > has a contract for every process engine, with no package allowlist 12ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > claude: binds the same harness and preserves the engine at launch 13ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > codex: binds the same harness and preserves the engine at launch 5ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > cursor: binds the same harness and preserves the engine at launch 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > opencode: binds the same harness and preserves the engine at launch 5ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > pi: binds the same harness and preserves the engine at launch 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > hermes: binds the same harness and preserves the engine at launch 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > commandcode: binds the same harness and preserves the engine at launch 5ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > devin: binds the same harness and preserves the engine at launch 6ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > muse: binds the same harness and preserves the engine at launch 7ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > amp: binds the same harness and preserves the engine at launch 5ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > kilo: binds the same harness and preserves the engine at launch 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > grok: binds the same harness and preserves the engine at launch 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > agy: binds the same harness and preserves the engine at launch 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > copilot: binds the same harness and preserves the engine at launch 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > codex: respects existing AGENTS.override.md and preserves its bytes 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > pi: respects existing CLAUDE.md and preserves its bytes 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > hermes: respects existing .hermes.md and preserves its bytes 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > hermes: respects existing .cursorrules and preserves its bytes 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > opencode: respects existing CLAUDE.md and preserves its bytes 4ms
+ ✓ src/dsh/runtime.spec.ts > portable harness adapters > agy: respects existing GEMINI.md and preserves its bytes 4ms
+ ✓ src/dsh/runtime.spec.ts > session isolation and lifecycle > makes legacy skill commands executable without redirecting upstream source paths 12ms
+ ✓ src/dsh/runtime.spec.ts > session isolation and lifecycle > does not inherit the previous account private grid on a harness relaunch 16ms
+ ✓ src/dsh/runtime.spec.ts > session isolation and lifecycle > keeps two harnesses in one project separate, leaving no harness content in project rules 6ms
+ ✓ src/dsh/runtime.spec.ts > session isolation and lifecycle > resumes and forks the original engine/content/env/args despite package changes, refreshing account facts 9ms
+ ✓ src/dsh/runtime.spec.ts > session isolation and lifecycle > keeps older rows stable using their agent id and supports package renames 5ms
+ ✓ src/dsh/runtime.spec.ts > session isolation and lifecycle > reports preparation failures, missing dependencies, or no resolver before a relaunch 6ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > retries the same fork without replacing an occupied destination with another snapshot 9ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > keeps runtime snapshots out of Git while preserving existing ignore rules 5ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > supports a minimal harness and deduplicates repeated skill roots 5ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > imports existing AGENTS rules for Claude once and normalizes legacy engine introductions 5ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > rejects terminal/viewer, missing instructions/skills, and duplicate skill names 4ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > refuses a different saved engine or package, corrupt snapshots and missing fork sources 8ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > refuses symlinked .harness directories 2ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > refuses symlinked .harness/runtime directories 2ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > refuses symlinked bundle directories 2ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > refuses symlinked skills directories 2ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > refuses directory collisions, user links, edited bootstraps and modified context links 6ms
+ ✓ src/dsh/runtime.spec.ts > runtime validation and file ownership > refuses missing skills and occupied skill paths without touching them 5ms
+ ✓ src/dsh/runtime.spec.ts > non-destructive legacy migration > archives exact bytes, removes only known instructions and owned native skill links, and is idempotent 3ms
+ ✓ src/dsh/runtime.spec.ts > non-destructive legacy migration > handles renamed and other installed harnesses and preserves non-owned skill paths 3ms
+ ✓ src/dsh/runtime.spec.ts > non-destructive legacy migration > preserves native directories reached through symlinks, even when their skill links match 2ms
+ ✓ src/dsh/runtime.spec.ts > non-destructive legacy migration > leaves edited or unknown legacy sections intact and returns an actionable failure 2ms
+ ✓ src/dsh/runtime.spec.ts > non-destructive legacy migration > migrates instruction-only harnesses without replacing an existing backup symlink 2ms
+ ✓ src/dsh/runtime.spec.ts > create and fork decisions > names what WOULD run when an engine cannot run the harness 2ms
+ ✓ src/dsh/runtime.spec.ts > create and fork decisions > refuses every engine for something that is not a runnable harness 1ms
+ ✓ src/dsh/runtime.spec.ts > create and fork decisions > forks the runtime the source recorded 1ms
+ ✓ src/dsh/runtime.spec.ts > create and fork decisions > forks a pre-key session from the bundle under its agent id, and otherwise starts fresh 3ms
+ ✓ src/dsh/runtime.spec.ts > create and fork decisions > turns a runtime that cannot be prepared into a refusal, never a throw 4ms
+ ✓ src/lib/stopAgentService.spec.ts > saves history before removing the runtime, joins concurrent stops, and clears confirmed reservations 122ms
+ ✓ src/lib/stopAgentService.spec.ts > missing identities are harmless and never allocate or signal anything 44ms
+ ✓ src/lib/stopAgentService.spec.ts > storage failure leaves the live process and registry untouched 48ms
+ ✓ src/lib/stopAgentService.spec.ts > retains work when stopping terminal 94ms
+ ✓ src/lib/stopAgentService.spec.ts > retains work when stopping without tmux 91ms
+ ✓ src/lib/stopAgentService.spec.ts > retains work when stopping failed process 73ms
+ ✓ src/lib/stopAgentService.spec.ts > retains work when stopping failed tmux 78ms
+ ✓ src/lib/stopAgentService.spec.ts > does not publish a stopped row until the exact process and terminal have both stopped 99ms
+ ✓ src/lib/stopAgentService.spec.ts > a rejected process check retains history, releases its route and permits a safe retry 80ms
+ ✓ src/lib/stopAgentService.spec.ts > a rejected pane check retains history, releases its route and permits a safe retry 79ms
+ ✓ src/lib/stopAgentService.spec.ts > cannot confirm stopping a shell with no backend 63ms
+ ✓ src/lib/stopAgentService.spec.ts > cannot confirm stopping a shell with no tmux route 60ms
+ ✓ src/lib/stopAgentService.spec.ts > does not remove a target removed during termination 60ms
+ ✓ src/lib/stopAgentService.spec.ts > does not remove a target replaced during termination 63ms
+ ✓ src/lib/stopAgentService.spec.ts > does not remove a target conversation during termination 62ms
+ ✓ src/lib/stopAgentService.spec.ts > does not remove a target route during termination 61ms
+ ✓ src/lib/stopAgentService.spec.ts > accepts a hook rebuilding the same process during capture 62ms
+ ✓ src/lib/stopAgentService.spec.ts > accepts a hook rebuilding the same process during termination 60ms
+stdout | src/lib/stopAgentService.spec.ts > only signals through the validated process deleter and does not erase a newer stop job
+fixture stop
+
+ ✓ src/lib/stopAgentService.spec.ts > only signals through the validated process deleter and does not erase a newer stop job 65ms
+ ✓ src/lib/stopAgentService.spec.ts > captures an unbound claude conversation before deleting its process 61ms
+ ✓ src/lib/stopAgentService.spec.ts > captures an unbound codex conversation before deleting its process 61ms
+ ✓ src/lib/stopAgentService.spec.ts > does not stop a process that was removed during identity capture 47ms
+ ✓ src/lib/stopAgentService.spec.ts > does not stop a process that was replaced during identity capture 47ms
+ ✓ src/lib/stopAgentService.spec.ts > keeps the newer hook binding that arrives during capture 62ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/orchestrator/service.spec.ts > durable orchestrator lifecycle > preserves corrupt state and refuses to overwrite its identity
+Error: state directory /tmp/orchestrator-spec-gXHuHc/state is group/world writable, so its contents cannot be trusted. If you did not set that mode yourself, delete it; otherwise: chmod 700 /tmp/orchestrator-spec-gXHuHc/state
+ ❯ secureStateDirectory src/lib/secureState.ts:43:13
+     41|     // (made by an older build on Ubuntu) lands in, so the message has…
+     42|     if ((mode & 0o022) !== 0) {
+     43|       throw new Error(`state directory ${directory} is group/world wri…
+       |             ^
+     44|         + ` trusted. If you did not set that mode yourself, delete it;…
+     45|     }
+ ❯ OrchestratorService.load src/orchestrator/service.ts:46:5
+ ❯ OrchestratorService.list src/orchestrator/service.ts:128:10
+ ❯ src/orchestrator/service.spec.ts:290:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 118 passed (119)
+   Start at  00:02:38
+   Duration  8.48s (transform 1.56s, setup 90ms, import 2.31s, tests 5.24s, environment 1ms)
+

@@ -1,0 +1,41 @@
+cwd=/tmp/oax-wake-core-tests-20260924
+command=cargo test -p wake-core --offline --lib cleanup::tests:: -- --skip system_trash_cleanup_round_trip
+   Compiling wake-core v0.8.1 (/tmp/oax-wake-core-tests-20260924/crates/wake-core)
+    Finished `test` profile [optimized + debuginfo] target(s) in 19.79s
+     Running unittests src/lib.rs (target/debug/deps/wake_core-73c15f93afc2ea9a)
+
+running 29 tests
+test cleanup::tests::independent_date_preferences_migrate_without_extra_restrictions ... ok
+test cleanup::tests::canonical_target_accepts_regular_paths_and_rejects_changed_locations ... ok
+test cleanup::tests::sort_direction_preferences_preserve_old_order_and_roundtrip ... ok
+test cleanup::tests::source_filters_union_each_group_and_intersect_with_other_filters ... ok
+test cleanup::tests::source_preferences_migrate_and_preserve_explicit_clears ... ok
+test cleanup::tests::symbolic_link_in_target_ancestor_is_excluded ... ok
+test cleanup::tests::date_filters_have_independent_boundaries_and_sort_does_not_change_them ... ok
+test cleanup::tests::cancelled_review_discards_partial_results_without_moving_files ... ok
+test cleanup::tests::legacy_journals_require_matching_type_length_and_timestamp ... ok
+test cleanup::tests::changed_files_new_children_and_favorites_invalidate_review ... ok
+test cleanup::tests::symbolic_links_are_excluded ... ok
+test cleanup::tests::index_conflict_can_be_retried_and_complete_restore_clears_only_its_tombstone ... ok
+test cleanup::tests::same_size_and_timestamp_replacement_is_rejected_before_deletion ... ok
+test cleanup::tests::hard_links_are_excluded ... ok
+test cleanup::tests::retired_content_preferences_do_not_hide_candidates ... ok
+test cleanup::tests::partial_failure_is_journaled_and_restored_files_can_be_reindexed ... ok
+test cleanup::tests::ownership_is_checked_again_after_parsing ... ok
+test cleanup::tests::unsupported_remote_missing_and_bad_content_are_not_moved ... ok
+test cleanup::tests::nested_paths_deduplicate_and_shared_session_prevents_cleanup ... ok
+test cleanup::tests::cancellation_stops_before_next_tree_and_never_claims_it_moved ... ok
+test cleanup::tests::reviewed_starred_pinned_and_recent_files_can_be_cleaned_up ... ok
+test cleanup::tests::watcher_race_still_writes_tombstones_and_restore_respects_later_deletion ... ok
+test cleanup::tests::restored_copies_can_have_new_file_identities ... ok
+test cleanup::tests::unavailable_entries_follow_date_source_and_tree_flag_filters ... ok
+test cleanup::tests::review_reports_every_failed_tree_and_preserves_ready_selection ... ok
+test cleanup::tests::manual_restore_check_never_moves_files_and_requires_complete_sidecars ... ok
+test cleanup::tests::mixed_entries_sort_together_with_unknown_size_last_in_both_directions ... ok
+test cleanup::tests::snapshot_uses_mainline_prompt_count_and_keeps_archived_children ... ok
+test cleanup::tests::revalidation_does_not_depend_on_the_message_index ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 106 filtered out; finished in 0.44s
+
+
+exit=0

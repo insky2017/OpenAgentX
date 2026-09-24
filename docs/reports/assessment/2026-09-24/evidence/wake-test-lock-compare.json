@@ -1,0 +1,8 @@
+{
+  "source_lock_sha256": "632d2eb821d7b2e7771a437e004d18690aaff707ad4899ff7cef4bf7bf63f2b2",
+  "test_lock_sha256": "d742c0a5b6f4c97fa6233aedc7c564ca4724ec790894ff8871387206a487cb0e",
+  "new_package_identities": [],
+  "removed_package_count": 782,
+  "source_package_count": 911,
+  "test_package_count": 129
+}

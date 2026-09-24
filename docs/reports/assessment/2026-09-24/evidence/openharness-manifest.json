@@ -1,0 +1,85 @@
+{
+  "repository": "https://github.com/autonomous-ai/openharness",
+  "commit": "a53351bd1a2c33c2976b7df6869e3666578fdd7d",
+  "commit_metadata": "2026-09-24T08:07:10-07:00\nMerge pull request #313 from autonomous-ai/fix/pane-header-details-left-of-model",
+  "observed_at": "2026-09-24T16:06:56.857811+00:00",
+  "clone": "/tmp/oax-openharness-assessment-20260924",
+  "tracked_files": 6067,
+  "file_counts": {
+    ".dart": 1196,
+    ".ts": 770,
+    ".mjs": 698,
+    ".md": 617,
+    ".json": 518,
+    ".sh": 433,
+    "": 337,
+    ".png": 317,
+    ".jpg": 193,
+    ".py": 151
+  },
+  "source_line_counts": {
+    "cli/src/cli.ts": 7002,
+    "cli/src/backendSocket.ts": 2681,
+    "cli/src/lib/registry.ts": 2119,
+    "cli/src/orchestrator/service.ts": 447
+  },
+  "git_status_porcelain": "",
+  "sha256": {
+    "README.md": "3894fb7b954ddfd81b394b437cad97ce32ac1cf0aba71f34c794a80b63f72c85",
+    "LICENSE": "c534961655bcd54bc25655accd21e6cd936ad6191751b16dd8ba8e23472babda",
+    "docs/architecture.md": "80605917ac45c505a2d5a0abe0c9d4ebfb414261ad45715ef6381e82b9630992",
+    "docs/engines.md": "8d29668b122936090405871e837aaabe340b878bf5e9a7090ae5274f08f1db1e",
+    "docs/reliability-2026-09-16.md": "8389575f80194ec988730d4c8c3e5dfa2555875736d92fdf2080d0241d4105dc",
+    "cli/package.json": "80e4dacbd1ac57a047e22316382321efa32d0e06f0157668eda04125462226cc",
+    "cli/package-lock.json": "334dec0bc0dfa611962846e9e031495a678782e5ae4dc965e979e382cf8b8413",
+    "cli/vitest.config.ts": "5499a8931aa36df52c45188cbfbef93cd70e426e7c9e67ca4adb8be96e2d3e9e",
+    "cli/vitest.setup.ts": "d3b1681b042e14c0993ce77a29085596a440fd954e6107dd9524b1d67b267eea",
+    "cli/src/backendSocket.ts": "e5d2d3661f3debb4980fdf9b6d98d85b96bea6f40e33fd9858dbc6a88fdb24d7",
+    "cli/src/cli.ts": "370f0371517a9d31edcf0968ef3b911ad4a9f7b0c14eab1c6c2155f4c0645fab",
+    "cli/src/orchestrator/service.ts": "3aa62fd06fb692bb1ed7798cfd4b3759b1d952d74f3cc3751fa07549d2f703bf",
+    "cli/src/orchestrator/model.ts": "f1cc7816bd8540d97623072f0e0300686943a75c4df3e7042daf273425c883f8",
+    "cli/src/orchestrator/artifacts.ts": "e954b6cf7cdcf513850880a6f7e860fac52786a1b01071595c5265cd26595258",
+    "cli/src/orchestrator/prompts.ts": "8e1ef1ead9e61676e6859934645ae7e7eb974521328ec80fe1fdc545e2cb314b",
+    "cli/src/orchestrator/service.spec.ts": "ea7f61f48e1fc4854892caee45141b8ec7f093152b261870b57d32f49637217a",
+    "cli/src/dsh/runtime.ts": "5629d3ce777a9081aad75cf371e476bad8d630a17d278b89907832e1773bf82a",
+    "cli/src/dsh/adapters.ts": "3f40d4f1911bf08bb2e3d37f1be3f9400b89f4a957c1c92cfbb73c511582cfe5",
+    "cli/src/dsh/runtime.spec.ts": "7c9cd71509187e264f7a2774baefaa4e47d5d25ff3b49bbd8916d94b40003446",
+    "cli/src/dsh/verdict.ts": "c47815974a240a57c2d282e06b6fbad85f456ad3725faedb944417db32b5ca9a",
+    "cli/src/lib/engineLaunch.ts": "8a7b257ef4a41ccaa5a1789a4575478f41bf33800ed0ecfd9c8b70f101804408",
+    "cli/src/lib/registry.ts": "2c79da849b43ae4cd70d8e94ccae6a5f882c778ac3834f25993b8d2e66545c9f",
+    "cli/src/lib/restoreAgents.ts": "7ff047e1e84234ed6e8f501a352d423767ee5a3ec5d55a1215b771c1a8a55afa",
+    "cli/src/lib/stopAgentService.ts": "37e1bde886ef9f6593cc91ca05deb03629764c22f5a4d18f2af496a47aeef9f8",
+    "cli/src/lib/stopAgentService.spec.ts": "0f68e071dd022087bbc6319d331a0a5828151b97caf0e963b2469fbabf89d821",
+    "cli/src/lib/sessionInput.ts": "a3169062e8c1c597c555c6149d0c37b25f936580a313e2a044859870823f28a5",
+    "cli/src/lib/secureState.ts": "8eac2f8d6bc8974c4b58e5fdb42ad73cbc1cc2a75d11743853dd8be36928b166",
+    "desktop/lib/orchestrator/orchestrator_controller.dart": "4f17c743a633355ceffa2888df329ae1837a14872e569f070fc3d16d95c4e35f",
+    "desktop/lib/orchestrator/orchestrator_workspace.dart": "9a558828601d32c3a07a00a029b58772ea2eb8d709e281b76df726a0332a9a68",
+    "desktop/lib/ws/ws_conn.dart": "9ad25e8b54b6dd5df8567e85b5736b0d42742173e7dd58024d756f4693153a98",
+    "cli/scripts/orchestrator-e2e-peer.ts": "6351049562096aae8c23409a9753a65996f52979b8bdff672fdfec99b8e25635",
+    "cli/scripts/orchestrator-live-engine.ts": "b747720e8c5170c6870f1b43008457e7c3759c3f9dec6fd63558319d984b0d34",
+    "cli/scripts/orchestrator-live-project.ts": "a06e15200f8fe3b50cb39f168e52ee65b1ddf74fa21558ec15b86a6ae2fdbd3d",
+    "cli/scripts/verify-orchestrator-live-cad.py": "27adde77677f9dda0464b0a822719fab9221c5de43f17301de45d590098ebbd1",
+    ".github/workflows/ci.yml": "1989c5168540006dafd520e7a9f2ae82907f3ec7eca4210cad4d561a72664ef4",
+    ".github/workflows/release.yml": "77510a34191e70c46384dbeb14690a08aa04139cf12adf8316a645f32a6c774b",
+    ".github/workflows/experience-checks.yml": "310f6beba639c0bedb838501b6697388e9470db41cebd89ad3a64593f2510ca9",
+    ".github/workflows/authoring-browser-checks.yml": "e814c2dee3d52c6417cb738ca731a7160c90f5d8323054bc3d8343e7ca6f63a5"
+  },
+  "test_runtime": {
+    "node": "20.19.4",
+    "npm": "10.8.2",
+    "vitest": "4.1.10",
+    "CI_node_pin": "22.23.2",
+    "initial_umask": "002",
+    "rerun_umask": "077"
+  },
+  "test_counts": {
+    "openharness-targeted-tests.txt": {
+      "src/orchestrator/service.spec.ts": 45,
+      "src/dsh/runtime.spec.ts": 49,
+      "src/lib/stopAgentService.spec.ts": 24
+    },
+    "openharness-orchestrator-umask077.txt": {
+      "src/orchestrator/service.spec.ts": 46
+    }
+  }
+}

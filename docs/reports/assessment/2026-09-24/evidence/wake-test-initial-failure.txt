@@ -1,0 +1,16 @@
+cwd=/tmp/oax-wake-assessment-20260924
+command=cargo test -p wake-core --locked --offline --test db_roundtrip
+exit=101
+
+error: failed to get `gpui` as a dependency of package `wake v0.8.1 (/tmp/oax-wake-assessment-20260924/crates/wake)`
+
+Caused by:
+  failed to load source for dependency `gpui`
+
+Caused by:
+  Unable to update https://github.com/zed-industries/zed#ce48461e
+
+Caused by:
+  can't checkout from 'https://github.com/zed-industries/zed': you are in the offline mode (--offline)
+
+Boundary: No tests compiled or ran. Switched to isolated core-only workspace to avoid downloading GUI git dependency.

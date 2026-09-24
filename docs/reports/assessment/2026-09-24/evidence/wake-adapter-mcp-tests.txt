@@ -1,0 +1,91 @@
+cwd=/tmp/oax-wake-core-tests-20260924
+command=cargo test -p wake-core --offline --test adapter_contracts --test mcp_stdio
+   Compiling wake-core v0.8.1 (/tmp/oax-wake-core-tests-20260924/crates/wake-core)
+    Finished `test` profile [optimized + debuginfo] target(s) in 13.56s
+     Running tests/adapter_contracts.rs (target/debug/deps/adapter_contracts-588b7350a7c0e593)
+
+running 71 tests
+test cursor_two_sources_remove_independently ... ok
+test data_roots_contract ... ok
+test codex_branch_transcript_injection_is_meta ... ok
+test claude_lists_project_memories ... ok
+test agent_id_all_matches_ord_and_roster ... ok
+test codex_parse_contract ... ok
+test adapter_ix_for_routes_to_owning_instance ... ok
+test claude_inline_images_only_decode_for_transcripts ... ok
+test codex_inline_images_decode_and_strip_desktop_wrappers ... ok
+test codebuddy_topic_title_and_model_id_fallback ... ok
+test codebuddy_lists_only_top_level_transcripts ... ok
+test codex_bare_data_dir_keeps_role ... ok
+test gemini_parse_contract ... ok
+test codex_normalize_lifts_sessions_dir_to_home ... ok
+test claude_memory_anchor_skips_empty_sessions ... ok
+test dsh_parse_contract ... ok
+test claude_parse_contract ... ok
+test kiro_parse_contract ... ok
+test codex_review_output_is_readable_and_not_duplicated ... ok
+test memory_titles_fold_block_scalars_and_clip ... ok
+test grok_parse_contract ... ok
+test merge_quick_meta_default_vs_codex_override ... ok
+test kimi_parse_contract ... ok
+test missing_parent_link_stores_mean_no_links_not_unknown ... ok
+test codebuddy_parse_contract ... ok
+test path_owns_boundaries ... ok
+test qoder_explicit_null_active_leaf_is_empty ... ok
+test codex_internal_threads_are_excluded_at_the_file_boundary ... ok
+test overlapping_watch_roots_dispatch_to_deepest ... ok
+test dsh_torn_final_frame_terminates ... ok
+test qoder_parse_contract ... ok
+test pi_parse_contract ... ok
+test remote_codex_merge_keeps_host_key ... ok
+test instruction_files_join_the_memory_layer ... ok
+test sqlite_custom_root_accepts_db_file ... ok
+test watch_paths_derive_from_data_roots ... ok
+test zcode_custom_root_lifts_to_home_before_storing ... ok
+test removed_defaults_suppress_instances ... ok
+test workbuddy_is_a_codebuddy_twin ... ok
+test qoder_credits_are_not_reported_as_tokens ... ok
+test with_custom_root_contract ... ok
+test antigravity_parse_contract ... ok
+test remote_mount_shaping_is_stable_across_sync_states ... ok
+test copilot_parse_contract ... ok
+test cursor_parse_contract ... ok
+test cursor_ide_parse_contract ... ok
+test opencode_parse_contract ... ok
+test openclaw_parse_contract ... ok
+test opencode_next_real_schema_contract ... ok
+test remote_adapters_stay_inside_cache_and_rewrite_keys ... ok
+test zcode_parse_contract ... ok
+test opencode_v2_parse_contract ... ok
+test seq_contract_holds_for_all_agents ... ok
+test remote_codex_state_matches_despite_foreign_rollout_path ... ok
+test disabled_location_stays_configured_but_leaves_active_roster ... ok
+test cursor_two_sources_route_by_path ... ok
+test create_adapters_for_honors_store_config ... ok
+test claude_bridge_metadata_can_pass_cleanup_review ... ok
+test roster_appends_remote_instances_for_enabled_hosts ... ok
+test opencode_default_databases_can_be_removed_individually ... ok
+test hermes_legacy_schema_still_parses ... ok
+test codex_lists_user_and_thread_memories ... ok
+test codex_spawn_links_need_the_state_db_registry ... ok
+test codex_spawn_cut_falls_back_to_the_dispatch_envelope ... ok
+test codex_spawned_subagent_keeps_only_its_own_turns ... ok
+test codex_running_subagent_keeps_its_tool_calls_over_the_event_stream ... ok
+test hermes_parse_contract ... ok
+test zcode_lists_project_memories ... ok
+test zcode_degrades_on_old_schema_and_missing_task_index ... ok
+test codex_spawn_title_survives_codex_auto_title ... ok
+test codex_spawn_without_a_usable_cut_keeps_everything ... ok
+
+test result: ok. 71 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.39s
+
+     Running tests/mcp_stdio.rs (target/debug/deps/mcp_stdio-43f211a530a085a7)
+
+running 2 tests
+test missing_index_exits_with_a_clear_error ... ok
+test stdio_contract_end_to_end ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.25s
+
+
+exit=0
