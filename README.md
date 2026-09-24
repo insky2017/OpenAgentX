@@ -12,6 +12,8 @@ ADR-008/009 实施分支与实际安装版本；下面的简图仅说明基础�
 [2026-09-23 全面评估](docs/reports/assessment/2026-09-23/README.md)。
 追加的 [OpenHarness / Wake 对照研究](docs/reports/assessment/2026-09-24/README.md)
 沿用上述评估边界，比较结果交付、会话找回、恢复与复杂度取舍。
+随后追加的 [Orca 研究与五项目对照](docs/reports/assessment/2026-09-25/README.md)
+补充并行开发工作台、执行回执与结果审阅的参考。
 
 ```text
 OpenAgentX daemon

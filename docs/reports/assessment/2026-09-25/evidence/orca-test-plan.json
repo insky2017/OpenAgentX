@@ -1,0 +1,18 @@
+{
+  "tests": [
+    "src/shared/orchestration-ask-timeout.test.ts",
+    "src/shared/agent-status-serving-readiness.test.ts",
+    "src/shared/agent-status-store-reopen.test.ts",
+    "src/shared/orchestration-fleet-evidence-clock.test.ts",
+    "src/shared/orchestration-fleet-projection.test.ts",
+    "src/shared/agent-status-run.test.ts",
+    "src/shared/tui-agent-permissions.test.ts",
+    "src/main/runtime/orchestration/db/attempt-outcome-projection.test.ts",
+    "src/main/runtime/orchestration/db-stopping-worker-task-guard.test.ts"
+  ],
+  "node": "/home/sky/.nvm/versions/node/v24.13.0/bin/node",
+  "vitest": "4.1.11",
+  "zod": "4.5.4",
+  "install": "npm install --prefix /tmp/oax-orca-test-runner-20260925 --ignore-scripts --no-audit --no-fund vitest@4.1.11 zod@4.5.4",
+  "scope": "original test files unchanged; custom node-only config; no upstream native-runtime ensure or shared fake-host setup; no real provider/UI/history"
+}

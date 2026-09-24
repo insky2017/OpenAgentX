@@ -1,0 +1,67 @@
+{
+  "checked_at": "2026-09-24T17:13:24.991444+00:00",
+  "report": "11-orca-reference.md",
+  "fixed_commit": "122b8c25d7c16f76e395bf9a65887d7c4bc5003b",
+  "markdown_files_checked": 6,
+  "local_links_checked": 53,
+  "missing_local_links": [],
+  "fixed_source_links_checked": 58,
+  "invalid_fixed_source_links": [],
+  "authored_markdown_trailing_whitespace": [],
+  "source_and_test_files_checked": 68,
+  "source_hash_mismatches": [],
+  "clone_status": "",
+  "frozen_files_checked": 9,
+  "frozen_files_changed": [],
+  "formal_services": [
+    {
+      "MainPID": "1686100",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "unchanged_from_start": true
+    },
+    {
+      "MainPID": "1687781",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx-worker@quote-service.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "unchanged_from_start": true
+    }
+  ],
+  "all_services_unchanged": true,
+  "credential_pattern_scan_hits": [],
+  "credential_scan_boundary": "有限常见凭据格式扫描；另核对测试与摘录来源。未读取用户账号或Agent历史，不声称全库秘密审计。",
+  "primary_review": "全文复核11及总入口；独立读取Orca结果投影、worker_report事务、mutation receipt、workerStop、默认权限、测试替身与MIT。核对测试日志85+27通过及收集失败。",
+  "independent_review": {
+    "agent": "/root/orca_consistency_review",
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high",
+    "scope": "总入口、旧ABC/四项目结论、Orca关键源码及schema、11结论/基线/第5–11节；未重跑测试或全仓审计。",
+    "blocking_findings": [],
+    "nonblocking_suggestion": "OAX intent用query/mutation统一术语",
+    "resolved": true
+  },
+  "test_boundary": "11个不同原有测试文件112断言通过，preamble缺依赖未执行；首轮配置依赖失败保留；没有完整构建、UI、真实Provider、SSH/mobile、实际取消或OAX新E2E。",
+  "staged_files": 18,
+  "out_of_scope_staged_files": [],
+  "author_report_hash_matches_final": true,
+  "author_cleanup_record": "orca-review-check.json：active_test_pids为空，clone clean，临时node_modules链接移除；clone及隔离runner保留。",
+  "staged_whitespace": {
+    "checked_at": "2026-09-24T17:16:01.978539+00:00",
+    "full_check_exit": 2,
+    "preserved_raw_evidence_warnings": {
+      "docs/reports/assessment/2026-09-25/evidence/orca-local-tests-rerun.txt": 1,
+      "docs/reports/assessment/2026-09-25/evidence/orca-local-tests.txt": 1,
+      "docs/reports/assessment/2026-09-25/evidence/orca-recovery-tests.txt": 1,
+      "docs/reports/assessment/2026-09-25/evidence/orca-source-excerpts.txt": 304
+    },
+    "unexpected_warnings": [],
+    "excluding_reviewed_raw_evidence_exit": 0,
+    "decision": "保留带行号源码空白与原始终端尾空行；其余手写文档/证据格式检查通过。"
+  }
+}
