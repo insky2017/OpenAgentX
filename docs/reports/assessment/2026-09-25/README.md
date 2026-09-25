@@ -27,6 +27,7 @@
 | [11 Orca](11-orca-reference.md) | 完成：固定源码、架构与模块判断、112 项局部断言及未执行项、许可证和借鉴裁决 |
 
 后续追加：[FenixAgent 研究与六项目对照](../2026-09-26/README.md)。本页保留 Orca 研究时点的五项目结论。
+随后追加：[Holon 与 Domain Agent 研究、七项目对照](../2026-09-26-holon/README.md)。
 
 ## 五个项目的参考分工
 

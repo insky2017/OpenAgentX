@@ -1,0 +1,12 @@
+{
+  "checked_at": "2026-09-26T01:11:04.038651+08:00",
+  "report_sha256": "9eb6f7b2c143f7eafe660a59bc180223e48ff3eac11021ab63cfdf97a4ed68aa",
+  "report_lines": 251,
+  "fixed_references": 61,
+  "used_references": 61,
+  "local_links": "pass",
+  "source_hashes": "pass",
+  "tracked_clone_status": "",
+  "errors": [],
+  "boundary": "document source/hash/link checks only; not product tests"
+}

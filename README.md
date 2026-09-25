@@ -16,6 +16,8 @@ ADR-008/009 实施分支与实际安装版本；下面的简图仅说明基础�
 补充并行开发工作台、执行回执与结果审阅的参考。
 新增的 [FenixAgent 研究与六项目对照](docs/reports/assessment/2026-09-26/README.md)
 比较企业 Agent 控制面、配置注入、会话交互和多入口执行的一致性。
+进一步的 [Holon 研究与七项目对照](docs/reports/assessment/2026-09-26-holon/README.md)
+聚焦长期 Domain Agent、跨 Agent 协作、等待唤醒与结果交付。
 
 ```text
 OpenAgentX daemon

@@ -1,0 +1,28 @@
+{
+  "observed_at": "2026-09-26T01:10:02.484518+08:00",
+  "repository": "https://github.com/holon-run/holon",
+  "commit": "7c0ebbdfbf2f38adf41968051ed3440bc5ddb774",
+  "commit_metadata": "2026-09-26T00:47:26+08:00 feat: add per-agent brief unread cursors (#3235)",
+  "clone": "/tmp/oax-holon-assessment-20260926",
+  "tracked_source_status": "",
+  "license": "Apache-2.0",
+  "license_sha256": "f7f222f158ee8777294fb46434f69658fcec61cf116c7614d2aaa0e6fe1d14de",
+  "cargo_version": "0.45.0",
+  "readme_english_recommendation": "v0.45.0",
+  "readme_chinese_recommendation": "v0.29.0",
+  "scope": "source-only researcher; independent test agent owns bounded verification",
+  "no_service_start": true,
+  "no_provider_or_account_access": true,
+  "no_product_or_frozen_adr_changes_by_researcher": true,
+  "no_tests_executed_by_researcher": true,
+  "quoted_source_hashes": "holon-source-hashes.json",
+  "source_excerpts": "holon-source-excerpts.txt",
+  "issue_snapshot": "holon-open-issues.json",
+  "limitations": [
+    "No browser/TUI interaction",
+    "No real Provider execution",
+    "No complete Rust build or runtime tests by researcher",
+    "No independent reproduction of upstream issue reports",
+    "Not a general security audit"
+  ]
+}
