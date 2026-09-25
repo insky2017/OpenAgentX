@@ -14,6 +14,8 @@ ADR-008/009 实施分支与实际安装版本；下面的简图仅说明基础�
 沿用上述评估边界，比较结果交付、会话找回、恢复与复杂度取舍。
 随后追加的 [Orca 研究与五项目对照](docs/reports/assessment/2026-09-25/README.md)
 补充并行开发工作台、执行回执与结果审阅的参考。
+新增的 [FenixAgent 研究与六项目对照](docs/reports/assessment/2026-09-26/README.md)
+比较企业 Agent 控制面、配置注入、会话交互和多入口执行的一致性。
 
 ```text
 OpenAgentX daemon

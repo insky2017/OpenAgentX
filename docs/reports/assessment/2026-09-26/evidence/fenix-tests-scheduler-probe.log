@@ -1,0 +1,24 @@
+bun test v1.3.14 (0d9b296a)
+
+../oax-fenix-assessment-20260926/src/__tests__/agent-executor.test.ts:
+(pass) agent executor > maps cron trigger to scheduled source [2.46ms]
+(pass) agent executor > maps manual trigger to scheduled source [0.31ms]
+
+../../home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/assessment/2026-09-26/evidence/fenix-test-scheduler-probe.test.ts:
+{"probe":"stopReason","reason":"end_turn","output":{"status":"success","duration":1,"resultSummary":""},"disposed":1}
+(pass) observed scheduler status for stopReason=end_turn [0.94ms]
+{"probe":"stopReason","reason":"cancelled","output":{"status":"success","duration":0,"resultSummary":""},"disposed":1}
+(pass) observed scheduler status for stopReason=cancelled [0.09ms]
+{"probe":"stopReason","reason":"max_tokens","output":{"status":"success","duration":0,"resultSummary":""},"disposed":1}
+(pass) observed scheduler status for stopReason=max_tokens [0.07ms]
+{"probe":"stopReason","reason":"error","output":{"status":"success","duration":0,"resultSummary":""},"disposed":1}
+(pass) observed scheduler status for stopReason=error [0.05ms]
+{"probe":"empty-stream","output":{"status":"success","duration":0,"resultSummary":""}}
+(pass) observed empty event stream is success without a terminal record [0.24ms]
+{"probe":"open-delay","configuredTimeoutMs":5,"injectedOpenDelayMs":40,"output":{"status":"success","duration":42,"resultSummary":""}}
+(pass) observed openAgentSession delay is outside timeout budget [41.42ms]
+
+ 8 pass
+ 0 fail
+ 14 expect() calls
+Ran 8 tests across 2 files. [85.00ms]
