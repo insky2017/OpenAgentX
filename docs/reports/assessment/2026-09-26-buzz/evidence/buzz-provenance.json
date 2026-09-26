@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/block/buzz",
+  "commit": "781d39510cf23cfe224e8f521ae06a23377e06de",
+  "source_path": "/tmp/oax-buzz-assessment-20260926",
+  "commit_timestamp": "2026-09-25T18:57:49-07:00",
+  "source_status": "",
+  "captured_at": "2026-09-26T02:37:02.863937+00:00",
+  "license": "Apache-2.0",
+  "license_sha256": "108cb15997e51b75a8d18b0c1e2c52bd3879d051ab02118973387df1e4aab584",
+  "reference_count": 52,
+  "scope": "read-only fixed source research; independent local tests linked separately; no deployment, provider or real UI E2E",
+  "report_sha256": "da09140506044970d17bc296f70caf747e07c0107d648e19db3485f87d58a90a"
+}

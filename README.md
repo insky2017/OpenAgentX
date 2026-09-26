@@ -18,6 +18,8 @@ ADR-008/009 实施分支与实际安装版本；下面的简图仅说明基础�
 比较企业 Agent 控制面、配置注入、会话交互和多入口执行的一致性。
 进一步的 [Holon 研究与七项目对照](docs/reports/assessment/2026-09-26-holon/README.md)
 聚焦长期 Domain Agent、跨 Agent 协作、等待唤醒与结果交付。
+新增 [Buzz 研究与八项目对照](docs/reports/assessment/2026-09-26-buzz/README.md)，
+比较人机协作工作区、Relay/执行 Harness、就绪与停止反馈，以及平台复杂度。
 
 ```text
 OpenAgentX daemon

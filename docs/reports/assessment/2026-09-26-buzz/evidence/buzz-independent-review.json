@@ -1,0 +1,189 @@
+{
+  "reviewer": "review_fenix",
+  "source_commit": "781d39510cf23cfe224e8f521ae06a23377e06de",
+  "status": "complete_no_blocking_findings",
+  "scope": [
+    "persona定义与执行身份、角色上下文注入",
+    "ACP完成、取消、进程清理与重排",
+    "消息准入与工具权限分层",
+    "恢复/去重/回复guard与业务效果边界",
+    "最终主报告与测试证据口径复核"
+  ],
+  "findings": [
+    {
+      "id": "completion_contract",
+      "conclusion": "本地run_task的completed包含end_turn、max_tokens、max_turn_requests、refusal；取消另分支。TASKS.md已明示退出0只说明回合正常返回，非业务成功，重复启动可重复执行；属于声明过的契约边界。",
+      "refs": [
+        "crates/buzz-acp/src/isolated_execution.rs:67-93",
+        "crates/buzz-acp/src/run_task.rs:248-271",
+        "crates/buzz-acp/TASKS.md:97-130"
+      ],
+      "evidence_level": "source_read_only"
+    },
+    {
+      "id": "service_completion",
+      "conclusion": "普通Ok(stop_reason)提交scope事件投递状态，返回PromptOutcome::Ok；主循环标ok并归还agent。这是ACP输入消费/回合状态，不能等同实际发信或工具效果。",
+      "refs": [
+        "crates/buzz-acp/src/pool.rs:3284-3352",
+        "crates/buzz-acp/src/lib.rs:4831-4897"
+      ],
+      "evidence_level": "source_read_only"
+    },
+    {
+      "id": "queue_and_retry",
+      "conclusion": "CLI dedup实际默认Queue，queue.rs的Drop默认注释陈旧。EventQueue是内存队列，有有界批次、退避和死信；错误重排不证明既有工具副作用未发生。硬超时按recently_active区分死信/重试，鉴权与缺失model立即死信，不应概括为全部失败自动重试。",
+      "refs": [
+        "crates/buzz-acp/src/config.rs:348-352",
+        "crates/buzz-acp/src/queue.rs:80-96",
+        "crates/buzz-acp/src/queue.rs:154-199",
+        "crates/buzz-acp/src/lib.rs:4705-4820"
+      ],
+      "evidence_level": "source_read_only"
+    },
+    {
+      "id": "cancel_boundary",
+      "conclusion": "Cancel/Rotate丢原批；Steer/Interrupt/SwitchModel按Queue保存带原因批次。ACP drain有界且local执行最终shutdown；Unix优先进程组SIGKILL并有界reap。这不承诺撤销已发生的本地/远端业务副作用或捕获脱离进程组的进程。",
+      "refs": [
+        "crates/buzz-acp/src/pool.rs:4784-4813",
+        "crates/buzz-acp/src/acp.rs:1070-1117",
+        "crates/buzz-acp/src/acp.rs:425-446",
+        "crates/buzz-acp/src/acp.rs:2372-2393",
+        "crates/buzz-acp/TASKS.md:90-95"
+      ],
+      "evidence_level": "source_read_only"
+    },
+    {
+      "id": "persona_identity_prompt",
+      "conclusion": "公开description不同于system_prompt；definition可为无key模板，执行record另有签名key。Desktop统一解析配置并拒绝orphan，在spawn注入实例key及persona prompt；ACP按能力放入session/new或legacy首user prompt，角色输入确实接线。行为env可覆盖prompt，身份/安全env另保留。未验证模型是否遵循。",
+      "refs": [
+        "desktop/src-tauri/src/managed_agents/types.rs:16-25",
+        "desktop/src-tauri/src/managed_agents/types.rs:117-142",
+        "desktop/src-tauri/src/managed_agents/types.rs:255-265",
+        "desktop/src-tauri/src/managed_agents/effective_config/mod.rs:247-260",
+        "desktop/src-tauri/src/managed_agents/runtime.rs:507-521",
+        "desktop/src-tauri/src/managed_agents/runtime.rs:611-612",
+        "desktop/src-tauri/src/managed_agents/runtime.rs:682-689",
+        "desktop/src-tauri/src/managed_agents/runtime.rs:777-784",
+        "desktop/src-tauri/src/managed_agents/reserved_env_keys.rs:24-38",
+        "crates/buzz-acp/src/pool.rs:1490-1555",
+        "crates/buzz-acp/src/pool.rs:2160-2190",
+        "crates/buzz-acp/src/pool.rs:2708-2722"
+      ],
+      "evidence_level": "source_read_only"
+    },
+    {
+      "id": "permission_layers",
+      "conclusion": "buzz-agent权限broker非法/未知响应fail-closed，但buzz-acp harness收到allow_once会自动选择；这不是人工批准或OS沙箱。身份、消息准入、工具permission与操作系统边界须分开。",
+      "refs": [
+        "crates/buzz-agent/src/permission.rs:68-73",
+        "crates/buzz-agent/src/permission.rs:317-322",
+        "crates/buzz-acp/src/acp.rs:1981-2043"
+      ],
+      "evidence_level": "source_read_only"
+    },
+    {
+      "id": "inbound_authority",
+      "conclusion": "owner-only实际允许owner及经NIP-OA验证的同owner sibling；DM除Nobody均仍限owner/sibling。workflow owner归因核对relay signer、签名和canonical显式目标；owner控制另核kind、精确body、目标mention和owner本人。",
+      "refs": [
+        "crates/buzz-acp/src/lib.rs:215-242",
+        "crates/buzz-acp/src/lib.rs:245-326",
+        "crates/buzz-acp/src/lib.rs:380-402",
+        "crates/buzz-acp/src/lib.rs:3367-3412",
+        "crates/buzz-acp/src/lib.rs:4177-4186"
+      ],
+      "evidence_level": "source_read_only"
+    },
+    {
+      "id": "recovery_and_delivery",
+      "conclusion": "relay重连水位和bounded TwoGenDedup是内存投递恢复，不是durable业务Task完成账。reply guard为advisory：执行前根据候选shell调用command子串判定，最多两次提醒；已接受echo等假阳性，不能视作执行成功或relay回执。",
+      "refs": [
+        "crates/buzz-acp/src/relay.rs:1087-1127",
+        "crates/buzz-acp/src/relay.rs:1226-1292",
+        "crates/buzz-agent/src/agent.rs:63-69",
+        "crates/buzz-agent/src/agent.rs:122-140",
+        "crates/buzz-agent/src/agent.rs:754-794"
+      ],
+      "evidence_level": "source_read_only"
+    }
+  ],
+  "report_review": {
+    "final_revision_pending": false,
+    "requested_small_clarifications": [
+      "默认dedup为Queue",
+      "local completed为已声明回合正常返回边界",
+      "Cancel/Rotate与Steer/Interrupt重排区别",
+      "persona description非指令但system_prompt已接线",
+      "ACP harness自动allow_once非人工批准",
+      "owner-only包含已验证sibling"
+    ],
+    "conclusion": "已复核最终主报告与本批README核心判断，未发现结论级阻断；源码、独立局部测试与真实E2E边界清楚，研究建议未自动变成OpenAgentX产品实施。",
+    "source_reference_bounds": {
+      "checked": 52,
+      "invalid": 0
+    },
+    "small_clarifications_resolved": [
+      "实际CLI默认Queue；Cancel/Rotate不重排，Steer/Interrupt另处理",
+      "local completed为已明确声明的正常回合终结，不称隐性误报成功",
+      "公开persona description与实际system_prompt分开；删除独立pack resolver至Desktop未证明的串行调用关系",
+      "明确ACP harness自动allow_once；owner-only包含已验证sibling",
+      "补充已有Unix进程组清理与有界reap能力，保留真实运行未验限制",
+      "按主代理裁定只写OpenAgentX现有uncertain及有限结算；不套用其他项目完成状态",
+      "Relay间mesh为QUIC传输并区别共享算力，不推导事件库复制",
+      "功能覆盖广不写成完整交付，mesh引入触发限定为实际多节点传输需求"
+    ],
+    "nonblocking_remaining": [],
+    "readme_revision_note": "README判断、比较与测试边界已复核；记录的是完成状态链接最终收口前快照，主代理可仅更新研究中/完成链接及提交信息。"
+  },
+  "tests_executed_by_reviewer": [],
+  "product_or_clone_edits": false,
+  "uncovered": [
+    "没有真实Provider、Desktop浏览器、relay部署或端到端业务效果验证",
+    "没有外部副作用撤销/重复执行动态复现",
+    "没有全仓安全审计、全部OS平台或沙箱逃逸测试",
+    "没有长期空闲资源/下一任务领取验证",
+    "测试代理的局部套件不由本复核代理重跑"
+  ],
+  "reviewed_source_sha256": {
+    "crates/buzz-acp/TASKS.md": "5313a1777a89e7d7afbfba95d1f38ca48e8b3134d7cb405e39a45f548509637c",
+    "crates/buzz-acp/src/acp.rs": "71635b2710a5c353e35f65b453b4429f337eebe73216fe07aa0ad0bd28070718",
+    "crates/buzz-acp/src/config.rs": "b1836f02f94ddc1e8a4694dc9545765e3039a390e8d06206c28a5e1c8d570513",
+    "crates/buzz-acp/src/isolated_execution.rs": "3e62bc0059a23772ea34d44464562cf5ab2b2155e698f58ba3f6e5224b96d041",
+    "crates/buzz-acp/src/lib.rs": "30af5e223cd54af2906a3f935a8bfd116a6ded4ec90314f9c9344dc93774482d",
+    "crates/buzz-acp/src/pool.rs": "ace979f1ef6d0adaf77d4e3d13358ec0846e410e4972a3eae69db0a08fd22260",
+    "crates/buzz-acp/src/queue.rs": "5fd64b9ebdbb9c27014fa801172e572f8336a40a11429f25d856bc5fc2a967b9",
+    "crates/buzz-acp/src/relay.rs": "b81a9935e2dc98779f42e10713e2d6d235b1039ed04dda927ad7d80ab3886224",
+    "crates/buzz-acp/src/run_task.rs": "0249a1f95d07fe2ca666e00fb8d72759b73112ea8e12f81e116553a04b587838",
+    "crates/buzz-agent/src/agent.rs": "c163c0c680274b6c9ff9d0224bca90cffae33f06db9f96df9f22b3498f54c94a",
+    "crates/buzz-agent/src/permission.rs": "045ec477ecc40fd39df1b1cab9a8084255081000a132bfd252ad3eb3a88b8477",
+    "desktop/src-tauri/src/managed_agents/effective_config/mod.rs": "f40eeaebe5debdd75a3cdd9775eb80cfcf7c7310066d91f2771319ae00fa4903",
+    "desktop/src-tauri/src/managed_agents/reserved_env_keys.rs": "efbfb17a0248e50864fb5fe04944241f7ee9cd163f0ae36c0a6eca6290acbc2c",
+    "desktop/src-tauri/src/managed_agents/runtime.rs": "63dc41fafb2e3a2be7dc62a2c52b4acb9627eb8d1f0b1402ae04bb5e60fd5df9",
+    "desktop/src-tauri/src/managed_agents/types.rs": "24a24e1a49a5f9ce1ea2c202c8fa5cd422324033671a6882017f57c515571bdf",
+    "crates/buzz-relay-mesh/src/lib.rs": "4903f9ae7aae1df213ae3d786a285de3750bfcc947df7041cff14a69e9063298",
+    "desktop/src/features/agents/lib/cancelTurnOutcome.test.mjs": "595d0b5ec3deeb7a6483cfc3c85034eb8a8a5c44de404384b1dbde1bcf92fed0",
+    "crates/buzz-persona/src/resolve.rs": "7ba64ad35406d496ffee93b93ef7ca5b956ba1532303166bda37bfd5b70ece92"
+  },
+  "recorded_at_utc": "2026-09-26T02:32:18.015836+00:00",
+  "test_evidence_read": [
+    "evidence/buzz-tests-summary.md",
+    "evidence/buzz-check-commands.md",
+    "evidence/buzz-test-environment.json",
+    "evidence/buzz-tests-desktop.log",
+    "evidence/buzz-tests-desktop-recheck.log",
+    "evidence/buzz-tests-ifc-core.log",
+    "evidence/buzz-test-process-check.json"
+  ],
+  "test_boundary": "29项桌面纯逻辑原测试：21首批通过，缺nostr-tools文件补精确真实依赖后唯一复验8项；取消fixture注入subscribe/send/timer，不证明真实停止。独立ifc-core为5项unit/property及2项doctest，含预期compile_fail；未证明生产授权接线。Rust1.89与官方1.95不同，未复现完整上游环境。测试由唯一测试代理执行，本复核仅读取原日志与夹具。",
+  "reviewed_document_sha256": {
+    "14-buzz-reference.md": "da09140506044970d17bc296f70caf747e07c0107d648e19db3485f87d58a90a",
+    "README.md": "3581e61e072183db6b6b904ef3eb4e72d062dc70e65d38910ee20aff2e28b2b4",
+    "evidence/buzz-tests-summary.md": "8829def78c761fbf35e303e2b02c760039f3b1f605266896d35c83f0590ea66a",
+    "evidence/buzz-check-commands.md": "43e68dfba8ffe0dca82814a2aa35c224c87ccdf66c086b911f76d77780966ed5",
+    "evidence/buzz-test-environment.json": "426cd4d29d394d5c69c4003128f65ea61c8910ad9a448ec78c4f94325995aaba",
+    "evidence/buzz-tests-desktop.log": "8e2c212229258feaccad8071a28498467a55fd830971f6f4ca7d2c4b2b34b9e0",
+    "evidence/buzz-tests-desktop-recheck.log": "bfc774e842390dfc7204c1222e0b34b23d3d5903ced8853e6aad8490cf8f6b54",
+    "evidence/buzz-tests-ifc-core.log": "28b39985dffd9f247169f77507b9d14362369cddc6d3dd455b8c651e81713932",
+    "evidence/buzz-test-process-check.json": "a89862de9cad23193cd3dcbc82017460188aa7194bafd28576a521ac30c4bc64"
+  },
+  "completed_at_utc": "2026-09-26T02:37:58.251079+00:00"
+}

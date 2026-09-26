@@ -1,0 +1,75 @@
+{
+  "checked_at": "2026-09-26T02:39:00.587519+00:00",
+  "fixed_commit": "781d39510cf23cfe224e8f521ae06a23377e06de",
+  "clone_head_matches": true,
+  "clone_status": "",
+  "markdown_files_checked": 7,
+  "local_links_checked": 74,
+  "missing_local_links": [],
+  "fixed_source_links_checked": 52,
+  "invalid_source_links": [],
+  "undefined_reference_links": [],
+  "source_files_checked": 39,
+  "source_hash_mismatches": [],
+  "selected_test_source_files_checked": 15,
+  "test_source_hash_mismatches": [],
+  "desktop_copied_files_checked": 2491,
+  "copy_count_matches_environment": true,
+  "runner_source_copy_mismatches": [],
+  "isolated_ifc_lock_mismatches": [],
+  "license_matches_source_and_provenance": true,
+  "frozen_files_checked": 9,
+  "frozen_files_changed": [],
+  "formal_services": [
+    {
+      "MainPID": "1686100",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "unchanged_from_start": true
+    },
+    {
+      "MainPID": "1687781",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx-worker@quote-service.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "unchanged_from_start": true
+    }
+  ],
+  "all_services_unchanged": true,
+  "credential_pattern_scan_hits": [],
+  "credential_scan_boundary": "仅本批报告、证据及修改入口的有限常见格式扫描；未读取用户秘密/历史，不声称全库秘密审计。",
+  "final_report_sha256": "da09140506044970d17bc296f70caf747e07c0107d648e19db3485f87d58a90a",
+  "report_sha_matches_provenance": true,
+  "final_readme_sha256": "3581e61e072183db6b6b904ef3eb4e72d062dc70e65d38910ee20aff2e28b2b4",
+  "primary_review": "主代理阅读完整报告、测试/失败日志和关键源码；独核取消UI与调用点、local task终态、workflow approval实际Failed、auto permission、回复guard、租户绑定、engram和mesh传输边界；未重跑已通过测试。",
+  "independent_review": {
+    "agent": "/root/review_fenix",
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high",
+    "status": "complete_no_blocking_findings",
+    "report_sha_matches": true,
+    "source_hash_mismatches": [],
+    "readme_finalization": "最终结论/比较/测试边界已经独立复核；主代理收口完成链接，README最终哈希见本文件。"
+  },
+  "dynamic_test_boundary": "29 upstream desktop logic tests; isolated ifc-core 5 unit/property plus 2 doctests. Initial missing-dependency collection failure preserved; only affected file rechecked. IFC is not wired into other production crates. No official full toolchain, Relay/ACP runtime, native UI/browser, Provider, DB or new OAX E2E.",
+  "product_changes": false,
+  "deployment_changes": false,
+  "check_passed": true,
+  "staged_files": 25,
+  "out_of_scope_staged_files": [],
+  "staged_whitespace": {
+    "full_check_exit": 2,
+    "preserved_raw_evidence_warnings": {
+      "docs/reports/assessment/2026-09-26-buzz/evidence/buzz-source-excerpts.txt": 115,
+      "docs/reports/assessment/2026-09-26-buzz/evidence/buzz-tests-ifc-core.log": 1
+    },
+    "unexpected_warnings": [],
+    "excluding_reviewed_raw_evidence_exit": 0,
+    "decision": "保留源码摘录的原始编号空行和测试终端尾空行；其他本轮文档与证据格式检查通过。"
+  }
+}

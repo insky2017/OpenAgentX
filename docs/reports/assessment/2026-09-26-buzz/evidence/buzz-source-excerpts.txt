@@ -1,0 +1,1401 @@
+Fixed source 781d39510cf23cfe224e8f521ae06a23377e06de; source excerpts only, not runtime verification.
+
+[mesh-transport] crates/buzz-relay-mesh/src/lib.rs:1-25
+1: //! buzz-relay-mesh — the inter-relay QUIC mesh.
+2: //!
+3: //! One iroh endpoint per relay runtime (identity = a boot-unique mesh
+4: //! keypair, attested by the relay's signing key — see [`wire::RuntimeId`]),
+5: //! a warm full mesh of authenticated connections, scuttlebutt membership
+6: //! gossip on a control substream, and a fenced wire contract that carries
+7: //! tunnel traffic (reliable streams + realtime datagrams) between pods.
+8: //!
+9: //! The relay consumes this crate exclusively through two seams:
+10: //!
+11: //! - [`RelayMeshMembership`] — "who is alive / draining / dialable?"
+12: //! - [`RelayPeerTransport`] — "move these bytes to that runtime."
+13: //!
+14: //! The seams are what keep single-instance deployments and same-pod sessions
+15: //! mesh-free: when `BUZZ_MESH=off` or no peers exist, the relay never
+16: //! constructs a mesh and the in-process fast path is untouched.
+17: //!
+18: //! **The law:** mesh membership is a hint; the Redis fenced generation is the
+19: //! arbiter. Nothing in this crate grants ownership — see [`wire::FencedHeader`].
+20: 
+21: pub mod endpoint;
+22: pub mod gossip;
+23: pub mod membership;
+24: pub mod peer;
+25: pub mod registry;
+
+[process-cleanup] crates/buzz-acp/src/acp.rs:420-446
+420:     /// Kill the agent subprocess and wait for it to exit (no zombies).
+421:     ///
+422:     /// `Drop` only calls `start_kill()` (sends SIGKILL but doesn't reap).
+423:     /// Call this when you need guaranteed cleanup — e.g., in `run_models`
+424:     /// before process exit.
+425:     pub async fn shutdown(&mut self) {
+426:         // Kill the entire process group when possible. The child was spawned
+427:         // with process_group(0), so its PID == its PGID. Killing the group
+428:         // ensures subprocesses (MCP servers, tool processes) are cleaned up
+429:         // rather than orphaned to init.
+430:         //
+431:         // Falls back to start_kill() (direct child only) on non-Unix or if
+432:         // the child has been polled to completion (id() returns None).
+433:         match self.child.id() {
+434:             Some(pid) if kill_process_group(pid) => {}
+435:             _ => {
+436:                 let _ = self.child.start_kill();
+437:             }
+438:         }
+439:         // Bounded wait: if the child doesn't exit within 5s after SIGKILL,
+440:         // give up and let Drop/OS handle it. An unbounded wait here would
+441:         // wedge the harness during respawn or shutdown if a child is stuck.
+442:         match tokio::time::timeout(std::time::Duration::from_secs(5), self.child.wait()).await {
+443:             Ok(Ok(_)) => {}
+444:             Ok(Err(e)) => tracing::debug!("child wait error after kill: {e}"),
+445:             Err(_) => tracing::warn!("child did not exit within 5s after SIGKILL — abandoning"),
+446:         }
+
+[toolchain] rust-toolchain.toml:1-3
+1: [toolchain]
+2: channel = "1.95.0"
+3: profile = "default"
+
+[package] package.json:1-6
+1: {
+2:   "name": "buzz-workspace",
+3:   "private": true,
+4:   "packageManager": "pnpm@11.4.0",
+5:   "scripts": {
+6:     "check": "pnpm -r check"
+
+[readme] README.md:27-42
+27: ## What is this, really?
+28: 
+29: Buzz is a self-hostable workspace where humans and AI agents share the same rooms.
+30: 
+31: A Buzz **community** is the workspace a user reaches by URL. In the single-relay
+32: setup that ships today, the relay URL selects exactly one community. A hosted
+33: operator can serve many communities behind many domains or subdomains, but the
+34: client-facing rule stays the same: the URL is authoritative for the workspace,
+35: and all tenant-observable state under that URL is community-local.
+36: 
+37: It's a Nostr relay: every message, reaction, workflow step, review approval, and git event is a signed event in one log. Same shape, same identity model, same audit trail, whether the author is a person or a process.
+38: 
+39: In practice it feels like a team workspace. Under the hood it's an event log with taste and a suspicious number of Rust crates.
+40: 
+41: Yes, it's another AI-adjacent developer tool. We're sorry. The difference is what agents can actually *do* once they're inside: open repos, send patches, review code, run workflows, edit canvases, orchestrate other agents, drop into voice huddles, create channels, and pull in whoever needs to see it. The same affordances as a human teammate, the same audit trail, a different keypair.
+42: 
+
+[workspace] Cargo.toml:27-46
+27:     "crates/git-credential-nostr",
+28:     "crates/git-sign-nostr",
+29:     "crates/buzz-pair-relay",
+30:     "crates/buzz-relay-mesh",
+31:     "crates/buzz-mesh-smoke",
+32:     "crates/buzz-dev-mcp",
+33:     "crates/buzz-voice",
+34:     "crates/buzz-backend-kubernetes",
+35:     "crates/buzz-datastore-tracing",
+36:     "examples/countdown-bot",
+37: ]
+38: exclude = ["desktop/src-tauri"]
+39: resolver = "2"
+40: 
+41: [workspace.package]
+42: version = "0.1.0"
+43: edition = "2021"
+44: rust-version = "1.88.0"
+45: license = "Apache-2.0"
+46: repository = "https://github.com/block/sprout"
+
+[tenant] crates/buzz-relay/src/tenant.rs:61-91
+61: /// Bind a raw connection host to a [`TenantContext`], failing closed.
+62: ///
+63: /// This is the single row-zero entry point. It normalizes the host with the
+64: /// one shared rule, resolves it, and on any non-success (unmapped *or* lookup
+65: /// error) returns a [`BindError`] the caller turns into a generic rejection.
+66: /// There is deliberately no path that yields a default or fallback community.
+67: ///
+68: /// The returned [`TenantContext`] carries the *normalized* host, so downstream
+69: /// NIP-05 / audit labelling and the NIP-98 `u`-host check all see the same
+70: /// canonical form the community was resolved from.
+71: pub async fn bind_community<R: HostResolver>(
+72:     resolver: &R,
+73:     raw_host: &str,
+74: ) -> Result<TenantContext, BindError<R::Error>> {
+75:     let host = normalize_host(raw_host);
+76:     // Inv_RowZero (host-binding seam): an empty raw_host carries no community
+77:     // evidence — there is no `connection.host` to resolve, so no community can
+78:     // be derived from it. Fail closed BEFORE the resolver lookup. The schema
+79:     // does not forbid an `host = ''` row in `communities`, so without this
+80:     // guard a request with a missing/whitespace-only Host header would silently
+81:     // bind to a misconfigured empty-host community. Reuse `UnmappedHost` (not a
+82:     // distinct variant) so the rejection is byte-identical to any other unmapped
+83:     // host — an unauthenticated caller cannot probe for an empty-host row.
+84:     if host.is_empty() {
+85:         return Err(BindError::UnmappedHost);
+86:     }
+87:     match resolver.resolve_host(&host).await {
+88:         Ok(Some(community)) => Ok(TenantContext::resolved(community, host)),
+89:         Ok(None) => Err(BindError::UnmappedHost),
+90:         Err(e) => Err(BindError::Lookup(e)),
+91:     }
+
+[crate-map] AGENTS.md:96-130
+96: ## Repo Structure
+97: 
+98: ```
+99: crates/
+100:   # Relay + core
+101:   buzz-relay          # WebSocket relay server — main entry point; also hosts git + huddle audio
+102:   buzz-core           # Core types, event verification, filter matching, kind registry
+103:   buzz-db             # Postgres event store and data access layer
+104:   buzz-auth           # Authentication and authorization
+105:   buzz-pubsub         # Redis pub/sub fan-out, presence, typing indicators
+106:   buzz-search         # Postgres FTS full-text search
+107:   buzz-audit          # Hash-chain audit log
+108:   buzz-media          # Blossom/S3 media storage
+109:   # Agent surface
+110:   buzz-acp            # ACP harness bridging Buzz events to AI agents
+111:   buzz-agent          # Minimal ACP-compliant agent (non-streaming, tool-calls-as-output)
+112:   buzz-dev-mcp        # Developer MCP server — shell + file-edit tools
+113:   buzz-persona        # Agent persona packs
+114:   buzz-workflow       # YAML-as-code workflow engine (evalexpr conditions)
+115:   # Clients + interop
+116:   buzz-pair-relay     # Ephemeral sidecar relay for NIP-AB device pairing
+117:   buzz-pairing-cli    # CLI for NIP-AB device pairing interop testing
+118:   git-sign-nostr      # Sign git objects with a Nostr key
+119:   git-credential-nostr # Git credential helper for Nostr-authed push/fetch
+120:   # Tooling + shared
+121:   buzz-cli            # Agent-first CLI
+122:   buzz-sdk            # Typed Nostr event builders
+123:   buzz-admin          # Operator CLI for relay administration
+124:   buzz-ws-client      # Shared NIP-42 WebSocket client (connect, auth, publish)
+125:   buzz-test-client    # Integration test client and E2E test suite
+126:   sprig               # All-in-one harness bundling ACP, agent, and dev MCP
+127: 
+128: desktop/              # Tauri 2 + React 19 desktop app
+129: web/                  # Browser web client (repo browser, served by the relay)
+130: mobile/               # Flutter mobile app
+
+[acp-readme] crates/buzz-acp/README.md:1-22
+1: # buzz-acp
+2: 
+3: For one prepared local task, use **`buzz-acp run --task <path|->`**. See
+4: [Local task runner and version-1 task contract](TASKS.md). With no command,
+5: `buzz-acp` remains the conversational service.
+6: 
+7: 
+8: ACP harness that connects AI agents to Buzz. The harness listens for @mentions on the relay, prompts your agent, and the agent replies using the Buzz CLI.
+9: 
+10: ```
+11: Buzz Relay ──WS──→ buzz-acp ──stdio──→ Your Agent
+12:                                                │
+13:                                           Buzz CLI
+14:                                        (send_message, etc.)
+15: ```
+16: 
+17: Supports any agent that speaks [ACP](https://agentclientprotocol.com/) over stdio: **goose**, **codex** (via [codex-acp](https://github.com/agentclientprotocol/codex-acp)), and **claude code** (via [claude-agent-acp](https://github.com/agentclientprotocol/claude-agent-acp)).
+18: 
+19: ## Prerequisites
+20: 
+21: - A running Buzz relay (`just relay` starts Docker services automatically, or use a hosted instance)
+22: - A Nostr keypair for the agent (see [Generating Keys](#generating-keys))
+
+[backend] desktop/src-tauri/src/managed_agents/backend.rs:509-533
+509: /// secret-bearing request, then invoke deploy on those exact same bytes.
+510: pub fn provider_deploy(
+511:     binary: &Path,
+512:     agent: &serde_json::Value,
+513:     provider_config: &serde_json::Value,
+514: ) -> Result<String, String> {
+515:     let (_directory, staged, _digest, _execution_guard) = stage_provider(binary)?;
+516:     let info_request = serde_json::json!({
+517:         "op": "info",
+518:         "request_id": uuid::Uuid::new_v4().to_string(),
+519:     });
+520:     let info = invoke_provider(&staged, &info_request, Duration::from_secs(10))?;
+521:     validate_provider_info(&info)?;
+522: 
+523:     let request = serde_json::json!({
+524:         "op": "deploy",
+525:         "request_id": uuid::Uuid::new_v4().to_string(),
+526:         "agent": agent,
+527:         "provider_config": provider_config,
+528:     });
+529:     let resp = invoke_provider(&staged, &request, Duration::from_secs(600))?;
+530:     resp["agent_id"]
+531:         .as_str()
+532:         .map(String::from)
+533:         .ok_or_else(|| "deploy response missing agent_id".to_string())
+
+[k8s-entry] crates/buzz-backend-kubernetes/src/main.rs:88-106
+88:             };
+89:             match runtime.block_on(deploy_agent(&deploy)) {
+90:                 Ok(agent_id) => Response::deployed(agent_id),
+91:                 Err(e) => Response::error(e),
+92:             }
+93:         }
+94:     }
+95: }
+96: 
+97: /// Refuse a shared-compute agent, reading the **raw wire value**.
+98: ///
+99: /// Trimmed before comparing: the desktop's own layers disagree about padding
+100: /// (`relay_mesh.rs:17` and `effective_config/mod.rs:46` trim; the deploy guard
+101: /// at `agents_deploy.rs:116` did not), and `non_blank` preserves surrounding
+102: /// whitespace on a non-blank value. A backstop that shares its bypass with the
+103: /// layer it backs is not a backstop.
+104: fn refuse_relay_mesh(raw: &serde_json::Value) -> Option<String> {
+105:     let provider = raw.get("agent")?.get("provider")?.as_str()?;
+106:     (provider.trim() == RELAY_MESH_PROVIDER).then(|| {
+
+[definition] desktop/src-tauri/src/managed_agents/types.rs:16-30
+16: pub struct AgentDefinition {
+17:     pub id: String,
+18:     pub display_name: String,
+19:     pub avatar_url: Option<String>,
+20:     /// Optional short, PUBLIC description (max 280 chars), shown on the
+21:     /// agent's card/profile and carried on the public kind:30175 persona
+22:     /// event. EXCLUDED from `persona_content_hash` (no restart badge).
+23:     #[serde(default, skip_serializing_if = "Option::is_none")]
+24:     pub description: Option<String>,
+25:     pub system_prompt: String,
+26:     /// ACP transport command selected alongside the runtime before deployment.
+27:     /// `None` preserves legacy definitions that predate persona-owned ACP
+28:     /// selection; linked instances then fall back to their stored command.
+29:     #[serde(default, skip_serializing_if = "Option::is_none")]
+30:     pub acp_command: Option<String>,
+
+[profile] docs/agent-profile-identity.md:1-41
+1: # Agent profile identity
+2: 
+3: ## An explicit key is exact
+4: 
+5: Opening a public key from a message, member, DM, deep link, or Instances row
+6: always opens that identity. Active, stopped, archived, and relay-only keys obey
+7: the same rule. A local managed record may supply controls only for that exact
+8: key. An owner-signed kind 30177 `persona_id` (or an archive request's historical
+9: persona link) is **not** an identity alias and does not grant access to a local
+10: sibling's controls, definition, configuration, or Start action.
+11: 
+12: Only explicit persona navigation (for example, the persona card in My Agents)
+13: selects an archive-aware representative using `pickProfileAgent`. With no live
+14: representative, it remains a persona-only surface and may offer Start. An
+15: explicit relay-only key must not turn into that persona-only surface, even if a
+16: matching definition exists locally. There is no synthetic/secretless
+17: `ManagedAgent` record.
+18: 
+19: This intentionally supersedes the old historical-message redirect: a message
+20: from stopped A no longer opens running B merely because they share persona P.
+21: The requested key takes precedence even if the caller also supplies persona
+22: context. Local instance profiles may still show their own linked definition and
+23: an explicitly navigable Instances list. Ownership alone permits owner-scoped
+24: relay reads, not local management.
+25: 
+26: Implementation: `useCanonicalManagedAgentProfile` and `UserProfilePanel`.
+27: The obsolete historical-persona relay lookup and inactive-instance redirect
+28: helper have been removed instead of adding another exception flag.
+29: 
+30: ## Regression gates
+31: 
+32: - `profile/lib/resolveCanonicalManagedAgent.test.mjs`: exact identity across
+33:   active/stopped/archived/relay-only keys, and persona representative selection.
+34: - `profile/lib/useCanonicalManagedAgentProfile.test.mjs`: remote A cannot borrow
+35:   persona P/local B, including persona-only navigation and returning to A.
+36: - `tests/e2e/exact-key-profile.spec.ts`: relay-only profile controls versus
+37:   explicit persona navigation, with and without a local sibling; exact archived
+38:   keys with a live sibling and persona-only navigation when all are archived.
+39: - `tests/e2e/profile.spec.ts`: historical messages match the exact Instances
+40:   selection rather than the current persona card; profile ingress parity.
+41: - `tests/e2e/identity-archive.spec.ts`: archive/unarchive authority and flair.
+
+[persona-resolve] crates/buzz-persona/src/resolve.rs:194-204
+194: fn resolve_one_persona(
+195:     lp: &LoadedPersona,
+196:     pack_version: &str,
+197:     pack_instructions: Option<&str>,
+198:     shared_mcp: Option<&serde_json::Value>,
+199: ) -> ResolvedPersona {
+200:     let system_prompt = lp.prompt.clone();
+201:     let pack_instructions = pack_instructions
+202:         .map(str::trim)
+203:         .filter(|instructions| !instructions.is_empty())
+204:         .map(str::to_string);
+
+[spawn-resolve] desktop/src-tauri/src/managed_agents/runtime.rs:507-521
+507:     // Resolve model/provider/prompt ONCE, here, at the shared spawn boundary —
+508:     // the single source both the env writes below and the spawn-config snapshot
+509:     // read from. Previously prompt was read from the record's own (possibly
+510:     // stale, Phase-A-snapshot) bytes while model/provider were resolved live
+511:     // from `personas`; a definition edit landing between a caller's snapshot
+512:     // apply and this spawn could hand a fresh model/provider to a stale
+513:     // prompt. This also folds in orphan refusal via `require_resolved`: every
+514:     // caller (interactive start, launch restore, `start_managed_agent_process`)
+515:     // inherits it — no caller can bypass this by reaching `spawn_agent_child`
+516:     // directly. Checked before any side effect (log marker, log file, process
+517:     // spawn) so a refused spawn leaves no trace.
+518:     let effective_cfg = crate::managed_agents::effective_config::resolve_effective_config(
+519:         record, &personas, &global,
+520:     )
+521:     .require_resolved()?;
+
+[spawn-prompt] desktop/src-tauri/src/managed_agents/runtime.rs:682-689
+682:     let effective_prompt = effective_cfg.system_prompt.value;
+683:     let effective_model = effective_cfg.model.value;
+684:     let effective_provider = effective_cfg.provider.value;
+685: 
+686:     if let Some(prompt) = &effective_prompt {
+687:         command.env("BUZZ_ACP_SYSTEM_PROMPT", prompt);
+688:     } else {
+689:         command.env_remove("BUZZ_ACP_SYSTEM_PROMPT");
+
+[config-prompt] crates/buzz-acp/src/config.rs:284-299
+284:     #[arg(
+285:         long,
+286:         env = "BUZZ_ACP_SYSTEM_PROMPT",
+287:         conflicts_with = "system_prompt_file"
+288:     )]
+289:     pub system_prompt: Option<String>,
+290: 
+291:     #[arg(
+292:         long,
+293:         env = "BUZZ_ACP_SYSTEM_PROMPT_FILE",
+294:         conflicts_with = "system_prompt"
+295:     )]
+296:     pub system_prompt_file: Option<PathBuf>,
+297: 
+298:     /// Number of parallel agent subprocesses.
+299:     #[arg(long, env = "BUZZ_ACP_AGENTS", default_value_t = 1,
+
+[framing] crates/buzz-acp/src/pool.rs:2160-2190
+2160: /// Frame the `session/new` `systemPrompt` so each present prompt carries its own
+2161: /// paired tag, keeping the base/workspace/persona boundaries recoverable downstream.
+2162: ///
+2163: /// The static base remains first for prompt-prefix caching. When a base is
+2164: /// present, the dynamic workspace anchor follows it and precedes the user-owned
+2165: /// agent instructions. A persona-only agent still yields
+2166: /// `<agent-instructions>…</agent-instructions>` rather than an unlabeled blob that would be mistaken
+2167: /// for `<base>`.
+2168: fn framed_system_prompt(
+2169:     cwd: &str,
+2170:     base_prompt: Option<&str>,
+2171:     system_prompt: Option<&str>,
+2172: ) -> Option<String> {
+2173:     match (base_prompt, system_prompt) {
+2174:         (Some(bp), Some(sp)) => Some(format!(
+2175:             "{}\n\n{}\n\n{}",
+2176:             crate::queue::base_section(bp),
+2177:             workspace_section(cwd),
+2178:             crate::prompt_framing::semantic_section("agent-instructions", sp),
+2179:         )),
+2180:         (Some(bp), None) => Some(format!(
+2181:             "{}\n\n{}",
+2182:             crate::queue::base_section(bp),
+2183:             workspace_section(cwd)
+2184:         )),
+2185:         (None, Some(sp)) => Some(crate::prompt_framing::semantic_section(
+2186:             "agent-instructions",
+2187:             sp,
+2188:         )),
+2189:         (None, None) => None,
+2190:     }
+
+[standing] crates/buzz-acp/src/pool.rs:2708-2725
+2708:     // Standing context is fixed for the life of a session. Agents with
+2709:     // systemPrompt support already hold it from session/new; legacy agents
+2710:     // receive it in the session's first user message and never again.
+2711:     //
+2712:     // `is_new_session` comes from the session registry, which is cleared
+2713:     // whenever a session is invalidated — so the replacement session re-delivers
+2714:     // rather than leaving the agent unbriefed.
+2715:     let standing = crate::queue::StandingContext {
+2716:         base_prompt: ctx.base_prompt.as_deref(),
+2717:         system_prompt: ctx.system_prompt.as_deref(),
+2718:         team_instructions: ctx.team_instructions.as_deref(),
+2719:         agent_core: agent_core.as_deref(),
+2720:         huddle_instructions: huddle_instructions.as_deref(),
+2721:         agent_canvas: agent_canvas.as_deref(),
+2722:     };
+2723:     // Delivery state is committed only after ACP confirms success. Existing
+2724:     // sessions created before this field existed fail safe by behaving as
+2725:     // undelivered once, rather than silently omitting standing context.
+
+[spawn-env] desktop/src-tauri/src/managed_agents/runtime.rs:777-781
+777:     // User env (descriptor.env): fully-layered floor→runtime→definition→global→persona→agent,
+778:     // reserved-key filtered. Written last so user-explicit values win over Buzz-set env.
+779:     for (key, value) in &descriptor.env {
+780:         command.env(key, value);
+781:     }
+
+[engram] crates/buzz-acp/src/engram_fetch.rs:28-67
+28: /// Build the rendered prompt section for the agent's core.
+29: ///
+30: /// Returns:
+31: /// - `Some(profile_section)` when a valid core exists,
+32: /// - `Some(nudge_section)` when the relay confirmed absence,
+33: /// - `None` when the fetch failed (transport, parse, decrypt) — the caller
+34: ///   should inject no section in that case so the agent doesn't conclude
+35: ///   memory is empty.
+36: pub async fn build_core_section(
+37:     rest: &RestClient,
+38:     agent_keys: &Keys,
+39:     owner: &PublicKey,
+40: ) -> Option<String> {
+41:     match fetch_core_body(rest, agent_keys, owner).await {
+42:         Ok(Some(profile)) => Some(crate::prompt_framing::semantic_section(
+43:             "core-memory",
+44:             &profile,
+45:         )),
+46:         Ok(None) => Some(crate::prompt_framing::semantic_section(
+47:             "core-memory",
+48:             ONBOARDING_NUDGE,
+49:         )),
+50:         Err(reason) => {
+51:             tracing::warn!(
+52:                 target: "engram::core",
+53:                 "core fetch failed: {reason} — emitting no section to avoid \
+54:                  confusing a relay outage with an absent core"
+55:             );
+56:             None
+57:         }
+58:     }
+59: }
+60: 
+61: /// Query the relay for the core head and decode it. Returns:
+62: /// - `Ok(Some(profile))` if a valid core body was found,
+63: /// - `Ok(None)` only if the relay confirmed absence (empty result set),
+64: /// - `Err(reason)` if the relay returned candidates we could not parse,
+65: ///   verify, or decrypt — those are NOT treated as absence (would let an
+66: ///   unreadable but real core be silently overwritten by the onboarding nudge),
+67: /// - `Err` for transport / parse errors.
+
+[agent-session] crates/buzz-agent/src/lib.rs:56-101
+56:     SessionNewParams, SessionPromptParams, SessionSetModelParams, SessionSteerParams, WireMsg,
+57:     WireSender, INVALID_PARAMS, METHOD_NOT_FOUND, PARSE_ERROR,
+58: };
+59: 
+60: struct App {
+61:     cfg: Config,
+62:     llm: Arc<Llm>,
+63:     sessions: Mutex<HashMap<String, Session>>,
+64:     /// ACP protocol version negotiated at `initialize`, stored for the whole
+65:     /// connection lifetime. The `session/request_permission` wire shape derives
+66:     /// from this value — never from a later mutable session field — so a strict
+67:     /// client always receives exactly the shape it negotiated. Defaults to
+68:     /// [`PROTOCOL_VERSION`] before `initialize`; no prompt (and thus no
+69:     /// permission ask) can run before then.
+70:     negotiated_version: AtomicU32,
+71:     /// Owns the entire `session/request_permission` correlation lifecycle:
+72:     /// process-wide admission, id allocation, response delivery, and abort-safe
+73:     /// cleanup. See [`permission::PermissionBroker`].
+74:     permissions: Arc<permission::PermissionBroker>,
+75:     /// Cached model catalog for Databricks providers. Populated lazily on the
+76:     /// first successful `session/new` discovery call. Failed discovery is never
+77:     /// cached: static-token authentication errors reject session creation, while
+78:     /// OAuth authentication and non-auth errors use the configured model for that
+79:     /// response and retry on the next session.
+80:     models_cache: tokio::sync::OnceCell<Vec<ModelEntry>>,
+81: }
+82: 
+83: struct Session {
+84:     id: String,
+85:     mcp: Arc<McpRegistry>,
+86:     /// Skills discovered at session creation; used by the built-in `load_skill` tool.
+87:     skills: Vec<SkillEntry>,
+88:     history: Vec<HistoryItem>,
+89:     cancel_tx: watch::Sender<bool>,
+90:     busy: bool,
+91:     /// Run id of the in-flight prompt, set when a prompt starts and cleared
+92:     /// when it ends. `None` means no active run — a steer request targeting
+93:     /// this session is rejected. Steer-capable clients learn this value from
+94:     /// the `params.update._meta.goose.activeRunId` field on `session/update`.
+95:     active_run_id: Option<String>,
+96:     /// Sender for mid-turn steer messages. Created fresh per prompt (like
+97:     /// `cancel_tx`); the running prompt loop holds the matching receiver and
+98:     /// drains queued steers at round boundaries. `None` when no prompt is in
+99:     /// flight.
+100:     steer_tx: Option<mpsc::UnboundedSender<Vec<ContentBlock>>>,
+101:     original_task: Option<String>,
+
+[remote-cost] VISION_REMOTE_AGENTS.md:47-68
+47: ## Honest Costs
+48: 
+49: **You bring the substrate.** A provider makes deployment one press, not free. The cluster, the credentials, the image policy are yours to run — same deal as the sovereign relay ([VISION_SOVEREIGN.md](VISION_SOVEREIGN.md)): ownership is work.
+50: 
+51: **Handing over the key is a decision.** Deploying remotely means trusting the provider binary and the substrate it targets with the agent's identity key. On Kubernetes, that key rests as a Secret: anyone the cluster trusts to read secrets in that namespace can read it. The design narrows the blast radius — immutable per-attempt secrets, no service-account token, digest-pinned images — rather than implying an isolation it doesn't provide.
+52: 
+53: **No backchannel cuts both ways.** The desktop shows you presence and words, not CPU graphs — and it holds no guaranteed emergency kill switch into the substrate. Stopping a healthy agent is a message; dealing with an unhealthy one, and all deep diagnostics, live in the substrate's own tools, where they always did.
+54: 
+55: **Self-reaping needs a living reaper.** The inactivity timer runs inside the body it exists to end — a body wedged badly enough to stop running its own timer cannot finish itself, and the desktop will not do it for it. That failure belongs to the substrate: a namespace TTL policy is the backstop, not an afterthought.
+56: 
+57: **The body's state is mortal.** Files, checkouts, half-finished working trees — gone with the body unless the substrate persists them. The agent survives; its scratch space doesn't. Durable knowledge belongs on the relay, and agents are built to put it there.
+58: 
+59: **Presence can lag the truth, but not for long.** If the substrate kills a body without ceremony, the presence dot can outlive the agent — by seconds if the connection drops cleanly, by at most about three minutes if it doesn't. Presence is a lease the agent renews, not a flag it sets: a dead agent stops renewing and the relay forgets it. A bounded wrong dot, never an indefinite one.
+60: 
+61: **A running agent finishes on the configuration it started with.** New keys, new models, new settings take effect on the next body. And an instance that never got far enough to run — a body that failed to start — is the substrate operator's residue to clear, with the substrate's own tools. Editing an agent mid-sentence was never on the menu.
+62: 
+63: These are honest costs. They're worth it if you want agents that outlive your laptop, on infrastructure you already trust, with no new control plane to guard. Know which one you are.
+64: 
+65: ---
+66: 
+67: ## The Point
+68: 
+
+[dedup] crates/buzz-acp/src/config.rs:351-363
+351:     #[arg(long, env = "BUZZ_ACP_DEDUP", default_value = "queue", value_enum)]
+352:     pub dedup: DedupMode,
+353: 
+354:     /// How ACP provider sessions are scoped in channels.
+355:     /// channel (default): one provider session per channel (legacy behavior).
+356:     /// thread: each canonical channel thread gets an isolated provider session;
+357:     /// direct messages stay conversation-scoped either way. Ships as `channel`
+358:     /// so thread scoping can be canaried and rolled back without code changes.
+359:     #[arg(
+360:         long,
+361:         env = "BUZZ_ACP_SESSION_POLICY",
+362:         default_value = "channel",
+363:         value_enum
+
+[queue] crates/buzz-acp/src/queue.rs:26-48
+26: /// Maximum events queued per session scope before oldest events are dropped.
+27: ///
+28: /// Under the `channel` policy there is exactly one scope per channel, so this
+29: /// is the historical per-channel cap. Under the `thread` policy it caps each
+30: /// thread partition; the channel as a whole is additionally bounded by
+31: /// [`MAX_PENDING_PER_CHANNEL`] so per-thread partitioning cannot multiply the
+32: /// total admitted backlog.
+33: const MAX_PENDING_PER_SCOPE: usize = 500;
+34: 
+35: /// Aggregate cap on events queued across ALL scopes of a single channel.
+36: ///
+37: /// Preserves the pre-thread-scoping backlog protection: moving the per-scope
+38: /// limit to “per thread” must not let one channel with many threads hold an
+39: /// unbounded multiple of the old cap. Equal to [`MAX_PENDING_PER_SCOPE`] so a
+40: /// single-scope channel behaves exactly as before.
+41: const MAX_PENDING_PER_CHANNEL: usize = 500;
+42: 
+43: /// A key that identifies a queue partition (session scope).
+44: ///
+45: /// Lets the queue's public API accept either a bare channel [`Uuid`] (treated
+46: /// as a conversation scope — the pre-thread-scoping default, and what the
+47: /// queue's own unit tests use) or an explicit [`SessionScope`] (what the
+48: /// harness passes once a thread scope has been resolved at admission). This
+
+[recovery] crates/buzz-acp/src/relay/recovery.rs:1-59
+1: //! Overflow recovery is an attempted replay, not an EOSE/consumer receipt.
+2: //! Keep the existing IDs and cursor retirement rules; bound when work is sent.
+3: use super::*;
+4: 
+5: pub(super) const RECOVERY_INTERVAL: Duration = Duration::from_secs(5);
+6: 
+7: #[derive(Default)]
+8: pub(super) struct RecoverySchedule {
+9:     next_attempt: Option<tokio::time::Instant>,
+10:     pub(super) last_attempt: HashMap<String, tokio::time::Instant>,
+11: }
+12: 
+13: /// Attempt at most one affected subscription, with space for replay to arrive.
+14: /// Failed writes retain the loss cursor and are paced too. No EOSE is interpreted
+15: /// as completion: overlapping requests keep their existing stable wire IDs.
+16: pub(super) async fn recover_one(
+17:     ws: &mut WsStream,
+18:     state: &mut BgState,
+19:     event_tx: &mpsc::Sender<Option<BuzzEvent>>,
+20:     agent_pubkey_hex: &str,
+21: ) {
+22:     let now = tokio::time::Instant::now();
+23:     if event_tx.is_closed()
+24:         || event_tx.capacity() < event_tx.max_capacity().div_ceil(2)
+25:         || state.recovery.next_attempt.is_some_and(|next| now < next)
+26:         || state.check_rate_gate().is_some()
+27:     {
+28:         return;
+29:     }
+30: 
+31:     let channel = next_channel(state);
+32:     let Some(channel) = channel else { return };
+33:     let sub = channel.map_or_else(|| MEMBERSHIP_NOTIF_SUB_ID.to_owned(), channel_sub_id);
+34:     state.recovery.last_attempt.insert(sub.clone(), now);
+35:     info!(subscription = sub, "attempting targeted overflow replay");
+36: 
+37:     if let Some(ch) = channel {
+38:         if let Some(filter) = state.active_filters.get(&ch).cloned() {
+39:             let since = state.channel_since(&ch);
+40:             if send_subscribe(ws, state, ch, agent_pubkey_hex, since, &filter).await {
+41:                 // Baseline retirement point: REQ write, NOT proven delivery.
+42:                 // New overflow after this attempt creates another pending cursor.
+43:                 state.channel_dropped_since.remove(&ch);
+44:             }
+45:         }
+46:     } else {
+47:         let since = match (state.membership_dropped_since, state.membership_last_seen) {
+48:             (Some(d), Some(l)) => Some(d.min(l)),
+49:             (Some(d), None) => Some(d),
+50:             (None, Some(l)) => Some(l),
+51:             (None, None) => state.startup_watermark,
+52:         };
+53:         if send_membership_subscribe(ws, agent_pubkey_hex, since).await {
+54:             state.membership_dropped_since = None;
+55:         }
+56:     }
+57:     // Pace from the end of a potentially backpressured write. No catch-up burst.
+58:     // The existing bounded write timeout and read/ping owner detect socket loss.
+59:     state.recovery.next_attempt = Some(tokio::time::Instant::now() + RECOVERY_INTERVAL);
+
+[turn-end] crates/buzz-acp/src/pool.rs:5143-5154
+5143: impl Drop for TurnCompletionGuard {
+5144:     fn drop(&mut self) {
+5145:         if let Some(observer) = self.observer.take() {
+5146:             let context = observer::context_for(self.channel_id, None, Some(self.turn_id.clone()));
+5147:             observer.emit(
+5148:                 "turn_completed",
+5149:                 self.agent_index,
+5150:                 &context,
+5151:                 serde_json::json!({}),
+5152:             );
+5153:         }
+5154:     }
+
+[task-input] crates/buzz-acp/TASKS.md:17-42
+17: ## Task document, version 1
+18: 
+19: Supply exactly one UTF-8 JSON object, at most 1 MiB including whitespace:
+20: 
+21: ```json
+22: {
+23:   "version": 1,
+24:   "taskId": "example-001",
+25:   "agentPubkey": "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+26:   "prompt": "Inspect the current workspace. Report your findings using the task's specified destination.",
+27:   "maxDurationMs": 120000
+28: }
+29: ```
+30: 
+31: The example public key is illustrative; use the public key of the configured
+32: agent. Never put a private key in a task document.
+33: 
+34: | Field | Contract |
+35: | --- | --- |
+36: | `version` | Integer `1`. Other versions fail before agent launch. |
+37: | `taskId` | Nonblank string, 1–256 UTF-8 bytes, no control characters. Correlation only, not a claim or deduplication key. |
+38: | `agentPubkey` | Exactly 64 lowercase hexadecimal characters. Must equal the configured agent's public key. |
+39: | `prompt` | Nonblank prepared task string. Include relevant context, original evidence, and reporting instructions here. |
+40: | `maxDurationMs` | Positive unsigned 64-bit integer. The shorter of this limit and the trusted `--max-turn-duration` cap wins. |
+41: 
+42: All fields are required. Unknown fields, duplicate fields, wrong types, trailing
+
+[task-result] crates/buzz-acp/TASKS.md:98-130
+98: 
+99: For each attempted invocation, stdout contains one JSON line (except help/version
+100: output). Diagnostics and child stderr stay on stderr. No prompt, private key,
+101: agent final text, or raw adapter error is included in the terminal record.
+102: 
+103: ```json
+104: {"version":1,"taskId":"example-001","status":"completed","stopReason":"end_turn"}
+105: ```
+106: 
+107: `taskId` is null until the document is validated. `status` is one of `completed`,
+108: `failed`, `invalid`, `timed_out`, or `cancelled`. `stopReason` is present only for
+109: normal completion: `end_turn`, `max_tokens`, `max_turn_requests`, or `refusal`.
+110: Failures include a stable, sanitized `error` code when available, such as
+111: `agent_identity_mismatch`, `invalid_task_json`, or `agent_spawn_failed`.
+112: 
+113: | Exit | Meaning |
+114: | --- | --- |
+115: | `0` | Turn returned normally. Inspect `stopReason`; this is not proof of task success. |
+116: | `1` | Startup/execution failure, adapter cancellation, or terminal-output failure. |
+117: | `2` | Invalid arguments, launch configuration, or task input/read. |
+118: | `124` | Execution deadline exceeded. |
+119: | `130` | SIGINT; bounded cleanup ran. |
+120: | `143` | SIGTERM; bounded cleanup ran. |
+121: 
+122: A killed host or broken stdout can leave no terminal record. A record is not a
+123: persistent result ledger. Launching the same task twice can execute it twice.
+124: 
+125: ## Future work
+126: 
+127: URL input and task-server retrieval are **not implemented**. URL-shaped sources
+128: are rejected, not fetched. A future design can GET a supplied URL and validate
+129: the same task document, with explicit authentication, size/time bounds, and
+130: redirect rules. This project adds no HTTP task endpoint or job queue.
+
+[run-result] crates/buzz-acp/src/run_task.rs:245-276
+245:         outcome = &mut execution => (outcome, None),
+246:     };
+247:     signal_task.abort();
+248:     let code = if let Some(code) = signal {
+249:         terminal.status = "cancelled";
+250:         code
+251:     } else {
+252:         match outcome {
+253:             Outcome::Completed(reason) => {
+254:                 terminal.status = "completed";
+255:                 terminal.stop_reason = Some(reason);
+256:                 0
+257:             }
+258:             Outcome::Cancelled => {
+259:                 terminal.status = "cancelled";
+260:                 1
+261:             }
+262:             Outcome::Deadline => {
+263:                 terminal.status = "timed_out";
+264:                 124
+265:             }
+266:             Outcome::Failed(error) => {
+267:                 terminal.status = "failed";
+268:                 terminal.error = Some(error);
+269:                 1
+270:             }
+271:         }
+272:     };
+273:     emit(terminal, code)
+274: }
+275: 
+276: fn emit(terminal: Terminal, code: i32) -> i32 {
+
+[cancel-ui] desktop/src/features/agents/lib/cancelTurnOutcome.ts:43-76
+43:   };
+44: 
+45:   unsubscribe = subscribe((frame) => {
+46:     if (
+47:       frame.type !== "cancel_turn" ||
+48:       frame.requestId !== requestId ||
+49:       frame.channelId !== channelId
+50:     ) {
+51:       return;
+52:     }
+53:     if (
+54:       frame.status === "sent" ||
+55:       frame.status === "no_active_turn" ||
+56:       frame.status === "ambiguous_target"
+57:     ) {
+58:       settle(frame.status);
+59:     }
+60:   });
+61:   // Start the timeout before sending. A hung relay transport must not keep the
+62:   // caller pending forever; timeout truthfully reports that the harness result
+63:   // was not confirmed. The send promise is still observed below so a later
+64:   // rejection cannot become an unhandled rejection.
+65:   cancelTimeout = scheduleTimeout(() => settle("unconfirmed"));
+66:   try {
+67:     // Race transport failure against the harness result. A correlated result
+68:     // may arrive before publish resolves, and a transport that hangs must not
+69:     // block the timeout from settling the outer operation.
+70:     void Promise.resolve(sendCancel()).catch(fail);
+71:   } catch (error) {
+72:     fail(error);
+73:   }
+74: 
+75:   return result;
+76: }
+
+[control-auth] crates/buzz-acp/src/lib.rs:1570-1615
+1570: /// Maximum age (seconds) for an observer control frame to be considered fresh.
+1571: const OBSERVER_CONTROL_FRESHNESS_SECS: i64 = 300;
+1572: 
+1573: fn handle_relay_observer_control_event(
+1574:     keys: &nostr::Keys,
+1575:     event: nostr::Event,
+1576:     pool: &mut AgentPool,
+1577:     observer: Option<&observer::ObserverHandle>,
+1578:     owner_pubkey_hex: &str,
+1579:     event_publisher: RelayEventPublisher,
+1580: ) {
+1581:     // Defense-in-depth: verify signature even though the relay already checked.
+1582:     if let Err(e) = buzz_core::verify_event(&event) {
+1583:         tracing::warn!(error = %e, "observer control frame failed signature verification");
+1584:         return;
+1585:     }
+1586: 
+1587:     // Defense-in-depth: verify the sender is the resolved owner.
+1588:     if event.pubkey.to_hex() != owner_pubkey_hex {
+1589:         tracing::warn!(
+1590:             sender = %event.pubkey,
+1591:             expected = %owner_pubkey_hex,
+1592:             "observer control frame from non-owner — dropping"
+1593:         );
+1594:         return;
+1595:     }
+1596: 
+1597:     // Freshness: reject stale/replayed frames outside ±5 minute window.
+1598:     let now = chrono::Utc::now().timestamp();
+1599:     let event_ts = event.created_at.as_secs() as i64;
+1600:     if (event_ts - now).unsigned_abs() > OBSERVER_CONTROL_FRESHNESS_SECS as u64 {
+1601:         tracing::warn!(
+1602:             event_ts,
+1603:             now,
+1604:             "observer control frame outside freshness window — dropping"
+1605:         );
+1606:         return;
+1607:     }
+1608: 
+1609:     let payload = match decrypt_observer_payload::<serde_json::Value>(keys, &event) {
+1610:         Ok(payload) => payload,
+1611:         Err(error) => {
+1612:             tracing::warn!("failed to decrypt observer control frame: {error}");
+1613:             return;
+1614:         }
+1615:     };
+
+[cancel-harness] crates/buzz-acp/src/lib.rs:1781-1819
+1781: /// Handle a `cancel_turn` control frame: signal the in-flight task to cancel.
+1782: fn handle_cancel_turn_control(
+1783:     payload: &serde_json::Value,
+1784:     pool: &mut AgentPool,
+1785:     observer: Option<&observer::ObserverHandle>,
+1786: ) {
+1787:     let Some(channel_id) = payload
+1788:         .get("channelId")
+1789:         .and_then(|value| value.as_str())
+1790:         .and_then(|value| value.parse::<Uuid>().ok())
+1791:     else {
+1792:         tracing::warn!("observer cancel_turn control frame missing valid channelId");
+1793:         return;
+1794:     };
+1795: 
+1796:     let status = if pool.channel_control_is_ambiguous(channel_id) {
+1797:         "ambiguous_target"
+1798:     } else if signal_in_flight_task(pool, channel_id, ControlSignal::Cancel) {
+1799:         "sent"
+1800:     } else {
+1801:         "no_active_turn"
+1802:     };
+1803:     if let Some(observer) = observer {
+1804:         observer.emit(
+1805:             "control_result",
+1806:             None,
+1807:             &observer::ObserverContext {
+1808:                 channel_id: Some(channel_id.to_string()),
+1809:                 session_id: None,
+1810:                 turn_id: None,
+1811:                 started_at: None,
+1812:             },
+1813:             serde_json::json!({
+1814:                 "type": "cancel_turn",
+1815:                 "status": status,
+1816:                 "requestId": payload.get("requestId"),
+1817:             }),
+1818:         );
+1819:     }
+
+[chat-cancel] crates/buzz-acp/src/lib.rs:3392-3428
+3392:                             // Mirrors !shutdown: kind:9, content "!cancel", from
+3393:                             // owner, mentions THIS agent. Must be BEFORE
+3394:                             // queue.push() — the event content is moved by push.
+3395:                             //
+3396:                             // Mode-independent: !cancel fires regardless of
+3397:                             // --multiple-event-handling. It is explicit user
+3398:                             // intent, not an automatic policy decision.
+3399:                             let is_cancel = is_owner_control_command(
+3400:                                 &buzz_event.event,
+3401:                                 kind_u32,
+3402:                                 "!cancel",
+3403:                                 &pubkey_hex,
+3404:                             );
+3405:                             if is_cancel {
+3406:                                 let from_owner = owner_cache.get().is_some_and(|owner| {
+3407:                                     buzz_event.event.pubkey.to_hex() == *owner
+3408:                                 });
+3409:                                 if from_owner {
+3410:                                     // Scope-exact: an owner's !cancel in thread A
+3411:                                     // must cancel thread A's turn, never a sibling
+3412:                                     // thread running in the same channel. Under
+3413:                                     // the default channel policy the scope is the
+3414:                                     // channel's sole conversation, so this is
+3415:                                     // byte-for-byte the prior behavior.
+3416:                                     let scope = scope::SessionScope::derive(
+3417:                                         config.session_policy,
+3418:                                         buzz_event.channel_id,
+3419:                                         is_dm_channel(buzz_event.channel_id, &ctx.channel_info)
+3420:                                             .await,
+3421:                                         &buzz_event.event,
+3422:                                     );
+3423:                                     let fired = signal_in_flight_task_for_scope(
+3424:                                         &mut pool,
+3425:                                         &scope,
+3426:                                         ControlSignal::Cancel,
+3427:                                     );
+3428:                                     if !fired {
+
+[requeue] crates/buzz-acp/src/pool.rs:4793-4813
+4793: /// Map a cancelling [`ControlSignal`] to the [`CancelReason`] that should frame
+4794: /// the merged re-prompt, then requeue the batch (in `Queue` dedup mode) with
+4795: /// that reason stamped onto [`FlushBatch::cancel_reason`]. `Cancel`/`Rotate`
+4796: /// drop the batch entirely. The reason is consumed by the main loop at requeue
+4797: /// time (`requeue_as_cancelled`) and ultimately by `format_prompt`.
+4798: #[inline]
+4799: fn requeue_cancelled_batch(
+4800:     ctx: &PromptContext,
+4801:     signal: ControlSignal,
+4802:     batch: Option<FlushBatch>,
+4803: ) -> Option<FlushBatch> {
+4804:     let reason = match signal {
+4805:         ControlSignal::Steer => CancelReason::Steer,
+4806:         ControlSignal::Interrupt | ControlSignal::SwitchModel { .. } => CancelReason::Interrupt,
+4807:         // Cancel/Rotate discard the batch — no merged re-prompt.
+4808:         ControlSignal::Cancel | ControlSignal::Rotate => return None,
+4809:     };
+4810:     requeue_batch_if_queue(ctx, batch).map(|mut b| {
+4811:         b.cancel_reason = Some(reason);
+4812:         b
+4813:     })
+
+[k8s-reconcile] crates/buzz-backend-kubernetes/src/reconcile.rs:1-18
+1: //! The deploy loop: executes [`crate::classify`]'s actions against a substrate
+2: //! and re-enters (spec §Deploy State Machine).
+3: //!
+4: //! The substrate is a trait so the conformance tests drive this exact
+5: //! reconciler — the shipped code path, not a test-only reimplementation — with
+6: //! a fake cluster and a fake clock.
+7: //!
+8: //! Two shapes are worth naming up front, because they are what keep the loop
+9: //! terminating:
+10: //!
+11: //! * **Success means the harness container started** (`:696-699`). There is no
+12: //!   "deployed but not confirmed" success: `deploy` returns an `agent_id` or an
+13: //!   in-band error carrying the latest condition. The wire has no third form.
+14: //! * **A create-conflict loser never repairs.** It verifies the winner, drops
+15: //!   its own Secret, and *observes* until the winner starts. Applying the
+16: //!   divergence row to the pod that just beat it is exactly the ping-pong the
+17: //!   spec forbids (`:845-850`), and the escape it names is the *next* deploy,
+18: //!   not this one.
+
+[remote-stop] desktop/src/features/agents/lib/managedAgentControlActions.ts:126-148
+126:       throw new Error("Cannot stop: agent is not in any channel");
+127:     }
+128: 
+129:     await sendChannelMessage(channelId, "!shutdown", undefined, undefined, [
+130:       agent.pubkey,
+131:     ]);
+132:     return {
+133:       noticeMessage:
+134:         "Shutdown requested. This does not confirm the agent has stopped.",
+135:     };
+136:   }
+137: 
+138:   await stopManagedAgent(agent.pubkey);
+139:   return {};
+140: }
+141: 
+142: export async function deleteManagedAgentWithRules({
+143:   agent,
+144:   channels,
+145:   deleteManagedAgent,
+146:   preferredChannelId,
+147:   getAvailability,
+148:   relayAgents,
+
+[remote-contract] VISION_REMOTE_AGENTS.md:19-45
+19: ## The Only Tether
+20: 
+21: Remote-execution systems accumulate control planes. An agent runner, a status poller, a log shipper, a kill switch — each one a live connection into your infrastructure, each one a credential that can leak, each one a thing that must be rebuilt for every new substrate.
+22: 
+23: Buzz's answer is an axiom: **after deploy, the desktop retains no substrate control channel.** Launch is a single one-way handoff — the desktop resolves the provider through one narrow path, stages one exact artifact for negotiation and deploy, refuses a protocol version it does not understand, and hands over a launch payload it never persists. From that moment, everything flows through the relay: you read the agent's messages to know how it's doing, you mention it to steer it, you tell a healthy agent to stop and it exits on its own. Presence means what it means for everyone else on the relay — *available for conversation* — not substrate telemetry. And if you press Start again, from this machine or another, the deploy converges: one agent identity, one live instance.
+24: 
+25: This is not asceticism. It is what makes the body replaceable. A management plane you never build is a management plane you never have to port — and conversation, coordination, and ordinary lifecycle control already have a home on the relay, for every agent, local or remote.
+26: 
+27: ---
+28: 
+29: ## Bodies Are Replaceable
+30: 
+31: Kubernetes is the first substrate, not the point. Deployment goes through a provider — a small, swappable binary the desktop discovers and interrogates — and the contract a provider must honor never mentions containers: preserve the agent's identity and fail closed with its key, converge to a single live instance no matter how deploys race, let presence describe conversational availability rather than substrate health, bound the instance's lifetime, and keep secrets out of configuration. A conformance suite pins those behaviors — it establishes that a provider honors the contract, not that arbitrary code is safe to hand a key; choosing a provider, like choosing a cluster, remains a trust decision you make deliberately.
+32: 
+33: Get that contract right and the substrate becomes a detail: a cluster today; a VM, a PaaS, or something serverless-shaped tomorrow — and, on the horizon, the same community machines that already pool their idle GPUs into shared compute ([VISION_MESH.md](VISION_MESH.md)).
+34: 
+35: The body itself stays small because the runtime already is ([VISION_AGENT.md](VISION_AGENT.md)): a harness and an agent purpose-built to be read in an afternoon, packed into an image measured in megabytes. Small bodies are cheap to summon and cheap to discard — which is the whole lifecycle.
+36: 
+37: ---
+38: 
+39: ## Agents That Know When to Leave
+40: 
+41: The oldest failure of remote automation is the orphan: the process nobody remembers, on a machine nobody checks, billing forever. Most systems solve it with a supervisor — one more control plane, one more thing watching the thing.
+42: 
+43: Remote agents solve it from the inside. Because the desktop retains no substrate control channel, a running agent cannot depend on the desktop to reap it — so it is built to bound its own lifetime: a timer that owes nothing to the agent's workload watches for silence, and after hours of quiet it finishes what's in flight, says goodbye to the relay, and exits. Not killed — *finished*. The default state of a remote agent is "not running," which is also the default state of the rest of the team at 3am. Compute is rented by attention: when nobody needs the agent, it isn't consuming a machine, and when somebody does, it can return under the same identity with its history intact.
+44: 
+45: ---
+
+[ingest] crates/buzz-relay/src/handlers/ingest.rs:2349-2378
+2349:     let required = match required_scope_for_kind(kind_u32, &event) {
+2350:         Ok(scope) => scope,
+2351:         Err(msg) => return Err(IngestError::Rejected(msg.into())),
+2352:     };
+2353:     // NIP-43: relay admin commands are global — channel-scoped tokens cannot
+2354:     // issue them even if the event has no `h` tag (is_global_only_kind strips
+2355:     // channel_id, but we still need to reject the token itself).
+2356:     if is_relay_admin_kind(kind_u32) && auth.channel_ids().is_some() {
+2357:         return Err(IngestError::AuthFailed(
+2358:             "restricted: relay admin commands require a global token, not a channel-scoped token"
+2359:                 .into(),
+2360:         ));
+2361:     }
+2362:     // NIP-43: leave requests are also global — channel-scoped tokens cannot
+2363:     // issue them.
+2364:     if kind_u32 == KIND_NIP43_LEAVE_REQUEST && auth.channel_ids().is_some() {
+2365:         return Err(IngestError::AuthFailed(
+2366:             "restricted: leave requests require a global token".into(),
+2367:         ));
+2368:     }
+2369:     if !auth.scopes().contains(&required) {
+2370:         return Err(IngestError::AuthFailed(format!(
+2371:             "restricted: insufficient scope (need {})",
+2372:             required
+2373:         )));
+2374:     }
+2375: 
+2376:     // Command kinds are routed AFTER signature verification, timestamp check,
+2377:     // pubkey/auth match, and scope validation — never before.
+2378:     if buzz_core::kind::is_command_kind(kind_u32) {
+
+[fanout] crates/buzz-relay/src/handlers/event.rs:99-123
+99: /// Drop recipients without access before fan-out on a private channel.
+100: ///
+101: /// Open and channel-less events skip membership filtering (open channel-scoped
+102: /// events pay one visibility lookup; see `channel_visibility_cached`). For a
+103: /// private channel, each recipient is kept only if its connection's
+104: /// authenticated pubkey is a current member; unknown/unauthenticated recipients
+105: /// fail closed. This is the cluster-wide backstop: even if a stale subscription
+106: /// survives on another node after an open->private flip, its events are not
+107: /// delivered here.
+108: ///
+109: /// `threaded` is an optional visibility read resolved earlier in the same
+110: /// request (E1 phase-2, §4.8 phase-2 addendum). It is consulted only when its
+111: /// `(community_id, channel_id)` exactly match this fan-out's — a mismatched or
+112: /// absent bundle falls back to the fresh fail-closed lookup below, never to
+113: /// "assume open". Membership checks stay fresh either way; the threaded value
+114: /// only replaces the visibility SELECT.
+115: pub async fn filter_fanout_by_access(
+116:     state: &AppState,
+117:     community_id: CommunityId,
+118:     stored_event: &StoredEvent,
+119:     matches: Vec<(crate::subscription::ConnId, crate::subscription::SubId)>,
+120:     threaded: Option<&crate::state::ThreadedChannelVisibility>,
+121: ) -> Vec<(crate::subscription::ConnId, crate::subscription::SubId)> {
+122:     // First enforce the receiver-side tenant label. Subscription indexes are
+123:     // community-scoped, but stale/injected matches and future fan-out helpers
+
+[permission] crates/buzz-agent/src/permission.rs:1-35
+1: //! `session/request_permission` broker.
+2: //!
+3: //! buzz-agent asks the client to authorize every LLM-issued MCP tool call
+4: //! *before* executing it; the client applies `BUZZ_ACP_PERMISSION_POLICY` and
+5: //! answers. The agent never reads the policy — it always asks, matching the
+6: //! layering of every other ACP harness. This module owns the whole request
+7: //! correlation lifecycle so the rest of the agent only sees a single
+8: //! `Allowed`/`Denied`/`Cancelled` decision.
+9: //!
+10: //! ## Invariants
+11: //!
+12: //! - **Process-wide admission.** The broker owns a global [`Semaphore`]
+13: //!   (`BUZZ_AGENT_MAX_PENDING_PERMISSIONS`) acquired *before* any correlation
+14: //!   entry is inserted. The per-turn `execute_parallel` semaphore is fresh per
+15: //!   turn and sessions are unbounded by default, so only this global cap bounds
+16: //!   simultaneously outstanding asks process-wide.
+17: //! - **Abort-safe cleanup.** A successful admission returns a
+18: //!   [`PendingPermission`] lease that owns the admission permit and the
+19: //!   correlation id. Its `Drop` synchronously removes the still-pending entry
+20: //!   and releases the slot, covering task abort/panic that bypasses the normal
+21: //!   `run_prompt` tail.
+22: //! - **Claim-before-wake / at-most-once.** [`PermissionBroker::deliver`] removes
+23: //!   the entry *before* waking the waiter, so each id resolves at most once and
+24: //!   a later lease `Drop` is a harmless no-op.
+25: //! - **Unknown/late ids ignored.** A response whose id is not a live entry is
+26: //!   logged and dropped.
+27: //! - **Undeliverable asks are terminal.** If the output wire is closed when the
+28: //!   request is enqueued, [`PermissionBroker::request_permission`] fails closed
+29: //!   immediately (dropping the lease removes the entry and releases the permit)
+30: //!   rather than leaving a resident waiter to time out — a closed wire can never
+31: //!   carry the reply.
+32: //! - **Single absolute deadline.** Admission wait and response wait share one
+33: //!   absolute deadline computed at gate entry, so a saturated call cannot live
+34: //!   for two full timeout windows.
+35: //! - **Cancellation races inside the wait.** The waiter selects on the turn's
+
+[auto-permission] crates/buzz-acp/src/acp.rs:1981-1989
+1981:     /// Auto-approve a `session/request_permission` request from the agent.
+1982:     ///
+1983:     /// Finds the option with `kind == "allow_once"` and responds with its `optionId`.
+1984:     /// If no `allow_once` option exists, falls back to `reject_once`.
+1985:     ///
+1986:     /// **Critical:** Never hardcode `optionId` — always find it dynamically by `kind`.
+1987:     ///
+1988:     /// The request `id` is stored as `serde_json::Value` to support both numeric
+1989:     /// and string IDs per JSON-RPC 2.0.
+
+[management] docs/agent-management-provenance.md:1-19
+1: # Agent management provenance
+2: 
+3: The shared **Not managed on this device** cloud marker means a viewer-owned
+4: identity has no exact-key record in successfully loaded local managed inventory.
+5: The glyph is the approved visual convention, not proof of physical cloud hosting.
+6: Locally managed provider-backed agents, unknown/failed local inventory, unknown
+7: owners, and other people's identities do not get the marker. Neither lifecycle
+8: state nor relay presence decides management provenance.
+9: 
+10: `KnownAgentPubkeysProvider` supplies stable inventory and ownership context to
+11: identity surfaces; rows must not create their own directory query observers.
+12: Picker candidates preserve exact local-management flags and use the same pure
+13: predicate. Profile ownership can supplement the shared directory evidence.
+14: 
+15: Pickers, member cards, authors, markdown mention chips, address controls, hover
+16: cards, profile headers/hero/subviews, new-message recipients and DM headers/sidebar
+17: rows use the same glyph and accessible label. The marker grants no membership,
+18: mention eligibility, availability or local management capability. This change does
+19: not change profile navigation, presence, native discovery or invitation/routing.
+
+[availability] desktop/src/features/agents/lib/useAgentAvailability.ts:9-31
+9: /** Availability is relay presence, never a retained deployment receipt or PID. */
+10: export function resolveAgentAvailability(
+11:   status: PresenceStatus | undefined,
+12:   presenceLoaded: boolean,
+13:   connected: boolean,
+14: ): PresenceStatus | undefined {
+15:   // Missing entries in a successful presence snapshot mean offline. Failed or
+16:   // disconnected reads cannot establish availability (including cached online).
+17:   return presenceLoaded && connected ? (status ?? "offline") : undefined;
+18: }
+19: 
+20: /** Positive presence blocks another start, but never grants lifecycle control.
+21:  * Missing/offline presence is not proof that starting another body is safe.
+22:  */
+23: export function agentPresenceStartBlockReason(
+24:   isLifecycleActive: boolean,
+25:   availability: PresenceStatus | undefined,
+26: ): string | undefined {
+27:   return !isLifecycleActive &&
+28:     (availability === "online" || availability === "away")
+29:     ? "This agent is present on the relay. Starting another instance is unavailable."
+30:     : undefined;
+31: }
+
+[approval] crates/buzz-workflow/src/executor.rs:725-743
+725:                 RequestApproval {
+726:                     from,
+727:                     message,
+728:                     timeout,
+729:                 } => {
+730:                     let timeout_str = timeout.as_deref().unwrap_or("24h");
+731:                     info!(
+732:                         run_id = %run_id, step = step_id,
+733:                         "RequestApproval from={from} timeout={timeout_str}: {message}"
+734:                     );
+735: 
+736:                     let token = generate_approval_token(run_id, step_id);
+737: 
+738:                     // TODO (WF-08): create approval record in DB, emit kind:46010.
+739:                     // For now, return Suspended with the token so the caller can persist state.
+740: 
+741:                     Ok(StepResult::Suspended {
+742:                         approval_token: token,
+743:                     })
+
+[approval-fail] crates/buzz-workflow/src/lib.rs:229-249
+229:                 if result.approval_token.is_some() {
+230:                     // Approval gates are not yet implemented (WF-08).
+231:                     // Fail explicitly rather than creating unreachable WaitingApproval rows.
+232:                     tracing::warn!(
+233:                         run_id = %run_id,
+234:                         step_index = result.step_index,
+235:                         "Workflow hit approval gate — not yet implemented, marking as failed"
+236:                     );
+237:                     if let Err(e) = self
+238:                         .db
+239:                         .update_workflow_run(
+240:                             community_id,
+241:                             run_id,
+242:                             RunStatus::Failed,
+243:                             step_count,
+244:                             &trace_json,
+245:                             Some(buzz_db::workflow::WorkflowRunFailure {
+246:                                 code: "approval_not_supported",
+247:                                 message: "approval gates not yet implemented — see WF-08",
+248:                             }),
+249:                         )
+
+[ci-smoke] .github/workflows/_ci-desktop.yml:167-174
+167:       - name: Desktop E2E build
+168:         run: pnpm -C desktop build:e2e
+169:       - name: Desktop smoke e2e
+170:         run: cd desktop && pnpm exec playwright test --project=smoke --shard=${{ matrix.shard }}/4
+171:       - name: Summarize flaky tests
+172:         if: ${{ !cancelled() }}
+173:         run: node scripts/summarize-flaky-tests.mjs playwright-report.json "Desktop Smoke E2E (${{ matrix.shard }})"
+174:         working-directory: desktop
+
+[ci-relay] .github/workflows/_ci-relay.yml:590-612
+590:       - name: Start relay
+591:         run: |
+592:           chmod +x ./target/ci/buzz-relay ./target/ci/git-credential-nostr
+593:           ./scripts/start-relay-for-tests.sh --no-build
+594:       - name: Relay E2E tests
+595:         run: |
+596:           cargo test -p buzz-test-client --test e2e_persona --test e2e_team_catalog --test e2e_nostr_interop --test e2e_thread_roots --test e2e_project -- --ignored --nocapture
+597:           cargo test -p buzz-test-client --test e2e_relay invite -- --ignored --nocapture
+598:           cargo test -p buzz-test-client --test e2e_relay nip43_membership_snapshots_are_rejected -- --ignored --nocapture
+599:           cargo test -p buzz-test-client --test e2e_relay nip29_departure_wire -- --ignored --nocapture
+600:         env:
+601:           RELAY_URL: ws://localhost:3000
+602:           GIT_CREDENTIAL_NOSTR_BIN: ${{ github.workspace }}/target/ci/git-credential-nostr
+603:       - name: Media read-auth e2e
+604:         # Reads require kind:24242 `t=get` auth, so these binaries are the only
+605:         # coverage that a real relay rejects bare reads and honours host- and
+606:         # hash-scoped tokens. They were #[ignore]d and selected by no CI job, so
+607:         # the lane never ran; select it here, where MinIO and the seeded
+608:         # 'localhost:3000' community already exist.
+609:         # --no-fail-fast: without it cargo stops after the first failing binary,
+610:         # so one broken case hides every later binary's result.
+611:         run: |
+612:           cargo test -p buzz-test-client --no-fail-fast --test e2e_media --test e2e_media_extended --test e2e_media_video -- --ignored --nocapture
+
+[testing] TESTING.md:238-265
+238: ## ACP Harness (optional, end-to-end with a real agent)
+239: 
+240: `buzz-acp` connects an ACP-speaking agent (goose, codex, claude code,
+241: buzz-agent) to the relay. The harness listens for events, drives the
+242: agent over stdio, and the agent replies through MCP tools.
+243: 
+244: Minimum recipe — assumes the relay from step 3 is running and the channel
+245: `$CHANNEL` from step 4 still exists. The agent identity must be **different**
+246: from the sender identity (`BUZZ_ACP_RESPOND_TO=anyone` still skips events
+247: the agent signed itself).
+248: 
+249: ```bash
+250: cargo build --release -p buzz-acp
+251: export PATH="$PWD/target/release:$PATH"
+252: 
+253: # 1. Save your sender identity from step 4 — you'll need it to @mention the agent
+254: SENDER_SK="$BUZZ_PRIVATE_KEY"
+255: 
+256: # 2. Mint a fresh agent identity and capture its pubkey
+257: AGENT_GEN=$(buzz-admin generate-key)
+258: AGENT_SK=$(echo "$AGENT_GEN" | awk '/Secret key:/ {print $3}')
+259: AGENT_PUBKEY=$(echo "$AGENT_GEN" | awk '/Public key:/ {print $3}')
+260: 
+261: # 3. Add the agent as a member of $CHANNEL — still using the sender identity.
+262: #    Skip this and the agent boots to "discovered 0 channel(s) → agent will
+263: #    sit idle" and silently ignores every mention.
+264: buzz channels add-member --channel "$CHANNEL" --pubkey "$AGENT_PUBKEY" --role member
+265: 
+
+[license] LICENSE:1-15
+1:                                  Apache License
+2:                            Version 2.0, January 2004
+3:                         http://www.apache.org/licenses/
+4: 
+5:    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+6: 
+7:    1. Definitions.
+8: 
+9:       "License" shall mean the terms and conditions for use, reproduction,
+10:       and distribution as defined by Sections 1 through 9 of this document.
+11: 
+12:       "Licensor" shall mean the copyright owner or entity authorized by
+13:       the copyright owner that is granting the License.
+14: 
+15:       "Legal Entity" shall mean the union of the acting entity and all
+
+[author-gate] crates/buzz-acp/src/lib.rs:210-244
+210:             map.insert(author, is_sibling);
+211:         }
+212:     }
+213: }
+214: 
+215: /// Check if `author` is the owner OR a sibling (same owner via NIP-OA).
+216: ///
+217: /// For unknown authors, queries their kind:0 profile to extract the NIP-OA
+218: /// auth tag and verify the owner matches. Result is cached.
+219: async fn is_owner_or_sibling(
+220:     author: &str,
+221:     owner_cache: &OwnerCache,
+222:     rest_client: &relay::RestClient,
+223: ) -> bool {
+224:     let my_owner = match owner_cache.get() {
+225:         Some(o) => o,
+226:         None => return false, // no owner configured — fail closed
+227:     };
+228: 
+229:     // Direct owner check.
+230:     if author == my_owner {
+231:         return true;
+232:     }
+233: 
+234:     // Check sibling cache.
+235:     if let Some(cached) = owner_cache.is_known_sibling(author) {
+236:         return cached;
+237:     }
+238: 
+239:     // Query the author's kind:0 profile to check for NIP-OA auth tag.
+240:     let is_sibling = check_sibling_via_profile(author, my_owner, rest_client).await;
+241:     owner_cache.cache_sibling(author.to_string(), is_sibling);
+242:     is_sibling
+243: }
+244: 
+
+[persona-session] crates/buzz-acp/src/pool.rs:1490-1555
+1490: async fn create_session_and_apply_model(
+1491:     agent: &mut OwnedAgent,
+1492:     ctx: &PromptContext,
+1493:     agent_core: Option<&str>,
+1494:     channel: NewSessionChannelContext<'_>,
+1495: ) -> Result<String, AcpError> {
+1496:     // Build base_prompt + system_prompt + agent core + canvas metadata into a
+1497:     // single prompt. Standard protocol-v2 agents receive it in `session/new`;
+1498:     // Goose receives it through the custom request below. Legacy agents receive
+1499:     // the same content as user-message sections via `format_prompt`. Core carries
+1500:     // its own `<core-memory>` boundary, and canvas carries its own
+1501:     // `<channel-canvas>` boundary; both are appended with a blank-line separator.
+1502:     let is_goose = agent.agent_name == "goose";
+1503:     let combined_system_prompt = with_canvas(
+1504:         with_huddle_instructions(
+1505:             with_core(
+1506:                 with_team(
+1507:                     framed_system_prompt(
+1508:                         &ctx.cwd,
+1509:                         ctx.base_prompt.as_deref(),
+1510:                         ctx.system_prompt.as_deref(),
+1511:                     ),
+1512:                     ctx.team_instructions.as_deref(),
+1513:                 ),
+1514:                 agent_core,
+1515:             ),
+1516:             channel.huddle_instructions,
+1517:         ),
+1518:         channel.canvas,
+1519:     );
+1520: 
+1521:     let session_title = ctx.session_title.as_deref().map(|agent_name| {
+1522:         compose_scoped_session_title(
+1523:             agent_name,
+1524:             channel.name,
+1525:             channel.scope.and_then(SessionScope::root_event_id),
+1526:         )
+1527:     });
+1528:     let mcp_servers = mcp_servers_with_git_origin(
+1529:         &ctx.mcp_servers,
+1530:         channel.scope.map(SessionScope::channel_id),
+1531:         channel.channel_type,
+1532:         ctx.session_title.as_deref(),
+1533:     );
+1534: 
+1535:     let resp = agent
+1536:         .acp
+1537:         .session_new_full(
+1538:             &ctx.cwd,
+1539:             mcp_servers,
+1540:             session_new_system_prompt(
+1541:                 is_goose,
+1542:                 agent.protocol_version,
+1543:                 &agent.agent_name,
+1544:                 combined_system_prompt.as_deref(),
+1545:             ),
+1546:             session_title.as_deref(),
+1547:         )
+1548:         .await?;
+1549: 
+1550:     if is_goose && agent.goose_system_prompt_supported != Some(false) {
+1551:         if let Some(prompt) = combined_system_prompt.as_deref() {
+1552:             match agent
+1553:                 .acp
+1554:                 .session_set_goose_system_prompt(&resp.session_id, prompt)
+1555:                 .await

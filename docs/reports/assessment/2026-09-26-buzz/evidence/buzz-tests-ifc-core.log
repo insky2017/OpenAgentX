@@ -1,0 +1,87 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded cfg-if v1.0.4
+  Downloaded bit-vec v0.8.0
+  Downloaded wait-timeout v0.2.1
+  Downloaded unarray v0.1.4
+  Downloaded quick-error v1.2.3
+  Downloaded errno v0.3.14
+  Downloaded bit-set v0.8.0
+  Downloaded rusty-fork v0.3.1
+  Downloaded rand_chacha v0.9.0
+  Downloaded once_cell v1.21.4
+  Downloaded fnv v1.0.7
+  Downloaded fastrand v2.4.1
+  Downloaded autocfg v1.5.0
+  Downloaded rand_xorshift v0.4.0
+  Downloaded rand_core v0.9.5
+  Downloaded ppv-lite86 v0.2.21
+  Downloaded tempfile v3.27.0
+  Downloaded num-traits v0.2.19
+  Downloaded getrandom v0.4.3
+  Downloaded getrandom v0.3.4
+  Downloaded bitflags v2.13.0
+  Downloaded rand v0.9.4
+  Downloaded proptest v1.11.0
+  Downloaded zerocopy v0.8.48
+  Downloaded regex-syntax v0.8.10
+  Downloaded rustix v1.1.4
+  Downloaded libc v0.2.189
+  Downloaded linux-raw-sys v0.12.1
+   Compiling libc v0.2.189
+   Compiling cfg-if v1.0.4
+   Compiling getrandom v0.3.4
+   Compiling getrandom v0.4.3
+   Compiling rustix v1.1.4
+   Compiling zerocopy v0.8.48
+   Compiling bitflags v2.13.0
+   Compiling linux-raw-sys v0.12.1
+   Compiling autocfg v1.5.0
+   Compiling fastrand v2.4.1
+   Compiling once_cell v1.21.4
+   Compiling quick-error v1.2.3
+   Compiling fnv v1.0.7
+   Compiling bit-vec v0.8.0
+   Compiling unarray v0.1.4
+   Compiling regex-syntax v0.8.10
+   Compiling ifc-core v0.1.0 (/tmp/oax-buzz-runner-20260926/ifc-core)
+   Compiling bit-set v0.8.0
+   Compiling num-traits v0.2.19
+   Compiling wait-timeout v0.2.1
+   Compiling rand_core v0.9.5
+   Compiling rand_xorshift v0.4.0
+   Compiling rand v0.9.4
+   Compiling tempfile v3.27.0
+   Compiling rusty-fork v0.3.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.9.0
+   Compiling proptest v1.11.0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 24.83s
+     Running unittests src/lib.rs (/tmp/oax-buzz-runner-20260926/target/debug/deps/ifc_core-84453ab7dd603d36)
+
+running 5 tests
+test tests::flow_state_accumulates_restrictions_and_never_forgets_unknown_input ... ok
+test tests::cross_universe_input_permanently_blocks_egress ... ok
+test tests::cross_universe_destination_reports_universe_mismatch ... ok
+test tests::reader_set_join_and_meet_satisfy_absorption ... ok
+test tests::reader_sets_obey_flow_and_join_laws ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests ifc_core
+
+running 2 tests
+error[E0599]: no method named `clone` found for struct `FlowState` in the current scope
+ --> src/lib.rs:220:25
+  |
+6 | let _clean_copy = state.clone();
+  |                         ^^^^^ method not found in `FlowState<String, String>`
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0599`.
+test src/lib.rs - FlowState (line 217) - compile fail ... ok
+test src/lib.rs - (line 5) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+

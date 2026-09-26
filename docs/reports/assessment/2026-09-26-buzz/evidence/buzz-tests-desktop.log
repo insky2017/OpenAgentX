@@ -1,0 +1,55 @@
+✔ stop returns the correlated harness result: sent (2.098421ms)
+✔ stop returns the correlated harness result: no_active_turn (0.307034ms)
+✔ stop returns the correlated harness result: ambiguous_target (0.221643ms)
+✔ relay delivery, old harnesses, replay, other channels and model acks cannot confirm a stop (0.350499ms)
+✔ stop unsubscribes and clears timeout after a transport error (1.145411ms)
+✔ a hung transport cannot block the unconfirmed timeout (0.327781ms)
+✔ a harness result can settle before the send promise resolves (0.464434ms)
+✔ a late transport rejection does not replace the settled result (7.883704ms)
+✔ reconcileRetryDelayMs walks a capped backoff then gives up (1.553368ms)
+✔ canonicalCommunityRelays dedupes by canonical form, keeps stored spelling (1.821053ms)
+✔ pendingReconcileRelays skips reconciled and in-flight relays (0.37556ms)
+✔ classifyReconcileResult marks the whole batch failed when the call throws (0.385156ms)
+✔ classifyReconcileResult splits by Failed rows, matching on requested URL (0.367044ms)
+✔ classifyReconcileResult treats a relay with no rows as reconciled (0.248503ms)
+✔ projects every backend lifecycle to the four product labels (1.749221ms)
+✔ backend-authoritative local setup takes precedence (0.294521ms)
+✔ unavailable detail distinguishes stopped and failed (0.273543ms)
+✔ pair key cannot collide at component boundaries (0.325097ms)
+✔ selects one relay without collapsing same-pubkey pairs (0.70962ms)
+✔ canonicalRelayUrl mirrors the backend pair-key normalization (0.420859ms)
+✔ matches a stored community URL against canonical backend rows (0.365993ms)
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'nostr-tools' imported from /tmp/oax-buzz-runner-20260926/desktop/src/shared/lib/pubkey.ts
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+    at packageResolve (node:internal/modules/esm/resolve:768:81)
+    at moduleResolve (node:internal/modules/esm/resolve:859:18)
+    at defaultResolve (node:internal/modules/esm/resolve:991:11)
+    at nextResolve (node:internal/modules/esm/hooks:785:28)
+    at resolve (file:///tmp/oax-buzz-runner-20260926/desktop/test-loader-hooks.mjs:140:10)
+    at nextResolve (node:internal/modules/esm/hooks:785:28)
+    at AsyncLoaderHooksOnLoaderHookWorker.resolve (node:internal/modules/esm/hooks:269:30)
+    at MessagePort.handleMessage (node:internal/modules/esm/worker:251:24)
+    at [nodejs.internal.kHybridDispatch] (node:internal/event_target:843:20) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v24.14.0
+✖ src/features/messages/lib/sendToChannelSemantics.test.mjs (775.059891ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 21
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 809.523982
+
+✖ failing tests:
+
+test at src/features/messages/lib/sendToChannelSemantics.test.mjs:1:1
+✖ src/features/messages/lib/sendToChannelSemantics.test.mjs (775.059891ms)
+  'test failed'

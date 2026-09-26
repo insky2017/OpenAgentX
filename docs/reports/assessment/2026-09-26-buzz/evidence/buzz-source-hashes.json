@@ -1,0 +1,306 @@
+{
+  "commit": "781d39510cf23cfe224e8f521ae06a23377e06de",
+  "files": {
+    "crates/buzz-relay-mesh/src/lib.rs": "4903f9ae7aae1df213ae3d786a285de3750bfcc947df7041cff14a69e9063298",
+    "crates/buzz-acp/src/acp.rs": "71635b2710a5c353e35f65b453b4429f337eebe73216fe07aa0ad0bd28070718",
+    "rust-toolchain.toml": "f93d36efbb7a45edf8197259661273bc5d22529eccd4ff6411a851bafa493398",
+    "package.json": "b657ada55607de606b5a49d233ff6f3c2243e1f117a65f523e36084caadae957",
+    "README.md": "84ba68fdb2a6afab1fa2b163ce4013d47fd45e498a057441f6a74c0bfda509a7",
+    "Cargo.toml": "fa5734f08700489e9d4b845bda45602aad4584d707f0e534f0cad979e6c505cd",
+    "crates/buzz-relay/src/tenant.rs": "20ceb665dad91b9023393988b9e6c1eb187d75ee3df540f58ca788e221a97364",
+    "AGENTS.md": "3f899f49921d468f79f91e85f8cb41cf93b7d0a9a22d1b1f0cf3a7daba6f8fed",
+    "crates/buzz-acp/README.md": "174bdb3e6c69b69ff1a2fbd7644edbe363fdcbc44da0a9e7332cd4be017b3367",
+    "desktop/src-tauri/src/managed_agents/backend.rs": "2144ce92c58ad7c1e6ff73cbe4a8d67f8b760ac364a6f9ec1685aeeca5bca9c4",
+    "crates/buzz-backend-kubernetes/src/main.rs": "f799d3e88adf47b27a20c305ad69a14ea347e4bb52db1c5fc26696c1619109d4",
+    "desktop/src-tauri/src/managed_agents/types.rs": "24a24e1a49a5f9ce1ea2c202c8fa5cd422324033671a6882017f57c515571bdf",
+    "docs/agent-profile-identity.md": "1a039ecbfee967f07db3d9898f60cb5fffb11ff07ec9c5cf9d45e737ce6e5384",
+    "crates/buzz-persona/src/resolve.rs": "7ba64ad35406d496ffee93b93ef7ca5b956ba1532303166bda37bfd5b70ece92",
+    "desktop/src-tauri/src/managed_agents/runtime.rs": "63dc41fafb2e3a2be7dc62a2c52b4acb9627eb8d1f0b1402ae04bb5e60fd5df9",
+    "crates/buzz-acp/src/config.rs": "b1836f02f94ddc1e8a4694dc9545765e3039a390e8d06206c28a5e1c8d570513",
+    "crates/buzz-acp/src/pool.rs": "ace979f1ef6d0adaf77d4e3d13358ec0846e410e4972a3eae69db0a08fd22260",
+    "crates/buzz-acp/src/engram_fetch.rs": "7894398b28b818398e4e307c72042a9b342690446d969daf41a3747b76c47e0e",
+    "crates/buzz-agent/src/lib.rs": "7f0c9e1d2f16dc6f9b8ddc67c6f19cb73c91f5920552ab5c361c7f09ff8b74b3",
+    "VISION_REMOTE_AGENTS.md": "833a52dab508a7417bc9d52c7e51f480ac48e1664f4e1acccccc92ba7c73d753",
+    "crates/buzz-acp/src/queue.rs": "5fd64b9ebdbb9c27014fa801172e572f8336a40a11429f25d856bc5fc2a967b9",
+    "crates/buzz-acp/src/relay/recovery.rs": "126c659c9ab32663408ab3356ae01c7972756076023cddf249084cfb2548e8be",
+    "crates/buzz-acp/TASKS.md": "5313a1777a89e7d7afbfba95d1f38ca48e8b3134d7cb405e39a45f548509637c",
+    "crates/buzz-acp/src/run_task.rs": "0249a1f95d07fe2ca666e00fb8d72759b73112ea8e12f81e116553a04b587838",
+    "desktop/src/features/agents/lib/cancelTurnOutcome.ts": "65250d0a6ec29d5a5f02b7b7db7a8597efcdbe6de255af0170dc3a248354f44a",
+    "crates/buzz-acp/src/lib.rs": "30af5e223cd54af2906a3f935a8bfd116a6ded4ec90314f9c9344dc93774482d",
+    "crates/buzz-backend-kubernetes/src/reconcile.rs": "70621554bec6c0b54f2b03ed03a7b6791476095a049c6c91930dd8d473d56dd3",
+    "desktop/src/features/agents/lib/managedAgentControlActions.ts": "a8e8714b6505d509f9ebef57db88b7058a1216ef129166448cb61f58d3b6abf0",
+    "crates/buzz-relay/src/handlers/ingest.rs": "a5ab3124c66fb0e7caca8fc82b4280f3bd8d80362dae6c99e27ff4ab936cb7fc",
+    "crates/buzz-relay/src/handlers/event.rs": "21a456b6484d23e38696411edc51b416a79463b3bfa5927e6c0559894d682837",
+    "crates/buzz-agent/src/permission.rs": "045ec477ecc40fd39df1b1cab9a8084255081000a132bfd252ad3eb3a88b8477",
+    "docs/agent-management-provenance.md": "05f0e8abbed7272dbbd19c22bb84e1bec745e98c0b88bc9cd4bb585b12aa5e6b",
+    "desktop/src/features/agents/lib/useAgentAvailability.ts": "d22cb7019374b714a54e846841ce063190d630428be212ba244209ae223dc087",
+    "crates/buzz-workflow/src/executor.rs": "851bc3ad0e66d35d1a037f5dacf6a5bc759b269a713c2d4fdccdb9d708f1bcf6",
+    "crates/buzz-workflow/src/lib.rs": "3da7d4d532791dc71b8ac7f9efae04f098ab380353fe9d0713a0101cde103b38",
+    ".github/workflows/_ci-desktop.yml": "9be2006bd3944b72353abef829f636eb8cf024f1bf9304292071ba8e6afd17c1",
+    ".github/workflows/_ci-relay.yml": "650fd2cb0cac3e82d590ff754bf296ca5463ab3b8cd8948ff48a0dfd377f52b8",
+    "TESTING.md": "bc2d49e33dcf272aef4340ebe6903d50eb892e1eb5daeb1131d249666c56c7d6",
+    "LICENSE": "108cb15997e51b75a8d18b0c1e2c52bd3879d051ab02118973387df1e4aab584"
+  },
+  "references": {
+    "mesh-transport": {
+      "path": "crates/buzz-relay-mesh/src/lib.rs",
+      "start": 1,
+      "end": 25
+    },
+    "process-cleanup": {
+      "path": "crates/buzz-acp/src/acp.rs",
+      "start": 420,
+      "end": 446
+    },
+    "toolchain": {
+      "path": "rust-toolchain.toml",
+      "start": 1,
+      "end": 3
+    },
+    "package": {
+      "path": "package.json",
+      "start": 1,
+      "end": 6
+    },
+    "readme": {
+      "path": "README.md",
+      "start": 27,
+      "end": 42
+    },
+    "workspace": {
+      "path": "Cargo.toml",
+      "start": 27,
+      "end": 46
+    },
+    "tenant": {
+      "path": "crates/buzz-relay/src/tenant.rs",
+      "start": 61,
+      "end": 91
+    },
+    "crate-map": {
+      "path": "AGENTS.md",
+      "start": 96,
+      "end": 130
+    },
+    "acp-readme": {
+      "path": "crates/buzz-acp/README.md",
+      "start": 1,
+      "end": 22
+    },
+    "backend": {
+      "path": "desktop/src-tauri/src/managed_agents/backend.rs",
+      "start": 509,
+      "end": 533
+    },
+    "k8s-entry": {
+      "path": "crates/buzz-backend-kubernetes/src/main.rs",
+      "start": 88,
+      "end": 106
+    },
+    "definition": {
+      "path": "desktop/src-tauri/src/managed_agents/types.rs",
+      "start": 16,
+      "end": 30
+    },
+    "profile": {
+      "path": "docs/agent-profile-identity.md",
+      "start": 1,
+      "end": 41
+    },
+    "persona-resolve": {
+      "path": "crates/buzz-persona/src/resolve.rs",
+      "start": 194,
+      "end": 204
+    },
+    "spawn-resolve": {
+      "path": "desktop/src-tauri/src/managed_agents/runtime.rs",
+      "start": 507,
+      "end": 521
+    },
+    "spawn-prompt": {
+      "path": "desktop/src-tauri/src/managed_agents/runtime.rs",
+      "start": 682,
+      "end": 689
+    },
+    "config-prompt": {
+      "path": "crates/buzz-acp/src/config.rs",
+      "start": 284,
+      "end": 299
+    },
+    "framing": {
+      "path": "crates/buzz-acp/src/pool.rs",
+      "start": 2160,
+      "end": 2190
+    },
+    "standing": {
+      "path": "crates/buzz-acp/src/pool.rs",
+      "start": 2708,
+      "end": 2725
+    },
+    "spawn-env": {
+      "path": "desktop/src-tauri/src/managed_agents/runtime.rs",
+      "start": 777,
+      "end": 781
+    },
+    "engram": {
+      "path": "crates/buzz-acp/src/engram_fetch.rs",
+      "start": 28,
+      "end": 67
+    },
+    "agent-session": {
+      "path": "crates/buzz-agent/src/lib.rs",
+      "start": 56,
+      "end": 101
+    },
+    "remote-cost": {
+      "path": "VISION_REMOTE_AGENTS.md",
+      "start": 47,
+      "end": 68
+    },
+    "dedup": {
+      "path": "crates/buzz-acp/src/config.rs",
+      "start": 351,
+      "end": 363
+    },
+    "queue": {
+      "path": "crates/buzz-acp/src/queue.rs",
+      "start": 26,
+      "end": 48
+    },
+    "recovery": {
+      "path": "crates/buzz-acp/src/relay/recovery.rs",
+      "start": 1,
+      "end": 59
+    },
+    "turn-end": {
+      "path": "crates/buzz-acp/src/pool.rs",
+      "start": 5143,
+      "end": 5154
+    },
+    "task-input": {
+      "path": "crates/buzz-acp/TASKS.md",
+      "start": 17,
+      "end": 42
+    },
+    "task-result": {
+      "path": "crates/buzz-acp/TASKS.md",
+      "start": 98,
+      "end": 130
+    },
+    "run-result": {
+      "path": "crates/buzz-acp/src/run_task.rs",
+      "start": 245,
+      "end": 276
+    },
+    "cancel-ui": {
+      "path": "desktop/src/features/agents/lib/cancelTurnOutcome.ts",
+      "start": 43,
+      "end": 76
+    },
+    "control-auth": {
+      "path": "crates/buzz-acp/src/lib.rs",
+      "start": 1570,
+      "end": 1615
+    },
+    "cancel-harness": {
+      "path": "crates/buzz-acp/src/lib.rs",
+      "start": 1781,
+      "end": 1819
+    },
+    "chat-cancel": {
+      "path": "crates/buzz-acp/src/lib.rs",
+      "start": 3392,
+      "end": 3428
+    },
+    "requeue": {
+      "path": "crates/buzz-acp/src/pool.rs",
+      "start": 4793,
+      "end": 4813
+    },
+    "k8s-reconcile": {
+      "path": "crates/buzz-backend-kubernetes/src/reconcile.rs",
+      "start": 1,
+      "end": 18
+    },
+    "remote-stop": {
+      "path": "desktop/src/features/agents/lib/managedAgentControlActions.ts",
+      "start": 126,
+      "end": 148
+    },
+    "remote-contract": {
+      "path": "VISION_REMOTE_AGENTS.md",
+      "start": 19,
+      "end": 45
+    },
+    "ingest": {
+      "path": "crates/buzz-relay/src/handlers/ingest.rs",
+      "start": 2349,
+      "end": 2378
+    },
+    "fanout": {
+      "path": "crates/buzz-relay/src/handlers/event.rs",
+      "start": 99,
+      "end": 123
+    },
+    "permission": {
+      "path": "crates/buzz-agent/src/permission.rs",
+      "start": 1,
+      "end": 35
+    },
+    "auto-permission": {
+      "path": "crates/buzz-acp/src/acp.rs",
+      "start": 1981,
+      "end": 1989
+    },
+    "management": {
+      "path": "docs/agent-management-provenance.md",
+      "start": 1,
+      "end": 19
+    },
+    "availability": {
+      "path": "desktop/src/features/agents/lib/useAgentAvailability.ts",
+      "start": 9,
+      "end": 31
+    },
+    "approval": {
+      "path": "crates/buzz-workflow/src/executor.rs",
+      "start": 725,
+      "end": 743
+    },
+    "approval-fail": {
+      "path": "crates/buzz-workflow/src/lib.rs",
+      "start": 229,
+      "end": 249
+    },
+    "ci-smoke": {
+      "path": ".github/workflows/_ci-desktop.yml",
+      "start": 167,
+      "end": 174
+    },
+    "ci-relay": {
+      "path": ".github/workflows/_ci-relay.yml",
+      "start": 590,
+      "end": 612
+    },
+    "testing": {
+      "path": "TESTING.md",
+      "start": 238,
+      "end": 265
+    },
+    "license": {
+      "path": "LICENSE",
+      "start": 1,
+      "end": 15
+    },
+    "author-gate": {
+      "path": "crates/buzz-acp/src/lib.rs",
+      "start": 210,
+      "end": 244
+    },
+    "persona-session": {
+      "path": "crates/buzz-acp/src/pool.rs",
+      "start": 1490,
+      "end": 1555
+    }
+  }
+}

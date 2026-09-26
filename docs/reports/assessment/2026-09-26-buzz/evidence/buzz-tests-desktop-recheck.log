@@ -1,0 +1,16 @@
+✔ send-to-channel preserves supported message semantics (4.098205ms)
+✔ edited messages recompute effective mention recipients from the body (3.239856ms)
+✔ edited messages preserve snapshotted mention recipients without profiles (0.590792ms)
+✔ an empty edited mention snapshot drops stale original recipients (0.380258ms)
+✔ send-to-channel canonicalizes suppressed link previews (0.367443ms)
+✔ send-to-channel handles messages without semantic tags (0.256231ms)
+✔ latest edit reference snapshot retains recipients added by an earlier edit without historical p-tags (0.376338ms)
+✔ snapshot forwarding preserves delivered automatic addresses but never promotes unnotified annotated metadata (0.369349ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 881.88681
