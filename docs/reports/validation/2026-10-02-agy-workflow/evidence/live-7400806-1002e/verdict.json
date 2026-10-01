@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "error": "network mode test: RUNTIME_HEALTH_FAILED",
+  "layer": "setup",
+  "product_agy_failure": false
+}

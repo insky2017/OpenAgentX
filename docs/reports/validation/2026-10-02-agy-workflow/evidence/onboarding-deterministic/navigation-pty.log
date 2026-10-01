@@ -1,0 +1,88 @@
+$ /tmp/openagentx-onboarding-navigation-candidate init
+Owner password: 
+Confirm owner password: 
+Initialized OpenAgentX owner "owner" and Organization "default"
+
+exit=0
+
+$ /tmp/openagentx-onboarding-navigation-candidate agent add --password-file /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/password --configure-only
+Agent 名称: fixture-one
+工作目录: /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace
+职责文档路径或职责描述: /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace/ROLE.md
+OpenAgentX is already initialized; no changes were made
+Created Agent "fixture-one" in Organization "default"
+CLI session established for owner; expires 2026-10-31T18:19:31Z
+Agent fixture-one 已纳管，工作目录 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace，职责 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace/ROLE.md
+Agent fixture-one 已纳管；运行 agent resume fixture-one 启动并准备网络。
+
+exit=0
+
+$ /tmp/openagentx-onboarding-navigation-candidate agent add --name fixture-two --workspace /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace --role /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace/ROLE.md --password-file /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/password --configure-only
+OpenAgentX is already initialized; no changes were made
+Created Agent "fixture-two" in Organization "default"
+Agent fixture-two 已纳管，工作目录 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace，职责 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace/ROLE.md
+Agent fixture-two 已纳管；运行 agent resume fixture-two 启动并准备网络。
+
+exit=0
+
+$ /tmp/openagentx-onboarding-navigation-candidate agent add --name fixture-one --workspace /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace --role /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace/ROLE.md --password-file /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/password --configure-only
+OpenAgentX is already initialized; no changes were made
+Agent "fixture-one" is unchanged; no events were appended
+Agent fixture-one 已纳管，工作目录 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace，职责 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-021930/workspace/ROLE.md
+Agent fixture-one 已纳管；运行 agent resume fixture-one 启动并准备网络。
+
+exit=0
+
+$ /tmp/openagentx-onboarding-navigation-candidate agent open fixture-one --no-open
+fixture-one (fixture-one) · 后台未运行
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open fixture-one
+  恢复：openagentx agent resume fixture-one
+
+
+exit=0
+
+$ /tmp/openagentx-onboarding-navigation-candidate agent status
+fixture-one (fixture-one) · 后台未运行
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open fixture-one
+  恢复：openagentx agent resume fixture-one
+
+fixture-two (fixture-two) · 后台未运行
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open fixture-two
+  恢复：openagentx agent resume fixture-two
+
+
+exit=0
+
+$ /tmp/openagentx-onboarding-navigation-candidate agent status --watch
+[H[2Jfixture-one (fixture-one) · 后台未运行
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open fixture-one
+  恢复：openagentx agent resume fixture-one
+
+fixture-two (fixture-two) · 后台未运行
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open fixture-two
+  恢复：openagentx agent resume fixture-two
+
+[H[2Jfixture-one (fixture-one) · 后台未运行
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open fixture-one
+  恢复：openagentx agent resume fixture-one
+
+fixture-two (fixture-two) · 后台未运行
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open fixture-two
+  恢复：openagentx agent resume fixture-two
+
+
+exit=0

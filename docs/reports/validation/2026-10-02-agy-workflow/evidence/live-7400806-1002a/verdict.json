@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "error": "'Request' object has no attribute 'method'",
+  "layer": "setup",
+  "product_agy_failure": false
+}

@@ -15,7 +15,7 @@ Worker 和全屏 Console：
 默认 Worker 宿主是用户级 systemd。系统级
 `deploy/systemd/openagentx-worker@.service` 仅供明确的系统部署使用，不要与本指南的用户级模板混装。
 
-主机必须提供可用的 user-systemd manager 和 `tmux`。从源码构建时还需要仓库声明的 Go、Node.js 与
+主机必须提供可用的 user-systemd manager；终端 Console 入口另需 `tmux`。从源码构建时还需要仓库声明的 Go、Node.js 与
 npm 版本；使用预构建发布产物时不需要编译工具。安装后确认当前 shell 能找到 canonical binary：
 
 ```bash
@@ -71,40 +71,16 @@ override。显式或环境 override 一旦为空、为相对路径或无法 cano
 
 ## 快速开始
 
-完成下面的文件安装后，一个新 installation 的主流程是：
+完成本指南的文件安装后，AGY 日用入口为：
 
-```bash
-# 创建 owner；密码通过 TTY 隐藏读取。
-openagentx init
-
-# 创建控制面中的正式 Agent；identity.yaml 是必需的业务输入。
-openagentx agent apply --file /absolute/path/to/identity.yaml
-
-# 启动 daemon 并验证默认数据库和 socket。
-systemctl --user daemon-reload
-systemctl --user enable --now openagentx.service
-openagentx schema verify
-
-# 创建 installation-bound CLI Token；密码仍只通过 TTY 输入。
-openagentx console login
-
-# 原子导入 Worker 配置，同时生成 fleet.yaml 和 OAX workspace。
-openagentx fleet init \
-  --agent quote-service \
-  --worker-config quote-service=/absolute/path/to/worker.yaml
-
-# 启动用户级 Worker，并确认控制面状态。
-openagentx fleet up
-openagentx fleet status
-
-# Fleet 已在 Agent window 的 pane 0 自动启动：
-# openagentx console attach --agent quote-service
-# 用户通常不需要重复运行该命令，直接进入 OAX 即可。
-tmux attach-session -t OAX
+```sh
+openagentx agent add
+openagentx agent open <agent-id>
 ```
 
-这条主路径只有 `agent_id`、Agent identity 和 Worker 配置是业务输入。DB、socket、manifest、canonical
-Worker 目录和 credential 均使用默认 profile，不需要显式 path flag。
+向导只收集名称、工作目录和职责；复用 owner 身份，内部完成配置、单 Agent user-systemd 服务与当前代次的网络准备。浏览器入口不需要 tmux。已有 identity 可用 `agent add --identity /absolute/path/to/identity.yaml` 纳管。详见[一页日用说明](agy-daily-workflow.md)；本轮实际安装和验收状态见[执行记录](../reports/validation/2026-10-02-agy-workflow/EXECUTION-LOG.md)。
+
+底层 `agent apply`、`console login`、`fleet init/up/status/down` 仍供导入和诊断使用，不再要求普通用户逐一调用。只有选择 `agent open <agent-id> --console` 时需要 tmux。
 
 ## 0. 安装或测试前预检
 

@@ -1,0 +1,12 @@
+Evidence level: D; real PTY/processes, fake Runtime. First attempt used a Unix socket path over the platform limit; this retry uses a short persistent path.
+UTC: 2026-10-01T18:09:38.958190+00:00
+Command: go test -count=1 -v ./internal/cli/console -run TestIsolatedDefaultProfileWorkflow
+=== RUN   TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident
+    workflow_integration_test.go:56: Persistent isolated fixture: /home/sky/.oax-e/console-r2/oax9-3042785488
+    workflow_integration_test.go:284: focused task detail missing
+--- FAIL: TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident (40.44s)
+FAIL
+FAIL	openagentx/internal/cli/console	40.448s
+FAIL
+
+Exit code: 1

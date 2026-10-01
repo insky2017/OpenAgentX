@@ -1,0 +1,18 @@
+{
+  "evidence_level": "D",
+  "real_e2e": false,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/api/panel",
+    "-run",
+    "TestContinueContext|TestPanelReadiness",
+    "-count=1",
+    "-v"
+  ],
+  "cwd": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree",
+  "started_at": "2026-10-01T18:01:01.902429+00:00",
+  "finished_at": "2026-10-01T18:01:03.421104+00:00",
+  "exit_code": 1
+}

@@ -1,0 +1,87 @@
+{
+  "reason": "Repeated --version health calls; full bytes retained privately; actual AGY model turns remain in runtime/",
+  "private_archive": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/public-version-probes/live-7400806-1002c",
+  "count": 10,
+  "probes": [
+    {
+      "path": "runtime/run-4087565",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "315db63fdd3652bd35f935e504997527e93206dcb7af701717084185b95e2fd1"
+      }
+    },
+    {
+      "path": "runtime/run-4087540",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "0108dc13dc6c052414097f536a76900b9a1a7b002119e77cff884416e71f1109"
+      }
+    },
+    {
+      "path": "runtime/run-4086853",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "23dee1aed3ed7704d74b25e66f20938515c7583cc85e8c0ac8ac9c6e9bff35be"
+      }
+    },
+    {
+      "path": "runtime/run-4087996",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "3f06b5aa9361b15c3990e03978d0345a41e22b1ada25b1741c17b6d697608945"
+      }
+    },
+    {
+      "path": "runtime/run-4088424",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "d60f824c4add72678f059f0905c63adc1ee2804ac46a5579b0b5844ad96718e8"
+      }
+    },
+    {
+      "path": "runtime/run-4090555",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "3dd41ea9870e30fb40d133424f1d755a672069c342a3eab7dc6ba0aa3c5a7201"
+      }
+    },
+    {
+      "path": "runtime/run-4090208",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "e3cc1f367d3224d851d0af5e0b36158da30286cce9d28c32d0a190aa17f0ee62"
+      }
+    },
+    {
+      "path": "runtime/run-4090850",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "5a9b9bbb9f15ddbc71ba1ab9431b244249d3432d680615ac4546c5594d9019c9"
+      }
+    },
+    {
+      "path": "runtime/run-4088207",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "9059c314cf593e595da588bfec66de3158bf5e1a7e683c487daa069aa3c90790"
+      }
+    },
+    {
+      "path": "runtime/run-4091126",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "pid": "e42555a7f37dbd3b8db124d0098e68402a8b852135c3760dd602ec3eff601ba6"
+      }
+    }
+  ]
+}

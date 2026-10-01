@@ -1,0 +1,56 @@
+=== RUN   TestTaskReviewPersistsDecisionWithoutRewritingExecution
+=== RUN   TestTaskReviewPersistsDecisionWithoutRewritingExecution/accepted-uncertain-effects
+=== RUN   TestTaskReviewPersistsDecisionWithoutRewritingExecution/rejected-uncertain-effects
+=== RUN   TestTaskReviewPersistsDecisionWithoutRewritingExecution/accepted-known-effects
+=== RUN   TestTaskReviewPersistsDecisionWithoutRewritingExecution/rejected-known-effects
+--- PASS: TestTaskReviewPersistsDecisionWithoutRewritingExecution (0.57s)
+    --- PASS: TestTaskReviewPersistsDecisionWithoutRewritingExecution/accepted-uncertain-effects (0.19s)
+    --- PASS: TestTaskReviewPersistsDecisionWithoutRewritingExecution/rejected-uncertain-effects (0.12s)
+    --- PASS: TestTaskReviewPersistsDecisionWithoutRewritingExecution/accepted-known-effects (0.12s)
+    --- PASS: TestTaskReviewPersistsDecisionWithoutRewritingExecution/rejected-known-effects (0.14s)
+=== RUN   TestTaskReviewRejectsStaleTaskAndRunVersions
+--- PASS: TestTaskReviewRejectsStaleTaskAndRunVersions (0.13s)
+=== RUN   TestTaskReviewRejectsUnconfirmedRuns
+=== RUN   TestTaskReviewRejectsUnconfirmedRuns/no-run
+=== RUN   TestTaskReviewRejectsUnconfirmedRuns/active
+=== RUN   TestTaskReviewRejectsUnconfirmedRuns/active-terminal-task
+=== RUN   TestTaskReviewRejectsUnconfirmedRuns/uncertain
+=== RUN   TestTaskReviewRejectsUnconfirmedRuns/failed
+=== RUN   TestTaskReviewRejectsUnconfirmedRuns/canceled
+--- PASS: TestTaskReviewRejectsUnconfirmedRuns (0.83s)
+    --- PASS: TestTaskReviewRejectsUnconfirmedRuns/no-run (0.10s)
+    --- PASS: TestTaskReviewRejectsUnconfirmedRuns/active (0.13s)
+    --- PASS: TestTaskReviewRejectsUnconfirmedRuns/active-terminal-task (0.15s)
+    --- PASS: TestTaskReviewRejectsUnconfirmedRuns/uncertain (0.15s)
+    --- PASS: TestTaskReviewRejectsUnconfirmedRuns/failed (0.14s)
+    --- PASS: TestTaskReviewRejectsUnconfirmedRuns/canceled (0.16s)
+=== RUN   TestTaskReviewRollsBackStateAndJournal
+=== RUN   TestTaskReviewRollsBackStateAndJournal/after_state_write
+=== RUN   TestTaskReviewRollsBackStateAndJournal/before_commit
+--- PASS: TestTaskReviewRollsBackStateAndJournal (0.31s)
+    --- PASS: TestTaskReviewRollsBackStateAndJournal/after_state_write (0.15s)
+    --- PASS: TestTaskReviewRollsBackStateAndJournal/before_commit (0.16s)
+=== RUN   TestTaskReviewConcurrentDuplicateIsOneAssessment
+--- PASS: TestTaskReviewConcurrentDuplicateIsOneAssessment (0.18s)
+PASS
+ok  	openagentx/internal/persistence/sqlite	3.057s
+=== RUN   TestTaskReviewHTTPPersistsAcceptedRejectedAndKeepsExecution
+--- PASS: TestTaskReviewHTTPPersistsAcceptedRejectedAndKeepsExecution (1.00s)
+=== RUN   TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence
+=== RUN   TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/anonymous
+=== RUN   TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/missing-csrf
+=== RUN   TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/wrong-csrf
+=== RUN   TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/idempotency-header-mismatch
+--- PASS: TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence (1.62s)
+    --- PASS: TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/anonymous (0.00s)
+    --- PASS: TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/missing-csrf (0.00s)
+    --- PASS: TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/wrong-csrf (0.00s)
+    --- PASS: TestTaskReviewHTTPAuthorizationAndCSRFProtectPersistence/idempotency-header-mismatch (0.00s)
+=== RUN   TestTaskReviewHTTPRejectsActiveAndUncertainExecution
+=== RUN   TestTaskReviewHTTPRejectsActiveAndUncertainExecution/active
+=== RUN   TestTaskReviewHTTPRejectsActiveAndUncertainExecution/uncertain
+--- PASS: TestTaskReviewHTTPRejectsActiveAndUncertainExecution (1.42s)
+    --- PASS: TestTaskReviewHTTPRejectsActiveAndUncertainExecution/active (0.71s)
+    --- PASS: TestTaskReviewHTTPRejectsActiveAndUncertainExecution/uncertain (0.70s)
+PASS
+ok  	openagentx/internal/api/panel	5.147s

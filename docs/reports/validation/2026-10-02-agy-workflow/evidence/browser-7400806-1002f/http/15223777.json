@@ -1,0 +1,89 @@
+{
+  "at": "2026-10-01T17:56:08.164698+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "live-agy-06-1002f",
+        "principal_id": "agent-live-agy-06-1002f",
+        "organization_id": "default",
+        "display_name": "Live AGY verification",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-01T17:49:07.341757359Z",
+        "updated_at": "2026-10-01T17:49:07.341757359Z"
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 471,
+    "server_time": "2026-10-01T17:56:08.163719409Z",
+    "tasks": [
+      {
+        "id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-a9787db9-e602-49a5-ae85-023d009cc419",
+        "target_agent_id": "live-agy-06-1002f",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "query",
+        "completion_basis": "query_result_delivered",
+        "idempotency_key": "39d11073b3609c25adf0359e",
+        "content": "Reply with exactly OAX-LIVE-06-1002f-1. Do not call tools or read files.",
+        "status": "succeeded",
+        "result": "OAX-LIVE-06-1002f-1",
+        "created_at": "2026-10-01T17:49:15.665316016Z",
+        "updated_at": "2026-10-01T17:49:28.497480313Z"
+      },
+      {
+        "id": "task-6e7c7661-0eaa-41f5-9811-936cf0e01550",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-a9787db9-e602-49a5-ae85-023d009cc419",
+        "target_agent_id": "live-agy-06-1002f",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "query",
+        "completion_basis": "query_result_delivered",
+        "idempotency_key": "c8d0f1943b0daa6feb8f3de6",
+        "content": "Reply with exactly OAX-LIVE-06-1002f-2. Do not call tools or read files.",
+        "status": "succeeded",
+        "result": "OAX-LIVE-06-1002f-2",
+        "created_at": "2026-10-01T17:49:29.714972265Z",
+        "updated_at": "2026-10-01T17:49:42.324259076Z"
+      },
+      {
+        "id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-a9787db9-e602-49a5-ae85-023d009cc419",
+        "target_agent_id": "live-agy-06-1002f",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "query",
+        "completion_basis": "query_result_delivered",
+        "idempotency_key": "task-cbb1ff7d-d339-4dda-a87f-db46ba320e65",
+        "content": "Reply with exactly OAX-BROWSER-7400806-1002F. Do not call tools or read files.",
+        "status": "succeeded",
+        "result": "OAX-BROWSER-7400806-1002F",
+        "created_at": "2026-10-01T17:53:52.601209081Z",
+        "updated_at": "2026-10-01T17:54:04.310310746Z"
+      }
+    ],
+    "workers": [
+      {
+        "worker_instance_id": "worker-b6940f65-3981-4d21-bbe0-b66d74dd9563",
+        "agent_id": "live-agy-06-1002f",
+        "generation": 1,
+        "status": "online",
+        "last_heartbeat_at": "2026-10-01T17:56:07.543286336Z",
+        "lease_until": "2026-10-01T17:56:37.543286336Z",
+        "started_at": "2026-10-01T17:49:10.536630036Z",
+        "updated_at": "2026-10-01T17:56:07.543286336Z"
+      }
+    ]
+  }
+}

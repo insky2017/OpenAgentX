@@ -1,0 +1,7 @@
+{
+  "captured_at": "2026-10-02T02:20:33+0800",
+  "source_head": "2d3fbcdd7183c9cb2b3979c12f880a02644f4f4e",
+  "source_state": "uncommitted concurrent implementation; not installed I candidate",
+  "build_command": "go build -o /tmp/openagentx-onboarding-navigation-candidate ./cmd/openagentx",
+  "binary_sha256": "79070d993ddee4ce749234c1d5a0976a6b9a02c9ca0da2335e16480a77e22e3f"
+}

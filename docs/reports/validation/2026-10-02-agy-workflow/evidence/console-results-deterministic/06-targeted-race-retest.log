@@ -1,0 +1,29 @@
+Evidence level: D
+UTC: 2026-10-01T18:15:15.620308+00:00
+Command: go test -race -count=1 -v ./internal/api/console ./internal/client/console ./internal/consolemodel ./internal/cli/console -run TestContinue|TestConsoleResult|TestResultReview|TestReviewVersion|TestTaskReducerVersion|TestTaskIntent|TestConsoleReview
+=== RUN   TestConsoleReviewProjectionAndReadinessUseAuthoritativeFacts
+--- PASS: TestConsoleReviewProjectionAndReadinessUseAuthoritativeFacts (0.72s)
+PASS
+ok  	openagentx/internal/api/console	1.799s
+=== RUN   TestResultReviewUsesAuthenticatedControlAPI
+--- PASS: TestResultReviewUsesAuthenticatedControlAPI (0.01s)
+PASS
+ok  	openagentx/internal/client/console	1.039s
+=== RUN   TestReviewVersionAdvancesWithoutChangingExecutionEvidence
+--- PASS: TestReviewVersionAdvancesWithoutChangingExecutionEvidence (0.00s)
+=== RUN   TestTaskIntentCannotChangeAcrossControlAndEventUpdates
+--- PASS: TestTaskIntentCannotChangeAcrossControlAndEventUpdates (0.00s)
+=== RUN   TestTaskIntentRequiresExplicitProjectionAndDuplicateIsIdempotent
+--- PASS: TestTaskIntentRequiresExplicitProjectionAndDuplicateIsIdempotent (0.00s)
+=== RUN   TestTaskReducerVersionTerminalAndCursorMatrix
+--- PASS: TestTaskReducerVersionTerminalAndCursorMatrix (0.00s)
+PASS
+ok  	openagentx/internal/consolemodel	1.048s
+=== RUN   TestContinueDispatchCarriesParentAndServerContext
+--- PASS: TestContinueDispatchCarriesParentAndServerContext (0.00s)
+=== RUN   TestConsoleResultReviewBindsTaskRunAndVersions
+--- PASS: TestConsoleResultReviewBindsTaskRunAndVersions (0.00s)
+PASS
+ok  	openagentx/internal/cli/console	1.055s
+
+Exit code: 0

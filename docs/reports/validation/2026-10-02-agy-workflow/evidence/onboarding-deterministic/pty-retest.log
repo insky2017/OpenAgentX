@@ -1,0 +1,102 @@
+$ /tmp/openagentx-onboarding-candidate init
+Owner password: 
+Confirm owner password: 
+Initialized OpenAgentX owner "owner" and Organization "default"
+
+exit=0
+
+$ /tmp/openagentx-onboarding-candidate agent add --password-file /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/password --configure-only
+Agent 名称: fixture-one
+工作目录: /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace
+职责文档路径或职责描述: /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace/ROLE.md
+OpenAgentX is already initialized; no changes were made
+Created Agent "fixture-one" in Organization "default"
+CLI session established for owner; expires 2026-10-31T17:59:00Z
+Agent fixture-one 已纳管，工作目录 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace，职责 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace/ROLE.md
+Agent fixture-one 已纳管；运行 agent resume fixture-one 启动并准备网络。
+
+exit=0
+
+$ /tmp/openagentx-onboarding-candidate agent add --name fixture-two --workspace /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace --role /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace/ROLE.md --password-file /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/password --configure-only
+OpenAgentX is already initialized; no changes were made
+Created Agent "fixture-two" in Organization "default"
+Agent fixture-two 已纳管，工作目录 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace，职责 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace/ROLE.md
+Agent fixture-two 已纳管；运行 agent resume fixture-two 启动并准备网络。
+
+exit=0
+
+$ /tmp/openagentx-onboarding-candidate agent add --name fixture-one --workspace /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace --role /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace/ROLE.md --password-file /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/password --configure-only
+OpenAgentX is already initialized; no changes were made
+Agent "fixture-one" is unchanged; no events were appended
+Agent fixture-one 已纳管，工作目录 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace，职责 /home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858/workspace/ROLE.md
+Agent fixture-one 已纳管；运行 agent resume fixture-one 启动并准备网络。
+
+exit=0
+
+$ /tmp/openagentx-onboarding-candidate agent open fixture-one --no-open
+{
+  "active_run": null,
+  "agent_id": "fixture-one",
+  "created_at": "2026-10-01T17:59:00.018421607Z",
+  "display_name": "fixture-one",
+  "open_command": "openagentx agent open fixture-one",
+  "organization_id": "default",
+  "pending_task": null,
+  "principal_id": "agent-fixture-one",
+  "readiness": {
+    "can_start_now": false,
+    "next_action": "openagentx agent resume fixture-one",
+    "ready": false,
+    "reason": "后台未运行"
+  },
+  "resume_command": "openagentx agent resume fixture-one",
+  "status": "active",
+  "updated_at": "2026-10-01T17:59:00.018421607Z",
+  "version": 1
+}
+
+exit=0
+
+$ /tmp/openagentx-onboarding-candidate agent status
+{
+  "active_run": null,
+  "agent_id": "fixture-one",
+  "created_at": "2026-10-01T17:59:00.018421607Z",
+  "display_name": "fixture-one",
+  "open_command": "openagentx agent open fixture-one",
+  "organization_id": "default",
+  "pending_task": null,
+  "principal_id": "agent-fixture-one",
+  "readiness": {
+    "can_start_now": false,
+    "next_action": "openagentx agent resume fixture-one",
+    "ready": false,
+    "reason": "后台未运行"
+  },
+  "resume_command": "openagentx agent resume fixture-one",
+  "status": "active",
+  "updated_at": "2026-10-01T17:59:00.018421607Z",
+  "version": 1
+}
+{
+  "active_run": null,
+  "agent_id": "fixture-two",
+  "created_at": "2026-10-01T17:59:00.561267083Z",
+  "display_name": "fixture-two",
+  "open_command": "openagentx agent open fixture-two",
+  "organization_id": "default",
+  "pending_task": null,
+  "principal_id": "agent-fixture-two",
+  "readiness": {
+    "can_start_now": false,
+    "next_action": "openagentx agent resume fixture-two",
+    "ready": false,
+    "reason": "后台未运行"
+  },
+  "resume_command": "openagentx agent resume fixture-two",
+  "status": "active",
+  "updated_at": "2026-10-01T17:59:00.561267083Z",
+  "version": 1
+}
+
+exit=0

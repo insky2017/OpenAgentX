@@ -1,0 +1,14 @@
+{
+  "source_commit": "7400806",
+  "binary": "/tmp/oax-live-base-7400806/openagentx",
+  "binary_sha256": "457d229074ebb4d3c01f0ddb86d36a9f0cad53ca212bd433f22e67a54ba96336",
+  "source_kind": "git archive baseline",
+  "coverage": "R formal API configuration; NOT first-use wizard or installed-service proof",
+  "url": "http://127.0.0.1:44481",
+  "profile": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-7400806-1002d",
+  "agent": "live-agy-06-1002d",
+  "proxy_mode": "explicit native HTTP proxy via formal agy-graft",
+  "model": "gemini-3.7-flash-low",
+  "agy_version": "1.2.14",
+  "agy-graft_version": "1.2.14"
+}

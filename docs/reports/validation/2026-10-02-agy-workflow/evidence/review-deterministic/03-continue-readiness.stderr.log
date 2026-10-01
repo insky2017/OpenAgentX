@@ -1,0 +1,2 @@
+# openagentx/internal/api/console
+internal/api/console/task_projection.go:123:22: cannot use resolved.DeadlineAt (variable of type time.Time) as *time.Time value in assignment

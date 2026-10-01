@@ -1,0 +1,212 @@
+=== RUN   TestAgentAddIncrementalIdempotentAndConflict
+    agent_test.go:82: D fixture: formal init/apply, two incremental Agents, repeat unchanged, conflict preserved; systemd/credentials are mocks.
+--- PASS: TestAgentAddIncrementalIdempotentAndConflict (1.20s)
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed
+--- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed (0.00s)
+=== RUN   TestAgentExistingNetworkPreservedAcrossGeneration
+--- PASS: TestAgentExistingNetworkPreservedAcrossGeneration (0.00s)
+=== RUN   TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop
+    agent_test.go:176: D fixture only: stop -> draining -> offline, no force-stop or systemctl kill
+--- PASS: TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop (0.00s)
+=== RUN   TestAgentURLUsesActualServiceOverride
+--- PASS: TestAgentURLUsesActualServiceOverride (0.00s)
+=== RUN   TestAgentStatusIncludesReadinessLatestResultAndOpenAction
+--- PASS: TestAgentStatusIncludesReadinessLatestResultAndOpenAction (0.00s)
+=== RUN   TestAgentUnitInstallRefusesExistingConflict
+--- PASS: TestAgentUnitInstallRefusesExistingConflict (0.01s)
+=== RUN   TestAgentParseWizardHasOnlyThreePrompts
+--- PASS: TestAgentParseWizardHasOnlyThreePrompts (0.46s)
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks
+    agent_test.go:320: D fixture: only selected unit starts despite other Agent config missing; existing binding must match new generation; no Task API write
+--- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks (0.00s)
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration/model-
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration/model-fixture-model
+--- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration (1.00s)
+    --- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration/model- (0.51s)
+    --- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration/model-fixture-model (0.49s)
+=== RUN   TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig
+--- PASS: TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig (0.03s)
+=== RUN   TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs
+--- PASS: TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs (0.02s)
+=== RUN   TestFleetInstallationMismatchNeverSendsStoredToken
+--- PASS: TestFleetInstallationMismatchNeverSendsStoredToken (0.00s)
+=== RUN   TestFleetUsesResolvedProfilePathsWithoutExplicitFlags
+--- PASS: TestFleetUsesResolvedProfilePathsWithoutExplicitFlags (0.00s)
+=== RUN   TestFleetInitConflictAndAtomicFailureAreNonDestructive
+--- PASS: TestFleetInitConflictAndAtomicFailureAreNonDestructive (0.01s)
+=== RUN   TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes
+--- PASS: TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes (0.03s)
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename
+--- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap (0.01s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink (0.00s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename (0.01s)
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/symlink
+--- PASS: TestFleetPrepareRejectsUnsafeManifestFile (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/symlink (0.00s)
+=== RUN   TestFleetInitRejectsRelativeImportedWorkerPathSemantics
+--- PASS: TestFleetInitRejectsRelativeImportedWorkerPathSemantics (0.00s)
+=== RUN   TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts
+--- PASS: TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts (0.00s)
+=== RUN   TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure
+--- PASS: TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure (0.04s)
+=== RUN   TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager
+--- PASS: TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager (0.00s)
+=== RUN   TestFleetUpRejectsUnitMismatchBeforeAnyMutation
+--- PASS: TestFleetUpRejectsUnitMismatchBeforeAnyMutation (0.00s)
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up
+--- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up (0.00s)
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable
+--- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable (0.00s)
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/status
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/down
+--- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/status (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/down (0.00s)
+=== RUN   TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile
+--- PASS: TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile (0.00s)
+=== RUN   TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero
+--- PASS: TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero (0.00s)
+=== RUN   TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser
+--- PASS: TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser (0.00s)
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked
+--- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked (0.00s)
+=== RUN   TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline
+--- PASS: TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline (0.00s)
+=== RUN   TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations
+--- PASS: TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations (0.00s)
+=== RUN   TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed
+--- PASS: TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed (0.00s)
+=== RUN   TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager
+--- PASS: TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured
+--- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file
+--- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file (0.00s)
+=== RUN   TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable
+--- PASS: TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable (0.00s)
+PASS
+ok  	openagentx/internal/cli/fleet	2.869s
+=== RUN   TestNamedProfileDirectRulesMaterializeIntoFormalAgyEnvironment
+--- PASS: TestNamedProfileDirectRulesMaterializeIntoFormalAgyEnvironment (0.07s)
+=== RUN   TestEnvironmentDirectRemovesProxyVariables
+--- PASS: TestEnvironmentDirectRemovesProxyVariables (0.00s)
+=== RUN   TestEnvironmentNamedProfileUses0600AgyConfig
+--- PASS: TestEnvironmentNamedProfileUses0600AgyConfig (0.00s)
+=== RUN   TestEnvironmentRejectsUnsafeAgyDirectMode
+--- PASS: TestEnvironmentRejectsUnsafeAgyDirectMode (0.00s)
+=== RUN   TestEnvironmentRejectsInsecureProfileFile
+--- PASS: TestEnvironmentRejectsInsecureProfileFile (0.00s)
+=== RUN   TestEnvironmentInheritPreservesNativeProxyWrapperContract
+--- PASS: TestEnvironmentInheritPreservesNativeProxyWrapperContract (0.00s)
+=== RUN   TestInspectAgyRuntimeIdentitySeparatesWrapperNativeAndHelper
+2026/10/02 02:09:26 WARN Runtime executable changed; continuing with current executable adapter_id=agy-batch expected_sha256=3027e3b18a68be8fd49cc24c3f04e460484e09866afe57d5a3d4d57427d2963c actual_sha256=653496c6b50d2c75b9a8d7dc186923f96eec7edef4906d21673c8a6ee91d4741
+--- PASS: TestInspectAgyRuntimeIdentitySeparatesWrapperNativeAndHelper (0.01s)
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/unchanged
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/executable
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/adapter
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/protocol
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/wrapper
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/helper
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/helper_version
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/missing_digest
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/invalid_digest
+=== RUN   TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/executable_and_helper
+--- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/unchanged (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/executable (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/adapter (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/protocol (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/wrapper (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/helper (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/helper_version (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/missing_digest (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/invalid_digest (0.00s)
+    --- PASS: TestCompareRuntimeIdentityOnlyExecutableChangeIsAdvisory/executable_and_helper (0.00s)
+=== RUN   TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges
+=== RUN   TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/wrapper
+=== RUN   TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/helper
+=== RUN   TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/native_missing
+=== RUN   TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/native_symlink
+=== RUN   TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/native_directory
+--- PASS: TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges (0.02s)
+    --- PASS: TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/wrapper (0.01s)
+    --- PASS: TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/helper (0.01s)
+    --- PASS: TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/native_missing (0.00s)
+    --- PASS: TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/native_symlink (0.00s)
+    --- PASS: TestVerifyRuntimeIdentityRejectsUnsafeFilesAndNetworkHelperChanges/native_directory (0.00s)
+=== RUN   TestInspectAgyRuntimeIdentityRejectsUnboundedHelperVersion
+--- PASS: TestInspectAgyRuntimeIdentityRejectsUnboundedHelperVersion (0.00s)
+=== RUN   TestMaterializerUsesPersistentKeyedIntegrity
+--- PASS: TestMaterializerUsesPersistentKeyedIntegrity (0.05s)
+=== RUN   TestImportSourceIdentityIsNormalizedAndKeyed
+--- PASS: TestImportSourceIdentityIsNormalizedAndKeyed (0.01s)
+=== RUN   TestMaterializerRejectsInvalidPersistentIntegrityKey
+--- PASS: TestMaterializerRejectsInvalidPersistentIntegrityKey (0.00s)
+=== RUN   TestMaterializerRejectsWhitespaceRoot
+--- PASS: TestMaterializerRejectsWhitespaceRoot (0.00s)
+=== RUN   TestMaterializerInternalFilesRemainAnchoredAfterRootReplacement
+--- PASS: TestMaterializerInternalFilesRemainAnchoredAfterRootReplacement (0.07s)
+=== RUN   TestMaterializerConcurrentOpenPublishesOneCompleteKey
+--- PASS: TestMaterializerConcurrentOpenPublishesOneCompleteKey (0.02s)
+=== RUN   TestMaterializerRendersNativeHTTPAddressWithoutURLScheme
+--- PASS: TestMaterializerRendersNativeHTTPAddressWithoutURLScheme (0.03s)
+=== RUN   TestMaterializerDoesNotPublishSensitiveConfigWhenBlackIPCommitFails
+--- PASS: TestMaterializerDoesNotPublishSensitiveConfigWhenBlackIPCommitFails (0.01s)
+=== RUN   TestImportConfigRejectsDuplicateKeysAndTrailingPortText
+=== RUN   TestImportConfigRejectsDuplicateKeysAndTrailingPortText/duplicate
+=== RUN   TestImportConfigRejectsDuplicateKeysAndTrailingPortText/trailing-port
+--- PASS: TestImportConfigRejectsDuplicateKeysAndTrailingPortText (0.01s)
+    --- PASS: TestImportConfigRejectsDuplicateKeysAndTrailingPortText/duplicate (0.00s)
+    --- PASS: TestImportConfigRejectsDuplicateKeysAndTrailingPortText/trailing-port (0.00s)
+=== RUN   TestProbeEndpointNegotiatesSOCKS5Authentication
+--- PASS: TestProbeEndpointNegotiatesSOCKS5Authentication (0.00s)
+=== RUN   TestProbeEndpointRejectsSOCKS5AuthenticationFailure
+--- PASS: TestProbeEndpointRejectsSOCKS5AuthenticationFailure (0.00s)
+=== RUN   TestProbeEndpointRejectsHTTPProxyAuthenticationRequirement
+--- PASS: TestProbeEndpointRejectsHTTPProxyAuthenticationRequirement (0.00s)
+=== RUN   TestProbeEndpointAcceptsBoundedHTTPProtocolResponse
+--- PASS: TestProbeEndpointAcceptsBoundedHTTPProtocolResponse (0.00s)
+=== RUN   TestProbeEndpointCancellationInterruptsStalledRead
+--- PASS: TestProbeEndpointCancellationInterruptsStalledRead (0.00s)
+=== RUN   TestProbeEndpointRejectsUnreachableAddress
+--- PASS: TestProbeEndpointRejectsUnreachableAddress (0.00s)
+PASS
+ok  	openagentx/internal/runtime/network	0.324s

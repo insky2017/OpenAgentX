@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-01T17:56:08.161405+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/run-attempts/run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+  "request": null,
+  "status": 200,
+  "response": {
+    "run_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+    "task_id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+    "agent_id": "live-agy-06-1002f",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-b6940f65-3981-4d21-bbe0-b66d74dd9563",
+    "worker_generation": 1,
+    "execution_spec_version": 1,
+    "adapter_id": "agy-batch",
+    "backend_id": "primary",
+    "model": "gemini-3.7-flash-low",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 1,
+    "network_binding_revision": 1,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "OAX-BROWSER-7400806-1002F",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-01T17:53:52.605180157Z",
+    "finished_at": "2026-10-01T17:54:04.310310746Z",
+    "created_at": "2026-10-01T17:53:52.605180157Z",
+    "updated_at": "2026-10-01T17:54:04.310310746Z"
+  }
+}

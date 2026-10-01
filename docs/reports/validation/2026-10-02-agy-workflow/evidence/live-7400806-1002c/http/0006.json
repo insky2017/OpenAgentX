@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-01T17:45:45.078983+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/network-profiles?agent_id=live-agy-06-1002c",
+  "request": null,
+  "status": 200,
+  "response": {
+    "profiles": [],
+    "versions": [],
+    "tests": [],
+    "mode_tests": [],
+    "bindings": [],
+    "active_runs": []
+  }
+}

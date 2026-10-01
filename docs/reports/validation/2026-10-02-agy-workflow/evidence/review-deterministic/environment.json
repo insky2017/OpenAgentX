@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-10-01T18:04:23.146745+00:00",
+  "evidence_level": "D",
+  "real_e2e": false,
+  "raw_directory": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/review-deterministic",
+  "git_head": "740080697f3e5a1a4d6381eb6a2ea5208be6e568",
+  "git_branch": "codex/agy-workflow",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "source_sha256": {
+    "internal/persistence/sqlite/task_review_repository.go": "d6e4c1448e5157e8293f42c0eafe987fc1b912cdbd67a422d84f321d129225a7",
+    "internal/persistence/sqlite/task_review_repository_test.go": "699000cdfbe1f100f93220466d66f7134d8286df3dd19f1e44a8646f8526ba36",
+    "internal/controlplane/task_review.go": "f239b0aaa3cf3b5c7d5221cbdf34a3ed54a9c33015a824b989d23e725e19be63",
+    "internal/controlplane/command_service.go": "2bfb66754da0080fca9c6bd784e815a142a2597b7c7bd0c4fd7417447325055f",
+    "internal/api/panel/task_review.go": "9430fca6de0a79fb9dbac00744b3a11c808d421cb02a944137095f8dc09cc93e",
+    "internal/api/panel/task_review_test.go": "3e9846661e80d7abdc03ee67e5b4bb67253259a892f95a5fa45c3cb4b3b29d4c",
+    "internal/api/panel/task_continue_test.go": "ef05cc743036ae9fea319f02293ef14fde09c486ac823d3368d482fa6b8f1672",
+    "internal/api/panel/readiness.go": "9adf23989d3ca09892c5911e159a968fd932605adca8ea401f86099faa522f98",
+    "internal/api/panel/readiness_test.go": "85fc4a15a27948fee797103b540b217e2ddaae1d80044d9128a33a998930a815",
+    "internal/api/readiness.go": "ecd72c16b593aacab2d96ce0b5fd1ba19b60fe7a5c0d86d361d5a647863fe377",
+    "internal/api/console/task_projection.go": "05c98387a97fb67764aa1dc5d96077bbd0dfa2dec6a468f0ec672e544ed30f67",
+    "internal/api/observe.go": "99f7dafcf7b91f0f59f41a1c8a28890ce1c16f2eccde5549cd391a8d0b351081"
+  },
+  "redaction": "Reviewed stdout/stderr contain only synthetic fixture test names and diagnostics. No real credential, Runtime output or production database data used."
+}

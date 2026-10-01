@@ -1,0 +1,9 @@
+{
+  "layer": "D",
+  "systemd": "mock; no real service or AGY execution",
+  "cli": "real binary with real PTY",
+  "daemon": "real isolated process/API/credential login",
+  "raw_directory": "/home/sky/.local/state/openagentx/evidence/onboarding-d-20261002-015858",
+  "binary_sha256": "54b26677281425eb75a4b125375bd1a5641eea00c62f28ca58eb83527ebfc310",
+  "result": "PASS"
+}

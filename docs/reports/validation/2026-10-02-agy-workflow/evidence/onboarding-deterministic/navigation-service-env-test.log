@@ -1,0 +1,131 @@
+=== RUN   TestAgentAddIncrementalIdempotentAndConflict
+    agent_test.go:84: D fixture: formal init/apply, two incremental Agents, repeat unchanged, conflict preserved; systemd/credentials are mocks.
+--- PASS: TestAgentAddIncrementalIdempotentAndConflict (1.03s)
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed
+--- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed (0.00s)
+=== RUN   TestAgentExistingNetworkPreservedAcrossGeneration
+--- PASS: TestAgentExistingNetworkPreservedAcrossGeneration (0.00s)
+=== RUN   TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop
+    agent_test.go:178: D fixture only: stop -> draining -> offline, no force-stop or systemctl kill
+--- PASS: TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop (0.00s)
+=== RUN   TestAgentURLUsesActualServiceOverride
+--- PASS: TestAgentURLUsesActualServiceOverride (0.00s)
+=== RUN   TestAgentStatusIncludesReadinessLatestResultAndOpenAction
+--- PASS: TestAgentStatusIncludesReadinessLatestResultAndOpenAction (0.00s)
+=== RUN   TestAgentUnitInstallRefusesExistingConflict
+--- PASS: TestAgentUnitInstallRefusesExistingConflict (0.00s)
+=== RUN   TestAgentParseWizardHasOnlyThreePrompts
+--- PASS: TestAgentParseWizardHasOnlyThreePrompts (0.46s)
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks
+    agent_test.go:322: D fixture: only selected unit starts despite other Agent config missing; existing binding must match new generation; no Task API write
+--- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks (0.00s)
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration/model-
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration/model-fixture-model
+--- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration (0.91s)
+    --- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration/model- (0.44s)
+    --- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration/model-fixture-model (0.46s)
+=== RUN   TestAgentURLResolvesActualMainPIDEnvironment
+    agent_test.go:417: link= err=daemon没有有效的OPENAGENTX_HTTP_ADDR；使用 --web-url
+--- FAIL: TestAgentURLResolvesActualMainPIDEnvironment (0.00s)
+=== RUN   TestAgentNavigationBoundsOutputAndRetainsJSONOption
+--- PASS: TestAgentNavigationBoundsOutputAndRetainsJSONOption (0.00s)
+=== RUN   TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig
+--- PASS: TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig (0.03s)
+=== RUN   TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs
+--- PASS: TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs (0.02s)
+=== RUN   TestFleetInstallationMismatchNeverSendsStoredToken
+--- PASS: TestFleetInstallationMismatchNeverSendsStoredToken (0.00s)
+=== RUN   TestFleetUsesResolvedProfilePathsWithoutExplicitFlags
+--- PASS: TestFleetUsesResolvedProfilePathsWithoutExplicitFlags (0.00s)
+=== RUN   TestFleetInitConflictAndAtomicFailureAreNonDestructive
+--- PASS: TestFleetInitConflictAndAtomicFailureAreNonDestructive (0.01s)
+=== RUN   TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes
+--- PASS: TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes (0.03s)
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename
+--- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap (0.01s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink (0.00s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename (0.01s)
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/symlink
+--- PASS: TestFleetPrepareRejectsUnsafeManifestFile (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/symlink (0.00s)
+=== RUN   TestFleetInitRejectsRelativeImportedWorkerPathSemantics
+--- PASS: TestFleetInitRejectsRelativeImportedWorkerPathSemantics (0.00s)
+=== RUN   TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts
+--- PASS: TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts (0.00s)
+=== RUN   TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure
+--- PASS: TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure (0.04s)
+=== RUN   TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager
+--- PASS: TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager (0.00s)
+=== RUN   TestFleetUpRejectsUnitMismatchBeforeAnyMutation
+--- PASS: TestFleetUpRejectsUnitMismatchBeforeAnyMutation (0.00s)
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up
+--- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up (0.00s)
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable
+--- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable (0.00s)
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/status
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/down
+--- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/status (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/down (0.00s)
+=== RUN   TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile
+--- PASS: TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile (0.00s)
+=== RUN   TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero
+--- PASS: TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero (0.00s)
+=== RUN   TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser
+--- PASS: TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser (0.00s)
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked
+--- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked (0.00s)
+=== RUN   TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline
+--- PASS: TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline (0.00s)
+=== RUN   TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations
+--- PASS: TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations (0.00s)
+=== RUN   TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed
+--- PASS: TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed (0.00s)
+=== RUN   TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager
+--- PASS: TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured
+--- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file
+--- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file (0.00s)
+=== RUN   TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable
+--- PASS: TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable (0.00s)
+FAIL
+FAIL	openagentx/internal/cli/fleet	2.599s
+FAIL

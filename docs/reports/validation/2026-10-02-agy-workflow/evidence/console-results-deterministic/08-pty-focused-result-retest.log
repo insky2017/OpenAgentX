@@ -1,0 +1,10 @@
+Evidence level: D; real PTY/processes, fake Runtime. Use the already-focused completed dispatch, avoid reselecting the same task; verify review response and refreshed version.
+UTC: 2026-10-01T18:22:08.202958+00:00
+Command: go test -count=1 -v ./internal/cli/console -run TestIsolatedDefaultProfileWorkflow
+=== RUN   TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident
+    workflow_integration_test.go:56: Persistent isolated fixture: /home/sky/.oax-e/console-r6/oax9-1121450386
+--- PASS: TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident (28.98s)
+PASS
+ok  	openagentx/internal/cli/console	28.989s
+
+Exit code: 0

@@ -1,0 +1,106 @@
+{
+  "evidence_layer": "D",
+  "redaction": "PTY input passwords are hidden by term.ReadPassword; log copier removes fixture password if ever present. No raw credential stores, DBs or private env files copied. Runtime fixture 503 intentionally stops after config parse/registration.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "2393a168cbb36748d84dc58566893dcc12c1de1e79f20a9120e492339a3ca13e",
+      "bytes": 5426
+    },
+    {
+      "path": "agent-final-targeted.log",
+      "sha256": "1095be5f5019c827ceeea52aa1d71d3821e5f4e2969a769394e9b2f4f057f369",
+      "bytes": 1968
+    },
+    {
+      "path": "build-metadata.json",
+      "sha256": "42c0c214f69a544e2900da97cc7eeae822a4297c00254d1de7dff6cb1a85d9f5",
+      "bytes": 433
+    },
+    {
+      "path": "daemon-retest.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "final-retest.log",
+      "sha256": "ebb5f88468025e7fe0f89a5e4569760293f6672e47cc9d09779e7148316dfd4b",
+      "bytes": 23660
+    },
+    {
+      "path": "final-test.log",
+      "sha256": "404444724e00411324471eb458ee69cca60f01f4177b64dd5c95e3d7c1381f23",
+      "bytes": 13862
+    },
+    {
+      "path": "first-pty-failure.json",
+      "sha256": "7f5e974e55155546a71e9cb2a8d9d61323fa03b0cdb77894796d1816a195ceab",
+      "bytes": 181
+    },
+    {
+      "path": "first-pty-failure.log",
+      "sha256": "f252d81a4c7d7154d34f84aa25aea2022713d30e6e7abd54a97e8e896c96d752",
+      "bytes": 2857
+    },
+    {
+      "path": "first-test.log",
+      "sha256": "93d7df22aee30e8a05b2705ed2700f8ea3710959c379dc09b875d5c03180a6c1",
+      "bytes": 23367
+    },
+    {
+      "path": "model-native-proxy-test.log",
+      "sha256": "da03c87dafa4cc73a2c9ab10fdd6426c1557905b3cad4333f6aec9f0fe296aa0",
+      "bytes": 16622
+    },
+    {
+      "path": "navigation-build-metadata.json",
+      "sha256": "be5a062550d7cbcb54df1e604f0b501c07996f40fea5b2f32b14d5841326240a",
+      "bytes": 381
+    },
+    {
+      "path": "navigation-daemon.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "navigation-pty.json",
+      "sha256": "d458f1741a1484a3c541b666e6fe3d369468f1b6a9e35388633a153bb2e04586",
+      "bytes": 371
+    },
+    {
+      "path": "navigation-pty.log",
+      "sha256": "5eb06daf6373beaf61cc076553b8d81df7e2c8960ddf8912e273970ff8587ed7",
+      "bytes": 4274
+    },
+    {
+      "path": "navigation-service-env-retest.log",
+      "sha256": "0d7aa8562cda716adf605eb16b15fbaf1525eb8931fe47b178f762ef861968a2",
+      "bytes": 10216
+    },
+    {
+      "path": "navigation-service-env-test.log",
+      "sha256": "9e415f63ab64a62370356f641b62f812038bdf0785253580da8d2c5770374bcd",
+      "bytes": 10315
+    },
+    {
+      "path": "pty-retest.json",
+      "sha256": "2379f052977533dc233c2a6450b66d9f0a88908664a0f981bf1d8cf346ae8e37",
+      "bytes": 371
+    },
+    {
+      "path": "pty-retest.log",
+      "sha256": "2bc52f2ac00aa223537255880d3676897179891dd739bc61a70c42efae868ed2",
+      "bytes": 4675
+    },
+    {
+      "path": "pty_fixture.py",
+      "sha256": "fb7da68130d7939dd12615092363791f504203a4cf048ddd8b0104a74b2be1c7",
+      "bytes": 4511
+    },
+    {
+      "path": "retest.log",
+      "sha256": "32e4cee950d959b47794954fc5be4ca5a5b6ff752feda37872724804251c180a",
+      "bytes": 23368
+    }
+  ]
+}

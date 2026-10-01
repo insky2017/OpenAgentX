@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-01T17:49:15.666941+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-06-1002f",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-LIVE-06-1002f-1. Do not call tools or read files.",
+    "execution": {
+      "adapter_id": "agy-batch",
+      "backend_id": "primary",
+      "model": "gemini-3.7-flash-low",
+      "reasoning": {
+        "mode": "backend_default"
+      },
+      "session": {
+        "mode": "new"
+      },
+      "timeout": 180000000000,
+      "approval_policy": "auto",
+      "sandbox": "none"
+    },
+    "meta": {
+      "idempotency_key": "39d11073b3609c25adf0359e"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 1
+  }
+}

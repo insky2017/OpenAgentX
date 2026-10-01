@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/tmp/oax-live-base-7400806/openagentx",
+    "agent",
+    "apply",
+    "--file",
+    "/tmp/oax-live-7400806-1002b/identity.yaml"
+  ],
+  "exit_code": 0,
+  "output": "Owner password: \r\nCreated Agent \"live-agy-06-1002b\" in Organization \"default\"\r\n"
+}

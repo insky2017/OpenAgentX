@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "task_id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+  "expected": "OAX-BROWSER-7400806-1002F",
+  "evidence_scope": "authenticated Observe cross-check of task created by actual CUA UI action",
+  "browser_tool": "mcp__cua_repl",
+  "source_commit": "7400806"
+}

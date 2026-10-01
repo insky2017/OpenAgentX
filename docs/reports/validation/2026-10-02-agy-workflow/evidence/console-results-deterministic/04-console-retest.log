@@ -1,0 +1,324 @@
+Evidence level: D; real PTY/processes, fake Runtime. Fixture fixes: complete Run identity and scroll to focused summary.
+UTC: 2026-10-01T18:12:44.916573+00:00
+Command: go test -count=1 -v ./internal/api/console ./internal/client/console ./internal/consolemodel ./internal/cli/console
+=== RUN   TestAttachIncludesCurrentRunAndBackendHealth
+--- PASS: TestAttachIncludesCurrentRunAndBackendHealth (0.48s)
+=== RUN   TestAttachFailsClosedOnInvalidWorkerOrRunIdentity
+=== RUN   TestAttachFailsClosedOnInvalidWorkerOrRunIdentity/invalid_Worker_status
+=== RUN   TestAttachFailsClosedOnInvalidWorkerOrRunIdentity/Run_bound_to_old_Worker
+--- PASS: TestAttachFailsClosedOnInvalidWorkerOrRunIdentity (0.55s)
+    --- PASS: TestAttachFailsClosedOnInvalidWorkerOrRunIdentity/invalid_Worker_status (0.30s)
+    --- PASS: TestAttachFailsClosedOnInvalidWorkerOrRunIdentity/Run_bound_to_old_Worker (0.26s)
+=== RUN   TestAttachFollowsLatestGenerationAndReconnect
+--- PASS: TestAttachFollowsLatestGenerationAndReconnect (0.27s)
+=== RUN   TestAttachReportsOfflineWithoutInventingWorkerIdentity
+--- PASS: TestAttachReportsOfflineWithoutInventingWorkerIdentity (0.28s)
+=== RUN   TestDiagnosticAttachIsAuthorizedRateLimitedAndDoesNotExposeFencing
+--- PASS: TestDiagnosticAttachIsAuthorizedRateLimitedAndDoesNotExposeFencing (0.27s)
+=== RUN   TestCLIAttachScopeRequirements
+--- PASS: TestCLIAttachScopeRequirements (0.00s)
+=== RUN   TestAgentOptionsArePaginatedWithoutSensitiveWorkerFields
+--- PASS: TestAgentOptionsArePaginatedWithoutSensitiveWorkerFields (0.30s)
+=== RUN   TestAgentOptionsFailClosedOnInvalidOrUnorderedProjection
+=== RUN   TestAgentOptionsFailClosedOnInvalidOrUnorderedProjection/unordered
+=== RUN   TestAgentOptionsFailClosedOnInvalidOrUnorderedProjection/invalid
+--- PASS: TestAgentOptionsFailClosedOnInvalidOrUnorderedProjection (0.59s)
+    --- PASS: TestAgentOptionsFailClosedOnInvalidOrUnorderedProjection/unordered (0.30s)
+    --- PASS: TestAgentOptionsFailClosedOnInvalidOrUnorderedProjection/invalid (0.30s)
+=== RUN   TestAttachIncludesSafeSuggestedTask
+--- PASS: TestAttachIncludesSafeSuggestedTask (0.31s)
+=== RUN   TestConsoleTasksListUsesOpaquePaginationAndRejectsTampering
+--- PASS: TestConsoleTasksListUsesOpaquePaginationAndRejectsTampering (0.28s)
+=== RUN   TestConsoleTaskDetailIsOwnedConsistentAndSafe
+--- PASS: TestConsoleTaskDetailIsOwnedConsistentAndSafe (0.28s)
+=== RUN   TestCLITaskRoutesRequireViewerAndConsoleReadScope
+--- PASS: TestCLITaskRoutesRequireViewerAndConsoleReadScope (0.39s)
+=== RUN   TestConsoleReviewProjectionAndReadinessUseAuthoritativeFacts
+--- PASS: TestConsoleReviewProjectionAndReadinessUseAuthoritativeFacts (0.26s)
+=== RUN   TestConsoleTaskOutcomeAndRuntimeReplyStatesAreStructuredAndSafe
+--- PASS: TestConsoleTaskOutcomeAndRuntimeReplyStatesAreStructuredAndSafe (0.00s)
+PASS
+ok  	openagentx/internal/api/console	4.301s
+=== RUN   TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence
+--- PASS: TestFollowStartsAtAttachCursorAndReconnectsFromLastAppliedSequence (0.01s)
+=== RUN   TestFollowReattachesOnlyAfterStructuredRetentionGap
+--- PASS: TestFollowReattachesOnlyAfterStructuredRetentionGap (0.00s)
+=== RUN   TestControlMethodsUseAuthenticatedOfficialAPIs
+--- PASS: TestControlMethodsUseAuthenticatedOfficialAPIs (0.00s)
+=== RUN   TestListAgentOptionsUsesAuthenticatedPaginatedConsoleAPI
+--- PASS: TestListAgentOptionsUsesAuthenticatedPaginatedConsoleAPI (0.00s)
+=== RUN   TestTaskOptionsAndSnapshotUseAuthenticatedConsoleAPIs
+--- PASS: TestTaskOptionsAndSnapshotUseAuthenticatedConsoleAPIs (0.00s)
+=== RUN   TestStoredCredentialIsNotSentAfterSocketInstallationReplacement
+--- PASS: TestStoredCredentialIsNotSentAfterSocketInstallationReplacement (0.00s)
+=== RUN   TestSessionValidatesStoredBearerAndReturnsStructuredUnauthenticated
+--- PASS: TestSessionValidatesStoredBearerAndReturnsStructuredUnauthenticated (0.00s)
+=== RUN   TestLegacyDirectPasswordLoginFailsBeforeNetwork
+--- PASS: TestLegacyDirectPasswordLoginFailsBeforeNetwork (0.00s)
+=== RUN   TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch
+=== RUN   TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch/missing_id
+=== RUN   TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch/sequence_mismatch
+=== RUN   TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch/backward_sequence
+--- PASS: TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch (0.00s)
+    --- PASS: TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch/missing_id (0.00s)
+    --- PASS: TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch/sequence_mismatch (0.00s)
+    --- PASS: TestEventStreamFailsClosedOnMissingIDOrSequenceMismatch/backward_sequence (0.00s)
+=== RUN   TestEventStreamAdvancesOnlyAfterSuccessfulApplyAndDeduplicates
+--- PASS: TestEventStreamAdvancesOnlyAfterSuccessfulApplyAndDeduplicates (0.00s)
+=== RUN   TestEventsRejectsInvalidModeBeforeNetwork
+--- PASS: TestEventsRejectsInvalidModeBeforeNetwork (0.00s)
+=== RUN   TestNewUnixClientDistinguishesMissingAndNonSocketPaths
+--- PASS: TestNewUnixClientDistinguishesMissingAndNonSocketPaths (0.00s)
+=== RUN   TestResultReviewUsesAuthenticatedControlAPI
+--- PASS: TestResultReviewUsesAuthenticatedControlAPI (0.00s)
+PASS
+ok  	openagentx/internal/client/console	0.030s
+=== RUN   TestCompletionBasisIsAuthoritativeAndFenced
+--- PASS: TestCompletionBasisIsAuthoritativeAndFenced (0.00s)
+=== RUN   TestReducerRejectsGenerationRollbackAndAdvancesIgnoredCursor
+--- PASS: TestReducerRejectsGenerationRollbackAndAdvancesIgnoredCursor (0.00s)
+=== RUN   TestReducerHandlesDuplicateBackwardAndSameGenerationConflict
+--- PASS: TestReducerHandlesDuplicateBackwardAndSameGenerationConflict (0.00s)
+=== RUN   TestReducerCoalescesHeartbeatBurstAndReportsMeaningfulTransitions
+--- PASS: TestReducerCoalescesHeartbeatBurstAndReportsMeaningfulTransitions (0.00s)
+=== RUN   TestReducerUpdatesBackendHealthFromCurrentWorkerHeartbeat
+--- PASS: TestReducerUpdatesBackendHealthFromCurrentWorkerHeartbeat (0.00s)
+=== RUN   TestReducerSwitchesAndClearsActiveRunFromSafeProjection
+--- PASS: TestReducerSwitchesAndClearsActiveRunFromSafeProjection (0.00s)
+=== RUN   TestReducerFencesOldWorkerRunWhileAdvancingTimelineCursor
+--- PASS: TestReducerFencesOldWorkerRunWhileAdvancingTimelineCursor (0.00s)
+=== RUN   TestReducerClearsWorkerScopedStateOnReplacementAndOffline
+=== RUN   TestReducerClearsWorkerScopedStateOnReplacementAndOffline/replacement
+=== RUN   TestReducerClearsWorkerScopedStateOnReplacementAndOffline/offline
+--- PASS: TestReducerClearsWorkerScopedStateOnReplacementAndOffline (0.00s)
+    --- PASS: TestReducerClearsWorkerScopedStateOnReplacementAndOffline/replacement (0.00s)
+    --- PASS: TestReducerClearsWorkerScopedStateOnReplacementAndOffline/offline (0.00s)
+=== RUN   TestReducerFailsClosedBeforeCursorAdvanceOnInvalidProjection
+--- PASS: TestReducerFailsClosedBeforeCursorAdvanceOnInvalidProjection (0.00s)
+=== RUN   TestReducerTimelineCanOnlyContainSafeOutputProjection
+--- PASS: TestReducerTimelineCanOnlyContainSafeOutputProjection (0.00s)
+=== RUN   TestReviewVersionAdvancesWithoutChangingExecutionEvidence
+--- PASS: TestReviewVersionAdvancesWithoutChangingExecutionEvidence (0.00s)
+=== RUN   TestTaskIntentCannotChangeAcrossControlAndEventUpdates
+--- PASS: TestTaskIntentCannotChangeAcrossControlAndEventUpdates (0.00s)
+=== RUN   TestTaskIntentRequiresExplicitProjectionAndDuplicateIsIdempotent
+--- PASS: TestTaskIntentRequiresExplicitProjectionAndDuplicateIsIdempotent (0.00s)
+=== RUN   TestTaskOptionsRetainAndFenceDeclaredIntent
+--- PASS: TestTaskOptionsRetainAndFenceDeclaredIntent (0.00s)
+=== RUN   TestTaskReducerFocusSourcesAndDispatchEventOrdering
+--- PASS: TestTaskReducerFocusSourcesAndDispatchEventOrdering (0.00s)
+=== RUN   TestTaskReducerVersionTerminalAndCursorMatrix
+--- PASS: TestTaskReducerVersionTerminalAndCursorMatrix (0.00s)
+=== RUN   TestTaskReducerPreservesAuthoritativeTaskOptionOrder
+--- PASS: TestTaskReducerPreservesAuthoritativeTaskOptionOrder (0.00s)
+=== RUN   TestTaskReducerAppliesMailboxMessageApprovalAndRuntimeReply
+--- PASS: TestTaskReducerAppliesMailboxMessageApprovalAndRuntimeReply (0.00s)
+=== RUN   TestTaskReducerControlMailboxDoesNotReplaceWorkDelivery
+--- PASS: TestTaskReducerControlMailboxDoesNotReplaceWorkDelivery (0.00s)
+=== RUN   TestTaskReducerPendingOutcomeDoesNotEnterTimeline
+--- PASS: TestTaskReducerPendingOutcomeDoesNotEnterTimeline (0.00s)
+=== RUN   TestTaskReducerFencesRunAndClearsOnlyUnprovenWorkerState
+--- PASS: TestTaskReducerFencesRunAndClearsOnlyUnprovenWorkerState (0.00s)
+=== RUN   TestTaskSnapshotFencesActiveRunButRetainsTerminalReply
+=== RUN   TestTaskSnapshotFencesActiveRunButRetainsTerminalReply/active_Run_and_native_Approval_from_old_Worker_are_cleared
+=== RUN   TestTaskSnapshotFencesActiveRunButRetainsTerminalReply/terminal_Run_reply_from_old_Worker_is_retained
+--- PASS: TestTaskSnapshotFencesActiveRunButRetainsTerminalReply (0.00s)
+    --- PASS: TestTaskSnapshotFencesActiveRunButRetainsTerminalReply/active_Run_and_native_Approval_from_old_Worker_are_cleared (0.00s)
+    --- PASS: TestTaskSnapshotFencesActiveRunButRetainsTerminalReply/terminal_Run_reply_from_old_Worker_is_retained (0.00s)
+=== RUN   TestTaskReducerRejectsStaleStreamAndNormalDiagnosticWithoutAck
+--- PASS: TestTaskReducerRejectsStaleStreamAndNormalDiagnosticWithoutAck (0.00s)
+=== RUN   TestModeSwitchBeginsAndAbortsFromNormalSafeState
+--- PASS: TestModeSwitchBeginsAndAbortsFromNormalSafeState (0.00s)
+=== RUN   TestTaskReducerRejectedSnapshotIsAtomic
+--- PASS: TestTaskReducerRejectedSnapshotIsAtomic (0.00s)
+=== RUN   TestTaskReducerRejectsInvalidSafeResultBeforeCursorAdvance
+=== RUN   TestTaskReducerRejectsInvalidSafeResultBeforeCursorAdvance/available_without_content
+=== RUN   TestTaskReducerRejectsInvalidSafeResultBeforeCursorAdvance/truncated_without_marker
+--- PASS: TestTaskReducerRejectsInvalidSafeResultBeforeCursorAdvance (0.00s)
+    --- PASS: TestTaskReducerRejectsInvalidSafeResultBeforeCursorAdvance/available_without_content (0.00s)
+    --- PASS: TestTaskReducerRejectsInvalidSafeResultBeforeCursorAdvance/truncated_without_marker (0.00s)
+=== RUN   TestTaskReducerCollectionsAndTimelineRemainBounded
+--- PASS: TestTaskReducerCollectionsAndTimelineRemainBounded (0.25s)
+=== RUN   FuzzTaskReducerMalformedProjectionDoesNotAdvanceCursor
+=== RUN   FuzzTaskReducerMalformedProjectionDoesNotAdvanceCursor/seed#0
+=== RUN   FuzzTaskReducerMalformedProjectionDoesNotAdvanceCursor/seed#1
+--- PASS: FuzzTaskReducerMalformedProjectionDoesNotAdvanceCursor (0.00s)
+    --- PASS: FuzzTaskReducerMalformedProjectionDoesNotAdvanceCursor/seed#0 (0.00s)
+    --- PASS: FuzzTaskReducerMalformedProjectionDoesNotAdvanceCursor/seed#1 (0.00s)
+PASS
+ok  	openagentx/internal/consolemodel	0.264s
+=== RUN   TestLoginAndLogoutUseSharedApplicationLifecycle
+--- PASS: TestLoginAndLogoutUseSharedApplicationLifecycle (0.00s)
+=== RUN   TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources
+=== RUN   TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources/explicit
+=== RUN   TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources/managed_window
+=== RUN   TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources/selector
+--- PASS: TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources (0.00s)
+    --- PASS: TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources/explicit (0.00s)
+    --- PASS: TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources/managed_window (0.00s)
+    --- PASS: TestPrepareAttachUsesExplicitManagedWindowAndSelectorSources/selector (0.00s)
+=== RUN   TestBindUsesTask05ServiceAndRequiresConfirmation
+--- PASS: TestBindUsesTask05ServiceAndRequiresConfirmation (0.00s)
+=== RUN   TestOnlyLatestAttachPreparationRetainsAuthenticatedClient
+--- PASS: TestOnlyLatestAttachPreparationRetainsAuthenticatedClient (0.00s)
+=== RUN   TestControlCmdUsesOfficialClientExactlyOnceWithCAS
+--- PASS: TestControlCmdUsesOfficialClientExactlyOnceWithCAS (0.00s)
+=== RUN   TestTaskReadsUsePreparedAuthenticatedClient
+--- PASS: TestTaskReadsUsePreparedAuthenticatedClient (0.00s)
+=== RUN   TestFollowWaitsForReducerAckBeforeAdvancingClientCursor
+--- PASS: TestFollowWaitsForReducerAckBeforeAdvancingClientCursor (0.00s)
+=== RUN   TestFollowCancellationEndsOldStreamBeforeStartingNewMode
+--- PASS: TestFollowCancellationEndsOldStreamBeforeStartingNewMode (0.00s)
+=== RUN   TestAuthenticatedClientDeletesExpiredAndStructuredUnauthorizedCredentials
+--- PASS: TestAuthenticatedClientDeletesExpiredAndStructuredUnauthorizedCredentials (0.00s)
+=== RUN   TestFinalConsoleGrammar
+--- PASS: TestFinalConsoleGrammar (0.00s)
+=== RUN   TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects
+=== RUN   TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/#00
+=== RUN   TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/login
+=== RUN   TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/attach
+=== RUN   TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/attach_--agent_quote
+--- PASS: TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects (0.00s)
+    --- PASS: TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/#00 (0.00s)
+    --- PASS: TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/login (0.00s)
+    --- PASS: TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/attach (0.00s)
+    --- PASS: TestNonInteractiveMenuLoginAndAttachFailBeforeSideEffects/attach_--agent_quote (0.00s)
+=== RUN   TestExecuteReturnsFailureForFatalDirectAttachAfterTerminalCleanup
+--- PASS: TestExecuteReturnsFailureForFatalDirectAttachAfterTerminalCleanup (0.00s)
+=== RUN   TestExecuteTreatsInterruptedProgramAsCleanDetach
+--- PASS: TestExecuteTreatsInterruptedProgramAsCleanDetach (0.00s)
+=== RUN   TestDispatchIntentUsesOfficialAPIWithoutChangingContent
+=== RUN   TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_tell_me_the_time
+=== RUN   TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--intent_query_tell_me_the_time
+=== RUN   TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--intent_mutation_update_the_file
+=== RUN   TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--intent_query_--_--intent_is_literal_text
+=== RUN   TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--_--intent_query_is_literal_text
+--- PASS: TestDispatchIntentUsesOfficialAPIWithoutChangingContent (0.00s)
+    --- PASS: TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_tell_me_the_time (0.00s)
+    --- PASS: TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--intent_query_tell_me_the_time (0.00s)
+    --- PASS: TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--intent_mutation_update_the_file (0.00s)
+    --- PASS: TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--intent_query_--_--intent_is_literal_text (0.00s)
+    --- PASS: TestDispatchIntentUsesOfficialAPIWithoutChangingContent//dispatch_--_--intent_query_is_literal_text (0.00s)
+=== RUN   TestInvalidDispatchIntentPreservesDraftAndDoesNotSend
+=== RUN   TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent
+=== RUN   TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_query
+=== RUN   TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_QUERY_work
+=== RUN   TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_invalid_work
+=== RUN   TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_query_--intent_mutation_work
+=== RUN   TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--unknown_work
+--- PASS: TestInvalidDispatchIntentPreservesDraftAndDoesNotSend (0.00s)
+    --- PASS: TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent (0.00s)
+    --- PASS: TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_query (0.00s)
+    --- PASS: TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_QUERY_work (0.00s)
+    --- PASS: TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_invalid_work (0.00s)
+    --- PASS: TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--intent_query_--intent_mutation_work (0.00s)
+    --- PASS: TestInvalidDispatchIntentPreservesDraftAndDoesNotSend//dispatch_--unknown_work (0.00s)
+=== RUN   TestContinueDispatchCarriesParentAndServerContext
+--- PASS: TestContinueDispatchCarriesParentAndServerContext (0.00s)
+=== RUN   TestConsoleResultReviewBindsTaskRunAndVersions
+--- PASS: TestConsoleResultReviewBindsTaskRunAndVersions (0.00s)
+=== RUN   TestConsoleTTYHelper
+--- PASS: TestConsoleTTYHelper (0.00s)
+=== RUN   TestConsoleDefaultTmuxTargetHelper
+--- PASS: TestConsoleDefaultTmuxTargetHelper (0.00s)
+=== RUN   TestDefaultDependenciesTargetsConsoleProcessPane
+--- PASS: TestDefaultDependenciesTargetsConsoleProcessPane (0.72s)
+=== RUN   TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes
+--- PASS: TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes (2.69s)
+=== RUN   TestStripTerminalControlsPreservesRenderedTextAcrossANSI
+--- PASS: TestStripTerminalControlsPreservesRenderedTextAcrossANSI (0.00s)
+=== RUN   TestMenuContainsAndExecutesEveryFrozenItem
+--- PASS: TestMenuContainsAndExecutesEveryFrozenItem (0.00s)
+=== RUN   TestLoginViewMasksAndClearsPassword
+--- PASS: TestLoginViewMasksAndClearsPassword (0.00s)
+=== RUN   TestSelectorSupportsMoreThanOnePageAndBindingConfirmation
+--- PASS: TestSelectorSupportsMoreThanOnePageAndBindingConfirmation (0.00s)
+=== RUN   TestAttachAsyncMessagesPreserveInputDraftCursorAndFocus
+--- PASS: TestAttachAsyncMessagesPreserveInputDraftCursorAndFocus (0.00s)
+=== RUN   TestCompactAttachFitsActualWindowAndKeepsReducerResponsive
+--- PASS: TestCompactAttachFitsActualWindowAndKeepsReducerResponsive (0.01s)
+=== RUN   TestTaskProjectionConflictIsRejectedBeforeFollowAck
+--- PASS: TestTaskProjectionConflictIsRejectedBeforeFollowAck (0.00s)
+=== RUN   TestEveryConsoleScreenFitsCompactWindow
+=== RUN   TestEveryConsoleScreenFitsCompactWindow/menu
+=== RUN   TestEveryConsoleScreenFitsCompactWindow/login
+=== RUN   TestEveryConsoleScreenFitsCompactWindow/loading
+=== RUN   TestEveryConsoleScreenFitsCompactWindow/selector
+=== RUN   TestEveryConsoleScreenFitsCompactWindow/attach
+--- PASS: TestEveryConsoleScreenFitsCompactWindow (0.01s)
+    --- PASS: TestEveryConsoleScreenFitsCompactWindow/menu (0.00s)
+    --- PASS: TestEveryConsoleScreenFitsCompactWindow/login (0.00s)
+    --- PASS: TestEveryConsoleScreenFitsCompactWindow/loading (0.00s)
+    --- PASS: TestEveryConsoleScreenFitsCompactWindow/selector (0.00s)
+    --- PASS: TestEveryConsoleScreenFitsCompactWindow/attach (0.00s)
+=== RUN   TestControlCommandsAreExactlyOnceCASAndDisabledWhenDisconnected
+--- PASS: TestControlCommandsAreExactlyOnceCASAndDisabledWhenDisconnected (0.00s)
+=== RUN   TestFocusedTaskShortcutsUseReducerCASAndExplicitSyntax
+--- PASS: TestFocusedTaskShortcutsUseReducerCASAndExplicitSyntax (0.00s)
+=== RUN   TestTaskOverlayFocusAndTerminalResultsUseAuthoritativeProjection
+--- PASS: TestTaskOverlayFocusAndTerminalResultsUseAuthoritativeProjection (0.00s)
+=== RUN   TestTaskOverlaySanitizesTerminalControlSequences
+--- PASS: TestTaskOverlaySanitizesTerminalControlSequences (0.00s)
+=== RUN   TestSuggestedTaskDetailKeepsCurrentOverlayAndFailureIsNonDisruptive
+--- PASS: TestSuggestedTaskDetailKeepsCurrentOverlayAndFailureIsNonDisruptive (0.00s)
+=== RUN   TestTerminalNoResultReasonsAreExplicit
+=== RUN   TestTerminalNoResultReasonsAreExplicit/task_not_recorded
+=== RUN   TestTerminalNoResultReasonsAreExplicit/runtime_not_recorded
+=== RUN   TestTerminalNoResultReasonsAreExplicit/runtime_empty
+=== RUN   TestTerminalNoResultReasonsAreExplicit/runtime_invalid
+=== RUN   TestTerminalNoResultReasonsAreExplicit/uncertain
+--- PASS: TestTerminalNoResultReasonsAreExplicit (0.00s)
+    --- PASS: TestTerminalNoResultReasonsAreExplicit/task_not_recorded (0.00s)
+    --- PASS: TestTerminalNoResultReasonsAreExplicit/runtime_not_recorded (0.00s)
+    --- PASS: TestTerminalNoResultReasonsAreExplicit/runtime_empty (0.00s)
+    --- PASS: TestTerminalNoResultReasonsAreExplicit/runtime_invalid (0.00s)
+    --- PASS: TestTerminalNoResultReasonsAreExplicit/uncertain (0.00s)
+=== RUN   TestLiveTaskLifecycleShowsDeliveryRunOutcomeAndRuntimeReply
+--- PASS: TestLiveTaskLifecycleShowsDeliveryRunOutcomeAndRuntimeReply (0.00s)
+=== RUN   TestTerminalTimelineSummaryKeepsOutcomeAndRuntimeReplyOnDedicatedLines
+--- PASS: TestTerminalTimelineSummaryKeepsOutcomeAndRuntimeReplyOnDedicatedLines (0.00s)
+=== RUN   TestStaleCASRefreshesWithoutRetryAndPreservesDraft
+--- PASS: TestStaleCASRefreshesWithoutRetryAndPreservesDraft (0.00s)
+=== RUN   TestConsumedOverlayCommandsClearDraftButRejectedCommandsRemainEditable
+--- PASS: TestConsumedOverlayCommandsClearDraftButRejectedCommandsRemainEditable (0.00s)
+=== RUN   TestSessionExpiryDisconnectsAndDisablesWritesWithoutChangingDraft
+--- PASS: TestSessionExpiryDisconnectsAndDisablesWritesWithoutChangingDraft (0.00s)
+=== RUN   TestSessionExpiryWhileControlPendingRestoresSubmittedDraft
+--- PASS: TestSessionExpiryWhileControlPendingRestoresSubmittedDraft (0.00s)
+=== RUN   TestControlIsDisabledDuringAuthoritativeTaskRefresh
+--- PASS: TestControlIsDisabledDuringAuthoritativeTaskRefresh (0.00s)
+=== RUN   TestTimelineRendersDiagnosticOnlyInDiagnosticMode
+--- PASS: TestTimelineRendersDiagnosticOnlyInDiagnosticMode (0.00s)
+=== RUN   TestRuntimeExecutableWarningIsVisibleInNormalConsole
+--- PASS: TestRuntimeExecutableWarningIsVisibleInNormalConsole (0.00s)
+=== RUN   TestTimelineNeverFallsBackFromDiagnosticToNormal
+--- PASS: TestTimelineNeverFallsBackFromDiagnosticToNormal (0.00s)
+=== RUN   TestInPlaceDiagnosticAndNormalModeSwitchUsesSingleFollowEpoch
+--- PASS: TestInPlaceDiagnosticAndNormalModeSwitchUsesSingleFollowEpoch (0.00s)
+=== RUN   TestDiagnosticFailureRestoresNormalWithoutRetryLoop
+--- PASS: TestDiagnosticFailureRestoresNormalWithoutRetryLoop (0.00s)
+=== RUN   TestRejectedDiagnosticSnapshotDrainsFollowBeforeNormalFallback
+--- PASS: TestRejectedDiagnosticSnapshotDrainsFollowBeforeNormalFallback (0.00s)
+=== RUN   TestDiagnosticSessionExpiryClearsPrivilegedStateAndCancelsFollow
+--- PASS: TestDiagnosticSessionExpiryClearsPrivilegedStateAndCancelsFollow (0.00s)
+=== RUN   TestEstablishedDiagnosticFollowTerminationClearsDiagnostic
+--- PASS: TestEstablishedDiagnosticFollowTerminationClearsDiagnostic (0.00s)
+=== RUN   TestStatusOverlayAndSafeBoundedTimeline
+--- PASS: TestStatusOverlayAndSafeBoundedTimeline (0.01s)
+=== RUN   TestFollowConnectionAndRetentionMessages
+--- PASS: TestFollowConnectionAndRetentionMessages (0.00s)
+=== RUN   TestTimelineScrollAndHeartbeatBurstPreserveDraft
+--- PASS: TestTimelineScrollAndHeartbeatBurstPreserveDraft (0.00s)
+=== RUN   TestHelpOverlayIncludesFocusedControlsAndTimelineNavigation
+--- PASS: TestHelpOverlayIncludesFocusedControlsAndTimelineNavigation (0.00s)
+=== RUN   TestDirectAttachFailureIsFatalButMenuFailureReturnsToMenu
+--- PASS: TestDirectAttachFailureIsFatalButMenuFailureReturnsToMenu (0.00s)
+=== RUN   TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident
+    workflow_integration_test.go:56: Persistent isolated fixture: /home/sky/.oax-e/console-r3/oax9-2461580511
+    workflow_integration_test.go:284: focused task detail missing
+--- FAIL: TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident (29.46s)
+FAIL
+FAIL	openagentx/internal/cli/console	32.955s
+FAIL
+
+Exit code: 1

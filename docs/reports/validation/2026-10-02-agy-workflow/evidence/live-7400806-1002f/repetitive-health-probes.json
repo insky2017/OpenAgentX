@@ -1,0 +1,391 @@
+{
+  "reason": "Repeated --version health calls; full bytes retained privately; actual AGY model turns remain in runtime/",
+  "private_archive": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/public-version-probes/live-7400806-1002f",
+  "count": 35,
+  "probes": [
+    {
+      "path": "runtime/run-4107924",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "c69bf13885fade0063aa6962465c1a80c8d14bbbba9d2b0bfab3b6d613fdd11b",
+        "exit.json": "5aa2a3f74d0bcf23921ad72439428f9e908fe464418989266b6dc6f2c500e360",
+        "pid": "dbb41aa2944a4b4741b542f3632dff9188ab36d00d96a01dee12597bf791dbf4",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109083",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "4fdbe7f47c13f64623d45e52ed550034a9f5ae25e654eb801254f43a43c05984",
+        "exit.json": "09d63ebb13eda99c2ced5693fe6fb722368647f8587a47da89d1bcf6e3df6155",
+        "pid": "ca3cd7e20eea7f28c598ebaa4227954c23d10efcb31e05c0fc05adac055e912c",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4110040",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "07961bb2723edd21b00845b903a79696c4b1a8ab43d55369e77fc692c37e3432",
+        "exit.json": "1eb3c7d6d4a6adaf3e4febafc00d7453a80582974b9fce0e7f451f2892eadc11",
+        "pid": "890daad9dfff394149e143de2a7525d46c6aee6d148cfb87c871d8fe91c9f7c8",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108199",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "0025c1d69930f5c62eaf61dfed8d3c142d69973a35d99d76dabc05acb8af42fa",
+        "exit.json": "e35a30d9b3016142d36e40d73d19aaffb78d66c11a220a60de67b32f06ef1b48",
+        "pid": "cab888973889a13b2f5bb99ab83995c7e689505e51adfba1d229e054c56b8092",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109409",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "a19437bd30f565c5f404b7b998c359309166fc8f470036867265f575d24208e9",
+        "exit.json": "23913815812021d41fab2f46e3131eb9edffc75b1c34a1e1460ec6a7999716fe",
+        "pid": "e8ecceeca570ed0c4a455e4cc3a70838fab5cea5eb392613a8fbd1c74a305626",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109151",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "4df6f5c28af01bfed63a1a3994f9c2a1d3667f4d87bfd7012014543c1b5fc844",
+        "exit.json": "d2930a4c01db2b8fa1bc8d8d7e757743959039ae95d15272e0ca5626ae24cede",
+        "pid": "ff0bae47375b211b7ea27dc9131dc26bf8fedfaac7da7d1abac14f904666326c",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107357",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "24fdd3e86ed538c960ddddfaef6a093779979218eec066b4e8ebc4f63d32cf41",
+        "exit.json": "72e119e5699de4d5592b69102afa6bdda6a45cf354b4182a921944e3ee74ca4a",
+        "pid": "d97170b54af90bcf3f9805b910adef5cbdefea2bf1f181d30a1b85e98de094ae",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4110160",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "183b40331aa9f48fbd0757a22b8520a8466516b119b6024039d02e4566d98fb5",
+        "exit.json": "5a6f3454bd3bf6eb373c416ae7353aae469fdeaa5a8be8f1c3d840b88d09d3de",
+        "pid": "e5a6d4ac3dd0cf128a94afaf798b497cddc3e33b5e4f89eb0623e3b58784b185",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109950",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "15bc7d5d30fc482d3a8821c5779dbd9939afa52a049a60e3be8a6f3edf0a8c70",
+        "exit.json": "d7890d3eed67cc3fb77b381c0b5d0dfe5bc9ed3d46f5b597335cdbd897b86a69",
+        "pid": "c54d19f77551f94d021875c68e960c7de96b8b1272edc4ceafdcef8ff340d055",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109528",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "8813e1bde37029276c94029887425ebef1bf87668a7333c553525a5f4ba7e56a",
+        "exit.json": "4ac86ed6d61169ab720449c116029d9ac94dc5e575aa9bc8aef2f82e8c34f37b",
+        "pid": "2eff0a53be83868b4e3046614f326614b759113739feabfef6c7199e863a8289",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109314",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "ccbb8eaca76bad6ecc48b001f4a8058fa9562e14ba834f867023a15fa9c090f6",
+        "exit.json": "215cab24078e45e58b94bfbde3acd8245bd32fa1af5c4397925c961ee92cdb10",
+        "pid": "b88df4a0b6337316a71c18205daaf232c98bdfc7ccfaf79efe69ae1a7c5ae886",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109240",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "5655e4f1319c1a5ea7cc96faf08ef0546197ccbbca6ad2a08dd1a8d2a24b3e50",
+        "exit.json": "89ccd198a5e152ac4c4cd1cbc7f0ea12d1d0afb75d98c6bff7d2879f4bc0954c",
+        "pid": "bfbcca41f00e644a4c8dbd2a9d1a4b1efa3aeac0014777aadf532437dabc25bb",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107670",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "804b665577d0faee405f0e4b812420d0b415e207d693afb4bf98150f1112acc8",
+        "exit.json": "76d717ef9e17b8d2dbff6452e46d6efda15969c4171964ab624d85827eea6fb2",
+        "pid": "4acc6b98808d6b380830558b0a34ab8d4e6438f869536dcb665e547cccb2a306",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108354",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "91d6fd5dc7d80e18191eb3cecbd3e54ed46bfc8aa7d81d51c91b2c242104cb18",
+        "exit.json": "e2cfa88a80ac2338a155522ac6e82e060683aa0cd20a7b4da792629aedaba5ea",
+        "pid": "c26437650f596195749a0929c60c293b9e8cb2fcf770eaedbc04e919589ae3f4",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107971",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "23b761c00ce299fee5f10c886437d1e0ea02dde638a8afb94676bb9802122e49",
+        "exit.json": "603ee20a84f2e818f271eeb51c93005ee1cc7190e1285755af2119ab1e090e33",
+        "pid": "24154afd05b8718ad6de876e254d2dcd8eaea5c1e84674fa9534e6c00e3b24ff",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4110308",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "child.pid": "88840bab92d46bd0769cf632b424ada77d398db279cfca3152a1f0f4465627ee",
+        "pid": "a498216e322442e7c0dde2e3f4d71441c6213d43b525a0b56f36f313bc0238ed",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107527",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "727ba9e8d6e481f60cb206149305dcda161e47da2e1eca62d99cc1919cbec5ba",
+        "exit.json": "7430d9b7579cb5112b815c363d64990ae868d4e49817778df313dfe9e9bc5471",
+        "pid": "e8614366a3723733a17d9858b817927affe861cd225416ac22bef9e193f13f24",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108144",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "faaa1410367cf33c8668c4c31dc260ad7a2d8fa7188bc43cd7b3f8f8b765a059",
+        "exit.json": "824ad388c2a2aef5a598faf92d5770d4bfc7444d4e2eb5eef2f414212cc601ee",
+        "pid": "4cceb91f957997b2a6006775d2c28c0b84a81ffe7c51badb6557ecabdb9af406",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107716",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "a0ac91220bf22b26ad1b59e4288825a46edd892ebb6abb6cc88a82521a04083d",
+        "exit.json": "298a263a9963c34034354da9d5dce83981d4b674758e199d3cf8f1f3fe614b6f",
+        "pid": "f1dc606a508b5b41fd96ce9310b03e13af9603dbccf4db32d554b8a3d0b46363",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107385",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "abc3a25037ad3f804912316e9db5cf026c522e2980ea81992cba628bee78155b",
+        "exit.json": "4f70eb649ceacce1bf9b5712b35e0aa51eb8be207b2f68c24adb65e94cb0739d",
+        "pid": "1925a00dcb179145a2518222cb92e5f68c7f0123654fc30f7486ed132f8c3455",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107426",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "e111b2b9de8d799cd8c81ea4ef0a255d4d1dcdc9a7d55e48bb6de17365a2f889",
+        "exit.json": "1e8de780e37e4f6136a2f736f7a2ce0dca64c3e5f4c33b804da7ff7a243a3fa4",
+        "pid": "8e2f8fe064d3dd740936adc4e8fc9a30e6a038d049c1400c5f812b09bacca82f",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108881",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "4c5863be86babeb05fc68d2fb77d623599d2c38c501bd41251be5250cbd19fd5",
+        "exit.json": "9d5cf16d9c0d06fb252d03bddee8a04d25b2f415e16271991f2a546a2404cf3b",
+        "pid": "3a2a2697c31a493679f42862e618494ec3e4e057e43c20e61de998728c3e11d8",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109872",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "6999671ff5865fc2c46d4fc037b8178e1bb2e9f6d18062d5c22aa57b0b4300bf",
+        "exit.json": "3488625e795e2cb86a1c78828a9bdade8a3f6ad563138cf8bc18be031bd01144",
+        "pid": "62a50614e9ff3aed3113695021ee97a0220a7710e31bbefda3511955afef5cab",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108779",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "45f735a87714e0ef3a1cfda8f4a0791b720a23571ae4afb15828a54732d16d61",
+        "exit.json": "6e48e4ae07ec505a94d12f3f0cacebfbc6d7948c22b53a9aff051ff71d4f7feb",
+        "pid": "efaf3d51f46f5a36efdff682aece06be1ddf5e662e983a681027351822a5d799",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107600",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "3e739f980bd25d3817f740b0c43f36e78edd061534c3d03f6f8252f4acda9647",
+        "exit.json": "1856bd7726b437901edb0b55aa01184b8ffb08965900e71b376836c6d1f30e82",
+        "pid": "20938874ee67069fab57d84364c5f6e8bf60b38b6999bc0f0708746142e1f2d1",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109826",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "0b3752e68fae1ee360a784e8e18a5cd593be582535d580468d9b882bba382126",
+        "exit.json": "a2cbbf4648e39b6e263ff3160017416bec2513f035141fcd59c7ddf5e22528a6",
+        "pid": "f549bd55d1866a27f9c4e6974a4897fa4dd56f224bfb299b00784ceaad399afe",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108817",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "f6b8015190cd5576b03e8749fa499d55828644f6a14d8d7970b0d98e7353f456",
+        "exit.json": "9fbb9c7ceaf2b4e5a43bf3633be6dc9c6a5f221c89298e402d64040b85a441f3",
+        "pid": "b3f03f136f3e8643b2470b1a12303c47555a0457859656f32caf399ab4401b58",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108068",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "051d9e174d30956ac2d912acf423475efc7c10f8bb62b3e9c2d01bae61b3cccb",
+        "exit.json": "90630ce9b5703ec30d21da2f7ad60d97399710c74a82dada7b86e04fa2cd8fff",
+        "pid": "2d6cdfdbaf6520a6d2e508b26ca49ab27ad587183c3153895031b57fe101b073",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109699",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "b70b1836f4fdb2a42d3c7c909ce5aa8aa69ffa5378220cae6ef3196bb5e235d1",
+        "exit.json": "796b3987f2e09e27cf8b497146203f946deb253a7cba775c7328ac2dafdd103b",
+        "pid": "dae88b14fc6b9db08a26e38bda535da382f88a9b111612ef03b0dbab643a9d87",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109662",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "167bd48a2aa9d35bb1f366efaeaeafb89d3b330cd88efed06ba160c39a89d17d",
+        "exit.json": "126680566b1acf7a872e48dac56b77c533c6c809d233298e66d33c6151bc971a",
+        "pid": "c404e9557676ec92543de30197ca01abf6d36c2705dab631fafb69e088419c1d",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4108654",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "3ff2b07bc5028a9b7ad578ee4733de3d34379894d8bfd8afe9eb234403a7e484",
+        "exit.json": "a753b04a54e52d569ed2e2abfa384c91cf2f798a1a93523eb049df0c9a614363",
+        "pid": "1e26c5d3fee67b4b8272c0d003cd90a492ec03f21b7a862e6acf8c65f55a0dd3",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4109390",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "96349e5ef4dbc3b5fbab9209590de82a956acae3c8611333794e85d04ec0c394",
+        "exit.json": "ffe789aa94116d533ca089a57569a85a5020c85d7618b8ae55e134291bfea4f7",
+        "pid": "542fea08928dd4a20a514b5cdba06d127322a8386ba775663d4f6dcb8038127a",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107207",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "dcd2b61ade45a3d4be05d49a56a7daf199a7ab510241c9781fa4d4ab70ae4dde",
+        "exit.json": "66fa0176e0af9308a8db1730c4907614185efb9303944b0bb04116a92842f4e5",
+        "pid": "9cadf19927be81fb3bf06d7166f3ac46cfaeb3d30c3f66049ea0f001ec6a0dd1",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4107261",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "c9618052a5b6d94c32636d760c45589ee5a6459875080fa3af210ff3007ce4fe",
+        "exit.json": "6ed2aacba919d770f16e627a320bdaac3f1877a7c70a13abab9dcdea8d06c85d",
+        "pid": "73ca4caa112cd4097580a1404860e729ebb8bf8f0b931e3b27134eec7009885a",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    },
+    {
+      "path": "runtime/run-4110230",
+      "files": {
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "22e988bfb2127d8584cc829f76868c2c85e138af32fe0989b29f7580b88a00a5",
+        "child.pid": "f24673b0e7a5bb53da900f4fee8f94dfaa75ce9943875d32561f246158e2cd7f",
+        "exit.json": "bbcdf948171f1772a5748585bf9721d11270eafcb944ec014589280d8035fbb9",
+        "pid": "d1a5b11e70fcd4e88ac587ca6e127509c343cf063ab132d4fb9c350f88c0c8c8",
+        "argv.json": "d2a16195ea6f0d8e77b726b1d8abe7685516ad66bcacf8411334dbe65bb14ca3"
+      }
+    }
+  ]
+}

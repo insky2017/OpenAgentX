@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/tmp/oax-live-base-7400806/openagentx",
+    "init"
+  ],
+  "exit_code": 0,
+  "output": "Owner password: \r\nConfirm owner password: \r\nInitialized OpenAgentX owner \"owner\" and Organization \"default\"\r\n"
+}

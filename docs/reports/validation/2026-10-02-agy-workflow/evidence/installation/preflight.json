@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-01T18:19:00.005619+00:00",
+  "backup": "/home/sky/.openagentx/backups/agy-workflow-20261002-021859",
+  "db_check": "ok",
+  "schema_meta": [
+    [
+      1,
+      1,
+      "2026-08-30T04:47:07.563Z"
+    ]
+  ],
+  "active_task_counts": [],
+  "binary_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+  "service": "MainPID=1877\nNRestarts=0\nActiveState=active\nSubState=running\n",
+  "note": "Read-only consistent pre-install backup. Final cutover will recheck active work and save database after service stop."
+}

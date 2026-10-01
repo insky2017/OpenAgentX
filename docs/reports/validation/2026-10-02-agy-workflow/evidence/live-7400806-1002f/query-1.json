@@ -1,0 +1,177 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+    "version": 3,
+    "target_agent_id": "live-agy-06-1002f",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-LIVE-06-1002f-1. Do not call tools or read files.",
+    "status": "succeeded",
+    "result": "OAX-LIVE-06-1002f-1",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T17:49:15.665316016Z",
+    "updated_at": "2026-10-01T17:49:28.497480313Z"
+  },
+  "messages": [
+    {
+      "id": "message-c927966e-d274-4a9b-9503-bfdda13b7684",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-a9787db9-e602-49a5-ae85-023d009cc419",
+      "target_agent_id": "live-agy-06-1002f",
+      "kind": "instruction",
+      "content": "Reply with exactly OAX-LIVE-06-1002f-1. Do not call tools or read files.",
+      "created_at": "2026-10-01T17:49:15.665316016Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "run_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "task_id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+      "agent_id": "live-agy-06-1002f",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-b6940f65-3981-4d21-bbe0-b66d74dd9563",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "agy-batch",
+      "backend_id": "primary",
+      "model": "gemini-3.7-flash-low",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX-LIVE-06-1002f-1",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-01T17:49:15.667989373Z",
+      "finished_at": "2026-10-01T17:49:28.497480313Z",
+      "created_at": "2026-10-01T17:49:15.667989373Z",
+      "updated_at": "2026-10-01T17:49:28.497480313Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 18,
+      "event_id": "event-c8d4c502-2614-46cf-bf27-a0dfc3a32137",
+      "aggregate_type": "task",
+      "aggregate_id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T17:49:15.665316016Z"
+    },
+    {
+      "sequence": 20,
+      "event_id": "event-task-e19fc079-ebc3-465e-bec5-d7c9c389b616",
+      "aggregate_type": "task",
+      "aggregate_id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+      "event_type": "task.running",
+      "created_at": "2026-10-01T17:49:15.66907923Z"
+    },
+    {
+      "sequence": 21,
+      "event_id": "event-run-d8d041ee-650e-4e6f-a404-9b4b954de0db",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-01T17:49:15.669084584Z"
+    },
+    {
+      "sequence": 31,
+      "event_id": "event-runtime-342fec1a-a232-4ba2-b9e4-5191e6b6c8cf",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "runtime.agy.init",
+      "created_at": "2026-10-01T17:49:23.690192086Z",
+      "output": {
+        "stage": "init"
+      }
+    },
+    {
+      "sequence": 32,
+      "event_id": "event-runtime-3fd76ccf-db7c-4bd3-b97b-66b4f984133a",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:49:24.04947871Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 36,
+      "event_id": "event-runtime-ef1393b2-38e9-4fc1-907f-2520601a1e24",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:49:26.850857913Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 37,
+      "event_id": "event-runtime-3bb471a8-30d0-463c-bb95-b76063a29697",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:49:26.950843458Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 38,
+      "event_id": "event-runtime-244e8273-4361-46fe-b513-324114bf79cf",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:49:27.101383999Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 39,
+      "event_id": "event-runtime-3bafbd06-4f39-49d5-91c9-a1593b3ebaa3",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "runtime.agy.result",
+      "created_at": "2026-10-01T17:49:27.132139691Z",
+      "output": {
+        "stage": "result",
+        "status": "succeeded",
+        "text": "OAX-LIVE-06-1002f-1\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 42,
+      "event_id": "event-run-cbddbd81-76ad-4b41-ae40-9e6a074c8e07",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-40a4e714-e853-4a89-b1f6-cb14b10ae67b",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-01T17:49:28.497537231Z"
+    },
+    {
+      "sequence": 43,
+      "event_id": "event-task-3eab86a9-ed00-425c-98b9-2c268fd869c7",
+      "aggregate_type": "task",
+      "aggregate_id": "task-a86bbc5b-b072-4b60-90c1-5c7d986bba77",
+      "event_type": "task.settled",
+      "created_at": "2026-10-01T17:49:28.497540275Z"
+    }
+  ],
+  "snapshot_sequence": 45,
+  "live_after_sequence": 45,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

@@ -1,0 +1,3 @@
+ok  	openagentx/internal/api/panel	22.260s
+ok  	openagentx/internal/controlplane	9.123s
+ok  	openagentx/internal/persistence/sqlite	15.537s

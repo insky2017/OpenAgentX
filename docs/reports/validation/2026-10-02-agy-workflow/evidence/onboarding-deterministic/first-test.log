@@ -1,0 +1,296 @@
+=== RUN   TestAgentAddIncrementalIdempotentAndConflict
+    agent_test.go:81: D fixture: formal init/apply, two incremental Agents, repeat unchanged, conflict preserved; systemd/credentials are mocks.
+--- PASS: TestAgentAddIncrementalIdempotentAndConflict (1.12s)
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed
+--- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed (0.00s)
+=== RUN   TestAgentExistingNetworkPreservedAcrossGeneration
+--- PASS: TestAgentExistingNetworkPreservedAcrossGeneration (0.00s)
+=== RUN   TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop
+    agent_test.go:175: D fixture only: stop -> draining -> offline, no force-stop or systemctl kill
+--- PASS: TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop (0.00s)
+=== RUN   TestAgentURLUsesActualServiceOverride
+--- PASS: TestAgentURLUsesActualServiceOverride (0.00s)
+=== RUN   TestAgentStatusIncludesReadinessLatestResultAndOpenAction
+--- PASS: TestAgentStatusIncludesReadinessLatestResultAndOpenAction (0.00s)
+=== RUN   TestAgentUnitInstallRefusesExistingConflict
+--- PASS: TestAgentUnitInstallRefusesExistingConflict (0.01s)
+=== RUN   TestAgentParseWizardHasOnlyThreePrompts
+--- PASS: TestAgentParseWizardHasOnlyThreePrompts (0.42s)
+=== RUN   TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig
+--- PASS: TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig (0.03s)
+=== RUN   TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs
+--- PASS: TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs (0.02s)
+=== RUN   TestFleetInstallationMismatchNeverSendsStoredToken
+--- PASS: TestFleetInstallationMismatchNeverSendsStoredToken (0.00s)
+=== RUN   TestFleetUsesResolvedProfilePathsWithoutExplicitFlags
+--- PASS: TestFleetUsesResolvedProfilePathsWithoutExplicitFlags (0.00s)
+=== RUN   TestFleetInitConflictAndAtomicFailureAreNonDestructive
+--- PASS: TestFleetInitConflictAndAtomicFailureAreNonDestructive (0.01s)
+=== RUN   TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes
+--- PASS: TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes (0.03s)
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename
+--- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap (0.01s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink (0.00s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename (0.01s)
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/symlink
+--- PASS: TestFleetPrepareRejectsUnsafeManifestFile (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/symlink (0.00s)
+=== RUN   TestFleetInitRejectsRelativeImportedWorkerPathSemantics
+--- PASS: TestFleetInitRejectsRelativeImportedWorkerPathSemantics (0.00s)
+=== RUN   TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts
+--- PASS: TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts (0.00s)
+=== RUN   TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure
+--- PASS: TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure (0.04s)
+=== RUN   TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager
+--- PASS: TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager (0.00s)
+=== RUN   TestFleetUpRejectsUnitMismatchBeforeAnyMutation
+--- PASS: TestFleetUpRejectsUnitMismatchBeforeAnyMutation (0.00s)
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up
+--- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up (0.00s)
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable
+--- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable (0.00s)
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/status
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/down
+--- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/status (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/down (0.00s)
+=== RUN   TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile
+--- PASS: TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile (0.00s)
+=== RUN   TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero
+--- PASS: TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero (0.00s)
+=== RUN   TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser
+--- PASS: TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser (0.00s)
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope
+--- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope (0.00s)
+=== RUN   TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline
+--- PASS: TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline (0.00s)
+=== RUN   TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations
+--- PASS: TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations (0.00s)
+=== RUN   TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed
+--- PASS: TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed (0.00s)
+=== RUN   TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager
+--- PASS: TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured
+--- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file
+--- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file (0.00s)
+=== RUN   TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable
+--- PASS: TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable (0.00s)
+PASS
+ok  	openagentx/internal/cli/fleet	1.739s
+=== RUN   TestWriteExactFileAtomicIsPrivateIdempotentAndNonDestructive
+--- PASS: TestWriteExactFileAtomicIsPrivateIdempotentAndNonDestructive (0.02s)
+=== RUN   TestWriteExactFileAtomicFailureKeepsOldFileAndCleansTemporary
+--- PASS: TestWriteExactFileAtomicFailureKeepsOldFileAndCleansTemporary (0.01s)
+=== RUN   TestWriteExactFileAtomicRejectsSymlinkAndBroadPermissions
+--- PASS: TestWriteExactFileAtomicRejectsSymlinkAndBroadPermissions (0.00s)
+=== RUN   TestReadSecureFileUsesOpenedRegularFileAndRejectsUnsafeInputs
+--- PASS: TestReadSecureFileUsesOpenedRegularFileAndRejectsUnsafeInputs (0.00s)
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_pane
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/missing_pane_zero
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/overview
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/duplicate_window
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/marker_mismatch
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_session
+--- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_pane (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/missing_pane_zero (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/overview (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/duplicate_window (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/marker_mismatch (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_session (0.00s)
+=== RUN   TestAttachPreflightOutsideTmuxFailsClosed
+--- PASS: TestAttachPreflightOutsideTmuxFailsClosed (0.00s)
+=== RUN   TestAttachPreflightPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero
+--- PASS: TestAttachPreflightPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero (0.00s)
+=== RUN   TestAttachPreflightRejectsAmbiguousCurrentUnmanagedName
+--- PASS: TestAttachPreflightRejectsAmbiguousCurrentUnmanagedName (0.00s)
+=== RUN   TestBindCurrentBindsUnmanagedWindowAndPreservesAdditionalPanes
+--- PASS: TestBindCurrentBindsUnmanagedWindowAndPreservesAdditionalPanes (0.00s)
+=== RUN   TestBindCurrentReusesSameAgentWithoutMutation
+--- PASS: TestBindCurrentReusesSameAgentWithoutMutation (0.00s)
+=== RUN   TestBindCurrentOtherAgentRequiresConfirmationWithoutMutation
+--- PASS: TestBindCurrentOtherAgentRequiresConfirmationWithoutMutation (0.00s)
+=== RUN   TestBindCurrentRejectsTargetConflictsBeforeMutation
+=== RUN   TestBindCurrentRejectsTargetConflictsBeforeMutation/compatible_occupied
+=== RUN   TestBindCurrentRejectsTargetConflictsBeforeMutation/unmanaged_occupied
+--- PASS: TestBindCurrentRejectsTargetConflictsBeforeMutation (0.00s)
+    --- PASS: TestBindCurrentRejectsTargetConflictsBeforeMutation/compatible_occupied (0.00s)
+    --- PASS: TestBindCurrentRejectsTargetConflictsBeforeMutation/unmanaged_occupied (0.00s)
+=== RUN   TestBindCurrentDetectsCurrentWindowTOCTOU
+--- PASS: TestBindCurrentDetectsCurrentWindowTOCTOU (0.00s)
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/managed_marker
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/agent_marker
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/rename
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/verify
+--- PASS: TestBindCurrentCompensatesEveryMutationFailure (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/managed_marker (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/agent_marker (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/rename (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/verify (0.00s)
+=== RUN   TestBindCurrentReportsPartialFailureWhenCompensationFails
+--- PASS: TestBindCurrentReportsPartialFailureWhenCompensationFails (0.00s)
+=== RUN   TestBindCurrentRestoresExistingNameAndOptionPresence
+--- PASS: TestBindCurrentRestoresExistingNameAndOptionPresence (0.00s)
+=== RUN   TestAddAgentConcurrentPreservesEveryEntry
+--- PASS: TestAddAgentConcurrentPreservesEveryEntry (0.14s)
+=== RUN   TestManifestIsExplicitAndStrict
+=== RUN   TestManifestIsExplicitAndStrict/empty
+=== RUN   TestManifestIsExplicitAndStrict/duplicate
+=== RUN   TestManifestIsExplicitAndStrict/unknown
+=== RUN   TestManifestIsExplicitAndStrict/session
+=== RUN   TestManifestIsExplicitAndStrict/old-session
+=== RUN   TestManifestIsExplicitAndStrict/spaced-agent
+--- PASS: TestManifestIsExplicitAndStrict (0.00s)
+    --- PASS: TestManifestIsExplicitAndStrict/empty (0.00s)
+    --- PASS: TestManifestIsExplicitAndStrict/duplicate (0.00s)
+    --- PASS: TestManifestIsExplicitAndStrict/unknown (0.00s)
+    --- PASS: TestManifestIsExplicitAndStrict/session (0.00s)
+    --- PASS: TestManifestIsExplicitAndStrict/old-session (0.00s)
+    --- PASS: TestManifestIsExplicitAndStrict/spaced-agent (0.00s)
+=== RUN   TestManifestAllowsOptionalIdentityAndEncodesDeterministically
+--- PASS: TestManifestAllowsOptionalIdentityAndEncodesDeterministically (0.00s)
+=== RUN   TestIsolatedTmuxReconcilePreservesPaneZeroOneTwoAndIgnoresOldAgentx
+--- PASS: TestIsolatedTmuxReconcilePreservesPaneZeroOneTwoAndIgnoresOldAgentx (0.86s)
+=== RUN   TestIsolatedTmuxCreatesOAXWithoutMigratingExistingAgentx
+--- PASS: TestIsolatedTmuxCreatesOAXWithoutMigratingExistingAgentx (0.76s)
+=== RUN   TestIsolatedTmuxPrependsManagedWindowsWithoutTakingOverExistingOAX
+--- PASS: TestIsolatedTmuxPrependsManagedWindowsWithoutTakingOverExistingOAX (1.10s)
+=== RUN   TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified
+--- PASS: TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified (0.79s)
+=== RUN   TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxiliaryPanes
+--- PASS: TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxiliaryPanes (1.25s)
+=== RUN   TestIsolatedTmuxConsoleSessionExitDoesNotTerminateIndependentWorker
+--- PASS: TestIsolatedTmuxConsoleSessionExitDoesNotTerminateIndependentWorker (0.72s)
+=== RUN   TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero
+--- PASS: TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero (1.16s)
+=== RUN   TestIsolatedTmuxBindCurrentPreservesPanesAndRequiresConfirmation
+--- PASS: TestIsolatedTmuxBindCurrentPreservesPanesAndRequiresConfirmation (1.80s)
+=== RUN   TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero
+=== RUN   TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/wrong_pane
+=== RUN   TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/missing_pane_zero
+--- PASS: TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero (1.22s)
+    --- PASS: TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/wrong_pane (0.67s)
+    --- PASS: TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/missing_pane_zero (0.55s)
+=== RUN   TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation
+=== RUN   TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_marker
+=== RUN   TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_name
+--- PASS: TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation (1.32s)
+    --- PASS: TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_marker (0.67s)
+    --- PASS: TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_name (0.65s)
+=== RUN   TestWorkspaceCreatesMissingOAXSessionWithMarkers
+--- PASS: TestWorkspaceCreatesMissingOAXSessionWithMarkers (0.00s)
+=== RUN   TestWorkspaceReusesExistingOAXAndPrependsOnlyCreatedWindows
+--- PASS: TestWorkspaceReusesExistingOAXAndPrependsOnlyCreatedWindows (0.00s)
+=== RUN   TestWorkspaceVerifiesCreatedAgentWindowBeforeStartingConsole
+--- PASS: TestWorkspaceVerifiesCreatedAgentWindowBeforeStartingConsole (0.00s)
+=== RUN   TestWorkspaceConsoleStartFailureRetainsConfiguredWindowWithoutReportingSuccess
+--- PASS: TestWorkspaceConsoleStartFailureRetainsConfiguredWindowWithoutReportingSuccess (0.00s)
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/Console_start
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/post-start_verify
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/empty_command
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/pane_base
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/remain_on_exit
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/managed_marker
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/Agent_marker
+=== RUN   TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/pre-start_verify
+--- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/Console_start (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/post-start_verify (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/empty_command (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/pane_base (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/remain_on_exit (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/managed_marker (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/Agent_marker (0.00s)
+    --- PASS: TestWorkspaceProvisioningFailuresRetainDiagnosticWindowWithoutReportingSuccess/pre-start_verify (0.00s)
+=== RUN   TestWorkspacePreservesExtraPanesUnmanagedAndOrphanedWindows
+--- PASS: TestWorkspacePreservesExtraPanesUnmanagedAndOrphanedWindows (0.00s)
+=== RUN   TestWorkspaceExplicitlyRespawnsOnlyCompatibleDeadPaneZero
+--- PASS: TestWorkspaceExplicitlyRespawnsOnlyCompatibleDeadPaneZero (0.00s)
+=== RUN   TestWorkspaceDeadPaneTOCTOUFailsWithoutKillingLivePane
+--- PASS: TestWorkspaceDeadPaneTOCTOUFailsWithoutKillingLivePane (0.00s)
+=== RUN   TestWorkspacePreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero
+--- PASS: TestWorkspacePreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero (0.00s)
+=== RUN   TestWorkspaceUsesNamesAndMarkersAcrossWindowReorder
+--- PASS: TestWorkspaceUsesNamesAndMarkersAcrossWindowReorder (0.00s)
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/marker_without_managed
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/name_marker_mismatch
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/overview_agent_marker
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/duplicate_name
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/missing_pane_zero
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/unmanaged_target
+=== RUN   TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/invalid_managed_marker
+--- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass (0.00s)
+    --- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/marker_without_managed (0.00s)
+    --- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/name_marker_mismatch (0.00s)
+    --- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/overview_agent_marker (0.00s)
+    --- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/duplicate_name (0.00s)
+    --- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/missing_pane_zero (0.00s)
+    --- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/unmanaged_target (0.00s)
+    --- PASS: TestWorkspaceFailsClosedBeforeMutationOnEveryConflictClass/invalid_managed_marker (0.00s)
+=== RUN   TestWorkspaceSecondPreflightCatchesTOCTOUWithoutMutation
+--- PASS: TestWorkspaceSecondPreflightCatchesTOCTOUWithoutMutation (0.00s)
+=== RUN   TestWorkspaceInspectUsesPerWindowPaneAndOptionQueries
+--- PASS: TestWorkspaceInspectUsesPerWindowPaneAndOptionQueries (0.00s)
+=== RUN   TestWorkspaceInspectFailsClosedOnEachStructuredQuery
+=== RUN   TestWorkspaceInspectFailsClosedOnEachStructuredQuery/options
+=== RUN   TestWorkspaceInspectFailsClosedOnEachStructuredQuery/session
+=== RUN   TestWorkspaceInspectFailsClosedOnEachStructuredQuery/windows
+=== RUN   TestWorkspaceInspectFailsClosedOnEachStructuredQuery/panes
+--- PASS: TestWorkspaceInspectFailsClosedOnEachStructuredQuery (0.00s)
+    --- PASS: TestWorkspaceInspectFailsClosedOnEachStructuredQuery/options (0.00s)
+    --- PASS: TestWorkspaceInspectFailsClosedOnEachStructuredQuery/session (0.00s)
+    --- PASS: TestWorkspaceInspectFailsClosedOnEachStructuredQuery/windows (0.00s)
+    --- PASS: TestWorkspaceInspectFailsClosedOnEachStructuredQuery/panes (0.00s)
+PASS
+ok  	openagentx/internal/fleet	11.184s
+=== RUN   TestDaemonMuxesKeepCLIAuthUDSOnly
+--- PASS: TestDaemonMuxesKeepCLIAuthUDSOnly (0.00s)
+=== RUN   TestServeAndSchemaUseProfilePathsWithExplicitPrecedence
+--- PASS: TestServeAndSchemaUseProfilePathsWithExplicitPrecedence (0.00s)
+=== RUN   TestServeSchemaInvalidPathsAndHelpFailClosedWithoutLeaks
+--- PASS: TestServeSchemaInvalidPathsAndHelpFailClosedWithoutLeaks (0.00s)
+=== RUN   TestLoadAuthManagerUsesPersistentWebUsersAndFailsClosedWhenEmpty
+--- PASS: TestLoadAuthManagerUsesPersistentWebUsersAndFailsClosedWhenEmpty (0.42s)
+PASS
+ok  	openagentx/cmd/openagentx	0.447s

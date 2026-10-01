@@ -1,0 +1,188 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+    "version": 3,
+    "target_agent_id": "live-agy-06-1002f",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-BROWSER-7400806-1002F. Do not call tools or read files.",
+    "status": "succeeded",
+    "result": "OAX-BROWSER-7400806-1002F",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T17:53:52.601209081Z",
+    "updated_at": "2026-10-01T17:54:04.310310746Z"
+  },
+  "messages": [
+    {
+      "id": "message-4958aee7-e6e4-4d06-83d2-cf25b61d35f6",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-a9787db9-e602-49a5-ae85-023d009cc419",
+      "target_agent_id": "live-agy-06-1002f",
+      "kind": "instruction",
+      "content": "Reply with exactly OAX-BROWSER-7400806-1002F. Do not call tools or read files.",
+      "created_at": "2026-10-01T17:53:52.601209081Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "run_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "task_id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+      "agent_id": "live-agy-06-1002f",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-b6940f65-3981-4d21-bbe0-b66d74dd9563",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "agy-batch",
+      "backend_id": "primary",
+      "model": "gemini-3.7-flash-low",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX-BROWSER-7400806-1002F",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-01T17:53:52.605180157Z",
+      "finished_at": "2026-10-01T17:54:04.310310746Z",
+      "created_at": "2026-10-01T17:53:52.605180157Z",
+      "updated_at": "2026-10-01T17:54:04.310310746Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 322,
+      "event_id": "event-9b5b87ea-fc2e-4102-bc98-f0e396d022a9",
+      "aggregate_type": "task",
+      "aggregate_id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T17:53:52.601209081Z"
+    },
+    {
+      "sequence": 324,
+      "event_id": "event-task-9ce856fc-e27b-4386-8098-9ad2eac923f2",
+      "aggregate_type": "task",
+      "aggregate_id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+      "event_type": "task.running",
+      "created_at": "2026-10-01T17:53:52.60654763Z"
+    },
+    {
+      "sequence": 325,
+      "event_id": "event-run-bd2dd852-b5ec-44b4-8855-d91f85feb39e",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-01T17:53:52.606554142Z"
+    },
+    {
+      "sequence": 334,
+      "event_id": "event-runtime-5e62d2d1-bb3e-40ad-9988-7ae02a324eda",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "runtime.agy.init",
+      "created_at": "2026-10-01T17:54:00.268331514Z",
+      "output": {
+        "stage": "init"
+      }
+    },
+    {
+      "sequence": 335,
+      "event_id": "event-runtime-b271ac73-3248-4db2-a47f-3aa6f1c715f5",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:54:00.50842935Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 339,
+      "event_id": "event-runtime-9c58f885-da3a-459b-bf90-be1b17387cbb",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:54:02.890671658Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 340,
+      "event_id": "event-runtime-94dca482-2b74-43a7-8708-0452f8b7e8a1",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:54:02.930282651Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 341,
+      "event_id": "event-runtime-1a52762b-1f68-48ce-b4a8-767308b68a02",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:54:02.95540664Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 342,
+      "event_id": "event-runtime-0cd243a0-523b-43e3-bd1d-c99711b91cde",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T17:54:02.991464566Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 343,
+      "event_id": "event-runtime-55cdd1a2-a8ca-4e64-9aa3-8589824487d8",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "runtime.agy.result",
+      "created_at": "2026-10-01T17:54:02.993178036Z",
+      "output": {
+        "stage": "result",
+        "status": "succeeded",
+        "text": "OAX-BROWSER-7400806-1002F\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 346,
+      "event_id": "event-run-fd14cda2-315e-4a8d-814e-7845c04d006a",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-18aafc21-c28a-4ff0-b577-38df790b5d77",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-01T17:54:04.310339382Z"
+    },
+    {
+      "sequence": 347,
+      "event_id": "event-task-8312c69a-a7ea-4e68-b036-a994f8e5ec02",
+      "aggregate_type": "task",
+      "aggregate_id": "task-0f048f54-82ca-4162-b72a-b78c1318f52f",
+      "event_type": "task.settled",
+      "created_at": "2026-10-01T17:54:04.310343202Z"
+    }
+  ],
+  "snapshot_sequence": 471,
+  "live_after_sequence": 471,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

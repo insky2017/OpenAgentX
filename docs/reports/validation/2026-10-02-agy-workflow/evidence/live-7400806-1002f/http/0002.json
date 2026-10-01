@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-01T17:49:09.618495+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "live-agy-06-1002f",
+        "principal_id": "agent-live-agy-06-1002f",
+        "organization_id": "default",
+        "display_name": "Live AGY verification",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-01T17:49:07.341757359Z",
+        "updated_at": "2026-10-01T17:49:07.341757359Z"
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 6,
+    "server_time": "2026-10-01T17:49:09.617307417Z",
+    "tasks": [],
+    "workers": []
+  }
+}

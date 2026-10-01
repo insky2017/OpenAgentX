@@ -6,3 +6,5 @@ run/
 *.sock
 web/node_modules/
 web/dist/
+
+scripts/e2e/__pycache__/

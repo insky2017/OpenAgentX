@@ -1,0 +1,1 @@
+daemon stopped: listen on Unix socket: listen unix /home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-7400806-1002d/profile/run/openagentx.sock: bind: invalid argument
