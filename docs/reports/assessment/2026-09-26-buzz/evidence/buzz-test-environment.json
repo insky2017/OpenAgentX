@@ -1,0 +1,49 @@
+{
+  "checked_at_utc": "2026-09-26T02:30:08.305466+00:00",
+  "source_commit": "781d39510cf23cfe224e8f521ae06a23377e06de",
+  "source_git_status": "",
+  "rustc_version": "rustc 1.89.0 (29483883e 2025-08-04)",
+  "cargo_version": "cargo 1.89.0 (c24e10642 2025-06-23)",
+  "upstream_rust_toolchain": "1.95.0",
+  "node_version": "v24.14.0",
+  "node_sha256": "e237a2839d0cbdc9a9a2adda1a184afc0f5b20306ffbe923af5686550472d8a8",
+  "typescript_version": "6.0.3",
+  "nostr_tools_version": "2.23.12",
+  "ci_windows_node_version": "24.14.1",
+  "upstream_environment_reproduced": false,
+  "root_workspace_registry_count": 1027,
+  "root_workspace_cached_exact_versions": 37,
+  "root_target_present": false,
+  "ifc_source_copy_equal": true,
+  "ifc_pruned_lock_entries": 40,
+  "ifc_lock_packages_not_in_upstream": [],
+  "desktop_copied_file_count": 2491,
+  "desktop_all_copied_files_equal": true,
+  "desktop_copied_file_path_and_hash_digest": "8c578c8ae37c94e10e9f70871189f06d543a50a7254f23efdcfbf356b58b51f0",
+  "selected_source_sha256": {
+    "crates/ifc-core/src/lib.rs": "dbad5e8bca6df32666347daa5d1d357f82d3bae448bbf71fc6ae45b4d5df0839",
+    "crates/ifc-core/Cargo.toml": "bfd56324d4b0d123276903317b010587153f6ad44bbc966f18c4e7c8bad9d13a",
+    "Cargo.toml": "fa5734f08700489e9d4b845bda45602aad4584d707f0e534f0cad979e6c505cd",
+    "Cargo.lock": "d47fa4cb1213d351d2c327889ab0c86fa31bd1ef5c6a002e0333e161a8de60ce",
+    "rust-toolchain.toml": "f93d36efbb7a45edf8197259661273bc5d22529eccd4ff6411a851bafa493398",
+    "desktop/test-loader.mjs": "c2477e724b085c96610e8aee9cf47f4079161a1a5788c36494568c5cd15558a4",
+    "desktop/test-loader-hooks.mjs": "64fb2025988fa5f2fc02a1a5e02e05fd5c78d1f69366a276f7d48fa9835d249b",
+    "desktop/src/features/agents/lib/cancelTurnOutcome.test.mjs": "595d0b5ec3deeb7a6483cfc3c85034eb8a8a5c44de404384b1dbde1bcf92fed0",
+    "desktop/src/features/agents/lib/cancelTurnOutcome.ts": "65250d0a6ec29d5a5f02b7b7db7a8597efcdbe6de255af0170dc3a248354f44a",
+    "desktop/src/features/agents/managedAgentReconciliationPlan.test.mjs": "9d74bfcfbbd618e4106ea1272df521df803dbfa3c2c2157051e730f35c6b5a56",
+    "desktop/src/features/agents/managedAgentReconciliationPlan.ts": "cc818974030e6676f97425ea155f43306211306f098e436fd414daf2a9b5dd6f",
+    "desktop/src/features/agents/managedAgentRuntimeStatus.test.mjs": "4694ee07b762cd72abbad6ae3b93fe3444eb1f4c852c8380c57880cba8a8eadc",
+    "desktop/src/features/agents/managedAgentRuntimeStatus.ts": "3b950852ff9440c37a2e6ed2c8a8cf41810c49cf19f4fc5e602b44789fa6aef1",
+    "desktop/src/features/messages/lib/sendToChannelSemantics.test.mjs": "18c4c04ba441a68e826d7254196c0ee8ebb06d4ac4bf0aaf47028cb54c92d84d",
+    "desktop/src/features/messages/lib/sendToChannelSemantics.ts": "a9d5f11a766f59a5b516df03966412a392bddf42ad02bf8f9e1100680c99e051"
+  },
+  "runner_package": {
+    "dependencies": {
+      "node-linux-x64": "24.14.0",
+      "nostr-tools": "2.23.12",
+      "typescript": "6.0.3"
+    }
+  },
+  "test_policy": "One primary batch; only missing-dependency message file rechecked once; no custom implementation or custom tests; no source-string assertions selected; no services or providers",
+  "process_environment_policy": "env -i for Rust and Node tests; temporary CARGO_HOME/CARGO_TARGET_DIR; actual stable toolchain executable selected without rustup upgrade; no HOME override"
+}

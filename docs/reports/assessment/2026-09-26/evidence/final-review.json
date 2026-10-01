@@ -1,0 +1,73 @@
+{
+  "checked_at": "2026-09-25T17:04:55.033242+00:00",
+  "fixed_commit": "da5eb543bf17aa0c772eebbf0961e4dc2daac0e8",
+  "markdown_files_checked": 8,
+  "local_links_checked": 78,
+  "missing_local_links": [],
+  "fixed_source_links_checked": 62,
+  "invalid_source_links": [],
+  "undefined_reference_links": [],
+  "source_files_checked": 51,
+  "source_hash_mismatches": [],
+  "upstream_test_files": {
+    "packages/acp-link/src/__tests__/acp-dispatcher-cancel.test.ts": "9cf90b05a3c86267c7847d4ab2e27f6b47ad00db72ae2628baa93c5f3acffb8c",
+    "packages/chat-channel/src/__tests__/snapshot-cas-isolation.test.ts": "e1c9ebd9d48a41593876c9ce813adb241493cae58a4346a20b5ac56bb8a6dea9",
+    "packages/chat-channel/src/channel/command-id-dedup.test.ts": "ffbb9fa249b413e60f959e3bd3d9461178ecfe6746055a0c3ce3eb057178c7a6",
+    "packages/chat-channel/src/channel/permission-cas.test.ts": "6a6f8c85272c14efcda775f4b97e90cdd4df47fdc1cdf5f237f5bb22847a8a5f",
+    "packages/chat-channel/src/channel/session-channel-action.test.ts": "eafe346730d050ce49b96dac7f86b65f1272059794003eeecd051f9001025db0",
+    "packages/workflow-engine/src/__tests__/executor/agent-executor.test.ts": "0dd36fcea840b61a6c7f72cdc842390f3fffcff336dcd14bc3b5b91bde707758",
+    "packages/workflow-engine/src/__tests__/recovery/snapshot-recovery.test.ts": "4c893a174c70d9ab63f1c5ba3acc7da0644d17f243239a9d7ddec7e3a676e3ba",
+    "src/__tests__/agent-executor.test.ts": "6182f9208dc4a82bed28c31c2d937f3033e1e0766499a0d8236aa19585cc5040",
+    "src/__tests__/task-timeout-instanceof-error.test.ts": "49d9cf51b8bc8aa2f5d890e77edf3a6ceaad4c7503c44da9c89098b9092f8550"
+  },
+  "frozen_files_checked": 9,
+  "frozen_files_changed": [],
+  "clone_status": "",
+  "test_boundary": "9 upstream files / 104 passed; 6 assessment behavior probes (includes positive control); isolated subset deps/config; no real Provider/UI/PG/Redis/OAX new E2E",
+  "primary_review": "read full report; independently read scheduler, PromptTurn, workflow transport/recovery, RuntimeCoordinator, Chat command dedup, UI auth/reconnect/status panel, license and CI, test fixtures/logs",
+  "formal_services": [
+    {
+      "MainPID": "1686100",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "unchanged_from_start": true
+    },
+    {
+      "MainPID": "1687781",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx-worker@quote-service.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "unchanged_from_start": true
+    }
+  ],
+  "all_services_unchanged": true,
+  "credential_pattern_scan_hits": [],
+  "credential_scan_boundary": "有限常见凭据格式扫描；源码与synthetic测试证据另核对，未读取用户秘密/历史，不声称全库秘密审计",
+  "final_report_sha256": "c26b5c5a4f6cb39b231e5587e7076c585eb52cb752aca98058ed9d4a9c7c418f",
+  "final_readme_sha256": "9eefb349ac5ac5eedcb0f5c3b94e5906a81d121d3d5e33a9e477fb791ccc5ab1",
+  "credential_scan_note": "边界限定的凭据格式扫描；初次无前缀边界模式命中 task-intent 等路径子串，修正模式后无命中，未输出匹配正文。",
+  "independent_review": {
+    "agent": "/root/review_fenix",
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high",
+    "blocking_findings": [],
+    "report_sha_matches": true,
+    "readme_finalization": "独立复核读过比较与范围；完成链接/104+6计数/检查链接在复核后由主代理收口，最终README哈希由本文件记录。"
+  },
+  "staged_files": 24,
+  "out_of_scope_staged_files": [],
+  "staged_whitespace": {
+    "full_check_exit": 2,
+    "preserved_raw_evidence_warnings": {
+      "docs/reports/assessment/2026-09-26/evidence/fenix-source-excerpts.txt": 16
+    },
+    "unexpected_warnings": [],
+    "excluding_reviewed_raw_evidence_exit": 0,
+    "decision": "保留原始证据的编号空行或终端尾空行；其他新增文档格式通过。"
+  }
+}

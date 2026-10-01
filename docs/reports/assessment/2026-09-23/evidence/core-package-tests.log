@@ -1,0 +1,19 @@
+COMMAND go test -race -count=1 ./internal/domain/... ./internal/auth/... ./internal/api/... ./internal/controlplane/... ./internal/persistence/sqlite/...
+START 2026-09-23T00:28:58.720532+08:00
+ok  	openagentx/internal/domain	1.029s
+ok  	openagentx/internal/auth	1.862s
+ok  	openagentx/internal/auth/cli	10.521s
+ok  	openagentx/internal/auth/web	3.495s
+ok  	openagentx/internal/api	1.029s
+ok  	openagentx/internal/api/admin	3.560s
+ok  	openagentx/internal/api/auth	3.374s
+ok  	openagentx/internal/api/console	10.577s
+ok  	openagentx/internal/api/panel	40.268s
+ok  	openagentx/internal/api/workerapi	1.038s
+ok  	openagentx/internal/controlplane	10.540s
+ok  	openagentx/internal/persistence/sqlite	17.105s
+ok  	openagentx/internal/persistence/sqlite/migrations	2.337s
+
+EXIT 0
+DURATION_SECONDS 46.239
+END 2026-09-23T00:29:44.959202+08:00

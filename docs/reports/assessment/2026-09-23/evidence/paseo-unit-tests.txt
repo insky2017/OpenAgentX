@@ -1,0 +1,11 @@
+
+ RUN  v3.2.4 /tmp/paseo-assessment-20260923
+
+ ✓ packages/server/src/server/agent/providers/provider-runner.test.ts (4 tests) 13ms
+ ✓ packages/server/src/server/agent/providers/jsonl-frame-decoder.test.ts (3 tests) 48ms
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  00:43:29
+   Duration  1.03s (transform 160ms, setup 0ms, collect 173ms, tests 61ms, environment 1ms, prepare 296ms)
+

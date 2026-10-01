@@ -1,0 +1,13 @@
+start=2026-09-23T00:32:15.889201+08:00
+env: OAX_ASSESS_NO_NETWORK=1
+command=go test -overlay=/tmp/oax-console-assessment/overlay.json -count=1 -v ./internal/cli/console -run ^TestAssessmentConsoleJourney$ -timeout 90s
+=== RUN   TestAssessmentConsoleJourney
+    workflow_integration_test.go:170: ONBOARDING real PTY owner init, Agent apply, Console login, Fleet Agent selection and manifest import completed
+    workflow_integration_test.go:203: NO_NETWORK fleet up/status active; dispatch accepted; after 3s task_status=queued latest_run_present=false
+    workflow_integration_test.go:204: NO_NETWORK task_outcome={TaskID:task-0a352c58-d756-4146-bc5d-f212b65905d9 Version:1 AgentID:quote-service Status:queued Content:first task before network configuration Result:<nil> ResultTruncated:false Error:<nil> ErrorTruncated:false OutcomeState:pending CreatedAt:2026-09-22T16:32:43.062405941Z UpdatedAt:2026-09-22T16:32:43.062405941Z}
+    workflow_integration_test.go:205: NO_NETWORK worker_log=
+--- PASS: TestAssessmentConsoleJourney (28.62s)
+PASS
+ok  	openagentx/internal/cli/console	28.625s
+
+exit_code=0 duration_seconds=30.257

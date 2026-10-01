@@ -1,0 +1,19 @@
+captured_at=2026-09-23T00:54:18.225783+08:00
+source_url=https://github.com/multica-ai/multica
+source_path=/tmp/oax-assessment-multica-20260923
+commit=90e0bdf830436b3981b32a7017e1c18d41c7cdea
+commit_metadata=2026-09-22T16:44:14+08:00 MUL-7586 Atomically create issues with custom properties (#8689)
+git_status_porcelain=''
+license_sha256=0e42d37bb02dc61f270c5a0528d489da76e5a578b209856f2e95ee4d60aacdbe
+go version=go version go1.22.4 linux/amd64
+node --version=v20.19.4
+python3 --version=Python 3.12.3
+declared_go=1.26.6; declared_node=>=22
+scope=read-only shallow clone; no dependency install; no new toolchain; no service/deployment start; no provider execution or account access
+tests=GOTOOLCHAIN=local GOWORK=off; unchanged upstream named files only, standard library; not full package/module/integration
+cloned_source_retained=true; reason=fixed-source audit reproducibility
+test_source_identical=server/internal/daemon/reconcile.go sha256=678df92b26c958b0f82e3a11dbb25aaf4c195e065fbc913c489b3d23c36020d5
+test_source_identical=server/internal/daemon/reconcile_test.go sha256=ded6fec72a8a2bc91d5d9318115ffee5d55507fd6a27bb09ca36d00242823373
+test_source_identical=server/internal/daemon/execenv/issue_state_instructions.go sha256=fe4053f3649b73d6dc5a9e14f2cb9927c6f55883f78a19cf532f1262692b4f15
+test_source_identical=server/internal/daemon/execenv/issue_state_instructions_test.go sha256=5214736c248a5ccd75cef9c23a9ccbcf741ff3627c8cd79b046d8833c2688377
+pure_test_copy_removed=true

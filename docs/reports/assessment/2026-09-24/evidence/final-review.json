@@ -1,0 +1,49 @@
+{
+  "checked_at": "2026-09-24T16:18:01.804745+00:00",
+  "reports": 2,
+  "markdown_files_checked": 6,
+  "local_links_checked": 52,
+  "missing_local_links": [],
+  "fixed_source_links_checked": 64,
+  "invalid_fixed_source_links": [],
+  "frozen_files_checked": 9,
+  "frozen_files_changed": [],
+  "authored_markdown_trailing_whitespace": [],
+  "openharness_manifest_files_checked": 38,
+  "openharness_manifest_mismatches": [],
+  "wake_source_copy_files_checked": 93,
+  "wake_source_copy_mismatches": [],
+  "clone_status": {
+    "autonomous-ai/openharness": "",
+    "iAmCorey/Wake": ""
+  },
+  "credential_pattern_scan_hits": [],
+  "credential_scan_limit": "有限常见凭据格式扫描；未读取用户凭据或真实Agent历史，另人工核对测试隔离与原始证据来源。",
+  "source_review": "主代理独立读取OpenHarness service/finish/cancel/artifacts/test fixture与LICENSE；Wake resume/MCP/remote/test fixture与LICENSE，全文复核两报告。",
+  "test_boundary": "固定源码与隔离局部测试；无第三方GUI、Provider、SSH、系统Trash、远程或OpenAgentX Runtime/浏览器重测。",
+  "initial_scan_false_positive": "宽泛 sk- 模式命中 ADR-006 文件名 task-intent 的后缀，已确认仅为路径子串；带边界模式无命中。",
+  "independent_review": {
+    "agent": "/root/reference_consistency_review",
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high",
+    "scope": "README全文；09/10正文/测试/前三建议；上一批00/07/08相关结论；本批测试输出/来源/lock；抽查OpenHarness finish/retry/cancel和Wake latest_activity。",
+    "blocking_findings": [],
+    "nonblocking_comment": "README停止作用域具体化为Pause同目标停止确认及编排取消反例",
+    "comment_resolved": true,
+    "tests_repeated": false
+  },
+  "staged_files": 28,
+  "out_of_scope_staged_files": [],
+  "staged_whitespace": {
+    "full_check_exit": 2,
+    "raw_evidence_preserved": {
+      "docs/reports/assessment/2026-09-24/evidence/openharness-orchestrator-umask077.txt": 1,
+      "docs/reports/assessment/2026-09-24/evidence/openharness-source-evidence.txt": 33,
+      "docs/reports/assessment/2026-09-24/evidence/openharness-targeted-tests.txt": 1,
+      "docs/reports/assessment/2026-09-24/evidence/wake-source-excerpts.txt": 77
+    },
+    "unexpected_warnings": [],
+    "excluding_four_reviewed_raw_evidence_files_exit": 0,
+    "decision": "保留终端原始尾空行和带行号源码空白，不为格式检查改写证据；其余全部文件检查通过。"
+  }
+}

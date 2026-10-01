@@ -1,0 +1,123 @@
+start=2026-09-23T00:33:25.932576+08:00
+command=go test -overlay=/tmp/oax-console-assessment/overlay.json -count=1 -v ./internal/cli/console -run ^TestAssessmentConsoleJourney$ -timeout 120s
+=== RUN   TestAssessmentConsoleJourney
+    workflow_integration_test.go:170: ONBOARDING real PTY owner init, Agent apply, Console login, Fleet Agent selection and manifest import completed
+    workflow_integration_test.go:209: NETWORK prerequisite completed via authenticated Web test/publish/apply APIs, outside Fleet/Console UX
+    workflow_integration_test.go:226: WORKSPACE_INITIAL OAX:overview.0 current_command=zsh dead=0 active_window=1
+        OAX:quote-service.0 current_command=openagentx dead=0 active_window=0
+    workflow_integration_test.go:276: TASK first dispatch -> waiting_input -> focused steer -> succeeded; TUI showed both Task outcome and Runtime reply
+    workflow_integration_test.go:277: SCREEN_TASK_REPLY
+        Agent quote-service | mode normal | connection connected | cursor 73
+        #30 run_attempt.started | Task task-52a177b2-c... | Run run-55168602-da... |
+        run version 2 | run status succeeded | Runtime reply state available
+        Task task-52a177b2-c... v6 succeeded (run succeeded) | Worker worker-05e343d0...
+        > /help
+    workflow_integration_test.go:299: TUI diagnostic -> normal succeeded
+    workflow_integration_test.go:325: RESIDENT second task succeeded after Console quit with same Worker PID/instance/generation
+    workflow_integration_test.go:333: REPEAT same dispatch idempotency key returned same Task ID, still exactly 2 tasks
+    workflow_integration_test.go:334: REENTRY workspace={
+          "cli_username": "owner",
+          "workspace": {
+            "SessionCreated": false,
+            "Created": null,
+            "Reused": [
+              "overview"
+            ],
+            "Respawned": null,
+            "Dead": [
+              "quote-service"
+            ],
+            "Unmanaged": null,
+            "Orphaned": null
+          }
+        }
+    workflow_integration_test.go:335: REENTRY up=started user unit openagentx-worker@quote-service.service
+    workflow_integration_test.go:336: REENTRY before_explicit_recovery=index=0 dead=1 current_command=openagentx
+        index=1 dead=0 current_command=sleep
+        index=2 dead=0 current_command=sleep
+    workflow_integration_test.go:337: REENTRY recovery={
+          "cli_username": "owner",
+          "workspace": {
+            "SessionCreated": false,
+            "Created": null,
+            "Reused": [
+              "overview"
+            ],
+            "Respawned": [
+              "quote-service"
+            ],
+            "Dead": null,
+            "Unmanaged": null,
+            "Orphaned": null
+          }
+        }
+    workflow_integration_test.go:338: STOP result=stop queued for quote-service generation 1 (pending); intent is persistent
+        {
+          "agent_id": "quote-service",
+          "generation": 1,
+          "worker_status": "online",
+          "elapsed": "0s",
+          "recent_status": "2026-09-22T16:33:58.216068457Z",
+          "no_new_tasks": false,
+          "message": "graceful stop pending; waiting for Worker to enter draining"
+        }
+        {
+          "agent_id": "quote-service",
+          "worker_status": "offline",
+          "elapsed": "1s",
+          "recent_status": "0001-01-01T00:00:00Z",
+          "no_new_tasks": false,
+          "message": "offline; graceful stop completed"
+        }
+    workflow_integration_test.go:339: STOP status={
+          "agents": [
+            {
+              "agent_id": "quote-service",
+              "organization_id": "default",
+              "display_name": "Quote Service",
+              "worker_status": "offline",
+              "generation": 1
+            }
+          ],
+          "fleet_agents": [
+            {
+              "AgentID": "quote-service",
+              "IdentityFile": "",
+              "WorkerConfig": "/tmp/oax9-1352306278/home/.openagentx/workers/quote-service.yaml",
+              "Enabled": true
+            }
+          ],
+          "foreground_takeover": "Foreground Takeover（规划中，暂不可用）",
+          "session": "OAX",
+          "windows": [
+            {
+              "agent_id": "",
+              "managed": true,
+              "name": "overview",
+              "pane_indices": [
+                0
+              ],
+              "pane_zero_dead": false
+            },
+            {
+              "agent_id": "quote-service",
+              "managed": true,
+              "name": "quote-service",
+              "pane_indices": [
+                0,
+                1,
+                2
+              ],
+              "pane_zero_dead": false
+            }
+          ],
+          "workers": {
+            "quote-service": "inactive"
+          },
+          "workspace_status": "available"
+        }
+--- PASS: TestAssessmentConsoleJourney (32.87s)
+PASS
+ok  	openagentx/internal/cli/console	32.884s
+
+exit_code=0 duration_seconds=33.526

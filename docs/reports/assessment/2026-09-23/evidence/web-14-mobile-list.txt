@@ -1,0 +1,58 @@
+OPENAGENTX
+指挥台
+在线
+退
+←
+
+观察窗口
+
+任务
+3 项
+搜索任务
+全部 Agent
+web-eval-a
+web-eval-b
+全部状态
+queued
+dispatching
+running
+waiting_input
+waiting_approval
+cancel_requested
+succeeded
+failed
+canceled
+uncertain
+全部时间
+最近 1 小时
+最近 24 小时
+最近 7 天
+WEB-EVAL-03 安全渲染
+task-c19c753f-fd06-4033-ac52-09d2d213fd46 · web-eval-a
+succeeded
+5 秒前
+WEB-EVAL-02 第二项任务
+task-f6fa5ad7-9c2a-4dec-9f8d-11d2effa4b67 · web-eval-a
+succeeded
+55 秒前
+WEB-EVAL-01 首次任务，无网络绑定
+task-c898db01-05be-4b99-b57c-d746616eaacb · web-eval-a
+succeeded
+58 秒前
+执行 Agent
+请选择执行 Agent
+web-eval-a (web-eval-a) · online
+web-eval-b (web-eval-b) · online
+
+Worker 在线 · generation 1
+
+向 web-eval-a 发送业务指令
+↑
+⌂
+指挥
+▣
+任务
+⌘
+组织
+⚙
+Runtime

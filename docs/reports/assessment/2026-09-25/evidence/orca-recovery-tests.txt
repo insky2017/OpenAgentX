@@ -1,0 +1,28 @@
+
+ RUN  v4.1.11 /tmp/oax-orca-assessment-20260925
+
+ ❯ src/main/runtime/orchestration/preamble.test.ts (0 test)
+(node:2074046) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2074098) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/runtime/orchestration/preamble.test.ts [ src/main/runtime/orchestration/preamble.test.ts ]
+Error: Cannot find package 'remark-parse' imported from /tmp/oax-orca-assessment-20260925/src/main/runtime/orchestration/preamble.test.ts
+ ❯ src/main/runtime/orchestration/preamble.test.ts:2:1
+      1| import { spawnSync } from 'node:child_process'
+      2| import remarkParse from 'remark-parse'
+       | ^
+      3| import { unified } from 'unified'
+      4| import { describe, expect, it } from 'vitest'
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  27 passed (27)
+   Start at  01:02:09
+   Duration  2.25s (transform 1.04s, setup 0ms, import 1.44s, tests 2.05s, environment 1ms)
+

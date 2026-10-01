@@ -1,0 +1,53 @@
+{
+  "source_links_valid": true,
+  "local_links": [
+    {
+      "href": "../2026-09-23/00-overall-assessment.md",
+      "exists": true
+    },
+    {
+      "href": "../2026-09-24/README.md",
+      "exists": true
+    },
+    {
+      "href": "README.md",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-provenance.json",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-source-excerpts.txt",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-check-commands.md",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-local-tests.txt",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-local-tests-rerun.txt",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-recovery-tests.txt",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-local-test-config.mjs",
+      "exists": true
+    },
+    {
+      "href": "evidence/orca-recovery-test-config.mjs",
+      "exists": true
+    }
+  ],
+  "clean_clone": true,
+  "source_hashes_match_HEAD": true,
+  "active_test_pids": [],
+  "report_sha256": "93db607dfe0aa3eb68e146312c5543db4832d8d49ddde2b64d995456d211075c"
+}

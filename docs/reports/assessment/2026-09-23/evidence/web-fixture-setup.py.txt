@@ -1,0 +1,45 @@
+import os,pty,select,secrets,pathlib,time,json
+root=pathlib.Path('/tmp/oax-web-assessment'); root.chmod(0o700)
+pw=secrets.token_urlsafe(24); (root/'password').write_text(pw); (root/'password').chmod(0o600)
+binary='/home/sky/.local/bin/openagentx'
+def run(args,n):
+ pid,fd=pty.fork()
+ if pid==0: os.execv(binary,[binary]+args)
+ buf=b''; sent=0; start=time.time()
+ while time.time()-start<30:
+  rd,_,_=select.select([fd],[],[],1)
+  if rd:
+   try: chunk=os.read(fd,65536)
+   except OSError: break
+   buf+=chunk
+   if b'password: ' in buf.lower() and sent<n:
+    os.write(fd,(pw+'\n').encode()); sent+=1; buf=b''
+  w,status=os.waitpid(pid,os.WNOHANG)
+  if w: print(args[0],os.waitstatus_to_exitcode(status)); return
+ _,status=os.waitpid(pid,0);print(args[0],os.waitstatus_to_exitcode(status),buf.decode(errors='replace').replace(pw,'[redacted]'))
+run(['init','--db',str(root/'db.sqlite')],2)
+for aid in ['web-eval-a','web-eval-b']:
+ (root/(aid+'.yaml')).write_text(f'''version: 1
+agent_id: {aid}
+principal_id: agent-{aid}
+organization_id: default
+display_name: {aid}
+profile:
+  instructions_path: ROLE.md
+  workspace_root: /tmp/oax-web-assessment
+  capabilities:
+    - control-plane-testing
+''')
+ (root/'ROLE.md').write_text('Isolated fake Runtime for browser assessment. No business side effects.\n')
+ run(['agent','apply','--db',str(root/'db.sqlite'),'--file',str(root/(aid+'.yaml'))],1)
+ (root/(aid+'-worker.yaml')).write_text(f'''version: 1
+agent_id: {aid}
+transport: unix
+unix_socket: /tmp/oax-web-assessment/daemon.sock
+runtime_backends:
+  - backend_id: primary
+    adapter_id: fake
+    options:
+      model: fake-model
+      result: "隔离浏览器验证结果：fake Runtime，无业务副作用。"
+'''+('      result_status_sequence: [waiting_input, succeeded, succeeded, succeeded, succeeded]\n      provider_session_id: web-eval-session\n      output_sequence: ["等待补充信息", "过程输出与结果", "下一项过程输出", "第三项", "第四项"]\n' if aid.endswith('a') else ''))

@@ -1,0 +1,13 @@
+{
+  "isolated_worker_pid": 3225460,
+  "process_state": "gone",
+  "seconds": 0.502,
+  "workers": [
+    {
+      "worker_instance_id": "worker-ebf9cff7-2ee5-4fa1-9670-4b3ca003db7d",
+      "generation": 1,
+      "status": "offline"
+    }
+  ],
+  "formal_services_signaled": false
+}

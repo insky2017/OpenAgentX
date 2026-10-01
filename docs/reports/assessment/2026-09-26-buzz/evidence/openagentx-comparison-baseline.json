@@ -1,0 +1,39 @@
+{
+  "observed_at": "2026-09-26T02:23:50.823899+00:00",
+  "main": "bc304c5cd733995c8afc767266d6366a230305dc",
+  "services": [
+    {
+      "MainPID": "1686100",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "same_as_previous": true
+    },
+    {
+      "MainPID": "1687781",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx-worker@quote-service.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+      "same_as_previous": true
+    }
+  ],
+  "frozen_files": {
+    "AGENTS.md": "b53264590ccb1ebace81668ae3c98f1e29ce8f61384a259f08a5e23b8b92a95b",
+    "docs/decisions/ADR-001-resident-agent-worker-runtime-observability.md": "587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403",
+    "docs/decisions/ADR-002-agent-cli-proxy-environment.md": "e1e4cb8b2368be2ea17f66fb1ce33c0185c8d4be9484bc63a245494b0d547f1d",
+    "docs/decisions/ADR-003-command-center-task-observation-and-content.md": "a538850fdf884a4d7a00ab92646c6a6c9e5374eb91ef35a0c7ffabf7e80ec99c",
+    "docs/decisions/ADR-004-streamlined-command-center-network-ux.md": "317e0d0017e2e5685d4112b010b1c5a0370bf6316495cc905014715446589ce3",
+    "docs/decisions/ADR-005-interactive-worker-console-and-developer-experience.md": "70164f591997051c26947b08ca2de1c7946b7dfa3389763ecb5ab79998187b7a",
+    "docs/decisions/ADR-006-task-intent-and-verifiable-terminal-semantics.md": "addb19af458824473aacdbb960294a8e08b368803b07c2ff78353737c455aa70",
+    "docs/decisions/ADR-007-worker-network-binding-generation-continuity.md": "98ed16da6ccecc9958e335f7a446ea04aafebf30923fc1e5568a12ff09d0f37a",
+    "docs/decisions/ADR-008-oax-workspace-console-tui-and-cli-session.md": "572e9edc47e8f1961f7db89ada9723ebbe2fcba6ee7fecd37891f76c53f7406d"
+  },
+  "frozen_changed_since_previous": [],
+  "previous_baseline": "../../2026-09-26/evidence/openagentx-comparison-baseline.json",
+  "scope": "本批重新核对主线、运行进程/二进制和冻结文件；复用先前Go/Web来源说明，不重跑OAX E2E。",
+  "runtime_or_browser_retested": false
+}

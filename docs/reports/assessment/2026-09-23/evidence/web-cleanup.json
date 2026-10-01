@@ -1,0 +1,22 @@
+{
+  "processes": [
+    {
+      "pid": 3142660,
+      "kind": "fake-worker-a",
+      "exited": true
+    },
+    {
+      "pid": 3142662,
+      "kind": "fake-worker-b",
+      "exited": true
+    },
+    {
+      "pid": 3140838,
+      "kind": "isolated-daemon",
+      "exited": true
+    }
+  ],
+  "production_untouched": true,
+  "temporary_data_retained_for_audit": true,
+  "recorded_at": "2026-09-23T00:48:18.804353+08:00"
+}

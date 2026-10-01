@@ -1,0 +1,26 @@
+{
+  "observed_at": "2026-09-22T16:53:31.855096+00:00",
+  "services": [
+    {
+      "MainPID": "1686100",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89"
+    },
+    {
+      "MainPID": "1687781",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx-worker@quote-service.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89"
+    }
+  ],
+  "same_processes_hashes_restart_count": true,
+  "health_status": 200,
+  "health_body": {
+    "status": "ok"
+  }
+}

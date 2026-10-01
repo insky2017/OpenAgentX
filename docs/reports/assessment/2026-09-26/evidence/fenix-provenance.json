@@ -1,0 +1,689 @@
+{
+  "repository": "https://github.com/HuangPuStar/FenixAgent",
+  "commit": "da5eb543bf17aa0c772eebbf0961e4dc2daac0e8",
+  "commit_time": "2026-09-11T11:32:09+08:00",
+  "source_checkout": "/tmp/oax-fenix-assessment-20260926",
+  "captured_at_utc": "2026-09-25T17:00:57.488768+00:00",
+  "scope": "只读源码研究；隔离测试由独立代理执行，详 fenix-test-environment.json；未启动服务或真实 Provider",
+  "tracked_status": "",
+  "workspace_package_count": 16,
+  "workspace_packages": [
+    "packages/acp-link/package.json",
+    "packages/acp-runtime-cli/package.json",
+    "packages/chat-channel/package.json",
+    "packages/core/package.json",
+    "packages/logger/package.json",
+    "packages/model-gateway-litellm/package.json",
+    "packages/model-gateway-sdk/package.json",
+    "packages/opensandbox-cluster/package.json",
+    "packages/orchestration/package.json",
+    "packages/plugin-ccb/package.json",
+    "packages/plugin-claude-code/package.json",
+    "packages/plugin-opencode/package.json",
+    "packages/plugin-sdk/package.json",
+    "packages/remote-runtime/package.json",
+    "packages/sandbox-provider/package.json",
+    "packages/workflow-engine/package.json"
+  ],
+  "tracked_license_paths": [
+    "LICENSE"
+  ],
+  "source_files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "4e6ad2c279f23108ca85ae3d637efc63791f95b48ab25804daf1eaea099e52c0",
+      "lines": 61
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "lines": 201
+    },
+    {
+      "path": "README.md",
+      "sha256": "70f0d4c16913e5af2a0733816705030a94a3358b8ea6cd0dd94411fbeb15e9f0",
+      "lines": 201
+    },
+    {
+      "path": "bunfig.toml",
+      "sha256": "4aeb20beb71c27d7ff069fc121ecbc3914b6d53f721cbd71cfea5dfa5de9c9a8",
+      "lines": 2
+    },
+    {
+      "path": "docs/user/agents/index.md",
+      "sha256": "0e4b224edcaf914d6971d8a2786059631c04988eba7be2e185bcf65d5b9896df",
+      "lines": 100
+    },
+    {
+      "path": "package.json",
+      "sha256": "25efe14fc3bb5038b317cbf049adfedd72440b26f33d01c3b80e5ffdedde0c2c",
+      "lines": 158
+    },
+    {
+      "path": "packages/acp-link/package.json",
+      "sha256": "d8c7e29b56238205c4b3050e1f9debfeb8870d86c6895e84dad7589fd79a80b8",
+      "lines": 75
+    },
+    {
+      "path": "packages/acp-link/src/acp-dispatcher.ts",
+      "sha256": "51cc8822db049b27608eacaf143628b87d5fd9cde945e8d9a8ad5746155bc7f6",
+      "lines": 553
+    },
+    {
+      "path": "packages/acp-runtime-cli/package.json",
+      "sha256": "c90eb4d8f1025720fff7c7cbbff4e0c3b25e3cafdb5aff80f0ec650f27aee051",
+      "lines": 30
+    },
+    {
+      "path": "packages/chat-channel/src/channel/command-coordinator.ts",
+      "sha256": "07cf8e396d4d0f999e5ae6b0c1ed6419cc39227290e72a5ea46e8dd5553ba853",
+      "lines": 258
+    },
+    {
+      "path": "packages/chat-channel/src/channel/relay-event-handler.ts",
+      "sha256": "b02ff631c7e087ee439406e4cb6a14d501e7b1e8f43288781961329f49fe94c8",
+      "lines": 766
+    },
+    {
+      "path": "packages/chat-channel/src/channel/session-channel.ts",
+      "sha256": "41dc8475e87e420c3c6a22d6d5b08e18403a0c44ceafbbb7929ef4d3cd303c63",
+      "lines": 526
+    },
+    {
+      "path": "packages/chat-channel/src/persist/snapshot-cas.ts",
+      "sha256": "50424360a00202ec92363bc3ff2c74f0e1a665db4722cd4455de04b3fe17dbfc",
+      "lines": 141
+    },
+    {
+      "path": "packages/chat-channel/src/persist/snapshot-config.ts",
+      "sha256": "df3d40412e24fe0f7ffccc0c034ae818b12a316e91fbf79bc92e3701559570e9",
+      "lines": 66
+    },
+    {
+      "path": "packages/chat-channel/src/protocol/acp-channel.ts",
+      "sha256": "2b2c3dd3666e8619da226a8c6dc301882276e0a5f41195cdc0f24e1324079638",
+      "lines": 489
+    },
+    {
+      "path": "packages/chat-channel/src/state/doc-manager.ts",
+      "sha256": "a468e7c941349dee710f3ccfcabaa5e162db6d3f927cd2ed7a973e15db98bfe3",
+      "lines": 431
+    },
+    {
+      "path": "packages/chat-channel/src/state/permission.ts",
+      "sha256": "214c1c50ad9e8113327a602f1044098b79cf01bc623dff732a6e8e5d94aba876",
+      "lines": 137
+    },
+    {
+      "path": "packages/chat-channel/src/state/turn-machine.ts",
+      "sha256": "3556086e094c304703a8f05eea5dfc69c965a196b550be06ac14978cc94d0469",
+      "lines": 84
+    },
+    {
+      "path": "packages/plugin-claude-code/src/runtime/environment.ts",
+      "sha256": "d0d65c9ddb0a417b731f66a11046baee6e5e0ed1882f91b9ad61767cb4c1980e",
+      "lines": 83
+    },
+    {
+      "path": "packages/plugin-claude-code/src/runtime/settings.ts",
+      "sha256": "89b04394ccee94f18a4c4e8e9df58932e735cd8f14c1d77c4a2d0b9a66560129",
+      "lines": 117
+    },
+    {
+      "path": "packages/plugin-opencode/src/relay/relay-handle.ts",
+      "sha256": "c5bba4788403eb8a14f123a4599701f699e4eefc629777012f78ab843b0a7e9b",
+      "lines": 204
+    },
+    {
+      "path": "packages/plugin-opencode/src/runtime/environment-preparer.ts",
+      "sha256": "44e7ca8ea89335b02198f0a424138233fc268b7eca48be88fb9b3d04be7213be",
+      "lines": 50
+    },
+    {
+      "path": "packages/plugin-opencode/src/runtime/runtime-config.ts",
+      "sha256": "ac6017a1edc2ec37ceab103786ffa42d43f1af05349a2b07293582af97b1a5ba",
+      "lines": 168
+    },
+    {
+      "path": "packages/plugin-sdk/src/agent-launch-spec.ts",
+      "sha256": "74ba26a22a0ec8429bdc23c244700385a12aa0af47d1c7dce8666321f0e98b12",
+      "lines": 96
+    },
+    {
+      "path": "packages/remote-runtime/src/remote-relay-handle.ts",
+      "sha256": "08905be4eb884ff5351696dc585e261dc0434ee24a97fad44763f90e45632a08",
+      "lines": 92
+    },
+    {
+      "path": "packages/workflow-engine/src/recovery/snapshot-recovery.ts",
+      "sha256": "1e4fe652eb740027bdf8ddfd6a901d3cb72a81ccdbb792f1570984bd92990e02",
+      "lines": 408
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "f22317f03204d921e06ceff6ea3fe250f4b304e927f4b9de3516104839ecc153",
+      "lines": 337
+    },
+    {
+      "path": "src/plugins/auth.ts",
+      "sha256": "f3aa71ed5c7f1f776d84c59e0f0f743c591cf82eeaea718305777853fdfa5f24",
+      "lines": 428
+    },
+    {
+      "path": "src/routes/acp/index.ts",
+      "sha256": "a806d4a7f2fc91212ab2d3abb6d88d7d7d7a12058dd041aca63353c9580e5c9b",
+      "lines": 404
+    },
+    {
+      "path": "src/routes/web/workflow-runs.ts",
+      "sha256": "5a6b413b9cbcdf28a37df27a25a4013c54060663ec50f9ae1413db54d0f5cc23",
+      "lines": 649
+    },
+    {
+      "path": "src/services/agent-chat-service.ts",
+      "sha256": "acc3d842fea12ab88b8900a96eb915c510741eb520df956fde9c3dec76b9621b",
+      "lines": 446
+    },
+    {
+      "path": "src/services/agent-instance-runtime-coordinator.ts",
+      "sha256": "bf2b3373ab866bc4ad1f1755a6f78041122deaf6964cc8728f75f52c4347bf4d",
+      "lines": 293
+    },
+    {
+      "path": "src/services/agent-system-prompt.ts",
+      "sha256": "c53f818028f29d8af16747897e477750369327d9f1b9f291735de0a3d344e998",
+      "lines": 43
+    },
+    {
+      "path": "src/services/cache.ts",
+      "sha256": "ae8486db70edba74e8fcbf913708ddbc1a1f01d6fc7f23482749ac5459cbc250",
+      "lines": 133
+    },
+    {
+      "path": "src/services/config/agent-config.ts",
+      "sha256": "9f7affdef1df01c55693c6d176f1e3581702c43611b651a38d686f89ac2241c5",
+      "lines": 425
+    },
+    {
+      "path": "src/services/core-bootstrap.ts",
+      "sha256": "576ad43640ae4fe8c95499b133c119f54da3266bc51643df0a748ca35c0fb97f",
+      "lines": 202
+    },
+    {
+      "path": "src/services/launch-spec-builder.ts",
+      "sha256": "31b3b0cc019fe39acd86f0c2bc93763e2d8c8375b9c50b3f4131d458bc7a6ad9",
+      "lines": 662
+    },
+    {
+      "path": "src/services/orchestration-bootstrap.ts",
+      "sha256": "e1602fd69d7ec44759be89e651b7e7fccd038982824c3da5fd39996339c7f1e9",
+      "lines": 163
+    },
+    {
+      "path": "src/services/orchestration-instance.ts",
+      "sha256": "32a1cb74224246b4955d401084e4be502e6095a37c2b312e0032c145dc2edd99",
+      "lines": 523
+    },
+    {
+      "path": "src/services/scheduler/agent-executor.ts",
+      "sha256": "3cd28bf6fb1fae5dc7fcde92856273dea092b2301564eb887b514fb637a069e0",
+      "lines": 125
+    },
+    {
+      "path": "src/services/scheduler/index.ts",
+      "sha256": "516679868808644b336cd46b6a791d917010d8304e3248285bd2aa2ecbf5c342",
+      "lines": 206
+    },
+    {
+      "path": "src/services/system-admin.ts",
+      "sha256": "bf4a2ec4ebfaa6c9faa00bced4e03611c7be72be322a68d81b8eecf2553d2aba",
+      "lines": 203
+    },
+    {
+      "path": "src/services/task-v2.ts",
+      "sha256": "f397c780072b713bdf062e9229c45620d8e69f7388c4570f1a8621dc4693083a",
+      "lines": 383
+    },
+    {
+      "path": "src/services/workflow/agent-chat-transport.ts",
+      "sha256": "7bc827cbbd20d0b69b660a9ebf982aa2818982391abc0b9f6d9717b044f20a26",
+      "lines": 420
+    },
+    {
+      "path": "src/services/workflow/index.ts",
+      "sha256": "f1d24fd669cd36d2900a78431633a2522a88ec34dfa9a43b6a67e60f6cc62ad6",
+      "lines": 101
+    },
+    {
+      "path": "src/services/workflow/pg-storage-adapter.ts",
+      "sha256": "f6ec159d5fe31dacc9c76cad225d8f1cf3df02a2b6818fc1319fb3fdf8dd437a",
+      "lines": 404
+    },
+    {
+      "path": "src/test-utils/setup-mocks.ts",
+      "sha256": "da6f1b164dfd7fb0a98864012bec718916d7c66a19558db90f4609c1e2822975",
+      "lines": 421
+    },
+    {
+      "path": "web/components/chat/chat-status-panel.tsx",
+      "sha256": "37c0f31c6aacb46a498a2127c04674d2b5504797113d742d397a9389d0f9663b",
+      "lines": 277
+    },
+    {
+      "path": "web/src/pages/agent-panel/ChatPanel.tsx",
+      "sha256": "39a9ae029aefabd29884fef2750441a3658319c704035cabc784a59363e69498",
+      "lines": 482
+    },
+    {
+      "path": "web/src/pages/agent-panel/chat-auth-state.ts",
+      "sha256": "06d40c0b6adeaedc3d337fb4b2d47fb661279dead49d2e4a3581dd6c7c397fd7",
+      "lines": 36
+    },
+    {
+      "path": "web/src/pages/agent-panel/chat-visible-reconnect.ts",
+      "sha256": "8fe1ef334c15a87ec6cc452dc57d401389522d26087c5ae986dc9c795c819a70",
+      "lines": 37
+    }
+  ],
+  "reference_count": 62,
+  "references": [
+    {
+      "key": "readme",
+      "path": "README.md",
+      "start": 3,
+      "end": 171
+    },
+    {
+      "key": "entry",
+      "path": "src/index.ts",
+      "start": 65,
+      "end": 133
+    },
+    {
+      "key": "admin",
+      "path": "src/services/system-admin.ts",
+      "start": 75,
+      "end": 125
+    },
+    {
+      "key": "model-readiness",
+      "path": "src/services/launch-spec-builder.ts",
+      "start": 185,
+      "end": 235
+    },
+    {
+      "key": "chat-auth",
+      "path": "web/src/pages/agent-panel/chat-auth-state.ts",
+      "start": 1,
+      "end": 35
+    },
+    {
+      "key": "session-capabilities",
+      "path": "packages/acp-link/src/acp-dispatcher.ts",
+      "start": 410,
+      "end": 512
+    },
+    {
+      "key": "package",
+      "path": "package.json",
+      "start": 1,
+      "end": 42
+    },
+    {
+      "key": "core",
+      "path": "src/services/core-bootstrap.ts",
+      "start": 64,
+      "end": 89
+    },
+    {
+      "key": "orch",
+      "path": "src/services/orchestration-bootstrap.ts",
+      "start": 48,
+      "end": 155
+    },
+    {
+      "key": "spawn",
+      "path": "src/services/orchestration-instance.ts",
+      "start": 100,
+      "end": 200
+    },
+    {
+      "key": "builder-boundary",
+      "path": "src/services/launch-spec-builder.ts",
+      "start": 1,
+      "end": 7
+    },
+    {
+      "key": "prompt",
+      "path": "src/services/agent-system-prompt.ts",
+      "start": 1,
+      "end": 42
+    },
+    {
+      "key": "launch-output",
+      "path": "src/services/launch-spec-builder.ts",
+      "start": 562,
+      "end": 634
+    },
+    {
+      "key": "opencode-config",
+      "path": "packages/plugin-opencode/src/runtime/runtime-config.ts",
+      "start": 103,
+      "end": 167
+    },
+    {
+      "key": "opencode-env",
+      "path": "packages/plugin-opencode/src/runtime/environment-preparer.ts",
+      "start": 18,
+      "end": 49
+    },
+    {
+      "key": "claude-env",
+      "path": "packages/plugin-claude-code/src/runtime/environment.ts",
+      "start": 49,
+      "end": 82
+    },
+    {
+      "key": "turn-start",
+      "path": "src/services/agent-chat-service.ts",
+      "start": 258,
+      "end": 269
+    },
+    {
+      "key": "model-resolution",
+      "path": "src/services/launch-spec-builder.ts",
+      "start": 94,
+      "end": 178
+    },
+    {
+      "key": "permission-doc",
+      "path": "docs/user/agents/index.md",
+      "start": 58,
+      "end": 84
+    },
+    {
+      "key": "launch-types",
+      "path": "packages/plugin-sdk/src/agent-launch-spec.ts",
+      "start": 8,
+      "end": 96
+    },
+    {
+      "key": "claude-settings",
+      "path": "packages/plugin-claude-code/src/runtime/settings.ts",
+      "start": 75,
+      "end": 117
+    },
+    {
+      "key": "relay-results",
+      "path": "packages/chat-channel/src/channel/relay-event-handler.ts",
+      "start": 524,
+      "end": 571
+    },
+    {
+      "key": "normalize-result",
+      "path": "packages/chat-channel/src/protocol/acp-channel.ts",
+      "start": 423,
+      "end": 438
+    },
+    {
+      "key": "scheduled-executor",
+      "path": "src/services/scheduler/agent-executor.ts",
+      "start": 54,
+      "end": 123
+    },
+    {
+      "key": "workflow-result",
+      "path": "src/services/workflow/agent-chat-transport.ts",
+      "start": 156,
+      "end": 270
+    },
+    {
+      "key": "scheduled-store",
+      "path": "src/services/scheduler/index.ts",
+      "start": 162,
+      "end": 180
+    },
+    {
+      "key": "turn-filter",
+      "path": "src/services/agent-chat-service.ts",
+      "start": 125,
+      "end": 188
+    },
+    {
+      "key": "handshake",
+      "path": "src/services/agent-chat-service.ts",
+      "start": 271,
+      "end": 339
+    },
+    {
+      "key": "local-relay",
+      "path": "packages/plugin-opencode/src/relay/relay-handle.ts",
+      "start": 165,
+      "end": 186
+    },
+    {
+      "key": "remote-relay",
+      "path": "packages/remote-runtime/src/remote-relay-handle.ts",
+      "start": 50,
+      "end": 65
+    },
+    {
+      "key": "chat-actions",
+      "path": "web/src/pages/agent-panel/ChatPanel.tsx",
+      "start": 117,
+      "end": 166
+    },
+    {
+      "key": "chat-cancel",
+      "path": "packages/chat-channel/src/channel/session-channel.ts",
+      "start": 278,
+      "end": 317
+    },
+    {
+      "key": "turn-exit",
+      "path": "packages/chat-channel/src/state/turn-machine.ts",
+      "start": 1,
+      "end": 84
+    },
+    {
+      "key": "acp-cancel",
+      "path": "packages/acp-link/src/acp-dispatcher.ts",
+      "start": 337,
+      "end": 353
+    },
+    {
+      "key": "runtime-coordinator",
+      "path": "src/services/agent-instance-runtime-coordinator.ts",
+      "start": 42,
+      "end": 263
+    },
+    {
+      "key": "chat-command",
+      "path": "packages/chat-channel/src/channel/session-channel.ts",
+      "start": 222,
+      "end": 275
+    },
+    {
+      "key": "permission-state",
+      "path": "packages/chat-channel/src/state/permission.ts",
+      "start": 27,
+      "end": 130
+    },
+    {
+      "key": "open-session",
+      "path": "src/services/agent-chat-service.ts",
+      "start": 415,
+      "end": 445
+    },
+    {
+      "key": "cache",
+      "path": "src/services/cache.ts",
+      "start": 5,
+      "end": 9
+    },
+    {
+      "key": "snapshot-cas",
+      "path": "packages/chat-channel/src/persist/snapshot-cas.ts",
+      "start": 1,
+      "end": 82
+    },
+    {
+      "key": "snapshot-config",
+      "path": "packages/chat-channel/src/persist/snapshot-config.ts",
+      "start": 1,
+      "end": 31
+    },
+    {
+      "key": "doc-manager",
+      "path": "packages/chat-channel/src/state/doc-manager.ts",
+      "start": 130,
+      "end": 183
+    },
+    {
+      "key": "commands",
+      "path": "packages/chat-channel/src/channel/command-coordinator.ts",
+      "start": 59,
+      "end": 195
+    },
+    {
+      "key": "scheduler",
+      "path": "src/services/scheduler/index.ts",
+      "start": 14,
+      "end": 126
+    },
+    {
+      "key": "workflow-service",
+      "path": "src/services/workflow/index.ts",
+      "start": 30,
+      "end": 90
+    },
+    {
+      "key": "recovery",
+      "path": "packages/workflow-engine/src/recovery/snapshot-recovery.ts",
+      "start": 53,
+      "end": 87
+    },
+    {
+      "key": "recover-route",
+      "path": "src/routes/web/workflow-runs.ts",
+      "start": 537,
+      "end": 551
+    },
+    {
+      "key": "auth",
+      "path": "src/plugins/auth.ts",
+      "start": 85,
+      "end": 146
+    },
+    {
+      "key": "ws-auth",
+      "path": "src/routes/acp/index.ts",
+      "start": 254,
+      "end": 298
+    },
+    {
+      "key": "task-isolation",
+      "path": "src/services/task-v2.ts",
+      "start": 174,
+      "end": 249
+    },
+    {
+      "key": "workflow-storage",
+      "path": "src/services/workflow/pg-storage-adapter.ts",
+      "start": 23,
+      "end": 115
+    },
+    {
+      "key": "status-panel",
+      "path": "web/components/chat/chat-status-panel.tsx",
+      "start": 27,
+      "end": 153
+    },
+    {
+      "key": "visible-reconnect",
+      "path": "web/src/pages/agent-panel/chat-visible-reconnect.ts",
+      "start": 1,
+      "end": 37
+    },
+    {
+      "key": "ci",
+      "path": ".github/workflows/ci.yml",
+      "start": 13,
+      "end": 61
+    },
+    {
+      "key": "bunfig",
+      "path": "bunfig.toml",
+      "start": 1,
+      "end": 2
+    },
+    {
+      "key": "mocks",
+      "path": "src/test-utils/setup-mocks.ts",
+      "start": 1,
+      "end": 27
+    },
+    {
+      "key": "license",
+      "path": "LICENSE",
+      "start": 66,
+      "end": 141
+    },
+    {
+      "key": "license-readme",
+      "path": "README.md",
+      "start": 199,
+      "end": 201
+    },
+    {
+      "key": "link-package",
+      "path": "packages/acp-link/package.json",
+      "start": 1,
+      "end": 8
+    },
+    {
+      "key": "cli-package",
+      "path": "packages/acp-runtime-cli/package.json",
+      "start": 1,
+      "end": 11
+    },
+    {
+      "key": "recovery-orphans",
+      "path": "packages/workflow-engine/src/recovery/snapshot-recovery.ts",
+      "start": 231,
+      "end": 275
+    },
+    {
+      "key": "agent-fields",
+      "path": "src/services/config/agent-config.ts",
+      "start": 17,
+      "end": 24
+    }
+  ],
+  "reference_check": {
+    "fixed_commit_and_line_ranges_valid": true,
+    "local_link_targets_exist": true,
+    "local_links": [
+      "../2026-09-23/00-overall-assessment.md",
+      "../2026-09-25/11-orca-reference.md",
+      "README.md",
+      "evidence/fenix-provenance.json",
+      "evidence/fenix-source-excerpts.txt",
+      "evidence/fenix-tests-summary.md",
+      "evidence/fenix-check-commands.md",
+      "evidence/fenix-test-environment.json",
+      "evidence/fenix-test-process-check.json"
+    ]
+  },
+  "final_source_verified_at_utc": "2026-09-25T17:03:09.189208+00:00",
+  "artifacts": [
+    {
+      "path": "fenix-source-excerpts.txt",
+      "sha256": "66241ca062e61683825350e708f77b93b34cb8838bdf28179336e4ad5bc3870c"
+    },
+    {
+      "path": "fenix-LICENSE.txt",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ]
+}

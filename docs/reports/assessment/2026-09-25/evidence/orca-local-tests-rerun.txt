@@ -1,0 +1,13 @@
+
+ RUN  v4.1.11 /tmp/oax-orca-assessment-20260925
+
+(node:2069760) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2069767) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  9 passed (9)
+      Tests  85 passed (85)
+   Start at  01:01:04
+   Duration  3.44s (transform 2.89s, setup 0ms, import 3.88s, tests 720ms, environment 2ms)
+

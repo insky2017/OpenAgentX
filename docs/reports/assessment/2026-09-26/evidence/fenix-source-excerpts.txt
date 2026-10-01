@@ -1,0 +1,276 @@
+FenixAgent source excerpts
+Commit: da5eb543bf17aa0c772eebbf0961e4dc2daac0e8
+Research only. Root LICENSE copied as fenix-LICENSE.txt; package metadata differences in report.
+No runtime output, user data or credentials collected.
+
+--- src/services/launch-spec-builder.ts:621-634 ---
+621:   return {
+622:     organizationId,
+623:     userId,
+624:     ...(environmentId ? { environmentId } : {}),
+625:     env: launchEnv,
+626:     agent: {
+627:       name: agentConfig.name,
+628:       prompt: finalPrompt,
+629:       ...(processedExtra ? { extra: processedExtra } : {}),
+630:     },
+631:     model,
+632:     skills,
+633:     mcpServers,
+634:   };
+
+--- packages/plugin-opencode/src/runtime/runtime-config.ts:152-164 ---
+152:     model: providerModelRef,
+153:     agent: {
+154:       [agentName]: {
+155:         model: providerModelRef,
+156:         mode: "primary",
+157:         steps: (launchSpec.agent.extra?.steps as number) ?? 1000,
+158:         ...(launchSpec.agent.prompt ? { prompt: launchSpec.agent.prompt } : {}),
+159:         hidden: false,
+160:         disable: false,
+161:       },
+162:     },
+163:     mcp: toMcpRecord(launchSpec.mcpServers.filter((s) => s.name !== "hindsight")),
+164:     ...(launchSpec.agent.extra?.plugin && Array.isArray(launchSpec.agent.extra.plugin)
+
+--- packages/plugin-claude-code/src/runtime/environment.ts:74-80 ---
+74:   if (mcpConfig) {
+75:     await writeMcpConfig(workspace, mcpConfig);
+76:   }
+77: 
+78:   if (agentPrompt) {
+79:     await writeClaudeMd(workspace, agentPrompt);
+80:   }
+
+--- src/services/scheduler/agent-executor.ts:79-103 ---
+79:       turn.prompt([{ type: "text", text: def.prompt }]);
+80: 
+81:       const events: Array<{ type: string; payload?: unknown }> = [];
+82:       const timeoutPromise = new Promise<never>((_, reject) => {
+83:         timeoutId = setTimeout(() => reject(new Error("Agent execution timeout")), timeoutMs);
+84:       });
+85: 
+86:       await Promise.race([
+87:         (async () => {
+88:           for await (const ev of turn.events()) {
+89:             events.push(ev as unknown as { type: string; payload?: unknown });
+90:             const raw = ev as unknown as Record<string, unknown>;
+91:             const rpc = raw.jsonrpc === "2.0" ? raw : (ev.payload as Record<string, unknown> | undefined);
+92:             if (rpc?.jsonrpc === "2.0" && (rpc as unknown as { result?: { stopReason?: unknown } }).result?.stopReason)
+93:               break;
+94:           }
+95:         })(),
+96:         timeoutPromise,
+97:       ]);
+98: 
+99:       const duration = Date.now() - startTime;
+100:       const resultSummary = extractPlainText(events);
+101: 
+102:       log(`[agent-executor] Task ${task.id} completed: duration=${duration}ms summaryLen=${resultSummary.length}`);
+103:       return { status: "success", duration, resultSummary };
+
+--- src/services/agent-chat-service.ts:290-299 ---
+290:     if (!full.onMessage) {
+291:       log("[openai] relay handle has no onMessage, using fallback sessionId");
+292:       resolve(`ses_${session.instanceId.slice(0, 12)}_${nextRpcId()}`);
+293:     }
+294: 
+295:     const timeout = setTimeout(() => {
+296:       unsub?.();
+297:       log(`[openai] session/new timeout, fallback sessionId`);
+298:       resolve(`ses_${session.instanceId.slice(0, 12)}_${nextRpcId()}`);
+299:     }, 30000);
+
+--- packages/chat-channel/src/channel/session-channel.ts:278-317 ---
+278:     if (command.type === "cancel") {
+279:       // 取消流程无条件进入状态机（聚合层权威）：turn → cancelling（非终态），晚到增量自此丢弃。
+280:       // - acpSessionId 非空：正常路径，Agent 确认（turn_cancelled）或取消超时（turn_interrupted）收敛终态；
+281:       // - acpSessionId 为 null（session/new 的 RPC 往返尚未完成）：Agent 回 {cancelled:false}
+282:       //   且无任何终态事件，必须 arm 取消超时兜底，否则 turn 永久卡 accepting（loading 卡死）。
+283:       docManager.processNormalizedEvent(connection.rcsSessionId, {
+284:         type: "turn_cancel_requested",
+285:         update: {},
+286:         content: null,
+287:       });
+288:       this.armCancelTimeout(connection.rcsSessionId);
+289:     }
+290: 
+291:     return { turnId };
+292:   }
+293: 
+294:   /**
+295:    * 启动取消超时兜底：Agent 长时间未确认取消（进程挂起/断连）时 turn 收敛为 interrupted，
+296:    * 不能停留在 cancelling 中间态。回调校验 activeTurn 仍是发起取消时的 turn 且仍处
+297:    * cancelling——用户可能已发起新 turn（旧 turn 被终结）或 Agent 已确认终态，
+298:    * 此时不得误中断当前 turn。
+299:    */
+300:   private armCancelTimeout(rcsSessionId: string): void {
+301:     const sessionDoc = this.dependencies.docManager.getSessionYdoc(rcsSessionId);
+302:     const turnId = sessionDoc ? (getSessionInfo(sessionDoc).get("activeTurnId") as string | null) : null;
+303:     if (!turnId) return;
+304: 
+305:     const timer = setTimeout(() => {
+306:       this.cancelTimers.delete(rcsSessionId);
+307:       const current = this.dependencies.docManager.getSessionYdoc(rcsSessionId);
+308:       const info = current ? getSessionInfo(current) : null;
+309:       if (!info) return;
+310:       if (info.get("activeTurnId") !== turnId || info.get("activeTurnStatus") !== "cancelling") return;
+311:       this.dependencies.docManager.processNormalizedEvent(rcsSessionId, {
+312:         type: "turn_interrupted",
+313:         update: {},
+314:         content: null,
+315:       });
+316:     }, this.dependencies.cancelTimeoutMs ?? DEFAULT_CANCEL_TIMEOUT_MS);
+317:     this.cancelTimers.set(rcsSessionId, timer);
+
+--- packages/chat-channel/src/channel/command-coordinator.ts:175-193 ---
+175:   private async runCommand(rcsSessionId: string, item: QueueItem): Promise<void> {
+176:     const { command, sinks } = item;
+177:     try {
+178:       const outcome = await this.dependencies.executeCommand(command);
+179:       const version = this.dependencies.getProjectionVersion?.(rcsSessionId) ?? null;
+180:       const committed: ActionAck = {
+181:         type: "action_ack",
+182:         commandId: command.commandId,
+183:         status: "committed",
+184:         ...(outcome.turnId ? { turnId: outcome.turnId } : {}),
+185:         ...(version !== null ? { committedProjectionVersion: version } : {}),
+186:       };
+187:       this.recordCommitted(rcsSessionId, command.commandId, committed);
+188:       sinks.sendAck(committed);
+189:     } catch (err) {
+190:       // 失败清除 in_flight：重发视为新执行（副作用未发生），客户端可安全重试
+191:       this.clearDedup(rcsSessionId, command.commandId);
+192:       sinks.sendError(this.toActionError(err, command.commandId));
+193:     } finally {
+
+--- src/services/agent-instance-runtime-coordinator.ts:175-184 ---
+175:     if (this.#shuttingDown) {
+176:       return Promise.reject(new Error("Agent runtime coordinator is shutting down"));
+177:     }
+178:     const entry = this.#entry(instance.id);
+179:     if (entry.deleting && operation !== "delete") {
+180:       return Promise.reject(new Error(`Agent Instance '${instance.id}' is being deleted`));
+181:     }
+182:     if (entry.state === "unknown" && operation !== "stop") {
+183:       return Promise.reject(new Error(`Runtime state for '${instance.id}' is unknown`));
+184:     }
+
+--- packages/workflow-engine/src/recovery/snapshot-recovery.ts:231-276 ---
+231:   for (const orphan of orphans) {
+232:     const nodeDef = workflowDef.nodes.find((n) => n.id === orphan.nodeId);
+233: 
+234:     switch (orphan.nodeType) {
+235:       case "shell": {
+236:         // Shell 节点：尝试终止残留进程
+237:         await cleanupShellOrphan(orphan, storage, runId);
+238:         updatedStates.set(orphan.nodeId, "CANCELLED");
+239:         break;
+240:       }
+241:       case "agent": {
+242:         // Agent 节点：无法可靠检测远程 agent，直接取消
+243:         await emitCleanupEvent(storage, runId, orphan.nodeId, orphan.nodeType, "node.cancelled");
+244:         updatedStates.set(orphan.nodeId, "CANCELLED");
+245:         break;
+246:       }
+247:       case "loop": {
+248:         // LoopNode 崩溃恢复：MVP 行为，标记 ERROR
+249:         await emitCleanupEvent(storage, runId, orphan.nodeId, orphan.nodeType, "node.failed", {
+250:           error: "recovery_not_supported",
+251:         });
+252:         updatedStates.set(orphan.nodeId, "FAILED");
+253:         break;
+254:       }
+255:       case "workflow": {
+256:         // SubWorkflowNode 崩溃恢复：MVP 行为，标记 ERROR
+257:         await emitCleanupEvent(storage, runId, orphan.nodeId, orphan.nodeType, "node.failed", {
+258:           error: "recovery_not_supported",
+259:         });
+260:         updatedStates.set(orphan.nodeId, "FAILED");
+261:         break;
+262:       }
+263:       default: {
+264:         // 其他类型：取消
+265:         await emitCleanupEvent(storage, runId, orphan.nodeId, orphan.nodeType, "node.cancelled");
+266:         updatedStates.set(orphan.nodeId, "CANCELLED");
+267:         break;
+268:       }
+269:     }
+270: 
+271:     // 检查重试配置
+272:     const retryConfig = nodeDef?.retry;
+273:     if (retryConfig && retryConfig.count > 0 && updatedStates.get(orphan.nodeId) !== "FAILED") {
+274:       // 有重试机会且不是 MVP 限制的失败 → 标记为 PENDING 让调度器重试
+275:       updatedStates.set(orphan.nodeId, "PENDING");
+276:     }
+
+--- src/services/workflow/agent-chat-transport.ts:234-270 ---
+234:         const stopReason = (result.stopReason as string) ?? "end_turn";
+235:         const usage = result.usage as { totalTokens?: number; inputTokens?: number; outputTokens?: number } | undefined;
+236: 
+237:         if (stopReason === "error") {
+238:           const existing = chunks.join("");
+239:           return {
+240:             stdout: existing || "Agent returned error stop reason",
+241:             exit_code: 1,
+242:             latency_ms: Date.now() - startTime,
+243:             messages: collectedMessages,
+244:           };
+245:         }
+246: 
+247:         return {
+248:           stdout: chunks.join(""),
+249:           exit_code: 0,
+250:           tokens: usage ? { input: usage.inputTokens ?? 0, output: usage.outputTokens ?? 0 } : undefined,
+251:           latency_ms: Date.now() - startTime,
+252:           messages: collectedMessages,
+253:         };
+254:       }
+255: 
+256:       // 检测 session/update 通知 → 收集文本和工具调用信息
+257:       const update = extractSessionUpdate(rpc);
+258:       if (update) {
+259:         this.collectUpdate(update, chunks, collectedMessages);
+260:       }
+261:     }
+262: 
+263:     // 事件流意外结束（无 JSON-RPC 响应）
+264:     logger.warn("PromptTurn events stream ended without JSON-RPC response");
+265:     return {
+266:       stdout: chunks.join(""),
+267:       exit_code: 0,
+268:       latency_ms: Date.now() - startTime,
+269:       messages: collectedMessages,
+270:     };
+
+--- packages/chat-channel/src/persist/snapshot-cas.ts:49-65 ---
+49:   for (let attempt = 0; attempt < SNAPSHOT_PERSIST_RETRIES; attempt += 1) {
+50:     let watched = false;
+51:     try {
+52:       await persistence.watch(...(fence ? [redisKey, fence.key] : [redisKey]));
+53:       watched = true;
+54:       if (fence && (await persistence.get(fence.key)) !== fence.generation) return false;
+55:       const existingRaw = await persistence.getBuffer(redisKey);
+56:       const merged = mergeSnapshotUpdates(existingRaw, localFull);
+57:       const result = await persistence.multi().set(redisKey, Buffer.from(merged), "EX", ttlSeconds).exec();
+58:       watched = false; // EXEC 会自动 UNWATCH。
+59:       if (result !== null) return true;
+60:     } finally {
+61:       if (watched) await persistence.unwatch().catch(() => {});
+62:     }
+63:   }
+64: 
+65:   return false;
+
+--- packages/plugin-sdk/src/agent-launch-spec.ts:87-96 ---
+87: export interface AgentLaunchSpec {
+88:   organizationId: string;
+89:   userId: string;
+90:   environmentId?: string;
+91:   env?: Record<string, string>;
+92:   agent: AgentConfig;
+93:   model: ModelConfig;
+94:   skills: SkillConfig[];
+95:   mcpServers: McpServerConfig[];
+96: }

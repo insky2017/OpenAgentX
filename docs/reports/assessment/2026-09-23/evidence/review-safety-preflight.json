@@ -1,0 +1,11 @@
+{
+  "frozen_files_checked": 10,
+  "frozen_changed": [],
+  "known_test_credentials_scanned": 2,
+  "known_credential_hit_files": [],
+  "forbidden_credential_files": [],
+  "tracked_changes": [
+    "docs/design/CURRENT_ARCHITECTURE.md",
+    "docs/design/current-architecture.html"
+  ]
+}

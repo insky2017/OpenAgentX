@@ -1,0 +1,310 @@
+{
+  "observed_at": "2026-09-26T02:25:21.347449+00:00",
+  "boundary": "Public metadata only; issue reports are not reproduced defects.",
+  "repository": {
+    "full_name": "block/buzz",
+    "description": "A hive mind communication platform",
+    "default_branch": "main",
+    "pushed_at": "2026-09-26T01:57:51Z",
+    "updated_at": "2026-09-26T02:25:00Z",
+    "archived": false,
+    "license": {
+      "key": "apache-2.0",
+      "name": "Apache License 2.0",
+      "spdx_id": "Apache-2.0",
+      "url": "https://api.github.com/licenses/apache-2.0",
+      "node_id": "MDc6TGljZW5zZTI="
+    },
+    "open_issues_count": 3653
+  },
+  "open_issues": [
+    {
+      "number": 7904,
+      "title": "feat(desktop): add Admin Console Actions tab for direct staff actions",
+      "html_url": "https://github.com/block/buzz/pull/7904",
+      "created_at": "2026-09-25T22:55:46Z",
+      "updated_at": "2026-09-26T02:23:28Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7904",
+        "html_url": "https://github.com/block/buzz/pull/7904",
+        "diff_url": "https://github.com/block/buzz/pull/7904.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7904.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7883,
+      "title": "feat(relay): add direct staff ban/timeout/delete with staff guard",
+      "html_url": "https://github.com/block/buzz/pull/7883",
+      "created_at": "2026-09-24T22:51:13Z",
+      "updated_at": "2026-09-26T02:09:37Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7883",
+        "html_url": "https://github.com/block/buzz/pull/7883",
+        "diff_url": "https://github.com/block/buzz/pull/7883.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7883.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7265,
+      "title": "feat(nip-fi): admin disconnect/deny API with in-memory deny-until-TTL map (S4)",
+      "html_url": "https://github.com/block/buzz/pull/7265",
+      "created_at": "2026-09-02T22:32:57Z",
+      "updated_at": "2026-09-26T01:50:21Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7265",
+        "html_url": "https://github.com/block/buzz/pull/7265",
+        "diff_url": "https://github.com/block/buzz/pull/7265.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7265.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7288,
+      "title": "feat(nip-fi): harden Blossom kind-24242 verifier to NIP-FI spec",
+      "html_url": "https://github.com/block/buzz/pull/7288",
+      "created_at": "2026-09-03T17:24:43Z",
+      "updated_at": "2026-09-26T01:41:33Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7288",
+        "html_url": "https://github.com/block/buzz/pull/7288",
+        "diff_url": "https://github.com/block/buzz/pull/7288.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7288.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7907,
+      "title": "fix(desktop): deduplicate native unread replay",
+      "html_url": "https://github.com/block/buzz/pull/7907",
+      "created_at": "2026-09-26T01:38:32Z",
+      "updated_at": "2026-09-26T01:38:47Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7907",
+        "html_url": "https://github.com/block/buzz/pull/7907",
+        "diff_url": "https://github.com/block/buzz/pull/7907.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7907.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7791,
+      "title": "docs(protocol): propose simplified channel artifacts",
+      "html_url": "https://github.com/block/buzz/pull/7791",
+      "created_at": "2026-09-22T02:47:14Z",
+      "updated_at": "2026-09-26T01:22:49Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7791",
+        "html_url": "https://github.com/block/buzz/pull/7791",
+        "diff_url": "https://github.com/block/buzz/pull/7791.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7791.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7224,
+      "title": "feat(buzz-relay): NIP-FI stateless enforcement (S3) — upgrade gate, NIP-42 pairing, session lifetime, JWKS warm",
+      "html_url": "https://github.com/block/buzz/pull/7224",
+      "created_at": "2026-09-02T02:22:24Z",
+      "updated_at": "2026-09-26T01:09:30Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7224",
+        "html_url": "https://github.com/block/buzz/pull/7224",
+        "diff_url": "https://github.com/block/buzz/pull/7224.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7224.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 3912,
+      "title": "fix: mobile composer, agent draft allowlist, git push DX, duplicate-session warning",
+      "html_url": "https://github.com/block/buzz/pull/3912",
+      "created_at": "2026-07-31T11:55:31Z",
+      "updated_at": "2026-09-26T00:45:44Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/3912",
+        "html_url": "https://github.com/block/buzz/pull/3912",
+        "diff_url": "https://github.com/block/buzz/pull/3912.diff",
+        "patch_url": "https://github.com/block/buzz/pull/3912.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7906,
+      "title": "feat(relay): draft private read-state accessory API",
+      "html_url": "https://github.com/block/buzz/pull/7906",
+      "created_at": "2026-09-26T00:35:46Z",
+      "updated_at": "2026-09-26T00:36:00Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7906",
+        "html_url": "https://github.com/block/buzz/pull/7906",
+        "diff_url": "https://github.com/block/buzz/pull/7906.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7906.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7901,
+      "title": "Show active thread count for agents",
+      "html_url": "https://github.com/block/buzz/pull/7901",
+      "created_at": "2026-09-25T20:10:14Z",
+      "updated_at": "2026-09-26T00:11:19Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7901",
+        "html_url": "https://github.com/block/buzz/pull/7901",
+        "diff_url": "https://github.com/block/buzz/pull/7901.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7901.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7905,
+      "title": "Live thread-summary emit runs an O(thread-size) participants aggregate on every reply (unbounded spawns, temp-file spill: ~63 TiB on a 1.39M-reply thread)",
+      "html_url": "https://github.com/block/buzz/issues/7905",
+      "created_at": "2026-09-25T23:59:04Z",
+      "updated_at": "2026-09-25T23:59:04Z",
+      "state": "open",
+      "pull_request": null
+    },
+    {
+      "number": 7854,
+      "title": "🤖 perf: bound long-thread aux reads and make query deadlines terminal",
+      "html_url": "https://github.com/block/buzz/pull/7854",
+      "created_at": "2026-09-23T23:10:20Z",
+      "updated_at": "2026-09-25T22:43:24Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7854",
+        "html_url": "https://github.com/block/buzz/pull/7854",
+        "diff_url": "https://github.com/block/buzz/pull/7854.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7854.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7818,
+      "title": "Add owner deletion admission control plane",
+      "html_url": "https://github.com/block/buzz/pull/7818",
+      "created_at": "2026-09-22T22:40:03Z",
+      "updated_at": "2026-09-25T22:24:20Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7818",
+        "html_url": "https://github.com/block/buzz/pull/7818",
+        "diff_url": "https://github.com/block/buzz/pull/7818.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7818.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 2618,
+      "title": "Evaluate RustFS as the default Apache-2.0 S3 backend for self-hosted deployments",
+      "html_url": "https://github.com/block/buzz/issues/2618",
+      "created_at": "2026-07-23T20:48:17Z",
+      "updated_at": "2026-09-25T22:10:28Z",
+      "state": "open",
+      "pull_request": null
+    },
+    {
+      "number": 7875,
+      "title": "fix: replace unavailable Compose MinIO runtime with RustFS",
+      "html_url": "https://github.com/block/buzz/pull/7875",
+      "created_at": "2026-09-24T19:52:35Z",
+      "updated_at": "2026-09-25T22:10:33Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7875",
+        "html_url": "https://github.com/block/buzz/pull/7875",
+        "diff_url": "https://github.com/block/buzz/pull/7875.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7875.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7874,
+      "title": "fix(desktop): release stale channel autocomplete before edit submission",
+      "html_url": "https://github.com/block/buzz/pull/7874",
+      "created_at": "2026-09-24T18:38:34Z",
+      "updated_at": "2026-09-25T22:08:15Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7874",
+        "html_url": "https://github.com/block/buzz/pull/7874",
+        "diff_url": "https://github.com/block/buzz/pull/7874.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7874.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7719,
+      "title": "fix(desktop): make persona deployment idempotent",
+      "html_url": "https://github.com/block/buzz/pull/7719",
+      "created_at": "2026-09-18T04:15:58Z",
+      "updated_at": "2026-09-25T21:36:16Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7719",
+        "html_url": "https://github.com/block/buzz/pull/7719",
+        "diff_url": "https://github.com/block/buzz/pull/7719.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7719.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7830,
+      "title": "Automate owner deletion preparation",
+      "html_url": "https://github.com/block/buzz/pull/7830",
+      "created_at": "2026-09-23T02:49:23Z",
+      "updated_at": "2026-09-25T21:33:01Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7830",
+        "html_url": "https://github.com/block/buzz/pull/7830",
+        "diff_url": "https://github.com/block/buzz/pull/7830.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7830.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 7805,
+      "title": "feat(desktop): merge sidebar sections and sort per item across devices",
+      "html_url": "https://github.com/block/buzz/pull/7805",
+      "created_at": "2026-09-22T17:01:32Z",
+      "updated_at": "2026-09-25T21:25:57Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/7805",
+        "html_url": "https://github.com/block/buzz/pull/7805",
+        "diff_url": "https://github.com/block/buzz/pull/7805.diff",
+        "patch_url": "https://github.com/block/buzz/pull/7805.patch",
+        "merged_at": null
+      }
+    },
+    {
+      "number": 6567,
+      "title": "feat(desktop): add agent skill picker to composer",
+      "html_url": "https://github.com/block/buzz/pull/6567",
+      "created_at": "2026-08-22T16:10:27Z",
+      "updated_at": "2026-09-25T21:24:15Z",
+      "state": "open",
+      "pull_request": {
+        "url": "https://api.github.com/repos/block/buzz/pulls/6567",
+        "html_url": "https://github.com/block/buzz/pull/6567",
+        "diff_url": "https://github.com/block/buzz/pull/6567.diff",
+        "patch_url": "https://github.com/block/buzz/pull/6567.patch",
+        "merged_at": null
+      }
+    }
+  ]
+}

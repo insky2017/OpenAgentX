@@ -1,0 +1,35 @@
+start=2026-09-23T00:48:41.325151+08:00
+command=go test -race -count=1 -v /tmp/oax-multica-pure-checks-20260923/reconcile/reconcile.go /tmp/oax-multica-pure-checks-20260923/reconcile/reconcile_test.go
+boundary=unchanged named files and their upstream tests, standard library only, not full package/runtime integration
+=== RUN   TestReconcileBroadcaster_FansOutToManySubscribers
+=== PAUSE TestReconcileBroadcaster_FansOutToManySubscribers
+=== RUN   TestReconcileBroadcaster_ReplaysMissedBroadcastToFirstLateSubscriber
+=== PAUSE TestReconcileBroadcaster_ReplaysMissedBroadcastToFirstLateSubscriber
+=== RUN   TestReconcileBroadcaster_DebouncesFlappingReconnects
+=== PAUSE TestReconcileBroadcaster_DebouncesFlappingReconnects
+=== RUN   TestReconcileBroadcaster_DebounceBoundaryIsExact
+=== PAUSE TestReconcileBroadcaster_DebounceBoundaryIsExact
+=== RUN   TestReconcileBroadcaster_ReSubscribesEachWake
+=== PAUSE TestReconcileBroadcaster_ReSubscribesEachWake
+=== RUN   TestWorkspaceChangeSignalCoalescesUntilConsumed
+=== PAUSE TestWorkspaceChangeSignalCoalescesUntilConsumed
+=== RUN   TestReconcileBroadcaster_ConcurrentBroadcastAndNotify
+=== PAUSE TestReconcileBroadcaster_ConcurrentBroadcastAndNotify
+=== CONT  TestReconcileBroadcaster_ReplaysMissedBroadcastToFirstLateSubscriber
+=== CONT  TestReconcileBroadcaster_DebounceBoundaryIsExact
+=== CONT  TestReconcileBroadcaster_ConcurrentBroadcastAndNotify
+--- PASS: TestReconcileBroadcaster_ReplaysMissedBroadcastToFirstLateSubscriber (0.00s)
+--- PASS: TestReconcileBroadcaster_DebounceBoundaryIsExact (0.00s)
+=== CONT  TestReconcileBroadcaster_FansOutToManySubscribers
+=== CONT  TestReconcileBroadcaster_DebouncesFlappingReconnects
+--- PASS: TestReconcileBroadcaster_DebouncesFlappingReconnects (0.00s)
+=== CONT  TestReconcileBroadcaster_ReSubscribesEachWake
+--- PASS: TestReconcileBroadcaster_ReSubscribesEachWake (0.00s)
+--- PASS: TestReconcileBroadcaster_FansOutToManySubscribers (0.00s)
+=== CONT  TestWorkspaceChangeSignalCoalescesUntilConsumed
+--- PASS: TestWorkspaceChangeSignalCoalescesUntilConsumed (0.00s)
+--- PASS: TestReconcileBroadcaster_ConcurrentBroadcastAndNotify (0.05s)
+PASS
+ok  	command-line-arguments	1.069s
+
+exit_code=0 duration_seconds=1.539

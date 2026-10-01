@@ -1,0 +1,128 @@
+{
+  "checked_at_utc": "2026-09-25T17:05:16.718996+00:00",
+  "source_commit": "7c0ebbdfbf2f38adf41968051ed3440bc5ddb774",
+  "source_git_status": "",
+  "node_version": "v24.14.0",
+  "node_sha256": "e237a2839d0cbdc9a9a2adda1a184afc0f5b20306ffbe923af5686550472d8a8",
+  "typescript_version": "Version 5.9.3",
+  "npm_version": "10.8.2",
+  "rustc_version": "rustc 1.89.0 (29483883e 2025-08-04)",
+  "cargo_version": "cargo 1.89.0 (c24e10642 2025-06-23)",
+  "rust_preflight": {
+    "locked_registry_packages": 470,
+    "cached_exact_versions": 33,
+    "missing_exact_versions": 437,
+    "target_directory_present": false,
+    "web_dist_present": false,
+    "web_dist_absence_blocks_compile": false,
+    "note": "src/http/mod.rs has RustEmbed allow_missing=true; no Rust build attempted due cold dependencies and bounded budget"
+  },
+  "runner_package": {
+    "dependencies": {
+      "node-linux-x64": "24.14.0",
+      "typescript": "5.9.3"
+    }
+  },
+  "runtime_environment": {
+    "PATH": "/usr/bin:/bin"
+  },
+  "runtime_environment_policy": "env -i; no inherited provider/auth/DB environment; no HOME override",
+  "source_copy_checks": [
+    {
+      "path": "packages/conversation-sdk/README.md",
+      "sha256": "41bf0ff5bdfe3dfd2e4ef7712d209a298252d3e80e6ed1fe6fc67f34c13a2527",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/e2e/real-server.mjs",
+      "sha256": "c9054732538e48e7e7ed14b4891309e81d0446c2cab54660dc7e0374ed863889",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/package-lock.json",
+      "sha256": "001001420d3b6a864354bbcfe31279d68b72c2878e9011cd25f38e4ff13ba608",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/package.json",
+      "sha256": "474ee37d7979fce576bd777f9574684be6f725194d1c35f3b60f1dd75f51fc34",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/client.ts",
+      "sha256": "db85d1b2977d8d33d8f90d4a22032d62dc0a7098dbc16040c77bf2910936aae3",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/controller.ts",
+      "sha256": "d34d63995320809317b9f56ff2981839a424a83e263a14625446f044e9421340",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/decode.ts",
+      "sha256": "8f927af13db0ca072f07012e4c501bc708797e3409a579725a7a540d107105e8",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/errors.ts",
+      "sha256": "acc5253f62ebd2dd93d8cafdaed442531a5834fc359eef494315f9cc9e5554fb",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/index.ts",
+      "sha256": "6681e8f8a531b7b1cdc0f635d402f57d56e295280d77d7814c8ce1149a55243c",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/sse.ts",
+      "sha256": "42ed4bdb49ed879939aeb6a4d47c4c131f0f820dec6590166c1a2673bf0b986e",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/state.ts",
+      "sha256": "b56428c276e75fc5f57d65ee16b773f90ae0da6bdcae38729917c6ed97d8d17d",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/src/types.ts",
+      "sha256": "d9bd07b8d240dba4f4d8363c4130732da9dc1e012fab862e71471eb77de14fa0",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/test/controller.test.mjs",
+      "sha256": "01f5804cf8e8646b278a21e969a47b9087ba058e38d027bd9fa4b7ae0127a28e",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/test/decode-client.test.mjs",
+      "sha256": "346bcbeaa7095a3882d272f7e131d761220e4e34d1ac08f9d83dad9b76464a1b",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/test/helpers.mjs",
+      "sha256": "3a3aa7150ee7308ee945300c516f59aa6d6bd89844f05521d8b46d29bcef06e3",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/test/sse.test.mjs",
+      "sha256": "56afb10931a73319cca5a97011596d113fc1d4dbbe7a9d229973f5b4ea9bd3eb",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/test/state.test.mjs",
+      "sha256": "bf4eddac63f5b7e30ef1725102cf3cf7b1a2f5d5d7d0f1f8ffbcdc64c7a5374c",
+      "copy_equal": true
+    },
+    {
+      "path": "packages/conversation-sdk/tsconfig.json",
+      "sha256": "18676b9d62cc66ac293597c17a8c437b42935c9b895d666dff72feb133214bf7",
+      "copy_equal": true
+    }
+  ],
+  "original_test_counts": {
+    "controller.test.mjs": 27,
+    "state.test.mjs": 11,
+    "sse.test.mjs": 4,
+    "decode-client.test.mjs": 11
+  }
+}

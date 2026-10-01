@@ -1,0 +1,268 @@
+bun test v1.3.14 (0d9b296a)
+
+../oax-fenix-assessment-20260926/packages/acp-link/src/__tests__/acp-dispatcher-cancel.test.ts:
+[acp-dispatcher] ← rpc: {"jsonrpc":"2.0","id":1,"method":"session/cancel","params":{"sessionId":"ses-target"}}
+[acp-dispatcher] → rpc response: {"method":"session/cancel","id":1,"elapsed":0}
+(pass) AcpDispatcher session/cancel > cancel 透传 params.sessionId 到 connection.cancel [2.31ms]
+[acp-dispatcher] ← rpc: {"jsonrpc":"2.0","id":2,"method":"session/cancel","params":{}}
+[acp-dispatcher] → rpc response: {"method":"session/cancel","id":2,"elapsed":0}
+(pass) AcpDispatcher session/cancel > cancel 无 sessionId 时 fallback 当前会话 [0.28ms]
+[acp-dispatcher] ← rpc: {"jsonrpc":"2.0","id":3,"method":"session/cancel","params":{}}
+[acp-dispatcher] → rpc response: {"method":"session/cancel","id":3,"elapsed":0}
+(pass) AcpDispatcher session/cancel > 无连接时 cancel 回 cancelled:false 不抛错 [0.20ms]
+
+../oax-fenix-assessment-20260926/packages/chat-channel/src/channel/command-id-dedup.test.ts:
+(pass) CommandCoordinator dedup > resubmitting a committed command returns duplicate ack and does not re-execute [4.12ms]
+(pass) CommandCoordinator dedup > resubmitting an in-flight command returns the original accepted ack [0.50ms]
+(pass) CommandCoordinator dedup > serializes commands per rcsSessionId [0.45ms]
+(pass) CommandCoordinator dedup > rejects commands beyond the bounded queue with RATE_LIMITED [1.12ms]
+(pass) CommandCoordinator dedup > clears dedup record on execution failure so retry re-executes [1.32ms]
+(pass) CommandCoordinator dedup > disposeRcsSession clears dedup table so resubmit re-executes [0.40ms]
+(pass) CommandCoordinator dedup > rejects malformed commands with INVALID_STATE before enqueueing [0.66ms]
+(pass) CommandCoordinator dedup > rejects oversized payloads with PAYLOAD_TOO_LARGE [2.08ms]
+(pass) CommandCoordinator dedup > rejects version conflicts with VERSION_CONFLICT [0.38ms]
+(pass) CommandCoordinator dedup > validateAction rejection returns error without accepted ack [0.35ms]
+(pass) CommandCoordinator dedup > committed ack carries the projection version [0.23ms]
+
+../oax-fenix-assessment-20260926/packages/chat-channel/src/channel/permission-cas.test.ts:
+(pass) permission CAS (C5) > duplicate respond_permission resolves once and agent receives a single resolve [22.67ms]
+(pass) permission CAS (C5) > unknown permissionId does not send resolve [3.70ms]
+(pass) permission CAS (C5) > deny response sends cancelled outcome and cancels the tool call [4.52ms]
+(pass) permission CAS (C5) > expired permission migrates to expired terminal state and cancels the turn [25.86ms]
+(pass) permission CAS (C5) > turn stays awaiting_permission until all pending permissions are resolved [3.94ms]
+(pass) permission CAS (C5) > session switch clears pending permissions [5.60ms]
+(pass) permission CAS (C5) > disposeRcsSession clears permission timers so late expiry is not applied [122.39ms]
+(pass) permission CAS on turn terminal (aggregator) > turn_completed expires the turn's pending permissions [2.57ms]
+(pass) permission CAS on turn terminal (aggregator) > turn_failed expires the turn's pending permissions [1.23ms]
+(pass) permission CAS on turn terminal (aggregator) > turn_cancelled expires the turn's pending permissions [1.26ms]
+(pass) permission CAS on turn terminal (aggregator) > turn_interrupted expires the turn's pending permissions [1.10ms]
+(pass) permission CAS on turn terminal (aggregator) > terminal cleanup only expires permissions of the finished turn [1.36ms]
+
+../oax-fenix-assessment-20260926/packages/chat-channel/src/channel/session-channel-action.test.ts:
+(pass) SessionChannel action flow > refreshes the instance environment before forwarding session/new [2.20ms]
+(pass) SessionChannel action flow > does not forward session/new when the instance environment refresh fails [0.82ms]
+(pass) SessionChannel action flow > send_prompt commits a user entry and forwards session/prompt to relay [2.00ms]
+(pass) SessionChannel action flow > send_prompt forwards the bound acpSessionId as the prompt target [1.18ms]
+(pass) SessionChannel action flow > retrying the same commandId returns duplicate without re-forwarding to relay [1.13ms]
+(pass) SessionChannel action flow > rejects load_session with invalid sessionId via INVALID_STATE [0.63ms]
+(pass) SessionChannel action flow > load_session replaces docs and forwards session/load with server-injected cwd [1.15ms]
+(pass) SessionChannel action flow > first load replaces a persisted timeline when it belongs to another session [1.71ms]
+(pass) SessionChannel action flow > first load reuses a persisted timeline when it belongs to the target session [1.50ms]
+(pass) SessionChannel action flow > skips load_session for the already-active session [0.74ms]
+(pass) SessionChannel action flow > create_session forwards session/new with server-injected cwd [0.90ms]
+(pass) SessionChannel action flow > gates list_sessions until agent status arrives [0.48ms]
+(pass) SessionChannel action flow > cancel forwards session/cancel and converges to cancelled after agent confirmation [2.03ms]
+(pass) SessionChannel action flow > cancel forwards session/cancel with the target sessionId from the action payload [0.79ms]
+(pass) SessionChannel action flow > cancel with null acpSessionId still enters cancelling and forwards session/cancel [1.44ms]
+(pass) SessionChannel action flow > cancel with null acpSessionId converges to interrupted via cancel timeout [26.25ms]
+(pass) SessionChannel action flow > turn_cancelled after cancel-timeout terminal is idempotently skipped [25.61ms]
+(pass) SessionChannel action flow > cancel after completed turn is a no-op (state unchanged, timeout guard holds) [64.94ms]
+(pass) SessionChannel action flow > rejects actions for unknown sessions with SESSION_NOT_FOUND [0.83ms]
+(pass) SessionChannel action flow > maps relay send failure to retryable AGENT_UNAVAILABLE [1.41ms]
+(pass) SessionChannel action flow > keeps old session binding when projection replacement rejects [0.96ms]
+(pass) SessionChannel doc projection > disposeRcsSession releases dedup state so resubmission re-executes [2.16ms]
+(pass) SessionChannel doc projection > agent status is projected to session doc via normalized event [1.26ms]
+
+../oax-fenix-assessment-20260926/packages/chat-channel/src/__tests__/snapshot-cas-isolation.test.ts:
+(pass) merges a legacy snapshot without leaking data across RCS session keys [7.12ms]
+(pass) rejects a stale generation fence before writing a snapshot [0.47ms]
+(pass) returns false after five conflicting snapshot transactions [0.42ms]
+
+../oax-fenix-assessment-20260926/packages/workflow-engine/src/__tests__/recovery/snapshot-recovery.test.ts:
+(pass) 全部完成的 DAG 恢复后直接返回 SUCCESS [6.32ms]
+(pass) 已失败的 DAG 恢复后直接返回 FAILED [0.50ms]
+(pass) 已取消的 DAG 恢复后直接返回 CANCELLED [0.37ms]
+(pass) 部分完成的 DAG 恢复后重新调度剩余节点 [4.65ms]
+(pass) 孤儿节点在恢复时被标记为 CANCELLED [3.69ms]
+(pass) 无孤儿的部分完成 DAG 恢复后继续执行剩余节点 [4.29ms]
+(pass) SUSPENDED 状态恢复后识别待审批节点 [0.64ms]
+(pass) LoopNode 崩溃恢复标记为 FAILED（MVP） [0.65ms]
+(pass) SubWorkflowNode 崩溃恢复标记为 FAILED（MVP） [0.63ms]
+(pass) AgentNode 孤儿在恢复时被标记为 CANCELLED [0.65ms]
+(pass) 多次恢复调用幂等 [0.43ms]
+(pass) 无快照时抛出 RECOVERY_ERROR [0.27ms]
+(pass) 快照之后有新事件时正确重放 [1.92ms]
+(pass) DAGScheduler 使用 initialNodeStates 跳过已完成节点 [2.88ms]
+(pass) 混合崩溃：孤儿节点 + SUSPENDED 节点同时存在 [0.82ms]
+(pass) Shell 孤儿真实进程在恢复时被 SIGKILL [5104.68ms]
+(pass) 连续两次恢复幂等且正确 [0.90ms]
+(pass) 恢复兼容定义变更：新增节点按 PENDING 正常调度 [3.02ms]
+
+../oax-fenix-assessment-20260926/packages/workflow-engine/src/__tests__/executor/agent-executor.test.ts:
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=9
+(pass) AgentExecutor > FakeTransport 返回预设响应 → 正确 stdout 和 exit_code [3.15ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=my-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=my-agent
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=12
+(pass) AgentExecutor > 指定 agent 参数时连接到对应 agent [0.37ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=my-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=my-agent
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=7
+(pass) AgentExecutor > connect 收到 ctx.spawnedInstanceIds 同一引用 [0.32ms]
+(pass) AgentExecutor > 非 agent 节点抛出错误 [0.19ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=unknown signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=unknown
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=22
+[workflow] AgentExecutor attempt 1/3 failed: nodeId=test-agent error=No response configured for agent: unknown errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=unknown signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=unknown
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=22
+[workflow] AgentExecutor attempt 2/3 failed: nodeId=test-agent error=No response configured for agent: unknown errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=unknown signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=unknown
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=22
+[workflow] AgentExecutor attempt 3/3 failed: nodeId=test-agent error=No response configured for agent: unknown errorType=Error
+(pass) AgentExecutor > 未配置响应时抛出错误 [2642.94ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor events > 执行产生 node.started 事件 [0.86ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor events > 成功执行产生 node.completed 事件 [0.42ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor events > Token 统计出现在 node.completed 事件 metadata [0.50ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+[workflow] AgentExecutor attempt 1/1 failed: nodeId=test-agent error=Agent exited with code 1: err errorType=WorkflowError
+(pass) AgentExecutor events > 非零退出码产生 node.failed 事件 [0.66ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=19
+(pass) AgentExecutor resolvedInputs > resolvedInputs.prompt 注入到 AgentRequest [0.40ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=resolved-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=resolved-agent
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor resolvedInputs > resolvedInputs.agent 注入到连接目标 [0.27ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=no-response signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=no-response
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=11
+[workflow] AgentExecutor attempt 1/3 failed: nodeId=test-agent error=No response configured for agent: no-response errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=no-response signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=no-response
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=11
+[workflow] AgentExecutor attempt 2/3 failed: nodeId=test-agent error=No response configured for agent: no-response errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=no-response signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=no-response
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=11
+[workflow] AgentExecutor attempt 3/3 failed: nodeId=test-agent error=No response configured for agent: no-response errorType=Error
+(pass) AgentExecutor retry > Transport 抛错 → FAILED（默认重试 2 次） [1605.55ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=no-response signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=no-response
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+[workflow] AgentExecutor attempt 1/2 failed: nodeId=test-agent error=No response configured for agent: no-response errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=no-response signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=no-response
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+[workflow] AgentExecutor attempt 2/2 failed: nodeId=test-agent error=No response configured for agent: no-response errorType=Error
+(pass) AgentExecutor retry > 自定义 retry.count=1 → 重试 1 次后失败 [47.72ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor attempt 1/3 failed: nodeId=test-agent error=Connection failed (attempt 1) errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor attempt 2/3 failed: nodeId=test-agent error=Connection failed (attempt 2) errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=8
+(pass) AgentExecutor retry > 重试成功：前两次失败、第三次成功 → COMPLETED [81.73ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=7
+[workflow] AgentExecutor attempt 1/3 failed: nodeId=test-agent error=Agent execute timed out errorType=WorkflowError
+(pass) AgentExecutor retry > execute 抛 WorkflowError(NODE_TIMEOUT) → 不重试直接失败 [1.17ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor session disposal > 正常执行后 session.dispose 被调用 [0.59ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=no-response signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=no-response
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+[workflow] AgentExecutor attempt 1/2 failed: nodeId=test-agent error=No response configured for agent: no-response errorType=Error
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=no-response signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=no-response
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+[workflow] AgentExecutor attempt 2/2 failed: nodeId=test-agent error=No response configured for agent: no-response errorType=Error
+(pass) AgentExecutor session disposal > execute 抛错后每次 attempt 的 session 均被 dispose [32.03ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor attempt 1/1 failed: nodeId=test-agent error=connect failed errorType=Error
+(pass) AgentExecutor session disposal > connect 抛错时 dispose 不被调用 [0.78ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=9
+[workflow] AgentExecutor attempt 1/3 failed: nodeId=test-agent error=The operation was aborted. errorType=DOMException
+(pass) AgentExecutor cancellation > AbortSignal 取消时 FakeTransport 收到 abort signal [52.57ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=9
+(pass) AgentExecutor JSON parsing > stdout 为合法 JSON 时 json 字段被解析 [0.63ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=9
+(pass) AgentExecutor JSON parsing > stdout 非法 JSON 时 json 包含简化会话流结构 [0.38ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor message stream > AgentResponse.messages 在未设 output_messages 时不输出 [0.42ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor message stream > output_messages 参数控制回传的消息数 [0.50ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=4
+(pass) AgentExecutor message stream > output_messages 为 0 时不回传 messages [0.36ms]
+[workflow] AgentExecutor executeOnce start: nodeId=test-agent agent=default signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor connecting: nodeId=test-agent agent=default
+[workflow] AgentExecutor connected: nodeId=test-agent signalAborted=false dagSignalAborted=false
+[workflow] AgentExecutor sending prompt: nodeId=test-agent promptLength=11
+(pass) AgentExecutor request > AgentRequest 只包含 prompt 和 signal [0.45ms]
+
+../oax-fenix-assessment-20260926/src/__tests__/task-timeout-instanceof-error.test.ts:
+(pass) timeout detection instanceof Error > detects DOMException TimeoutError (Bun runtime) [0.13ms]
+(pass) timeout detection instanceof Error > detects DOMException AbortError [0.04ms]
+(pass) timeout detection instanceof Error > detects plain Error with name TimeoutError (Node.js runtime) [0.05ms]
+(pass) timeout detection instanceof Error > detects plain Error with name AbortError [0.03ms]
+(pass) timeout detection instanceof Error > non-Error objects are not detected as timeout [0.04ms]
+(pass) timeout detection instanceof Error > generic Error is not detected as timeout [0.02ms]
+(pass) timeout detection instanceof Error > TypeError is not detected as timeout [0.03ms]
+
+ 102 pass
+ 0 fail
+ 291 expect() calls
+Ran 102 tests across 8 files. [10.16s]

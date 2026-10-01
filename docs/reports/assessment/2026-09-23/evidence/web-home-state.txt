@@ -1,0 +1,24 @@
+homeBeforeTasks web-eval-a
+online · idle
+
+web-eval-a · 心跳 10 秒前
+
+进入工作台 ↗
+web-eval-b
+online · idle
+
+web-eval-b · 心跳 10 秒前
+
+进入工作台 ↗
+homeAfterTasks web-eval-a
+online · idle
+
+web-eval-a · 心跳 1 秒前
+
+进入工作台 ↗
+web-eval-b
+online · busy
+
+web-eval-b · 心跳 1 秒前
+
+进入工作台 ↗

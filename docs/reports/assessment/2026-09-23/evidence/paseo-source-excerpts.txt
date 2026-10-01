@@ -1,0 +1,1588 @@
+Paseo source excerpts
+Repository: https://github.com/getpaseo/paseo
+Commit: 4c051388e1e00bdcad002e07aa7ce43e3f692caa
+Copyright (c) 2025-present Mohamed Boudra; Apache-2.0; see paseo-LICENSE.txt.
+Evidence: static source inspection, not execution evidence.
+
+FILE README.md L35-114
+35:   <img src="https://paseo.sh/hero-mockup.png" alt="Paseo app screenshot" width="100%">
+36: </p>
+37: 
+38: <p align="center">
+39:   <img src="https://paseo.sh/mobile-mockup.png" alt="Paseo mobile app" width="100%">
+40: </p>
+41: 
+42: Run agents in parallel on your own machines. Ship from your phone or your desk.
+43: 
+44: - **Self-hosted:** Agents run on your machine with your full dev environment. Use your tools, your configs, and your skills.
+45: - **Multi-provider:** Claude Code, Codex, Copilot, OpenCode, and Pi through the same interface. Pick the right model for each job.
+46: - **Voice control:** Dictate tasks or talk through problems in voice mode. Hands-free when you need it.
+47: - **Cross-device:** iOS, Android, desktop, web, and CLI. Start work at your desk, check in from your phone, script it from the terminal.
+48: - **Privacy-first:** Paseo doesn't have any telemetry, tracking, or forced log-ins.
+49: 
+50: ## Plugins
+51: 
+52: Add themes, workspace panels, commands, settings screens, and coding-agent providers with trusted
+53: TypeScript plugins. Install from npm, Git, or a local directory with `paseo plugin install <source>`.
+54: 
+55: Start with the [plugin quickstart](https://paseo.sh/docs/plugins). Plugins run with access to your daemon
+56: machine and inside connected clients; install only code you trust.
+57: 
+58: ## Getting Started
+59: 
+60: Paseo runs a local server called the daemon that manages your coding agents. Clients like the desktop app, mobile app, web app, and CLI connect to it.
+61: 
+62: ### Prerequisites
+63: 
+64: You need at least one agent CLI installed and configured with your credentials:
+65: 
+66: - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+67: - [Codex](https://github.com/openai/codex)
+68: - [GitHub Copilot](https://github.com/features/copilot/cli/)
+69: - [OpenCode](https://github.com/anomalyco/opencode)
+70: - [Pi](https://pi.dev)
+71: 
+72: ### Desktop app (recommended)
+73: 
+74: Download it from [paseo.sh/download](https://paseo.sh/download) or the [GitHub releases page](https://github.com/getpaseo/paseo/releases). Open the app and the daemon starts automatically. Nothing else to install.
+75: 
+76: To connect from your phone, open **Settings → your host → Pair Device**.
+77: 
+78: ### CLI / headless
+79: 
+80: Install the CLI and start Paseo:
+81: 
+82: ```bash
+83: npm install -g @getpaseo/cli
+84: paseo
+85: ```
+86: 
+87: Paseo starts locally, then asks whether to enable the end-to-end encrypted relay for device pairing. If you decline, connect directly over TCP, Tailscale, or another VPN. This path is useful for servers and remote machines.
+88: 
+89: For full setup and configuration, see:
+90: 
+91: - [Docs](https://paseo.sh/docs)
+92: - [Connectivity guide](https://paseo.sh/docs/connectivity)
+93: - [Configuration reference](https://paseo.sh/docs/configuration)
+94: 
+95: ### Docker
+96: 
+97: Run the Paseo daemon and self-hosted web UI in Docker:
+98: 
+99: ```bash
+100: docker run -d --name paseo \
+101:   -p 6767:6767 \
+102:   -e PASEO_PASSWORD=change-me \
+103:   -v "$PWD/paseo-home:/home/paseo" \
+104:   -v "$PWD:/workspace" \
+105:   ghcr.io/getpaseo/paseo:latest
+106: ```
+107: 
+108: Open `http://localhost:6767` after it starts. Extend the base image with the agent CLIs you use, then provide credentials through environment variables or the persistent `/home/paseo` volume. See the [Docker documentation](docs/docker.md) for full setup details.
+109: 
+110: ## CLI
+111: 
+112: Everything you can do in the app, you can do from the terminal.
+113: 
+114: ```bash
+
+FILE README.md L132-174
+132: ```ts
+133: import { createPaseoClient } from "@getpaseo/client";
+134: 
+135: const client = createPaseoClient({ url: "ws://127.0.0.1:6767/ws" });
+136: await client.connect();
+137: 
+138: const agent = await client.agents.create({
+139:   config: { provider: "codex/gpt-5.5" },
+140:   cwd: "/Users/me/dev/storefront",
+141:   prompt: "Review the current diff and name the riskiest change.",
+142: });
+143: 
+144: const result = await agent.waitForFinish();
+145: console.log(result.lastMessage);
+146: 
+147: await client.close();
+148: ```
+149: 
+150: See the [SDK quickstart](https://paseo.sh/docs/sdk/quickstart), [recipes](https://paseo.sh/docs/sdk/recipes), and [API reference](https://paseo.sh/docs/sdk/reference).
+151: 
+152: ## Skills
+153: 
+154: Skills teach your agent to use Paseo to orchestrate other agents.
+155: 
+156: ```bash
+157: npx skills add getpaseo/paseo
+158: ```
+159: 
+160: Then use them in any agent conversation:
+161: 
+162: - `/paseo-handoff` — hand off work between agents. I use this to plan with Claude and then handoff to Codex to implement.
+163: - `/paseo-advisor` — spin up a single agent as an advisor for a second opinion, without delegating the work itself.
+164: - `/paseo-committee` — form a committee of two contrasting agents to step back, do root cause analysis, and produce a plan.
+165: 
+166: ## Development
+167: 
+168: Quick monorepo package map:
+169: 
+170: - `packages/server`: Paseo daemon (agent process orchestration, WebSocket API, MCP server)
+171: - `packages/app`: Expo client (iOS, Android, web)
+172: - `packages/cli`: `paseo` CLI for daemon and agent workflows
+173: - `packages/desktop`: Electron desktop app
+174: - `packages/relay`: Relay transport and encryption used by the daemon and clients
+
+FILE docs/product.md L1-29
+1: # Product
+2: 
+3: Paseo is an environment for running, monitoring, and interacting with coding agents across desktop, mobile, web, and the command line.
+4: 
+5: **Paseo has a lean, opinionated core built to be extended.** It should be easy to start using and leave room for people to build far beyond the default experience.
+6: 
+7: ## Agents are the focus
+8: 
+9: The central workflow is giving an agent a task, understanding what it is doing, providing direction, and reviewing the result. Files, terminals, diffs, and other supporting tools help you do that.
+10: 
+11: Paseo should make this workflow coherent across providers and devices. You should be able to use the agent that fits a task and keep working from another device without rebuilding your environment around it.
+12: 
+13: This is the basis for product decisions. A familiar feature from another development tool earns its place by improving that experience. Familiarity alone does not make it a requirement for Paseo.
+14: 
+15: ## A low floor and a high ceiling
+16: 
+17: ### Easy to start
+18: 
+19: The default experience should be lean, polished, and understandable to someone who has never run a server or configured a VPN.
+20: 
+21: With a supported coding agent installed and authenticated, you can open the desktop app and start working. The app manages its local daemon. To connect your phone through the optional Paseo relay, enable pairing and scan a QR code. You do not need to configure a VPN or understand the networking behind it.
+22: 
+23: You should not need to know that plugins exist to get a useful, complete experience. Extra capability should become discoverable when it helps with something you want to do.
+24: 
+25: Keeping this starting point approachable is an ongoing responsibility. A technically correct feature can still make the product harder to understand through extra choices, controls, or setup.
+26: 
+27: ### Room to build your own setup
+28: 
+29: The same product should also work for someone running agents on a home server, using their own network, or building an automated workflow.
+
+FILE docs/product.md L55-97
+55: Core development continues through improvements to reliability, performance, interaction design, and workflows with broad value. A lean core takes ongoing work.
+56: 
+57: Every addition also has a lasting cost. It needs a place in the interface, an understandable relationship with existing behavior, testing across affected platforms, and maintenance as the rest of the product changes. A feature can work exactly as intended and still be the wrong addition.
+58: 
+59: The preference is for a small number of well-shaped capabilities that work together. Before adding a specialized workflow, consider whether an existing capability can serve it or whether a reusable extension point would let people build it themselves.
+60: 
+61: The boundary can evolve. Some built-in capabilities may eventually make more sense as plugins. Any such move needs to preserve a coherent default experience and account for people who already depend on it.
+62: 
+63: ## Extensibility and composition
+64: 
+65: Plugins are a central part of how Paseo gains capability.
+66: 
+67: Someone who needs a different agent provider, a specialized workspace panel, or a custom command should be able to build and share it independently. They can make the choices that fit their users and maintain the integration on their own schedule.
+68: 
+69: Paseo's role is to provide interfaces that make those contributions possible across the daemon and connected clients. The [plugin documentation](https://paseo.sh/docs/plugins) describes what each released API supports.
+70: 
+71: The [SDK](https://paseo.sh/docs/sdk) lets applications and services use the daemon directly. A separate dashboard, automation service, or client can build on the same agent infrastructure. Those projects do not all need to become features of the main app.
+72: 
+73: Composition means useful pieces can be combined in ways the maintainer did not have to predict. Keeping the daemon independent, offering multiple connection methods, and exposing agent operations through APIs gives people room to choose those combinations.
+74: 
+75: The extension interfaces need the same care as the core experience. They should be understandable, reusable, and maintainable. New extension points should follow concrete workflows that need them.
+76: 
+77: ## How Paseo develops
+78: 
+79: Product, design, architecture, and workflow decisions remain with the maintainer.
+80: 
+81: Those decisions draw on the history of the product: why a workflow has its current shape, what previous approaches taught us, how it interacts with the rest of the system, and where it is intended to go. Documentation shares that context, but familiarity also develops through sustained use and maintenance.
+82: 
+83: Development starts with the smallest useful change that can make a substantial difference. After shipping it, leave room to learn:
+84: 
+85: - Can people discover and understand it?
+86: - Does it work well in their actual workflows?
+87: - What friction or missing capability appears with repeated use?
+88: - Does the next addition improve the shared experience or belong in a plugin?
+89: 
+90: That feedback guides the next step. Expanding a workflow too far before people use it creates commitments that are difficult to reverse. Users build habits and integrations around what ships, so removing features or changing interfaces has a real cost.
+91: 
+92: Writing an implementation is one part of this process. Product judgment, design, QA, review, and learning from use determine how quickly a change can responsibly become part of Paseo.
+93: 
+94: ## An ecosystem people can build on
+95: 
+96: People contribute through reproducible bug reports, testing, workflow discussions, documentation, plugins, integrations, and helping each other.
+97: 
+
+FILE docs/agent-lifecycle.md L1-53
+1: # Agent lifecycle
+2: 
+3: How an agent is created, runs, becomes a subagent, gets archived, and disappears from the UI. The model spans the daemon (lifecycle, archive) and the client (tabs, the subagents track).
+4: 
+5: ## States
+6: 
+7: ```
+8: initializing → idle → running → idle (or error → closed)
+9:                  ↑        │
+10:                  └────────┘  (agent completes a turn, awaits next prompt)
+11: ```
+12: 
+13: Each live agent in `AgentManager` carries a `lastStatus` of `initializing`, `idle`, `running`, or `error`. `closed` is the persisted, resumable state for an agent record that has no live provider runtime. State transitions persist to disk and stream to subscribed clients via WebSocket.
+14: 
+15: ## Runtime residency
+16: 
+17: An unarchived agent may be `closed` without being deleted or archived. Closing releases its provider
+18: processes and subscriptions while retaining its Paseo identity, persistence handle, timeline,
+19: workspace, labels, title, usage, attention, timestamps, and parent relationship. Opening or prompting
+20: the agent runs through `ensureAgentLoaded()`, which resumes the durable provider session under the
+21: same Paseo agent ID. Provider history is not appended again when the canonical timeline is already
+22: primed.
+23: 
+24: Reload releases the old runtime before resuming its durable session: an idle provider process can
+25: still own an exclusive writer. A close failure retains that runtime for cleanup and blocks the
+26: replacement. Once closure succeeds, a failed resume leaves the durable agent closed and retryable.
+27: 
+28: Idle agents remain resident indefinitely. Runtime closure happens only through an explicit lifecycle
+29: action such as archive, replacement, reload, workspace teardown, or daemon shutdown.
+30: 
+31: A provider runtime can still die on its own — crash, OOM kill, host suspend. Work the agent parked
+32: inside that process dies with it: Claude Code's background Bash shells, `Monitor` watches, and
+33: workflows all live in the CLI process, and the completion notification that would have woken the
+34: agent never arrives. A runtime that dies mid-turn is reported by whatever is draining its stream, but
+35: between turns nothing is watching, so the agent sits at `idle` looking healthy while its background
+36: work is gone. Report that exit as a turn failure so the agent lands in `error` with a timeline entry.
+37: Only the Claude provider does this today; the others still report a death only when a turn happens to
+38: be in flight.
+39: 
+40: ### Cancellation
+41: 
+42: Provider interruption is idempotent at the `AgentSession` boundary. It resolves when the prior
+43: foreground turn can no longer run, including when the provider reports that it is already idle. It
+44: rejects only when the provider may still own the turn. Provider adapters translate native errors
+45: into that contract; lifecycle callers do not interpret provider-specific errors.
+46: 
+47: After an acknowledged interrupt, the manager settles the captured run even when no terminal event
+48: arrives or the run was still waiting for its provider turn id. The captured run token prevents an
+49: older cancellation from settling a newer turn. If interruption is rejected or times out, the agent
+50: keeps its active foreground turn and replacement, reload, rewind, and Stop report the failure.
+51: Accepting new work after an ambiguous interruption would create a split-brain session.
+52: 
+53: ## Relationships
+
+FILE docs/permissions.md L1-59
+1: # Daemon permissions
+2: 
+3: The daemon authorizes principals with semantic permissions. RPC names and protocol namespaces are not authority.
+4: 
+5: ## Model
+6: 
+7: ```text
+8: principal -> grants
+9:     |
+10:     +-- authenticated by a device or service credential
+11:     `-- opens a session with equal or narrower authority
+12: ```
+13: 
+14: A principal is the durable identity the daemon authorizes. A credential proves that a device or service represents it. Keep them separate so you can rotate credentials, attach more than one device, and revoke a Hub user without inventing daemon user accounts.
+15: 
+16: A pairing invitation is neither. It is an expiring, single-use exchange that creates a principal and credential with the permissions selected by its issuer.
+17: 
+18: ## Permissions
+19: 
+20: | Permission          | Authority                                                                  |
+21: | ------------------- | -------------------------------------------------------------------------- |
+22: | `daemon.read`       | Daemon status, diagnostics, configuration, and provider information        |
+23: | `daemon.manage`     | Restart, update, configuration changes, providers, skills, and plugins     |
+24: | `tunnel.manage`     | Relay, Hub, service tunnel, and public endpoint relationships              |
+25: | `access.manage`     | Pairing invitations, principals, credentials, grants, and revocation       |
+26: | `workspace.read`    | Projects, workspaces, agents, timelines, files, diffs, and terminal output |
+27: | `workspace.write`   | Prompts, agent control, files, terminals, git operations, and scripts      |
+28: | `workspace.manage`  | Create, rename, archive, and remove projects and workspaces                |
+29: | `automation.manage` | Schedules, heartbeats, and loops                                           |
+30: | `hub.execute`       | Agent lifecycle, agent/workspace observation, and workspace recovery       |
+31: 
+32: Agents and terminals use workspace authority. Both can execute code and mutate the workspace, so separate write permissions would claim an isolation boundary the daemon cannot enforce.
+33: 
+34: Owner, operator, and viewer are UI presets expanded into explicit permissions. Do not persist them as roles. Adding a permission must not silently widen an existing principal.
+35: 
+36: Permissions are additive allows. Missing authority denies the operation. Do not add deny precedence.
+37: 
+38: ## Resources
+39: 
+40: Permissions are daemon-wide today. Future grants may select workspaces or agents, but operation classification remains inside the authorization module:
+41: 
+42: ```ts
+43: type Grant = {
+44:   permission: Permission;
+45:   resource: { kind: "daemon" } | { kind: "workspace"; ids: string[] };
+46: };
+47: ```
+48: 
+49: A delegating principal can grant only authority it already possesses. A session may attenuate its principal's grants but cannot widen them.
+50: 
+51: Workspace-scoped grants require every resource-bearing operation and outbound observation to enforce the same workspace boundary. File preview currently accepts any daemon-readable regular file, so it must gain resource enforcement before workspace-specific access ships.
+52: 
+53: ## Hub
+54: 
+55: The Hub authenticates as a service principal. Its locally selected grants decide whether it may execute agents, manage the daemon, manage tunnels, or manage access.
+56: 
+57: Hub user and role identifiers remain opaque external subjects. The Hub may create and revoke linked daemon principals when granted `access.manage`; the daemon does not interpret accounts, organizations, or roles.
+58: 
+59: Hub enrollment and permission updates exchange these semantic permissions directly. Legacy persisted Hub relationships that contain `hub.execution.*` migrate once to `hub.execute` when the daemon loads them; new relationships never persist or emit transport scopes as authority.
+
+FILE packages/server/src/server/agent/provider-registry.ts L182-229
+182:         !HUB_E2E_TOOL_NAME.test(grant.tool)
+183:       ) {
+184:         throw new ToolPolicyUnsupportedError(
+185:           provider,
+186:           `Provider '${provider}' accepts only exact MCP tool grants for the injected '${HUB_E2E_MCP_SERVER}' server`,
+187:         );
+188:       }
+189:     }
+190:     return {
+191:       preapproved: toolPolicy.preapproved.map((grant) => ({ ...grant })),
+192:     };
+193:   },
+194: };
+195: 
+196: const PROVIDER_CLIENT_FACTORIES: Record<string, ProviderClientFactory> = {
+197:   claude: (logger, runtimeSettings) =>
+198:     new ClaudeAgentClient({
+199:       logger,
+200:       runtimeSettings,
+201:     }),
+202:   codex: (logger, runtimeSettings, options) =>
+203:     new CodexAppServerAgentClient(logger, runtimeSettings, {
+204:       workspaceGitService: options?.workspaceGitService,
+205:       customProvider: options?.customProvider,
+206:     }),
+207:   copilot: (logger, runtimeSettings) =>
+208:     new CopilotACPAgentClient({
+209:       logger,
+210:       runtimeSettings,
+211:     }),
+212:   cursor: (logger, runtimeSettings) =>
+213:     new CursorACPAgentClient({
+214:       logger,
+215:       command: getCursorACPCommand(runtimeSettings),
+216:       env: runtimeSettings?.env,
+217:     }),
+218:   opencode: (logger, runtimeSettings, options) =>
+219:     new OpenCodeAgentClient(logger, runtimeSettings, {
+220:       managedProcesses: options?.managedProcesses,
+221:       bridge: options?.openCodeBridge,
+222:     }),
+223:   pi: (logger, runtimeSettings, options) =>
+224:     new PiRpcAgentClient({
+225:       logger,
+226:       runtimeSettings,
+227:       providerParams: options?.providerParams,
+228:     }),
+229:   omp: (logger, runtimeSettings, options) =>
+
+FILE packages/server/src/server/agent/agent-sdk-types.ts L182-203
+182: export interface AgentCapabilityFlags {
+183:   [capability: string]: boolean | undefined;
+184:   supportsStreaming: boolean;
+185:   supportsSessionPersistence: boolean;
+186:   supportsSessionListing?: boolean;
+187:   supportsDynamicModes: boolean;
+188:   supportsMcpServers: boolean;
+189:   supportsNativePaseoTools?: boolean;
+190:   supportsReasoningStream: boolean;
+191:   supportsToolInvocations: boolean;
+192:   supportsRewindConversation?: boolean;
+193:   supportsRewindFiles?: boolean;
+194:   supportsRewindBoth?: boolean;
+195: }
+196: 
+197: export interface AgentPersistenceHandle {
+198:   provider: AgentProvider;
+199:   sessionId: string;
+200:   /** Provider specific handle (Codex thread id, Claude resume token, etc). */
+201:   nativeHandle?: string;
+202:   metadata?: AgentMetadata;
+203: }
+
+FILE packages/server/src/server/agent/agent-manager.ts L2278-2315
+2278:   async runAgent(
+2279:     agentId: string,
+2280:     prompt: AgentPromptInput,
+2281:     options?: AgentRunOptions,
+2282:   ): Promise<AgentRunResult> {
+2283:     const events = this.streamAgent(agentId, prompt, options);
+2284:     const timeline: AgentTimelineItem[] = [];
+2285:     let finalText = "";
+2286:     let usage: AgentUsage | undefined;
+2287:     let canceled = false;
+2288: 
+2289:     for await (const event of events) {
+2290:       if (event.type === "timeline") {
+2291:         timeline.push(event.item);
+2292:       } else if (event.type === "turn_completed") {
+2293:         usage = event.usage;
+2294:       } else if (event.type === "turn_failed") {
+2295:         throw new Error(this.formatTurnFailedMessage(event));
+2296:       } else if (event.type === "turn_canceled") {
+2297:         canceled = true;
+2298:       }
+2299:     }
+2300: 
+2301:     finalText = this.getLastAssistantMessageFromTimeline(timeline) ?? "";
+2302: 
+2303:     const agent = this.requireAgent(agentId);
+2304:     const sessionId = agent.persistence?.sessionId;
+2305:     if (!sessionId) {
+2306:       throw new Error(`Agent ${agentId} has no persistence.sessionId after run completed`);
+2307:     }
+2308:     return {
+2309:       sessionId,
+2310:       finalText,
+2311:       usage,
+2312:       timeline,
+2313:       canceled,
+2314:     };
+2315:   }
+
+FILE packages/server/src/server/agent/agent-manager.ts L2943-3088
+2943:   async respondToPermission(
+2944:     agentId: string,
+2945:     requestId: string,
+2946:     response: AgentPermissionResponse,
+2947:   ): Promise<AgentPermissionResult | void> {
+2948:     const agent = this.requireAgent(agentId);
+2949:     if (agent.inFlightPermissionResponses.has(requestId)) {
+2950:       throw new Error("A response to this permission request is already being submitted");
+2951:     }
+2952:     agent.inFlightPermissionResponses.add(requestId);
+2953: 
+2954:     try {
+2955:       const result = await agent.session.respondToPermission(requestId, response);
+2956:       agent.pendingPermissions.delete(requestId);
+2957: 
+2958:       try {
+2959:         await this.refreshSessionState(agent);
+2960:       } catch {
+2961:         // Ignore refresh errors - state sync after permission approval is best effort.
+2962:       }
+2963: 
+2964:       this.touchUpdatedAt(agent);
+2965:       await this.persistSnapshot(agent);
+2966:       this.emitState(agent);
+2967: 
+2968:       const bufferedResolution = agent.bufferedPermissionResolutions.get(requestId);
+2969:       if (bufferedResolution) {
+2970:         agent.bufferedPermissionResolutions.delete(requestId);
+2971:         this.dispatchStream(agent.id, bufferedResolution, { timestamp: new Date().toISOString() });
+2972:       }
+2973: 
+2974:       return result;
+2975:     } finally {
+2976:       agent.inFlightPermissionResponses.delete(requestId);
+2977:       agent.bufferedPermissionResolutions.delete(requestId);
+2978:     }
+2979:   }
+2980: 
+2981:   async cancelAgentRun(agentId: string): Promise<AgentRunCancellationResult> {
+2982:     return this.runForegroundMutation(agentId, () => this.cancelAgentRunNow(agentId));
+2983:   }
+2984: 
+2985:   private async cancelAgentRunNow(agentId: string): Promise<AgentRunCancellationResult> {
+2986:     const agent = this.requireSessionAgent(agentId);
+2987:     const run =
+2988:       this.runs.getRun(agentId) ??
+2989:       (agent.lifecycle === "running" ? this.runs.trackAutonomousRun(agentId, null) : null);
+2990:     if (!run) {
+2991:       return { status: "not_running" };
+2992:     }
+2993: 
+2994:     const interruptAcknowledged = await this.interruptSession(agent.session, agentId);
+2995:     const settlement = await this.waitWithTimeout({
+2996:       operation: run.settledPromise,
+2997:       timeoutMs: interruptAcknowledged
+2998:         ? INTERRUPT_SESSION_TIMEOUT_MS
+2999:         : this.rescueTimeouts.interruptSessionMs,
+3000:     });
+3001: 
+3002:     if (!interruptAcknowledged) {
+3003:       return { status: settlement === "completed" ? "settled" : "refused" };
+3004:     }
+3005: 
+3006:     const runTurnId = this.runs.getTurnId(agentId);
+3007:     if (settlement === "timed_out" && runTurnId) {
+3008:       this.logger.warn(
+3009:         { agentId, turnId: runTurnId, kind: run.kind },
+3010:         "cancelAgentRun: acknowledged turn still active after timeout, force-canceling",
+3011:       );
+3012:       await this.dispatchSessionEvent(agent, {
+3013:         type: "turn_canceled",
+3014:         provider: agent.provider,
+3015:         reason: "interrupted",
+3016:         turnId: runTurnId,
+3017:       });
+3018:       await run.settledPromise;
+3019:     } else if (settlement === "timed_out" && run.kind === "foreground") {
+3020:       this.logger.warn(
+3021:         { agentId, kind: run.kind },
+3022:         "cancelAgentRun: acknowledged pending turn still active after timeout, clearing it",
+3023:       );
+3024:       this.runs.settleForegroundRun(agentId, run.token);
+3025:       if (!agent.pendingReplacement) {
+3026:         agent.lifecycle = "idle";
+3027:         this.touchUpdatedAt(agent);
+3028:         this.emitState(agent);
+3029:       }
+3030:     } else if (settlement === "timed_out" && run.kind === "autonomous") {
+3031:       this.logger.warn(
+3032:         { agentId, kind: run.kind },
+3033:         "cancelAgentRun: acknowledged turn still active after timeout, force-canceling",
+3034:       );
+3035:       await this.dispatchSessionEvent(agent, {
+3036:         type: "turn_canceled",
+3037:         provider: agent.provider,
+3038:         reason: "interrupted",
+3039:       });
+3040:     }
+3041: 
+3042:     if (agent.pendingPermissions.size > 0) {
+3043:       this.resolvePendingPermissionsForAgent(agent, agent.provider, undefined, "Interrupted");
+3044:       this.touchUpdatedAt(agent);
+3045:       this.emitState(agent);
+3046:     }
+3047:     return { status: "settled" };
+3048:   }
+3049: 
+3050:   private async cancelAgentRunBefore(
+3051:     agentId: string,
+3052:     action: "reload" | "replace" | "rewind",
+3053:   ): Promise<void> {
+3054:     const result = await this.cancelAgentRun(agentId);
+3055:     if (result.status === "refused") {
+3056:       throw new AgentRunCancellationError(agentId, action);
+3057:     }
+3058:   }
+3059: 
+3060:   private async interruptSession(session: AgentSession, agentId: string): Promise<boolean> {
+3061:     try {
+3062:       const result = await this.waitWithTimeout({
+3063:         operation: session.interrupt(),
+3064:         timeoutMs: this.rescueTimeouts.interruptSessionMs,
+3065:         onLateError: (error) => {
+3066:           this.logger.warn(
+3067:             { err: error, agentId },
+3068:             "Session interrupt failed after timeout during cancel",
+3069:           );
+3070:         },
+3071:       });
+3072: 
+3073:       if (result === "timed_out") {
+3074:         this.logger.warn(
+3075:           { agentId, timeoutMs: this.rescueTimeouts.interruptSessionMs },
+3076:           "Timed out interrupting session during cancel",
+3077:         );
+3078:         return false;
+3079:       }
+3080:       return true;
+3081:     } catch (error) {
+3082:       this.logger.error({ err: error, agentId }, "Failed to interrupt session");
+3083:       return false;
+3084:     }
+3085:   }
+3086: 
+3087:   getPendingPermissions(agentId: string): AgentPermissionRequest[] {
+3088:     const agent = this.requireSessionAgent(agentId);
+
+FILE packages/server/src/server/agent/providers/provider-runner.ts L20-117
+20: 
+21: export interface RunProviderTurnOptions extends ProviderTurnRunner {
+22:   prompt: AgentPromptInput;
+23:   runOptions?: AgentRunOptions;
+24:   reduceFinalText?: ProviderFinalTextReducer;
+25: }
+26: 
+27: export async function runProviderTurn({
+28:   prompt,
+29:   runOptions,
+30:   startTurn,
+31:   subscribe,
+32:   getSessionId,
+33:   reduceFinalText = replaceFinalTextWithAssistantMessage,
+34: }: RunProviderTurnOptions): Promise<AgentRunResult> {
+35:   const timeline: AgentTimelineItem[] = [];
+36:   let finalText = "";
+37:   let usage: AgentRunResult["usage"];
+38:   let turnId: string | null = null;
+39:   const bufferedEvents: AgentStreamEvent[] = [];
+40:   let settled = false;
+41:   let resolveCompletion!: () => void;
+42:   let rejectCompletion!: (error: Error) => void;
+43: 
+44:   const processEvent = (event: AgentStreamEvent) => {
+45:     if (settled) {
+46:       return;
+47:     }
+48:     const eventTurnId = getAgentStreamEventTurnId(event);
+49:     if (turnId && eventTurnId && eventTurnId !== turnId) {
+50:       return;
+51:     }
+52:     if (event.type === "timeline") {
+53:       timeline.push(event.item);
+54:       finalText = reduceFinalText({ current: finalText, item: event.item });
+55:       return;
+56:     }
+57:     if (event.type === "turn_completed") {
+58:       usage = event.usage;
+59:       settled = true;
+60:       resolveCompletion();
+61:       return;
+62:     }
+63:     if (event.type === "turn_failed") {
+64:       settled = true;
+65:       rejectCompletion(new Error(event.error));
+66:       return;
+67:     }
+68:     if (event.type === "turn_canceled") {
+69:       settled = true;
+70:       resolveCompletion();
+71:     }
+72:   };
+73: 
+74:   const completion = new Promise<void>((resolve, reject) => {
+75:     resolveCompletion = resolve;
+76:     rejectCompletion = reject;
+77:   });
+78:   const unsubscribe = subscribe((event) => {
+79:     if (!turnId) {
+80:       bufferedEvents.push(event);
+81:       return;
+82:     }
+83:     processEvent(event);
+84:   });
+85: 
+86:   try {
+87:     const result = await startTurn(prompt, runOptions);
+88:     turnId = result.turnId;
+89:     for (const event of bufferedEvents) {
+90:       processEvent(event);
+91:     }
+92:     await completion;
+93:   } finally {
+94:     unsubscribe();
+95:   }
+96: 
+97:   return {
+98:     sessionId: await getSessionId(),
+99:     finalText,
+100:     usage,
+101:     timeline,
+102:   };
+103: }
+104: 
+105: export function replaceFinalTextWithAssistantMessage({
+106:   current,
+107:   item,
+108: }: {
+109:   current: string;
+110:   item: AgentTimelineItem;
+111: }): string {
+112:   return item.type === "assistant_message" ? item.text : current;
+113: }
+114: 
+115: export function appendOrReplaceGrowingAssistantMessage({
+116:   current,
+117:   item,
+
+FILE packages/server/src/server/agent/providers/opencode-agent.ts L3456-3484
+3456:   async interrupt(): Promise<void> {
+3457:     const turnId = this.activeForegroundTurnId;
+3458:     this.abortController?.abort();
+3459:     const abort = this.issueStop(turnId);
+3460:     // COMPAT(opencodeSlowAbort): OpenCode 1.14.42+ blocks session.abort until
+3461:     // the running tool actually stops, which can be tens of seconds for
+3462:     // long-running tools. Cap the wait so the user-visible cancel lands
+3463:     // quickly while still giving OpenCode a chance to confirm the abort
+3464:     // cleanly. Drop the timeout once upstream returns abort acknowledgement
+3465:     // before tool teardown.
+3466:     const settledAbort = abort.then(
+3467:       () => undefined,
+3468:       (error: unknown) => error,
+3469:     );
+3470:     // Only the cap is tolerated. A settled failure means the runner may still be
+3471:     // going, and the caller must hear about it.
+3472:     const abortFailure = await withTimeout(settledAbort, 2_000, "OpenCode session.abort").catch(
+3473:       (error) => {
+3474:         this.logger.warn(
+3475:           { err: error, sessionId: this.sessionId, turnId },
+3476:           "OpenCode session.abort did not settle within the cancel cap",
+3477:         );
+3478:         return undefined;
+3479:       },
+3480:     );
+3481:     if (abortFailure !== undefined) {
+3482:       throw abortFailure;
+3483:     }
+3484:   }
+
+FILE packages/server/src/server/agent/providers/opencode-agent.ts L3610-3637
+3610:   /**
+3611:    * Gate every runner-affecting operation on the previous stop. OpenCode runs one
+3612:    * runner per session and aborts it session-wide, so a replacement may start
+3613:    * only once the canceled run published its terminal and our own abort settled.
+3614:    * A failed abort never proved the runner stopped, so it fails closed until the
+3615:    * next Stop issues a fresh one.
+3616:    */
+3617:   private async awaitRunnerQuiescence(): Promise<void> {
+3618:     const providerIdle = this.waitUntilProviderIdle();
+3619:     // A failed abort is decisive on its own, so let it reject this wait without
+3620:     // leaving the still-running observation unhandled.
+3621:     void providerIdle.catch(() => undefined);
+3622:     let observed = this.abortSettlement;
+3623:     await Promise.all([observed, providerIdle]);
+3624:     // Stop can issue a further abort while we waited, and the settlement is
+3625:     // replaced rather than mutated, so drain until what we observed is current.
+3626:     while (this.abortSettlement !== observed) {
+3627:       observed = this.abortSettlement;
+3628:       await observed;
+3629:     }
+3630:   }
+3631: 
+3632:   private async waitUntilProviderIdle(): Promise<void> {
+3633:     if (this.turnState.status !== "stopping") return;
+3634:     await withTimeout(
+3635:       this.observeProviderStopBoundary(this.turnState.stop),
+3636:       OPENCODE_PENDING_ABORT_START_TIMEOUT_MS,
+3637:       "OpenCode previous turn to stop",
+
+FILE packages/server/src/server/agent/providers/opencode-agent.ts L3700-3715
+3700:       throw new Error("OpenCode session is closed");
+3701:     }
+3702:     if (this.turnState.status === "running") {
+3703:       throw new Error("A foreground turn is already active");
+3704:     }
+3705:     try {
+3706:       await this.awaitRunnerQuiescence();
+3707:     } catch (error) {
+3708:       this.rethrowRunnerWaitError(error);
+3709:     }
+3710:     if (this.closed) {
+3711:       throw new Error("OpenCode session is closed");
+3712:     }
+3713:     if (this.turnState.status !== "idle") {
+3714:       throw new Error("OpenCode is still stopping the previous turn");
+3715:     }
+
+FILE packages/server/src/server/agent/agent-storage.ts L13-78
+13: const SERIALIZABLE_CONFIG_SCHEMA = z
+14:   .object({
+15:     modeId: z.string().nullable().optional(),
+16:     model: z.string().nullable().optional(),
+17:     thinkingOptionId: z.string().nullable().optional(),
+18:     featureValues: z.record(z.string(), z.unknown()).nullable().optional(),
+19:     providerOptions: z.record(z.string(), z.json()).nullable().optional(),
+20:     toolPolicy: z
+21:       .object({
+22:         preapproved: z.array(
+23:           z.object({ kind: z.literal("mcp"), server: z.string(), tool: z.string() }).strict(),
+24:         ),
+25:       })
+26:       .strict()
+27:       .nullable()
+28:       .optional(),
+29:     systemPrompt: z.string().nullable().optional(),
+30:     mcpServers: z.record(z.string(), z.any()).nullable().optional(),
+31:   })
+32:   .nullable()
+33:   .optional();
+34: 
+35: const PERSISTENCE_HANDLE_SCHEMA = z
+36:   .object({
+37:     provider: z.string(),
+38:     sessionId: z.string(),
+39:     nativeHandle: z.any().optional(),
+40:     metadata: z.record(z.string(), z.any()).optional(),
+41:   })
+42:   .nullable()
+43:   .optional();
+44: 
+45: const STORED_AGENT_SCHEMA = z.object({
+46:   id: z.string(),
+47:   provider: z.string(),
+48:   cwd: z.string(),
+49:   workspaceId: z.string().optional(),
+50:   createdAt: z.string(),
+51:   updatedAt: z.string(),
+52:   lastActivityAt: z.string().optional(),
+53:   lastUserMessageAt: z.string().nullable().optional(),
+54:   title: z.string().nullable().optional(),
+55:   labels: z.record(z.string(), z.string()).default({}),
+56:   lastStatus: AgentStatusSchema.default("closed"),
+57:   lastModeId: z.string().nullable().optional(),
+58:   config: SERIALIZABLE_CONFIG_SCHEMA,
+59:   runtimeInfo: z
+60:     .object({
+61:       provider: z.string(),
+62:       sessionId: z.string().nullable(),
+63:       model: z.string().nullable().optional(),
+64:       thinkingOptionId: z.string().nullable().optional(),
+65:       modeId: z.string().nullable().optional(),
+66:       extra: z.record(z.string(), z.unknown()).optional(),
+67:     })
+68:     .optional(),
+69:   features: z.array(AgentFeatureSchema).optional(),
+70:   persistence: PERSISTENCE_HANDLE_SCHEMA,
+71:   lastError: z.string().nullable().optional(),
+72:   requiresAttention: z.boolean().optional(),
+73:   attentionReason: z.enum(["finished", "error", "permission"]).nullable().optional(),
+74:   attentionTimestamp: z.string().nullable().optional(),
+75:   internal: z.boolean().optional(),
+76:   archivedAt: z.string().nullable().optional(),
+77:   owner: AgentOwnerSchema.optional(),
+78: });
+
+FILE packages/server/src/server/agent/agent-storage.ts L153-202
+153:   async upsert(record: StoredAgentRecord): Promise<void> {
+154:     await this.load();
+155:     await this.queueRecordWrite(record);
+156:   }
+157: 
+158:   private queueRecordWrite(record: StoredAgentRecord): Promise<void> {
+159:     return this.queueRecordMutation(record.id, () => record);
+160:   }
+161: 
+162:   private queueRecordMutation(
+163:     agentId: string,
+164:     mutate: (existing: StoredAgentRecord | null) => StoredAgentRecord,
+165:   ): Promise<void> {
+166:     const prev = this.pendingWrites.get(agentId) ?? Promise.resolve();
+167:     const next = prev.then(async () => {
+168:       if (this.deleting.has(agentId)) {
+169:         return undefined;
+170:       }
+171: 
+172:       const record = mutate(this.cache.get(agentId) ?? null);
+173:       await this.writeRecord(record);
+174:       return undefined;
+175:     });
+176: 
+177:     const tracked = next.finally(() => {
+178:       if (this.pendingWrites.get(agentId) === tracked) {
+179:         this.pendingWrites.delete(agentId);
+180:       }
+181:     });
+182: 
+183:     this.pendingWrites.set(agentId, tracked);
+184:     return tracked;
+185:   }
+186: 
+187:   private async writeRecord(record: StoredAgentRecord): Promise<void> {
+188:     const agentId = record.id;
+189:     const nextPath = this.buildRecordPath(record);
+190:     const previousPath = this.pathById.get(agentId);
+191: 
+192:     await writeJsonFileAtomic(nextPath, record);
+193:     this.addIndexedPath(agentId, nextPath);
+194: 
+195:     if (previousPath && previousPath !== nextPath) {
+196:       try {
+197:         await fs.unlink(previousPath);
+198:       } catch {
+199:         // ignore cleanup errors
+200:       }
+201:       this.removeIndexedPath(agentId, previousPath);
+202:     }
+
+FILE packages/server/src/server/atomic-file.ts L1-25
+1: import { randomUUID } from "node:crypto";
+2: import { promises as fs } from "node:fs";
+3: import path from "node:path";
+4: 
+5: export async function writeFileAtomic(
+6:   filePath: string,
+7:   data: string | NodeJS.ArrayBufferView,
+8: ): Promise<void> {
+9:   await fs.mkdir(path.dirname(filePath), { recursive: true });
+10:   const tempPath = path.join(
+11:     path.dirname(filePath),
+12:     `.${path.basename(filePath)}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`,
+13:   );
+14:   try {
+15:     await fs.writeFile(tempPath, data, "utf8");
+16:     await fs.rename(tempPath, filePath);
+17:   } catch (error) {
+18:     await fs.rm(tempPath, { force: true });
+19:     throw error;
+20:   }
+21: }
+22: 
+23: export async function writeJsonFileAtomic(filePath: string, value: unknown): Promise<void> {
+24:   await writeFileAtomic(filePath, JSON.stringify(value, null, 2));
+25: }
+
+FILE packages/server/src/server/agent/providers/claude/agent.ts L3230-3235
+3230:   private buildAppendedSystemPrompt(): string {
+3231:     return (
+3232:       composeSystemPromptParts(this.config.systemPrompt, this.config.daemonAppendSystemPrompt) ?? ""
+3233:     );
+3234:   }
+3235: 
+
+FILE packages/server/src/server/agent/providers/claude/agent.ts L3280-3295
+3280:       allowDangerouslySkipPermissions: true,
+3281:       agents: this.defaults?.agents,
+3282:       canUseTool: this.handlePermissionRequest,
+3283:       pathToClaudeCodeExecutable: claudeBinary,
+3284:       // Use Claude Code preset system prompt and load CLAUDE.md files
+3285:       // Append provider-agnostic system prompts for agents.
+3286:       systemPrompt: {
+3287:         type: "preset",
+3288:         preset: "claude_code",
+3289:         append: appendedSystemPrompt,
+3290:       },
+3291:       settingSources: CLAUDE_SETTING_SOURCES,
+3292:       stderr: (data: string) => {
+3293:         this.captureStderr(data);
+3294:         this.logger.error({ stderr: data.trim() }, "Claude Agent SDK stderr");
+3295:       },
+
+FILE packages/server/src/server/agent/providers/codex-app-server-agent.ts L3949-3971
+3949:   private async ensureThreadLoaded(): Promise<void> {
+3950:     if (!this.client || !this.currentThreadId) return;
+3951:     const params: Record<string, unknown> = { threadId: this.currentThreadId };
+3952:     const developerInstructions = composeSystemPromptParts(
+3953:       this.config.systemPrompt,
+3954:       this.config.daemonAppendSystemPrompt,
+3955:     );
+3956:     if (developerInstructions) {
+3957:       params.developerInstructions = developerInstructions;
+3958:     }
+3959:     const codexConfig = this.buildCodexInnerConfig();
+3960:     if (codexConfig) {
+3961:       params.config = codexConfig;
+3962:     }
+3963:     try {
+3964:       const loaded = toObjectRecord(await this.client.request("thread/loaded/list", {}));
+3965:       const ids = Array.isArray(loaded?.data) ? loaded.data : [];
+3966:       if (ids.includes(this.currentThreadId)) {
+3967:         return;
+3968:       }
+3969:       const response = await this.client.request("thread/resume", params);
+3970:       this.rememberResolvedSandboxPolicy(response);
+3971:     } catch (error) {
+
+FILE packages/app/src/timeline/timeline-sync-plan.ts L54-101
+54: export function planTimelineResumeFetch(
+55:   range: { epoch: string; endSeq: number } | null | undefined,
+56: ): ProjectedTimelineForwardFetchPlan {
+57:   return range
+58:     ? planTimelineCatchUpAfter({ epoch: range.epoch, seq: range.endSeq })
+59:     : planTimelineTailFetch();
+60: }
+61: 
+62: export function planTimelineOlderFetch(cursor: TimelineSyncCursor) {
+63:   return {
+64:     direction: "before",
+65:     cursor,
+66:     limit: TIMELINE_FETCH_PAGE_SIZE,
+67:     projection: "projected",
+68:   } as const;
+69: }
+70: 
+71: export function planTimelinePromptJump(target: TimelineSyncCursor) {
+72:   const newerRows = Math.floor(TIMELINE_FETCH_PAGE_SIZE / 2);
+73:   return {
+74:     direction: "before",
+75:     cursor: { epoch: target.epoch, seq: target.seq + newerRows + 1 },
+76:     limit: TIMELINE_FETCH_PAGE_SIZE,
+77:     projection: "projected",
+78:     mergeWindow: true,
+79:   } as const;
+80: }
+81: 
+82: export function isTimelineCatchUpComplete(input: {
+83:   direction: "tail" | "before" | "after";
+84:   hasNewer: boolean;
+85:   error: string | null;
+86: }): boolean {
+87:   if (input.error) {
+88:     return false;
+89:   }
+90: 
+91:   return input.direction !== "after" || !input.hasNewer;
+92: }
+93: 
+94: export function isTimelineResumeSnapshotAuthoritative(input: {
+95:   direction: "tail" | "before" | "after";
+96:   hasNewer: boolean;
+97:   error: string | null;
+98: }): boolean {
+99:   if (input.error || input.direction === "before") return false;
+100:   return input.direction === "tail" || !input.hasNewer;
+101: }
+
+FILE packages/app/src/timeline/viewed-timeline-sync.ts L550-615
+550:       }
+551:     }
+552:     if (changed) notifyListeners();
+553:   };
+554: 
+555:   const cancelCatchUp = (agentId: string) => {
+556:     catchUpGenerations.set(agentId, (catchUpGenerations.get(agentId) ?? 0) + 1);
+557:     catchUps.get(agentId)?.cancelRetry?.();
+558:     catchUps.delete(agentId);
+559:     pendingCatchUps.delete(agentId);
+560:   };
+561: 
+562:   const fetchUntilCurrent = async (
+563:     agentId: string,
+564:     generation: number,
+565:     request: ProjectedTimelineForwardFetchPlan,
+566:     fallbackToLatestTailOnOverflow: boolean,
+567:   ): Promise<void> => {
+568:     if (!ownsCatchUp(agentId, generation)) return;
+569: 
+570:     try {
+571:       const page = await ports.fetchPage(agentId, request);
+572:       if (!ownsCatchUp(agentId, generation)) return;
+573:       if (page.hasNewer && page.endCursor) {
+574:         if (fallbackToLatestTailOnOverflow) {
+575:           await ports.fetchLatestTail(agentId);
+576:           if (!ownsCatchUp(agentId, generation)) return;
+577:           catchUps.set(agentId, { generation, status: "complete" });
+578:           setVisibilityCatchUpReady(agentId);
+579:           return;
+580:         }
+581:         await fetchUntilCurrent(
+582:           agentId,
+583:           generation,
+584:           planTimelineCatchUpAfter(page.endCursor),
+585:           false,
+586:         );
+587:         return;
+588:       }
+589:       if (page.hasNewer) {
+590:         throw new Error(`Timeline page for ${agentId} hasNewer without an end cursor`);
+591:       }
+592:       catchUps.set(agentId, { generation, status: "complete" });
+593:       const pendingCatchUp = pendingCatchUps.get(agentId);
+594:       if (pendingCatchUp) {
+595:         startCatchUp(agentId, { request: pendingCatchUp, supersede: true });
+596:         return;
+597:       }
+598:       setVisibilityCatchUpReady(agentId);
+599:     } catch (error) {
+600:       if (catchUps.get(agentId)?.generation === generation) {
+601:         const nextRetryDelayMs = getNextRetryDelayMs(catchUps.get(agentId)?.retryDelayMs);
+602:         const cancelRetry = ports.schedule(() => {
+603:           const current = catchUps.get(agentId);
+604:           if (current?.generation !== generation || current.status !== "error") return;
+605:           startCatchUp(agentId);
+606:         }, nextRetryDelayMs);
+607:         catchUps.set(agentId, {
+608:           generation,
+609:           status: "error",
+610:           request,
+611:           cancelRetry,
+612:           retryDelayMs: nextRetryDelayMs,
+613:         });
+614:         setVisibilityCatchUpError([agentId], error);
+615:         ports.reportError(error);
+
+FILE packages/app/src/composer/submit.ts L25-81
+25: export async function submitAgentInput<TAttachment>(
+26:   input: AgentInputSubmitActionInput<TAttachment>,
+27: ): Promise<AgentInputSubmitResult> {
+28:   const trimmedMessage = input.message.trim();
+29:   const attachments = input.attachments;
+30:   const shouldClearOnSubmit = input.submitBehavior !== "preserve-and-lock";
+31: 
+32:   if (
+33:     !trimmedMessage &&
+34:     attachments.length === 0 &&
+35:     !input.hasExternalContent &&
+36:     !input.allowEmptySubmit
+37:   ) {
+38:     return "noop";
+39:   }
+40: 
+41:   if (!input.canSubmit) {
+42:     return "noop";
+43:   }
+44: 
+45:   if (input.isAgentRunning && !input.forceSend) {
+46:     input.queueMessage({ message: trimmedMessage, attachments });
+47:     if (shouldClearOnSubmit) {
+48:       input.setUserInput("");
+49:       input.setAttachments([]);
+50:     }
+51:     return "queued";
+52:   }
+53: 
+54:   // Clear immediately so the submitted timeline row and composer state stay in sync.
+55:   if (shouldClearOnSubmit) {
+56:     input.setUserInput("");
+57:     input.setAttachments([]);
+58:   }
+59:   input.setSendError(null);
+60:   input.setIsProcessing(true);
+61: 
+62:   try {
+63:     await input.submitMessage({ message: trimmedMessage, attachments });
+64:     input.clearDraft("sent");
+65:     input.setIsProcessing(false);
+66:     return "submitted";
+67:   } catch (error) {
+68:     input.onSubmitError?.(error);
+69:     if (shouldClearOnSubmit) {
+70:       input.setUserInput(trimmedMessage);
+71:       input.setAttachments(attachments);
+72:     }
+73:     input.setSendError(
+74:       error instanceof Error
+75:         ? error.message
+76:         : (input.failedToSendMessage ?? i18n.t("composer.errors.failedToSend")),
+77:     );
+78:     input.setIsProcessing(false);
+79:     return "failed";
+80:   }
+81: }
+
+FILE packages/server/src/server/test-utils/daemon-test-context.ts L1-56
+1: import { createTestPaseoDaemon, type TestPaseoDaemon } from "./paseo-daemon.js";
+2: import { DaemonClient } from "./daemon-client.js";
+3: import { createTestAgentClients } from "./fake-agent-client.js";
+4: 
+5: export interface DaemonTestContext {
+6:   daemon: TestPaseoDaemon;
+7:   client: DaemonClient;
+8:   cleanup: () => Promise<void>;
+9: }
+10: 
+11: /**
+12:  * Create a test context with an isolated daemon and connected client.
+13:  *
+14:  * Usage:
+15:  * ```typescript
+16:  * let ctx: DaemonTestContext;
+17:  *
+18:  * beforeEach(async () => {
+19:  *   ctx = await createDaemonTestContext();
+20:  * });
+21:  *
+22:  * afterEach(async () => {
+23:  *   await ctx.cleanup();
+24:  * });
+25:  *
+26:  * test("creates agent", async () => {
+27:  *   const agent = await ctx.client.createAgent({
+28:  *     provider: "codex",
+29:  *     cwd: "/tmp",
+30:  *   });
+31:  *   expect(agent.id).toBeTruthy();
+32:  * });
+33:  * ```
+34:  */
+35: export async function createDaemonTestContext(
+36:   options?: Parameters<typeof createTestPaseoDaemon>[0],
+37: ): Promise<DaemonTestContext> {
+38:   const daemon = await createTestPaseoDaemon({
+39:     agentClients: createTestAgentClients(),
+40:     ...options,
+41:   });
+42:   const client = new DaemonClient({
+43:     url: `ws://127.0.0.1:${daemon.port}/ws`,
+44:   });
+45:   await client.connect();
+46:   await client.fetchAgents({ subscribe: {} });
+47: 
+48:   return {
+49:     daemon,
+50:     client,
+51:     cleanup: async () => {
+52:       await client.close();
+53:       await daemon.close();
+54:     },
+55:   };
+56: }
+
+FILE packages/server/src/server/daemon-e2e/daemon-restart-resume.e2e.test.ts L1-66
+1: import { afterEach, beforeEach, describe, expect, test } from "vitest";
+2: import { mkdtempSync, rmSync } from "node:fs";
+3: import { tmpdir } from "node:os";
+4: import path from "node:path";
+5: 
+6: import { createDaemonTestContext, type DaemonTestContext } from "../test-utils/index.js";
+7: import type { PersistenceHandle } from "@getpaseo/protocol/messages";
+8: 
+9: function tmpCwd(): string {
+10:   return mkdtempSync(path.join(tmpdir(), "daemon-restart-resume-"));
+11: }
+12: 
+13: describe("daemon restart resume", () => {
+14:   let ctx: DaemonTestContext;
+15: 
+16:   beforeEach(async () => {
+17:     ctx = await createDaemonTestContext();
+18:   });
+19: 
+20:   afterEach(async () => {
+21:     await ctx.cleanup();
+22:   }, 60_000);
+23: 
+24:   test("Codex agent survives daemon restart with persistence handle", async () => {
+25:     const cwd = tmpCwd();
+26:     const marker = `DAEMON_RESTART_MARKER_${Date.now()}`;
+27:     try {
+28:       const agent = await ctx.client.createAgent({
+29:         provider: "codex",
+30:         cwd,
+31:         title: "Daemon Restart Test Agent",
+32:         modeId: "full-access",
+33:       });
+34: 
+35:       await ctx.client.sendMessage(
+36:         agent.id,
+37:         `Remember this marker string for a test: "${marker}".`,
+38:       );
+39: 
+40:       const afterRemember = await ctx.client.waitForFinish(agent.id, 5_000);
+41:       expect(afterRemember.status).toBe("idle");
+42:       expect(afterRemember.final?.persistence).toBeTruthy();
+43:       expect(afterRemember.final!.persistence!.metadata).toMatchObject({ marker });
+44: 
+45:       const handle = afterRemember.final!.persistence as PersistenceHandle;
+46: 
+47:       await ctx.cleanup();
+48:       ctx = await createDaemonTestContext();
+49: 
+50:       const resumed = await ctx.client.resumeAgent(handle);
+51:       await ctx.client.sendMessage(
+52:         resumed.id,
+53:         "What was the marker string I asked you to remember earlier?",
+54:       );
+55: 
+56:       const afterRecall = await ctx.client.waitForFinish(resumed.id, 5_000);
+57:       expect(afterRecall.status).toBe("idle");
+58:       expect(afterRecall.final?.persistence).toBeTruthy();
+59:       expect(afterRecall.final!.persistence!.metadata).toMatchObject({ marker });
+60: 
+61:       await ctx.client.deleteAgent(resumed.id);
+62:     } finally {
+63:       rmSync(cwd, { recursive: true, force: true });
+64:     }
+65:   }, 30_000);
+66: });
+
+FILE packages/server/src/server/daemon-e2e/real-provider-test-config.ts L17-35
+17: export type RealProvider = (typeof realProviders)[number];
+18: export type RealProviderConfig = Pick<
+19:   AgentSessionConfig,
+20:   "provider" | "model" | "modeId" | "thinkingOptionId"
+21: >;
+22: 
+23: const OPENROUTER_BASE_URL = "https://openrouter.ai/api";
+24: const OPENROUTER_OPENAI_BASE_URL = "https://openrouter.ai/api";
+25: const PI_AUTH_CONFIG_PATH = join(homedir(), ".pi", "agent", "auth.json");
+26: const CODEX_AUTH_CONFIG_PATH = join(homedir(), ".codex", "auth.json");
+27: const CLAUDE_REAL_TEST_MODEL = "haiku";
+28: const CODEX_REAL_TEST_MODEL = "~openai/gpt-latest";
+29: const OPENCODE_REAL_TEST_MODEL = "openrouter/google/gemini-2.5-flash-lite";
+30: const PI_OPENROUTER_REAL_TEST_MODEL = "openrouter/google/gemini-2.5-flash-lite";
+31: const PI_CODEX_REAL_TEST_MODEL = "openai-codex/gpt-5.4";
+32: const OMP_OPENROUTER_REAL_TEST_MODEL = "openrouter/google/gemini-2.5-flash-lite";
+33: const OMP_CODEX_REAL_TEST_MODEL = "openai-codex/gpt-5.6-sol";
+34: 
+35: const availabilityCache = new Map<RealProvider, Promise<boolean>>();
+
+FILE packages/server/src/server/daemon-e2e/real-provider-test-config.ts L156-182
+156: 
+157: export function createRealProviderClients(
+158:   providers: readonly RealProvider[],
+159:   logger: Logger,
+160: ): Partial<Record<AgentProvider, AgentClient>> {
+161:   return Object.fromEntries(
+162:     providers.map((provider) => [provider, createRealProviderClient(provider, logger)]),
+163:   );
+164: }
+165: 
+166: export function canRunRealProvider(provider: RealProvider): Promise<boolean> {
+167:   const cached = availabilityCache.get(provider);
+168:   if (cached) {
+169:     return cached;
+170:   }
+171: 
+172:   const availability = (async () => {
+173:     if (provider !== "omp" && provider !== "pi" && !getOpenRouterApiKeyOrNull()) {
+174:       return false;
+175:     }
+176:     return await isCommandAvailable(getProviderBinary(provider));
+177:   })();
+178: 
+179:   availabilityCache.set(provider, availability);
+180:   return availability;
+181: }
+182: 
+
+FILE packages/server/src/server/daemon-e2e/user-message-contract.real.e2e.test.ts L31-105
+31: const CONTRACT_CASES: ProviderContractCase[] = [
+32:   {
+33:     provider: "claude",
+34:     title: "Claude",
+35:     timeoutMs: 180_000,
+36:     createConfig: () => getRealProviderConfig("claude"),
+37:   },
+38:   {
+39:     provider: "codex",
+40:     title: "Codex",
+41:     timeoutMs: 180_000,
+42:     createConfig: () => getRealProviderConfig("codex"),
+43:   },
+44:   {
+45:     provider: "opencode",
+46:     title: "OpenCode",
+47:     timeoutMs: 180_000,
+48:     createConfig: () => getRealProviderConfig("opencode"),
+49:   },
+50:   {
+51:     provider: "pi",
+52:     title: "Pi",
+53:     timeoutMs: 240_000,
+54:     createConfig: () => getRealProviderConfig("pi"),
+55:   },
+56: ];
+57: 
+58: function tmpCwd(provider: ContractProvider): string {
+59:   return mkdtempSync(path.join(tmpdir(), `daemon-real-${provider}-user-message-contract-`));
+60: }
+61: 
+62: function collectUserMessageEvents(client: DaemonClient, agentId: string): AgentStreamEvent[] {
+63:   const events: AgentStreamEvent[] = [];
+64:   client.subscribeAgentTimeline(agentId, (message) => {
+65:     if (message.type !== "agent_stream" || message.payload.agentId !== agentId) {
+66:       return;
+67:     }
+68:     if (message.payload.event.type !== "timeline") {
+69:       return;
+70:     }
+71:     if (message.payload.event.item.type !== "user_message") {
+72:       return;
+73:     }
+74:     events.push(message.payload.event);
+75:   });
+76:   return events;
+77: }
+78: 
+79: describe.each(CONTRACT_CASES)("daemon E2E (real $provider) - user_message contract", (entry) => {
+80:   let canRun = false;
+81:   let daemon: TestPaseoDaemon | null = null;
+82:   let client: DaemonClient | null = null;
+83:   let cwd: string | null = null;
+84: 
+85:   beforeAll(async () => {
+86:     canRun = await canRunRealProvider(entry.provider);
+87:   });
+88: 
+89:   beforeEach(async (context) => {
+90:     if (!canRun) {
+91:       context.skip();
+92:       return;
+93:     }
+94: 
+95:     cwd = tmpCwd(entry.provider);
+96:     const logger = pino({ level: "silent" });
+97:     daemon = await createTestPaseoDaemon({
+98:       agentClients: { [entry.provider]: createRealProviderClient(entry.provider, logger) },
+99:       logger,
+100:     });
+101:     client = new DaemonClient({
+102:       url: `ws://127.0.0.1:${daemon.port}/ws`,
+103:       appVersion: "0.1.80",
+104:     });
+105:     await client.connect();
+
+FILE packages/server/src/server/daemon-e2e/user-message-contract.real.e2e.test.ts L131-159
+131:         ...entry.createConfig(),
+132:       });
+133:       const liveUserEvents = collectUserMessageEvents(client, agent.id);
+134: 
+135:       await client.sendMessage(agent.id, prompt);
+136:       const finish = await client.waitForFinish(agent.id, entry.timeoutMs);
+137:       expect(finish.status).toBe("idle");
+138:       expect(finish.final?.lastError).toBeUndefined();
+139: 
+140:       const liveUserMessages = liveUserEvents.filter(
+141:         (event) => event.type === "timeline" && event.item.type === "user_message",
+142:       );
+143:       expect(liveUserMessages).toHaveLength(1);
+144:       const [liveUserMessage] = liveUserMessages;
+145:       expect(liveUserMessage?.type).toBe("timeline");
+146:       expect(liveUserMessage?.item.type).toBe("user_message");
+147:       expect(liveUserMessage?.item.text).toBe(prompt);
+148:       expect(liveUserMessage?.item.messageId).toEqual(expect.any(String));
+149:       expect(liveUserMessage?.item.messageId).not.toBe("");
+150: 
+151:       const timeline = await fetchTimelineItems(client, agent.id);
+152:       const canonicalUserMessages = timeline.filter((item) => item.type === "user_message");
+153:       expect(canonicalUserMessages).toHaveLength(1);
+154:       expect(canonicalUserMessages[0]?.text).toBe(prompt);
+155:       expect(canonicalUserMessages[0]?.messageId).toBe(liveUserMessage?.item.messageId);
+156:     },
+157:     entry.timeoutMs + 60_000,
+158:   );
+159: });
+
+FILE packages/app/playwright.config.ts L35-53
+35:     {
+36:       name: "browser",
+37:       testIgnore: ["**/*.real.spec.ts"],
+38:       use: { ...devices["Desktop Chrome"] },
+39:     },
+40:     {
+41:       name: "real-provider",
+42:       testMatch: ["**/*.real.spec.ts"],
+43:       testIgnore: [relayDeploymentSpec],
+44:       use: { ...devices["Desktop Chrome"] },
+45:     },
+46:     {
+47:       name: "relay-deployment",
+48:       testMatch: [relayDeploymentSpec],
+49:       use: { ...devices["Desktop Chrome"] },
+50:     },
+51:   ],
+52:   // Note: Metro is started by global-setup.ts on a dynamic port to allow parallel test runs
+53: });
+
+FILE .github/workflows/ci.yml L150-170
+150:       - name: Fetch origin/main (worktree tests)
+151:         if: ${{ needs.changes.outputs.full != 'false' || needs.changes.outputs.server != 'false' }}
+152:         run: git fetch --no-tags origin main:refs/remotes/origin/main
+153: 
+154:       - name: Install dependencies
+155:         run: node scripts/npm-retry.mjs ci
+156: 
+157:       - name: Install agent CLIs for provider tests
+158:         if: ${{ needs.changes.outputs.full != 'false' || needs.changes.outputs.server != 'false' }}
+159:         run: node scripts/npm-retry.mjs install -g @anthropic-ai/claude-code opencode-ai
+160: 
+161:       - name: Build server dependencies
+162:         run: npm run build:server-deps
+163: 
+164:       - name: Run server tests
+165:         if: ${{ needs.changes.outputs.full != 'false' || needs.changes.outputs.server != 'false' }}
+166:         run: npm run test --workspace=@getpaseo/server
+167:         env:
+168:           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+169:           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+170:           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+FILE .github/workflows/ci.yml L350-378
+350:       - name: Install Playwright browsers
+351:         timeout-minutes: 10
+352:         run: npx playwright install chromium
+353: 
+354:       - name: Build server stack
+355:         run: npm run build:server
+356: 
+357:       - name: Build native app dependency
+358:         run: npm run build --workspace=@getpaseo/expo-two-way-audio
+359: 
+360:       - name: Install agent CLIs for provider tests
+361:         run: node scripts/npm-retry.mjs install -g @anthropic-ai/claude-code @openai/codex@0.105.0 opencode-ai
+362: 
+363:       - name: Run Playwright E2E tests
+364:         run: npm run test:e2e --workspace=@getpaseo/app -- --shard=${{ env.PLAYWRIGHT_SHARD }}
+365:         env:
+366:           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+367:           # Weight file groups by observed duration; raw test counts overload
+368:           # early agent/Changes specs. Required check names remain unchanged.
+369:           PWTEST_SHARD_WEIGHTS: "111:172:137:160"
+370: 
+371:       - name: Upload test artifacts
+372:         uses: actions/upload-artifact@v4
+373:         if: failure()
+374:         with:
+375:           name: playwright-results-${{ env.PLAYWRIGHT_ARTIFACT }}
+376:           path: |
+377:             packages/app/test-results/
+378:             packages/app/playwright-report/
+
+FILE packages/server/src/server/bootstrap.ts L920-941
+920:   });
+921:   const initialAgentManagerState = providerSnapshotManager.getAgentManagerProviderState();
+922:   const agentManager = new AgentManager({
+923:     pluginLifecycle: pluginRuntime,
+924:     clients: initialAgentManagerState.clients,
+925:     providerDefinitions: initialAgentManagerState.providerDefinitions,
+926:     registry: agentStorage,
+927:     appendSystemPrompt: config.appendSystemPrompt,
+928:     onWorkspaceStateMayHaveChanged: ({ cwd }) => {
+929:       workspaceGitService.onWorkspaceStateMayHaveChanged(cwd);
+930:     },
+931:     mcpAuthToken: agentMcpAuthToken,
+932:     resolvePaseoToolPolicy: (provider) =>
+933:       resolvePaseoToolPolicy(provider, daemonConfigStore.get().providers),
+934:     logger,
+935:   });
+936:   const syncPluginProviders = () => {
+937:     agentManager.updateProviderRegistry(
+938:       providerSnapshotManager.replacePluginProviders(pluginRuntime.getProviderRegistrations()),
+939:     );
+940:   };
+941:   const unsubscribePluginProviders =
+
+FILE packages/server/src/server/agent/agent-timeline-store.ts L1-39
+1: import { randomUUID } from "node:crypto";
+2: import {
+3:   TimelineProjection,
+4:   selectProjectedTimelinePage,
+5:   type ProjectedTimelineRow,
+6: } from "./timeline-projection.js";
+7: import type { AgentTimelineItem } from "./agent-sdk-types.js";
+8: import type {
+9:   AgentTimelineFetchOptions,
+10:   AgentTimelineFetchResult,
+11:   AgentTimelineRow,
+12: } from "./agent-timeline-store-types.js";
+13: 
+14: export interface SeedAgentTimelineOptions {
+15:   items?: readonly AgentTimelineItem[];
+16:   rows?: readonly AgentTimelineRow[];
+17:   epoch?: string;
+18:   nextSeq?: number;
+19:   timestamp?: string;
+20: }
+21: 
+22: interface AgentTimelineState {
+23:   epoch: string;
+24:   projection: TimelineProjection;
+25:   minSeq: number;
+26:   nextSeq: number;
+27: }
+28: const DEFAULT_TIMELINE_FETCH_LIMIT = 200;
+29: function cloneRow<T extends AgentTimelineRow>(row: T): T {
+30:   return { ...row };
+31: }
+32: 
+33: export class InMemoryAgentTimelineStore {
+34:   private readonly states = new Map<string, AgentTimelineState>();
+35: 
+36:   has(agentId: string): boolean {
+37:     return this.states.has(agentId);
+38:   }
+39: 
+
+FILE docs/timeline-sync.md L1-22
+1: # Timeline sync
+2: 
+3: Agent chat delivery has two paths:
+4: 
+5: 1. **Live stream** — `agent_stream` WebSocket messages for immediacy. These may be delta-shaped lifecycle updates.
+6: 2. **Authoritative history** — `fetch_agent_timeline_request` for correctness. This always returns full projected timeline items, never lifecycle deltas.
+7: 
+8: The daemon retains projected items in memory. Each source event advances the stream sequence,
+9: then replaces the previous tool state or merges into the current text item. Intermediate payloads
+10: are never retained for history or catch-up. Provider history is the durable transcript authority
+11: and rebuilds the projection when an agent resumes.
+12: 
+13: The invariants are:
+14: 
+15: > A continuously subscribed client applies every committed row in order. Opening or resuming an
+16: > agent establishes the daemon's current tail in one bounded request, with older history reachable
+17: > through backward pagination.
+18: 
+19: Tool output is bounded before it enters either delivery path. Canonical shell tool output is sliced
+20: to 64 KiB, and the same bounded item is used for runtime timeline rows and live stream events.
+21: Provider history hydration applies the same rule so reopening an agent cannot restore an oversized
+22: tool payload.

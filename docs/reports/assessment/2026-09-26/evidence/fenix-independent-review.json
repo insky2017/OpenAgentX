@@ -1,0 +1,150 @@
+{
+  "reviewer": "review_fenix",
+  "source_commit": "da5eb543bf17aa0c772eebbf0961e4dc2daac0e8",
+  "status": "complete_no_blocking_findings",
+  "scope": [
+    "定时 Agent executor 成功判据与正式 Chat 终态区分",
+    "workflow Agent 孤儿恢复与 retry",
+    "Chat 命令去重及 Redis 快照 CAS 边界",
+    "角色 LaunchSpec 消费与 Runtime unknown 保护",
+    "根许可证及包级声明",
+    "Agent permission 文档承诺与 OpenCode/Claude 装配"
+  ],
+  "source_findings": [
+    {
+      "id": "scheduler_success",
+      "conclusion": "有界支持：定时 executor 将 truthy stopReason 或有限流正常耗尽判 success；不外推正式 Chat",
+      "refs": [
+        "src/services/scheduler/agent-executor.ts:86-103",
+        "packages/chat-channel/src/protocol/acp-channel.ts:423-438"
+      ]
+    },
+    {
+      "id": "workflow_orphan",
+      "conclusion": "有界支持：Agent 孤儿直接记 CANCELLED，retry.count>0 可重置 PENDING；未证明远端停止或副作用未发生",
+      "refs": [
+        "packages/workflow-engine/src/recovery/snapshot-recovery.ts:241-245",
+        "packages/workflow-engine/src/recovery/snapshot-recovery.ts:271-275"
+      ]
+    },
+    {
+      "id": "chat_dedup_snapshot",
+      "conclusion": "有界支持：去重与串行队列是内存 Map；Redis CAS 合并 Yjs 快照并续 TTL，不能据此视为业务持久队列",
+      "refs": [
+        "packages/chat-channel/src/channel/command-coordinator.ts:59-114",
+        "packages/chat-channel/src/persist/snapshot-cas.ts:42-66"
+      ]
+    },
+    {
+      "id": "role_injection",
+      "conclusion": "源码接线支持：角色 prompt 进入 LaunchSpec 并由 OpenCode prompt 和 Claude CLAUDE.md/SDK systemPrompt 消费；未实测模型遵循",
+      "refs": [
+        "src/services/launch-spec-builder.ts:565-628",
+        "packages/plugin-opencode/src/runtime/runtime-config.ts:152-161",
+        "packages/plugin-claude-code/src/claude-code-handler.ts:18-48",
+        "packages/acp-link/src/client/claude-acp-adapter.ts:394-408"
+      ]
+    },
+    {
+      "id": "runtime_unknown",
+      "conclusion": "有界支持：协调器 unknown 拒绝 ensure/restart/delete，仅允许 stop；stop/delete 失败保留 unknown；不扩张为全平台停止安全证明",
+      "refs": [
+        "src/services/agent-instance-runtime-coordinator.ts:179-183",
+        "src/services/agent-instance-runtime-coordinator.ts:255-263"
+      ]
+    },
+    {
+      "id": "license",
+      "conclusion": "根 LICENSE 与 package.json 是 Apache-2.0；acp-link/acp-runtime-cli manifest 声明 MIT，报告需保留包级差异",
+      "refs": [
+        "LICENSE",
+        "package.json:4",
+        "packages/acp-link/package.json:6",
+        "packages/acp-runtime-cli/package.json:6"
+      ]
+    },
+    {
+      "id": "agent_permission",
+      "conclusion": "文档声明的 Agent 细粒度 permission，核查的 LaunchSpec 至 OpenCode/Claude 配置装配未见兑现；不等于全平台无审批或权限控制",
+      "refs": [
+        "docs/user/agents/index.md:58-84",
+        "src/services/config/agent-config.ts:20",
+        "src/services/config/agent-config.ts:334-336",
+        "packages/plugin-sdk/src/agent-launch-spec.ts:11-16",
+        "packages/plugin-opencode/src/runtime/runtime-config.ts:115-167",
+        "packages/plugin-claude-code/src/runtime/settings.ts:78-116"
+      ]
+    }
+  ],
+  "executed_tests": [],
+  "code_edits": false,
+  "uncovered": [
+    "未执行测试或重复测试代理工作",
+    "未启动第三方服务或真实 Provider",
+    "未验收实际 Chat/调度/Workflow 运行效果、浏览器或分布式恢复",
+    "未审计完整仓库安全与全部退出路径",
+    "未做全部第三方依赖许可证清点"
+  ],
+  "reviewed_source_sha256": {
+    "src/services/scheduler/agent-executor.ts": "3cd28bf6fb1fae5dc7fcde92856273dea092b2301564eb887b514fb637a069e0",
+    "packages/workflow-engine/src/recovery/snapshot-recovery.ts": "1e4fe652eb740027bdf8ddfd6a901d3cb72a81ccdbb792f1570984bd92990e02",
+    "packages/chat-channel/src/protocol/acp-channel.ts": "2b2c3dd3666e8619da226a8c6dc301882276e0a5f41195cdc0f24e1324079638",
+    "packages/chat-channel/src/channel/command-coordinator.ts": "07cf8e396d4d0f999e5ae6b0c1ed6419cc39227290e72a5ea46e8dd5553ba853",
+    "packages/chat-channel/src/persist/snapshot-cas.ts": "50424360a00202ec92363bc3ff2c74f0e1a665db4722cd4455de04b3fe17dbfc",
+    "src/services/launch-spec-builder.ts": "31b3b0cc019fe39acd86f0c2bc93763e2d8c8375b9c50b3f4131d458bc7a6ad9",
+    "packages/plugin-opencode/src/runtime/runtime-config.ts": "ac6017a1edc2ec37ceab103786ffa42d43f1af05349a2b07293582af97b1a5ba",
+    "packages/plugin-claude-code/src/claude-code-handler.ts": "5422e1c35e03a73816d6ef342799f8bc709c6ca84a71743544ad567fe95e5940",
+    "packages/plugin-claude-code/src/runtime/settings.ts": "89b04394ccee94f18a4c4e8e9df58932e735cd8f14c1d77c4a2d0b9a66560129",
+    "packages/acp-link/src/client/claude-acp-adapter.ts": "c924235fe2a5598b74f8ddad9429a04885aa6bcd042f115c35ae1f979420b846",
+    "src/services/agent-instance-runtime-coordinator.ts": "bf2b3373ab866bc4ad1f1755a6f78041122deaf6964cc8728f75f52c4347bf4d",
+    "src/services/config/agent-config.ts": "9f7affdef1df01c55693c6d176f1e3581702c43611b651a38d686f89ac2241c5",
+    "packages/plugin-sdk/src/agent-launch-spec.ts": "74ba26a22a0ec8429bdc23c244700385a12aa0af47d1c7dce8666321f0e98b12",
+    "docs/user/agents/index.md": "0e4b224edcaf914d6971d8a2786059631c04988eba7be2e185bcf65d5b9896df",
+    "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "package.json": "25efe14fc3bb5038b317cbf049adfedd72440b26f33d01c3b80e5ffdedde0c2c",
+    "packages/acp-link/package.json": "d8c7e29b56238205c4b3050e1f9debfeb8870d86c6895e84dad7589fd79a80b8",
+    "packages/acp-runtime-cli/package.json": "c90eb4d8f1025720fff7c7cbbff4e0c3b25e3cafdb5aff80f0ec650f27aee051"
+  },
+  "completed_at": "2026-09-25T17:03:45.461426+00:00",
+  "report_review": {
+    "documents": [
+      "12-fenixagent-reference.md",
+      "README.md"
+    ],
+    "conclusion": "已核对高影响结论与相关源码；未发现结论级阻断。未将局部/fake测试冒充E2E，未将外部缺点转为本轮OpenAgentX实现任务。",
+    "source_reference_bounds": {
+      "checked": 62,
+      "invalid": 0
+    },
+    "resolved_review_comments": [
+      {
+        "id": "license_metadata",
+        "resolution": "报告第11节已保留根Apache-2.0与两包MIT声明差异"
+      },
+      {
+        "id": "runtime_failure_citation",
+        "resolution": "runtime-coordinator引用扩展至L263，覆盖stop/delete失败保留unknown"
+      },
+      {
+        "id": "probe_classification",
+        "resolution": "明确6项自编行为探针含1项正向对照，不全部称为反例"
+      }
+    ],
+    "test_evidence_read": [
+      "evidence/fenix-tests-summary.md",
+      "evidence/fenix-tests-scheduler-probe.log",
+      "evidence/fenix-test-scheduler-probe.test.ts"
+    ],
+    "evidence_interpretation": "104项来自9个上游原测试文件，6项为自编行为探针；配置/依赖/替身差异已披露，反例通过不等于产品修复或业务验收。",
+    "not_rerun": true,
+    "nonblocking_remaining": [],
+    "readme_revision_note": "已复核总README的比较与范围取舍；记录的README哈希是主代理最终完成状态/测试计数更新前的快照，后续索引收口由主代理核对。"
+  },
+  "reviewed_document_sha256": {
+    "12-fenixagent-reference.md": "c26b5c5a4f6cb39b231e5587e7076c585eb52cb752aca98058ed9d4a9c7c418f",
+    "README.md": "8b0c522e3a7c55d497a85627dd13e61478b1391ad064a6b8b487792072590b68",
+    "evidence/fenix-tests-summary.md": "9bc26fba532727976fa74b398caf7b15ff872ae6cc4e5f569a7eaa325278c840",
+    "evidence/fenix-tests-scheduler-probe.log": "b7fa493b2cd76ff8064b93bef66dfc6b295900805e06715ea1928e4d76e6c86e",
+    "evidence/fenix-test-scheduler-probe.test.ts": "691dad782eb2d112e5362cc22321b726c2349ca0b92af34eb4fbf768d5c1b5e4"
+  }
+}

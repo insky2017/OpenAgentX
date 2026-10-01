@@ -1,0 +1,1100 @@
+PUBLIC UPSTREAM SOURCE EXCERPTS
+commit=90e0bdf830436b3981b32a7017e1c18d41c7cdea
+Boundary: source inspection only; comments/definitions do not establish live correctness.
+
+FILE LICENSE
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/LICENSE#L1
+1: # Multica License
+2: 
+3: Multica is provided under the terms of the Apache License, Version 2.0 —
+4: the complete, unmodified text of which is reproduced in Part II of this
+5: file — subject to the additional conditions in Part I.
+6: 
+7: Part I and Part II together constitute the "Multica License". Neither part
+8: grants any rights on its own. Condition 3 states how the two parts fit
+9: together and what must be delivered when you redistribute.
+10: 
+11: ------------------------------------------------------------------------
+12: 
+13:                        Part I — Additional Conditions
+14: 
+15: 1. Multica may be utilized commercially, including as a backend service for
+16:    other applications or as a task management platform for enterprises,
+17:    subject to the following conditions:
+18: 
+19:    a. Hosted or embedded service: Unless you have obtained a commercial
+20:       license from the producer, you may not use the Multica source code
+21:       to provide a hosted service to third parties, or embed Multica as a
+22:       component of a product or service that is sold, licensed, or
+23:       otherwise commercially distributed to third parties.
+24: 
+25:       - This restriction applies to offering Multica (in whole or
+26:         substantial part) as a SaaS platform, a managed service, or as
+27:         an integrated component within another commercial offering.
+28:       - Providing a hosted service to third parties is restricted whether
+29:         or not you charge for it. A publicly accessible instance operated
+30:         for users outside your own organization requires a commercial
+31:         license even when it is offered free of charge, carries no
+32:         advertising, and sells no paid tier.
+33:       - Internal use within a single organization (including multiple
+34:         workspaces) does not require a commercial license.
+35:       - Making the source code available, including publishing the source
+36:         code of a fork in a public repository, is not itself a hosted
+37:         service and does not require a commercial license. Any such
+38:         distribution remains subject to all applicable terms of this
+39:         Multica License, including conditions (b) and (c) below and
+40:         condition 3. Source distribution does not grant recipients the
+41:         right to operate a hosted service; each operator must obtain its
+42:         own commercial license.
+43: 
+44:    b. Branding and copyright information: Unless the producer has granted
+45:       you a written branding waiver, you may not remove or modify the
+46:       Multica LOGO, the Multica product name, or the copyright and
+47:       attribution information displayed by a Multica user interface.
+48: 
+49:       - User Interface Definition: For the purposes of this license, a
+50:         "Multica user interface" means any user interface derived, in whole
+51:         or in substantial part, from the user interface code in this
+52:         repository. This includes the components located in the
+53:         `apps/web/`, `apps/desktop/`, `apps/mobile/`, `packages/views/`,
+54:         and `packages/ui/` directories when running Multica from the raw
+55:         source code, the frontend container image (published as
+56:         `ghcr.io/multica-ai/multica-web`) when running Multica with
+57:         Docker, and any compiled desktop or mobile application built from
+58:         that code. That enumeration is illustrative rather than
+59:         exhaustive: user interface code remains covered when it is
+60:         modified, moved, renamed, or extracted into another package or
+61:         repository.
+62:       - This restriction is inapplicable to uses of Multica that do not
+63:         involve a Multica user interface, such as running only the
+64:         `server/` backend, the daemon, or the CLI without redistributing
+65:         or operating any Multica user interface. Such uses remain subject
+66:         to condition (c) below.
+67: 
+68:    c. Attribution for non-interface use: If you redistribute or operate a
+69:       product or service built on Multica's backend, daemon, or CLI
+70:       without a Multica user interface, you must retain all copyright,
+71:       patent, trademark, and attribution notices present in the source
+72:       code and in the NOTICE file, and state in your user-facing
+73:       documentation that the product is built on Multica, including a link
+74:       to https://github.com/multica-ai/multica.
+75: 
+76:    d. Relationship between grants: A branding waiver is not a commercial
+77:       license and does not permit any use restricted by condition (a). A
+78:       commercial license does not by itself waive condition (b) or
+79:       condition (c). Each grant must be obtained from the producer
+80:       expressly and separately, and neither may be inferred from the other
+81:       or from the producer's silence, review, or acceptance of your
+82:       contributions.
+83: 
+84: 2. Contributions: By submitting a contribution to Multica, you agree that:
+85: 
+86:    a. The producer can adjust this Multica License to be more strict or
+87:       relaxed as deemed necessary.
+88: 
+89:    b. Your contributed code may be used for commercial purposes, including
+90:       but not limited to its cloud business operations.
+91: 
+92:    c. Your contribution is submitted under this Multica License as a whole,
+93:       as described in condition 3, and not under Part II alone.
+94: 
+95: 3. Composition, precedence, and redistribution:
+96: 
+97:    a. This entire file is the Multica License. Part I (these additional
+98:       conditions) and Part II (the incorporated Apache License, Version
+99:       2.0) together form a single set of terms. Apart from the conditions
+100:       stated in Part I, all other rights and restrictions follow Part II.
+101: 
+102:    b. Wherever Part II refers to "this License", that reference means the
+103:       Multica License as a whole — Part I and Part II together — and not
+104:       Part II in isolation. This includes the copy of the License that
+105:       section 4(a) of Part II requires you to give to recipients, and the
+106:       terms under which section 5 of Part II treats a contribution as
+107:       submitted.
+108: 
+109:    c. If Part I and Part II conflict, Part I controls.
+110: 
+111:    d. If you redistribute Multica or a derivative work of it, you must
+112:       deliver this complete file. Delivering Part II alone does not
+113:       satisfy the Multica License or section 4(a) of Part II.
+114: 
+115: © 2025-2026 Multica, Inc.
+
+FILE AGENTS.md
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/AGENTS.md#L240
+
+FILE apps/docs/content/docs/cloud-quickstart.mdx
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/apps/docs/content/docs/cloud-quickstart.mdx#L42
+42: **Success check**: an online computer appears in the runtime list.
+43: 
+44: ![Add a computer dialog: two commands and the waiting-for-detection notice](/images/docs/quickstart-add-computer.webp)
+45: 
+46: <Callout type="info">
+47: The connection commands differ slightly on self-hosted instances — see the [Self-host quickstart](/self-host-quickstart).
+48: </Callout>
+49: 
+50: ## 3. Create an agent
+51: 
+52: Open **Workspace → Agents** in the sidebar, click **New agent**, and pick a path:
+53: 
+54: - **Start blank**: fill in the fields yourself. Only a name is strictly required — confirm the runtime and AI coding tool, then create.
+55: - **Build with AI**: describe what you want, and the Agent Builder asks questions and generates the configuration. This path needs an online runtime.
+56: 
+57: Everything else can be refined later — see [Create and configure agents](/agents-create).
+58: 
+59: **Success check**: your agent appears in the agent list and shows as online.
+60: 
+61: ![Agent creation starting-point picker: Start blank and Build with AI](/images/docs/quickstart-new-agent.webp)
+62: 
+63: ## 4. Hand it your first issue
+64: 
+65: Click **New Issue** at the top of the sidebar (or press `C`). In the default agent mode:
+66: 
+67: 1. Under **Created by**, select the agent you just created.
+68: 2. Describe the work in a sentence or two, for example "Explain how this workspace can be used."
+69: 3. Submit. Multica creates the issue, sets the agent as the assignee, and starts executing immediately.
+70: 
+71: ![New issue dialog in agent mode: Created by set to Multica Assistant](/images/docs/quickstart-new-issue.webp)
+72: 
+73: ## 5. Watch progress and results
+74: 
+75: After submitting, open the issue: the execution log shows the run status, and the agent's progress and replies appear in the timeline.
+76: 
+77: **Success check**: the execution log status changes to Completed and the agent's reply appears in the timeline. To see the full transcript, click **View transcript**.
+78: 
+79: ![The agent's reply in the issue and a completed execution log](/images/docs/quickstart-run-result.webp)
+80: 
+81: ## Common problems
+82: 
+83: | Symptom | Check first |
+84: |---|---|
+85: | No runtime found | Confirm the AI coding tool is installed and runs in a terminal. On Desktop, click **Refresh**; on the CLI path, rerun `multica setup`. |
+86: | Runtime shows offline | Keep Desktop open; on the CLI path, run `multica daemon status`, and `multica daemon start` if it is not running. |
+87: | Issue stays queued | Confirm the runtime the agent uses is online. When a runtime hits its concurrency limit, new runs keep queueing. |
+88: 
+89: For more cases, see [Troubleshooting](/troubleshooting).
+90: 
+91: ## Next steps
+92: 
+93: - [Core concepts](/concepts) — meet all of Multica's core objects in three minutes.
+94: - [How Multica works](/how-multica-works) — how issues, agents, runtimes, and each run relate.
+95: - [Put agents to work](/triggering-agents) — beyond assignment: @-mentions, chat, and Autopilots.
+
+FILE apps/docs/content/docs/issues.mdx
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/apps/docs/content/docs/issues.mdx#L55
+55: |---|---|
+56: | `backlog` | Not starting yet. An issue assigned to an agent only creates a run after it leaves `backlog`. |
+57: | `todo` | Scoped and waiting to start. |
+58: | `in_progress` | Being worked on. |
+59: | `in_review` | Has a result waiting for review. |
+60: | `done` | Finished. |
+61: | `blocked` | Cannot continue for now. |
+62: | `cancelled` | No longer pursued; the record stays. |
+63: 
+64: There is no fixed flow between statuses — members and agents can change them directly.
+65: 
+66: Agents write the status the issue is in as their work changes it: starting work on what the issue asks for — in whatever form, research, design, or a review the issue itself requests — moves it to `in_progress` right away, so the board shows the work while it runs; delivering moves it to `in_review`; work that continues beyond the turn keeps it `in_progress`; a turn that produces nothing of the issue's own deliverable — answering questions, consulting on work owned elsewhere — leaves the status untouched throughout. These updates are written explicitly by the agent through the Multica CLI during the run — the server does not flip issue status when a run starts or completes (apart from the two system exceptions below). `done` is usually a human confirmation, or an integration such as a PR with close intent that merges.
+67: 
+68: <Callout type="info">
+69: Two changes are made by the system:
+70: 
+71: - When a run fails, the issue has no other runs, and no retry is triggered, `in_progress` rolls back to `todo`.
+72: - When a linked GitHub PR merges with close intent and no other linked PR is still open or draft, the issue becomes `done`.
+73: </Callout>
+74: 
+75: ### Custom statuses
+76: 
+77: A workspace owner or admin can add statuses under **Settings → Issue Statuses** — `Code Review`, `QA`, `Rework`. Every status belongs to one of four lifecycle categories:
+78: 
+
+FILE server/internal/handler/daemon.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/handler/daemon.go#L2520
+2520: 	resp.Agent = &TaskAgentData{
+2521: 		ID:                    uuidToString(agent.ID),
+2522: 		Name:                  agent.Name,
+2523: 		Instructions:          agent.Instructions,
+2524: 		CustomEnv:             customEnv,
+2525: 		CustomArgs:            customArgs,
+2526: 		McpConfig:             mcpConfig,
+2527: 		Model:                 agent.Model.String,
+2528: 		ThinkingLevel:         agent.ThinkingLevel.String,
+2529: 		ServiceTier:           agent.ServiceTier.String,
+2530: 		RuntimeConfig:         runtimeConfig,
+2531: 		DisabledRuntimeSkills: disabledRuntimeSkillsFor(agent.DisabledRuntimeSkills, runtimeID, runtime.Provider),
+2532: 	}
+
+FILE server/internal/daemon/daemon.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/daemon/daemon.go#L7738
+7738: 
+7739: 	agentName := "agent"
+7740: 	var skills []SkillData
+7741: 	var instructions string
+7742: 	agentName = task.Agent.Name
+7743: 	skills = task.Agent.Skills
+7744: 	instructions = task.Agent.Instructions
+7745: 
+7746: 	// Prepare isolated execution environment.
+7747: 	// Repos are passed as metadata only — the agent checks them out on demand
+7748: 	// via `multica repo checkout <url>`.
+7749: 	taskCtx := execenv.TaskContextForEnv{
+7750: 		IssueID:             task.IssueID,
+7751: 		TriggerCommentID:    task.TriggerCommentID,
+7752: 		TriggerThreadID:     task.TriggerThreadID,
+7753: 		CommentReplyTargets: commentReplyThreads(task),
+7754: 		NewCommentCount:     task.NewCommentCount,
+7755: 		NewCommentsSince:    task.NewCommentsSince,
+7756: 		PriorSessionResumed: task.PriorSessionID != "",
+7757: 		// MUL-5305: the server sets this when a more recent Codex session was
+7758: 		// withheld (rollout missing) and PriorSessionID is an older fallback (or
+7759: 		// absent). Seed the brief's continuity disclosure from it; the local
+7760: 		// resume gates below only ever OR it to true, so the signal is monotonic.
+7761: 		PriorSessionResumeUnavailable:    task.PriorSessionResumeUnavailable,
+7762: 		AgentID:                          task.AgentID,
+7763: 		AgentName:                        agentName,
+7764: 		AgentInstructions:                instructions,
+7765: 		AgentSkills:                      convertSkillsForEnv(skills),
+7766: 		DisabledRuntimeSkills:            convertDisabledRuntimeSkillsForEnv(task.Agent, task.RuntimeID, provider),
+
+FILE server/internal/daemon/execenv/runtime_config_sections.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/daemon/execenv/runtime_config_sections.go#L108
+108: // writeAgentIdentity emits the Agent Identity heading and (optionally) the
+109: // agent's instructions body.
+110: func writeAgentIdentity(b *strings.Builder, ctx TaskContextForEnv) {
+111: 	if ctx.AgentName != "" || ctx.AgentID != "" {
+112: 		b.WriteString("## Agent Identity\n\n")
+113: 		if ctx.AgentName != "" {
+114: 			fmt.Fprintf(b, "**You are: %s**", ctx.AgentName)
+115: 			if ctx.AgentID != "" {
+116: 				fmt.Fprintf(b, " (ID: `%s`)", ctx.AgentID)
+117: 			}
+118: 			b.WriteString("\n\n")
+119: 		}
+120: 		if ctx.AgentInstructions != "" {
+121: 			b.WriteString(ctx.AgentInstructions)
+122: 			b.WriteString("\n\n")
+123: 		}
+124: 		return
+125: 	}
+126: 	if ctx.AgentInstructions != "" {
+127: 		b.WriteString("## Agent Identity\n\n")
+128: 		b.WriteString(ctx.AgentInstructions)
+129: 		b.WriteString("\n\n")
+130: 	}
+131: }
+132: 
+133: // writeRequestingUser emits the Requesting User block when the runtime
+
+FILE server/internal/daemon/execenv/runtime_config.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/daemon/execenv/runtime_config.go#L159
+159: // config file so the agent discovers its environment through its native mechanism.
+160: //
+161: // For Claude:   writes {workDir}/CLAUDE.md  (skills discovered natively from .claude/skills/)
+162: // For CodeBuddy: writes {workDir}/CODEBUDDY.md  (CodeBuddy's native memory filename; skills discovered natively from .codebuddy/skills/)
+163: // For Codex:    writes {workDir}/AGENTS.md  (skills discovered natively via CODEX_HOME)
+164: // For Copilot:  writes {workDir}/AGENTS.md  (skills discovered natively from .github/skills/)
+165: // For OpenCode: writes {workDir}/AGENTS.md  (skills discovered natively from .opencode/skills/)
+166: // For CodeArts: writes {workDir}/AGENTS.md  (skills discovered natively from .codeartsdoer/skills/)
+167: // For DevEco Code: writes {workDir}/AGENTS.md  (skills discovered natively from .deveco/skills/)
+168: // For OpenClaw: writes {workDir}/AGENTS.md  (skills discovered natively from {workDir}/skills/ via per-task openclaw-config.json that pins agents.defaults.workspace)
+169: // For Hermes:   writes {workDir}/AGENTS.md  (skills discovered natively from a per-task HERMES_HOME/skills seeded by the daemon; see hermes_home.go)
+170: // For Pi:       writes {workDir}/AGENTS.md  (skills discovered natively from .pi/skills/)
+171: // For Oh-My-Pi (omp): writes {workDir}/AGENTS.md  (omp is a pi fork; skills discovered from .omp/skills/)
+172: // For Cursor:   writes {workDir}/AGENTS.md  (skills discovered natively from .cursor/skills/)
+173: // For Kimi:        writes {workDir}/AGENTS.md  (Kimi Code CLI reads AGENTS.md natively; skills auto-discovered from project skills dirs)
+174: // For Reasonix:    writes {workDir}/AGENTS.md  (Reasonix reads AGENTS.md and .reasonix/skills/ natively)
+175: // For DSH:         writes {workDir}/AGENTS.md  (DSH reads AGENTS.md and .dsh/skills/ natively)
+176: // For Kiro:        writes {workDir}/AGENTS.md  (Kiro CLI reads AGENTS.md natively; skills auto-discovered from project skills dirs)
+177: // For Qoder/Qoder CN: writes {workDir}/AGENTS.md  (skills discovered from .qoder/skills/; user-level roots are unaffected)
+178: // For Antigravity: writes {workDir}/AGENTS.md  (agy CLI reads AGENTS.md natively; skills discovered natively from .agents/skills/ — see https://antigravity.google/docs/gcli-migration)
+179: // For Traecli:     writes {workDir}/AGENTS.md  (traecli reads .trae/rules/ not AGENTS.md, so the brief is delivered inline via providerNeedsInlineSystemPrompt; the file is written for parity/visibility only)
+180: // For Grok:        writes {workDir}/AGENTS.md  (Grok Build CLI reads AGENTS.md natively from the workdir)
+181: // For Qwen:        writes {workDir}/QWEN.md (Qwen Code's native context file; it also reads AGENTS.md, but QWEN.md avoids cross-runtime ambiguity)
+182: func InjectRuntimeConfig(workDir, provider string, ctx TaskContextForEnv) (string, error) {
+183: 	content := buildMetaSkillContent(provider, ctx)
+184: 	path := runtimeConfigPath(workDir, provider)
+185: 	if path == "" {
+186: 		// Unknown provider — skip config injection, prompt-only mode.
+187: 		return content, nil
+188: 	}
+189: 	return content, writeRuntimeConfigFile(path, content)
+190: }
+191: 
+
+FILE server/internal/daemon/daemon.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/daemon/daemon.go#L8665
+8665: 		QwenpawWorkspace:       env.QwenpawWorkspace,
+8666: 	}
+8667: 	// Some providers do not reliably load the per-task runtime config files we
+8668: 	// write into the task workdir:
+8669: 	//   - openclaw is pinned to the task workdir via the per-task config we
+8670: 	//     synthesize (see prepareOpenclawConfig), so AGENTS.md / .agent_context/
+8671: 	//     in the workdir ARE picked up by the CLI. Inline injection is retained
+8672: 	//     as a belt-and-suspenders for older openclaw releases until that load
+8673: 	//     path stabilises in production; remove this once a release tracks the
+8674: 	//     workdir bootstrap reliably end-to-end.
+8675: 	//   - kimi is wrapped through its own CLI whose cwd handling is opaque
+8676: 	//     enough that we can't trust the file-based path either.
+8677: 	// Pass the full runtime brief inline (CLI catalog + workflow steps + agent
+8678: 	// identity/persona + skills + project context) so the backend prepends the
+8679: 	// same payload that file-based runtimes pick up from disk. Without this,
+8680: 	// these providers silently miss the workflow section and never call
+8681: 	// `multica issue status` / `multica issue comment add`, leaving issues
+8682: 	// stuck in `todo`.
+8683: 	//
+8684: 	// Hermes and Kiro are intentionally excluded: their ACP sessions start in
+8685: 	// the task cwd and load AGENTS.md themselves. Kiro documents root AGENTS.md
+8686: 	// as always included, and a real kiro-cli 2.13.0 ACP smoke confirms it.
+8687: 	// Prepending the full runtime brief into the ACP user prompt duplicates that
+8688: 	// context and bloats every turn.
+8689: 	if providerNeedsInlineSystemPrompt(provider) {
+8690: 		execOpts.SystemPrompt = runtimeBrief
+8691: 	}
+8692: 
+8693: 	// A quick-actions refresh task from a server that predates server-side
+
+FILE server/internal/service/task.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/service/task.go#L4325
+4325: // CompleteTaskWithTransition reports whether this call won the running ->
+4326: // completed compare-and-swap. Callers with transaction-external side effects
+4327: // must only run them when transitioned is true; a replay against an already
+4328: // terminal task is still an idempotent success but must not emit them again.
+4329: func (s *TaskService) CompleteTaskWithTransition(ctx context.Context, taskID pgtype.UUID, result []byte, sessionID, workDir, branchName string, sessionRolloutMissing bool, retiredSessionID, durableWorkDir string) (*db.AgentTaskQueue, bool, error) {
+4330: 	var task db.AgentTaskQueue
+4331: 	// chatAssistantMsg is the single assistant outcome row written for a chat
+4332: 	// task inside the completion transaction below. It is broadcast (chat:done)
+4333: 	// only after the transaction commits.
+4334: 	var chatAssistantMsg *db.ChatMessage
+4335: 	if err := s.runInTx(ctx, func(qtx *db.Queries) error {
+4336: 		if err := lockChatSessionForTaskWrite(ctx, qtx, taskID); err != nil {
+4337: 			return err
+4338: 		}
+4339: 		t, err := qtx.CompleteAgentTask(ctx, db.CompleteAgentTaskParams{
+4340: 			ID:                    taskID,
+
+FILE server/internal/service/task.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/service/task.go#L4394
+4394: 
+4395: 			// Write the assistant outcome in the SAME transaction as the status
+4396: 			// flip and resume-pointer update (MUL-4351). For a task-owned direct
+4397: 			// task this is exactly one row (message or no_response); for a
+4398: 			// legacy/channel task an empty output writes no row (see
+4399: 			// writeChatCompletionOutcome). Failing here rolls the whole completion
+4400: 			// back so the daemon retries the terminal callback, and the status CAS
+4401: 			// above guarantees a replay can't write a second row.
+4402: 			msg, err := s.writeChatCompletionOutcome(ctx, qtx, t, result)
+4403: 			if err != nil {
+4404: 				return fmt.Errorf("write chat assistant outcome: %w", err)
+4405: 			}
+4406: 			chatAssistantMsg = msg
+4407: 		}
+4408: 		return nil
+4409: 	}); err != nil {
+4410: 		// When parallel agents race, a task may already be completed,
+4411: 		// cancelled, or failed by the time this call runs. The UPDATE
+4412: 		// … WHERE status = 'running' returns no rows in that case.
+4413: 		// Treat it as an idempotent success — same pattern as CancelTask.
+4414: 		if existing, lookupErr := s.Queries.GetAgentTask(ctx, taskID); lookupErr == nil {
+4415: 			if errors.Is(err, pgx.ErrNoRows) {
+
+FILE server/internal/daemon/daemon.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/daemon/daemon.go#L8844
+8844: 	// MUL-5305: withhold a Codex session whose rollout never reached the per-issue
+8845: 	// store, for ANY terminal state — including `completed`, since a completed
+8846: 	// turn whose rollout is missing is exactly the #5934 case and must not be
+8847: 	// recorded as a resume pointer the next follow-up would only drop. Blanking
+8848: 	// the id keeps GetLastTaskSession falling back to the last session whose
+8849: 	// rollout is real; SessionRolloutMissing tells the server to clear the row's
+8850: 	// session and record a continuity gap, so the next claim still discloses the
+8851: 	// loss (PriorSessionResumeUnavailable, MUL-4424 transparency) even while
+8852: 	// resuming that older good session. No-op for non-Codex providers
+8853: 	// (env.CodexHome == "") and when there is no session.
+8854: 	var sessionRolloutMissing bool
+8855: 	if result.SessionID != "" && !codexSessionResumable(env.CodexHome, result.SessionID, codexRolloutFlushWait) {
+8856: 		taskLog.Warn("codex session rollout not present in task CODEX_HOME; withholding resume pointer and flagging continuity gap",
+8857: 			"session_id", result.SessionID, "codex_home", env.CodexHome, "status", result.Status)
+8858: 		result.SessionID = ""
+8859: 		sessionRolloutMissing = true
+8860: 	}
+8861: 	// Stamp the withhold flag onto whichever TaskResult the status switch below
+8862: 	// returns (SessionID is already blanked above); reportTaskResult forwards it
+8863: 	// as session_rollout_missing on the terminal callback (MUL-5305).
+8864: 	defer func() { taskResult.SessionRolloutMissing = sessionRolloutMissing }()
+8865: 
+8866: 	switch result.Status {
+8867: 	case "completed":
+8868: 		if result.Output == "" {
+8869: 			// The agent completed successfully but produced no text output.
+8870: 			// This is valid — the agent may have done all its work via tool
+8871: 			// calls (e.g. posting comments via CLI, pushing code). Treat as
+8872: 			// a normal completion so the task is not incorrectly marked as
+8873: 			// blocked.
+8874: 			return TaskResult{
+8875: 				Status:    "completed",
+8876: 				Comment:   "",
+8877: 				SessionID: result.SessionID,
+8878: 				WorkDir:   env.WorkDir,
+8879: 				EnvRoot:   env.RootDir,
+8880: 				Usage:     usageEntries,
+8881: 			}, nil
+8882: 		}
+8883: 		// Detect "poisoned" terminal output: the agent didn't reach a real
+8884: 		// conclusion but emitted a known fallback marker (iteration limit,
+8885: 		// fallback meta message). Route through the blocked path with a
+8886: 		// specific failure_reason so the server can exclude this session
+8887: 		// from the (agent_id, issue_id) resume lookup — otherwise a manual
+8888: 		// rerun would inherit the same poisoned session and reproduce the
+8889: 		// same bad output.
+8890: 		if reason, ok := classifyPoisonedOutput(result.Output); ok {
+
+FILE server/pkg/db/queries/agent.sql
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/db/queries/agent.sql#L1564
+1564: -- name: CancelAgentTask :one
+1565: -- Automatic cancellation without an explicit persisted failure reason. Unlike
+1566: -- CancelAgentTaskByUser, this deliberately leaves recovery inputs replayable.
+1567: UPDATE agent_task_queue
+1568: SET status = 'cancelled', completed_at = now(), prepare_lease_expires_at = NULL,
+1569:     cancelled_by_type = 'system', cancelled_by_id = NULL, cancelled_by_name = NULL
+1570: WHERE id = $1 AND status IN ('queued', 'dispatched', 'running', 'waiting_local_directory', 'deferred')
+1571: RETURNING *;
+1572: 
+1573: -- name: CancelAgentTaskByUser :one
+1574: -- An explicit user cancellation is a terminal acknowledgement for any
+1575: -- delegated-failure recovery signal planned into this task. Server-initiated
+1576: -- cancellations keep using CancelAgentTask / CancelAgentTaskWithReason so a
+1577: -- stale plan, claim failure, or other automatic repair can still be replayed.
+1578: UPDATE agent_task_queue AS task
+1579: SET status = 'cancelled',
+1580:     completed_at = now(),
+
+FILE server/pkg/db/queries/agent.sql
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/db/queries/agent.sql#L1696
+1696: -- name: CancelQueuedAgentTask :one
+1697: -- Queue editing is a compare-and-set: never cancel a task that the daemon
+1698: -- promoted between the user's click and this statement.
+1699: UPDATE agent_task_queue
+1700: SET status = 'cancelled', completed_at = now(), prepare_lease_expires_at = NULL,
+1701:     cancelled_by_type = sqlc.arg('cancelled_by_type'),
+1702:     cancelled_by_id = sqlc.narg('cancelled_by_id'),
+1703:     cancelled_by_name = sqlc.narg('cancelled_by_name')
+1704: WHERE id = sqlc.arg('id')
+1705:   AND chat_session_id = sqlc.arg('chat_session_id')
+1706:   AND status = 'queued'
+1707: RETURNING *;
+1708: 
+1709: -- name: CancelQueuedAgentTasksForSession :many
+1710: -- Clear only positional follow-ups. The first visible task is current even
+
+FILE server/internal/daemon/terminal_report_queue.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/daemon/terminal_report_queue.go#L84
+84: // terminalReportStore is a file-backed outbox. One file per task keeps each
+85: // acknowledgement independent, and hashing task IDs prevents a malformed or
+86: // tampered task ID from becoming a path traversal primitive.
+87: type terminalReportStore struct {
+88: 	root      string
+89: 	namespace string
+90: 	dir       string
+91: 	mu        sync.Mutex
+92: }
+93: 
+94: func newTerminalReportStore(cfg Config) *terminalReportStore {
+95: 	if strings.TrimSpace(cfg.WorkspacesRoot) == "" {
+96: 		return nil
+97: 	}
+98: 	identity := strings.TrimRight(cfg.ServerBaseURL, "/") + "\x00" + cfg.Profile + "\x00" + cfg.DaemonID
+99: 	sum := sha256.Sum256([]byte(identity))
+100: 	namespace := hex.EncodeToString(sum[:16])
+101: 	root := filepath.Join(cfg.WorkspacesRoot, ".pending-terminal-reports", "v1")
+102: 	return &terminalReportStore{
+103: 		root:      root,
+104: 		namespace: namespace,
+105: 		dir:       filepath.Join(root, namespace),
+106: 	}
+107: }
+108: 
+109: func (s *terminalReportStore) failedDir() string { return filepath.Join(s.dir, "failed") }
+110: 
+
+FILE server/internal/daemon/daemon.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/internal/daemon/daemon.go#L6230
+6230: // reportTaskResult writes the final task disposition back to the server.
+6231: //
+6232: // Fail closed: only an explicit "completed" status is reported as success.
+6233: // Anything else — "blocked", "cancelled", or any future status we forget to
+6234: // enumerate — must go through FailTask, so a run that never produced a real
+6235: // result can never be displayed as "Completed" in the UI (e.g. provider 429 /
+6236: // out-of-credit / runtime crash). Forward SessionID/WorkDir on every path:
+6237: // the agent may have built a real session before getting stuck, and we want
+6238: // the next chat turn to resume there rather than start over and "forget"
+6239: // the conversation.
+6240: func (d *Daemon) reportTaskResult(ctx context.Context, taskID string, result TaskResult, taskLog *slog.Logger) {
+6241: 	switch result.Status {
+6242: 	case "completed":
+6243: 		taskLog.Info("task completed", "status", result.Status)
+6244: 		err := d.reportTerminalTask(ctx, terminalTaskReport{
+6245: 			kind:                  terminalTaskReportComplete,
+6246: 			taskID:                taskID,
+6247: 			output:                result.Comment,
+6248: 			branchName:            result.BranchName,
+6249: 			sessionID:             result.SessionID,
+6250: 			workDir:               result.WorkDir,
+6251: 			durableWorkDir:        result.DurableWorkDir,
+6252: 			sessionRolloutMissing: result.SessionRolloutMissing,
+6253: 			retiredSessionID:      result.RetiredSessionID,
+6254: 		})
+6255: 		if err == nil {
+6256: 			return
+6257: 		}
+6258: 		// The original completion is already durable. Never overwrite it with a
+6259: 		// synthetic failure: a temporary auth/config skew can make a 4xx recover
+6260: 		// after restart just as a transport outage can make a 5xx recover, and the
+6261: 		// user's successful output must remain authoritative in both cases.
+6262: 		taskLog.Error("complete task callback not acknowledged; durable report remains queued", "error", err)
+6263: 	default:
+6264: 		failureReason := result.FailureReason
+6265: 		if failureReason == "" {
+6266: 			if result.Status == "cancelled" {
+6267: 				// "cancelled" is a deliberate non-failure terminal
+6268: 				// state masquerading as a failure_reason — preserved
+
+FILE server/pkg/agent/codex.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/agent/codex.go#L2867
+2867: 	var method string
+2868: 	_ = json.Unmarshal(raw["method"], &method)
+2869: 
+2870: 	// Auto-approve all exec/patch requests in daemon mode
+2871: 	switch method {
+2872: 	case "item/commandExecution/requestApproval", "execCommandApproval":
+2873: 		c.respond(id, map[string]any{"decision": "accept"})
+2874: 	case "item/fileChange/requestApproval", "applyPatchApproval":
+2875: 		c.respond(id, map[string]any{"decision": "accept"})
+2876: 	case "item/permissions/requestApproval":
+2877: 		c.respond(id, codexPermissionsApprovalResponse(raw["params"], c.cfg.Logger))
+2878: 	case "mcpServer/elicitation/request":
+2879: 		c.respond(id, map[string]any{"action": "accept", "content": nil, "_meta": nil})
+2880: 	default:
+2881: 		msg := fmt.Sprintf("unsupported codex app-server request: %s", method)
+
+FILE server/pkg/agent/claude.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/agent/claude.go#L727
+727: 	"--effort": blockedWithValue,
+728: }
+729: 
+730: func buildClaudeArgs(opts ExecOptions, logger *slog.Logger) []string {
+731: 	args := []string{
+732: 		"-p",
+733: 		"--output-format", "stream-json",
+734: 		"--input-format", "stream-json",
+735: 		"--verbose",
+736: 		"--permission-mode", "bypassPermissions",
+737: 		// AskUserQuestion is Claude Code's built-in interactive question tool.
+738: 		// The daemon runs Claude in non-interactive stream-json mode and has
+739: 		// no UI for the prompt to render in, so a call returns an empty
+
+FILE server/pkg/agent/antigravity.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/agent/antigravity.go#L648
+648: // 1.1.11+, or the verbatim single-column value (e.g. "Claude Opus 4.6
+649: // (Thinking)") on older output. Either shape ships as one exec arg, so spaces
+650: // and parens need no shell quoting. agy still exposes no --system-prompt;
+651: // runtime instructions are delivered via AGENTS.md in the task workdir.
+652: //
+653: // agy silently no-ops on a model string it doesn't recognise (empty output,
+654: // exit 0), so Execute validates opts.Model against the `agy models` catalog
+655: // and rejects an unrecognised value up front (see antigravityModelError) —
+656: // by the time we build argv the value is either empty or known-good. When
+657: // opts.Model is empty we omit the flag and agy resolves its own default.
+658: func buildAntigravityArgs(prompt, logPath string, timeout time.Duration, opts ExecOptions, logger *slog.Logger) []string {
+659: 	args := []string{
+660: 		"-p", prompt,
+661: 		"--dangerously-skip-permissions",
+662: 		"--output-format", "stream-json",
+663: 	}
+664: 	if opts.Model != "" {
+
+FILE packages/core/api/ws-client.ts
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/packages/core/api/ws-client.ts#L159
+159:     this.ws.onclose = () => {
+160:       this.scheduleReconnect();
+161:     };
+162: 
+163:     this.ws.onerror = () => {
+164:       // Suppress — onclose handles reconnect; errors during StrictMode
+165:       // double-fire are expected in dev and harmless.
+166:     };
+167:   }
+168: 
+169:   /**
+170:    * Schedule a reconnection attempt with exponential backoff and jitter.
+171:    * Retries indefinitely with a capped delay because the web/desktop UI
+172:    * does not yet expose a visible disconnected state or manual retry action.
+173:    */
+174:   private scheduleReconnect() {
+175:     const base = Math.min(
+176:       RECONNECT_BASE_DELAY_MS * 2 ** this.reconnectAttempt,
+177:       RECONNECT_MAX_DELAY_MS,
+178:     );
+179:     // ±20 % jitter so clients that disconnected at the same time don't
+180:     // reconnect in lockstep.
+181:     const jitter = base * 0.2 * (Math.random() * 2 - 1);
+182:     const delay = Math.round(
+183:       Math.min(base + jitter, RECONNECT_MAX_DELAY_MS),
+184:     );
+185: 
+186:     this.reconnectAttempt++;
+187:     this.logger.warn(
+188:       `ws: disconnected, reconnecting in ${delay}ms (attempt ${this.reconnectAttempt})`,
+189:     );
+190:     this.reconnectTimer = setTimeout(() => this.connect(), delay);
+191:   }
+192: 
+193:   private onAuthenticated() {
+194:     this.logger.info("connected");
+195:     const recoveredConnection = this.hasConnectedBefore || this.reconnectAttempt > 0;
+196:     this.reconnectAttempt = 0;
+197:     if (recoveredConnection) {
+198:       for (const cb of this.onReconnectCallbacks) {
+199:         try {
+200:           cb();
+201:         } catch {
+202:           // ignore reconnect callback errors
+203:         }
+204:       }
+205:     }
+206:     this.hasConnectedBefore = true;
+
+FILE packages/views/issues/components/execution-log-section.tsx
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/packages/views/issues/components/execution-log-section.tsx#L34
+34: // Right-panel section that lists every agent run for this issue. Active
+35: // runs sit at the top (always visible when present); past runs (terminal
+36: // statuses) collapse behind a "Show past runs (N)" toggle.
+37: //
+38: // Replaces:
+39: //   - the click-to-expand timeline that used to live inside the in-body live
+40: //     card (the live "agent is working" signal now lives in the header via
+41: //     IssueAgentHeaderChip)
+42: //   - the standalone <TaskRunHistory> below the main content
+43: //
+44: // Row layout — simple left/right flex:
+45: //   1. Agent avatar (no status dot — agent availability is not the
+46: //      story here; the row's right column carries the task status)
+47: //   2. Trigger description flexes and truncates
+48: //   3. Status is a normal shrink-0 right column; on hover it is replaced
+49: //      in place by the action buttons (status is removed, not covered).
+50: //      Left text keeps flex-1 so the row never shows a mid-row gap. Do
+51: //      not use masks/padding gymnastics here.
+52: //
+53: // One query (`listTasksByIssue`) drives both buckets — the back-end
+54: // returns every status, the front-end filters into active vs past on the
+55: // client. WS task:* events for this issue trigger an invalidate so the
+56: // list updates without polling.
+57: 
+58: interface ExecutionLogSectionProps {
+59:   issueId: string;
+60:   /** Shown in the usage dialog's subtitle so the panel names what it totals. */
+61:   identifier?: string;
+62: }
+63: 
+64: // Past-runs sort priority: newest first by timestamp. When two runs
+65: // share the same timestamp, failed ranks above cancelled, which ranks
+66: // above completed.
+67: const PAST_STATUS_RANK: Record<string, number> = {
+68:   failed: 0,
+69:   cancelled: 1,
+70:   completed: 2,
+71: };
+72: 
+73: export function ExecutionLogSection({ issueId, identifier }: ExecutionLogSectionProps) {
+74:   const { t } = useT("issues");
+75:   const [open, setOpen] = useState(true);
+76:   const [showPast, setShowPast] = useState(false);
+77:   const [usageOpen, setUsageOpen] = useState(false);
+78: 
+79:   // Cache key registered in `issueKeys.tasks` (packages/core/issues/queries.ts)
+80:   // so the global useRealtimeSync `task:` prefix path invalidates it via
+81:   // a `["issues", "tasks"]` prefix-match — no local WS subscriptions
+82:   // needed, and the cache stays fresh even when this component isn't
+83:   // mounted (e.g. user cancels from agent-side, then navigates here).
+84:   const { data: tasks = [] } = useQuery(issueTasksOptions(issueId));
+85: 
+86:   const activeTasks = useMemo(
+87:     () =>
+88:       tasks.filter(
+89:         (t) =>
+90:           t.status === "queued" ||
+91:           t.status === "dispatched" ||
+92:           // Daemon-parked task on a busy local_directory — still active
+93:           // (waiting on a path lock), not terminal. Surfacing it here is
+94:           // what tells the user the agent is alive and will resume.
+95:           t.status === "waiting_local_directory" ||
+96:           t.status === "running",
+97:       ).toSorted(compareActiveIssueTasks),
+98:     [tasks],
+99:   );
+100: 
+101:   const pastTasks = useMemo(() => {
+102:     const past = tasks.filter(
+103:       (t) =>
+104:         t.status === "completed" ||
+105:         t.status === "failed" ||
+106:         t.status === "cancelled",
+107:     );
+108:     return past.toSorted((a, b) => {
+109:       const at = a.completed_at ?? a.created_at;
+110:       const bt = b.completed_at ?? b.created_at;
+
+FILE e2e/comment-agent-routing.spec.ts
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/e2e/comment-agent-routing.spec.ts#L1
+1: import "./env";
+2: 
+3: import { expect, test } from "@playwright/test";
+4: import pg from "pg";
+5: import { createTestApi } from "./helpers";
+6: 
+7: // Routing matrices live in the Go handler tests. This browser regression covers
+8: // the reply composer, real API routing, and historical inline-run visibility.
+9: test("reply stays with the thread agent and hides unused historical fallbacks", async ({ page }, testInfo) => {
+10:   test.setTimeout(120_000);
+11:   const api = await createTestApi();
+12:   const db = new pg.Client(process.env.DATABASE_URL);
+13:   await db.connect();
+14:   let runtimeId: string | undefined;
+15:   const agentIds: string[] = [];
+16:   try {
+17:     const workspace = (await api.getWorkspaces())[0]!;
+18:     const user = await db.query<{ id: string }>(`SELECT id FROM "user" WHERE email = $1`, [api.getEmail()]);
+19:     const userId = user.rows[0]!.id;
+20:     const runtime = await db.query<{ id: string }>(
+21:       `INSERT INTO agent_runtime (workspace_id, name, runtime_mode, provider, status, device_info, metadata, owner_id, last_seen_at)
+22:        VALUES ($1, 'Comment routing verification', 'cloud', 'e2e_comment_routing', 'online', 'E2E fixture', '{}'::jsonb, $2, now()) RETURNING id`,
+23:       [workspace.id, userId],
+24:     );
+25:     runtimeId = runtime.rows[0]!.id;
+26:     for (const name of ["Agent A Assignee", "Agent B Thread Owner", "Agent C Cancelled Control"]) {
+27:       const row = await db.query<{ id: string }>(
+28:         `INSERT INTO agent (workspace_id, name, description, instructions, runtime_mode, runtime_config, runtime_id, visibility, permission_mode, max_concurrent_tasks, owner_id)
+29:          VALUES ($1, $2, '', '', 'cloud', '{}'::jsonb, $3, 'private', 'private', 1, $4) RETURNING id`,
+30:         [workspace.id, name, runtimeId, userId],
+31:       );
+32:       agentIds.push(row.rows[0]!.id);
+33:     }
+34:     const [agentA, agentB, agentC] = agentIds;
+35:     const issue = await api.createIssue("Verify reply routing and historical cancelled blocks");
+36:     // Seed assignment without triggering an unrelated assignment run.
+37:     await db.query(`UPDATE issue SET assignee_type = 'agent', assignee_id = $1 WHERE id = $2`, [agentA, issue.id]);
+38:     const root = await db.query<{ id: string }>(
+39:       `INSERT INTO comment (workspace_id, issue_id, author_type, author_id, content)
+40:        VALUES ($1, $2, 'member', $3, $4) RETURNING id`,
+41:       [workspace.id, issue.id, userId, `[@Agent B Thread Owner](mention://agent/${agentB}) Please investigate this thread.`],
+42:     );
+43:     const rootId = root.rows[0]!.id;
+44:     const primary = await db.query<{ id: string }>(
+45:       `INSERT INTO agent_task_queue (agent_id, runtime_id, issue_id, trigger_comment_id, delivered_comment_ids, status, started_at, completed_at)
+46:        VALUES ($1, $2, $3, $4, ARRAY[$4]::uuid[], 'completed', now() - interval '1 minute', now()) RETURNING id`,
+47:       [agentB, runtimeId, issue.id, rootId],
+48:     );
+49:     const primaryId = primary.rows[0]!.id;
+50:     await db.query(
+51:       `INSERT INTO comment (workspace_id, issue_id, author_type, author_id, content, parent_id, source_task_id)
+52:        VALUES ($1, $2, 'agent', $3, 'Agent B is following this thread. Please reply here.', $4, $5)`,
+53:       [workspace.id, issue.id, agentB, rootId, primaryId],
+54:     );
+55:     const hiddenIds: string[] = [];
+56:     for (const dispatched of [false, true]) {
+57:       const row = await db.query<{ id: string }>(
+58:         `INSERT INTO agent_task_queue (agent_id, runtime_id, issue_id, trigger_comment_id, status, escalation_for_task_id, dispatched_at, completed_at)
+59:          VALUES ($1, $2, $3, $4, 'cancelled', $5, CASE WHEN $6 THEN now() ELSE NULL END, now()) RETURNING id`,
+60:         [agentA, runtimeId, issue.id, rootId, primaryId, dispatched],
+61:       );
+62:       hiddenIds.push(row.rows[0]!.id);
+63:     }
+64:     const control = await db.query<{ id: string }>(
+65:       `INSERT INTO agent_task_queue (agent_id, runtime_id, issue_id, trigger_comment_id, status, completed_at)
+
+FILE .github/workflows/ci.yml
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/.github/workflows/ci.yml#L379
+379:       # before the save compares against this marker.
+380:       - name: Mark Go build cache epoch
+381:         id: goepoch
+382:         run: touch -d '-1 hour' "$RUNNER_TEMP/go-build-epoch"
+383: 
+384:       - name: Build
+385:         run: cd server && go build -race ./...
+386: 
+387:       # The `agentintegration` files execute real agent CLIs, so no CI job runs
+388:       # them. Nothing compiled them either, which let them rot silently: a
+389:       # helper renamed in an ordinary test file, or two branches each defining
+390:       # the same helper in one package, breaks the tagged build with every
+391:       # untagged job still green. vet type-checks test files, so this is the
+392:       # cheapest gate that keeps them honest without needing an agent CLI.
+393:       - name: Vet tag-gated agent integration tests
+394:         run: cd server && go vet -race -tags agentintegration ./...
+395: 
+396:       - name: Run migrations
+
+FILE server/pkg/agent/real_agent_smoke_integration_test.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/agent/real_agent_smoke_integration_test.go#L1
+1: //go:build agentintegration
+2: 
+3: package agent
+4: 
+5: import (
+6: 	"os"
+7: 	"testing"
+8: )
+9: 
+10: func requireRealAgentSmoke(t *testing.T) {
+11: 	t.Helper()
+12: 	if os.Getenv("MULTICA_RUN_REAL_AGENT_SMOKE") != "1" {
+13: 		t.Skip("set MULTICA_RUN_REAL_AGENT_SMOKE=1 to allow real agent CLI and account access")
+14: 	}
+15: 	t.Log("REAL AGENT SMOKE TEST: this test may access an authenticated account and consume quota")
+16: }
+
+FILE server/pkg/agent/antigravity_integration_test.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/agent/antigravity_integration_test.go#L1
+1: //go:build agentintegration
+2: 
+3: package agent
+4: 
+5: import (
+6: 	"context"
+7: 	"os/exec"
+8: 	"strings"
+9: 	"testing"
+10: 	"time"
+11: )
+12: 
+13: // TestAntigravityRealResumedUsageIsPerExecution is opt-in because it consumes
+14: // the signed-in Antigravity account's quota. It verifies the installed agy
+15: // binary's wire contract and, importantly, that a resumed execution reports
+16: // only that execution's completed-step usage to Multica.
+17: func TestAntigravityRealResumedUsageIsPerExecution(t *testing.T) {
+18: 	requireRealAgentSmoke(t)
+19: 	if testing.Short() {
+20: 		t.Skip("skipping real-binary smoke test in -short mode")
+21: 	}
+22: 	execPath, err := exec.LookPath("agy")
+23: 	if err != nil {
+24: 		t.Skipf("agy is not installed: %v", err)
+25: 	}
+26: 
+27: 	backend, err := New("antigravity", Config{
+28: 		ExecutablePath: execPath,
+29: 		Logger:         quietAntigravityLogger(),
+30: 	})
+31: 	if err != nil {
+32: 		t.Fatalf("new antigravity backend: %v", err)
+33: 	}
+34: 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
+35: 	defer cancel()
+36: 	workDir := t.TempDir()
+37: 	first := runAntigravityRealTurn(t, ctx, backend, "Reply with exactly FIRST_TURN_OK and nothing else.", ExecOptions{
+38: 		Cwd:     workDir,
+39: 		Timeout: 2 * time.Minute,
+40: 	})
+41: 	if !strings.Contains(first.Output, "FIRST_TURN_OK") {
+42: 		t.Fatalf("first output = %q, want FIRST_TURN_OK", first.Output)
+43: 	}
+44: 	if first.SessionID == "" {
+45: 		t.Fatal("expected first stream-json conversation id")
+46: 	}
+47: 	if total := antigravityResultUsageTotal(first); total <= 0 {
+48: 		t.Fatalf("expected non-zero first-turn provider usage, got %+v", first.Usage)
+
+FILE server/pkg/agent/cursor_integration_test.go
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/server/pkg/agent/cursor_integration_test.go#L1
+1: //go:build agentintegration
+2: 
+3: package agent
+4: 
+5: import (
+6: 	"context"
+7: 	"log/slog"
+8: 	"os/exec"
+9: 	"strings"
+10: 	"testing"
+11: 	"time"
+12: )
+13: 
+14: // TestCursorRealStreamObservability drives the real cursor-agent binary with a
+15: // task that must use tools, and asserts the run is observable: reasoning and
+16: // each tool call/result reach the message stream, not just the final answer.
+17: //
+18: // The fixture test pins the parser against a recorded stream; this one is what
+19: // catches the upstream protocol moving on (MUL-5231).
+20: func TestCursorRealStreamObservability(t *testing.T) {
+21: 	requireRealAgentSmoke(t)
+22: 	if testing.Short() {
+23: 		t.Skip("skipping real-binary smoke test in -short mode")
+24: 	}
+25: 	path, err := exec.LookPath("cursor-agent")
+26: 	if err != nil {
+27: 		t.Skip("cursor-agent not on PATH; skipping real-binary smoke test")
+28: 	}
+29: 	if version, err := exec.Command(path, "--version").CombinedOutput(); err == nil {
+30: 		t.Logf("cursor-agent CLI version: %s", strings.TrimSpace(string(version)))
+31: 	} else {
+32: 		t.Logf("cursor-agent CLI version unavailable: %v (%s)", err, strings.TrimSpace(string(version)))
+33: 	}
+34: 
+35: 	backend, err := New("cursor", Config{ExecutablePath: path, Logger: slog.Default()})
+36: 	if err != nil {
+37: 		t.Fatalf("new cursor backend: %v", err)
+38: 	}
+39: 	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
+40: 	defer cancel()
+41: 
+42: 	session, err := backend.Execute(ctx,
+43: 		"Create a file named ping.txt in this workspace containing exactly the word pong, then read it back and tell me what it says.",
+44: 		ExecOptions{Cwd: t.TempDir(), Timeout: 170 * time.Second})
+45: 	if err != nil {
+46: 		t.Fatalf("execute: %v", err)
+47: 	}
+48: 
+49: 	var thinking strings.Builder
+50: 	var toolUses, toolResults []Message
+51: 	done := make(chan struct{})
+52: 	go func() {
+53: 		defer close(done)
+54: 		for msg := range session.Messages {
+55: 			switch msg.Type {
+56: 			case MessageThinking:
+57: 				thinking.WriteString(msg.Content)
+58: 			case MessageToolUse:
+59: 				toolUses = append(toolUses, msg)
+60: 			case MessageToolResult:
+61: 				toolResults = append(toolResults, msg)
+62: 			}
+63: 		}
+64: 	}()
+65: 
+66: 	result := <-session.Result
+67: 	<-done
+68: 
+69: 	if result.Status != "completed" {
+70: 		t.Fatalf("real cursor run did not complete: status=%q error=%q", result.Status, result.Error)
+71: 	}
+72: 	if thinking.Len() == 0 {
+73: 		t.Error("no reasoning observed from the real cursor stream")
+74: 	}
+75: 	if len(toolUses) == 0 {
+76: 		t.Fatal("no tool calls observed from the real cursor stream")
+77: 	}
+78: 	if len(toolResults) != len(toolUses) {
+79: 		t.Errorf("tool results = %d, tool uses = %d; every call must report a result", len(toolResults), len(toolUses))
+80: 	}
+81: 	for _, msg := range toolUses {
+82: 		if msg.Tool == "" {
+83: 			t.Errorf("tool call without a name: %+v", msg)
+84: 		}
+85: 		if strings.ContainsAny(msg.CallID, "\r\n") {
+86: 			t.Errorf("tool call id spans multiple lines: %q", msg.CallID)
+87: 		}
+88: 	}
+89: 	t.Logf("real cursor smoke OK: thinking=%d bytes, tools=%v, output=%q",
+90: 		thinking.Len(), toolNames(toolUses), result.Output)
+91: }
+92: 
+93: func toolNames(msgs []Message) []string {
+94: 	names := make([]string, 0, len(msgs))
+95: 	for _, msg := range msgs {
+96: 		names = append(names, msg.Tool)
+97: 	}
+98: 	return names
+99: }
+
+
+FILE AGENTS.md
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/AGENTS.md#L114
+114: - Give each behavior one canonical test layer: helper tests own parsing/state matrices; component tests cover wiring, accessibility, happy paths, and named regressions. Prefer a failing regression test before behavioral fixes.
+115: - DOM-free `.test.ts` files start with `// @vitest-environment node`; do not use it if it would silently switch the code under test to an SSR path.
+116: - Views tests must not mock `next/*` or `react-router-dom`. Mock stores with their Zustand callable shape plus `getState`; mock API calls at `@multica/core/api`.
+117: - E2E setup/teardown uses `TestApiClient`.
+118: - DB-backed Go tests use `server/internal/testutil` fixtures (`dbfx.Issue`, `dbfx.Task`, `dbfx.Insert`) and `testutil.Call(h, req).Want(status).JSON(&out)`. Keep product assertions and case-specific diagnostics in the test, not fixture helpers.
+119: - Default tests must not resolve or execute user-installed agent CLIs; pass test-created fake or missing executable paths. New default agent commands go in `scripts/agent-cli-command-names.txt`.
+120: - Only run real-agent smoke tests when explicitly authorized. Gate them behind `agentintegration` and check `MULTICA_RUN_REAL_AGENT_SMOKE=1` before executable lookup/account access. Run the specific test: `(cd server && MULTICA_RUN_REAL_AGENT_SMOKE=1 go test -tags=agentintegration ./pkg/agent -run '<test-name>' -count=1 -v)`.
+121: 
+122: ## Change and Delivery Rules
+123: 
+
+FILE apps/docs/content/docs/security-model.mdx
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/apps/docs/content/docs/security-model.mdx#L8
+8: When an agent picks up a run, the daemon spawns an AI coding tool (Codex, Claude Code, and so on) as a child process. Understanding what that process can touch is the whole security model.
+9: 
+10: ## The boundary is the daemon user
+11: 
+12: By default a run executes with the **full permissions of the operating-system user running the daemon**. It can read and write every file that user can, use that user's credentials, and reach the network without restriction.
+13: 
+14: Multica makes no filesystem-sandbox guarantee. One narrow exception exists today — Windows, where you have explicitly opted into Codex's native sandbox — but which platform and configuration combinations sandbox anything is a compatibility detail that moves with tool versions. Treat every run as unsandboxed and put the boundary outside the daemon.
+15: 
+16: <Callout type="warning">
+17: Multica does not sandbox the filesystem for you. If the daemon runs as your personal user account, a run can read your SSH keys, edit your shell profile, and delete your documents. Isolation has to come from the boundary you put the daemon in.
+18: </Callout>
+19: 
+20: This is deliberate. Agents are asked to install dependencies, run builds, use your cloud CLIs, and drive tooling that expects a normal home directory. A partial filesystem sandbox breaks that work in ways that are hard to diagnose — the tool reports "not logged in" or silently uses the wrong account — while still not protecting the thing that matters most, since it cannot stop a run from reading credentials and sending them over the network.
+21: 
+22: So Multica does not pretend to be the boundary. Put one around it.
+23: 
+24: ## Recommended setups
+25: 
+26: Pick whichever fits your infrastructure — they are listed from lightest to strongest:
+27: 
+28: 1. **Dedicated Unix user.** Create a `multica` user, give it only the repositories and credentials the agents need, and run the daemon as that user. Your own account stays untouched.
+29: 2. **Container.** Run the daemon in a container with only the mounts and secrets the agents need.
+30: 3. **Virtual machine.** Full isolation, at the cost of provisioning a machine.
+31: 
+32: Whichever you choose, treat the credentials reachable from that environment as credentials the agent may use: scope tokens narrowly, prefer per-purpose deploy keys over your personal SSH key, and avoid leaving unrelated production credentials in that user's home directory.
+33: 
+34: ## What Multica does isolate
+35: 
+36: These are real, but they are conveniences and blast-radius reduction — not a security boundary against a run that actively tries to escape:
+37: 
+38: - **Per-run working directory.** Each run gets its own workdir under `~/multica_workspaces/`, so concurrent runs do not collide on the same checkout.
+39: - **Per-run agent state.** Codex runs get a run-scoped `CODEX_HOME` holding config, sessions, and skills, so per-run settings do not pollute your `~/.codex/`.
+40: - **Run-scoped API tokens.** The `MULTICA_TOKEN` handed to a run is bound to that agent and that run by the server, so a run cannot act as you or as another agent through the Multica API.
+41: 
+42: ## What is not a boundary
+43: 
+44: - **The coding tool's own sandbox and approval settings.** Multica runs agents unattended, so approval prompts are answered automatically. On the default path the filesystem sandbox is off as well: Codex runs with `sandbox_mode = "danger-full-access"` and Claude Code with `--permission-mode bypassPermissions`. The exception is Windows — if you explicitly configure Codex's native sandbox (`windows.sandbox = "unelevated"` or `"elevated"`), Multica honors that opt-in and keeps `workspace-write` for those runs. Worth doing where it fits, but it is one tool on one platform and it does not change how you should scope the daemon user.
+45: - **Your `HOME` directory layout.** Runs inherit the daemon user's real `HOME` and `XDG_*` variables, which is what makes host CLIs (`gh`, `aws`, `kubectl`, `gcloud`, `glab`) work inside a run exactly as they do in your shell. It also means everything under that home is reachable.
+46: 
+47: <Callout>
+48: On Linux, Codex runs previously ran under the `workspace-write` sandbox with a redirected per-run `HOME`. That was removed: it left host CLIs unconfigured inside runs, and because it restricted writes only, it never prevented a run from reading and exfiltrating credentials. Linux now matches the macOS and Windows default.
+
+FILE apps/docs/content/docs/tasks.mdx
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/apps/docs/content/docs/tasks.mdx#L138
+138: This form does not point at a specific past run, so it uses the issue's current agent assignee and starts with a fresh session and working directory.
+139: 
+140: ## Run completion and issue completion
+141: 
+142: `completed` only means this particular run ended normally — it does not confirm the issue's goal has been met. You can still review the result, keep discussing, add requirements, or trigger the agent again.
+143: 
+144: Whether an issue is done is judged by the actual progress of the work and the issue's status.
+145: 
+
+FILE packages/core/realtime/use-realtime-sync.ts
+https://github.com/multica-ai/multica/blob/90e0bdf830436b3981b32a7017e1c18d41c7cdea/packages/core/realtime/use-realtime-sync.ts#L1788
+1788:       if (aggregateRefreshTimer) clearTimeout(aggregateRefreshTimer);
+1789:       timers.forEach(clearTimeout);
+1790:       timers.clear();
+1791:     };
+1792:   }, [ws, qc, authStore, onToast]);
+1793: 
+1794:   // Reconnect -> refetch all data to recover missed events
+1795:   useEffect(() => {
+1796:     if (!ws) return;
+1797: 
+1798:     const unsub = ws.onReconnect(async () => {
+1799:       logger.info("reconnected, refetching all data");
+1800:       try {
+1801:         invalidateWorkspaceScopedQueries(qc);
+1802:       } catch (e) {
+1803:         logger.error("reconnect refetch failed", e);
+1804:       }
+1805:     });
+1806: 
+1807:     return unsub;
+1808:   }, [ws, qc]);
+1809: 
+1810:   // New WSClient instance (workspace switch) -> invalidate workspace-scoped
+1811:   // queries to recover events missed while the previous instance was torn down.
+1812:   // Skips the initial assignment to avoid a redundant refetch on first mount.

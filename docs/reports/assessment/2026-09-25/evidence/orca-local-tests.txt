@@ -1,0 +1,43 @@
+
+ RUN  v4.1.11 /tmp/oax-orca-assessment-20260925
+
+ ❯ src/main/runtime/orchestration/db/attempt-outcome-projection.test.ts (0 test)
+ ❯ src/shared/orchestration-fleet-projection.test.ts (0 test)
+ ❯ src/main/runtime/orchestration/db-stopping-worker-task-guard.test.ts (0 test)
+ ❯ src/shared/orchestration-fleet-evidence-clock.test.ts (0 test)
+ ❯ src/shared/agent-status-run.test.ts (0 test)
+ ❯ src/shared/agent-status-store-reopen.test.ts (0 test)
+ ❯ src/shared/tui-agent-permissions.test.ts (0 test)
+ ❯ src/shared/orchestration-ask-timeout.test.ts (0 test)
+ ❯ src/shared/agent-status-serving-readiness.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/shared/agent-status-run.test.ts [ src/shared/agent-status-run.test.ts ]
+ FAIL  src/shared/agent-status-serving-readiness.test.ts [ src/shared/agent-status-serving-readiness.test.ts ]
+ FAIL  src/shared/agent-status-store-reopen.test.ts [ src/shared/agent-status-store-reopen.test.ts ]
+ FAIL  src/shared/orchestration-ask-timeout.test.ts [ src/shared/orchestration-ask-timeout.test.ts ]
+ FAIL  src/shared/orchestration-fleet-evidence-clock.test.ts [ src/shared/orchestration-fleet-evidence-clock.test.ts ]
+ FAIL  src/shared/orchestration-fleet-projection.test.ts [ src/shared/orchestration-fleet-projection.test.ts ]
+ FAIL  src/shared/tui-agent-permissions.test.ts [ src/shared/tui-agent-permissions.test.ts ]
+ FAIL  src/main/runtime/orchestration/db-stopping-worker-task-guard.test.ts [ src/main/runtime/orchestration/db-stopping-worker-task-guard.test.ts ]
+ FAIL  src/main/runtime/orchestration/db/attempt-outcome-projection.test.ts [ src/main/runtime/orchestration/db/attempt-outcome-projection.test.ts ]
+Error: Transform failed with 1 error:
+
+[31m[TSCONFIG_ERROR] [0mFailed to load tsconfig '@electron-toolkit/tsconfig/tsconfig.node.json': Tsconfig not found
+
+  Plugin: vite:oxc
+  File: /tmp/oax-orca-assessment-20260925/src/shared/agent-status-run.test.ts
+ ❯ transformWithOxc ../oax-orca-test-runner-20260925/node_modules/vite/dist/node/chunks/node.js:7551:19
+ ❯ TransformPluginContext.transform ../oax-orca-test-runner-20260925/node_modules/vite/dist/node/chunks/node.js:7623:26
+ ❯ EnvironmentPluginContainer.transform ../oax-orca-test-runner-20260925/node_modules/vite/dist/node/chunks/node.js:8515:51
+ ❯ loadAndTransform ../oax-orca-test-runner-20260925/node_modules/vite/dist/node/chunks/node.js:19998:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+
+ Test Files  9 failed (9)
+      Tests  no tests
+   Start at  00:59:45
+   Duration  1.55s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 2ms)
+

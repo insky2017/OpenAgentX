@@ -1,0 +1,18 @@
+time=2026-09-23T00:42:51.173683+08:00
+source_commit=34053c02042ca7448587ff8c20bdd82c11ed870c
+source_git_status=''
+ADR-001-resident-agent-worker-runtime-observability.md unchanged=True sha256=587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403
+ADR-002-agent-cli-proxy-environment.md unchanged=True sha256=e1e4cb8b2368be2ea17f66fb1ce33c0185c8d4be9484bc63a245494b0d547f1d
+ADR-003-command-center-task-observation-and-content.md unchanged=True sha256=a538850fdf884a4d7a00ab92646c6a6c9e5374eb91ef35a0c7ffabf7e80ec99c
+ADR-004-streamlined-command-center-network-ux.md unchanged=True sha256=317e0d0017e2e5685d4112b010b1c5a0370bf6316495cc905014715446589ce3
+ADR-005-interactive-worker-console-and-developer-experience.md unchanged=True sha256=70164f591997051c26947b08ca2de1c7946b7dfa3389763ecb5ab79998187b7a
+ADR-006-task-intent-and-verifiable-terminal-semantics.md unchanged=True sha256=addb19af458824473aacdbb960294a8e08b368803b07c2ff78353737c455aa70
+ADR-007-worker-network-binding-generation-continuity.md unchanged=True sha256=98ed16da6ccecc9958e335f7a446ea04aafebf30923fc1e5568a12ff09d0f37a
+ADR-008-oax-workspace-console-tui-and-cli-session.md unchanged=True sha256=572e9edc47e8f1961f7db89ada9723ebbe2fcba6ee7fecd37891f76c53f7406d
+ADR-009-pane-zero-task-console-observability.md unchanged=True sha256=afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69
+remaining_isolated_console_processes=[]
+remaining_active_matching_console_test_tmux_servers=[]
+default_tmux_not_operated=true
+product_files_modified=false; production_services_modified=false; git_commit_created=false
+test_overlay_patches_preserved_in=evidence/console-*-fixture.patch
+owned_overlay_directory_and_generator_removed=true

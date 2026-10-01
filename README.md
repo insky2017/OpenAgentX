@@ -4,6 +4,23 @@ OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持�
 
 ## 架构
 
+最新部署与 ADR 演进见 [当前系统架构（Markdown）](docs/design/CURRENT_ARCHITECTURE.md)
+和 [离线 HTML 架构图](docs/design/current-architecture.html)。该快照区分当前主线、
+ADR-008/009 实施分支与实际安装版本；下面的简图仅说明基础控制面关系。
+
+逐模块测试、功能缺口、过度设计判断与 Paseo / Multica 借鉴建议见
+[2026-09-23 全面评估](docs/reports/assessment/2026-09-23/README.md)。
+追加的 [OpenHarness / Wake 对照研究](docs/reports/assessment/2026-09-24/README.md)
+沿用上述评估边界，比较结果交付、会话找回、恢复与复杂度取舍。
+随后追加的 [Orca 研究与五项目对照](docs/reports/assessment/2026-09-25/README.md)
+补充并行开发工作台、执行回执与结果审阅的参考。
+新增的 [FenixAgent 研究与六项目对照](docs/reports/assessment/2026-09-26/README.md)
+比较企业 Agent 控制面、配置注入、会话交互和多入口执行的一致性。
+进一步的 [Holon 研究与七项目对照](docs/reports/assessment/2026-09-26-holon/README.md)
+聚焦长期 Domain Agent、跨 Agent 协作、等待唤醒与结果交付。
+新增 [Buzz 研究与八项目对照](docs/reports/assessment/2026-09-26-buzz/README.md)，
+比较人机协作工作区、Relay/执行 Harness、就绪与停止反馈，以及平台复杂度。
+
 ```text
 OpenAgentX daemon
   ├─ Transactional SQLite + Event Journal

@@ -1,0 +1,19 @@
+{
+  "completed_at": "2026-09-22T17:00:19.028178+00:00",
+  "reports": 9,
+  "local_links_checked": 51,
+  "missing_local_links": [],
+  "fixed_git_objects_checked": 90,
+  "invalid_git_objects": [],
+  "frozen_files_checked": 10,
+  "frozen_changed": [],
+  "known_credentials_scanned": 2,
+  "secret_hit_files": [],
+  "git_diff_check_exit": 0,
+  "html_script_syntax_exit": 0,
+  "browser_check": "architecture-revised-browser.json",
+  "independent_review": "independent-summary-review.json",
+  "formal_services": "deployment-final.json",
+  "git_diff_check_scope": "authored Markdown and HTML; raw evidence reviewed separately",
+  "raw_evidence_whitespace_review": "evidence-whitespace-review.json"
+}

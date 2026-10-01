@@ -1,0 +1,16 @@
+{
+  "readme_document_gate": {
+    "command": "python3 scripts/check_docs.py",
+    "exit": 2,
+    "stderr": "python3: can't open file '/tmp/oax-assessment-20260923-source/scripts/check_docs.py': [Errno 2] No such file or directory"
+  },
+  "cutover_dry_run": {
+    "exit": 0,
+    "stdout": "OpenAgentX cutover rehearsal (--dry-run)\nrelease=/tmp/oax-assessment-cutover-nb8d2omm target_db=/var/lib/openagentx/openagentx.db archive=/tmp/oax-assessment-20260923-source/.cutover-archive\n+ mkdir -p /tmp/oax-assessment-20260923-source/.cutover-archive\n+ install -d -m 0700 /var/lib/openagentx /run/openagentx\n+ /tmp/oax-assessment-cutover-nb8d2omm/bin/openagentx schema verify --db /var/lib/openagentx/openagentx.db\n+ systemctl stop openagentx-worker@quote-service.service\n+ systemctl stop openagentx.service\n+ systemctl start openagentx.service\n+ systemctl start openagentx-worker@quote-service.service\n+ systemctl is-active openagentx.service openagentx-worker@quote-service.service\n+ nginx -t\n+ systemctl reload nginx\nRehearsal checks passed. Execute mode is the only mode that mutates services.\n",
+    "stderr": ""
+  },
+  "go_source_equal_to_installed": true,
+  "tracked_ci_files": [
+    "scripts/check-legacy-control-paths.sh"
+  ]
+}

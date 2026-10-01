@@ -1,0 +1,1288 @@
+commit=269c50b466b023a0f38cc14e34105ab27b983dd2
+
+FILE README.md
+11: 
+12: Your agent history is scattered across `~/.claude`, `~/.codex`, and a dozen other private directories. Wake reads them all, read-only, and gives you one fast window into it. Everything stays local; Wake only contacts GitHub when you explicitly check for an update.
+13: 
+14: ![Wake — sessions list and transcript view](imgs/screenshot-1.webp)
+15: 
+16: ## Features
+17: 
+18: - **Unified browsing** — all sessions grouped by agent / project, with Grok Build subagents nested under their parent and live file watching for incremental updates
+19: - **Full-text search** (⌘K / Ctrl+K) — SQLite FTS5 trigram index; handles CJK text and code substrings (like `useEffect(`) equally well; jumps straight to the matched message in the transcript
+20: - **Transcript view** — per-message rendering with user/assistant bubbles, inline images (copy or save them), collapsible tool-call clusters, thinking summaries, tree-sitter code highlighting (30+ languages)
+21: - **One-click resume** — reopens the session in your terminal (Terminal/iTerm on macOS; native terminal hosts on Linux and Windows) at the original project directory (`claude --resume`, `codex resume`, …)
+22: - **Manage** — star/pin (stored in Wake's own DB, original files untouched), export to Markdown or save an inline image through the system Save dialog (Wake remembers the last folder), delete (system Trash + tombstone so deleted sessions stay deleted)
+23: - **Insights** — a stats page for your whole library: GitHub-style activity heatmap with streaks, hour / weekday / month breakdowns, and Agents / Projects / Models leaderboards switchable between sessions, tokens, and prompts
+24: - **Remote hosts** — mirror the sessions on your other machines over SSH (Settings → Remote hosts); they show up next to local ones with an `@host` badge, searchable like everything else, and resume through a copied `ssh -t` command
+25: - **Connect your agents (MCP)** — a bundled read-only MCP server, `wake-mcp`, lets Claude Code, Codex, Cursor or any MCP client search your whole history, list recent sessions per project and read transcripts page by page, so a new agent can pick up where another one left off; Settings → Connect has copy-paste setup snippets
+26: - **Command line** — `wake-cli` gives the same answers to anything that can run a shell command: `wake-cli sessions --project "$PWD"`, `wake-cli search "…"`, `wake-cli show <key>`; it prints the same text an MCP client sees; `npx skills add iAmCorey/Wake` installs a skill so agents reach for it on their own; `wake-cli refresh` keeps the index fresh from a scheduled task while the app is closed
+27: 
+28: ![Full-text search across every agent's sessions](imgs/screenshot-2.webp)
+29: 
+30: ## Supported agents
+31: 
+32: | Agent | Data source | Model | Via |
+33: |---|---|---|---|
+34: | Claude Code | `~/.claude/projects/**/*.jsonl` | ✅ | — |
+35: | Codex CLI | `~/.codex/sessions` + `state_5.sqlite` (read-only) | ✅ | ✅ |
+36: | Qoder CLI | `~/.qoder/projects/*/*.jsonl` (`QODER_CONFIG_DIR` is respected) | ✅ | — |
+
+FILE README.md
+116: Not every agent speaks MCP, and sometimes you just want the answer in a terminal. `wake-cli` sits next to `wake-mcp` and covers the same ground:
+117: 
+118: ```bash
+119: wake-cli sessions --project "$PWD" --limit 5      # what happened in this repo
+120: wake-cli search "rate limiter" --project "$PWD"   # where was this discussed
+121: wake-cli show 'claude-code:1b2c3d4e-…'            # read that transcript
+122: wake-cli setup                                    # path, PATH setup, and a block to paste into CLAUDE.md
+123: wake-cli refresh                                  # update the index while Wake is closed — schedule it
+124: ```
+125: 
+126: It prints what the MCP tools return, asserted byte for byte in the test suite apart from a trailing newline the CLI adds, so an agent driving it through a shell sees what a connected one does. Full reference in [docs/cli.md](docs/cli.md).
+127: 
+128: To make an agent reach for it without being told, install the bundled skill with `npx skills add iAmCorey/Wake` (or copy `skills/wake/` into `~/.claude/skills/wake/`). Claude Code can go one step further and receive the project's recent sessions the moment a session starts, through a `SessionStart` hook that runs `wake-cli` — the recipe is in [docs/cli.md](docs/cli.md#teaching-an-agent-to-use-it).
+129: 
+130: ## Language
+131: 
+132: Wake's interface follows your system language on first launch and falls back to
+133: English. Simplified Chinese ships with the app; pick a fixed language under
+134: **Settings → General → Language**.
+135: 
+136: Adding a language is one flat JSON file mapping the English text to your
+137: translation — drop it in Wake's config folder to use it immediately, or send it
+138: as a pull request. Untranslated strings simply stay English, so a partial pack is
+139: welcome. See [crates/wake/locales/README.md](crates/wake/locales/README.md).
+140: 
+141: ## Privacy stance
+142: 
+143: - Agent data directories are opened **read-only**; Wake never writes to another tool's files or databases
+144: - Credential files (`auth.json` and friends) are never read
+145: - Remote hosts are mirrored read-only with `rsync` over your existing SSH setup: only session data and its sidecar files come across (never credentials), nothing on the remote machine is ever written, and the mirror lives inside Wake's own data directory (`remotes/<host>/`), so removing the host removes it
+146: - No background network requests — the only network actions are a user-initiated update check against Wake's public GitHub Release metadata and, if you configure remote hosts, SSH/rsync to those hosts on launch, refresh, and Sync now; session data is never sent anywhere else
+147: - Wake's own index lives at `~/Library/Application Support/wake/wake.db` (Linux: `~/.local/share/wake`, Windows: `%LOCALAPPDATA%\wake`) and can be rebuilt from scratch at any time (stars/pins live in a separate table and survive rebuilds). Three small preference files (`appearance`, `language`, `window.json`) sit beside it on macOS, under `~/.config/wake` on Linux and `%APPDATA%\wake` on Windows; Open In and export-folder choices live in the index database's `prefs` table
+148: 
+149: ## Performance
+150: 
+151: On the author's machine (~310 sessions, ~800 MB of JSONL): full index ~5 s, subsequent launches are instant (mtime-based incremental scan), search results in under 1 ms.
+152: 
+153: ## Install
+154: 
+155: Download `Wake-<version>-macos.zip` from the [latest release](https://github.com/iAmCorey/Wake/releases/latest), unzip, and drag Wake to Applications. The release is a Universal Binary for both Apple Silicon and Intel Macs. Or build from source (requires a Rust toolchain):
+156: 
+157: ```bash
+158: git clone https://github.com/iAmCorey/Wake && cd Wake
+159: scripts/make-app.sh          # builds dist/Wake.app (icon + Info.plist, ad-hoc signed)
+160: open dist/Wake.app
+161: ```
+162: 
+163: To build the same Universal Binary locally, install the `aarch64-apple-darwin` and `x86_64-apple-darwin` Rust targets, then run `scripts/make-app.sh --universal`.
+164: 
+165: The app is ad-hoc signed, so if you download a prebuilt copy instead of building it yourself, macOS Gatekeeper will block the first launch — right-click the app and choose *Open*, or run `xattr -d com.apple.quarantine Wake.app`.
+
+FILE crates/wake-core/src/adapters/mod.rs
+29: pub use sqlite_ro::strip_virtual_path as session_source_path;
+30: 
+31: use crate::models::*;
+32: use anyhow::{Context as _, Result};
+33: use std::path::Path;
+34: 
+35: /// agent 数据源适配器。列表扫描与详情解析共用同一核心解析器,
+36: /// 保证 FTS 的 seq 与详情页消息序号一致(搜索跳转依赖)。
+37: pub trait AgentAdapter: Send + Sync {
+38:     fn agent(&self) -> AgentId;
+39:     /// 实例服务的远程 host;空 = 本地。只有 remote::RemoteAdapter 覆写。
+40:     /// scanner 的同家同 ID 去重按 (host, agent, native_id) 分域——两台机器
+41:     /// 各自续跑过的同 UUID 会话是两条会话,不能按 mtime 互吞
+42:     fn host(&self) -> &str {
+43:         ""
+44:     }
+45:     /// 本机是否有这家的数据。由 data_roots 派生,**不要覆写**——它必须与
+46:     /// 面板逐路径的 exists() 同一判据,手写版本(is_dir/is_file)与之打架
+47:     /// 正是 2026-08-24 数轮 review 反复修的源头之一
+48:     fn detect(&self) -> bool {
+49:         self.data_roots().iter().any(|p| p.exists())
+50:     }
+51:     /// 枚举全部会话文件。契约是"枚举必须廉价、绝不做全量解析":多数家纯 stat,
+52:     /// SQLite 型跑元数据查询,dsh 读有界首行(子代理标志只存在于文件头)。
+53:     /// 故障就地降级为空列表,不外溢炸掉整轮扫描。
+54:     fn list_session_files(&self) -> Result<Vec<SessionFileRef>>;
+55:     /// watcher 事件路径 → 本 adapter 的会话文件引用;None = 非会话文件
+56:     /// (边车、子代理转录等)。默认:非空 .jsonl,stem 即 native_id。
+57:     /// 各家的路径布局知识收敛在此,watcher 不再硬编码任何 agent 特例。
+58:     fn file_ref(&self, path: &Path) -> Option<SessionFileRef> {
+59:         parse_utils::default_file_ref(self.agent(), path)
+60:     }
+61:     /// 快路径:不解析文件直接给出 meta(Codex 走 state DB)。None = 无快路径
+62:     fn quick_meta(
+63:         &self,
+64:         _refs: &[SessionFileRef],
+65:     ) -> Option<std::collections::HashMap<String, SessionMeta>> {
+66:         None
+67:     }
+68:     /// Refresh project metadata from sidecars even when the transcript did not
+69:     /// change. Keys are source file paths; only existing, unchanged winning
+70:     /// copies are updated, without replacing their body or source timestamps.
+71:     fn project_path_updates(
+72:         &self,
+73:         _refs: &[SessionFileRef],
+74:     ) -> std::collections::HashMap<String, String> {
+75:         Default::default()
+76:     }
+77:     /// quick 与 parsed 的合并策略:默认 parsed 为准、quick 补缺。
+78:     /// Codex 覆写(state DB 的 title 是用户手动命名,优先级更高)。
+79:     fn merge_quick_meta(&self, mut parsed: SessionMeta, quick: &SessionMeta) -> SessionMeta {
+80:         if parsed.source.is_none() {
+81:             parsed.source = quick.source.clone();
+82:         }
+83:         if parsed.model.is_none() {
+84:             parsed.model = quick.model.clone();
+85:         }
+86:         if parsed.tokens_used.is_none() {
+87:             parsed.tokens_used = quick.tokens_used;
+88:         }
+89:         parsed
+90:     }
+91:     /// 全解析:meta + FTS 单元
+92:     fn parse_session(&self, r: &SessionFileRef) -> Result<ParsedSession>;
+93:     /// 详情解析
+94:     fn parse_transcript(&self, r: &SessionFileRef) -> Result<ParsedTranscript>;
+95:     /// 加载 sidechain 消息(仅 Claude/Cursor subagents)
+96:     fn load_sidechain(
+97:         &self,
+98:         _r: &SessionFileRef,
+
+FILE crates/wake-core/src/adapters/mod.rs
+147:     }
+148:     /// 当前数据根内的 `(child_key, direct_parent_key)` 全量快照。scanner 会在
+149:     /// 合并同 agent 的所有 location 后统一扁平到 root。**`None` 是"这一刻读不出来"**
+150:     /// (state DB 打不开、读到一半出错),scanner 对这一家整段跳过、库里的关系原样
+151:     /// 保留;`Some(空)` 才是"确定没有关系"——把读失败折成空会让 sync_parent_links
+152:     /// 当成关系全解除,一句整家清空(2026-09-21 review)
+153:     fn parent_links(&self) -> Option<Vec<(String, String)>> {
+154:         Some(Vec::new())
+155:     }
+156:     /// watcher 事件是否会改变父子关系快照。关系边车不是会话主文件，不能塞进
+157:     /// `file_ref`；命中后 watcher 会单独刷新同 agent 的所有关系快照。
+158:     fn is_parent_link_event(&self, _path: &Path) -> bool {
+159:         false
+160:     }
+161:     /// 本家会话文件所在的根位置(目录,或 SQLite 型的库文件),**不论当前存不存在**。
+162:     /// 这是路径的**唯一事实源**:watch_paths 由它派生,"Scanned locations" 面板
+163:     /// 直接展示它,按路径前缀统计会话数也依赖它——故语义定死为"其子树(或其本身)
+164:     /// 拥有本家 session 文件的位置",凭据/配置/索引这类不产生会话的文件不列。
+165:     /// 新增 adapter 必须实现:没有默认值,漏了编译就过不去
+166:     fn data_roots(&self) -> Vec<std::path::PathBuf>;
+167:     /// 文件监听根目录。默认 = data_roots 中现存的目录,十九家实测全部吻合:
+168:     /// 目录型给出自己的 root,SQLite 型的根是库文件、天然筛空(watcher 只认
+169:     /// .jsonl,库变更靠启动/手动刷新),codex 的 sessions + archived 一并覆盖。
+170:     /// 只有当监听范围确实不同于数据根时才覆写——否则一次根路径搬迁
+171:     /// (如 CODEX_HOME / XDG_DATA_HOME)就要在两处各改一遍,漏一处则静默失去实时更新
+172:     fn watch_paths(&self) -> Vec<std::path::PathBuf> {
+
+FILE crates/wake-core/src/models.rs
+215:     /// agent 恒为首段(scanner 的易主检测按 `split(':').next()` 取 agent);
+216:     /// host 段只由 adapters::remote 的装饰器在解析出口插入,adapter 本体
+217:     /// 永远生产本地格式
+218:     pub key: String,
+219:     /// 原生会话 id(resume 用;不含 host 段)
+220:     pub id: String,
+221:     /// 远程 host 名(Settings 里配置的 SSH 目标);空 = 本地会话。
+222:     /// 只由 RemoteAdapter 装饰器填充,各家 adapter 构造时一律留空
+223:     #[serde(default)]
+224:     pub host: String,
+225:     pub agent: AgentId,
+226:     pub title: String,
+227:     pub project_path: String,
+228:     pub project_name: String,
+229:     pub file_path: String,
+230:     /// epoch ms
+231:     pub created_at: i64,
+232:     pub updated_at: i64,
+233:     pub message_count: i64,
+234:     pub size_bytes: i64,
+235:     pub git_branch: Option<String>,
+236:     pub model: Option<String>,
+237:     pub tokens_used: Option<i64>,
+238:     pub archived: bool,
+239:     pub source: Option<String>,
+240:     // app 自有状态(user_data 表)
+241:     pub favorite: bool,
+242:     pub pinned: bool,
+243: }
+244: 
+245: #[derive(Debug, Clone, Serialize, Deserialize)]
+246: pub struct ToolCallView {
+247:     pub id: String,
+248:     pub name: String,
+249:     pub input_preview: String,
+250:     pub input: Option<String>,
+251:     pub output: Option<String>,
+252:     pub is_error: bool,
+
+FILE crates/wake-core/src/models.rs
+312:     pub thinking: Option<String>,
+313:     /// epoch ms
+314:     pub timestamp: Option<i64>,
+315:     pub model: Option<String>,
+316:     /// 随消息出现的图片，保持源内容块的顺序。
+317:     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+318:     pub images: Vec<ImageAttachment>,
+319: }
+320: 
+321: #[derive(Debug, Clone, Serialize, Deserialize)]
+322: pub struct SidechainInfo {
+323:     pub id: String,
+324:     pub agent_type: Option<String>,
+325:     pub description: Option<String>,
+326:     pub tool_use_id: Option<String>,
+327: }
+328: 
+329: impl SidechainInfo {
+330:     /// 边车给的"是谁、干什么":`Explore: find the watcher code`;两项都没有时为空串。
+331:     /// 导出的 `## ⑂ Subagent:` 标题与 MCP 的 subagent 事实行共用,别各拼一份
+332:     pub fn label(&self) -> String {
+333:         [self.agent_type.as_deref(), self.description.as_deref()]
+334:             .into_iter()
+335:             .flatten()
+336:             .map(str::trim)
+337:             .filter(|s| !s.is_empty())
+338:             .collect::<Vec<_>>()
+339:             .join(": ")
+340:     }
+341: }
+342: 
+343: #[derive(Debug, Clone)]
+344: pub struct ParsedTranscript {
+345:     pub meta: SessionMeta,
+
+FILE crates/wake-core/src/scanner.rs
+35: /// UI 的模态刷新弹窗把三条关闭路径全关了(close_button / overlay_closable /
+36: /// keyboard),只认这个事件收场——扫描中途离开而没发终态,界面就被永久锁死。
+37: /// 把它挂在 Drop 上,提前 `?` 与 panic unwind 就都兜得住,"必发"由类型保证,
+38: /// 不再依赖后来者记得在每条返回路径上补一句。
+39: struct ScanFinale<'a> {
+40:     events: &'a dyn ScanEvents,
+41:     progress: ScanProgress,
+42:     /// 正常收尾时置 true;panic unwind 会让它保持 false,Drop 借此区分两种收场
+43:     graceful: bool,
+44: }
+45: 
+46: impl Drop for ScanFinale<'_> {
+47:     fn drop(&mut self) {
+48:         self.progress.scanning = false;
+49:         if !self.graceful {
+50:             self.progress.error = Some("Scan stopped unexpectedly".into());
+51:         }
+52:         self.events.on_progress(&self.progress);
+53:     }
+54: }
+55: 
+56: /// 进程内同一时刻只跑一条扫描。GUI 里 Dock 重开主窗会新建 Workbench 并立刻
+57: /// 起一轮启动扫描,而上一个 Workbench 的扫描线程是脱管的(watcher 在 Drop 里
+58: /// join 了,扫描没有)——不排队就是两条扫描并发改写同一个库。门放在 run_scan
+59: /// 入口而不是某个调用方:任何起扫描的入口都自动被管住。锁是进程级而非 Store
+60: /// 级,要挡的正是两个 Store 实例开同一个库文件;扫描 panic 会毒化锁,
+61: /// into_inner 照常放行。排在后面的照常出终态事件,UI 只是多等一会儿。进程**之间**
+62: /// 由 `db::IndexLock` 管(GUI 整个生命周期持有、CLI 写命令干活时持有),两者不可
+63: /// 互代:按扫描粒度拿文件锁会与 GUI 的常驻持有自锁(同进程第二个文件描述是另一把 flock)
+64: static SCAN_GATE: std::sync::Mutex<()> = std::sync::Mutex::new(());
+65: 
+
+FILE crates/wake-core/src/scanner.rs
+120: 
+121: /// 从零建一次索引:**只在索引文件不存在时**建,已经有库就原样留给 GUI(`Skipped`)。
+122: /// 这是"重建权只归 GUI 的 `open_or_rebuild`"(db.rs)对"建"的唯一例外,场景是
+123: /// "装了 Wake 但从没启动过";已有的库要跟上磁盘用 `refresh_index`。
+124: ///
+125: /// 先拿 `IndexLock`(拿不到即 `Busy` 退让:GUI 正在启动、下一步就是自己建库),拿到
+126: /// 再看一次库在不在。扫描仍落在旁边的 `<db>.build-<pid>`,扫完才用 `hard_link` 占位——
+127: /// 锁管的是"同一时刻只有一个写者",这一层管的是"中途死掉不留半截":
+128: /// ① 中途报错 / panic / 被 agent 超时杀掉,目标路径一个字节都没出现过,下次
+129: ///    还能重试(不然半截索引会被开头那道 exists 当成"已经有了"永久挡住,而
+130: ///    只读查询会把它当正常结果);
+131: /// ② 不认这把锁的老版本 GUI 在这几秒里首次启动建了库,hard_link 对它照样是
+132: ///    AlreadyExists——我们丢掉自己那份退让,绝不往对方的库里写;
+133: /// ③ 用 hard_link 不用 rename:rename 无条件覆盖,给不出"已存在即失败"这条
+134: ///    语义(POSIX 与 Windows 都保证)。
+135: ///
+136: /// 占位成功后清孤儿边车:目标刚才还不存在,躺在那儿的 -wal/-shm 只可能是孤儿(主库
+137: /// 被手删,或 open_or_rebuild 挪库与删边车之间崩过),留着任何一个,新库都会接着读旧
+138: /// 日志——锁在手,这几十微秒里没人会开这个库。**别加 --force**:重建已有的库归 GUI
+139: pub fn build_index(path: &Path, events: &dyn ScanEvents) -> Result<Outcome> {
+140:     if path.exists() {
+141:         return Ok(Outcome::Skipped(Skip::Exists));
+142:     }
+143:     let _lock = match IndexLock::try_acquire(path, "wake-cli index")? {
+144:         Ownership::Ours(lock) => lock,
+145:         Ownership::Held(holder) => return Ok(Outcome::Busy(holder)),
+146:     };
+147:     // 锁外那一眼可能过时:GUI 刚建完库又退出了
+148:     if path.exists() {
+149:         return Ok(Outcome::Skipped(Skip::Exists));
+150:     }
+151:     let staging = Staging::new(path);
+152:     let tally = {
+153:         let store = Arc::new(Store::open(&staging.0)?);
+154:         scan_with(&store, events, true)?
+155:     }; // 关掉最后一个连接即 checkpoint,-wal/-shm 消失,临时库自成一体
+156:     match std::fs::hard_link(&staging.0, path) {
+157:         Ok(()) => {}
+158:         // 有人抢先了(不认锁的老版本 GUI 首扫)。他的库归他,退让
+159:         Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+160:             return Ok(Outcome::Skipped(Skip::Exists))
+161:         }
+162:         // 个别文件系统不给硬链接:退回 rename,但只在目标确实还空着时
+163:         Err(_) if !path.exists() => std::fs::rename(&staging.0, path)?,
+164:         Err(_) => return Ok(Outcome::Skipped(Skip::Exists)),
+165:     }
+166:     for suffix in ["-wal", "-shm"] {
+167:         let _ = std::fs::remove_file(format!("{}{suffix}", path.display()));
+168:     }
+169:     Ok(Outcome::Done(tally))
+170: }
+171: 
+
+FILE crates/wake-core/src/watcher.rs
+12: /// 监听 adapter 数据目录,800ms 去抖后做单文件增量。
+13: /// drop 即停:先撤事件源(通道关闭、线程退出循环),再 **join 等线程真正
+14: /// 退出**——roster 换代时旧线程可能正持旧 roster/Store 在写库,不等它收尾,
+15: /// 已移除根的会话会在新 roster 补扫之后被写回、复活到下次手动刷新
+16: /// (2026-08-24 Codex review P1)。在批处理粒度上等待,通常毫秒级
+17: pub struct SessionWatcher {
+18:     watcher: Option<notify::RecommendedWatcher>,
+19:     thread: Option<std::thread::JoinHandle<()>>,
+20:     watched: std::collections::BTreeSet<PathBuf>,
+21: }
+22: 
+23: impl SessionWatcher {
+24:     /// 实际 watch 成功的根(缺目录等失败被静默跳过的不在内)——"挂了哪些"
+25:     /// 的唯一真话。远程同步收工后据此判断缓存树是否长出了监听外的新根。
+26:     pub fn watched_roots(&self) -> &std::collections::BTreeSet<PathBuf> {
+27:         &self.watched
+28:     }
+29: }
+30: 
+31: impl Drop for SessionWatcher {
+32:     fn drop(&mut self) {
+33:         self.watcher.take();
+34:         if let Some(t) = self.thread.take() {
+35:             let _ = t.join();
+36:         }
+37:     }
+38: }
+39: 
+40: /// 事件路径 → 归属 agent:取**最长匹配根**,不是第一个命中。env 自定义根
+
+FILE crates/wake-core/src/watcher.rs
+155:             while let Ok(ev) =
+156:                 rx.recv_timeout(deadline.saturating_duration_since(std::time::Instant::now()))
+157:             {
+158:                 batch.push(ev);
+159:                 if std::time::Instant::now() >= deadline {
+160:                     break;
+161:                 }
+162:             }
+163: 
+164:             let mut parent_link_agents = HashSet::new();
+165:             let mut rescan = false;
+166:             for ev in batch {
+167:                 let Ok(ev) = ev.inspect_err(|e| eprintln!("watcher: notify error: {e}")) else {
+168:                     continue;
+169:                 };
+170:                 // 后端丢过事件(FSEvents MustScanSubDirs / inotify Q_OVERFLOW):
+171:                 // 这条不指向具体会话文件——macOS 挂的是出事的目录、Linux 干脆
+172:                 // 无路径——按路径处理会被 file_ref 静默丢弃,改由整轮增量兜底
+173:                 if ev.need_rescan() {
+174:                     rescan = true;
+175:                     continue;
+176:                 }
+177:                 for path in ev.paths {
+178:                     let owner_ix = resolve_ix(&path);
+179:                     if let Some(adapter) = owner_ix.and_then(|ix| adapters.get(ix)) {
+180:                         if adapter.is_parent_link_event(&path) {
+181:                             parent_link_agents.insert(adapter.agent());
+182:                         }
+183:                     }
+184:                     if matches!(ev.kind, notify::EventKind::Remove(_)) {
+
+FILE crates/wake-core/src/db.rs
+322: fn open_conn_ro(path: &Path) -> Result<Connection> {
+323:     let conn = Connection::open_with_flags(
+324:         path,
+325:         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+326:     )?;
+327:     conn.busy_timeout(std::time::Duration::from_millis(3000))?;
+328:     Ok(conn)
+329: }
+330: 
+331: fn table_has_column(conn: &Connection, table: &str, column: &str) -> Result<bool> {
+332:     let mut stmt = conn.prepare(&format!("PRAGMA table_info({table})"))?;
+333:     let names = stmt.query_map([], |row| row.get::<_, String>(1))?;
+334:     for name in names {
+335:         if name? == column {
+336:             return Ok(true);
+337:         }
+338:     }
+339:     Ok(false)
+340: }
+341: 
+342: /// 打开索引库;打不开就把它连同 WAL/SHM 一起挪到 `.corrupt` 旁路再建一个空的。
+343: /// 索引本来就能从磁盘全量重扫恢复,重建的真实损失只有 user_data(收藏/置顶)
+344: /// 与 location 配置——而它远好过 GUI 无提示秒退。
+345: /// 返回的 `Some(_)` 是给用户看的说明文案。
+346: pub fn open_or_rebuild(path: &Path) -> Result<(Store, Option<String>)> {
+347:     let first = match Store::open(path) {
+348:         Ok(store) => return Ok((store, None)),
+349:         Err(e) => e,
+350:     };
+351:     // 挪走的是**真实文件**:默认路径是符号链接时链接留着、新库仍沿链接建在目标处,GUI 手里
+352:     // `IndexLock` 锁的正是目标旁那把;挪链接本身会让锁留在旧目标旁、新库无人看管
+353:     // (Codex review 2026-09-23)。重开仍走原路径,`Store.path` 与远程镜像目录不变。
+354:     // 三件套一起挪:留下 WAL 或 SHM 任何一个,新库都会接着读旧日志
+355:     let real = canonical(path);
+356:     let backup = std::path::PathBuf::from(format!("{}.corrupt", real.display()));
+357:     let _ = std::fs::remove_file(&backup);
+358:     let _ = std::fs::rename(&real, &backup);
+359:     for suffix in ["-wal", "-shm"] {
+360:         let _ = std::fs::remove_file(format!("{}{suffix}", real.display()));
+361:     }
+362:     let store = Store::open(path).with_context(|| format!("rebuild failed after: {first}"))?;
+363:     Ok((
+364:         store,
+365:         Some(format!(
+366:             "Index was damaged and has been rebuilt — stars, pins and location \
+367:              settings are gone. The old file is kept at {}",
+368:             backup.display()
+369:         )),
+370:     ))
+371: }
+372: 
+373: /// 索引库的**跨进程**写者锁。`scanner::SCAN_GATE` 只管一个进程里的两条扫描串行,
+374: /// 这把锁管进程之间:GUI 与 `wake-cli refresh` / `wake-cli index` / scan bin 都是写者,
+375: /// 同一时刻只能有一个——两个进程各建一份 roster,launchd 与 Dock 起的 GUI 看到的 env
+376: /// 未必相同(CODEX_HOME / XDG_DATA_HOME / WAKE_HOME 各解各的根),删除检测会把对方收进来
+377: /// 的会话当"磁盘已删"清掉、下一轮再由对方加回,每十分钟互删一次;靠 busy_timeout 排队
+378: /// 解决不了这个,只能不并发。
+379: ///
+380: /// 形态:`<db>.lock` 旁路文件上的文件锁(unix flock / Windows LockFileEx,std 的
+381: /// `File::try_lock`),路径按库的**真实路径**派生——`--db` 给到符号链接别名也得撞上同一把。
+382: /// **GUI 另持一把 `<db>.lock.app`**:别人拿不到主锁时探这把锁,拿不到就是有个活着的 GUI——
+383: /// 锁随进程生死,不会残留,"持有者是不是 GUI"这条决定 GUI 等不等、CLI 怎么措辞的判据
+384: /// 只认它。持有者自述(`"wake-cli refresh 4242"`)另写在 `<db>.lock.holder`,**只用来点名**:
+385: /// 它写在拿到锁之后,拿到与写完之间读到的是上一任的残留,拿它做判断就会把新起的 GUI 误
+386: /// 劝退;也不写进锁文件——Windows 的文件锁是强制锁,别的句柄读不到被锁的内容(三条都是
+387: /// 2026-09-23 Codex review)。
+388: /// **谁写库谁持有,且持有期必须盖住读写 `Store` 的整个生命期**:GUI 从启动持到退出
+389: /// (watcher 与扫描随时会写),CLI 写命令只在干活那几秒持有;只读旁路(wake-mcp、
+390: /// wake-cli 的查询)不拿。锁不长在 `Store::open` 里,因为同一进程会同时开多个 Store
+391: /// (scanner_finale 的用例、Dock 重开)而 `open_or_rebuild` 还会把库挪走重开,锁的生命期
+392: /// 得独立于单个 Store——写者名单是封闭的,见 `Store::open` 的约定。锁跟着文件描述符走,
+
+FILE crates/wake-core/src/db.rs
+696:     pub fn latest_activity(&self) -> Result<Option<i64>> {
+697:         let conn = self.read.lock().unwrap();
+698:         let latest: Option<i64> =
+699:             conn.query_row("SELECT MAX(updated_at) FROM sessions", [], |r| r.get(0))?;
+700:         Ok(latest.filter(|t| *t > 0))
+701:     }
+702: 
+703:     // ---------- 写路径(扫描器/用户操作) ----------
+704: 
+705:     pub fn write_session(
+
+FILE crates/wake-core/src/db.rs
+733:     pub fn write_session_guarded(
+734:         &self,
+735:         meta: &SessionMeta,
+736:         file_mtime: i64,
+737:         units: &[IndexUnit],
+738:         lookups: &[WakeLookup],
+739:         rank_of: &dyn Fn(&str) -> u8,
+740:         supersedes: Option<(&str, i64)>,
+741:     ) -> Result<bool> {
+742:         let mut conn = self.write.lock().unwrap();
+743:         let tx = conn.transaction()?;
+744:         let cur: Option<(String, i64)> = tx
+745:             .query_row(
+746:                 "SELECT file_path, file_mtime FROM sessions WHERE key = ?1",
+747:                 params![meta.key],
+748:                 |r| Ok((r.get(0)?, r.get(1)?)),
+749:             )
+750:             .optional()?;
+751:         if let Some((cur_path, cur_mtime)) = cur {
+752:             // 让位只认"库里还是我们解析失败的那个版本或更旧的":同路径且行上的
+753:             // file_mtime ≤ 枚举时看到的 mtime(quick 占位的 0 自然包含;早先入库、
+754:             // 后来损坏的转录是"更旧");期间 watcher 已把修好的同路径文件成功入库
+755:             //(mtime 更新)就不让位,照常裁决(Codex review 第四轮)
+756:             let yields = supersedes
+757:                 .is_some_and(|(failed, seen_mtime)| failed == cur_path && cur_mtime <= seen_mtime);
+758:             if cur_path != meta.file_path && !yields {
+759:                 let (cur_rank, new_rank) = (rank_of(&cur_path), rank_of(&meta.file_path));
+760:                 let loses = cur_rank < new_rank
+761:                     || (cur_rank == new_rank
+762:                         && (cur_mtime > file_mtime
+763:                             || (cur_mtime == file_mtime
+764:                                 && cur_path.as_str() < meta.file_path.as_str())));
+765:                 if loses {
+766:                     return Ok(false); // 事务未提交即弃
+767:                 }
+768:             }
+769:         }
+770:         write_session_tx(&tx, meta, file_mtime, units, lookups)?;
+771:         tx.commit()?;
+772:         Ok(true)
+773:     }
+
+FILE crates/wake-core/src/cleanup.rs
+713: pub enum TargetStatus {
+714:     Pending,
+715:     Moving,
+716:     Moved,
+717:     Failed(String),
+718: }
+719: #[derive(Clone, Debug, Serialize, Deserialize)]
+720: pub struct CleanupRecord {
+721:     pub candidate: CleanupCandidate,
+722:     pub targets: Vec<TargetStatus>,
+723:     /// Kept when reading old journals; file recovery is handled by the OS.
+724:     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+725:     pub trash_paths: Vec<Option<PathBuf>>,
+726:     /// Captured and journaled before any move, independent of inode/allocation
+727:     /// changes caused by the OS restoring a file across volumes.
+728:     #[serde(default)]
+729:     pub content_hashes: HashMap<PathBuf, String>,
+730:     pub indexed: bool,
+731:     pub restored: bool,
+732:     pub error: Option<String>,
+733: }
+734: #[derive(Clone, Debug, Serialize, Deserialize)]
+735: pub struct CleanupBatch {
+736:     pub id: String,
+737:     pub stamp: i64,
+738:     pub records: Vec<CleanupRecord>,
+
+FILE crates/wake-core/src/cleanup.rs
+779: 
+780: /// Retry only the index transaction for targets durably recorded as moved.
+781: /// An interrupted `Moving` status remains ambiguous and requires user review.
+782: pub fn retry_index_updates(store: &Store, batch: &mut CleanupBatch) -> Result<usize> {
+783:     let mut count = 0;
+784:     for i in 0..batch.records.len() {
+785:         let r = &batch.records[i];
+786:         if r.indexed || r.restored || !r.targets.iter().all(|s| *s == TargetStatus::Moved) {
+787:             continue;
+788:         }
+789:         let result = (|| {
+790:             for target in &r.candidate.targets {
+791:                 ensure!(
+792:                     !target.path.try_exists()?,
+793:                     "Source is present again; review it before updating the index"
+794:                 );
+795:             }
+796:             store.complete_cleanup(&r.candidate.sessions, batch.stamp)
+797:         })();
+798:         match result {
+799:             Ok(()) => {
+800:                 batch.records[i].indexed = true;
+801:                 batch.records[i].error = None;
+802:                 count += 1;
+803:             }
+804:             Err(e) => batch.records[i].error = Some(e.to_string()),
+805:         }
+806:         batch.save(store)?;
+807:     }
+808:     Ok(count)
+
+FILE crates/wake-core/src/cleanup.rs
+829:     batch.save(store)?;
+830:     for i in 0..batch.records.len() {
+831:         if cancel.load(Ordering::Relaxed) {
+832:             break;
+833:         }
+834:         let plan = batch.records[i].candidate.clone();
+835:         if let Err(e) = revalidate(store, adapters, &plan) {
+836:             batch.records[i].error = Some(e.to_string());
+837:             batch.save(store)?;
+838:             progress(i + 1);
+839:             continue;
+840:         }
+841:         match content_hashes(&plan.targets).and_then(|hashes| {
+842:             // Hashing large trees can take time; recheck source ownership and
+843:             // user metadata as well as the file snapshots before moving.
+844:             revalidate(store, adapters, &plan)?;
+845:             Ok(hashes)
+846:         }) {
+847:             Ok(hashes) => batch.records[i].content_hashes = hashes,
+848:             Err(e) => {
+849:                 batch.records[i].error = Some(e.to_string());
+850:                 batch.save(store)?;
+851:                 progress(i + 1);
+852:                 continue;
+853:             }
+854:         }
+855:         // Recovery evidence must be durable before the first move.
+856:         batch.save(store)?;
+857:         for (j, expected) in plan.targets.iter().enumerate() {
+858:             batch.records[i].targets[j] = TargetStatus::Moving;
+859:             batch.save(store)?;
+860:             let result = (|| {
+861:                 ensure!(
+862:                     target(&expected.path)? == *expected,
+863:                     "Source changed before move"
+864:                 );
+865:                 trash(&expected.path)?;
+866:                 ensure!(
+867:                     !expected.path.try_exists()?,
+868:                     "Source is still present after move"
+869:                 );
+870:                 Ok(())
+871:             })();
+872:             match result {
+873:                 Ok(()) => batch.records[i].targets[j] = TargetStatus::Moved,
+874:                 Err(e) => {
+875:                     batch.records[i].targets[j] = TargetStatus::Failed(format!("{e:#}"));
+876:                     batch.records[i].error = Some(format!("{e:#}"));
+877:                     batch.save(store)?;
+878:                     break;
+879:                 }
+880:             }
+881:             batch.save(store)?;
+882:         }
+883:         if batch.records[i]
+884:             .targets
+885:             .iter()
+886:             .all(|s| *s == TargetStatus::Moved)
+887:         {
+888:             match store.complete_cleanup(&plan.sessions, batch.stamp) {
+889:                 Ok(()) => batch.records[i].indexed = true,
+890:                 Err(e) => batch.records[i].error = Some(e.to_string()),
+891:             }
+892:         }
+893:         batch.save(store)?;
+894:         progress(i + 1);
+895:     }
+896:     batch.finished = true;
+897:     batch.save(store)
+898: }
+899: 
+
+FILE crates/wake-core/src/cleanup.rs
+983: pub fn restore(
+984:     store: &Store,
+985:     adapters: &[Box<dyn AgentAdapter>],
+986:     batch: &mut CleanupBatch,
+987: ) -> Result<usize> {
+988:     let mut count = 0;
+989:     for i in 0..batch.records.len() {
+990:         if batch.records[i].restored || !batch.records[i].can_restore() {
+991:             continue;
+992:         }
+993:         let result = (|| {
+994:             let record = &batch.records[i];
+995:             store.validate_cleanup_restore(&record.candidate.sessions, batch.stamp)?;
+996:             let checked = verify_restored_files(record)?;
+997:             for meta in &record.candidate.sessions {
+998:                 let parsed = supported_adapter(adapters, meta)?
+999:                     .parse_session(&SessionFileRef::from_meta(meta))?;
+1000:                 ensure!(
+1001:                     parsed.unknown_line_count == 0 && parsed.meta.id == meta.id,
+1002:                     "Restored session could not be verified"
+1003:                 );
+1004:             }
+1005:             for expected in checked {
+1006:                 ensure!(
+1007:                     target(&expected.path)? == expected,
+1008:                     "Restored files changed before verification"
+1009:                 );
+1010:             }
+1011:             store.restore_cleanup(&record.candidate.sessions, batch.stamp)?;
+
+FILE crates/wake-core/src/services/terminal/mod.rs
+151: fn resume_args(meta: &SessionMeta) -> Option<(Vec<String>, bool)> {
+152:     let id = meta.id.as_str();
+153:     match meta.agent {
+154:         AgentId::ClaudeCode => Some((vec!["--resume".into(), id.into()], true)),
+155:         AgentId::Codex => Some((vec!["resume".into(), id.into()], false)),
+156:         // Qoder 的历史会话按 cwd 分桶，`--resume <id>` 需在原项目目录启动。
+157:         AgentId::Qoder => Some((vec!["--resume".into(), id.into()], true)),
+158:         AgentId::Copilot => Some((vec![format!("--resume={id}")], false)),
+159:         AgentId::Cursor => Some((vec!["--resume".into(), id.into()], false)),
+160:         // 参数形制与 kooky 的 resume 集成一致(空格/等号是各家 CLI 实测约束)
+161:         // OpenCode 两代 CLI 同为 --session;v2 会话由 session_bin 换 opencode2
+162:         AgentId::Opencode => Some((vec!["--session".into(), id.into()], false)),
+163:         AgentId::Pi => Some((vec!["--session".into(), id.into()], false)),
+164:         AgentId::Omp => Some((vec!["--resume".into(), id.into()], false)),
+165:         AgentId::Grok => Some((vec!["--resume".into(), id.into()], false)),
+166:         AgentId::Kimi => Some((vec!["--session".into(), id.into()], false)),
+167:         AgentId::Antigravity => Some((vec![format!("--conversation={id}")], false)),
+168:         // dsh 官方 tui bundle 未发布(rc.8 shipped profile 只有 web/headless,
+169:         // help 里的 --profile tui --resume 当下无消费端),web 是唯一交互
+170:         // surface 且无 per-session 深链——resume 退而求其次:cd 到会话 cwd
+171:         // 按官方原样 `npx @deepseek-ai/dsh web` 拉起(workspace 由启动目录
+172:         // 决定),会话在 UI 里即点即续。官方发布 tui bundle 后切回定点 resume
+173:         AgentId::Dsh => Some((vec!["@deepseek-ai/dsh".into(), "web".into()], true)),
+174:         // Hermes 会话不按 cwd 分桶(库里没有 cwd),任何目录都行;`--profile` 必带:
+175:         // 它显式覆盖 sticky 的 active_profile,会话在哪个档案库里就开哪个档案
+176:         // (主库 = "default"),否则别的档案激活期间会 "session not found"
+177:         AgentId::Hermes => Some((
+178:             vec![
+179:                 "--profile".into(),
+180:                 crate::adapters::hermes::profile_of(&meta.file_path),
+181:                 "--resume".into(),
+182:                 id.into(),
+183:             ],
+184:             false,
+185:         )),
+186:         // OpenClaw 的 TUI 只按 session **key**(agent:main:main)打开会话,
+187:         // `--session-id` 只有一次性的 `openclaw agent` 认;Wake 存的是 session id,
+188:         // 历史窗口(reset/rollover 之前的)也没有可续的 key——不提供 Open In
+189:         AgentId::Openclaw => None,
+190:         // CodeBuddy 的历史会话按 cwd 分桶(`--continue` 只看当前目录),
+191:         // `--resume <id>`(别名 -r)同样在原项目目录启动最稳
+192:         AgentId::Codebuddy => Some((vec!["--resume".into(), id.into()], true)),
+193:         // WorkBuddy 只有桌面端、没有 CLI,没有可拼的 resume 命令——不画 Open In
+194:         AgentId::Workbuddy => None,
+195:         // ZCode:没有 CLI,`zcode://` scheme 的参数未公开——不画 Open In
+196:         AgentId::Zcode => None,
+197:         // Kiro / Gemini CLI 没有按会话 id 续会话的形制
+198:         AgentId::Kiro | AgentId::Gemini => None,
+199:     }
+200: }
+201: 
+
+FILE crates/wake-core/src/services/terminal/mod.rs
+267:     /// 把 `ssh -t <host> '…resume…'` 整条放进剪贴板(远端 CLI 是否存在
+268:     /// 本地无从探测,贴到终端后由远端 shell 裁决)
+269:     CopySshCommand,
+270: }
+271: 
+272: pub fn resume_targets(meta: &SessionMeta) -> Vec<ResumeTarget> {
+273:     // 没有 resume 形制的 agent(OpenClaw)不列任何目标——否则菜单里每一项都是
+274:     // 点了才报 "isn't supported" 的死项;本地/远程两条路同源于 resume_args
+275:     if resume_args(meta).is_none() {
+276:         return Vec::new();
+277:     }
+278:     if meta.host.is_empty() {
+279:         terminals_for(meta.agent)
+280:             .into_iter()
+281:             .map(ResumeTarget::App)
+282:             .collect()
+283:     } else {
+284:         vec![ResumeTarget::CopySshCommand]
+285:     }
+
+FILE crates/wake-core/src/services/terminal/mod.rs
+324: pub fn resume_session_in(meta: &SessionMeta, term: TerminalApp) -> ResumeOutcome {
+325:     // 深链类目标(macOS 的 Kooky / Claude Desktop / Codex Desktop)由平台
+326:     // 整锅接管,不走 shell 命令构建;新增非 shell 目标在平台的
+327:     // deep_link_resume 里声明,这里无需加旁路
+328:     if let Some(outcome) = platform::deep_link_resume(meta, term) {
+329:         return outcome;
+330:     }
+331:     let Some((args, requires_cwd)) = resume_args(meta) else {
+332:         return ResumeOutcome {
+333:             ok: false,
+334:             command: String::new(),
+335:             error: Some(format!(
+336:                 "Resume isn't supported for {} yet",
+337:                 meta.agent.display_name()
+338:             )),
+339:         };
+340:     };
+341:     let bin = session_bin(meta);
+342:     let Some(cli) = bin.and_then(resolve_cli) else {
+343:         return ResumeOutcome {
+344:             ok: false,
+345:             command: String::new(),
+346:             error: Some(cli_not_found_error(meta.agent, bin.unwrap_or("?"))),
+347:         };
+348:     };
+349:     let cwd_ok = !meta.project_path.is_empty() && Path::new(&meta.project_path).is_dir();
+350:     let cwd = cwd_ok.then(|| meta.project_path.as_str());
+351:     // 按用户选的宿主取方言:command 既是成功 toast 的展示面,也是失败时
+352:     // 塞进剪贴板的那条,必须与真正跑的一致(Windows 的 cmd 宿主方言不同)
+353:     let command = compose_command(term, &cli, &args, cwd);
+354:     if requires_cwd && !cwd_ok {
+355:         let hint = clipboard_fallback(&command);
+356:         return ResumeOutcome {
+357:             ok: false,
+358:             command,
+359:             error: Some(format!(
+360:                 "Project directory no longer exists: {}. {hint}",
+361:                 meta.project_path
+362:             )),
+363:         };
+364:     }
+365: 
+366:     // 起终端:POSIX 直接投喂拼好的 command;Windows 的 launch_shell 另收
+367:     // 结构化件按宿主重拼方言(cmd 宿主 cmd 方言、其余复用 command 的
+368:     // PowerShell 形态)——一条字符串塞不进两种引号规则,平台差异只摊在
+369:     // 这一处调用点上。
+370:     #[cfg(not(target_os = "windows"))]
+371:     let result = platform::launch_shell(term, &command);
+372:     #[cfg(target_os = "windows")]
+373:     let result = platform::launch_shell(term, &cli, &args, cwd, &command);
+374:     match result {
+375:         Ok(()) => ResumeOutcome {
+376:             ok: true,
+377:             command,
+378:             error: None,
+379:         },
+380:         Err(e) => {
+381:             let hint = clipboard_fallback(&command);
+382:             ResumeOutcome {
+383:                 ok: false,
+384:                 command,
+385:                 error: Some(format!("Couldn't open terminal ({e}). {hint}")),
+386:             }
+
+FILE crates/wake-core/src/services/context.rs
+8: /// 把 agent 给的 project 参数解析成索引里的项目路径集合(交给
+9: /// `SessionFilter::project_paths` / `SearchFilter::project_paths`)。
+10: ///
+11: /// 绝对路径三级:①完全相等;②该路径是某项目路径的后代(agent 的 cwd 在
+12: /// 子目录里)→ 取最长的那个祖先;③项目路径是该路径的后代(monorepo 根、或
+13: /// `~/Github` 这类上层目录)→ 并集。边界判定用 `path_owns`,`wake-old` 不算
+14: /// `wake` 的后代。非绝对路径按项目名匹配(大小写不敏感;`project_name` 就是
+15: /// 各 adapter 经 `project_name_of` 取的路径尾段,不必再自己切一遍)。
+16: /// 返回空 = 没匹配上,调用方据此报"未知项目",**不要退化成不过滤**。
+17: pub fn resolve_project_paths(arg: &str, projects: &[ProjectInfo]) -> Vec<String> {
+18:     let arg = crate::adapters::expand_tilde(arg.trim());
+19:     let wanted = strip_trailing_sep(&arg);
+20:     if wanted.is_empty() {
+21:         return Vec::new();
+22:     }
+23:     if looks_like_path(wanted) {
+24:         if let Some(p) = projects
+25:             .iter()
+26:             .find(|p| strip_trailing_sep(&p.path) == wanted)
+27:         {
+28:             return vec![p.path.clone()];
+29:         }
+30:         let mut best: Option<&ProjectInfo> = None;
+31:         for p in projects.iter().filter(|p| !p.path.is_empty()) {
+32:             if path_owns(&p.path, wanted) && best.is_none_or(|b| p.path.len() > b.path.len()) {
+33:                 best = Some(p);
+34:             }
+35:         }
+36:         if let Some(b) = best {
+37:             return vec![b.path.clone()];
+38:         }
+39:         let mut inside: Vec<String> = projects
+40:             .iter()
+41:             .filter(|p| !p.path.is_empty() && path_owns(wanted, &p.path))
+42:             .map(|p| p.path.clone())
+43:             .collect();
+44:         inside.sort();
+45:         inside.dedup();
+46:         return inside;
+47:     }
+48:     let lower = wanted.to_lowercase();
+49:     let mut matched: Vec<String> = projects
+50:         .iter()
+51:         .filter(|p| !p.path.is_empty() && p.name.to_lowercase() == lower)
+52:         .map(|p| p.path.clone())
+53:         .collect();
+54:     matched.sort();
+55:     matched.dedup();
+56:     matched
+57: }
+58: 
+59: /// 是"路径"而非"项目名"的判据。不能只看 `Path::is_absolute`:Windows 上它对
+
+FILE crates/wake-core/src/mcp/mod.rs
+1: //! wake-mcp:把 Wake 的索引以 MCP(stdio 传输、JSON-RPC 2.0)**只读**暴露给别的
+2: //! coding agent(Claude Code / Codex / Cursor …)。目标是"换一个 agent 不用重新
+3: //! 解释自己做到哪了":对方按项目列最近会话、全文搜、读一段转录,全部来自本机
+4: //! 索引与磁盘上的会话文件,零 LLM、零网络、不写库。
+5: //!
+6: //! 协议层手写而不引 rmcp:wake-core 全同步、没有 tokio,server 端真正要实现的
+7: //! 只有 initialize / notifications/initialized / ping / tools/list / tools/call
+8: //! 五个方法。消息按行分隔(stdio 传输规范:一行一条 JSON,不含裸换行),
+9: //! stdout 只写协议,日志一律 stderr。需要 resources / prompts / sampling
+10: //! 全家桶时再考虑换库。
+11: //!
+12: //! 索引库经 `Store::open_read_only` 打开——旁路进程绝不 `open_or_rebuild`,
+13: //! 也不扫描;新鲜度靠 GUI 常驻的 watcher,每个工具返回都带"索引覆盖到的最新
+14: //! 活动时间"。读会话是现场解析磁盘文件,不受索引新旧影响。
+15: 
+16: pub mod tools;
+
+FILE crates/wake-core/src/mcp/mod.rs
+224: // ---------------------------------------------------------------- 安装辅助
+225: 
+226: /// 只读打开索引,并按库里的 location / remote host 配置建 roster(不变量
+227: /// 8⑥:否则自定义根与远程缓存里的会话找不到能读它的 adapter)。旁路进程
+228: /// (wake-mcp / wake-cli)共用这一条——**绝不 open_or_rebuild**,那会把 GUI
+229: /// 正在写的库挪走重建
+230: pub fn open_index(db: &Path) -> Result<(Arc<Store>, Vec<Box<dyn AgentAdapter>>), String> {
+231:     let store = Arc::new(Store::open_read_only(db).map_err(|e| format!("{e:#}"))?);
+232:     let adapters = crate::adapters::create_adapters_for(&store);
+233:     Ok((store, adapters))
+234: }
+235: 
+
+FILE crates/wake-core/src/mcp/tools.rs
+1111: fn get_session(ctx: &ToolContext, args: &Value) -> ToolResult {
+1112:     let raw_key = text_arg(args, "key")?
+1113:         .ok_or_else(|| ToolError::InvalidParams("`key` is required".into()))?;
+1114:     // 记忆引用走另一条读法;不另开工具,agent 拿到什么引用都交给同一个入口
+1115:     let (key, ref_seq) = match WakeRef::parse(raw_key) {
+1116:         WakeRef::Memory { key } => return get_memory(ctx, &key, args),
+1117:         WakeRef::Session { key, seq } => (key, seq),
+1118:     };
+1119:     let from_seq = int_arg(args, "from_seq", ref_seq.unwrap_or(0), 0, i64::MAX)?;
+1120:     let opts = CompactOptions {
+1121:         from_seq,
+1122:         max_messages: int_arg(args, "max_messages", 60, 1, 200)? as usize,
+1123:         max_chars: int_arg(args, "max_chars", 20_000, 200, 100_000)? as usize,
+1124:         max_message_chars: int_arg(args, "max_message_chars", 4_000, 100, 50_000)? as usize,
+1125:         include_tools: bool_arg(args, "include_tools", false)?,
+1126:         include_thinking: bool_arg(args, "include_thinking", false)?,
+1127:     };
+1128:     let subagent = text_arg(args, "subagent")?;
+1129:     let meta = match find_session(ctx.store, &key)? {
+1130:         Ok(m) => m,
+1131:         Err(text) => return Err(ToolError::Failed(text)),
+1132:     };
+1133:     let adapter = adapter_for(ctx.adapters, meta.agent, &meta.file_path).ok_or_else(|| {
+1134:         ToolError::Failed(format!(
+1135:             "No adapter can read `{}` ({}) — its data location may be disabled in Wake's settings.",
+1136:             meta.key,
+1137:             meta.agent.display_name()
+1138:         ))
+1139:     })?;
+1140:     let transcript = ctx.cache.get_or_parse(adapter, &meta).map_err(|e| {
+1141:         ToolError::Failed(format!(
+1142:             "Could not read the transcript of `{}` from {}: {e:#}",
+1143:             meta.key, meta.file_path
+1144:         ))
+1145:     })?;
+1146:     let live = &transcript.meta;
+1147:     let title = if live.title.is_empty() {
+1148:         UNTITLED
+1149:     } else {
+1150:         &live.title
+
+FILE crates/wake-core/src/remote.rs
+273: 
+274: /// ssh 的批处理选项:探测与 rsync 的 `-e` 同一份——认证/超时行为两步一致,
+275: /// 探测过了 rsync 就不会再卡在认证上
+276: const SSH_OPTS: [&str; 2] = ["-oBatchMode=yes", "-oConnectTimeout=10"];
+277: 
+278: /// 白名单全部 sync_paths,按 REMOTE_LAYOUTS 顺序(探测脚本、rsync 源列表、
+
+FILE crates/wake-core/src/remote.rs
+310: /// 单 host 的 rsync 参数(不含程序名),`paths` 是探测确认存在的源。纯函数,
+311: /// 单测卡命令形状。`-R`(--relative)让 `host:./<相对路径>` 在目标重建相对
+312: /// 布局;`--delete` 让远程删除传播到缓存(watcher 收 Remove 后清库内行)——
+313: /// 它只作用于各源树**内部**,整棵源消失由 sync_host 的缺席清理负责。
+314: fn rsync_args(host: &str, dest: &Path, paths: &[&str]) -> Vec<String> {
+315:     let mut args = vec!["-az".to_string(), "-R".to_string(), "--delete".to_string()];
+316:     args.extend(
+317:         REMOTE_LAYOUTS
+318:             .iter()
+319:             .flat_map(|l| l.exclude.iter())
+320:             .map(|pat| format!("--exclude={pat}")),
+321:     );
+322:     args.extend([
+323:         "--timeout=120".to_string(),
+324:         "-e".to_string(),
+325:         format!("ssh {}", SSH_OPTS.join(" ")),
+326:     ]);
+327:     args.extend(paths.iter().map(|path| format!("{host}:./{path}")));
+328:     args.push(dest.to_string_lossy().to_string());
+329:     args
+330: }
+331: 
+332: /// 同步指定 host(调用方给"全部启用的"或单个新加的)。**绝不 panic、绝不
+333: /// Err**——任何失败只记进 `remote_hosts.last_sync_error`,面板展示,后续
+334: /// 扫描照常消费既有缓存。各 host 的同步彼此独立(纯网络等待),并行跑,
+
+FILE crates/wake-core/src/remote.rs
+360: /// 重探一轮再镜像(第二轮拿到的源集合已经是消失后的),第二轮结果照实报。
+361: fn sync_host(host: &str, dest: &Path) -> Result<(), String> {
+362:     if let Err(e) = std::fs::create_dir_all(dest) {
+363:         return Err(format!("cannot create cache dir {}: {e}", dest.display()));
+364:     }
+365:     let mut retried = false;
+366:     loop {
+367:         let present = probe_remote(host)?;
+368:         // 远端整个不存在的白名单项(该家卸了、库被清了):镜像也删。rsync 的
+369:         // --delete 只作用于它拿到的源树内部,整棵源消失只有这里能传播
+370:         for path in all_sync_paths() {
+371:             if !present.contains(&path) {
+372:                 remove_cached(&dest.join(path))?;
+373:             }
+374:         }
+375:         if present.is_empty() {
+376:             return Ok(());
+377:         }
+378:         match run_rsync(host, dest, &present) {
+379:             Ok(()) => return Ok(()),
+380:             Err(RsyncError::SourcesVanished(_)) if !retried => retried = true,
+381:             Err(RsyncError::SourcesVanished(msg) | RsyncError::Other(msg)) => return Err(msg),
+382:         }
+383:     }
+384: }
+385: 
+386: /// 删缓存里的一个白名单项(目录整树 / 单文件),不存在即无事;删不掉(权限、
+387: /// 锁着的库文件、瞬时 I/O 错误)要当同步失败上报——否则远端已删的会话留在
+388: /// 缓存和索引里,面板却显示同步成功
+389: fn remove_cached(path: &Path) -> Result<(), String> {
+390:     let not_found = |e: &std::io::Error| e.kind() == std::io::ErrorKind::NotFound;
+391:     let meta = match std::fs::symlink_metadata(path) {
+392:         Ok(m) => m,
+393:         Err(e) if not_found(&e) => return Ok(()),
+394:         Err(e) => {
+395:             return Err(format!(
+396:                 "cannot inspect stale cache {}: {e}",
+397:                 path.display()
+
+FILE crates/wake/src/index_lock.rs
+1: //! 索引写锁在 GUI 里的生命期:跟着 Workbench 与它派出的写线程走,**不跟进程走**。macOS 关掉
+2: //! 主窗、app 留在 Dock 时 Workbench 已释放、watcher 随之停了;进程若还持锁,定时跑的
+3: //! `wake-cli refresh` 会一直退让、索引就此停摆(Codex review 2026-09-23)。Workbench 持一份
+4: //! `Arc`,每条会写库的线程 / 后台任务各持一份克隆(扫描、远程同步、记忆同步、删除、清理),
+5: //! 最后一份放掉锁才释放;watcher 在 Workbench 的字段里排在锁前面,drop 时先 join 再放锁。
+6: //! Dock 重开新建 Workbench 时旧扫描线程可能还在跑、那份 Arc 还活着,就在这里 upgrade 共用——
+7: //! 否则同进程第二次 try_lock 会撞上自己的 fd,把自己当成"另一个 Wake"劝退
+8: use std::path::Path;
+9: use std::sync::{Arc, Mutex, Weak};
+10: use std::time::{Duration, Instant};
+11: 
+12: use wake_core::db::{IndexLock, Wait, LOCK_KIND_APP};
+13: 
+14: static SLOT: Mutex<Weak<IndexLock>> = Mutex::new(Weak::new());
+15: 
+16: /// 拿到就 Some。持有者是另一个 Wake、或等满 60s 仍拿不到就弹窗退出——两个 GUI 写同一个库
+17: /// 正是 wake-core SCAN_GATE 那段注释想挡而挡不住的事;拿锁本身出错(不给建议锁的文件系统)
+18: /// 不该把 app 拦在门外,记一行、None 照常起。阻塞调用方:只在开窗之前的 Workbench::new 里调
+19: pub fn take(db: &Path) -> Option<Arc<IndexLock>> {
+20:     let mut slot = SLOT
+21:         .lock()
+22:         .unwrap_or_else(std::sync::PoisonError::into_inner);
+23:     if let Some(live) = slot.upgrade() {
+24:         return Some(live);
+25:     }
+26:     let me = format!("{LOCK_KIND_APP} {}", std::process::id());
+27:     let deadline = Instant::now() + Duration::from_secs(60);
+28:     let holder = loop {
+29:         match IndexLock::acquire_or_wait(db, LOCK_KIND_APP, Duration::from_secs(60)) {
+30:             Ok(Wait::Ours(lock)) => {
+31:                 let lock = Arc::new(lock);
+32:                 *slot = Arc::downgrade(&lock);
+33:                 return Some(lock);
+34:             }
+35:             // 上一份的最后一个持有者刚放手、fd 还没关上的那一瞬,撞见的是自己:等一下再拿
+36:             Ok(Wait::HeldByApp(holder))
+37:                 if holder.to_string() == me && Instant::now() < deadline =>
+38:             {
+39:                 std::thread::sleep(Duration::from_millis(10));
+40:             }
+41:             Ok(Wait::HeldByApp(holder) | Wait::TimedOut(holder)) => break holder,
+42:             Err(e) => {
+43:                 eprintln!(
+44:                     "wake: index lock unavailable at {}: {e}; continuing without it",
+45:                     db.display()
+46:                 );
+47:                 return None;
+48:             }
+49:         }
+50:     };
+51:     wake_core::services::terminal::show_fatal_alert(&crate::tf!(
+52:         "Wake couldn't open its index at {}: another process is using it ({}). Wait for it to finish or quit it, then open Wake again.",
+53:         db.display(),
+54:         holder
+55:     ));
+56:     std::process::exit(1);
+57: }
+
+FILE crates/wake-core/tests/adapter_contracts.rs
+1: //! 各家 adapter 的解析契约测试:全部走公开 API(`AgentAdapter` trait),
+2: //! fixture 为全合成数据(tests/fixtures/,SQLite 型在临时 HOME 里现建,
+3: //! dsh 的 zstd 日志由检入的明文 fixture 在临时 HOME 里压制)。
+4: //!
+5: //! Copilot/OpenCode/Antigravity 的 parse 只认各自 HOME 下的库,Gemini 的 cwd
+6: //! 反查读 `~/.gemini/projects.json`,Kimi 的 cwd 反查读
+7: //! `~/.kimi-code/session_index.jsonl`,因此测试统一把 HOME 指到临时假家目录
+8: //! (OnceLock 保证 set_var 先于一切 adapter 构造,且只发生一次)。文件型
+9: //! agent 的 SessionFileRef 直接指向 fixture 路径,不依赖 HOME。
+10: 
+11: use std::collections::HashSet;
+
+FILE crates/wake-core/tests/adapter_contracts.rs
+1952: /// 跨文件不变量 1:FTS 单元的 seq 必须能在详情页 mainline 中找到同号消息,
+1953: /// 且 mainline seq 从 0 严格递增(搜索跳转按 seq 定位依赖此契约)。
+1954: fn assert_seq_contract(adapter: &dyn AgentAdapter, r: &SessionFileRef) {
+1955:     let tag = r.agent.as_str();
+1956:     let s = adapter
+1957:         .parse_session(r)
+1958:         .unwrap_or_else(|e| panic!("[{tag}] parse_session: {e}"));
+1959:     let t = adapter
+1960:         .parse_transcript(r)
+1961:         .unwrap_or_else(|e| panic!("[{tag}] parse_transcript: {e}"));
+1962: 
+1963:     assert!(!t.mainline.is_empty(), "[{tag}] mainline 不应为空");
+1964:     for (i, m) in t.mainline.iter().enumerate() {
+1965:         assert_eq!(m.seq, i as i64, "[{tag}] mainline seq 必须从 0 严格递增");
+1966:     }
+1967: 
+1968:     assert!(
+1969:         !s.units.is_empty(),
+1970:         "[{tag}] fixture 应产出至少一个 FTS 单元"
+1971:     );
+1972:     let seqs: HashSet<i64> = t.mainline.iter().map(|m| m.seq).collect();
+1973:     for u in &s.units {
+1974:         assert!(
+1975:             seqs.contains(&u.seq),
+1976:             "[{tag}] unit seq {} 在 mainline 中不存在",
+1977:             u.seq
+1978:         );
+1979:         let m = &t.mainline[u.seq as usize];
+1980:         assert_eq!(m.role, u.role, "[{tag}] seq {} 两侧角色不一致", u.seq);
+1981:     }
+1982: 
+1983:     // 两条解析路径共用核心解析器,meta 关键字段必须一致
+1984:     assert_eq!(s.meta.key, t.meta.key, "[{tag}] key 两侧不一致");
+1985:     assert_eq!(s.meta.title, t.meta.title, "[{tag}] title 两侧不一致");
+1986:     assert_eq!(
+1987:         s.meta.message_count, t.meta.message_count,
+1988:         "[{tag}] message_count 两侧不一致"
+1989:     );
+1990: }
+1991: 
+1992: #[test]
+
+FILE crates/wake-core/tests/mcp_stdio.rs
+1: //! wake-mcp 的端到端契约:合成 fixtures 建临时库 → 以真实 bin 起子进程 → 走
+2: //! stdio JSON-RPC。卡住:工具清单稳定;search 命中的 seq 等于 parse_transcript
+3: //! 的序号(seq 契约延伸到 MCP);get_session 分页的 next_seq 逐页衔接、覆盖全部
+4: //! 非 Meta 消息;全程只读(库文件字节不变);坏 key 是 isError 而非崩溃;未知
+5: //! 方法 -32601;库不存在时进程以清晰错误退出。
+6: //!
+7: //! WAKE_HOME 是进程级环境且子进程继承它,整个文件只有一个用例。
+
+FILE crates/wake-core/tests/mcp_stdio.rs
+119: #[test]
+120: fn stdio_contract_end_to_end() {
+121:     let tmp = tempfile::Builder::new()
+122:         .prefix("wake-mcp-e2e-")
+123:         .tempdir()
+124:         .unwrap();
+125:     let home = tmp.path().join("home");
+126:     common::stage_dir_fixtures(&home);
+127:     common::stage_sidecars(&home);
+128:     // 子进程继承这些:它的 roster 也要指向 fixture home,别读到开发机的真实数据
+129:     common::isolate_home(&home);
+130: 
+131:     // 1. 建库 + 全量扫描,并从本进程算出 seq 契约的参照
+132:     let db = tmp.path().join("wake.db");
+133:     let expected_seqs: Vec<i64>;
+134:     let qr_seq: i64;
+135:     let total_sessions: i64;
+136:     {
+137:         let store = Arc::new(Store::open(&db).unwrap());
+
+FILE crates/wake-core/tests/remote_sync.rs
+1: //! 远程同步的端到端(假 ssh + 真 rsync + 真实 roster/scanner):
+2: //!
+3: //! 卡 2026-09-02 本机实测出的两个 bug——①缺父目录的源让 openrsync 发送端
+4: //! 截断文件列表、后面的源静默不传;②任何缺源都让 rsync 跳过 --delete。修法
+5: //! 是先探测再镜像,这里断言的就是"远端缺一大半 agent 时,存在的照样全到、
+6: //! 删除照样传播",再接上 `create_adapter_roster_for` + `run_scan`,确认远程
+7: //! 会话以 `{agent}:{host}:{native}` 入库、Remove host 后按"磁盘已删"出清。
+8: //!
+9: //! 假 ssh 把远端命令交给 sh 在假 home 里跑,与真 ssh 把命令串交给远端登录
+10: //! shell 的行为同形;rsync 用系统真身(macOS 是 openrsync,CI ubuntu 是 GNU
+11: //! rsync,两种发送端都覆盖)。Windows 无 sh/rsync,整文件不编译。
+
+FILE crates/wake-core/tests/remote_sync.rs
+297: /// 手动 live 检查:对着一台**真实** host(`~/.ssh/config` 别名,或 scratchpad
+298: /// 里的 Docker 容器)跑同一条管线——真 ssh、真远端登录 shell、真 rsync 发送端,
+299: /// 是假 ssh 覆盖不到的那一层。默认 ignore:
+300: /// `WAKE_LIVE_REMOTE_HOST=<host> cargo test -p wake-core --test remote_sync live -- --ignored --nocapture`
+301: /// 不做 fixture 级断言,只要求同步无错、缓存非空、扫描后有该 host 的会话入库,
+302: /// 分家数量打印出来人工看。临时库与缓存都在 tempdir,不碰真实索引。
+303: #[test]
+304: #[ignore]
+305: fn live_remote_host() {
+306:     let Ok(host) = std::env::var("WAKE_LIVE_REMOTE_HOST") else {
+307:         eprintln!("WAKE_LIVE_REMOTE_HOST not set; nothing to do");
+308:         return;
+309:     };
+310:     let tmp = tempfile::tempdir().unwrap();
+311:     let local_home = tmp.path().join("local-home");
+312:     fs::create_dir_all(&local_home).unwrap();
+313:     // 本地 roster 指向空 home(HOME 保留,ssh 要读 ~/.ssh)
+
+FILE .github/workflows/ci.yml
+1: name: CI
+2: 
+3: on:
+4:   push:
+5:     branches: [main]
+6:   pull_request:
+7: 
+8: env:
+9:   CARGO_TERM_COLOR: always
+10: 
+11: jobs:
+12:   test:
+13:     name: Test & build (${{ matrix.os }})
+14:     runs-on: ${{ matrix.os }}
+15:     strategy:
+16:       fail-fast: false
+17:       matrix:
+18:         os: [macos-15, ubuntu-24.04, windows-2022]
+19:     steps:
+20:       - uses: actions/checkout@v4
+21: 
+22:       - name: Install Rust
+23:         uses: dtolnay/rust-toolchain@stable
+24:         with:
+25:           components: rustfmt
+26: 
+27:       # 格式门槛:rustfmt 漂移一次就红,不让它累积(2026-09-14 归零后加)
+28:       - name: Check formatting
+29:         run: cargo fmt --all --check
+30: 
+31:       - name: Install Intel macOS target
+32:         if: runner.os == 'macOS'
+33:         run: rustup target add x86_64-apple-darwin
+34: 
+35:       - name: Cache cargo
+36:         uses: Swatinem/rust-cache@v2
+37: 
+38:       # gpui Linux 后端的系统依赖(Wayland/X11/字体/音频头文件)
+39:       - name: Install system dependencies
+40:         if: runner.os == 'Linux'
+41:         run: |
+42:           sudo apt-get update
+43:           sudo apt-get install -y --no-install-recommends \
+44:             libasound2-dev libfontconfig1-dev libwayland-dev \
+45:             libxkbcommon-dev libxkbcommon-x11-dev libssl-dev libzstd-dev \
+46:             pkg-config cmake clang
+47: 
+48:       # 数据层测试:adapter 解析契约 / seq 一致性 / db 往返 / 扫描终态
+49:       - name: Test wake-core
+50:         run: cargo test -p wake-core
+51: 
+52:       # Exercise the real OS trash only with uniquely named synthetic fixtures.
+53:       # Normal local test runs do not touch the system trash.
+54:       - name: Test system trash round trip
+55:         if: runner.os == 'Linux' || runner.os == 'Windows'
+56:         run: cargo test -p wake-core --lib cleanup::tests::system_trash_cleanup_round_trip -- --ignored --exact
+57: 
+58:       # UI crate 内不启动窗口的纯逻辑单测；联网测试标为 ignored
+59:       - name: Test app logic
+60:         run: cargo test -p wake
+61: 
+62:       # GPUI 窗口层仍以三平台编译通过为门槛
+63:       - name: Build app
+64:         run: cargo build -p wake
+65: 
+66:       - name: Build app for Intel macOS
+67:         if: runner.os == 'macOS'
+68:         run: cargo build -p wake --target x86_64-apple-darwin

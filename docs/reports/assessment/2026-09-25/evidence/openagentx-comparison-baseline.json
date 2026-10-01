@@ -1,0 +1,48 @@
+{
+  "observed_at": "2026-09-24T16:56:33.767861+00:00",
+  "main": "da7dddf7e38a67bacc14db052a869a3d2e7efbea",
+  "installed_go_metadata": [
+    "build\tvcs.revision=6d599aca8ce7c32fe11f23244478b495a0a78e68",
+    "build\tvcs.time=2026-09-22T11:32:10Z",
+    "build\tvcs.modified=false"
+  ],
+  "installed_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89",
+  "services": [
+    {
+      "MainPID": "1686100",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89"
+    },
+    {
+      "MainPID": "1687781",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "openagentx-worker@quote-service.service",
+      "exe_sha256": "a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89"
+    }
+  ],
+  "same_service_state_as_previous": true,
+  "runtime_or_browser_retested": false,
+  "frozen_files": {
+    "AGENTS.md": "b53264590ccb1ebace81668ae3c98f1e29ce8f61384a259f08a5e23b8b92a95b",
+    "docs/decisions/ADR-001-resident-agent-worker-runtime-observability.md": "587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403",
+    "docs/decisions/ADR-002-agent-cli-proxy-environment.md": "e1e4cb8b2368be2ea17f66fb1ce33c0185c8d4be9484bc63a245494b0d547f1d",
+    "docs/decisions/ADR-003-command-center-task-observation-and-content.md": "a538850fdf884a4d7a00ab92646c6a6c9e5374eb91ef35a0c7ffabf7e80ec99c",
+    "docs/decisions/ADR-004-streamlined-command-center-network-ux.md": "317e0d0017e2e5685d4112b010b1c5a0370bf6316495cc905014715446589ce3",
+    "docs/decisions/ADR-005-interactive-worker-console-and-developer-experience.md": "70164f591997051c26947b08ca2de1c7946b7dfa3389763ecb5ab79998187b7a",
+    "docs/decisions/ADR-006-task-intent-and-verifiable-terminal-semantics.md": "addb19af458824473aacdbb960294a8e08b368803b07c2ff78353737c455aa70",
+    "docs/decisions/ADR-007-worker-network-binding-generation-continuity.md": "98ed16da6ccecc9958e335f7a446ea04aafebf30923fc1e5568a12ff09d0f37a",
+    "docs/decisions/ADR-008-oax-workspace-console-tui-and-cli-session.md": "572e9edc47e8f1961f7db89ada9723ebbe2fcba6ee7fecd37891f76c53f7406d"
+  },
+  "web_assets": {
+    "assets/app.js": "2e173b5064a89c61ca6a5a57f3e9ea1cc3fe8479b7695c81735edeb2053b1e7c",
+    "assets/app.css": "c7e9b0f8d223ff14ab76c2280ded37613bd4c06918f002c1627e9133a89b548f",
+    "index.html": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38"
+  },
+  "same_web_as_previous_assessment": true,
+  "adr006_head": "d0fd561cb2d19495a4b849079cfebc74b8e60303"
+}

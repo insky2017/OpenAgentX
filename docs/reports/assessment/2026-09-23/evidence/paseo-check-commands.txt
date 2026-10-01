@@ -1,0 +1,7 @@
+Scope: isolated two original pure test suites; no provider credentials used.
+Command:
+npm exec --yes --package=vitest@3.2.4 -- vitest run --config /tmp/paseo-assessment-checks/vitest.config.mjs --bail=1
+Result: exit 0, 2 files, 7 tests passed.
+Node v20.19.4, Vitest 3.2.4.
+Config differs from upstream CI (Node 22, full workspace install); no project typecheck/build/full suite executed.
+Only npm tool cache downloaded; no product dependencies or services installed.

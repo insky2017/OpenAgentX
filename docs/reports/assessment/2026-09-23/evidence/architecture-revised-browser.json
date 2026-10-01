@@ -1,0 +1,49 @@
+{
+  "browser": "143.0.7499.109",
+  "offline": true,
+  "checks": [
+    {
+      "width": 1440,
+      "view": "系统总览",
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 1440,
+      "view": "任务执行链路",
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 1440,
+      "view": "网络与身份",
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 1440,
+      "view": "部署与 ADR 演进",
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 390,
+      "view": "系统总览",
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 390,
+      "view": "任务执行链路",
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 390,
+      "view": "网络与身份",
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 390,
+      "view": "部署与 ADR 演进",
+      "no_horizontal_overflow": true
+    }
+  ],
+  "errors": [],
+  "external_requests": [],
+  "role_and_adr_corrections": true
+}

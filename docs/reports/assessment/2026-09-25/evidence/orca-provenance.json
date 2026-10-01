@@ -1,0 +1,517 @@
+{
+  "repository": "https://github.com/stablyai/orca",
+  "commit": "122b8c25d7c16f76e395bf9a65887d7c4bc5003b",
+  "commit_metadata": "2026-09-24T00:50:03-07:00\nfix(terminal): let Linux IMEs keep the candidate key for a preedit they own (#22607)",
+  "captured_at": "2026-09-25T01:08:52.763418+08:00",
+  "clone": "/tmp/oax-orca-assessment-20260925",
+  "tracked_file_count": 29257,
+  "source_ts_tsx_count": 22824,
+  "test_file_count": 11101,
+  "git_status": "",
+  "source_and_test_files": {
+    ".github/workflows/e2e.yml": {
+      "sha256": "ab1cdbace12a0a74644232c6d466956f7625356112c19e5400fad2a7e8340092",
+      "bytes": 20327,
+      "lines": 475,
+      "matches_fixed_HEAD": true
+    },
+    ".github/workflows/pi-provider-runtime.yml": {
+      "sha256": "c389a9c102b7e7b0fefb43e1378aecc3e3d9e9dc11a36f0fa3dd88f003a63756",
+      "bytes": 1013,
+      "lines": 28,
+      "matches_fixed_HEAD": true
+    },
+    ".github/workflows/unit-tests.yml": {
+      "sha256": "e64b52c9002d418f4d6b4bdafe8dcf1eebdb7d303a47e7ab423370326df59b1f",
+      "bytes": 4651,
+      "lines": 116,
+      "matches_fixed_HEAD": true
+    },
+    "AGENTS.md": {
+      "sha256": "656416b93267bbde2b6facac9cc1b34c2ed5855f7bfb1eb2d4bd2d45fd89ecdc",
+      "bytes": 13341,
+      "lines": 133,
+      "matches_fixed_HEAD": true
+    },
+    "LICENSE": {
+      "sha256": "ff1b611f80580d49f4b97e93a97b24eb050b0671b26b8afe16341fab699112f3",
+      "bytes": 1070,
+      "lines": 21,
+      "matches_fixed_HEAD": true
+    },
+    "README.md": {
+      "sha256": "c92333ba0340e47646ff69b2679349b8e293d0d965aac04da80046f4c6606e7c",
+      "bytes": 17099,
+      "lines": 273,
+      "matches_fixed_HEAD": true
+    },
+    "config/scripts/vitest-host-ports-setup.ts": {
+      "sha256": "13bad1952f2da1a3c0042d06cbc375dc03ec112552d91661589ea2c64d159b21",
+      "bytes": 2746,
+      "lines": 67,
+      "matches_fixed_HEAD": true
+    },
+    "config/vitest.config.ts": {
+      "sha256": "05c58f7f4f53008ba46800f5a14759751e0b4da2ccf35613931d2bc27ca5a1c9",
+      "bytes": 1801,
+      "lines": 47,
+      "matches_fixed_HEAD": true
+    },
+    "docs/reference/agent-status-store.md": {
+      "sha256": "b03fffe905835bcd67d9feb37971d61a73e1f9da08529b8d622155ecb5d0d454",
+      "bytes": 29510,
+      "lines": 452,
+      "matches_fixed_HEAD": true
+    },
+    "docs/reference/ssh-execution-boundary.md": {
+      "sha256": "1e19e3bbe4b98e49f62d1bd1d4ce1a434887f4b90d05c98fa04b3151ccb81db8",
+      "bytes": 16149,
+      "lines": 129,
+      "matches_fixed_HEAD": true
+    },
+    "docs/site/content/docs/cli/orchestration.mdx": {
+      "sha256": "47bd3bc8e73470b8cb1b2efadd2919450e5519f60dbb517ab30460aa7e0c9eb2",
+      "bytes": 9630,
+      "lines": 199,
+      "matches_fixed_HEAD": true
+    },
+    "package.json": {
+      "sha256": "313f7e1a61bf7eabd2251f3749994c69b45a937895163294e33b604eb972e3dc",
+      "bytes": 26760,
+      "lines": 370,
+      "matches_fixed_HEAD": true
+    },
+    "pnpm-lock.yaml": {
+      "sha256": "dd08171e409aff27574f1c321e3fbdbc6b21bf1b67a2b4cb6e74cd746c8f8119",
+      "bytes": 533549,
+      "lines": 14782,
+      "matches_fixed_HEAD": true
+    },
+    "pnpm-workspace.yaml": {
+      "sha256": "05c7714a3057b4f69dea52fc3665e01a9efe6fedebfd17011e000ba974bdb2f8",
+      "bytes": 3126,
+      "lines": 71,
+      "matches_fixed_HEAD": true
+    },
+    "src/cli/handlers/orchestration/dispatch-handlers.ts": {
+      "sha256": "3532dc8e28859a609f7a5d80fd929d93d47939e4eeba78f1e9b41268ad83e94a",
+      "bytes": 3486,
+      "lines": 84,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/agent-hooks/server/server-hydration.ts": {
+      "sha256": "a26d2f92a40ebc2478572cfdec83165f9e796e618e5cac789e533b7cfb6213dd",
+      "bytes": 7310,
+      "lines": 170,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/agent-launch/agent-launch-executor.ts": {
+      "sha256": "2b4516976f7d724df09a0629e60f7cda79cc43521c49ca88371febe28de0a1e2",
+      "bytes": 14675,
+      "lines": 350,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/agent-launch/agent-launch-mode.ts": {
+      "sha256": "f93b261d09349016ed7f6d2793aebe3947dccfa9bd72d0710069bf9f6f3d9b06",
+      "bytes": 10854,
+      "lines": 245,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/claude/claude-tui-resume-real-binary.integration.test.ts": {
+      "sha256": "34ff2ae50f90942a32853a7d6e398fa5231c62c3116a85ec2469d88cfa3f7bc3",
+      "bytes": 10128,
+      "lines": 285,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/codex/codex-structured-prompt-replies.ts": {
+      "sha256": "7b927e9910031ee80ab885ce1d713133d3ee614c5b6d460a5c91ff3768d9cb2e",
+      "bytes": 4377,
+      "lines": 121,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/codex/codex-structured-turn-cancellation.ts": {
+      "sha256": "518b8e5a2f6dc4f8e46e01366c0a61830d6c805b68101484726bd62bbfc831a8",
+      "bytes": 6238,
+      "lines": 194,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/codex/codex-tui-resume-real-binary.integration.test.ts": {
+      "sha256": "4d399e3aa8f25b72316982d8261ef00f01d37224f0e36e70afbb355e0fb326cc",
+      "bytes": 5459,
+      "lines": 160,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/native-chat/agent-session-journal/journal-crash-boundary.test.ts": {
+      "sha256": "5b27448a9914083fb69eea80e28d94822c13ee028e6a639eac9724cdd42453ad",
+      "bytes": 16701,
+      "lines": 481,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/native-chat/agent-session-journal/journal-pending-submission-recovery.ts": {
+      "sha256": "205e0fcfc77d6a279d860c0120d084dc06e397fd885f95b156ae3571d7593e83",
+      "bytes": 1151,
+      "lines": 31,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/native-chat/agent-session-journal/journal-restart-reconciliation.test.ts": {
+      "sha256": "87d22f8c23e7c0f977055ad8587fbce081821550ff665878e780dec727fa6535",
+      "bytes": 8736,
+      "lines": 284,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/native-chat/agent-session-journal/journal-restart-reconciliation.ts": {
+      "sha256": "5a4cbcb225815b1c31de690abc3b7bd442598a602ecdf82a3b7626ddf8470cb2",
+      "bytes": 4647,
+      "lines": 122,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/native-chat/agent-session-wire/structured-agent-session-adapter.ts": {
+      "sha256": "f2cc7844b83b1842bb535d7e11f211abb3958bfc7ca2c0bed9cfec7cfd2b32f9",
+      "bytes": 12957,
+      "lines": 292,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/db-stopping-worker-task-guard.test.ts": {
+      "sha256": "294ed051e89b1406e39311ac3bc003c5814919c4f16090551cc45c8f723dc4ee",
+      "bytes": 4938,
+      "lines": 122,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/db/attempt-outcome-projection.test.ts": {
+      "sha256": "3eb10a62be6274fa6965566f4f9664a51cc8c8100216dfdf8e3b7073eb4c8137",
+      "bytes": 14716,
+      "lines": 448,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/db/attempt-outcome-projection.ts": {
+      "sha256": "80972891301e10a79f92f63cf17450bab03760f80a90d6a5c7a497414df3049a",
+      "bytes": 5363,
+      "lines": 159,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/db/dispatch-context/dispatch-capability.ts": {
+      "sha256": "52efc6c2d9f02c3d6a6616dbd38c934a59a5d66c0d92b30ac450ed57d4f0676e",
+      "bytes": 4167,
+      "lines": 121,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/db/dispatch-context/worker-report-settlement.ts": {
+      "sha256": "716507a2fd093a870fa39616015b5f1c9bcbfcd5d0ef82a332719db6f6dbf699",
+      "bytes": 10958,
+      "lines": 293,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/db/orchestration-db.ts": {
+      "sha256": "16b3e2b35d40466e3a30a36a29b9a16b06bb0f457078b6247585209414a4a7fb",
+      "bytes": 2222,
+      "lines": 50,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/db/worker-dispatch/worker-dispatch-stop.ts": {
+      "sha256": "3912c58b474771cd303aedff149890f8e891210fd1ec229a8486db4cd783235d",
+      "bytes": 10241,
+      "lines": 287,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/preamble.test.ts": {
+      "sha256": "5ed69e4aa1440317a6ea93346edb0554f0b27e0920d051b4b5d9e4484ac0f42a",
+      "bytes": 16603,
+      "lines": 405,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/orchestration/preamble.ts": {
+      "sha256": "2aeb1392579a861ab4277102ac17af3a6b15bdb2dda6f335d8a46bb253a302b9",
+      "bytes": 11869,
+      "lines": 243,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/methods/index.ts": {
+      "sha256": "85b85531ea70259bf50e316cb98684ac0716b72fa6cba8241efddb876b3d6aa5",
+      "bytes": 4151,
+      "lines": 106,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/methods/orchestration/gates/gates.ts": {
+      "sha256": "0a38a03aac23a1b0d1f88f1f8ef399a4f338d04f20a535356f0dd2ca98bbd04e",
+      "bytes": 6304,
+      "lines": 181,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/methods/orchestration/worker/deliver-worker-dispatch-preamble.ts": {
+      "sha256": "8fa9e2cbe0805ac9b546f8a902335ead91d32cafc0856f280ecd7ed08d9eff9d",
+      "bytes": 2438,
+      "lines": 63,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/methods/orchestration/worker/worker-release-completion.ts": {
+      "sha256": "1df44c2da0daa2967d23ca6a388bff3e6261b2a11fd86c8d27e07ccadd5c72fb",
+      "bytes": 12654,
+      "lines": 322,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/methods/orchestration/worker/worker-start-receipt.ts": {
+      "sha256": "ed84f88a882dab1923b8b14e244baaf3f62949890fef520a44c66877f2849c56",
+      "bytes": 3345,
+      "lines": 70,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/methods/orchestration/worker/worker-stop.ts": {
+      "sha256": "9362ae02a581d0108989bf7b97830fe4ff1fbd6a6101691536d805de5924e94e",
+      "bytes": 12448,
+      "lines": 308,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/methods/structured-agent-session.ts": {
+      "sha256": "7310206696490b67929aafcabc5c9f9b8a1453d171b813ad3449953dc1438bb6",
+      "bytes": 13781,
+      "lines": 338,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/mobile-e2ee-auth-validation.ts": {
+      "sha256": "5c9b0728e95ae2c723e82b73aace8788bc082f68bb080399c7b01a4b37037ddb",
+      "bytes": 1892,
+      "lines": 60,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/rpc/orchestration-mutation-executor.ts": {
+      "sha256": "a0105aa6b3f3a28b34d251b1cffb4eccbfa21969dd4327df3da9b4c24e8cda66",
+      "bytes": 10931,
+      "lines": 287,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/runtime/structured-agent-session-runtime.ts": {
+      "sha256": "ea36d381f7073ba08963b744746b7876d6c9ae64c885ac2d7766ae541d363de9",
+      "bytes": 16895,
+      "lines": 355,
+      "matches_fixed_HEAD": true
+    },
+    "src/main/startup/main-process-runtime-service.ts": {
+      "sha256": "c38b5d9f95e5d697148af1914d3f83b9afca0c4b76d454a3fb74b0c107be7e01",
+      "bytes": 10521,
+      "lines": 188,
+      "matches_fixed_HEAD": true
+    },
+    "src/renderer/src/components/landing-preflight-issues.ts": {
+      "sha256": "78bf8c6d6eaf4eac95fa4aa2ccb6c1c0b8f067174f7b4185ed7ea025a859eb05",
+      "bytes": 2624,
+      "lines": 82,
+      "matches_fixed_HEAD": true
+    },
+    "src/renderer/src/components/onboarding/AgentStep.tsx": {
+      "sha256": "870d61ce6eda54a2b0fa38d824c68429fe7116a977081ea9e010d5f8d3a7cb87",
+      "bytes": 12441,
+      "lines": 313,
+      "matches_fixed_HEAD": true
+    },
+    "src/renderer/src/components/onboarding/use-onboarding-flow-types.ts": {
+      "sha256": "a74ae0ea37efe149398d5c19ce143f2c769dc8c2ac3ecd05a0d6abd617d2d7e1",
+      "bytes": 626,
+      "lines": 14,
+      "matches_fixed_HEAD": true
+    },
+    "src/renderer/src/components/terminal-pane/terminal-orchestration-task-links.ts": {
+      "sha256": "b192451078d93a04cc0a03fc92bc9add8275340321c8af274307291f5e0a2d75",
+      "bytes": 2649,
+      "lines": 80,
+      "matches_fixed_HEAD": true
+    },
+    "src/renderer/src/hooks/composer-state/full-submit-orchestration.ts": {
+      "sha256": "2f292bdf12f9f9406730692addff9a8a05a0bba0012276cbb79bb99cda01c982",
+      "bytes": 3795,
+      "lines": 149,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/agent-status-run.test.ts": {
+      "sha256": "73f8b9de2f15e91f4bad91c3e27b94e4e4a26bf3ccd07564126da2c9ed87b16c",
+      "bytes": 3929,
+      "lines": 126,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/agent-status-serving-readiness.test.ts": {
+      "sha256": "f502ccfd5dbfbf4c7a002395b1e147728aa003ffb5fa391853b1e38e829b10aa",
+      "bytes": 1047,
+      "lines": 29,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/agent-status-serving-readiness.ts": {
+      "sha256": "fc64d40da6b9923c38ae2cc7a347ded51e96cdbaedc239d329f81bd5ef41b1c4",
+      "bytes": 1309,
+      "lines": 35,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/agent-status-store-reopen.test.ts": {
+      "sha256": "57bc5dc3c705aca054432f0486b8d1d47d0d3deba40825ffad087f3e33393617",
+      "bytes": 3276,
+      "lines": 64,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/default-global-settings.ts": {
+      "sha256": "ec31d4798b1a5332a59b0a7b0e40c89b32284e17645020b81cafbf3000128ab3",
+      "bytes": 12367,
+      "lines": 276,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/orchestration-ask-timeout.test.ts": {
+      "sha256": "37286eff3fb99e7a1e854854c2638ccc4a5e963edc176babc9e773d15299d13b",
+      "bytes": 1150,
+      "lines": 27,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/orchestration-ask-timeout.ts": {
+      "sha256": "6f6cafcfd2e4133736d3f861c728db98dad615e23e54cf6b3925c76c5579f930",
+      "bytes": 611,
+      "lines": 14,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/orchestration-fleet-evidence-clock.test.ts": {
+      "sha256": "593d0a55e870f694fe1be0eea7b202c10dfe12903e3bf278358b3ac399b1a08e",
+      "bytes": 3985,
+      "lines": 111,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/orchestration-fleet-projection.test.ts": {
+      "sha256": "6273be5bdc4b4c924af9a9b954331c934ca0886f007c06a0f6eaf77bf902c872",
+      "bytes": 20842,
+      "lines": 628,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/tui-agent-launch-defaults.ts": {
+      "sha256": "5deed67cb0c312c6239d16539c97aa85959d228469abd1ee6210b6f5d37090c1",
+      "bytes": 5544,
+      "lines": 166,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/tui-agent-permissions.test.ts": {
+      "sha256": "96d5f11c12a9e0866cfc62897e1eec1165378c00623800ea0c7156d82a570e7e",
+      "bytes": 2816,
+      "lines": 105,
+      "matches_fixed_HEAD": true
+    },
+    "src/shared/tui-agent-permissions.ts": {
+      "sha256": "30032285f2cd67f79eb2eef8bb9cadf1044b69541d8bb47b74dc49caa6774863",
+      "bytes": 5032,
+      "lines": 168,
+      "matches_fixed_HEAD": true
+    },
+    "tests/e2e/golden-agent-tui-launch.spec.ts": {
+      "sha256": "1ef3b449280aee35515d52646d2592f9a70de0dce481bb9871e20e889258e0cf",
+      "bytes": 1318,
+      "lines": 31,
+      "matches_fixed_HEAD": true
+    },
+    "tests/e2e/orchestration-worker-settlement-release-cli.spec.ts": {
+      "sha256": "1595a1252e975d70bf4c711f13ecf682e5b8422b791239c9b5eae01d233dc871",
+      "bytes": 12814,
+      "lines": 358,
+      "matches_fixed_HEAD": true
+    },
+    "tests/playwright.config.ts": {
+      "sha256": "5c5f7e2e4b2efcec8c290d967ee78ba3cea2f7ed20c6b120a47521317c5f4acf",
+      "bytes": 2213,
+      "lines": 60,
+      "matches_fixed_HEAD": true
+    },
+    "tests/tools/pi-provider-runtime-smoke.mjs": {
+      "sha256": "0bf9f34379075ed4b14cc4d6b0512e427568a124a68e7ba543b30a7a057b3427",
+      "bytes": 4232,
+      "lines": 130,
+      "matches_fixed_HEAD": true
+    }
+  },
+  "test_summary": {
+    "initial_collection_failure": 9,
+    "initial_assertions": 0,
+    "rerun_pass_files": 9,
+    "rerun_pass_assertions": 85,
+    "recovery_pass_files": 2,
+    "recovery_pass_assertions": 27,
+    "recovery_collection_failure_files": [
+      "src/main/runtime/orchestration/preamble.test.ts"
+    ],
+    "unique_pass_assertions": 112
+  },
+  "runner": {
+    "path": "/tmp/oax-orca-test-runner-20260925",
+    "node": "v24.13.0",
+    "vitest": "4.1.11",
+    "upstream_vitest_declared": "^4.1.11",
+    "upstream_node_declared": "24",
+    "package_lock_sha256": "95c56170d1f024b60a8618c5b712568e421862ec9ffe31a962e20a3ee08332f7",
+    "dependencies": {
+      "vitest": "4.1.11",
+      "zod": "4.5.4",
+      "@electron-toolkit/tsconfig": "2.0.0",
+      "vite": "8.3.1"
+    },
+    "upstream_setup": "not loaded; native-runtime ensure and fake host/secret-store setup bypassed for selected self-contained suites",
+    "source_tests_modified": false,
+    "upstream_vite_locked": "rolldown-vite@7.3.1",
+    "dependency_boundary": "Isolated npm runtime is not the full upstream pnpm-lock environment; only selected original tests."
+  },
+  "source_link_clamps": [
+    [
+      "src/renderer/src/components/onboarding/use-onboarding-flow-types.ts",
+      14
+    ],
+    [
+      "src/renderer/src/components/landing-preflight-issues.ts",
+      82
+    ],
+    [
+      "src/main/runtime/orchestration/db/orchestration-db.ts",
+      50
+    ],
+    [
+      "src/main/runtime/orchestration/db/attempt-outcome-projection.ts",
+      159
+    ],
+    [
+      "src/main/codex/codex-structured-prompt-replies.ts",
+      121
+    ],
+    [
+      "src/main/runtime/rpc/methods/orchestration/worker/worker-start-receipt.ts",
+      70
+    ],
+    [
+      "src/shared/orchestration-ask-timeout.ts",
+      14
+    ],
+    [
+      "src/main/native-chat/agent-session-journal/journal-pending-submission-recovery.ts",
+      31
+    ],
+    [
+      "src/main/native-chat/agent-session-journal/journal-restart-reconciliation.ts",
+      122
+    ],
+    [
+      "src/shared/agent-status-serving-readiness.ts",
+      35
+    ],
+    [
+      "src/main/runtime/rpc/mobile-e2ee-auth-validation.ts",
+      60
+    ],
+    [
+      "tests/playwright.config.ts",
+      60
+    ],
+    [
+      ".github/workflows/pi-provider-runtime.yml",
+      28
+    ]
+  ],
+  "final_git_status": "",
+  "cleanup": {
+    "checked_at": "2026-09-25T01:11:09.864254+08:00",
+    "active_test_pids": [],
+    "temporary_node_modules_symlink_removed": true,
+    "app_services_started": false,
+    "clone_retained": true,
+    "runner_retained": true,
+    "all_hashed_source_tests_match_HEAD": true
+  },
+  "report_source_link_count": 58,
+  "report_source_file_count": 51
+}

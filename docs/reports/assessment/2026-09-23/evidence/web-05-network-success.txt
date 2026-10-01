@@ -1,0 +1,43 @@
+OPENAGENTX
+指挥台
+在线
+退
+←
+
+Runtime
+
+网络配置
+0 个方案
+出网与代理设置
+
+管理 Agent Runtime 的网络出口策略与代理服务器
+
+在线
+刷新
+【系统默认 (inherit)】已提交应用，等待 Worker 回执确认实际生效。
+目标 Runtime:
+web-eval-a (主服务) · gen 1 [当前 · online]
+web-eval-b (主服务) · gen 1 [当前 · online]
+● 当前代次 (gen 1)
+Backend: 离线
+出网方式:
+系统默认 (inherit)
+直接出网 (direct)
+⚡ 测试连接
+保存并应用
+实际生效:
+等待 Worker (等待当前 Worker 应用)
+代理池管理 (0)
+
+可供任何 Runtime 选用的 HTTP / SOCKS5 代理服务器
+
++ 添加新代理
+代理池暂无配置
+⌂
+指挥
+▣
+任务
+⌘
+组织
+⚙
+Runtime

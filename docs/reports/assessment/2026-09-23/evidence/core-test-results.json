@@ -1,0 +1,77 @@
+{
+  "baseline": "34053c0",
+  "race": true,
+  "count": 1,
+  "start": "2026-09-23T00:28:58.720532+08:00",
+  "end": "2026-09-23T00:29:44.959202+08:00",
+  "exit_code": 0,
+  "wall_seconds": 46.239,
+  "packages": [
+    {
+      "package": "openagentx/internal/domain",
+      "status": "pass",
+      "duration": "1.029s"
+    },
+    {
+      "package": "openagentx/internal/auth",
+      "status": "pass",
+      "duration": "1.862s"
+    },
+    {
+      "package": "openagentx/internal/auth/cli",
+      "status": "pass",
+      "duration": "10.521s"
+    },
+    {
+      "package": "openagentx/internal/auth/web",
+      "status": "pass",
+      "duration": "3.495s"
+    },
+    {
+      "package": "openagentx/internal/api",
+      "status": "pass",
+      "duration": "1.029s"
+    },
+    {
+      "package": "openagentx/internal/api/admin",
+      "status": "pass",
+      "duration": "3.560s"
+    },
+    {
+      "package": "openagentx/internal/api/auth",
+      "status": "pass",
+      "duration": "3.374s"
+    },
+    {
+      "package": "openagentx/internal/api/console",
+      "status": "pass",
+      "duration": "10.577s"
+    },
+    {
+      "package": "openagentx/internal/api/panel",
+      "status": "pass",
+      "duration": "40.268s"
+    },
+    {
+      "package": "openagentx/internal/api/workerapi",
+      "status": "pass",
+      "duration": "1.038s"
+    },
+    {
+      "package": "openagentx/internal/controlplane",
+      "status": "pass",
+      "duration": "10.540s"
+    },
+    {
+      "package": "openagentx/internal/persistence/sqlite",
+      "status": "pass",
+      "duration": "17.105s"
+    },
+    {
+      "package": "openagentx/internal/persistence/sqlite/migrations",
+      "status": "pass",
+      "duration": "2.337s"
+    }
+  ],
+  "note": "package tests, not deployed real Runtime E2E"
+}

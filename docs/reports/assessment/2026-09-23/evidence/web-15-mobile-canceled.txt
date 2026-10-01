@@ -1,0 +1,79 @@
+OPENAGENTX
+指挥台
+在线
+退
+find active run for cancel: resource not found
+x
+←
+
+观察窗口
+
+任务
+1 项
+搜索任务
+全部 Agent
+web-eval-a
+web-eval-b
+全部状态
+queued
+dispatching
+running
+waiting_input
+waiting_approval
+cancel_requested
+succeeded
+failed
+canceled
+uncertain
+全部时间
+最近 1 小时
+最近 24 小时
+最近 7 天
+WEB-EVAL-04 取消隔离排队任务
+task-2c9b9067-5d4f-4e3c-97bd-9185ae890564 · web-eval-b
+queued
+1 秒前
+执行 Agent
+请选择执行 Agent
+web-eval-a (web-eval-a) · online
+web-eval-b (web-eval-b) · online
+
+Worker 在线 · generation 1
+
+向 web-eval-b 发送业务指令
+↑
+←
+web-eval-b
+WEB-EVAL-04 取消隔离排队任务
+
+task-2c9b9067-5d4f-4e3c-97bd-9185ae890564 · 更新于 1 秒前
+
+指令已入队，等待 Worker 领取
+
+queued
+取消任务
+收起运行日志
+执行结果
+指令已入队，等待 Worker 领取
+任务指令
+查看原文
+复制原文
+
+WEB-EVAL-04 取消隔离排队任务
+
+执行过程
+×
+尚无可观察的 RunAttempt
+任务创建
+
+task.created · task
+
+9/23/2026, 12:33:55 AM · #88
+⌂
+指挥
+▣
+任务
+⌘
+组织
+⚙
+Runtime

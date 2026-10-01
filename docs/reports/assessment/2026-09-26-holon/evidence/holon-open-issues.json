@@ -1,0 +1,270 @@
+{
+  "observed_at": "2026-09-25T16:57:34.094717+00:00",
+  "source": "https://api.github.com/repos/holon-run/holon/issues?state=open&per_page=35",
+  "scope": "first 35 open issue/PR entries; PRs omitted; not exhaustive",
+  "issues": [
+    {
+      "number": 3229,
+      "title": "Track Android release and app-store readiness",
+      "url": "https://github.com/holon-run/holon/issues/3229",
+      "updated_at": "2026-09-25T08:29:33Z",
+      "labels": []
+    },
+    {
+      "number": 3225,
+      "title": "Cost regression in v0.45.0: tail-attached TurnScoped context sits outside every cache breakpoint and is re-billed each round",
+      "url": "https://github.com/holon-run/holon/issues/3225",
+      "updated_at": "2026-09-25T07:19:12Z",
+      "labels": []
+    },
+    {
+      "number": 3219,
+      "title": "feat(web): render HTML files in the workspace file browser",
+      "url": "https://github.com/holon-run/holon/issues/3219",
+      "updated_at": "2026-09-24T16:51:22Z",
+      "labels": [
+        "enhancement"
+      ]
+    },
+    {
+      "number": 3217,
+      "title": "feat(mobile): 支持局域网 Holon 服务发现与 Tailscale 扫码添加",
+      "url": "https://github.com/holon-run/holon/issues/3217",
+      "updated_at": "2026-09-24T16:22:26Z",
+      "labels": []
+    },
+    {
+      "number": 3216,
+      "title": "feat(mobile): document Tailscale Serve HTTPS connection path",
+      "url": "https://github.com/holon-run/holon/issues/3216",
+      "updated_at": "2026-09-24T16:10:48Z",
+      "labels": [
+        "documentation",
+        "enhancement"
+      ]
+    },
+    {
+      "number": 3212,
+      "title": "Improve TaskResult presentation in the Web conversation timeline",
+      "url": "https://github.com/holon-run/holon/issues/3212",
+      "updated_at": "2026-09-24T14:40:38Z",
+      "labels": []
+    },
+    {
+      "number": 3194,
+      "title": "runtime(scheduler): queued_available 重派无退避且无空转护栏，generation 递增使幂等去重失效（44 分钟空转案例）",
+      "url": "https://github.com/holon-run/holon/issues/3194",
+      "updated_at": "2026-09-23T04:23:30Z",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 3169,
+      "title": "refactor: 把 holon-runtime-ops skill 中属于 agent 工作规范的内容拆出去",
+      "url": "https://github.com/holon-run/holon/issues/3169",
+      "updated_at": "2026-09-21T23:55:58Z",
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "number": 3149,
+      "title": "test: cover dedicated SQL columns written by narrow defer UPDATE",
+      "url": "https://github.com/holon-run/holon/issues/3149",
+      "updated_at": "2026-09-20T15:37:46Z",
+      "labels": []
+    },
+    {
+      "number": 3145,
+      "title": "Agent deletion does not clean up memory_index_rebuild_jobs / memory_index_rebuild_seen",
+      "url": "https://github.com/holon-run/holon/issues/3145",
+      "updated_at": "2026-09-20T13:07:15Z",
+      "labels": []
+    },
+    {
+      "number": 3137,
+      "title": "Security: holon.run's DMARC is p=none — spoofed mail is still being delivered (free fix inside)",
+      "url": "https://github.com/holon-run/holon/issues/3137",
+      "updated_at": "2026-09-20T04:10:38Z",
+      "labels": []
+    },
+    {
+      "number": 3132,
+      "title": "feat(models): ViewImage 连续失败后切换候选 vision 模型",
+      "url": "https://github.com/holon-run/holon/issues/3132",
+      "updated_at": "2026-09-20T01:46:32Z",
+      "labels": [
+        "enhancement",
+        "priority:p3",
+        "models-dev"
+      ]
+    },
+    {
+      "number": 3129,
+      "title": "feat(skills): workspace 存在 curated skill roots 时，将通用 skills/ 降级为 catalog-only（不注入 agent 提示）",
+      "url": "https://github.com/holon-run/holon/issues/3129",
+      "updated_at": "2026-09-20T01:32:45Z",
+      "labels": []
+    },
+    {
+      "number": 3103,
+      "title": "feat(mobile): 自研轻量手机入口，闭合任务交代、待决处理与结果验收",
+      "url": "https://github.com/holon-run/holon/issues/3103",
+      "updated_at": "2026-09-19T06:49:14Z",
+      "labels": []
+    },
+    {
+      "number": 3102,
+      "title": "refactor(api): 手机端独立发布前收敛原生客户端契约与历史兼容负担",
+      "url": "https://github.com/holon-run/holon/issues/3102",
+      "updated_at": "2026-09-19T06:49:51Z",
+      "labels": []
+    },
+    {
+      "number": 3078,
+      "title": "bug(runtime-db): runtime.sqlite 无界增长到 27.8GB（retention 默认关闭），Web API 慢请求/超时慢性劣化",
+      "url": "https://github.com/holon-run/holon/issues/3078",
+      "updated_at": "2026-09-25T09:07:07Z",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 3064,
+      "title": "Flaky test: fixture_coding_loop_regression_stays_green reads empty file between create and write",
+      "url": "https://github.com/holon-run/holon/issues/3064",
+      "updated_at": "2026-09-18T04:53:25Z",
+      "labels": []
+    },
+    {
+      "number": 3041,
+      "title": "improve(tool): accept bare @@ hunk headers in unified diff ApplyPatch input",
+      "url": "https://github.com/holon-run/holon/issues/3041",
+      "updated_at": "2026-09-17T06:04:47Z",
+      "labels": []
+    },
+    {
+      "number": 3037,
+      "title": "feat(web): 模型设置第二批——接入引导、连接检测与模型管理",
+      "url": "https://github.com/holon-run/holon/issues/3037",
+      "updated_at": "2026-09-17T02:33:25Z",
+      "labels": []
+    },
+    {
+      "number": 3026,
+      "title": "daemon status 的 last_failure 跨重启保留且缺少运行世代标识，易误读为当前故障",
+      "url": "https://github.com/holon-run/holon/issues/3026",
+      "updated_at": "2026-09-17T00:04:40Z",
+      "labels": []
+    },
+    {
+      "number": 3020,
+      "title": "test: 追踪并修复近期 CI 易错（flaky / 非 hermetic）测试",
+      "url": "https://github.com/holon-run/holon/issues/3020",
+      "updated_at": "2026-09-21T10:37:30Z",
+      "labels": [
+        "testing"
+      ]
+    },
+    {
+      "number": 2944,
+      "title": "runtime: 无 current WorkItem 的轮次占 83.5% ⇒ work_item_scoped 采纳率被锁死在 9.1%，每轮重灌 ~25.9k token 跨工作历史（wake_hint 长激活，附可复算口径）",
+      "url": "https://github.com/holon-run/holon/issues/2944",
+      "updated_at": "2026-09-13T03:13:43Z",
+      "labels": []
+    },
+    {
+      "number": 2936,
+      "title": "chore: remove legacy agent template ID compatibility after one release cycle",
+      "url": "https://github.com/holon-run/holon/issues/2936",
+      "updated_at": "2026-09-12T16:49:46Z",
+      "labels": []
+    },
+    {
+      "number": 2904,
+      "title": "feat: 增加 OpenAI Agents API 北向兼容层",
+      "url": "https://github.com/holon-run/holon/issues/2904",
+      "updated_at": "2026-09-12T01:08:55Z",
+      "labels": [
+        "enhancement",
+        "discussion",
+        "priority:p2"
+      ]
+    },
+    {
+      "number": 2903,
+      "title": "test: HTTP skill library integration tests pollute real ~/.agents/.skill-lock.json",
+      "url": "https://github.com/holon-run/holon/issues/2903",
+      "updated_at": "2026-09-12T00:41:32Z",
+      "labels": []
+    },
+    {
+      "number": 2888,
+      "title": "Reduce read-side projection amplification from active waits and per-connection FD scans",
+      "url": "https://github.com/holon-run/holon/issues/2888",
+      "updated_at": "2026-09-11T04:14:14Z",
+      "labels": [
+        "enhancement",
+        "maintenance",
+        "priority:p2"
+      ]
+    },
+    {
+      "number": 2866,
+      "title": "feat(web): 在 brief 下展示本轮产物与变更入口",
+      "url": "https://github.com/holon-run/holon/issues/2866",
+      "updated_at": "2026-09-10T06:20:36Z",
+      "labels": []
+    },
+    {
+      "number": 2861,
+      "title": "enhancement(web): serve SPA routes for missing or wildcard Accept headers",
+      "url": "https://github.com/holon-run/holon/issues/2861",
+      "updated_at": "2026-09-10T05:21:01Z",
+      "labels": [
+        "enhancement"
+      ]
+    },
+    {
+      "number": 2838,
+      "title": "Define cleanup policy for agent_home/tmp (and lifecycle-aware media retention)",
+      "url": "https://github.com/holon-run/holon/issues/2838",
+      "updated_at": "2026-09-08T12:13:35Z",
+      "labels": []
+    },
+    {
+      "number": 2795,
+      "title": "enhancement: bootstrap agents created without an initial_message",
+      "url": "https://github.com/holon-run/holon/issues/2795",
+      "updated_at": "2026-09-23T14:42:34Z",
+      "labels": [
+        "enhancement"
+      ]
+    },
+    {
+      "number": 2775,
+      "title": "Web GUI: coordinate multi-tab access to the shared event ledger (unread badge stuck while an old background tab exists)",
+      "url": "https://github.com/holon-run/holon/issues/2775",
+      "updated_at": "2026-09-03T15:44:13Z",
+      "labels": [
+        "bug",
+        "enhancement"
+      ]
+    },
+    {
+      "number": 2766,
+      "title": "Observation: file-mutation tool-usage drift after goal-oriented prompt defaults (PR #2764)",
+      "url": "https://github.com/holon-run/holon/issues/2766",
+      "updated_at": "2026-09-03T04:24:01Z",
+      "labels": []
+    },
+    {
+      "number": 2742,
+      "title": "Web UI: 实现 Dark Mode 暗色主题",
+      "url": "https://github.com/holon-run/holon/issues/2742",
+      "updated_at": "2026-09-02T06:58:20Z",
+      "labels": []
+    }
+  ]
+}

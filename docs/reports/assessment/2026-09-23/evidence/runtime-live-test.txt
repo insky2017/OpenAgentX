@@ -1,0 +1,21 @@
+COMMAND go test -overlay=/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/assessment/2026-09-23/evidence/runtime-overlay.json -count=1 -v -timeout=7m ./internal/cli/worker -run ^TestAssessmentRealAGYConsecutiveTurns$
+formal_worker_environment_keys=NO_PROXY,no_proxy
+formal_worker_environment_values=omitted
+=== RUN   TestAssessmentRealAGYConsecutiveTurns
+    process_test.go:521: worker_id=worker-eb00ba54-ed30-4754-a888-f20776a28f94 generation=1 schema=1 transport=isolated_uds adapter=agy-batch model=gemini-3.7-flash-low
+    process_test.go:523: idle_interval_seconds=6 http_requests=20
+    process_test.go:547: task_1 id=task-0868c353-17c4-4ce3-b38e-580be797c58a status=uncertain run_status=succeeded side_effects_known=false reply_bytes=416 reply_has_marker=true elapsed_seconds=19.018
+    process_test.go:548: task_1 error=business_effect_unverified
+    process_test.go:550: task_1 artifact_exists=true bytes=24 sha256=ec6c45e643137647f577f8d6a62cb1e94768bf6db9809f77725c8525961153ff content_exact=true
+    process_test.go:555: task_1 same_worker=true worker_status=online
+    process_test.go:547: task_2 id=task-1dae13dc-77c8-4bd5-a9a6-8b6d449acb70 status=uncertain run_status=succeeded side_effects_known=false reply_bytes=250 reply_has_marker=true elapsed_seconds=19.019
+    process_test.go:548: task_2 error=business_effect_unverified
+    process_test.go:550: task_2 artifact_exists=true bytes=24 sha256=ec6c45e643137647f577f8d6a62cb1e94768bf6db9809f77725c8525961153ff content_exact=true
+    process_test.go:555: task_2 same_worker=true worker_status=online
+    process_test.go:560: journal_counts={"agent.created":1,"mailbox.accepted":2,"mailbox.claimed":2,"network.mode_binding_pending":1,"network.mode_test_requested":1,"network.work_succeeded":2,"organization.created":1,"principal.created":3,"run_attempt.finished":2,"run_attempt.started":2,"runtime.agy.init":2,"runtime.agy.result":2,"runtime.agy.step_update":46,"session_binding.saved":2,"task.created":2,"task.running":2,"task.settled":2,"worker.heartbeat":47,"worker.registered":1}
+    process_test.go:562: production_e2e=false identity_fixture=true task_and_network_service=true worker_http=true direct_sql_state_mutation=false
+--- PASS: TestAssessmentRealAGYConsecutiveTurns (47.49s)
+PASS
+ok  	openagentx/internal/cli/worker	47.571s
+
+{"exit_code": 0, "duration_seconds": 48.935}

@@ -1,0 +1,36 @@
+formal_worker_process_environment_used=true
+loaded_keys=NO_PROXY,no_proxy
+environment_values=omitted
+sha256 /home/sky/.local/bin/agy-graft 31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de
+sha256 /home/sky/.local/bin/agy c20434f0b9278196498069dac5a0a2e72bc0b5f8aebdf17c5d535b5369b76f67
+sha256 /home/sky/tools/bin/mgraftcp 0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678
+COMMAND /home/sky/.local/bin/agy-graft --version exit=0 seconds=0.326
+1.2.8
+COMMAND /home/sky/.local/bin/agy-graft --help exit=0 seconds=0.32
+stdout_bytes=0 stderr_bytes=2891
+--print: -p                              Short alias for --print | --print                         Run a single prompt non-interactively and print the response
+--input-format: --input-format                  Input format for print mode (text, stream-json). stream-json reads one NDJSON message per line from stdin and runs a turn for each; it requires --output-format stream-json (default text)
+--output-format: --input-format                  Input format for print mode (text, stream-json). stream-json reads one NDJSON message per line from stdin and runs a turn for each; it requires --output-format stream-json (default text) | --output-format                 Output format for print mode (text, json, stream-json) (default text)
+--conversation: --conversation                  Resume a previous conversation by ID
+--model: --model                         Model for the current CLI session
+--effort: --effort                        Reasoning effort for the current CLI session (low|medium|high)
+--print-timeout: --print-timeout                 Optional time limit for print mode; 0 waits until the turn completes (default 0s)
+--dangerously-skip-permissions: --dangerously-skip-permissions  Auto-approve all tool permission requests without prompting
+--permission-mode: not advertised
+--max-turns: not advertised
+--no-session-persistence: not advertised
+COMMAND codebuddy --version exit=0 seconds=0.057
+2.143.0
+COMMAND codebuddy --help exit=0 seconds=3.571
+stdout_bytes=12517 stderr_bytes=0
+--print: CodeBuddy Code - starts an interactive session by default, use -p/--print for | -p, --print                                      Print response and exit (useful for pipes) (default: false)
+--input-format: --input-format <format>                          Input format (only works with --print): "text" (default), or "stream-json" (realtime streaming input) (choices: "text", "stream-json") (default: "text") | --replay-user-messages                           Re-emit user messages from stdin back on stdout for acknowledgment (only works with --input-format=stream-json and --output-format=stream-json)
+--output-format: --output-format <format>                         Output format (only works with --print): "text" (default), "json" (single result), or "stream-json" (realtime streaming) (default: "text") | --include-partial-messages                       Output raw SSE incremental messages from model requests (only works with --output-format stream-json) (default: false)
+--conversation: not advertised
+--model: --model <model>                                  Model for the current session. Please provide the model ID. Currently supported: (hy4-preview, hy3, hy3-x, glm-5.3, glm-5.3-flash, glm-5.2, glm-5.1, glm-5v-turbo, minimax-m3, minimax-m2.7, kimi-k3-1, kimi-k2.7, kimi-k2.6, deepseek-v4-pro, deepseek-v4-flash)
+--effort: --effort <level>                                 Reasoning effort level (minimal, low, medium, high, xhigh, max)
+--print-timeout: not advertised
+--dangerously-skip-permissions: -y, --dangerously-skip-permissions               Bypass permission prompts (HIGH/CRITICAL still ask). Isolated-sandbox full pass: CODEBUDDY_IS_SANDBOX=1 (process env only; high-risk). (default: false)
+--permission-mode: --permission-mode <mode>                         Default permission mode for this process (TUI, --serve Web, ACP). Choices: acceptEdits, bypassPermissions, default, plan, dontAsk, auto. Does not write settings. | --permission-mode-before-plan <mode>             Permission mode to restore when exiting plan mode
+--max-turns: --max-turns <number>                             Limit the number of agentic turns
+--no-session-persistence: --no-session-persistence                         Disable session persistence - sessions stay in memory and are not saved to disk

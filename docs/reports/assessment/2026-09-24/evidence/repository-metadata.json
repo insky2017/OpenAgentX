@@ -1,0 +1,37 @@
+{
+  "observed_at": "2026-09-24T16:00:07.823845+00:00",
+  "repositories": [
+    {
+      "full_name": "autonomous-ai/openharness",
+      "html_url": "https://github.com/autonomous-ai/openharness",
+      "description": "The ultimate harness for coding agents and beyond. All your agents. All your machines. One command center. Start with code, then follow your curiosity and build across disciplines: CAD, circuits, robots, games and music.",
+      "default_branch": "main",
+      "archived": false,
+      "pushed_at": "2026-09-24T15:07:25Z",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "language": "C"
+    },
+    {
+      "full_name": "iAmCorey/Wake",
+      "html_url": "https://github.com/iAmCorey/Wake",
+      "description": "All your AI agent sessions in one place — browse, search, resume. Rust + GPUI.",
+      "default_branch": "main",
+      "archived": false,
+      "pushed_at": "2026-09-23T04:18:06Z",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "language": "Rust"
+    }
+  ]
+}

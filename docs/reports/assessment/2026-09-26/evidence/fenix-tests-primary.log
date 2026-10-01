@@ -1,0 +1,6 @@
+2 | preload = []
+              ^
+error: Expected preload to be an array
+    at /tmp/oax-fenix-runner-20260926/isolated.toml:2:11
+
+Invalid Bunfig: failed to load bunfig

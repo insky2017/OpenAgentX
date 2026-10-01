@@ -1,0 +1,3076 @@
+Holon public fixed-source excerpts
+commit=7c0ebbdfbf2f38adf41968051ed3440bc5ddb774
+Boundary: static inspection only; these excerpts do not prove live behavior.
+
+
+[readme] README.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/README.md#L7
+7: **Agents that act and follow through**
+8: 
+9: Holon is a local workbench for agents handling ongoing work—not just one-off prompts. It keeps goals, plans, progress, and wait conditions in explicit WorkItems, so work can continue across sessions, commands, human input, and external events.
+10: 
+11: When the next condition is satisfied, the agent resumes the right work in the right workspace and delivers the result back to you.
+12: 
+13: Use Holon when a task should keep moving after you close the terminal, wait for a command result, ask for review, or receive an external event.
+14: 
+15: Holon itself is not an agent. It provides a local working environment for multiple agents. Agents understand goals and drive execution; Holon treats "work" as the core unit, preserving state, organizing context, recording waits and wakes, so tasks can resume at the right time and eventually deliver results back to the operator.
+16: 
+17: ## What does Holon provide?
+18: 
+19: | Capability | What it means |
+20: |---|---|
+21: | **Continuous agent workspace** | Each agent has its own continuous working context in Holon, instead of restarting with every terminal, request, or client connection. |
+22: | **Work-first task model** | Holon organizes tasks, waits, execution progress, and final delivery as explicit Work, instead of leaving them scattered across conversations. |
+23: | **Event-driven wait and wake** | Agents can wait for task results, external events, or operator input, then return to the corresponding work when the condition is satisfied. |
+24: | **Explicit context and trust boundaries** | Holon distinguishes operator input, external events, tool results, and internal execution traces so information from different origins is not mixed together. |
+25: | **Local-first execution environment** | Holon is built for local repositories, shell, worktrees, and development toolchains, letting agents execute tasks in the real working environment. |
+26: 
+27: > Keep agent work alive in your local workspace.
+28: 
+29: ## Quickstart
+30: 
+31: Holon provides two interaction modes: **TUI** (terminal) and **Web GUI** (browser).
+32: 
+33: ### 1. Install
+34: 
+35: ```bash
+36: brew tap holon-run/tap && brew install holon
+37: ```
+38: 
+39: Or download binaries from [GitHub Releases](https://github.com/holon-run/holon/releases/latest).
+40: 
+41: ### 2. Configure a provider
+42: 
+43: ```bash
+44: holon onboard
+45: ```
+46: 
+47: This walks through provider credential setup interactively. You can also
+48: configure providers through the Web GUI **Settings** page after starting the
+49: daemon. See [Configuration Reference](docs/website/reference/configuration.md)
+50: and [Web GUI guide](docs/website/guides/use-web-gui.md) for more.
+51: 
+52: ### 3. Start the daemon
+53: 
+54: ```bash
+55: holon daemon start
+56: ```
+57: 
+58: ### 4a. TUI (terminal)
+59: 
+60: ```bash
+61: holon tui
+62: ```
+63: 
+64: Select an agent and start working. Agents keep running after you disconnect.
+65: 
+66: ### 4b. Web GUI (browser)
+67: 
+68: Open <http://localhost:7878>. Create an agent and work through a chat interface
+69: with built-in file browser, task tracking, and more.
+70: 
+71: For more: [TUI guide](docs/website/reference/tui.md) · [Web GUI guide](docs/website/guides/use-web-gui.md) · [First agent](docs/website/getting-started/first-agent.md)
+72: 
+73: ## Install
+74: 
+75: ```bash
+76: brew tap holon-run/tap
+77: brew install holon
+78: holon --help
+
+[version] Cargo.toml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/Cargo.toml#L1
+1: [package]
+2: name = "holon"
+3: version = "0.45.0"
+4: edition = "2021"
+5: default-run = "holon"
+6: authors = ["Holon Contributors"]
+7: description = "A headless, event-driven runtime for long-lived agents"
+8: license = "Apache-2.0"
+9: readme = "README.md"
+10: homepage = "https://holon.run"
+11: repository = "https://github.com/holon-run/holon"
+12: documentation = "https://holon.run"
+13: 
+14: # crates.io caps package uploads at 10 MB. Ship only what is required to build
+15: # and use the crate; keep monorepo-only assets (docs site, benchmarks, macOS
+
+[chinese] README.zh-CN.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/README.zh-CN.md#L138
+138: - **Workspace / worktree** — 在本地仓库中执行，把编码任务隔离到托管 worktree。
+139: - **Origin / brief** — 保留输入来源和信任信息，把执行痕迹与操作者可见交付分开。
+140: 
+141: 更详细的概念说明请看 [Concepts](docs/website/concepts/)。
+142: 
+143: ## 状态与兼容性
+144: 
+145: Holon 正在积极开发中。当前推荐版本为
+146: [`v0.29.0`](https://github.com/holon-run/holon/releases/tag/v0.29.0)。
+147: 
+148: 当前项目重心仍是 Rust 运行时：agent 生命周期、队列、WaitFor/wake、task、WorkItem、
+
+[entry] src/main.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/main.rs#L868
+868: async fn serve(mut config: AppConfig, options: ServeOptions) -> Result<()> {
+869:     let serve_args = serve_args_for_options(&options).args;
+870:     let desktop_integration = options.desktop_integration.unwrap_or(false);
+871:     let web_dist = options.web_dist.clone();
+872:     let advertise_url = apply_serve_options(&mut config, options)?;
+873:     if desktop_integration {
+874:         let address: std::net::SocketAddr = config
+875:             .http_addr
+876:             .parse()
+877:             .context("desktop integration requires a numeric loopback listen address")?;
+878:         if !cfg!(target_os = "macos") || !address.ip().is_loopback() {
+879:             anyhow::bail!("desktop integration requires macOS and a loopback-only listener");
+880:         }
+881:     }
+882:     if let Some(web_dist) = &web_dist {
+883:         if !web_dist.is_dir() {
+884:             return Err(anyhow!(
+885:                 "--web-dist must point to a directory: {}",
+886:                 web_dist.display()
+887:             ));
+888:         }
+889:     }
+890:     std::fs::create_dir_all(config.agent_root_dir())
+891:         .with_context(|| format!("failed to create {}", config.agent_root_dir().display()))?;
+892:     std::fs::create_dir_all(config.run_dir())
+893:         .with_context(|| format!("failed to create {}", config.run_dir().display()))?;
+894:     println!(
+895:         "{}",
+896:         apply_nofile_limit_policy(DEFAULT_NOFILE_TARGET).startup_summary()
+897:     );
+898:     if let Some(report) = startup_report() {
+899:         println!("{}", report.startup_summary());
+900:     }
+901:     ensure_serve_preflight(&config).await?;
+902:     if std::env::var_os(PRE_SERVER_PREPARED_ENV).is_none() {
+903:         prepare_runtime_before_server(&config)?;
+904:     }
+905:     if std::env::var_os(DAEMON_SERVE_ARGS_ENV).is_none() {
+906:         std::env::set_var(
+907:             DAEMON_SERVE_ARGS_ENV,
+
+[provider] src/provider/mod.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/provider/mod.rs#L580
+580:             is_error: true,
+581:             error: None,
+582:         }
+583:     }
+584: }
+585: 
+586: #[async_trait]
+587: pub trait AgentProvider: Send + Sync {
+588:     async fn complete_turn(&self, request: ProviderTurnRequest) -> Result<ProviderTurnResponse>;
+589: 
+590:     fn select_model_lineage(
+591:         &self,
+592:         _model_ref: &ModelRouteRef,
+593:     ) -> Option<std::sync::Arc<dyn AgentProvider>> {
+594:         None
+595:     }
+596: 
+597:     async fn generate_image(
+598:         &self,
+599:         _request: ProviderGenerateImageRequest,
+600:     ) -> Result<ProviderGenerateImageResponse> {
+601:         Err(anyhow!("active provider does not support image generation"))
+602:     }
+603: 
+604:     fn prompt_capabilities(&self) -> Vec<ProviderPromptCapability> {
+605:         vec![ProviderPromptCapability::FullRequestOnly]
+606:     }
+607: 
+608:     fn supports_freeform_grammar_tools(&self) -> bool {
+609:         false
+
+[identity] src/domain/agent.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/domain/agent.rs#L9
+9: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+10: #[serde(rename_all = "snake_case")]
+11: pub enum AgentIdentityLifecycle {
+12:     Active,
+13:     Deleting,
+14:     Deleted,
+15: }
+16: 
+17: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+18: #[serde(rename_all = "snake_case")]
+19: pub enum AgentLifecycleFenceState {
+20:     Open,
+21:     DeletionFenced,
+22:     Tombstoned,
+23: }
+24: 
+25: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+26: #[serde(rename_all = "snake_case")]
+27: pub enum AgentLineageCreationCause {
+28:     LegacySpawn,
+29:     CreateAgent,
+30:     Migration,
+31: }
+32: 
+33: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+34: pub struct AgentLineageRecord {
+35:     pub child_agent_id: String,
+36:     pub parent_agent_id: String,
+37:     pub creation_cause: AgentLineageCreationCause,
+38:     pub revision: u64,
+39:     pub created_at: DateTime<Utc>,
+40: }
+41: 
+42: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+43: #[serde(rename_all = "snake_case")]
+44: pub enum AgentSupervisionState {
+45:     Active,
+46:     CleanupRequired,
+47:     Closed,
+48: }
+49: 
+50: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+51: pub struct AgentSupervisionRecord {
+52:     pub supervision_id: String,
+53:     pub supervisor_agent_id: String,
+54:     pub child_agent_id: String,
+55:     #[serde(default, skip_serializing_if = "Option::is_none")]
+56:     pub delegated_from_work_item_id: Option<String>,
+57:     #[serde(default, skip_serializing_if = "Option::is_none")]
+58:     pub delegated_from_task_id: Option<String>,
+59:     pub state: AgentSupervisionState,
+60:     pub revision: u64,
+61:     pub created_at: DateTime<Utc>,
+62:     pub updated_at: DateTime<Utc>,
+63: }
+64: 
+65: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+66: #[serde(rename_all = "snake_case")]
+67: pub enum AgentCanonicalDurability {
+68:     Persistent,
+69:     Ephemeral,
+70: }
+71: 
+72: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+73: pub struct AgentDurabilityRecord {
+74:     pub agent_id: String,
+75:     pub durability: AgentCanonicalDurability,
+76:     pub revision: u64,
+77:     pub created_at: DateTime<Utc>,
+78: }
+79: 
+80: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+81: #[serde(rename_all = "snake_case")]
+82: pub enum AgentLifecycleAttachment {
+83:     Independent,
+84:     SupervisionAttached,
+85: }
+86: 
+87: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+88: pub struct AgentLifecycleAttachmentRecord {
+89:     pub agent_id: String,
+90:     pub attachment: AgentLifecycleAttachment,
+91:     pub revision: u64,
+92:     pub created_at: DateTime<Utc>,
+93: }
+94: 
+95: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+
+[capability] src/domain/agent.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/domain/agent.rs#L95
+95: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+96: #[serde(rename_all = "snake_case")]
+97: pub enum AgentCapabilityFamily {
+98:     CoreAgent,
+99:     LocalEnvironment,
+100:     Web,
+101:     AgentCreation,
+102:     AuthorityExpanding,
+103:     ExternalTrigger,
+104: }
+105: 
+106: impl AgentCapabilityFamily {
+107:     pub(crate) fn label(self) -> &'static str {
+108:         match self {
+109:             Self::CoreAgent => "core_agent",
+110:             Self::LocalEnvironment => "local_environment",
+111:             Self::Web => "web",
+112:             Self::AgentCreation => "agent_creation",
+113:             Self::AuthorityExpanding => "authority_expanding",
+114:             Self::ExternalTrigger => "external_trigger",
+115:         }
+116:     }
+117: }
+118: 
+119: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+120: #[serde(rename_all = "snake_case")]
+121: pub enum AgentPolicyEffect {
+122:     Allow,
+123:     Deny,
+124: }
+125: 
+126: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+127: pub struct AgentCapabilityPolicyRule {
+128:     pub family: AgentCapabilityFamily,
+129:     pub effect: AgentPolicyEffect,
+130: }
+131: 
+132: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+133: pub struct AgentCapabilityPolicyRecord {
+134:     pub agent_id: String,
+135:     pub revision: u64,
+136:     pub rules: Vec<AgentCapabilityPolicyRule>,
+137:     pub created_at: DateTime<Utc>,
+138: }
+139: 
+140: impl AgentCapabilityPolicyRecord {
+141:     pub fn allows(&self, family: AgentCapabilityFamily) -> bool {
+142:         self.rules
+143:             .iter()
+144:             .rev()
+145:             .find(|rule| rule.family == family)
+146:             .is_some_and(|rule| rule.effect == AgentPolicyEffect::Allow)
+147:     }
+148: }
+149: 
+150: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+151: #[serde(rename_all = "snake_case")]
+152: pub enum AgentMessagePrincipalKind {
+153:     Operator,
+154:     SupervisingParent,
+155:     PeerAgent,
+156:     ExternalIngress,
+157:     RuntimeCapability,
+158: }
+159: 
+160: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+161: pub struct AgentMessagePolicyRule {
+162:     pub principal_kind: AgentMessagePrincipalKind,
+163:     #[serde(default, skip_serializing_if = "Option::is_none")]
+164:     pub principal_id: Option<String>,
+165:     #[serde(default, skip_serializing_if = "Option::is_none")]
+166:     pub route: Option<String>,
+167:     pub effect: AgentPolicyEffect,
+168: }
+169: 
+170: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+171: pub struct AgentMessagePolicyRecord {
+172:     pub agent_id: String,
+173:     pub revision: u64,
+174:     pub default_effect: AgentPolicyEffect,
+175:     pub rules: Vec<AgentMessagePolicyRule>,
+
+[relations] src/runtime_db/agent_relations.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime_db/agent_relations.rs#L413
+413:             creation_cause: AgentLineageCreationCause::CreateAgent,
+414:             revision: identity.revision,
+415:             created_at: identity.created_at,
+416:         }),
+417:         supervision: None,
+418:         durability: Some(AgentDurabilityRecord {
+419:             agent_id: identity.agent_id.clone(),
+420:             durability,
+421:             revision: identity.revision,
+422:             created_at: identity.created_at,
+423:         }),
+424:         lifecycle_attachment: Some(AgentLifecycleAttachmentRecord {
+425:             agent_id: identity.agent_id.clone(),
+426:             attachment: AgentLifecycleAttachment::Independent,
+427:             revision: identity.revision,
+428:             created_at: identity.created_at,
+429:         }),
+430:         capability_policy: Some(capability_policy_for_preset(
+431:             identity,
+432:             AgentProfilePreset::PublicNamed,
+433:         )),
+434:         message_policy: Some(message_policy_for_supervisor(identity, None)),
+435:     }
+436: }
+437: 
+438: pub(crate) fn supervised_creation_records(
+439:     identity: &AgentIdentityRecord,
+440:     supervisor_agent_id: &str,
+441:     delegated_from_task_id: &str,
+442:     delegated_from_work_item_id: Option<&str>,
+443: ) -> AgentCanonicalRecordSet {
+444:     AgentCanonicalRecordSet {
+445:         lineage: Some(AgentLineageRecord {
+446:             child_agent_id: identity.agent_id.clone(),
+447:             parent_agent_id: supervisor_agent_id.to_string(),
+448:             creation_cause: AgentLineageCreationCause::CreateAgent,
+449:             revision: identity.revision,
+450:             created_at: identity.created_at,
+451:         }),
+452:         supervision: Some(AgentSupervisionRecord {
+453:             supervision_id: format!("supervision:{delegated_from_task_id}"),
+454:             supervisor_agent_id: supervisor_agent_id.to_string(),
+455:             child_agent_id: identity.agent_id.clone(),
+456:             delegated_from_work_item_id: delegated_from_work_item_id.map(ToString::to_string),
+457:             delegated_from_task_id: Some(delegated_from_task_id.to_string()),
+458:             state: AgentSupervisionState::Active,
+459:             revision: identity.revision,
+460:             created_at: identity.created_at,
+461:             updated_at: identity.updated_at,
+462:         }),
+463:         durability: Some(AgentDurabilityRecord {
+464:             agent_id: identity.agent_id.clone(),
+465:             durability: AgentCanonicalDurability::Ephemeral,
+466:             revision: identity.revision,
+467:             created_at: identity.created_at,
+468:         }),
+469:         lifecycle_attachment: Some(AgentLifecycleAttachmentRecord {
+470:             agent_id: identity.agent_id.clone(),
+471:             attachment: AgentLifecycleAttachment::SupervisionAttached,
+472:             revision: identity.revision,
+473:             created_at: identity.created_at,
+474:         }),
+475:         capability_policy: Some(capability_policy_for_preset(
+476:             identity,
+477:             AgentProfilePreset::PrivateChild,
+478:         )),
+479:         message_policy: Some(message_policy_for_supervisor(
+480:             identity,
+481:             Some(supervisor_agent_id),
+482:         )),
+483:     }
+484: }
+485: 
+486: pub(crate) fn upsert_canonical_record_set_tx(
+487:     tx: &Transaction<'_>,
+488:     records: &AgentCanonicalRecordSet,
+
+[rule-order] src/runtime_db/agent_relations.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime_db/agent_relations.rs#L989
+989: fn latest_message_policy(
+990:     connection: &rusqlite::Connection,
+991:     agent_id: &str,
+992: ) -> Result<Option<AgentMessagePolicyRecord>> {
+993:     let header = connection
+994:         .query_row(
+995:             "SELECT revision, default_effect, created_at FROM agent_message_policy_records
+996:              WHERE agent_id = ?1 ORDER BY revision DESC LIMIT 1",
+997:             [agent_id],
+998:             |row| {
+999:                 Ok((
+1000:                     row.get::<_, i64>(0)?,
+1001:                     row.get::<_, String>(1)?,
+1002:                     row.get::<_, String>(2)?,
+1003:                 ))
+1004:             },
+1005:         )
+1006:         .optional()?;
+1007:     let Some((revision, default_effect, created_at)) = header else {
+1008:         return Ok(None);
+1009:     };
+1010:     let mut statement = connection.prepare(
+1011:         "SELECT principal_kind, principal_id, route, effect
+1012:          FROM agent_message_policy_rules
+1013:          WHERE agent_id = ?1 AND revision = ?2 ORDER BY rule_index",
+1014:     )?;
+1015:     let rules = statement
+1016:         .query_map(params![agent_id, revision], |row| {
+1017:             Ok((
+1018:                 row.get::<_, String>(0)?,
+1019:                 row.get::<_, Option<String>>(1)?,
+1020:                 row.get::<_, Option<String>>(2)?,
+1021:                 row.get::<_, String>(3)?,
+1022:             ))
+1023:         })?
+1024:         .map(|row| -> Result<_> {
+1025:             let (principal_kind, principal_id, route, effect) = row?;
+1026:             Ok(AgentMessagePolicyRule {
+1027:                 principal_kind: decode_enum(&principal_kind, "message principal kind")?,
+1028:                 principal_id,
+1029:                 route,
+1030:                 effect: decode_enum(&effect, "message policy effect")?,
+1031:             })
+1032:         })
+1033:         .collect::<Result<Vec<_>>>()?;
+1034:     Ok(Some(AgentMessagePolicyRecord {
+1035:         agent_id: agent_id.to_string(),
+1036:         revision: u64::try_from(revision).context("negative message policy revision")?,
+1037:         default_effect: decode_enum(&default_effect, "message policy default effect")?,
+1038:         rules,
+1039:         created_at: parse_timestamp(&created_at, "message policy")?,
+1040:     }))
+
+[delivery] src/runtime_db/agent_message_delivery.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime_db/agent_message_delivery.rs#L182
+182: pub(crate) fn prepare_delivery_admission_tx(
+183:     tx: &Transaction<'_>,
+184:     candidate: &AgentMessageDeliveryRecord,
+185: ) -> Result<AgentMessageDeliveryAdmissionDecision> {
+186:     let existing = delivery_by_idempotency_scope_tx(
+187:         tx,
+188:         &candidate.idempotency_scope,
+189:         &candidate.idempotency_key_digest,
+190:     )?;
+191:     if let Some(existing) = existing.as_ref() {
+192:         if existing.request_digest != candidate.request_digest {
+193:             return Err(AgentMessageDeliveryError::IdempotencyConflict {
+194:                 idempotency_scope: candidate.idempotency_scope.clone(),
+195:                 idempotency_key_digest: candidate.idempotency_key_digest.clone(),
+196:             }
+197:             .into());
+198:         }
+199:         if existing.outcome == AgentMessageDeliveryOutcome::Accepted || !existing.retryable {
+200:             return Ok(AgentMessageDeliveryAdmissionDecision::Complete {
+201:                 record: existing.clone(),
+202:                 insert: false,
+203:                 replay: true,
+204:             });
+205:         }
+206:     }
+207: 
+208:     let identity = tx
+209:         .query_row(
+210:             "SELECT payload_json FROM agent_identities WHERE agent_id = ?1",
+211:             [&candidate.target_agent_id],
+212:             |row| row.get::<_, String>(0),
+213:         )
+214:         .optional()?
+215:         .map(|payload| {
+216:             serde_json::from_str::<AgentIdentityRecord>(&payload)
+217:                 .context("decoding delivery target identity")
+218:         })
+219:         .transpose()?;
+220:     let state = tx
+221:         .query_row(
+222:             "SELECT payload_json FROM agent_states WHERE agent_id = ?1",
+223:             [&candidate.target_agent_id],
+224:             |row| row.get::<_, String>(0),
+225:         )
+226:         .optional()?
+227:         .map(|payload| {
+228:             serde_json::from_str::<AgentState>(&payload)
+229:                 .context("decoding delivery target agent state")
+230:         })
+231:         .transpose()?;
+232:     let relations = canonical_relations_from_connection(tx, &candidate.target_agent_id)?;
+233:     let policy = relations
+234:         .as_ref()
+235:         .and_then(|projection| projection.message_policy.as_ref());
+236:     let principal_id = match candidate.caller.principal_kind {
+237:         crate::types::AgentMessagePrincipalKind::SupervisingParent
+238:         | crate::types::AgentMessagePrincipalKind::PeerAgent => candidate
+239:             .caller
+240:             .caller_agent_id
+241:             .as_deref()
+242:             .unwrap_or(&candidate.caller.caller_principal),
+243:         crate::types::AgentMessagePrincipalKind::Operator
+244:         | crate::types::AgentMessagePrincipalKind::ExternalIngress
+245:         | crate::types::AgentMessagePrincipalKind::RuntimeCapability => {
+246:             &candidate.caller.caller_principal
+247:         }
+248:     };
+249:     let matched_rule = policy.and_then(|policy| {
+250:         policy.rules.iter().enumerate().find(|(_, rule)| {
+251:             rule.principal_kind == candidate.caller.principal_kind
+252:                 && rule
+253:                     .principal_id
+254:                     .as_deref()
+255:                     .is_none_or(|expected| expected == principal_id)
+256:                 && rule
+257:                     .route
+258:                     .as_deref()
+259:                     .is_none_or(|expected| expected == candidate.caller.route)
+260:         })
+261:     });
+262:     let derived_grant = (matched_rule.is_none()
+263:         && identity
+264:             .as_ref()
+265:             .is_some_and(|identity| identity.status == AgentRegistryStatus::Active)
+266:         && candidate.caller.principal_kind == AgentMessagePrincipalKind::PeerAgent
+267:         && matches!(
+268:             candidate.caller.route.as_str(),
+269:             "agent_invocation" | "agent_message"
+270:         )
+271:         && relations.as_ref().is_some_and(|relations| {
+272:             relations
+273:                 .durability
+274:                 .as_ref()
+275:                 .is_some_and(|record| record.durability == AgentCanonicalDurability::Persistent)
+276:                 && relations
+277:                     .lifecycle_attachment
+278:                     .as_ref()
+279:                     .is_some_and(|record| {
+280:                         record.attachment == AgentLifecycleAttachment::Independent
+281:                     })
+282:         }))
+283:     .then(|| match candidate.caller.route.as_str() {
+284:         "agent_message" => AgentMessageDerivedGrant::PersistentIndependentPeerMessage,
+285:         _ => AgentMessageDerivedGrant::PersistentIndependentPeerInvocation,
+286:     });
+287:     let allowed = matched_rule.map_or_else(
+288:         || {
+289:             derived_grant.is_some()
+290:                 || policy.is_some_and(|policy| policy.default_effect == AgentPolicyEffect::Allow)
+291:         },
+292:         |(_, rule)| rule.effect == AgentPolicyEffect::Allow,
+293:     );
+294:     let evidence = AgentMessageAdmissionEvidence {
+295:         identity_revision: identity.as_ref().map(|identity| identity.revision),
+296:         identity_status: identity.as_ref().map(|identity| match identity.status {
+297:             AgentRegistryStatus::Active => AgentIdentityLifecycle::Active,
+298:             AgentRegistryStatus::Deleting => AgentIdentityLifecycle::Deleting,
+299:             AgentRegistryStatus::Deleted => AgentIdentityLifecycle::Deleted,
+300:         }),
+301:         runtime_status: state
+302:             .as_ref()
+303:             .map(|state| enum_string(&state.status))
+304:             .transpose()?,
+305:         message_policy_revision: policy.map(|policy| policy.revision),
+306:         principal_kind: candidate.caller.principal_kind,
+307:         principal_id: Some(principal_id.to_string()),
+308:         route: candidate.caller.route.clone(),
+309:         matched_rule_index: matched_rule.map(|(index, _)| index),
+310:         derived_grant,
+311:     };
+312:     let rejection = match identity.as_ref().map(|identity| identity.status) {
+313:         None => Some((
+314:             AgentMessageDeliveryRejectionCode::TargetNotFound,
+315:             "target agent identity was not found",
+316:         )),
+317:         Some(AgentRegistryStatus::Deleting) => Some((
+318:             AgentMessageDeliveryRejectionCode::AgentDeleting,
+319:             "target agent is deletion-fenced",
+320:         )),
+321:         Some(AgentRegistryStatus::Deleted) => Some((
+322:             AgentMessageDeliveryRejectionCode::AgentDeleted,
+323:             "target agent is deleted",
+324:         )),
+325:         Some(AgentRegistryStatus::Active)
+326:             if state
+327:                 .as_ref()
+328:                 .is_some_and(|state| state.status == AgentStatus::Stopped) =>
+329:         {
+330:             Some((
+331:                 AgentMessageDeliveryRejectionCode::AgentStopped,
+332:                 "target agent is stopped",
+333:             ))
+334:         }
+335:         Some(AgentRegistryStatus::Active) if !allowed => Some((
+336:             AgentMessageDeliveryRejectionCode::MessageNotAuthorized,
+337:             "caller is not authorized by the target message policy",
+338:         )),
+339:         Some(AgentRegistryStatus::Active) => None,
+340:     };
+
+[delivery-tx] src/runtime_db/transitions.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime_db/transitions.rs#L1476
+1476:     pub fn commit_delivery_admission(
+1477:         &self,
+1478:         command: &QueueTransitionCommand,
+1479:         delivery: &AgentMessageDeliveryRecord,
+1480:     ) -> Result<TransitionCommit> {
+1481:         self.commit_queue_transaction_with_delivery(
+1482:             command,
+1483:             &ExecutionProtocolTransition::default(),
+1484:             None,
+1485:             None,
+1486:             None,
+1487:             &[],
+1488:             &[],
+1489:             Some(delivery),
+1490:             DeliverySynchronization::Required,
+1491:             None,
+1492:             None,
+1493:         )
+1494:     }
+
+[queue-tx] src/runtime_db/transitions.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime_db/transitions.rs#L1570
+1570:         timer_wake_claim: Option<&TimerWakeClaim>,
+1571:         task_result_settlement: Option<
+1572:             &crate::runtime_db::task_result_settlement::TaskResultActivationSettlement,
+1573:         >,
+1574:     ) -> Result<TransitionCommit> {
+1575:         self.db.transaction(|tx| {
+1576:             let synchronize_delivery = match delivery_synchronization {
+1577:                 DeliverySynchronization::Required => true,
+1578:                 DeliverySynchronization::IfAvailable => tx.query_row(
+1579:                     "SELECT EXISTS(
+1580:                         SELECT 1 FROM sqlite_master
+1581:                         WHERE type = 'table' AND name = 'agent_message_deliveries'
+1582:                     )",
+1583:                     [],
+1584:                     |row| row.get::<_, bool>(0),
+1585:                 )?,
+1586:             };
+1587:             let delivery = delivery
+1588:                 .map(|delivery| prepare_delivery_admission_tx(tx, delivery))
+1589:                 .transpose()?;
+1590:             if let Some(decision @ AgentMessageDeliveryAdmissionDecision::Complete { .. }) =
+1591:                 delivery.as_ref()
+1592:             {
+1593:                 persist_completed_admission_tx(tx, decision)?;
+1594:                 return Ok(TransitionCommit {
+1595:                     applied: true,
+1596:                     effects: PostCommitEffects::default(),
+1597:                     delivery_receipt: Some(decision.receipt()),
+1598:                 });
+1599:             }
+1600:             if let Some(AgentMessageDeliveryAdmissionDecision::Queue { record, .. }) =
+1601:                 delivery.as_ref()
+1602:             {
+1603:                 validate_delivery_queue_admission(command, record)?;
+1604:             }
+1605:             validate_queue_operation(command)?;
+1606:             validate_queue_mutation_tx(tx, &command.mutation)?;
+1607:             if let Some(timer_wake_claim) = timer_wake_claim {
+1608:                 let valid = tx.query_row(
+1609:                     "SELECT EXISTS(
+1610:                        SELECT 1 FROM timer_wakes w JOIN timers t ON t.timer_id = w.timer_id
+1611:                        WHERE w.timer_id = ?1 AND w.message_id = ?2 AND w.fire_count = ?3
+1612:                          AND w.status = 'pending' AND t.status IN ('active', 'completed'))",
+1613:                     params![
+1614:                         timer_wake_claim.timer_id,
+1615:                         timer_wake_claim.message_id,
+1616:                         timer_wake_claim.fire_count as i64
+1617:                     ],
+1618:                     |row| row.get::<_, bool>(0),
+1619:                 )?;
+1620:                 if !valid {
+1621:                     return Ok(TransitionCommit::default());
+1622:                 }
+1623:             }
+1624:             if let Some(wait_transition) = wait_transition {
+1625:                 validate_wait_condition_expectation_tx(tx, &wait_transition.expected)?;
+1626:                 validate_wait_condition_tx(tx, &wait_transition.record)?;
+1627:                 if let Some(work_item) = wait_transition.work_item.as_ref() {
+1628:                     validate_work_item_mutation_tx(tx, work_item)?;
+1629:                 }
+1630:             }
+1631:             for condition in extra_wait_conditions {
+1632:                 validate_wait_condition_tx(tx, condition)?;
+1633:             }
+1634:             if let Some(task_expectation) = task_expectation {
+1635:                 validate_task_expectation_tx(tx, task_expectation)?;
+1636:             }
+1637:             if let Some(wait_registration) = wait_registration {
+1638:                 for work_item in &wait_registration.work_items {
+1639:                     validate_work_item_mutation_tx(tx, work_item)?;
+1640:                 }
+1641:                 for condition in &wait_registration.wait_conditions {
+1642:                     validate_wait_condition_tx(tx, condition)?;
+1643:                 }
+1644:                 for expected in &wait_registration.expected_wait_conditions {
+1645:                     validate_wait_condition_expectation_tx(tx, expected)?;
+1646:                 }
+1647:             }
+1648:             if let Some(completion) = completion {
+1649:                 validate_completion_transition_tx(tx, &command.agent_id, completion)?;
+1650:                 if completion.requires_execution_continuation {
+1651:                     validate_completion_execution_commands(
+1652:                         completion,
+1653:                         &execution_protocol_transition.commands,
+1654:                     )?;
+1655:                 }
+1656:                 for work_item in &completion.work_items {
+1657:                     validate_work_item_mutation_tx(tx, work_item)?;
+1658:                 }
+1659:                 for condition in &completion.wait_conditions {
+1660:                     validate_wait_condition_tx(tx, condition)?;
+1661:                 }
+1662:                 for continuation in &completion.continuations {
+1663:                     validate_work_item_continuation_tx(
+1664:                         tx,
+1665:                         continuation,
+1666:                         &completion.continuation_expectations,
+
+[profile] docs/rfcs/agent-profile-model.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/rfcs/agent-profile-model.md#L1
+1: ---
+2: title: RFC: Agent Profile Model
+3: date: 2026-04-22
+4: status: draft
+5: ---
+6: 
+7: # RFC: Agent Profile Model
+8: 
+9: > **Supersession note:** The draft
+10: > [Unified Agent Identity, Relations, And Message Delivery](./agent-identity-relations-and-message-delivery.md)
+11: > RFC deprecates `private_child` and `public_named` as canonical product
+12: > profiles. Capability policy remains, but no longer defines identity class,
+13: > operator discoverability, or lifecycle supervision.
+14: 
+15: ## Summary
+
+[identity-rfc] docs/rfcs/agent-identity-relations-and-message-delivery.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/rfcs/agent-identity-relations-and-message-delivery.md#L8
+8: 
+9: ## Summary
+10: 
+11: Holon should treat every agent as the same addressable runtime object.
+12: 
+13: `public agent` and `private agent` should no longer be product-level identity
+14: classes. A subagent is an agent with explicit lineage, supervision, durability,
+15: lifecycle attachment, and policy relations. It is not a hidden or lesser
+16: runtime species.
+17: 
+18: The first agent-facing native tool surface should separate three operations
+19: that are currently combined by `SpawnAgent` or hidden behind invocation:
+20: 
+21: 1. `CreateAgent` creates an independently managed agent identity.
+22: 2. `SendAgentMessage` durably admits one asynchronous message to an existing
+23:    authorized agent.
+24: 3. `InvokeAgent` is a convenience operation: for `existing_agent` it sends a
+25:    message and returns a message-arrival wait handle; for `new_subagent` it
+26:    creates a supervised child and returns a result-bearing task handle.
+27: 
+28: The runtime uses one internal `AgentMessageDeliveryService` for
+29: `SendAgentMessage`, existing-agent invocation, operator ingress, and future
+30: protocol adapters. None of those surfaces may create a private queue path.
+31: 
+32: Every adapter must call the same application service. Native runtime tools must
+33: not fork the CLI to implement runtime semantics.
+34: 
+35: Message delivery is not synchronous RPC. Acceptance means that Holon durably
+36: admitted one message under an identity-lifecycle fence. It does not mean that a
+37: turn completed or that the target produced a result. A message-arrival wait
+38: handle means only that a later message from the selected agent reached the
+39: caller's durable inbox boundary; it does not represent business completion.
+40: 
+41: This RFC also defines the migration away from:
+42: 
+43: - `AgentVisibility::{Public, Private}` as an identity classification;
+44: - `AgentOwnership::{ParentSupervised, SelfOwned}` as a bundled lifecycle model;
+45: - `AgentProfilePreset::{PrivateChild, PublicNamed}` as a combined
+
+[role] docs/website/blog/what-is-holon.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/website/blog/what-is-holon.md#L85
+85: ### Why different roles, rather than just multiple chat windows?
+86: 
+87: Having two agents discuss the same code does not establish collaboration. Who makes the changes? Who judges whether those changes address the issues? Who decides when opinions differ? Without these agreements, another round of conversation may just repeat the argument.
+88: 
+89: Roles first need to define decision boundaries. The familiar PR workflow makes this clear: the development agent submits changes and responds to issues; the reviewer checks risks and verification evidence and judges whether merging is appropriate within its authorization. Disputed or out-of-scope trade-offs go to you. The earlier example authorized conditional merging, not publishing a release. These agreements come from the responsibilities you assign, not from the name "reviewer."
+90: 
+91: Separate roles also let work advance independently. While a development agent fixes an interface, a documentation agent can check usage instructions that are already stable. If a change tightly couples the frontend and backend, though, one agent may handle it more directly. Dividing the work is not worth an unnecessary handoff.
+92: 
+93: Long-term roles also have experience worth keeping. A testing agent can maintain regression scenarios that are easy to miss. An operations agent can record log locations, diagnostic steps, and operations that need human confirmation. These materials need revision as work happens; they support repeated collaboration better than explaining responsibilities from scratch each time.
+94: 
+95: ### Keep roles and experience in AgentHome
+96: 
+97: Each agent has its own AgentHome to keep its responsibilities, memory, and materials. Its `AGENTS.md` can record the role contract: what it handles, what it can do directly, and what it must ask you to confirm. This file records existing authorization. Editing its text does not expand the agent's actual permissions.
+98: 
+99: Role agreements also differ from project rules. The reviewer's review responsibilities belong in its own AgentHome; how a repository builds and runs tests stays in the corresponding workspace. This lets it reuse its review methods in another project while following that project's specific requirements.
+100: 
+101: You can start from a template when creating a role. Reusable methods can become Skills, such as review steps, documentation checks, or log investigation. If you temporarily need an independent second look, you can delegate to a child agent and end that assignment after receiving the results, without maintaining a long-term role for every small task. For configuration, see the [Agent templates](/reference/agent-templates) and [Skills](/reference/skills) references (in English).
+102: 
+103: ### Keep unfinished work and continue when conditions allow
+104: 
+105: In Holon, the agent persists over the long term, while individual pieces of work have a starting point and acceptance conditions. A WorkItem is the record of such work: it saves the objective, plan, progress, waiting conditions, and final completion report.
+106: 
+107: With this record, "waiting for test results" and "delivered" are different states. The agent yields execution while waiting. When task results, operator input, or integrated external events arrive, the runtime schedules it to continue. The model does not need to keep looping to ask whether results are ready.
+108: 
+109: This fits reviews spanning multiple rounds of feedback, as well as documentation, investigation, and acceptance work with staged confirmation. Ordinary questions can still end directly; explaining a command does not require a full work item.
+110: 
+111: WorkItem does not guarantee infinite context or lossless recovery. Its records need ongoing maintenance so agents and people can check whether the objective has changed and whether the next step still makes sense. For what is saved and how waiting works, see [Holon's WorkItem architecture: separating work state from conversation](/blog/why-work-items).
+112: 
+113: ## Let agents work directly in your projects
+114: 
+115: Agents can directly use the repositories, shell, and toolchain on the machine running Holon. After connecting to an existing project, an agent follows project rules to edit files and run tests. After drafting documentation, it can build the site to check pages. You receive actual workspace changes and verification results that you can continue to edit, review, or commit.
+116: 
+117: One agent can bind multiple workspaces and switch between them. For example, adding an interface may require first changing the server, then updating the SDK, and finally adjusting the application that uses it. A development agent can work toward the same objective through each repository's changes and verification. Each project's code, build methods, and guidance files stay in its own directory. When changes need isolation, it can also create a separate Git worktree for the corresponding repository. See the [workspace reference](/reference/workspaces) (in English) for details.
+118: 
+119: Models and image tools can be configured for the work, for example to prepare illustrations for documentation or read page screenshots for inspection. When using remote models, requests still go to the corresponding services, so choose models and the material you send according to the project's data requirements. See the [model reference](/reference/models), [image understanding](/reference/view-image), and [image generation](/reference/image-generation) reference pages (in English) for supported capabilities and required credentials.
+120: 
+121: ## Teams share responsibilities and work results
+122: 
+123: Individuals can use Holon to organize their remote development environments. Teams can put shared roles on a server so members can hand off the same piece of work, rather than each person investigating from scratch. Role assignments do not replace system permissions or access controls. The deployer must still manage the server's network, credentials, and actual access scope.
+
+[security] docs/website/concepts/security-and-execution-boundaries.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/website/concepts/security-and-execution-boundaries.md#L13
+13: ## The host-local runtime
+14: 
+15: Holon runs as a user-level process on your machine. It is **not a sandbox**:
+16: 
+17: - Agents can run any command your user account can run.
+18: - File operations use your user permissions.
+19: - Network access follows your host's network configuration.
+20: - There is no container, VM, or seccomp isolation built into the runtime.
+21: 
+22: **What this means:** scope workspaces intentionally, use dedicated user
+23: accounts or containers when running untrusted agent workloads, and treat agent
+24: command execution with the same care you'd give a shell script running as your
+25: user.
+26: 
+27: ## Execution environment summary
+28: 
+29: Every agent receives an execution environment summary in context. This summary
+30: describes the current policy snapshot and what is enforced:
+31: 
+32: | Boundary | Level | What it means |
+33: |----------|-------|---------------|
+34: | `cwd_rooting` | runtime_shaped | The runtime allows workdir outside the workspace root when explicitly requested; sandboxing is the responsibility of the execution backend |
+35: | `projection_rooting` | hard_enforced | Filesystem views are constrained to the projected root |
+36: | `path_confinement` | not_enforced | The runtime does not prevent access outside the workspace by path |
+37: | `write_confinement` | not_enforced | Write operations are not restricted to the workspace |
+38: | `network_confinement` | not_enforced | Network access is unrestricted by default |
+39: | `secret_isolation` | not_enforced | The runtime does not isolate secrets from agent commands |
+40: | `child_process_containment` | not_enforced | Spawned child processes are not confined by the runtime |
+41: 
+42: **Key takeaway:** boundaries marked `hard_enforced` are runtime guarantees.
+43: Boundaries marked `not_enforced` rely on the operator's host configuration
+44: (filesystem permissions, firewall rules, container isolation).
+45: 
+46: ## Workspace binding
+47: 
+48: Holon provides workspace binding that constrains where the agent operates:
+49: 
+50: - **Workspace root** — the agent's default working directory. The runtime
+51:   defaults commands to start inside this root, but an explicit workdir may
+52:   point outside the workspace when the execution backend allows it.
+53: - **Projection root** — constrains the filesystem view presented to the agent.
+54:   When enforced, the agent only sees files under the projection root.
+55: - **ApplyPatch targets** — file mutation tools resolve relative paths against
+56:   the active workspace by default.
+57: 
+58: These bindings are **organizational guardrails**, not security boundaries:
+59: an agent that can execute arbitrary shell commands can `cd /etc` or read files
+60: outside the workspace if your OS permissions allow it. For true confinement,
+61: pair Holon with a container, VM, or dedicated user account.
+
+[policy] src/system/host_local_policy.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/system/host_local_policy.rs#L10
+10: #[derive(Debug, Clone, PartialEq, Eq)]
+11: pub struct HostLocalBoundary {
+12:     pub backend: ExecutionBackendKind,
+13:     pub projection_kind: Option<WorkspaceProjectionKind>,
+14:     pub access_mode: Option<WorkspaceAccessMode>,
+15:     pub execution_root_id: Option<String>,
+16:     pub process_execution_exposed: bool,
+17:     pub allow_background_tasks: bool,
+18:     pub supports_managed_worktrees: bool,
+19: }
+20: 
+21: impl HostLocalBoundary {
+22:     pub fn from_snapshot(execution: &ExecutionSnapshot) -> Self {
+23:         Self::from_parts(
+24:             &execution.profile,
+25:             execution.projection_kind,
+26:             execution.access_mode,
+27:             execution.execution_root_id.clone(),
+28:         )
+29:     }
+30: 
+31:     pub fn from_parts(
+32:         profile: &ExecutionProfile,
+33:         projection_kind: Option<WorkspaceProjectionKind>,
+34:         access_mode: Option<WorkspaceAccessMode>,
+35:         execution_root_id: Option<String>,
+36:     ) -> Self {
+37:         Self {
+38:             backend: profile.backend,
+39:             projection_kind,
+40:             access_mode,
+41:             execution_root_id,
+42:             process_execution_exposed: profile.process_execution_exposed,
+43:             allow_background_tasks: profile.allow_background_tasks,
+44:             supports_managed_worktrees: profile.supports_managed_worktrees,
+45:         }
+46:     }
+47: 
+48:     pub fn audit_metadata(&self) -> Value {
+49:         json!({
+50:             "backend": execution_backend_label(self.backend),
+51:             "projection_kind": self.projection_kind.map(super::types::workspace_projection_kind_label),
+52:             "access_mode": self.access_mode.map(super::types::workspace_access_mode_kind_label),
+53:             "execution_root_id": self.execution_root_id,
+54:             "process_execution_exposed": self.process_execution_exposed,
+55:             "allow_background_tasks": self.allow_background_tasks,
+56:             "supports_managed_worktrees": self.supports_managed_worktrees,
+57:         })
+58:     }
+59: }
+60: 
+61: pub fn ensure_process_execution_allowed(boundary: &HostLocalBoundary, surface: &str) -> Result<()> {
+62:     if boundary.process_execution_exposed {
+63:         return Ok(());
+64:     }
+65:     Err(anyhow!(
+66:         "{} is not available because process execution is disabled by the current host_local execution profile",
+67:         surface
+68:     ))
+69: }
+70: 
+71: pub fn ensure_background_task_allowed(boundary: &HostLocalBoundary, surface: &str) -> Result<()> {
+72:     if boundary.allow_background_tasks {
+73:         return Ok(());
+74:     }
+75:     Err(anyhow!(
+76:         "{} is not available because background tasks are disabled by the current host_local execution profile",
+77:         surface
+78:     ))
+79: }
+80: 
+81: pub fn ensure_workspace_projection_allowed(
+82:     boundary: &HostLocalBoundary,
+83:     projection_kind: WorkspaceProjectionKind,
+84:     surface: &str,
+85: ) -> Result<()> {
+86:     if projection_kind != WorkspaceProjectionKind::GitWorktreeRoot {
+87:         return Ok(());
+88:     }
+89:     if boundary.supports_managed_worktrees {
+90:         return Ok(());
+91:     }
+92:     Err(anyhow!(
+93:         "{} is not available because git_worktree_root is disabled by the current host_local execution profile",
+94:         surface
+95:     ))
+96: }
+
+[agent-home] docs/rfcs/agent-home-directory-layout.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/rfcs/agent-home-directory-layout.md#L8
+8: 
+9: ## Summary
+10: 
+11: Holon should define `agent_home` as both an agent-owned workspace and a
+12: runtime-owned state root with explicit directory ownership boundaries.
+13: 
+14: The phase-1 layout is:
+15: 
+16: ```text
+17: agent_home/
+18:   AGENTS.md
+19:   memory/
+20:     self.md
+21:     operator.md
+22:   notes/
+23:   work/
+24:   skills/
+25:   .holon/
+26:     state/
+27:     ledger/
+28:     indexes/
+29:     cache/
+30: ```
+31: 
+32: Host-scoped shared memory projections live beside the host runtime state rather
+33: than under an agent home:
+34: 
+35: ```text
+36: holon_home/
+37:   state/
+38:   diagnostics.sqlite
+39:   indexes/
+40:     memory.v2.sqlite3
+41:   agents/
+42:     <agent-id>/
+43:       .holon/
+44:         indexes/   # agent-local indexes, when present
+45: ```
+46: 
+47: `holon_home/indexes/` is the canonical shared index directory. It is distinct
+48: from each agent's `.holon/indexes/` directory and must not be derived by
+49: appending the per-storage-root `.holon` runtime segment to `holon_home`.
+50: 
+51: Visible top-level files and directories are the agent-maintained workspace
+52: surface. `.holon/` is runtime-owned state and must not be treated as ordinary
+53: agent notes or Markdown memory.
+54: 
+55: ## Context
+56: 
+57: Existing RFCs already define parts of `agent_home`:
+
+[instruction] src/agents_md.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/agents_md.rs#L12
+12: pub fn load_agents_md(
+13:     user_home: Option<&Path>,
+14:     agent_home: &Path,
+15:     workspace_anchor: Option<&Path>,
+16: ) -> Result<LoadedAgentsMd> {
+17:     let (user_global_source, user_global_status) = load_user_global_agents_md(user_home)?;
+18:     let (agent_source, agent_status) = load_agent_agents_md(agent_home)?;
+19:     let (workspace_source, workspace_status) = load_workspace_agents_md(workspace_anchor)?;
+20:     Ok(LoadedAgentsMd {
+21:         user_global_source,
+22:         user_global_status,
+23:         agent_source,
+24:         agent_status,
+25:         workspace_source,
+26:         workspace_status,
+27:     })
+28: }
+29: 
+30: fn load_user_global_agents_md(
+31:     user_home: Option<&Path>,
+32: ) -> Result<(Option<AgentsMdSource>, AgentsMdLoadStatus)> {
+33:     let Some(user_home) = user_home else {
+34:         return Ok((None, AgentsMdLoadStatus::RootUnavailable));
+35:     };
+36:     let path = user_home.join(".agents").join(AGENTS_MD_FILENAME);
+37:     load_source(AgentsMdScope::UserGlobal, AgentsMdKind::AgentsMd, &path)
+38: }
+39: 
+40: fn load_agent_agents_md(agent_home: &Path) -> Result<(Option<AgentsMdSource>, AgentsMdLoadStatus)> {
+41:     let path = agent_home.join(AGENTS_MD_FILENAME);
+42:     load_source(AgentsMdScope::Agent, AgentsMdKind::AgentsMd, &path)
+43: }
+44: 
+45: fn load_workspace_agents_md(
+46:     workspace_anchor: Option<&Path>,
+47: ) -> Result<(Option<AgentsMdSource>, AgentsMdLoadStatus)> {
+48:     let Some(workspace_anchor) = workspace_anchor else {
+49:         return Ok((None, AgentsMdLoadStatus::RootUnavailable));
+50:     };
+51: 
+52:     let agents_md = workspace_anchor.join(AGENTS_MD_FILENAME);
+53:     let (source, status) =
+54:         load_source(AgentsMdScope::Workspace, AgentsMdKind::AgentsMd, &agents_md)?;
+55:     if source.is_some() {
+56:         return Ok((source, status));
+57:     }
+58: 
+59:     let claude_md = workspace_anchor.join(CLAUDE_MD_FILENAME);
+60:     load_source(
+61:         AgentsMdScope::Workspace,
+62:         AgentsMdKind::ClaudeMdFallback,
+63:         &claude_md,
+64:     )
+65: }
+66: 
+67: fn load_source(
+68:     scope: AgentsMdScope,
+69:     kind: AgentsMdKind,
+70:     path: &Path,
+71: ) -> Result<(Option<AgentsMdSource>, AgentsMdLoadStatus)> {
+72:     let content = match std::fs::read_to_string(path) {
+73:         Ok(content) => content,
+74:         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+75:             return Ok((None, AgentsMdLoadStatus::NotFound));
+76:         }
+77:         Err(err) => {
+78:             return Err(err).with_context(|| {
+79:                 format!(
+80:                     "failed to read {} instruction file at {}",
+81:                     agents_md_scope_name(&scope),
+82:                     path.display()
+83:                 )
+84:             });
+85:         }
+86:     };
+87:     Ok((
+88:         Some(AgentsMdSource {
+89:             scope,
+90:             kind,
+91:             path: PathBuf::from(path),
+92:             content,
+93:         }),
+94:         AgentsMdLoadStatus::Loaded,
+95:     ))
+
+[prompt] src/prompt/mod.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/prompt/mod.rs#L993
+993:     if let Some(section) =
+994:         user_global_agents_md_section(loaded_agents_md.user_global_source.as_ref())
+995:     {
+996:         sections.push(section);
+997:     }
+998:     if let Some(section) = agent_agents_md_section(loaded_agents_md.agent_source.as_ref()) {
+999:         sections.push(section);
+1000:     }
+1001:     if let Some(section) =
+1002:         agent_memory_operator_section(loaded_agent_memory.operator_source.as_ref())
+1003:     {
+1004:         sections.push(section);
+1005:     }
+1006:     if let Some(section) = agent_memory_self_section(loaded_agent_memory.self_source.as_ref()) {
+1007:         sections.push(section);
+1008:     }
+1009:     if let Some(section) = workspace_agents_md_section(loaded_agents_md.workspace_source.as_ref()) {
+1010:         sections.push(section);
+1011:     }
+1012:     if let Some(section) = skills_usage_contract_section(skills) {
+1013:         sections.push(section);
+1014:     }
+1015: 
+1016:     sections.extend(tools::tool_sections_with_context(
+1017:         available_tools,
+1018:         tool_prompt_context,
+1019:     ));
+
+[load] src/runtime.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime.rs#L3895
+3895:             .await?
+3896:             .snapshot())
+3897:     }
+3898: 
+3899:     pub(crate) async fn loaded_agents_md(&self) -> Result<LoadedAgentsMd> {
+3900:         let guard = self.inner.agent.lock().await;
+3901:         self.loaded_agents_md_for_state(&guard.state)
+3902:     }
+3903: 
+3904:     fn loaded_agents_md_for_state(&self, state: &AgentState) -> Result<LoadedAgentsMd> {
+3905:         load_agents_md(
+3906:             self.user_home().as_deref(),
+3907:             self.agent_home().as_path(),
+3908:             self.workspace_anchor_for_state_ref(state),
+3909:         )
+3910:     }
+3911: 
+3912:     fn loaded_agent_memory_for_state(&self) -> Result<LoadedAgentMemory> {
+3913:         load_agent_memory(self.agent_home().as_path())
+3914:     }
+3915: 
+3916:     pub(crate) async fn skills_runtime_view(
+3917:         &self,
+3918:         identity: &AgentIdentityView,
+
+[memory] src/agent_memory.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/agent_memory.rs#L9
+9: /// Default per-file character budget for the auto-loaded slice of
+10: /// `agent_home/memory/{operator,self}.md`. Keeps the prompt injection bounded
+11: /// while still letting a compact high-priority slice ride along with the
+12: /// always-loaded guidance. Larger files remain available via
+13: /// `MemorySearch` / `MemoryGet`.
+14: pub const DEFAULT_MEMORY_BUDGET_CHARS: usize = 1500;
+15: 
+16: const OPERATOR_MEMORY_FILENAME: &str = "operator.md";
+17: const SELF_MEMORY_FILENAME: &str = "self.md";
+18: 
+19: pub fn load_agent_memory(agent_home: &Path) -> Result<LoadedAgentMemory> {
+20:     load_agent_memory_with_budget(agent_home, DEFAULT_MEMORY_BUDGET_CHARS)
+21: }
+22: 
+23: pub fn load_agent_memory_with_budget(
+24:     agent_home: &Path,
+25:     budget_chars: usize,
+26: ) -> Result<LoadedAgentMemory> {
+27:     let operator = load_source(
+28:         agent_home.join("memory").join(OPERATOR_MEMORY_FILENAME),
+29:         budget_chars,
+30:     )?;
+31:     let self_md = load_source(
+32:         agent_home.join("memory").join(SELF_MEMORY_FILENAME),
+33:         budget_chars,
+34:     )?;
+35:     Ok(LoadedAgentMemory {
+36:         operator_source: operator,
+37:         self_source: self_md,
+38:         budget_chars,
+39:     })
+40: }
+41: 
+42: fn load_source(path: PathBuf, budget_chars: usize) -> Result<Option<AgentMemorySource>> {
+43:     let raw = match std::fs::read_to_string(&path) {
+44:         Ok(content) => content,
+45:         Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+46:         Err(err) => return Err(err.into()),
+47:     };
+48:     let trimmed = raw.trim_start();
+49:     if trimmed.is_empty() {
+50:         return Ok(Some(AgentMemorySource {
+51:             path,
+52:             content: String::new(),
+53:             truncated: false,
+54:             total_chars: 0,
+55:         }));
+56:     }
+57:     let total_chars = trimmed.chars().count();
+58:     let (content, truncated) = if total_chars <= budget_chars {
+59:         (trimmed.to_string(), false)
+60:     } else {
+61:         let truncated_text: String = trimmed.chars().take(budget_chars).collect();
+62:         (truncated_text, true)
+63:     };
+64:     Ok(Some(AgentMemorySource {
+65:         path,
+66:         content,
+67:         truncated,
+68:         total_chars,
+69:     }))
+
+[context] docs/rfcs/long-lived-context-memory.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/rfcs/long-lived-context-memory.md#L1
+1: ---
+2: title: RFC: Long-Lived Context Memory
+3: date: 2026-04-23
+4: status: draft; partially superseded by current WorkItem refs
+5: ---
+6: 
+7: # RFC: Long-Lived Context Memory
+8: 
+9: ## Summary
+10: 
+11: Holon is designed around one durable agent with long-lived working memory.
+12: The runtime should not require an operator-visible "new session" reset to keep
+13: an agent useful.
+14: 
+15: This RFC covers cross-turn memory and prompt assembly. In-turn provider
+16: conversation compaction inside one `run_agent_loop()` is handled separately by
+17: `docs/rfcs/turn-local-context-compaction.md`.
+18: 
+19: This RFC defines the context compression and memory model that lets a Holon
+20: agent continue across many turns while keeping prompt growth bounded.
+21: 
+22: The core design is:
+23: 
+24: - keep append-only durable logs as the audit source
+25: - derive a deterministic working memory snapshot after turns
+26: - accumulate active work into episode builders
+27: - finalize immutable episode records at meaningful boundaries
+28: - assemble each prompt from budgeted memory sections instead of replaying all
+29:   history
+30: - keep provider prompt-cache identity aligned with slow-changing memory
+31:   revisions
+32: 
+33: This RFC uses "memory" in the runtime-continuity sense. Curated durable memory,
+34: loaded guidance, runtime evidence, working-memory projection, and compaction
+35: output remain separate governance surfaces; see
+
+[context-select] src/runtime/turn/context_management.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/turn/context_management.rs#L36
+36: pub(super) fn configured_work_item_scoped_window_messages() -> HistoryWindowMessages {
+37:     configured_work_item_scoped_window_messages_with_lookup(|key| std::env::var(key).ok())
+38: }
+39: 
+40: pub(super) fn configured_history_selector(
+41:     agent_id: &str,
+42:     model: &ModelRouteRef,
+43: ) -> HistorySelector {
+44:     configured_history_selector_with_lookup(agent_id, model, |key| std::env::var(key).ok())
+45: }
+46: 
+47: pub(super) fn projection_fallback_reason(
+48:     provider: &dyn AgentProvider,
+49:     selector: HistorySelector,
+50: ) -> Option<&'static str> {
+51:     if selector == HistorySelector::RecentTurns {
+52:         return None;
+53:     }
+54:     let capabilities = provider.prompt_capabilities();
+55:     if capabilities.contains(&ProviderPromptCapability::FullRequestOnly)
+56:         || capabilities.contains(&ProviderPromptCapability::PromptCacheKey)
+57:         || capabilities.contains(&ProviderPromptCapability::PromptCacheBlocks)
+58:     {
+59:         None
+60:     } else {
+61:         Some("provider_projection_capability_unavailable")
+62:     }
+63: }
+64: 
+65: fn configured_history_selector_with_lookup(
+66:     agent_id: &str,
+67:     model: &ModelRouteRef,
+68:     mut lookup: impl FnMut(&str) -> Option<String>,
+69: ) -> HistorySelector {
+70:     let model_ref = format!(
+71:         "{}@{}/{}",
+72:         model.provider.as_str(),
+73:         model.endpoint.as_str(),
+74:         model.model
+75:     );
+76:     let keys = [
+77:         format!(
+78:             "HOLON_CONTEXT_HISTORY_SELECTOR_AGENT_{}",
+79:             selector_env_component(agent_id)
+80:         ),
+81:         format!(
+82:             "HOLON_CONTEXT_HISTORY_SELECTOR_MODEL_{}",
+83:             selector_env_component(&model_ref)
+84:         ),
+85:         format!(
+86:             "HOLON_CONTEXT_HISTORY_SELECTOR_PROVIDER_{}",
+87:             selector_env_component(model.provider.as_str())
+88:         ),
+89:         "HOLON_CONTEXT_HISTORY_SELECTOR".to_string(),
+90:     ];
+91:     keys.iter()
+92:         .find_map(|key| lookup(key).and_then(|value| parse_configured_history_selector(&value)))
+93:         .unwrap_or(HistorySelector::WorkItemScoped)
+94: }
+95: 
+
+[invoke] src/runtime/agent_services.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/agent_services.rs#L125
+125:             let summary = super::tasks::spawn_agent_task_label(&message);
+126:             match request.target {
+127:                 InvokeAgentTarget::ExistingAgent { agent_id } => {
+128:                     let task = self
+129:                         .runtime
+130:                         .create_agent_message_wait_task(
+131:                             summary,
+132:                             message.clone(),
+133:                             agent_id.clone(),
+134:                             request.authority_class.clone(),
+135:                         )
+136:                         .await?;
+137:                     let mut admitted = match bridge
+138:                         .invoke_existing_agent(
+139:                             &task,
+140:                             &agent_id,
+141:                             message,
+142:                             request.authority_class.clone(),
+143:                         )
+144:                         .await
+145:                     {
+146:                         Ok(admitted) => admitted,
+147:                         Err(error) => {
+148:                             self.runtime
+149:                                 .fail_agent_invocation_task(&task, &error)
+150:                                 .await?;
+151:                             if describe_runtime_error(&error).code == "agent_target_unavailable" {
+152:                                 return Err(error);
+153:                             }
+154:                             let direct_cause = collect_runtime_error_source_chain(&error)
+155:                                 .last()
+156:                                 .cloned()
+157:                                 .unwrap_or_else(|| {
+158:                                     "agent message wait admission failed".to_string()
+159:                                 });
+160:                             return Err(error.context(
+161:                                 RuntimeError::new(
+162:                                     RuntimeErrorDomain::Task,
+163:                                     "agent_invocation_failed",
+164:                                     format!("failed to invoke agent: {direct_cause}"),
+165:                                 )
+166:                                 .with_safe_context("task_id", &task.id)
+167:                                 .with_recovery_hint(
+168:                                     "correct the target agent or message and retry",
+169:                                 ),
+170:                             ));
+171:                         }
+172:                     };
+173:                     let delivery_id = admitted.delivery_id.clone().ok_or_else(|| {
+174:                         anyhow!("accepted agent message invocation is missing its delivery id")
+175:                     })?;
+176:                     let after_delivery_rowid = bridge.agent_message_delivery_rowid(&delivery_id)?;
+177:                     admitted.task_detail["created_new_subagent"] = serde_json::json!(false);
+178:                     admitted.task_detail["request_delivery_id"] = serde_json::json!(&delivery_id);
+179:                     if let Some(detail) = admitted.task_detail.as_object_mut() {
+180:                         detail.remove("delivery_id");
+181:                     }
+182:                     admitted.task_detail["message_wait_after_delivery_rowid"] =
+183:                         serde_json::json!(after_delivery_rowid);
+184:                     admitted.task_detail["business_completion"] = serde_json::json!(false);
+185:                     let queued_task = self
+186:                         .runtime
+187:                         .start_agent_message_wait_monitor(
+188:                             task,
+189:                             request.authority_class,
+190:                             agent_id.clone(),
+191:                             delivery_id,
+192:                             after_delivery_rowid,
+193:                             admitted.task_detail,
+194:                             false,
+195:                         )
+196:                         .await?;
+197:                     Ok(AgentInvocationReceipt {
+198:                         agent_id,
+199:                         created: false,
+200:                         task_handle: TaskHandle::from_task_record(&queued_task, None),
+201:                     })
+
+[child] src/runtime/agent_services.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/agent_services.rs#L203
+203:                 InvokeAgentTarget::NewSubagent {
+204:                     template,
+205:                     workspace_mode,
+206:                     model_resolution,
+207:                 } => {
+208:                     let model_resolution = required_model_resolution(model_resolution)?;
+209:                     let task = self
+210:                         .runtime
+211:                         .create_agent_invocation_task(
+212:                             summary,
+213:                             message.clone(),
+214:                             request.authority_class.clone(),
+215:                             None,
+216:                             true,
+217:                             workspace_mode,
+218:                         )
+219:                         .await?;
+220:                     let mut admitted = match bridge
+221:                         .spawn_child_task(
+222:                             self.runtime.clone(),
+223:                             &task,
+224:                             message,
+225:                             request.authority_class.clone(),
+226:                             workspace_mode.is_worktree(),
+227:                             template,
+228:                             model_resolution,
+229:                         )
+230:                         .await
+231:                     {
+232:                         Ok(admitted) => admitted,
+233:                         Err(error) => {
+234:                             self.runtime
+235:                                 .fail_agent_invocation_task(&task, &error)
+236:                                 .await?;
+237:                             let direct_cause = collect_runtime_error_source_chain(&error)
+238:                                 .last()
+239:                                 .cloned()
+240:                                 .unwrap_or_else(|| "agent invocation admission failed".to_string());
+241:                             return Err(error.context(
+242:                                 RuntimeError::new(
+243:                                     RuntimeErrorDomain::Task,
+244:                                     "agent_invocation_failed",
+245:                                     format!("failed to invoke agent: {direct_cause}"),
+246:                                 )
+247:                                 .with_safe_context("task_id", &task.id)
+248:                                 .with_recovery_hint(
+249:                                     "correct the template, model, or workspace configuration and retry",
+250:                                 ),
+251:                             ));
+252:                         }
+253:                     };
+254:                     admitted.task_detail["created_new_subagent"] = serde_json::json!(true);
+255:                     let queued_task = self
+256:                         .runtime
+257:                         .start_agent_invocation_monitor(
+258:                             task,
+259:                             request.authority_class,
+260:                             workspace_mode.is_worktree(),
+261:                             admitted.child_agent_id.clone(),
+262:                             admitted.child_turn_baseline,
+263:                             admitted.delivery_id,
+264:                             admitted.task_detail,
+265:                         )
+266:                         .await?;
+267:                     Ok(AgentInvocationReceipt {
+268:                         agent_id: admitted.child_agent_id,
+
+[legacy-input] src/tool/tools/invoke_agent.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/tool/tools/invoke_agent.rs#L107
+107: fn reject_legacy_agent_invocation_input(input: &Value) -> Result<()> {
+108:     let Some(object) = input.as_object() else {
+109:         return Ok(());
+110:     };
+111:     let top_level = ["preset", "profile_preset", "visibility", "ownership"]
+112:         .into_iter()
+113:         .find(|field| object.contains_key(*field));
+114:     let target_level = object
+115:         .get("target")
+116:         .and_then(Value::as_object)
+117:         .and_then(|target| {
+118:             ["preset", "profile_preset", "visibility", "ownership"]
+119:                 .into_iter()
+120:                 .find(|field| target.contains_key(*field))
+121:         });
+122:     let Some(field) = top_level.or(target_level) else {
+123:         return Ok(());
+124:     };
+125:     Err(anyhow::Error::from(
+126:         ToolError::new(
+127:             "legacy_agent_invocation_input",
+128:             format!("InvokeAgent no longer accepts the legacy `{field}` field"),
+129:         )
+130:         .with_details(serde_json::json!({
+131:             "tool_name": NAME,
+132:             "field": field,
+133:         }))
+134:         .with_recovery_hint(
+135:             "select target.kind=existing_agent or target.kind=new_subagent without legacy identity presets",
+136:         ),
+137:     ))
+
+[send] src/tool/tools/send_agent_message.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/tool/tools/send_agent_message.rs#L28
+28:         family: ToolCapabilityFamily::CoreAgent,
+29:         spec: typed_spec::<SendAgentMessageArgs>(
+30:             NAME,
+31:             include_str!("../tool_descriptions/send_agent_message.md"),
+32:         )?,
+33:     })
+34: }
+35: 
+36: pub(crate) async fn execute(
+37:     runtime: &RuntimeHandle,
+38:     authority_class: &AuthorityClass,
+39:     tool_call_id: &str,
+40:     input: &Value,
+41: ) -> Result<crate::tool::ToolResult> {
+42:     let args: SendAgentMessageArgs = parse_tool_args(NAME, input)?;
+43:     let agent_id = validate_non_empty(args.agent_id, NAME, "agent_id")?;
+44:     if let Err(error) = validate_agent_id_format(&agent_id) {
+45:         return Err(invalid_tool_input(
+46:             NAME,
+47:             format!("SendAgentMessage requires a valid `agent_id`: {error}"),
+48:             serde_json::json!({
+49:                 "field": "agent_id",
+50:                 "validation_error": error.to_string(),
+51:             }),
+52:             "provide a valid existing agent id",
+53:         ));
+54:     }
+55:     let message = validate_non_empty(args.message, NAME, "message")?;
+56:     let receipt = runtime
+57:         .agent_messaging_service()
+58:         .send(
+59:             AgentMessageSendRequest {
+60:                 target_agent_id: agent_id,
+61:                 content: MessageBody::Text { text: message },
+62:                 client_idempotency_key: tool_call_id.to_string(),
+63:                 correlation_id: None,
+64:                 causation_id: None,
+65:                 requested_priority: Some(Priority::Normal),
+66:             },
+67:             authority_class.clone(),
+68:         )
+69:         .await
+70:         .map_err(map_send_error)?;
+71:     let mut value = serde_json::to_value(&receipt)?;
+72:     value["summary_text"] = Value::String(format!(
+73:         "accepted message delivery {} for agent {}",
+74:         receipt.delivery_id, receipt.target_agent_id
+75:     ));
+76:     Ok(success_from_value(NAME, value))
+77: }
+
+[work] src/domain/work_item.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/domain/work_item.rs#L21
+21: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+22: #[serde(rename_all = "snake_case")]
+23: pub enum WorkItemState {
+24:     Open,
+25:     Completing,
+26:     Completed,
+27: }
+28: 
+29: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+30: #[serde(rename_all = "snake_case")]
+31: pub enum WorkItemPlanStatus {
+32:     Draft,
+33:     Ready,
+34:     NeedsInput,
+35: }
+36: 
+37: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+38: #[serde(rename_all = "snake_case")]
+39: pub enum WorkItemReadiness {
+40:     Runnable,
+41:     Yielded,
+42:     WaitingForOperator,
+43:     Blocked,
+44:     Completing,
+45:     Completed,
+46: }
+47: 
+48: #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+49: #[serde(rename_all = "snake_case")]
+50: pub enum WorkItemSchedulingState {
+51:     Runnable,
+52:     YieldedToWorkItem,
+53:     WaitingOperator,
+54:     WaitingTask,
+55:     WaitingExternal,
+56:     WaitingTimer,
+57:     WaitingSystem,
+58:     Blocked,
+59:     Completing,
+60:     Completed,
+61: }
+
+[work-record] src/domain/work_item.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/domain/work_item.rs#L171
+171: #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+172: pub struct WorkItemRecord {
+173:     pub id: String,
+174:     #[serde(alias = "session_id")]
+175:     pub agent_id: String,
+176:     #[serde(default = "default_agent_home_workspace_id")]
+177:     pub workspace_id: String,
+178:     #[serde(default = "default_work_item_revision")]
+179:     pub revision: u64,
+180:     pub objective: String,
+181:     pub state: WorkItemState,
+182:     pub plan_status: WorkItemPlanStatus,
+183:     #[serde(default, skip_serializing_if = "Option::is_none")]
+184:     pub plan_artifact: Option<WorkItemPlanArtifact>,
+185:     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+186:     pub todo_list: Vec<TodoItem>,
+187:     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+188:     pub work_refs: Vec<WorkItemRef>,
+189:     #[serde(default, skip_serializing_if = "Option::is_none")]
+190:     pub blocked_by: Option<String>,
+191:     #[serde(default, skip_serializing_if = "Option::is_none")]
+192:     pub recheck_at: Option<DateTime<Utc>>,
+193:     #[serde(default, skip_serializing_if = "Option::is_none")]
+194:     pub recheck_consumed_at: Option<DateTime<Utc>>,
+195:     #[serde(default, skip_serializing_if = "Option::is_none")]
+196:     pub result_brief_id: Option<String>,
+197:     #[serde(default, skip_serializing_if = "Option::is_none")]
+198:     pub result_summary: Option<String>,
+199:     #[serde(default, skip_serializing_if = "Option::is_none")]
+200:     pub completion_intent: Option<WorkItemCompletionIntent>,
+201:     pub created_at: DateTime<Utc>,
+202:     pub updated_at: DateTime<Utc>,
+203:     #[serde(default, skip_serializing_if = "Option::is_none")]
+204:     pub turn_id: Option<String>,
+205: }
+
+[wait] src/tool/tools/wait_for.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/tool/tools/wait_for.rs#L96
+96: pub(crate) async fn execute(
+97:     runtime: &RuntimeHandle,
+98:     agent_id: &str,
+99:     authority_class: &AuthorityClass,
+100:     input: &Value,
+101:     context: &ToolExecutionContext,
+102: ) -> Result<ToolResult> {
+103:     let args = parse_wait_for_args(input)?;
+104:     validate_wait_for_args(&args)?;
+105:     if args.delivery == WaitForDeliveryArg::Final && context.completion_report_candidate.is_none() {
+106:         return Ok(ToolResult::deferred(
+107:             NAME,
+108:             json!({
+109:                 "disposition": "awaiting_final_report",
+110:                 "wait_registered": false,
+111:                 "expected_output": "final_text_only",
+112:             }),
+113:             Some("Awaiting the final operator-facing report before committing the wait.".into()),
+114:             ToolLoopDirective::AwaitWaitReport(AwaitWaitReportDirective {
+115:                 input: input.clone(),
+116:             }),
+117:         ));
+118:     }
+119:     prepare_settlement(runtime, agent_id, authority_class, args).await
+120: }
+121: 
+122: pub(crate) async fn prepare_settlement(
+123:     runtime: &RuntimeHandle,
+124:     agent_id: &str,
+125:     _authority_class: &AuthorityClass,
+126:     args: WaitForArgs,
+127: ) -> Result<ToolResult> {
+128:     settle_impl(runtime, agent_id, args, true).await
+129: }
+130: 
+131: async fn settle_impl(
+132:     runtime: &RuntimeHandle,
+133:     agent_id: &str,
+134:     args: WaitForArgs,
+135:     prepare_only: bool,
+136: ) -> Result<ToolResult> {
+137:     validate_wait_for_args(&args)?;
+138:     let reason = validate_non_empty(args.reason, NAME, "reason")?;
+139:     let resource = optional_resource(args.resource);
+140: 
+141:     let context = query_context(runtime).await?;
+142:     let state = runtime.agent_state().await?;
+143:     let requested_work_item_id = optional_resource(args.work_item_id.clone());
+144:     let (work_item_id, owner_selection) = resolve_wait_work_item_id(
+145:         requested_work_item_id.clone(),
+146:         state
+147:             .current_execution_binding
+148:             .as_ref()
+149:             .and_then(|binding| binding.work_item_id.clone()),
+150:         state.current_turn_work_item_id.clone(),
+151:         context.current_work_item_id.clone(),
+152:     );
+153:     let disclosure = WaitForOwnerDisclosure {
+154:         waiter_work_item_id: work_item_id.clone(),
+155:         requested_work_item_id: requested_work_item_id.clone(),
+156:         owner_selection,
+157:         ignored_request: requested_work_item_id
+158:             .as_deref()
+159:             .is_some_and(|requested| work_item_id.as_deref() != Some(requested)),
+160:     };
+
+[wake] src/runtime/wake_matching.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/wake_matching.rs#L19
+19: pub(super) fn resolve_resume_authorization(
+20:     prior_outcome: ClosureOutcome,
+21:     prior_waiting_reason: Option<WaitingReason>,
+22:     trigger_kind: ContinuationTriggerKind,
+23:     contentful: bool,
+24:     task_result_outcome: Option<TaskResultOutcome>,
+25:     exact_task_wait: bool,
+26: ) -> ResumeDecision {
+27:     let terminal_task_result =
+28:         trigger_kind == ContinuationTriggerKind::TaskResult && task_result_outcome.is_some();
+29:     let expected = if trigger_kind == ContinuationTriggerKind::TaskResult {
+30:         exact_task_wait
+31:     } else {
+32:         waiting_reason_matches(prior_waiting_reason, trigger_kind)
+33:     };
+34: 
+35:     if prior_outcome == ClosureOutcome::Waiting {
+36:         if expected {
+37:             let model_reentry = match trigger_kind {
+38:                 ContinuationTriggerKind::TaskResult => terminal_task_result,
+39:                 ContinuationTriggerKind::ExternalEvent | ContinuationTriggerKind::SystemTick => {
+40:                     contentful
+41:                 }
+42:                 _ => true,
+43:             };
+44:             return ResumeDecision {
+45:                 authorization: if model_reentry {
+46:                     ResumeAuthorization::ExpectedWait
+47:                 } else {
+48:                     ResumeAuthorization::LivenessOnly
+49:                 },
+50:                 model_reentry,
+51:                 matched_waiting_reason: true,
+52:             };
+53:         }
+54: 
+55:         if trigger_kind == ContinuationTriggerKind::OperatorInput {
+56:             return ResumeDecision {
+57:                 authorization: ResumeAuthorization::Override,
+58:                 model_reentry: true,
+59:                 matched_waiting_reason: false,
+60:             };
+61:         }
+62: 
+63:         if terminal_task_result {
+64:             return ResumeDecision {
+65:                 authorization: ResumeAuthorization::RuntimeEventReentry,
+66:                 model_reentry: true,
+67:                 matched_waiting_reason: false,
+68:             };
+69:         }
+70: 
+71:         return ResumeDecision {
+72:             authorization: ResumeAuthorization::LivenessOnly,
+73:             model_reentry: false,
+74:             matched_waiting_reason: false,
+75:         };
+76:     }
+77: 
+78:     let runtime_event_reentry = terminal_task_result;
+79:     let local_continuation = matches!(
+80:         trigger_kind,
+81:         ContinuationTriggerKind::OperatorInput
+82:             | ContinuationTriggerKind::TimerFire
+83:             | ContinuationTriggerKind::InternalFollowup
+84:     ) || matches!(
+85:         trigger_kind,
+86:         ContinuationTriggerKind::ExternalEvent | ContinuationTriggerKind::SystemTick
+87:     ) && contentful;
+88: 
+89:     let authorization = if runtime_event_reentry {
+90:         ResumeAuthorization::RuntimeEventReentry
+91:     } else if local_continuation {
+92:         ResumeAuthorization::LocalContinuation
+93:     } else {
+94:         ResumeAuthorization::LivenessOnly
+95:     };
+96:     ResumeDecision {
+97:         model_reentry: authorization != ResumeAuthorization::LivenessOnly,
+98:         authorization,
+99:         matched_waiting_reason: false,
+100:     }
+101: }
+102: 
+103: fn waiting_reason_matches(
+104:     reason: Option<WaitingReason>,
+105:     trigger_kind: ContinuationTriggerKind,
+106: ) -> bool {
+
+[sleep] src/runtime.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime.rs#L5850
+5850:                 scheduler_executor::RunLoopPoll::Message(scheduled) => scheduled,
+5851:                 scheduler_executor::RunLoopPoll::AuthorityBlocked => {
+5852:                     let retry_at =
+5853:                         self.now() + chrono::Duration::seconds(AUTHORITY_BLOCKED_RETRY_SECONDS);
+5854:                     tokio::select! {
+5855:                         _ = self.inner.notify.notified() => {}
+5856:                         _ = self.inner.clock.sleep_until(retry_at) => {}
+5857:                     }
+5858:                     continue;
+5859:                 }
+5860:                 scheduler_executor::RunLoopPoll::Idle => {
+5861:                     let notified = self.inner.notify.notified();
+5862:                     tokio::pin!(notified);
+5863:                     notified.as_mut().enable();
+5864:                     if self.maybe_emit_pending_system_tick(None).await? {
+5865:                         continue;
+5866:                     }
+5867:                     let idle_snapshot = {
+5868:                         let guard = self.inner.agent.lock().await;
+5869:                         (guard.state.clone(), guard.queue.len())
+5870:                     };
+5871:                     let projection = scheduler::SchedulerProjection::from_state_with_queue_len_at(
+5872:                         &self.inner.storage,
+5873:                         &idle_snapshot.0,
+5874:                         idle_snapshot.1,
+5875:                         self.now(),
+5876:                     )?;
+5877:                     let decision = scheduler::decide_next_action(
+5878:                         &projection,
+5879:                         scheduler::SchedulerBoundary::RunLoopIdle,
+5880:                         scheduler::SchedulerInput::Idle,
+5881:                     );
+5882:                     if !matches!(
+5883:                         decision.kind,
+5884:                         scheduler::SchedulerDecisionKind::Sleep
+5885:                             | scheduler::SchedulerDecisionKind::StayIdle
+5886:                     ) {
+5887:                         scheduler::append_scheduler_decision(
+5888:                             &self.inner.storage,
+5889:                             &self.inner.default_agent_id,
+5890:                             &decision,
+5891:                         )?;
+5892:                     }
+5893:                     let next_recheck_at = match (
+5894:                         self.next_blocked_work_item_recheck_at().await?,
+5895:                         self.next_agent_wait_recheck_at().await?,
+5896:                     ) {
+5897:                         (Some(left), Some(right)) => Some(left.min(right)),
+5898:                         (left, right) => left.or(right),
+5899:                     };
+5900:                     let result_recheck_at = self
+5901:                         .inner
+5902:                         .runtime_db
+5903:                         .task_result_settlements()
+5904:                         .next_recheck_at(&self.inner.default_agent_id)?;
+5905:                     let next_recheck_at = match (next_recheck_at, result_recheck_at) {
+5906:                         (Some(left), Some(right)) => Some(left.min(right)),
+5907:                         (left, right) => left.or(right),
+5908:                     };
+5909:                     let idle_transition = scheduler_executor::SchedulerDecisionExecutor::new(&self)
+5910:                         .transition_run_loop_idle_to_sleep(next_recheck_at)
+5911:                         .await?;
+5912:                     let Some(idle_transition) = idle_transition else {
+5913:                         continue;
+5914:                     };
+5915:                     if idle_transition.posture_changed {
+5916:                         self.append_state_changed_events(&idle_transition.state)?;
+5917:                     }
+5918:                     if let Some(next_recheck_at) = next_recheck_at {
+5919:                         if next_recheck_at > self.now() {
+5920:                             tokio::select! {
+5921:                                 _ = &mut notified => {}
+5922:                                 _ = self.inner.clock.sleep_until(next_recheck_at) => {}
+5923:                             }
+5924:                         }
+5925:                     } else {
+5926:                         notified.await;
+5927:                     }
+5928:                     continue;
+
+[completion] src/tool/tools/complete_work_item.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/tool/tools/complete_work_item.rs#L57
+57: pub(crate) async fn execute(
+58:     runtime: &RuntimeHandle,
+59:     _agent_id: &str,
+60:     _authority_class: &AuthorityClass,
+61:     input: &Value,
+62:     context: &ToolExecutionContext,
+63: ) -> Result<crate::tool::ToolResult> {
+64:     let args: CompleteWorkItemArgs = parse_tool_args(NAME, input)?;
+65:     let work_item_id = validate_non_empty(args.work_item_id, NAME, "work_item_id")?;
+66:     let before = runtime.latest_work_item(&work_item_id).await?;
+67:     let warnings = before.as_ref().map(completion_warnings).unwrap_or_default();
+68:     let candidate = context
+69:         .completion_report_candidate
+70:         .as_ref()
+71:         .filter(|candidate| !candidate.text.trim().is_empty());
+72:     let execution_binding = runtime
+73:         .agent_state()
+74:         .await?
+75:         .current_execution_binding
+76:         .ok_or_else(|| {
+77:             RuntimeError::policy(
+78:                 "work_item_execution_binding_missing",
+79:                 "CompleteWorkItem requires an active agent execution binding",
+80:             )
+81:         })?;
+82:     let authority = WorkItemCompletionAuthority::AgentExecution {
+83:         binding: execution_binding,
+84:         effective_work_item_id: context.effective_work_item_id.clone(),
+85:     };
+86:     if candidate.is_none()
+87:         && before
+88:             .as_ref()
+89:             .is_some_and(|record| record.state != WorkItemState::Completed)
+90:     {
+91:         let (expected_work_revision, settlement) = runtime
+92:             .validate_work_item_completion_request(&work_item_id, &authority)
+93:             .await?;
+94:         let request_id = crate::ids::completion_report_request_id();
+95:         return Ok(crate::tool::ToolResult::deferred(
+96:             NAME,
+97:             serde_json::json!({
+98:                 "disposition": "awaiting_completion_report",
+99:                 "completion_request_id": request_id,
+100:                 "work_item_id": work_item_id,
+101:                 "completed_transition": false,
+102:                 "completion_mode": completion_mode_name(settlement),
+103:                 "expected_output": "final_text_only",
+104:                 "warnings": warnings_json(&warnings),
+105:             }),
+106:             Some("Awaiting the final operator-facing completion report.".into()),
+107:             ToolLoopDirective::AwaitCompletionReport(AwaitCompletionReportDirective {
+108:                 request_id,
+109:                 work_item_id,
+110:                 expected_work_revision,
+111:                 warnings: warnings_json(&warnings),
+112:             }),
+113:         ));
+114:     }
+115:     complete_with_report_candidate(
+116:         runtime,
+117:         work_item_id,
+118:         authority,
+119:         candidate,
+120:         warnings,
+121:         "same_assistant_round_preceding_text",
+122:     )
+123:     .await
+
+[completion-prepare] src/runtime/tasks.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/tasks.rs#L4114
+4114:     pub(crate) async fn prepare_work_item_completion_with_report(
+4115:         &self,
+4116:         work_item_id: String,
+4117:         authority: WorkItemCompletionAuthority,
+4118:         report_text: String,
+4119:         citations: Vec<crate::types::Citation>,
+4120:         source_turn_index: Option<u64>,
+4121:         source_round: Option<usize>,
+4122:         source_turn_id: Option<String>,
+4123:         source_message_id: Option<String>,
+4124:         source_assistant_round_id: Option<String>,
+4125:         source_tool_call_id: Option<String>,
+4126:         report_source: &'static str,
+4127:         warnings: Vec<serde_json::Value>,
+4128:     ) -> Result<WorkItemCompletionDispatch> {
+4129:         let agent_id = self.agent_id().await?;
+4130:         let existing = self.validate_owned_work_item(&agent_id, &work_item_id)?;
+4131:         if existing.state == WorkItemState::Completed {
+4132:             return Ok(WorkItemCompletionDispatch::Unchanged(existing));
+4133:         }
+4134:         if existing.state != WorkItemState::Open {
+4135:             return Err(RuntimeError::new(
+4136:                 RuntimeErrorDomain::Conflict,
+4137:                 "work_item_completion_in_progress",
+4138:                 format!(
+4139:                     "work item {work_item_id} already has a legacy completion intent in progress"
+4140:                 ),
+4141:             )
+4142:             .with_safe_context("work_item_id", work_item_id)
+4143:             .with_recovery_hint(
+4144:                 "complete the existing legacy completion intent through the control completion API",
+4145:             )
+4146:             .into());
+4147:         }
+4148:         let report_text = report_text.trim();
+4149:         if report_text.is_empty() {
+4150:             return Err(RuntimeError::validation(
+4151:                 "missing_completion_report",
+4152:                 "CompleteWorkItem requires nearby preceding same-round operator-facing report text",
+4153:             )
+4154:             .with_safe_context("work_item_id", work_item_id)
+4155:             .with_recovery_hint(
+4156:                 "write the concise operator-facing completion report immediately before CompleteWorkItem in the same assistant response",
+4157:             )
+4158:             .into());
+4159:         }
+4160: 
+4161:         let mut brief =
+4162:             BriefRecord::new(agent_id.clone(), BriefKind::Result, report_text, None, None);
+4163:         if !citations.is_empty() {
+4164:             brief.citations = Some(citations);
+4165:         }
+4166:         brief.work_item_id = Some(existing.id.clone());
+4167:         brief.workspace_id = existing.workspace_id.clone();
+4168:         brief.turn_index = source_turn_index;
+4169:         brief.turn_id = source_turn_id;
+4170:         brief.related_message_id = source_message_id;
+4171:         brief.finalizes_assistant_round_id = source_assistant_round_id.clone();
+4172: 
+4173:         let Some(prepared) = self
+4174:             .plan_work_item_completion_with_brief_mode(
+4175:                 &work_item_id,
+4176:                 Some(&authority),
+4177:                 &brief,
+4178:                 AuditEvent::legacy(
+4179:                     "work_item_completion_report_promoted",
+4180:                     serde_json::json!({
+4181:                         "agent_id": agent_id,
+4182:                         "work_item_id": work_item_id,
+4183:                         "source_turn_index": source_turn_index,
+4184:                         "source_round": source_round,
+4185:                         "source_assistant_round_id": source_assistant_round_id,
+4186:                         "source_tool_call_id": source_tool_call_id,
+4187:                         "source": report_source,
+4188:                         "text_preview": crate::tool::helpers::truncate_text(report_text, 600),
+4189:                         "warnings": warnings.clone(),
+4190:                         "warning_count": warnings.len(),
+4191:                         "brief_id": brief.id.clone(),
+4192:                     }),
+4193:                 ),
+4194:                 true,
+4195:                 true,
+4196:             )
+4197:             .await?
+4198:         else {
+4199:             return Ok(WorkItemCompletionDispatch::Unchanged(
+4200:                 self.validate_owned_work_item(&agent_id, &work_item_id)?,
+4201:             ));
+4202:         };
+4203:         Ok(WorkItemCompletionDispatch::Prepared(prepared))
+4204:     }
+
+[todo-warning] src/tool/tools/complete_work_item.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/tool/tools/complete_work_item.rs#L239
+239: pub(crate) fn completion_warnings(record: &WorkItemRecord) -> Vec<WorkItemCompletionWarning> {
+240:     let pending_count = record
+241:         .todo_list
+242:         .iter()
+243:         .filter(|item| item.state == TodoItemState::Pending)
+244:         .count();
+245:     let in_progress_count = record
+246:         .todo_list
+247:         .iter()
+248:         .filter(|item| item.state == TodoItemState::InProgress)
+249:         .count();
+250:     if pending_count == 0 && in_progress_count == 0 {
+251:         return Vec::new();
+252:     }
+253:     let sample = record
+254:         .todo_list
+255:         .iter()
+256:         .filter(|item| item.state != TodoItemState::Completed)
+257:         .take(5)
+258:         .cloned()
+259:         .collect();
+260:     vec![WorkItemCompletionWarning {
+261:         kind: "unfinished_todos".into(),
+262:         message: "Work item completion requested with unfinished todo items.".into(),
+263:         pending_count: Some(pending_count),
+264:         in_progress_count: Some(in_progress_count),
+265:         sample,
+266:     }]
+
+[cancel] src/runtime/tasks.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/tasks.rs#L2367
+2367:     pub async fn stop_task(
+2368:         &self,
+2369:         task_id: &str,
+2370:         authority_class: &AuthorityClass,
+2371:     ) -> Result<TaskRecord> {
+2372:         let existing = self.task_record(task_id).await?;
+2373:         let is_command_task = existing
+2374:             .as_ref()
+2375:             .is_some_and(|task| task.kind == TaskKind::CommandTask);
+2376:         let mut force_stop_requested = false;
+2377:         let mut command_handle_missing = false;
+2378:         if is_command_task {
+2379:             let mut handles = self.inner.task_handles.lock().await;
+2380:             match handles.get_mut(task_id) {
+2381:                 Some(command_task::ManagedTaskHandle::Command(handle)) => {
+2382:                     if let Some(cancel_tx) = handle.cancel_tx.take() {
+2383:                         let _ = cancel_tx.send(());
+2384:                     } else if let Some(force_stop_tx) = handle.force_stop_tx.take() {
+2385:                         let _ = force_stop_tx.send(());
+2386:                         force_stop_requested = true;
+2387:                     } else {
+2388:                         force_stop_requested = true;
+2389:                     }
+2390:                 }
+2391:                 Some(command_task::ManagedTaskHandle::Async(_)) => {
+2392:                     return Err(RuntimeError::new(
+2393:                         RuntimeErrorDomain::Task,
+2394:                         "task_handle_type_mismatch",
+2395:                         format!("task {task_id} has an unexpected async handle"),
+2396:                     )
+2397:                     .with_safe_context("task_id", task_id)
+2398:                     .into());
+2399:                 }
+2400:                 None => {
+2401:                     command_handle_missing = true;
+2402:                     force_stop_requested = true;
+2403:                 }
+2404:             }
+2405:             drop(handles);
+
+[cancel-missing] src/runtime/tasks.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/tasks.rs#L2444
+2444:         if let Some(child_agent_id) = existing
+2445:             .as_ref()
+2446:             .and_then(|task| detail_string(&task.detail, "child_agent_id"))
+2447:         {
+2448:             if let Some(bridge) = self.inner.host_bridge.as_ref() {
+2449:                 let _ = bridge.stop_private_agent(&child_agent_id).await;
+2450:             }
+2451:         }
+2452: 
+2453:         let agent_id = self.agent_id().await?;
+2454:         let status = if is_command_task {
+2455:             if command_handle_missing {
+2456:                 TaskStatus::Cancelled
+2457:             } else {
+2458:                 TaskStatus::Cancelling
+2459:             }
+2460:         } else {
+2461:             TaskStatus::Cancelled
+2462:         };
+2463:         let status_text = match status {
+2464:             TaskStatus::Cancelling => "cancelling",
+2465:             TaskStatus::Cancelled => "cancelled",
+2466:             _ => unreachable!("stop_task only emits cancelling or cancelled"),
+
+[restart] src/runtime/tasks.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/tasks.rs#L2000
+2000:     async fn persist_interrupted_tasks(&self, tasks: Vec<TaskRecord>) -> Result<Vec<TaskRecord>> {
+2001:         let mut interrupted = Vec::new();
+2002:         for task in tasks {
+2003:             let prior_status = task_status_name(&task.status);
+2004:             let mut detail = task.detail.clone().unwrap_or_else(|| serde_json::json!({}));
+2005:             if let Some(detail) = detail.as_object_mut() {
+2006:                 detail.insert(
+2007:                     "status_before_restart".into(),
+2008:                     serde_json::json!(prior_status),
+2009:                 );
+2010:                 detail.insert("task_status".into(), serde_json::json!("interrupted"));
+2011:                 detail.insert(
+2012:                     "interrupted_reason".into(),
+2013:                     serde_json::json!("runtime_restarted"),
+2014:                 );
+2015:                 detail.insert("interrupted_at".into(), to_json_value(&Utc::now()));
+2016:             }
+2017:             let interrupted_task = TaskRecord {
+2018:                 id: task.id.clone(),
+2019:                 agent_id: task.agent_id.clone(),
+2020:                 kind: task.kind.clone(),
+2021:                 status: TaskStatus::Interrupted,
+2022:                 created_at: task.created_at,
+2023:                 updated_at: Utc::now(),
+2024:                 parent_message_id: None,
+2025:                 work_item_id: task.work_item_id.clone(),
+2026:                 summary: task.summary.clone(),
+2027:                 detail: Some(detail),
+2028:                 recovery: task.recovery.clone(),
+2029:             };
+2030:             let result_message =
+2031:                 interrupted_task_result_message(&interrupted_task, "runtime_restarted");
+2032:             let interrupted_task = task_with_result_message(
+2033:                 &interrupted_task,
+2034:                 TaskStatus::Interrupted,
+2035:                 interrupted_task.detail.clone(),
+2036:                 &result_message,
+2037:             );
+2038:             self.commit_terminal_task_result(
+2039:                 &interrupted_task,
+2040:                 "task_interrupted_on_restart",
+2041:                 &result_message,
+2042:             )
+2043:             .await?;
+2044:             interrupted.push(interrupted_task);
+2045:         }
+2046:         Ok(interrupted)
+
+[result-tx] src/runtime/task_state_reducer.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime/task_state_reducer.rs#L499
+499:     pub(super) async fn commit_terminal_task_result(
+500:         &self,
+501:         task: &TaskRecord,
+502:         event_kind: &'static str,
+503:         message: &MessageEnvelope,
+504:     ) -> Result<()> {
+505:         self.commit_terminal_task_result_with_agent_deletion(task, event_kind, message, None)
+506:             .await
+507:     }
+508: 
+509:     pub(super) async fn commit_terminal_task_result_with_agent_deletion(
+510:         &self,
+511:         task: &TaskRecord,
+512:         event_kind: &'static str,
+513:         message: &MessageEnvelope,
+514:         agent_deletion: Option<crate::runtime_db::repositories::AgentDeletionRequest>,
+515:     ) -> Result<()> {
+516:         let mut message = message.clone();
+517:         message.normalize_admission_fields();
+518:         let mut transition = TaskTransition::new(task, event_kind).with_terminal_result(&message);
+519:         if let Some(agent_deletion) = agent_deletion {
+520:             transition = transition.with_agent_deletion(agent_deletion);
+521:         }
+522:         self.apply_task_transition(transition).await
+523:     }
+524: 
+525:     pub(super) async fn commit_terminal_child_task_result(
+526:         &self,
+527:         task: &TaskRecord,
+528:         event_kind: &'static str,
+529:         message: &MessageEnvelope,
+530:         deletion: Option<crate::runtime_db::repositories::AgentDeletionRequest>,
+531:     ) -> Result<bool> {
+532:         let deletion_requested = deletion.is_some();
+533:         match self
+534:             .commit_terminal_task_result_with_agent_deletion(
+535:                 task,
+536:                 event_kind,
+537:                 message,
+538:                 deletion,
+
+[recovery] src/storage/recovery.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/storage/recovery.rs#L8
+8: #[derive(Debug, Clone)]
+9: pub struct RecoverySnapshot {
+10:     pub agent: Option<AgentState>,
+11:     pub replay_messages: Vec<MessageEnvelope>,
+12:     pub active_tasks: Vec<TaskRecord>,
+13:     pub active_timers: Vec<TimerRecord>,
+14:     pub work_items: Vec<WorkItemRecord>,
+15:     pub work_item_delegations: Vec<WorkItemDelegationRecord>,
+16: }
+17: 
+18: pub(crate) fn external_wait_recoverability_event(
+19:     record: &WaitConditionRecord,
+20: ) -> Option<AuditEvent> {
+21:     match record.external_recoverability()? {
+22:         ExternalWaitRecoverability::Weak => Some(AuditEvent::legacy(
+23:             "external_wait_without_recovery",
+24:             serde_json::json!({
+25:                 "wait_condition_id": record.id,
+26:                 "work_item_id": record.work_item_id,
+27:                 "source": record.source,
+28:                 "subject_ref": record.subject_ref,
+29:                 "waiting_for": record.waiting_for,
+30:                 "external_recoverability": "weak",
+31:                 "wake_sources": record.wake_sources,
+32:             }),
+33:         )),
+34:         ExternalWaitRecoverability::ExplicitNoFallback => Some(AuditEvent::legacy(
+35:             "external_wait_without_recovery",
+36:             serde_json::json!({
+37:                 "wait_condition_id": record.id,
+38:                 "work_item_id": record.work_item_id,
+39:                 "source": record.source,
+40:                 "subject_ref": record.subject_ref,
+41:                 "waiting_for": record.waiting_for,
+42:                 "external_recoverability": "explicit_no_fallback",
+43:                 "no_fallback_reason": record.no_fallback_reason(),
+44:                 "wake_sources": record.wake_sources,
+45:             }),
+46:         )),
+
+[first-agent] docs/website/getting-started/first-agent.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/website/getting-started/first-agent.md#L209
+209: ### Recommended: Quick setup with `holon onboard`
+210: 
+211: The fastest way to configure Holon is the interactive onboarding wizard:
+212: 
+213: ```bash
+214: holon onboard
+215: ```
+216: 
+217: In a terminal, this launches an interactive TUI that walks you through:
+218: 
+219: 1. **Provider selection** — choose from built-in providers (Anthropic, OpenAI,
+220:    DeepSeek, Codex, etc.) or a custom provider
+221: 2. **Credential entry** — for OpenAI Codex: browser-based OAuth login; for other
+222:    providers: enter your API key (input is never echoed or stored in logs)
+223: 3. **Model selection** — pick your default model, or enter a custom model id
+224: 4. **Search configuration** — enable DuckDuckGo managed search, model-native
+225:    search, or keep search disabled
+226: 
+227: `holon onboard` writes the config, stores credentials securely, and prints a
+228: summary. It's the recommended path for first-time setup.
+229: 
+230: ### Manual setup (alternative)
+
+[webguide] docs/website/guides/use-web-gui.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/website/guides/use-web-gui.md#L43
+43: ## Pages
+44: 
+45: ### Dashboard
+46: 
+47: The Dashboard provides a runtime overview:
+48: 
+49: - **Agent roster** — all agents with their status (Awake, Asleep, Booting),
+50:   pending message counts, and current model.
+51: - **Runtime health** — scheduler posture, wake hints, and recent activity.
+52: - **Task list** — click a task to open its detail panel showing status,
+53:   command, workdir, and output. Task events (creation, status updates,
+54:   completion) refresh the list in real time.
+55: - **Quick actions** — create agents, attach workspaces, and view agent detail.
+56: - **Agent lifecycle** — start, stop, and delete agents directly from the
+57:   dashboard. Deleting an agent permanently removes it and its data, with an
+58:   option to also remove its private child agents.
+59: 
+60: ### Agent Conversation
+61: 
+62: Select an agent from the Dashboard to open its conversation page:
+63: 
+64: - **Message stream** — recent messages, tool calls, and briefs displayed as a
+65:   threaded conversation.
+66: - **Display levels** — switch between Info (compact user-facing output),
+67:   Verbose (tool calls and intermediate results), and Debug (full runtime
+68:   metadata including tool execution records).
+69: - **Input bar** — send operator messages to the selected agent.
+70: - **Event timeline** — a sidebar timeline of recent events including turns,
+71:   tool executions, and state transitions.
+72: - **Virtual scrolling** — message lists use virtualized rendering for
+73:   smooth performance across long conversations without DOM overhead.
+74: - **Tool execution details** — expand individual tool calls in the message
+75:   stream to inspect request/response payloads, timing, and metadata.
+76:   Tool result panels show structured output alongside raw data, making
+77:   it easier to debug agent behavior.
+
+[tuiguide] docs/website/reference/tui.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/website/reference/tui.md#L76
+76: | `/state` | Open agent state overlay |
+77: | `/abort` | Abort current agent run |
+78: 
+79: ### Navigation Commands
+80: 
+81: | Command | Description |
+82: |---------|-------------|
+83: | `/help` | Show slash command help |
+84: | `/events` | Open raw events overlay |
+85: | `/transcript` | Open transcript overlay |
+86: 
+87: ### Runtime Commands
+88: 
+89: | Command | Description |
+90: |---------|-------------|
+91: | `/tasks` | Open task overlay |
+92: | `/refresh` | Refresh selected agent |
+93: | `/clear-status` | Clear local status line |
+94: | `/onboard` | Configure the runtime default model through daemon config |
+95: | `/vim` | Toggle vim composer editing |
+96: | `/display <mode>` | Set or reset chat display mode (`info`, `verbose`, `debug`, `3`–`5`, or `reset`) |
+97: 
+98: ### Skills Commands
+99: 
+100: Manage skills from the TUI:
+101: 
+102: | Command | Description |
+103: |---------|-------------|
+104: | `/skills` | Show enabled skills for the selected agent |
+
+[web-current] web-gui/app/e2e/current-work.spec.ts
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/web-gui/app/e2e/current-work.spec.ts#L1
+1: import { expect, test } from "@playwright/test";
+2: 
+3: const created = new Date(Date.now() - 90_000).toISOString();
+4: const work = { id: "work-current", objective: "Restore session after login", state: "open", plan_status: "ready", revision: 1, created_at: created, updated_at: created, scheduling_state: "waiting_task", is_current: true, readiness: "blocked", focus: "current" };
+5: const task = { id: "task-tests", agent_id: "bootstrap-agent", work_item_id: work.id, kind: "command_task", status: "running", summary: "Run login regression tests", created_at: created, updated_at: created };
+6: const wait = { id: "wait-tests", work_item_id: work.id, kind: "task", status: "active", task_ids: [task.id], created_at: created };
+7: 
+8: test("all waiting statuses stay visible without a waiting timer", async ({ page }) => {
+9:   let kind = "operator";
+10:   await page.route("**/api/agents/bootstrap-agent/state", async (route) => {
+11:     const body = await (await route.fetch()).json();
+12:     body.agent.agent.current_work_item_id = work.id;
+13:     body.work_items = [work]; body.tasks = [task]; body.waits = [{ ...wait, kind }];
+14:     await route.fulfill({ json: body });
+15:   });
+16:   await page.goto("/agents/bootstrap-agent/conversation");
+17:   const bar = page.locator(".current-work-bar");
+18:   for (const [next, expected] of [["operator", "needsInput"], ["task", "waitingTask"], ["timer", "waitingTimer"], ["external", "waitingExternal"], ["system", "waitingExternal"]]) {
+19:     kind = next;
+20:     await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+21:     await expect(bar).toHaveAttribute("data-state", expected);
+22:     await expect(bar.getByRole("status")).not.toBeEmpty();
+23:     await expect(bar.locator(".current-work-status time")).toHaveCount(0);
+24:   }
+25:   await bar.getByRole("button", { name: "Expand", exact: true }).click();
+26:   await expect(bar.locator(".current-work-task time")).toContainText("Elapsed");
+27: });
+28: 
+29: test("current work stays visible with the panel closed and opens work/task details", async ({ page }) => {
+30:   await page.route("**/api/agents/bootstrap-agent/state", async (route) => {
+31:     const body = await (await route.fetch()).json();
+32:     body.agent.agent.current_work_item_id = work.id;
+33:     body.work_items = [work]; body.tasks = [task]; body.waits = [wait];
+34:     await route.fulfill({ json: body });
+35:   });
+36:   await page.route(`**/api/agents/bootstrap-agent/work-items/${work.id}`, (route) => route.fulfill({ json: { ...work, agent_id: "bootstrap-agent", workspace_id: "test", plan_artifact: { path: "/test/plan.md", relative_path: "plan.md", workspace_id: "test", preview: "# Login repair plan", preview_complete: true, updated_at: created } } }));
+37:   await page.route(`**/api/agents/bootstrap-agent/tasks/${task.id}`, (route) => route.fulfill({ json: { ...task, wait_policy: "none", command: { cmd: "npm test", workdir: "/test" } } }));
+38:   await page.route(`**/api/agents/bootstrap-agent/tasks/${task.id}/output**`, (route) => route.fulfill({ json: { task_id: task.id, output: "Tests running", status: "running" } }));
+39:   await page.setViewportSize({ width: 1440, height: 1000 });
+40:   await page.goto("/agents/bootstrap-agent/conversation");
+41:   const bar = page.getByRole("region", { name: "Current work", exact: true });
+42:   await expect(bar).toBeVisible();
+43:   await expect(bar).toHaveAttribute("data-state", "waitingTask");
+44:   await expect(bar.getByRole("status")).toContainText("Waiting for Run login regression tests");
+45:   await expect(bar.locator(".current-work-status time")).toHaveCount(0);
+46:   await bar.getByRole("button", { name: work.objective, exact: true }).click();
+47:   await expect(page.locator(".side-panel")).toBeVisible();
+48:   await expect(page.locator(".detail-plan-preview")).toContainText("Login repair plan");
+49:   await page.getByRole("button", { name: "Context side panel", exact: true }).click();
+50:   await bar.getByRole("button", { name: "Expand", exact: true }).click();
+51:   await bar.locator(".current-work-task").click();
+52:   await expect(page.locator(".side-panel")).toContainText("npm test");
+53:   await page.getByRole("button", { name: "Context side panel", exact: true }).click();
+54:   await page.setViewportSize({ width: 390, height: 844 });
+55:   await expect(page.locator(".composer textarea")).toBeVisible();
+56:   const box = (await bar.boundingBox())!;
+57:   expect(box.x + box.width).toBeLessThanOrEqual(390);
+58:   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+59: });
+60: 
+61: test("live state moves from waiting to result ready to running and completed without changing turn time", async ({ page }) => {
+62:   let phase = "waiting";
+63:   await page.route("**/api/agents/bootstrap-agent/state", async (route) => {
+64:     const body = await (await route.fetch()).json();
+65:     body.agent.agent.current_work_item_id = phase === "completed" ? null : work.id;
+66:     body.session.current_run_id = phase === "running" ? "new-run" : null;
+67:     body.work_items = [{ ...work, state: phase === "completed" ? "completed" : "open" }];
+68:     body.tasks = phase === "waiting" ? [task] : [];
+69:     body.waits = phase === "waiting" ? [wait] : phase === "ready" ? [{ ...wait, status: "triggered" }] : [];
+70:     await route.fulfill({ json: body });
+71:   });
+72:   await page.goto("/agents/bootstrap-agent/conversation");
+73:   const bar = page.locator(".current-work-bar");
+74:   await expect(bar).toHaveAttribute("data-state", "waitingTask");
+75:   for (const [next, expected] of [["ready", "resultReady"], ["running", "running"], ["completed", "completed"]]) {
+
+[web-cold] web-gui/app/e2e/cold-start.spec.ts
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/web-gui/app/e2e/cold-start.spec.ts#L1
+1: import { expect, test } from "@playwright/test";
+2: import { sessionFor } from "./test-session";
+3: 
+4: interface DiagnosticsSnapshot {
+5:   bootstrapLoading: boolean;
+6:   bootstrapError?: string;
+7:   globalStreamStatus: string;
+8:   discovery: { mode: string; freshness: string };
+9:   agentIds: string[];
+10: }
+11: 
+12: test("cold start bootstraps and applies a live roster event", async ({ page, request }, testInfo) => {
+13:   const session = sessionFor(testInfo);
+14:   const controlPath = (path: string) => `${path}?session=${encodeURIComponent(session)}`;
+15:   await page.context().addCookies([{
+16:     name: "holon_e2e_session",
+17:     value: session,
+18:     domain: "127.0.0.1",
+19:     path: "/",
+20:   }]);
+21:   await page.goto("/");
+22: 
+23:   await expect(page.locator('aside[aria-label="Holon navigation"]')).toBeVisible();
+24:   await expect(page.locator('nav[aria-label="Global navigation"]')).toBeVisible();
+25:   await expect(page.getByText("1 agents · all clear", { exact: true })).toBeVisible();
+26: 
+27:   await expect.poll(async () => page.evaluate(() => window.__HOLON_E2E__?.snapshot()))
+28:     .toMatchObject({
+29:       bootstrapLoading: false,
+30:       globalStreamStatus: "streaming",
+31:       discovery: { mode: "authoritative", freshness: "fresh" },
+32:       agentIds: ["bootstrap-agent"],
+33:     } satisfies Partial<DiagnosticsSnapshot>);
+34: 
+35:   const initialRequests = await request.get(controlPath("/__e2e__/requests"))
+36:     .then((response) => response.json());
+37:   expect(initialRequests.requests).toEqual(expect.arrayContaining([
+38:     "GET /api/handshake",
+39:     "GET /api/agents/list",
+40:     "GET /api/agents/snapshot",
+41:     "GET /api/events/stream",
+42:   ]));
+43:   expect(initialRequests.requests.indexOf("GET /api/handshake"))
+44:     .toBeLessThan(initialRequests.requests.indexOf("GET /api/agents/list"));
+45: 
+46:   await request.post(controlPath("/__e2e__/emit-agent"));
+47: 
+
+[web-ci] .github/workflows/web-e2e.yml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/.github/workflows/web-e2e.yml#L30
+30:   chromium-p0:
+31:     name: Chromium P0
+32:     if: github.event_name != 'schedule'
+33:     runs-on: ubuntu-latest
+34:     timeout-minutes: 20
+35:     defaults:
+36:       run:
+37:         working-directory: web-gui/app
+38:     steps:
+39:       - uses: actions/checkout@v4
+40: 
+41:       - uses: actions/setup-node@v4
+42:         with:
+43:           node-version: "24"
+44:           cache: npm
+45:           cache-dependency-path: |
+46:             web-gui/app/package-lock.json
+47:             packages/conversation-sdk/package-lock.json
+48: 
+49:       - name: Install dependencies
+50:         run: npm ci
+51: 
+52:       - name: Build conversation SDK
+53:         working-directory: packages/conversation-sdk
+54:         run: |
+55:           npm ci
+56:           npm run build
+57: 
+58:       - name: Install Chromium
+59:         run: npx playwright install --with-deps chromium
+60: 
+61:       - name: Build diagnostics assets
+62:         run: npm run build:e2e
+63: 
+64:       - name: Run Chromium P0
+65:         run: npm run test:e2e -- --project=chromium
+66: 
+67:       - name: Verify production bundle
+68:         run: npm run test:e2e:production-bundle
+69: 
+70:       - name: Upload Chromium P0 artifacts
+71:         if: always()
+72:         uses: actions/upload-artifact@v4
+73:         with:
+74:           name: web-e2e-chromium-p0
+75:           if-no-files-found: ignore
+76:           path: |
+77:             web-gui/app/playwright-report
+78:             web-gui/app/test-results
+79:           retention-days: 7
+80: 
+81:   real-daemon:
+82:     name: Real daemon (${{ github.event_name == 'schedule' && 'nightly repeat' || 'on demand' }})
+83:     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+84:     runs-on: ubuntu-latest
+85:     timeout-minutes: 45
+86:     defaults:
+87:       run:
+88:         working-directory: web-gui/app
+89:     steps:
+90:       - uses: actions/checkout@v4
+91: 
+92:       - uses: dtolnay/rust-toolchain@stable
+93: 
+94:       - uses: actions/setup-node@v4
+95:         with:
+96:           node-version: "24"
+97:           cache: npm
+98:           cache-dependency-path: |
+99:             web-gui/app/package-lock.json
+100:             packages/conversation-sdk/package-lock.json
+101: 
+102:       - name: Install dependencies
+103:         run: npm ci
+104: 
+105:       - name: Build conversation SDK
+106:         working-directory: packages/conversation-sdk
+107:         run: |
+108:           npm ci
+109:           npm run build
+110: 
+111:       - name: Install Chromium
+112:         run: npx playwright install --with-deps chromium
+113: 
+114:       - name: Build daemon
+115:         working-directory: .
+116:         run: cargo build --bin holon
+117: 
+118:       - name: Build production and diagnostics assets
+119:         run: |
+120:           npm run build
+121:           npm run build:e2e:real-daemon
+122: 
+123:       - name: Run real daemon repeat suite
+124:         env:
+125:           HOLON_E2E_REPEAT: ${{ github.event_name == 'schedule' && '20' || '3' }}
+126:         run: npm run test:e2e:real-daemon -- --workers=1 --repeat-each="${HOLON_E2E_REPEAT}"
+127: 
+128:       - name: Upload real daemon artifacts
+129:         if: always()
+130:         uses: actions/upload-artifact@v4
+
+[web-stub] web-gui/app/e2e/real-daemon/daemon-fixture.ts
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/web-gui/app/e2e/real-daemon/daemon-fixture.ts#L56
+56: 
+57: /**
+58:  * The daemon fails fast at startup unless the configured model chain has a
+59:  * usable provider, and CI runners hold no provider credentials. Every daemon
+60:  * therefore gets a local stub provider that rejects requests quickly, so
+61:  * startup succeeds and turns settle as deterministic provider errors without
+62:  * external network calls. Specs that need real provider behavior override
+63:  * OPENAI_API_KEY / HOLON_OPENAI_BASE_URL through `options.env`.
+64:  */
+65: async function startStubProvider(): Promise<{ baseUrl: string; stop: () => Promise<void> }> {
+66:   const port = await reservePort();
+67:   const server = http.createServer((_request, response) => {
+68:     response.writeHead(500, { "Content-Type": "application/json" });
+69:     response.end(JSON.stringify({ error: { message: "e2e stub provider rejection" } }));
+70:   });
+71:   await new Promise<void>((resolve, reject) => {
+72:     server.once("error", reject);
+73:     server.listen(port, "127.0.0.1", resolve);
+74:   });
+75:   return {
+76:     baseUrl: `http://127.0.0.1:${port}/v1`,
+77:     async stop() {
+
+[ci-live] .github/workflows/ci.yml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/.github/workflows/ci.yml#L669
+669:     name: Scheduler Live Canary (optional)
+670:     needs:
+671:       - changes
+672:       - docker
+673:     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped') && (needs.changes.outputs.docker == 'true' || needs.changes.outputs.rust == 'true') && contains(github.event.pull_request.labels.*.name, 'e2e-scheduler')
+674:     runs-on: ubuntu-latest
+675:     continue-on-error: true
+676:     timeout-minutes: 20
+677:     env:
+678:       HOLON_E2E_MODEL: ${{ vars.HOLON_E2E_SCHEDULER_MODEL || 'dashscope-token-plan/qwen-3.7' }}
+679:       HOLON_E2E_CREDENTIAL_ENV: ${{ vars.HOLON_E2E_SCHEDULER_CREDENTIAL_ENV || 'DASHSCOPE_TOKEN_PLAN_API_KEY' }}
+680:       HOLON_E2E_CREDENTIAL: ${{ secrets.HOLON_E2E_SCHEDULER_CREDENTIAL || secrets.DASHSCOPE_TOKEN_PLAN_API_KEY || secrets.DEEPSEEK_API_KEY }}
+681:       HOLON_E2E_CONFIG_JSON: ${{ vars.HOLON_E2E_SCHEDULER_CONFIG_JSON }}
+682:     steps:
+683:       - uses: actions/checkout@v4
+684: 
+
+[ci-required] .github/workflows/ci.yml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/.github/workflows/ci.yml#L790
+790: 
+791:   scheduler-e2e-required:
+792:     name: Scheduler E2E Required
+793:     needs:
+794:       - changes
+795:       - docker
+796:     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped') && (needs.changes.outputs.full_sweep == 'true' || needs.changes.outputs.docker == 'true' || needs.changes.outputs.rust == 'true')
+797:     runs-on: ubuntu-latest
+798:     timeout-minutes: 45
+799:     steps:
+800:       - uses: actions/checkout@v4
+801: 
+802:       - name: Download shared image
+803:         if: needs.docker.result == 'success'
+804:         uses: actions/download-artifact@v4
+805:         with:
+806:           name: ci-holon-docker-image
+807:           path: target
+808: 
+809:       - name: Load shared image
+810:         if: needs.docker.result == 'success'
+811:         run: |
+812:           docker image load --input target/holon-ci.tar
+813:           docker image tag holon:ci holon:scheduler-required
+814: 
+815:       - name: Set up Docker Buildx
+816:         if: needs.docker.result == 'skipped'
+817:         uses: docker/setup-buildx-action@v4
+818: 
+819:       - name: Build image
+820:         if: needs.docker.result == 'skipped'
+821:         uses: docker/build-push-action@v7
+822:         with:
+823:           context: .
+824:           load: true
+825:           push: false
+826:           tags: holon:scheduler-required
+827:           cache-from: type=gha,scope=holon-docker
+828:           cache-to: type=gha,mode=max,scope=holon-docker
+829: 
+830:       - name: Run deterministic scheduler E2E
+831:         run: |
+832:           set -euo pipefail
+833:           python3 scripts/docker-e2e.py \
+834:             --image holon:scheduler-required \
+835:             --skip-build \
+836:             --profile scheduler-required \
+837:             --scheduler-matrix \
+838:             --timeout 120 \
+839:             --evidence-dir target/docker-e2e/scheduler-required
+840: 
+841:       - name: Verify required reports
+842:         run: |
+843:           python3 - <<'PY'
+844:           import json
+845:           from pathlib import Path
+846:           root = Path("target/docker-e2e/scheduler-required")
+847:           for name in (
+848:               "summary.json",
+849:               "scheduler-acceptance-report.json",
+850:               "scheduler-coverage-report.json",
+851:           ):
+852:               report = json.loads((root / name).read_text())
+853:               if report["status"] != "pass":
+854:                   raise SystemExit(f"{name} did not pass: {report['status']}")
+855:           PY
+856: 
+
+[nightly] .github/workflows/e2e-scheduler-nightly.yml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/.github/workflows/e2e-scheduler-nightly.yml#L119
+119:     timeout-minutes: 60
+120:     env:
+121:       HOLON_E2E_MODEL: ${{ inputs.model || vars.HOLON_E2E_SCHEDULER_MODEL || 'dashscope-token-plan/qwen-3.7' }}
+122:       HOLON_E2E_CREDENTIAL_ENV: ${{ vars.HOLON_E2E_SCHEDULER_CREDENTIAL_ENV || 'DASHSCOPE_TOKEN_PLAN_API_KEY' }}
+123:       HOLON_E2E_CREDENTIAL: ${{ secrets.HOLON_E2E_SCHEDULER_CREDENTIAL || secrets.DASHSCOPE_TOKEN_PLAN_API_KEY || secrets.DEEPSEEK_API_KEY }}
+124:       HOLON_E2E_CONFIG_JSON: ${{ vars.HOLON_E2E_SCHEDULER_CONFIG_JSON }}
+125:     steps:
+126:       - uses: actions/checkout@v4
+127: 
+128:       - name: Set up Docker Buildx
+129:         uses: docker/setup-buildx-action@v4
+130: 
+131:       - name: Build image
+132:         uses: docker/build-push-action@v7
+133:         with:
+134:           context: .
+135:           load: true
+136:           push: false
+137:           tags: holon:nightly
+138:           cache-from: type=gha,scope=holon-docker
+
+[nightly-optional] .github/workflows/e2e-scheduler-nightly.yml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/.github/workflows/e2e-scheduler-nightly.yml#L165
+165:             "${HOLON_E2E_CREDENTIAL}" > "${HOLON_E2E_PROVIDER_ENV_FILE}"
+166:           chmod 0600 "${HOLON_E2E_PROVIDER_ENV_FILE}"
+167:           if [ -n "${HOLON_E2E_CONFIG_JSON}" ]; then
+168:             printf '%s' "${HOLON_E2E_CONFIG_JSON}" > "${HOLON_E2E_PROVIDER_CONFIG_FILE}"
+169:             python3 -m json.tool "${HOLON_E2E_PROVIDER_CONFIG_FILE}" >/dev/null
+170:             chmod 0600 "${HOLON_E2E_PROVIDER_CONFIG_FILE}"
+171:           fi
+172: 
+173:       - name: Run scheduler live canary
+174:         id: live-canary
+175:         if: steps.provider-env.outcome == 'success'
+176:         continue-on-error: true
+177:         env:
+178:           HOLON_E2E_PROVIDER_ENV_FILE: /tmp/holon-e2e.env
+179:         run: |
+180:           set -euo pipefail
+181:           config_file=/tmp/holon-e2e-config.json
+182:           args=(
+183:             --image holon:nightly
+184:             --skip-build
+185:             --profile scheduler-live-canary
+186:             --scheduler-matrix
+187:             --env-file "${HOLON_E2E_PROVIDER_ENV_FILE}"
+188:             --timeout 120
+189:             --evidence-dir target/docker-e2e/scheduler-live-canary
+190:           )
+191:           if [ -s "${config_file}" ]; then
+192:             args+=(--config-file "${config_file}")
+193:           fi
+194:           python3 scripts/docker-e2e.py "${args[@]}"
+195: 
+196:       - name: Publish run summary
+197:         if: always()
+198:         run: |
+199:           python3 - <<'PY'
+200:           import json, os
+201:           from pathlib import Path
+202:           required = json.loads(
+203:               Path("target/docker-e2e/scheduler-required/summary.json").read_text()
+204:           )
+205:           canary_path = Path(
+206:               "target/docker-e2e/scheduler-live-canary/"
+207:               "scheduler-live-canary-report.json"
+208:           )
+209:           canary = json.loads(canary_path.read_text()) if canary_path.is_file() else None
+210:           lines = [
+211:               "# Scheduler E2E Nightly",
+212:               "",
+213:               f"- Deterministic gate: **{required['status']}**",
+214:               f"- Live canary: **{canary['status'] if canary else 'missing'}**",
+
+[nightly-manual] .github/workflows/e2e-scheduler-nightly.yml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/.github/workflows/e2e-scheduler-nightly.yml#L257
+257:             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+258:             const issueParams = {
+259:               owner: context.repo.owner,
+260:               repo: context.repo.repo,
+261:               title: `Scheduler E2E Nightly Failure (${new Date().toISOString().slice(0,10)})`,
+262:               body: `The nightly scheduler E2E suite failed. See [the run](${runUrl}).`
+263:             };
+264:             try {
+265:               await github.rest.issues.create({...issueParams, labels: ["e2e-failure", "scheduler"]});
+266:             } catch (labelError) {
+267:               // Labels may not exist in the repo; retry without them so the
+268:               // failure notification is never silently lost.
+269:               core.warning(`Could not apply labels: ${labelError.message}`);
+270:               await github.rest.issues.create(issueParams);
+
+[release] .github/workflows/release-e2e.yml
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/.github/workflows/release-e2e.yml#L317
+317:       - name: Write release E2E attestation
+318:         run: |
+319:           set -euo pipefail
+320:           python3 - <<'PY'
+321:           import hashlib
+322:           import json
+323:           import os
+324:           from pathlib import Path
+325: 
+326:           summary_path = Path("target/docker-e2e/release-core/summary.json")
+327:           summary = json.loads(summary_path.read_text())
+328:           if summary["status"] != "pass":
+329:               raise SystemExit(f"Release E2E did not pass: {summary['status']}")
+330:           scheduler_root = Path("target/docker-e2e/scheduler-required")
+331:           scheduler_report_path = scheduler_root / "scheduler-acceptance-report.json"
+332:           scheduler_report = json.loads(scheduler_report_path.read_text())
+333:           coverage_report_path = scheduler_root / "scheduler-coverage-report.json"
+334:           coverage_report = json.loads(coverage_report_path.read_text())
+335:           canary_report_path = Path(
+336:               "target/docker-e2e/scheduler-live-canary/"
+337:               "scheduler-live-canary-report.json"
+338:           )
+339:           canary_report = (
+340:               json.loads(canary_report_path.read_text())
+341:               if canary_report_path.is_file()
+342:               else None
+343:           )
+344:           if scheduler_report["status"] != "pass":
+345:               raise SystemExit(
+346:                   f"Scheduler acceptance did not pass: {scheduler_report['status']}"
+347:               )
+348:           if coverage_report["status"] != "pass":
+349:               raise SystemExit(
+350:                   f"Scheduler coverage did not pass: {coverage_report['status']}"
+351:               )
+352:           if scheduler_report["git_sha"] != os.environ["CANDIDATE_SHA"]:
+353:               raise SystemExit("Scheduler acceptance Git SHA does not match candidate")
+354:           if scheduler_report["image_digest"] != summary["image_digest"]:
+355:               raise SystemExit("Scheduler acceptance image digest does not match summary")
+356:           if coverage_report["git_sha"] != os.environ["CANDIDATE_SHA"]:
+357:               raise SystemExit("Scheduler coverage Git SHA does not match candidate")
+358:           if coverage_report["image_digest"] != summary["image_digest"]:
+359:               raise SystemExit("Scheduler coverage image digest does not match summary")
+
+[license] LICENSE
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/LICENSE#L1
+1:                                  Apache License
+2:                            Version 2.0, January 2004
+3:                         http://www.apache.org/licenses/
+4: 
+5:    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+6: 
+7:    1. Definitions.
+8: 
+9:       "License" shall mean the terms and conditions for use, reproduction,
+10:       and distribution as defined by Sections 1 through 9 of this document.
+11: 
+12:       "Licensor" shall mean the copyright owner or entity authorized by
+13:       the copyright owner that is granting the License.
+14: 
+15:       "Legal Entity" shall mean the union of the acting entity and all
+16:       other entities that control, are controlled by, or are under common
+17:       control with that entity. For the purposes of this definition,
+18:       "control" means (i) the power, direct or indirect, to cause the
+19:       direction or management of such entity, whether by contract or
+20:       otherwise, or (ii) ownership of fifty percent (50%) or more of the
+
+[delivery-tests] src/runtime_db/agent_message_delivery.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/runtime_db/agent_message_delivery.rs#L844
+844:     fn accepted_delivery_is_idempotent_and_survives_restart() -> Result<()> {
+845:         let (dir, db) = runtime_db()?;
+846:         seed_target(&db, AgentStatus::AwakeIdle)?;
+847:         let prepared = prepare("stable-key", "hello")?;
+848:         assert_eq!(prepared.message.turn_id, None);
+849:         assert_eq!(prepared.message.task_id, None);
+850:         assert_eq!(prepared.message.work_item_id, None);
+851:         let first = db
+852:             .transitions()
+853:             .commit_delivery_admission(&admission_command(&prepared), &prepared.record)?;
+854:         let first = first.delivery_receipt.context("missing delivery receipt")?;
+855:         assert_eq!(first.outcome, AgentMessageDeliveryOutcome::Accepted);
+856:         assert_eq!(first.state, AgentMessageDeliveryState::Queued);
+857:         assert!(!first.idempotent_replay);
+858: 
+859:         let replay = prepare("stable-key", "hello")?;
+860:         let replay = db
+861:             .transitions()
+862:             .commit_delivery_admission(&admission_command(&replay), &replay.record)?;
+863:         let replay = replay.delivery_receipt.context("missing replay receipt")?;
+864:         assert_eq!(replay.delivery_id, first.delivery_id);
+865:         assert!(replay.idempotent_replay);
+866:         assert_eq!(db.queue_entries().latest_all()?.len(), 1);
+867: 
+868:         let stored = db
+869:             .agent_message_deliveries()
+870:             .latest(&first.delivery_id)?
+
+[tool-gate] src/tool/dispatch.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/tool/dispatch.rs#L151
+151:         if runtime
+152:             .agent_capability_policy()
+153:             .await?
+154:             .is_some_and(|policy| !policy.allows(required_family))
+155:         {
+156:             return Err(ToolError::new(
+157:                 "agent_capability_not_allowed",
+158:                 format!(
+159:                     "{} is not allowed by the agent capability policy",
+160:                     call.name
+161:                 ),
+162:             )
+163:             .with_details(json!({
+164:                 "tool_name": call.name,
+165:                 "required_family": required_family.label(),
+166:             }))
+167:             .with_recovery_hint(format!(
+168:                 "run {} from an agent whose capability policy allows the `{}` family",
+169:                 call.name,
+170:                 required_family.label()
+171:             ))
+172:             .into());
+
+[policy-rfc] docs/rfcs/agent-identity-relations-and-message-delivery.md
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/docs/rfcs/agent-identity-relations-and-message-delivery.md#L342
+342: The initial send policy is:
+343: 
+344: | Caller evidence | Initial send decision |
+345: |---|---|
+346: | authenticated operator control with `agent.message.send` scope | allow unless an applicable explicit deny exists |
+347: | active supervising parent using the supervision follow-up route | allow while that supervision remains active |
+348: | lineage parent without active supervision | deny unless an explicit scoped allow exists |
+349: | peer agent using the `agent_invocation` route to an active persistent independent target | allow unless an applicable explicit rule overrides it |
+350: | any other peer-agent message | deny unless an explicit scoped allow exists |
+351: | configured external ingress binding | allow only within that binding's target and content scope |
+352: | any other caller | deny |
+353: 
+354: Lifecycle fences and authenticated namespace resolution run before policy
+355: grants. Within message policy, an applicable explicit deny wins over derived or
+356: explicit allow. A narrower principal, target, route, or ingress-binding rule
+357: wins over a broader rule; equally scoped conflicting rules resolve to deny.
+358: Operator control may change policy through a separate authorized management
+359: operation, but message admission does not silently bypass an explicit deny.
+
+[storage] src/storage/mod.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/src/storage/mod.rs#L68
+68: pub struct AppStorage {
+69:     data_dir: PathBuf,
+70:     agent_id: Option<String>,
+71:     runtime_db: RuntimeDb,
+72:     store: RuntimeStore,
+73: }
+74: 
+75: #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+76: enum StorageOpenMode {
+77:     ReadWrite,
+78:     ReadOnly,
+79: }
+80: 
+81: impl AppStorage {
+82:     pub fn new(data_dir: impl Into<PathBuf>, runtime_db: RuntimeDb) -> Result<Self> {
+83:         let data_dir = data_dir.into();
+84:         let agent_id = infer_agent_id_from_data_dir(&data_dir);
+85:         Self::new_with_scope(data_dir, agent_id, runtime_db)
+86:     }
+87: 
+88:     /// Test-only constructor that opens its own RuntimeDb from the data dir.
+89:     pub fn new_for_test(data_dir: impl Into<PathBuf>) -> Result<Self> {
+90:         let data_dir = data_dir.into();
+
+[sdk-make] Makefile
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/Makefile#L55
+55: conversation-sdk-ci: ## Test the TypeScript conversation SDK against the real Rust HTTP/SSE server
+56: 	@bash -c 'set -e; \
+57: 		if ! node -e '\''process.exit(Number(process.versions.node.split(".")[0]) >= 24 ? 0 : 1)'\''; then \
+58: 			. "$$HOME/.nvm/nvm.sh" && nvm use; \
+59: 		fi; \
+60: 		cd $(CONVERSATION_SDK_DIR) && \
+61: 		npm_config_engine_strict=true npm ci && npm test && \
+62: 		cd ../.. && cargo test --test conversation_sdk_e2e typescript_sdk_runs_against_real_conversation_server -- --ignored'
+63: 
+64: macos-menu-test: ## Build and test the native macOS menu app
+
+[sdk-http] tests/conversation_sdk_e2e.rs
+https://github.com/holon-run/holon/blob/7c0ebbdfbf2f38adf41968051ed3440bc5ddb774/tests/conversation_sdk_e2e.rs#L45
+45: #[tokio::test]
+46: #[ignore = "run through `make conversation-sdk-e2e` after building the TypeScript SDK"]
+47: async fn typescript_sdk_runs_against_real_conversation_server() -> Result<()> {
+48:     let retained_config = support::TestConfigBuilder::new()
+49:         .with_control_auth_mode(ControlAuthMode::Auto)
+50:         .build();
+51:     let host = RuntimeHost::new_with_provider_and_event_bus_capacity_for_test(
+52:         retained_config.config().clone(),
+53:         Arc::new(StubProvider::new("unused")),
+54:         1,
+55:     )?;
+56:     host.create_named_agent(AGENT_ID, None).await?;
+57:     seed_conversation(&host)?;
+58: 

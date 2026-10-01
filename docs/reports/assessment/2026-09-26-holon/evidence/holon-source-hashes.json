@@ -1,0 +1,432 @@
+{
+  "commit": "7c0ebbdfbf2f38adf41968051ed3440bc5ddb774",
+  "files": [
+    {
+      "reference": "readme",
+      "path": "README.md",
+      "sha256": "efb5a394184bfd1f2f524dd9054db44c001455d0da75836e6a5bdc19ead03c48",
+      "line_start": 7,
+      "line_end": 78
+    },
+    {
+      "reference": "version",
+      "path": "Cargo.toml",
+      "sha256": "9a6c8a9d0b53b361f1438194769ac3111a098e221163d305ac01c3c92c3a7bf2",
+      "line_start": 1,
+      "line_end": 15
+    },
+    {
+      "reference": "chinese",
+      "path": "README.zh-CN.md",
+      "sha256": "34fd74c045b28af0001d80322adb430b8220060d5ae21ab6c5250c0e99ff1511",
+      "line_start": 138,
+      "line_end": 148
+    },
+    {
+      "reference": "entry",
+      "path": "src/main.rs",
+      "sha256": "ebf8d7394a12e7da63d67473242943cdc767ed47a928ff25d563bf37e541f2b1",
+      "line_start": 868,
+      "line_end": 907
+    },
+    {
+      "reference": "provider",
+      "path": "src/provider/mod.rs",
+      "sha256": "e2fed6803a7d0fa31bbae266849f4f19f39cafafebc6f2d6849f34f4e39ea108",
+      "line_start": 580,
+      "line_end": 609
+    },
+    {
+      "reference": "identity",
+      "path": "src/domain/agent.rs",
+      "sha256": "93aa8847bf83f3ea9ea56d88a766ccf8df660f5c938b43c8062fd68ef9b310b3",
+      "line_start": 9,
+      "line_end": 95
+    },
+    {
+      "reference": "capability",
+      "path": "src/domain/agent.rs",
+      "sha256": "93aa8847bf83f3ea9ea56d88a766ccf8df660f5c938b43c8062fd68ef9b310b3",
+      "line_start": 95,
+      "line_end": 175
+    },
+    {
+      "reference": "relations",
+      "path": "src/runtime_db/agent_relations.rs",
+      "sha256": "58ee8ff0c2450245ee30bc3463463ef1655dc7ec85b060c0779cef71f0ca6c49",
+      "line_start": 413,
+      "line_end": 488
+    },
+    {
+      "reference": "rule-order",
+      "path": "src/runtime_db/agent_relations.rs",
+      "sha256": "58ee8ff0c2450245ee30bc3463463ef1655dc7ec85b060c0779cef71f0ca6c49",
+      "line_start": 989,
+      "line_end": 1040
+    },
+    {
+      "reference": "delivery",
+      "path": "src/runtime_db/agent_message_delivery.rs",
+      "sha256": "acc0ac2fe9130397358f36dc5b24a039ba08404114dc082d61753162cdb1b4fc",
+      "line_start": 182,
+      "line_end": 340
+    },
+    {
+      "reference": "delivery-tx",
+      "path": "src/runtime_db/transitions.rs",
+      "sha256": "ee1aeebdff5b64984d9dca7df35bc24de2a4daf4c5bd7f45a65a2628623c4036",
+      "line_start": 1476,
+      "line_end": 1494
+    },
+    {
+      "reference": "queue-tx",
+      "path": "src/runtime_db/transitions.rs",
+      "sha256": "ee1aeebdff5b64984d9dca7df35bc24de2a4daf4c5bd7f45a65a2628623c4036",
+      "line_start": 1570,
+      "line_end": 1666
+    },
+    {
+      "reference": "profile",
+      "path": "docs/rfcs/agent-profile-model.md",
+      "sha256": "dfe50abb01c5947ee494048723ffba53742539cb9f1ea7954ee197c6c46ef2da",
+      "line_start": 1,
+      "line_end": 15
+    },
+    {
+      "reference": "identity-rfc",
+      "path": "docs/rfcs/agent-identity-relations-and-message-delivery.md",
+      "sha256": "bc708282fdafbc682e31f67c4c7e0c49813fcdc81227ae5328f652a985f12888",
+      "line_start": 8,
+      "line_end": 45
+    },
+    {
+      "reference": "role",
+      "path": "docs/website/blog/what-is-holon.md",
+      "sha256": "3e92696af4882b392e84290ed2276cc02c5bb55a02eddf30946067fa56ff340c",
+      "line_start": 85,
+      "line_end": 123
+    },
+    {
+      "reference": "security",
+      "path": "docs/website/concepts/security-and-execution-boundaries.md",
+      "sha256": "284e50989a7c399a86ee5190ebbf105b2dd574e0a0ea30364f45b274c818eafd",
+      "line_start": 13,
+      "line_end": 61
+    },
+    {
+      "reference": "policy",
+      "path": "src/system/host_local_policy.rs",
+      "sha256": "779af0eb9115793fac75499f2edb7ce1d3a4205e9fadc2fe31c99d46d687730b",
+      "line_start": 10,
+      "line_end": 96
+    },
+    {
+      "reference": "agent-home",
+      "path": "docs/rfcs/agent-home-directory-layout.md",
+      "sha256": "865e443043c07b1c1da04979464189e301403e07a83c71b6e83d1836689e4931",
+      "line_start": 8,
+      "line_end": 57
+    },
+    {
+      "reference": "instruction",
+      "path": "src/agents_md.rs",
+      "sha256": "4d8254bec49e07cc9daafc7b4a62f6f7cd22f962f757b2d94acdd8a5af680682",
+      "line_start": 12,
+      "line_end": 95
+    },
+    {
+      "reference": "prompt",
+      "path": "src/prompt/mod.rs",
+      "sha256": "ed33058c1c2514b52200bf30a367b8da6e335f1e7d18a10aee46a1b44b096af2",
+      "line_start": 993,
+      "line_end": 1019
+    },
+    {
+      "reference": "load",
+      "path": "src/runtime.rs",
+      "sha256": "e6700498933fe15e9370a1f3e245ca50b558dcba15db9cca83c7c13dc4fc0b71",
+      "line_start": 3895,
+      "line_end": 3918
+    },
+    {
+      "reference": "memory",
+      "path": "src/agent_memory.rs",
+      "sha256": "2a7633d21aa74a18f8086aeb1cdc2cc228cffeed203d3d9a316ca5cd7c6dba3e",
+      "line_start": 9,
+      "line_end": 69
+    },
+    {
+      "reference": "context",
+      "path": "docs/rfcs/long-lived-context-memory.md",
+      "sha256": "6e0b522287d3fb5b37ff0036d270269be989464a5166dda38933ee7b32117257",
+      "line_start": 1,
+      "line_end": 35
+    },
+    {
+      "reference": "context-select",
+      "path": "src/runtime/turn/context_management.rs",
+      "sha256": "5f82331a67ef13d663f2bd40a5f49b97733322137d96358d2d34a84d466da63c",
+      "line_start": 36,
+      "line_end": 95
+    },
+    {
+      "reference": "invoke",
+      "path": "src/runtime/agent_services.rs",
+      "sha256": "b4cfb003556222020f1ff0a36f7e150b3f441e5a2882ac6a1a7b5875001fab64",
+      "line_start": 125,
+      "line_end": 201
+    },
+    {
+      "reference": "child",
+      "path": "src/runtime/agent_services.rs",
+      "sha256": "b4cfb003556222020f1ff0a36f7e150b3f441e5a2882ac6a1a7b5875001fab64",
+      "line_start": 203,
+      "line_end": 268
+    },
+    {
+      "reference": "legacy-input",
+      "path": "src/tool/tools/invoke_agent.rs",
+      "sha256": "0e296fe2cccbe4361ed97017481f8eacacd6b5e849a3c6f3da979b0bb3309e36",
+      "line_start": 107,
+      "line_end": 137
+    },
+    {
+      "reference": "send",
+      "path": "src/tool/tools/send_agent_message.rs",
+      "sha256": "6bd91056a2d4c14e31e011a1aa340e810c1e8256ded2e77d98aacef7ac25cb01",
+      "line_start": 28,
+      "line_end": 77
+    },
+    {
+      "reference": "work",
+      "path": "src/domain/work_item.rs",
+      "sha256": "fbbb570440030cf4b974590b36507d00e164fe56099b9df95eddfebe976d76ff",
+      "line_start": 21,
+      "line_end": 61
+    },
+    {
+      "reference": "work-record",
+      "path": "src/domain/work_item.rs",
+      "sha256": "fbbb570440030cf4b974590b36507d00e164fe56099b9df95eddfebe976d76ff",
+      "line_start": 171,
+      "line_end": 205
+    },
+    {
+      "reference": "wait",
+      "path": "src/tool/tools/wait_for.rs",
+      "sha256": "2a11591f75f9505e831e93b21da416414bb7296618883640b5a3cdfa8d11d864",
+      "line_start": 96,
+      "line_end": 160
+    },
+    {
+      "reference": "wake",
+      "path": "src/runtime/wake_matching.rs",
+      "sha256": "37a73d0fcea90c3cba064d488b61e5448bb63d73f36424d21b98285aa741e2ed",
+      "line_start": 19,
+      "line_end": 106
+    },
+    {
+      "reference": "sleep",
+      "path": "src/runtime.rs",
+      "sha256": "e6700498933fe15e9370a1f3e245ca50b558dcba15db9cca83c7c13dc4fc0b71",
+      "line_start": 5850,
+      "line_end": 5928
+    },
+    {
+      "reference": "completion",
+      "path": "src/tool/tools/complete_work_item.rs",
+      "sha256": "232c5f5d0c4339c13a06bf038142375c46f358bfd8885e8ccfa9614b66590fe1",
+      "line_start": 57,
+      "line_end": 123
+    },
+    {
+      "reference": "completion-prepare",
+      "path": "src/runtime/tasks.rs",
+      "sha256": "9d696ee9e45052d773abb55b1c2d45d780dad8a7c14ddca471475b5318490464",
+      "line_start": 4114,
+      "line_end": 4204
+    },
+    {
+      "reference": "todo-warning",
+      "path": "src/tool/tools/complete_work_item.rs",
+      "sha256": "232c5f5d0c4339c13a06bf038142375c46f358bfd8885e8ccfa9614b66590fe1",
+      "line_start": 239,
+      "line_end": 266
+    },
+    {
+      "reference": "cancel",
+      "path": "src/runtime/tasks.rs",
+      "sha256": "9d696ee9e45052d773abb55b1c2d45d780dad8a7c14ddca471475b5318490464",
+      "line_start": 2367,
+      "line_end": 2405
+    },
+    {
+      "reference": "cancel-missing",
+      "path": "src/runtime/tasks.rs",
+      "sha256": "9d696ee9e45052d773abb55b1c2d45d780dad8a7c14ddca471475b5318490464",
+      "line_start": 2444,
+      "line_end": 2466
+    },
+    {
+      "reference": "restart",
+      "path": "src/runtime/tasks.rs",
+      "sha256": "9d696ee9e45052d773abb55b1c2d45d780dad8a7c14ddca471475b5318490464",
+      "line_start": 2000,
+      "line_end": 2046
+    },
+    {
+      "reference": "result-tx",
+      "path": "src/runtime/task_state_reducer.rs",
+      "sha256": "42789376727c9d63220f63372c48b7c822e8ea59491eef60162cc47073c6928b",
+      "line_start": 499,
+      "line_end": 538
+    },
+    {
+      "reference": "recovery",
+      "path": "src/storage/recovery.rs",
+      "sha256": "82caae7d55b7e538b8518234e2243d7aebeb841eb959d27708c8c9c3763d4f3a",
+      "line_start": 8,
+      "line_end": 46
+    },
+    {
+      "reference": "first-agent",
+      "path": "docs/website/getting-started/first-agent.md",
+      "sha256": "22dbedf884b5b741831428fa7351d1bd0d9e51da8559f59848295931d7c3ea3c",
+      "line_start": 209,
+      "line_end": 230
+    },
+    {
+      "reference": "webguide",
+      "path": "docs/website/guides/use-web-gui.md",
+      "sha256": "d409de6b00881919d227fb8725872c4e4ffa7341863209f65d0d9e61319d55a0",
+      "line_start": 43,
+      "line_end": 77
+    },
+    {
+      "reference": "tuiguide",
+      "path": "docs/website/reference/tui.md",
+      "sha256": "ec56d252d6719dd311b7ae272320958b5aa402cd4416b1bff3a1014e42968965",
+      "line_start": 76,
+      "line_end": 104
+    },
+    {
+      "reference": "web-current",
+      "path": "web-gui/app/e2e/current-work.spec.ts",
+      "sha256": "c02ffbbd12d10584912029cd76199bf18e894592a84b1fbbafc078be1f5da120",
+      "line_start": 1,
+      "line_end": 75
+    },
+    {
+      "reference": "web-cold",
+      "path": "web-gui/app/e2e/cold-start.spec.ts",
+      "sha256": "b537772ba85fbb8a6c08e8f79888d0aee343b2d7d144dd4bcb86bd730b791edc",
+      "line_start": 1,
+      "line_end": 47
+    },
+    {
+      "reference": "web-ci",
+      "path": ".github/workflows/web-e2e.yml",
+      "sha256": "0546b67a468fa37ddd3e689505c1c3d0ec366412780fa69db012a1c45075ea27",
+      "line_start": 30,
+      "line_end": 130
+    },
+    {
+      "reference": "web-stub",
+      "path": "web-gui/app/e2e/real-daemon/daemon-fixture.ts",
+      "sha256": "5df79c1f6d844d827c7124d3d7932729302fff2cd3f138b83c07fe432b70d752",
+      "line_start": 56,
+      "line_end": 77
+    },
+    {
+      "reference": "ci-live",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "72d086ef1afe5b21b16321f75cb0874c1b36be96d8273b3c0abfaf18f517aae6",
+      "line_start": 669,
+      "line_end": 684
+    },
+    {
+      "reference": "ci-required",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "72d086ef1afe5b21b16321f75cb0874c1b36be96d8273b3c0abfaf18f517aae6",
+      "line_start": 790,
+      "line_end": 856
+    },
+    {
+      "reference": "nightly",
+      "path": ".github/workflows/e2e-scheduler-nightly.yml",
+      "sha256": "bc548906a08fb2e8789b796408c2c06efc598f803505889a8764a8c933b46d18",
+      "line_start": 119,
+      "line_end": 138
+    },
+    {
+      "reference": "nightly-optional",
+      "path": ".github/workflows/e2e-scheduler-nightly.yml",
+      "sha256": "bc548906a08fb2e8789b796408c2c06efc598f803505889a8764a8c933b46d18",
+      "line_start": 165,
+      "line_end": 214
+    },
+    {
+      "reference": "nightly-manual",
+      "path": ".github/workflows/e2e-scheduler-nightly.yml",
+      "sha256": "bc548906a08fb2e8789b796408c2c06efc598f803505889a8764a8c933b46d18",
+      "line_start": 257,
+      "line_end": 270
+    },
+    {
+      "reference": "release",
+      "path": ".github/workflows/release-e2e.yml",
+      "sha256": "823e90bc89e27d20dfb6171c92feee147344293216b3533aac631d7700e50490",
+      "line_start": 317,
+      "line_end": 359
+    },
+    {
+      "reference": "license",
+      "path": "LICENSE",
+      "sha256": "f7f222f158ee8777294fb46434f69658fcec61cf116c7614d2aaa0e6fe1d14de",
+      "line_start": 1,
+      "line_end": 20
+    },
+    {
+      "reference": "delivery-tests",
+      "path": "src/runtime_db/agent_message_delivery.rs",
+      "sha256": "acc0ac2fe9130397358f36dc5b24a039ba08404114dc082d61753162cdb1b4fc",
+      "line_start": 844,
+      "line_end": 870
+    },
+    {
+      "reference": "tool-gate",
+      "path": "src/tool/dispatch.rs",
+      "sha256": "574ee9e76358f1e9c59bdbb2e9ba94345306017c61d65d6fb80ac21d6c226e78",
+      "line_start": 151,
+      "line_end": 172
+    },
+    {
+      "reference": "policy-rfc",
+      "path": "docs/rfcs/agent-identity-relations-and-message-delivery.md",
+      "sha256": "bc708282fdafbc682e31f67c4c7e0c49813fcdc81227ae5328f652a985f12888",
+      "line_start": 342,
+      "line_end": 359
+    },
+    {
+      "reference": "storage",
+      "path": "src/storage/mod.rs",
+      "sha256": "3dd7c175947735cf75da8eb68ba6a08a31dc68f40f51e1a9496c42b12b7c67ac",
+      "line_start": 68,
+      "line_end": 90
+    },
+    {
+      "reference": "sdk-make",
+      "path": "Makefile",
+      "sha256": "64f50f67f767b7768ac8c0b39bc1af8a18d9e5debc2cda32ad21742326e94214",
+      "line_start": 55,
+      "line_end": 64
+    },
+    {
+      "reference": "sdk-http",
+      "path": "tests/conversation_sdk_e2e.rs",
+      "sha256": "16f0ee87e889e7143d1a7fe276fe750b9434c29997ae30aa7c61e065cc40263b",
+      "line_start": 45,
+      "line_end": 58
+    }
+  ]
+}

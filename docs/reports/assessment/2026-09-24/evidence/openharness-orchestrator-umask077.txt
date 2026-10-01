@@ -1,0 +1,55 @@
+
+ RUN  v4.1.10 /tmp/oax-openharness-assessment-20260924/cli
+
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > starts once, preserves permissions, and rejects a conflicting creation retry 20ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > validates every dependency and harness before launching any task 8ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > fans out and joins different harnesses using pinned, checksummed copies 203ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > names each agent's role: specialists are never news, the Director only once nothing is left to run 64ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > limits parallelism and treats a repeated plan as the same work 118ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > blocks dependencies after failure and retries in a new workspace 169ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not mistake idle for success or complete unfinished work 56ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > rejects path traversal, outside symlinks, directories, and missing artifacts 74ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > stops only this project, ignores late results, and never kills sessions on close 57ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > cancels an agent that finishes launching after cancellation 55ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > refuses blind retry of an uncertain process spawn 55ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > persists transcript and reattaches without launching duplicate agents 65ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > handles lost chat acknowledgments without sending twice 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > tracks real delivery receipts and does not silently resend after restart 7ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > recovers a result notification saved before dispatch without rerunning work 61ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > keeps assistant turns separate even when a user message arrives mid-stream 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > steers the current worker once and rejects stale or finished attempts 64ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > revokes only this project’s queued receipts when stopped 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not race a retry against a worker still being created 106ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > reports invalid folders as an editable request refusal 3ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > exposes actionable wire errors without throwing or weakening validation 3ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > deduplicates simultaneous creation after asynchronous folder validation 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > lists recent projects in order without exposing their full briefs 5ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > preserves corrupt state and refuses to overwrite its identity 3ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > recovers interrupted director and worker launches conservatively 56ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > records a director creation failure without hiding it: Error: Engine not authenticated 2ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > records a director creation failure without hiding it: unknown process refusal 2ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > never overwrites an existing workspace, even without a saved run 2ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > refuses unsupported engines and invalid folder forms before creation 2ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not start cancelled work while its folder is being prepared 34ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > handles a removed harness without mistaking it for an uncertain spawn 55ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > can run general-purpose work, resume, and add a new revision after completion 113ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > reports the same failure only once and rejects overlapping result commits 63ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > retains uncertain guidance instead of resending: Error: Input route disappeared 5ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > retains uncertain guidance instead of resending: unknown dispatch failure 4ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > leaves a recovered pending receipt pending when no director was recorded 3ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > flushes coalesced transcript changes and bounds retained messages 212ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > pauses after a real background storage failure without duplicating the agent 62ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > keeps cancellation authoritative when director creation later rejects 55ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > keeps cancellation authoritative when worker creation later rejects 75ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not downgrade a very fast worker result while creation is returning 55ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > normalizes non-Error worker failures and explicit input rejection 56ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > preserves orphaned worker results without inventing a director 63ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > does not lose a committed result if staging cleanup itself fails 65ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > normalizes untyped private-state and background notification failures 66ms
+ ✓ src/orchestrator/service.spec.ts > durable orchestrator lifecycle > finishes a 64-task mixed-engine graph with bounded parallelism and verified fan-in 667ms
+
+ Test Files  1 passed (1)
+      Tests  46 passed (46)
+   Start at  00:04:03
+   Duration  3.69s (transform 357ms, setup 54ms, import 466ms, tests 2.93s, environment 0ms)
+

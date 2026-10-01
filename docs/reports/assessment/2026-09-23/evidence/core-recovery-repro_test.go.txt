@@ -1,0 +1,46 @@
+package sqlite
+
+import (
+	"context"
+	"openagentx/internal/domain"
+	"testing"
+	"time"
+)
+
+// Assessment-only isolated repository fixture; no production DB or direct SQL writes.
+func TestAssessmentCanceledRecoveryHidesUnknownPhysicalOutcome(t *testing.T) {
+	repository, _ := openTestRepository(t, nil)
+	fixture := seedRepository(t, repository)
+	ctx := context.Background()
+	if err := repository.CreatePrincipal(ctx, &domain.Principal{ID: "assessment-daemon", Kind: domain.PrincipalSystem, DisplayName: "Daemon", Status: domain.IdentityActive}, journalEvent("assessment-daemon-created", "principal.created", fixture.ownerPrincipal, "")); err != nil {
+		t.Fatal(err)
+	}
+	created := createTask(t, repository, fixture, "assessment-recovery")
+	worker := &domain.WorkerInstance{ID: "assessment-worker", AgentID: fixture.agentID, Generation: 1, Transport: domain.WorkerTransportUnix, AuthenticatedPrincipal: fixture.ownerPrincipal, Status: domain.WorkerStatusOnline, Capabilities: []string{"coding"}, LeaseUntil: repositoryTestTime.Add(-time.Minute), FencingToken: 1}
+	if err := repository.CreateWorkerInstance(ctx, worker, journalEvent("assessment-worker-created", "worker.registered", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+		t.Fatal(err)
+	}
+	run := &domain.RunAttempt{ID: "assessment-run", TaskID: created.Task.ID, AgentID: fixture.agentID, Version: 1, Status: domain.RunAttemptRunning, WorkerInstanceID: worker.ID, FencingToken: 1, LeaseUntil: repositoryTestTime.Add(-time.Minute), ExecutionSpecVersion: 1, RequestedExecutionJSON: `{}`, ResolvedExecutionJSON: `{}`, AdapterID: "fake", BackendID: "local", Model: "model-1", ReasoningMode: domain.ReasoningBackendDefault}
+	active, err := repository.BeginRunAttempt(ctx, created.Task.Version, run, journalEvent("assessment-task-running", "task.running", fixture.ownerPrincipal, fixture.organizationID), journalEvent("assessment-run-started", "run_attempt.started", fixture.ownerPrincipal, fixture.organizationID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err = repository.RequestTaskCancel(ctx, active.ID, active.Version, fixture.ownerPrincipal, &domain.MailboxItem{ID: "assessment-cancel"}, journalEvent("assessment-cancel-request", "task.cancel_requested", fixture.ownerPrincipal, fixture.organizationID), journalEvent("assessment-cancel-mailbox", "mailbox.cancel_created", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
+		t.Fatal(err)
+	}
+	if err = repository.ReconcileExpired(ctx); err != nil {
+		t.Fatal(err)
+	}
+	gotRun, err := repository.GetRunAttempt(ctx, run.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotTask, err := repository.GetTask(ctx, active.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotTask.Status != domain.TaskStatusCanceled || gotRun.Status != domain.RunAttemptUncertain {
+		t.Fatalf("unexpected states task=%s run=%s", gotTask.Status, gotRun.Status)
+	}
+	t.Logf("DEFECT cancellation only requested; no runtime cancellation acknowledgement or physical result; after expired-lease recovery Task=%s Run=%s", gotTask.Status, gotRun.Status)
+}
