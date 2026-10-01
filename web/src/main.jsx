@@ -170,8 +170,8 @@ function Login({ onLogin }) {
         body: JSON.stringify({ username, password }),
       })
       onLogin(session)
-    } catch {
-      setError('用户名或密码错误')
+    } catch (requestError) {
+      setError(requestError.status === 401 || requestError.status === 403 ? '用户名或密码错误' : '暂时无法连接服务，请稍后重试；已填写内容保留。')
     } finally {
       setSubmitting(false)
     }
