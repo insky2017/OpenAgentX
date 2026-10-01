@@ -730,27 +730,28 @@ func prepareNetwork(ctx context.Context, api *agentAPI, attached consoleapi.Atta
 	if err != nil {
 		return err
 	}
-	hasBinding := false
+	mode := backend.Network.Mode
+	if mode == "" {
+		mode = domain.NetworkInherit
+	}
+	var expectedVersion int64
 	for _, b := range current.Bindings {
 		if b.AgentID == attached.AgentID && b.BackendID == backend.BackendID {
-			hasBinding = true
 			if networkApplied(b, attached) {
 				return nil
 			}
+			// Preserve the published choice. A new generation needs a new
+			// formal test and publish, guarded by the existing binding revision.
+			mode, expectedVersion = b.Mode, b.Version
+			break
 		}
 	}
-	// Existing published bindings are reapplied by the new Worker generation.
-	// Do not replace an explicit proxy profile with inherited settings.
-	if !hasBinding {
-		mode := backend.Network.Mode
-		if mode == "" {
-			mode = domain.NetworkInherit
-		}
-		if mode != domain.NetworkInherit && mode != domain.NetworkDirect {
-			return fmt.Errorf("现有显式网络需要先通过工作台发布；不会改为其它模式")
-		}
+	if mode != domain.NetworkInherit && mode != domain.NetworkDirect {
+		return fmt.Errorf("命名网络配置尚不支持自动恢复；请在工作台为当前 Worker 重新测试并发布原绑定，现有绑定未修改")
+	}
+	{
 		key := consoleclient.IdempotencyKey("agent-network")
-		req := openapi.TestNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-test"}, AgentID: attached.AgentID, BackendID: backend.BackendID, Mode: mode, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
+		req := openapi.TestNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-test", ExpectedVersion: expectedVersion}, AgentID: attached.AgentID, BackendID: backend.BackendID, Mode: mode, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
 		var receipt openapi.NetworkCommandResponse
 		if err = api.call(ctx, http.MethodPost, openapi.ControlNetworkModeTestPath, req, &receipt); err != nil {
 			return err
@@ -785,7 +786,7 @@ func prepareNetwork(ctx context.Context, api *agentAPI, attached consoleapi.Atta
 				return fmt.Errorf("等待网络测试: %w", err)
 			}
 		}
-		publish := openapi.PublishNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-publish"}, TestID: test.TestID, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
+		publish := openapi.PublishNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-publish", ExpectedVersion: expectedVersion}, TestID: test.TestID, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
 		if err = api.call(ctx, http.MethodPost, openapi.ControlNetworkModePublishPath, publish, &receipt); err != nil {
 			return err
 		}
@@ -800,9 +801,6 @@ func prepareNetwork(ctx context.Context, api *agentAPI, attached consoleapi.Atta
 				if networkApplied(b, attached) {
 					return nil
 				}
-				// A failed old-generation binding is still eligible for
-				// reapplication. Wait for this generation or the deadline.
-
 			}
 		}
 		if err = deps.Wait(ctx, time.Second); err != nil {

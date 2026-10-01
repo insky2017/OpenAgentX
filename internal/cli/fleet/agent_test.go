@@ -135,7 +135,7 @@ func TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration(t *testi
 	}
 }
 
-func TestAgentExistingNetworkPreservedAcrossGeneration(t *testing.T) {
+func TestAgentExistingNamedNetworkRequiresExplicitRecovery(t *testing.T) {
 	a := consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-2", Generation: 2}
 	reads := 0
 	api := fixtureAgentAPI(t, func(w http.ResponseWriter, r *http.Request) {
@@ -143,17 +143,91 @@ func TestAgentExistingNetworkPreservedAcrossGeneration(t *testing.T) {
 			t.Fatal("existing named profile replaced")
 		}
 		reads++
-		generation := int64(1)
-		if reads > 1 {
-			generation = 2
-		}
-		_ = json.NewEncoder(w).Encode(openapi.NetworkOverviewResponse{Bindings: []domain.NetworkBinding{{AgentID: "quote", BackendID: "agy", Mode: domain.NetworkNamedProfile, ProfileID: "existing", AppliedProfileID: "existing", AppliedMode: domain.NetworkNamedProfile, Version: 4, DesiredStatus: "applied", AppliedWorkerID: "worker-2", AppliedGeneration: generation, AppliedBindingRevision: 4}}})
+		_ = json.NewEncoder(w).Encode(openapi.NetworkOverviewResponse{Bindings: []domain.NetworkBinding{{AgentID: "quote", BackendID: "agy", Mode: domain.NetworkNamedProfile, ProfileID: "existing", Version: 4, DesiredStatus: "applied", AppliedWorkerID: "worker-1", AppliedGeneration: 1, AppliedBindingRevision: 4}}})
 	})
-	if err := prepareNetwork(context.Background(), api, a, workerconfig.RuntimeBackendConfig{BackendID: "agy"}, withDefaults(Dependencies{})); err != nil {
-		t.Fatal(err)
+	err := prepareNetwork(context.Background(), api, a, workerconfig.RuntimeBackendConfig{BackendID: "agy"}, withDefaults(Dependencies{}))
+	if err == nil || !strings.Contains(err.Error(), "现有绑定未修改") || reads != 1 {
+		t.Fatalf("err=%v reads=%d", err, reads)
 	}
-	if reads != 2 {
-		t.Fatalf("reads=%d", reads)
+}
+
+func TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP(t *testing.T) {
+	for _, mode := range []domain.NetworkMode{domain.NetworkInherit, domain.NetworkDirect} {
+		for _, conflict := range []string{"", "test", "publish"} {
+			t.Run(string(mode)+"/"+conflict, func(t *testing.T) {
+				a := consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-new", Generation: 3}
+				posts := []string{}
+				published := false
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if r.Header.Get("Authorization") != "Bearer test-token" {
+						t.Error("missing auth")
+					}
+					if r.Method == http.MethodGet {
+						binding := domain.NetworkBinding{AgentID: "quote", BackendID: "agy", Mode: mode, Version: 7, DesiredStatus: "applied", AppliedWorkerID: "worker-old", AppliedGeneration: 2, AppliedMode: mode, AppliedBindingRevision: 7}
+						if published {
+							binding.Version = 8
+							binding.AppliedBindingRevision = 8
+							binding.AppliedWorkerID = a.WorkerInstanceID
+							binding.AppliedGeneration = a.Generation
+						}
+						_ = json.NewEncoder(w).Encode(openapi.NetworkOverviewResponse{Bindings: []domain.NetworkBinding{binding}, ModeTests: []domain.NetworkModeTest{{ID: "test-current", State: "succeeded"}}})
+						return
+					}
+					posts = append(posts, r.URL.Path)
+					if r.Header.Get("Idempotency-Key") == "" {
+						t.Error("missing idempotency key")
+					}
+					switch r.URL.Path {
+					case openapi.ControlNetworkModeTestPath:
+						var req openapi.TestNetworkModeRequest
+						if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+							t.Error(err)
+						}
+						if req.Mode != mode || req.Meta.ExpectedVersion != 7 || req.WorkerInstanceID != a.WorkerInstanceID || req.Generation != a.Generation {
+							t.Errorf("test changed mode or omitted CAS/current Worker: %+v", req)
+						}
+						if conflict == "test" {
+							w.WriteHeader(http.StatusConflict)
+							return
+						}
+					case openapi.ControlNetworkModePublishPath:
+						var req openapi.PublishNetworkModeRequest
+						if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+							t.Error(err)
+						}
+						if req.Meta.ExpectedVersion != 7 || req.WorkerInstanceID != a.WorkerInstanceID || req.Generation != a.Generation || req.TestID != "test-current" {
+							t.Errorf("publish missing CAS/current Worker: %+v", req)
+						}
+						if conflict == "publish" {
+							w.WriteHeader(http.StatusConflict)
+							return
+						}
+						published = true
+					default:
+						t.Errorf("unexpected POST %s", r.URL.Path)
+					}
+					fmt.Fprint(w, `{"receipt":{"test_id":"test-current"}}`)
+				}))
+				defer server.Close()
+				transport := &http.Transport{DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+					return (&net.Dialer{}).DialContext(ctx, "tcp", server.Listener.Addr().String())
+				}}
+				defer transport.CloseIdleConnections()
+				api := &agentAPI{token: "test-token", http: &http.Client{Transport: transport}}
+				deps := withDefaults(Dependencies{Wait: func(context.Context, time.Duration) error { return fmt.Errorf("unexpected wait") }})
+				// The local default is intentionally different from an existing direct binding.
+				err := prepareNetwork(context.Background(), api, a, workerconfig.RuntimeBackendConfig{BackendID: "agy"}, deps)
+				if conflict == "" && (err != nil || !published || len(posts) != 2) {
+					t.Fatalf("err=%v posts=%v", err, posts)
+				}
+				if conflict != "" && (err == nil || published) {
+					t.Fatalf("conflict accepted: err=%v published=%v", err, published)
+				}
+				if conflict == "test" && len(posts) != 1 {
+					t.Fatalf("publish after failed test: %v", posts)
+				}
+			})
+		}
 	}
 }
 
