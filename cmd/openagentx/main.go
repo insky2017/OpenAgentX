@@ -47,7 +47,10 @@ func execute(args []string) int {
 	case "init":
 		return admincli.ExecuteInit(args[1:], admincli.DefaultDependencies())
 	case "agent":
-		return admincli.ExecuteAgent(args[1:], admincli.DefaultDependencies())
+		if len(args) > 1 && args[1] == "apply" {
+			return admincli.ExecuteAgent(args[1:], admincli.DefaultDependencies())
+		}
+		return fleetcli.ExecuteAgent(args[1:], fleetcli.DefaultDependencies())
 	case "worker":
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
 	case "console":
@@ -61,6 +64,7 @@ func execute(args []string) int {
 	case "help", "--help", "-h":
 		fmt.Fprintln(os.Stderr, "OpenAgentX - Agent Organization Control Plane")
 		fmt.Fprintln(os.Stderr, "Usage: openagentx init [--db <path>]")
+		fmt.Fprintln(os.Stderr, "       openagentx agent <add|open|status|pause|resume> [agent] [flags]")
 		fmt.Fprintln(os.Stderr, "       openagentx agent apply [--db <path>] --file <identity.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx serve [--db <path>] [--socket <path>] [--http-addr :18100] [--web-dir web/dist]")
 		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")

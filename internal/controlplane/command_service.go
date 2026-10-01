@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -52,6 +53,23 @@ func commandEvent(id, typ, actor, aggregate string, payload any, now time.Time) 
 func (s *CommandService) CreateTask(ctx context.Context, principal string, req api.CreateTaskRequest) (*api.CreateTaskResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
+	}
+	if req.ContinueContext {
+		parent, err := s.state.GetTask(ctx, req.ParentTaskID)
+		if err != nil {
+			return nil, err
+		}
+		if !parent.IsTerminal() {
+			return nil, domain.ErrInvalidInput("continue after the current task finishes; use a queued message while it runs")
+		}
+		if parent.TargetAgentID != req.TargetAgentID || parent.OrganizationID != req.OrganizationID {
+			return nil, domain.ErrForbidden("continuation must use the same Agent and organization")
+		}
+		result := "No confirmed final reply; do not repeat any previous side effects automatically."
+		if parent.Result != nil && strings.TrimSpace(*parent.Result) != "" {
+			result = *parent.Result
+		}
+		req.Content = fmt.Sprintf("%s\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: %s\nObjective:\n%s\nResult:\n%s", req.Content, parent.ID, boundedContext(parent.Content, 4096), boundedContext(result, 12288))
 	}
 	now := s.now().UTC()
 	intent, err := domain.NormalizeTaskIntent(req.Intent)
@@ -141,4 +159,13 @@ func (s *CommandService) DecideApproval(ctx context.Context, principal, requestI
 		response.Sequence = createdItem.Sequence
 	}
 	return response, nil
+}
+
+// Bound inherited context without silently cutting UTF-8 characters.
+func boundedContext(value string, max int) string {
+	r := []rune(value)
+	if len(r) <= max {
+		return value
+	}
+	return string(r[:max]) + "\n[Earlier context truncated; consult the linked task for full details.]"
 }

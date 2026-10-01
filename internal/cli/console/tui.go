@@ -144,18 +144,28 @@ type taskSnapshotResultMsg struct {
 }
 
 type tickMsg struct{ Now time.Time }
+type statusReadinessMsg struct {
+	Snapshot consoleapi.AttachResponse
+	Err      error
+}
 
 type controlKind string
 
 const (
-	controlDispatch controlKind = "dispatch"
-	controlSteer    controlKind = "steer"
-	controlCancel   controlKind = "cancel"
-	controlApprove  controlKind = "approve"
-	controlReject   controlKind = "reject"
+	controlContinue     controlKind = "continue"
+	controlAcceptResult controlKind = "accept-result"
+	controlRejectResult controlKind = "reject-result"
+	controlDispatch     controlKind = "dispatch"
+	controlSteer        controlKind = "steer"
+	controlCancel       controlKind = "cancel"
+	controlApprove      controlKind = "approve"
+	controlReject       controlKind = "reject"
 )
 
 type controlRequest struct {
+	ParentTaskID    string
+	RunID           string
+	RunVersion      int64
 	Kind            controlKind
 	AgentID         string
 	Intent          domain.TaskIntent
@@ -172,6 +182,7 @@ type controlResultMsg struct {
 }
 
 type controlOutcome struct {
+	Review         *domain.TaskReview
 	TaskID         string
 	TaskVersion    int64
 	TaskStatus     domain.TaskStatus
@@ -252,6 +263,9 @@ type agentItem struct{ option domain.ConsoleAgentOption }
 
 func (i agentItem) Title() string { return i.option.AgentID + "  " + i.option.DisplayName }
 func (i agentItem) Description() string {
+	if i.option.ReadinessReason != "" {
+		return i.option.ReadinessReason + " " + i.option.NextAction
+	}
 	active := "idle"
 	if i.option.ActiveRunStatus != "" {
 		active = string(i.option.ActiveRunStatus)
@@ -271,8 +285,9 @@ func (i taskItem) FilterValue() string {
 }
 
 type tuiModel struct {
-	actions tuiActions
-	now     func() time.Time
+	statusReadiness *openapi.AgentReadiness
+	actions         tuiActions
+	now             func() time.Time
 
 	screen       screenKind
 	overlay      overlayKind
@@ -706,7 +721,12 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			m.overlay = overlayNone
 		}
 		m.input.Focus()
-		m.syncTimeline(false)
+		m.syncTimeline(msg.Purpose == taskSnapshotFocus || msg.Purpose == taskSnapshotStale)
+		return m, nil
+	case statusReadinessMsg:
+		if msg.Err == nil && msg.Snapshot.AgentID == m.selectedAgent {
+			m.statusReadiness = msg.Snapshot.Readiness
+		}
 		return m, nil
 	case controlResultMsg:
 		m.pending = false
@@ -729,7 +749,7 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			if m.reducer != nil && msg.Outcome.TaskID != "" {
 				applyErr := m.reducer.ApplyControlTask(consolemodel.ControlTaskUpdate{
 					AgentID: m.selectedAgent, TaskID: msg.Outcome.TaskID, Version: msg.Outcome.TaskVersion,
-					Status: msg.Outcome.TaskStatus, Focus: msg.Kind == controlDispatch,
+					Status: msg.Outcome.TaskStatus, Focus: msg.Kind == controlDispatch || msg.Kind == controlContinue,
 				})
 				if applyErr != nil {
 					m.connection = consoleclient.ConnectionDisconnected
@@ -746,6 +766,11 @@ func (m tuiModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.timeline.Add(msg.Outcome.summary(msg.Kind))
 			m.pendingDraft = ""
+			if msg.Outcome.Review != nil {
+				m.taskLoading = true
+				m.syncTimeline(false)
+				return m, m.actions.taskSnapshotCmd(m.preparationID, m.selectedAgent, msg.Outcome.Review.TaskID, taskSnapshotFocus)
+			}
 		}
 		m.syncTimeline(false)
 		return m, nil
@@ -993,6 +1018,10 @@ func (m tuiModel) executeInput(line string) (tea.Model, tea.Cmd) {
 	case errors.Is(err, errStatusCommand):
 		m.input.Reset()
 		m.overlay = overlayStatus
+		m.statusReadiness = nil
+		if actions, ok := m.actions.(interface{ statusReadinessCmd(uint64, string) tea.Cmd }); ok {
+			return m, actions.statusReadinessCmd(m.preparationID, m.selectedAgent)
+		}
 		return m, nil
 	case errors.Is(err, errHelpCommand):
 		m.input.Reset()
@@ -1207,6 +1236,35 @@ func parseControlInput(line, agentID string, state consolemodel.State) (controlR
 		return controlRequest{}, errForegroundCommand
 	case "/dispatch":
 		return parseDispatchRequest(remainder, agentID)
+	case "/continue":
+		task := state.FocusedTask
+		if task == nil || !taskTerminal(task.Status) || task.Detail == nil {
+			return controlRequest{}, userVisibleError{message: "请用 /tasks 选择已结束的工作并加载结果后继续"}
+		}
+		body := strings.TrimSpace(remainder)
+		if !strings.HasPrefix(body, "--intent ") && task.Intent.Valid() {
+			body = "--intent " + string(task.Intent) + " " + body
+		}
+		request, err := parseDispatchRequest(body, agentID)
+		if err != nil {
+			return controlRequest{}, userVisibleError{message: "用法: /continue [--intent query|mutation] <继续内容>"}
+		}
+		request.Kind = controlContinue
+		request.ParentTaskID = task.TaskID
+		return request, nil
+	case "/accept", "/result-reject":
+		task := state.FocusedTask
+		if task == nil || !taskTerminal(task.Status) || task.Detail == nil || task.Detail.Version != task.Version || task.LatestRun == nil || task.LatestRun.Status != domain.RunAttemptSucceeded {
+			return controlRequest{}, userVisibleError{message: "请用 /tasks 选择已有确认完成 Run 的工作；执行未确认停止时不能验收"}
+		}
+		if len(remainder) > 4096 {
+			return controlRequest{}, userVisibleError{message: "验收备注不能超过4096字节"}
+		}
+		kind := controlAcceptResult
+		if command == "/result-reject" {
+			kind = controlRejectResult
+		}
+		return controlRequest{Kind: kind, AgentID: agentID, TargetID: task.TaskID, ExpectedVersion: task.Version, RunID: task.LatestRun.ID, RunVersion: task.LatestRun.Version, Content: strings.TrimSpace(remainder)}, nil
 	case "/steer":
 		return parseSteerRequest(strings.TrimSpace(remainder), agentID, state)
 	case "/cancel":
@@ -1588,7 +1646,8 @@ func (m tuiModel) overlayView() string {
 		content = m.statusView()
 	case overlayHelp:
 		content = strings.Join([]string{"Console commands", "/status", "/tasks", "/dispatch [--intent query|mutation] <content>",
-			"/steer <content>", "/cancel", "/steer --task <task-id> --version <n> <content>",
+			"/continue [--intent query|mutation] <继续内容>", "/accept [验收备注]", "/result-reject [问题说明]",
+			"/steer <content>（执行中补充，下轮处理）", "/cancel", "/steer --task <task-id> --version <n> <content>",
 			"/cancel --task <task-id> --version <n>",
 			"/approve <approval-id> <expected-version>", "/reject <approval-id> <expected-version>",
 			"/diagnostic", "/normal", "/help", "/quit", "/foreground",
@@ -1699,6 +1758,12 @@ func (m tuiModel) statusView() string {
 		"Connection: " + string(m.connection),
 		fmt.Sprintf("Event cursor: %d", cursor),
 		"Mode: " + m.mode}
+	if m.statusReadiness != nil {
+		lines = append(lines, "就绪: "+m.statusReadiness.Reason)
+		if m.statusReadiness.NextAction != "" {
+			lines = append(lines, "下一步: "+m.statusReadiness.NextAction)
+		}
+	}
 	if state.FocusedTask == nil {
 		lines = append(lines, "", "Focused Task: none", "Use /tasks to select an active or recent Task")
 		return strings.Join(lines, "\n")
@@ -1716,6 +1781,12 @@ func (m tuiModel) statusView() string {
 		lines = append(lines, "Task request: "+task.Detail.Content,
 			"Task updated: "+task.Detail.UpdatedAt,
 			"Task outcome state: "+task.Detail.OutcomeState)
+		if task.Detail.ParentTaskID != nil {
+			lines = append(lines, "继续自: "+*task.Detail.ParentTaskID)
+		}
+		if task.Detail.Review != nil {
+			lines = append(lines, reviewSummary(task.Detail.Review))
+		}
 		if task.Detail.CompletionBasis != "" {
 			lines = append(lines, "Completion basis: "+string(task.Detail.CompletionBasis))
 			if task.Detail.CompletionBasis == domain.TaskCompletionQueryResultDelivered {
@@ -1747,6 +1818,9 @@ func (m tuiModel) statusView() string {
 			"Run Worker: "+run.WorkerInstanceID,
 			fmt.Sprintf("Run generation: %d", generation),
 			"Runtime reply state: "+run.TurnResultState)
+		if run.DeadlineAt != nil && !run.DeadlineAt.IsZero() {
+			lines = append(lines, "运行截止: "+run.DeadlineAt.Local().Format(time.RFC3339))
+		}
 		if run.TurnResult != nil {
 			lines = append(lines, "Runtime status: "+string(run.TurnResult.RuntimeStatus))
 			if run.TurnResult.Body != "" {
@@ -1790,6 +1864,10 @@ func taskResultSummaries(task *consolemodel.TaskState) []string {
 		return nil
 	}
 	result := make([]string, 0, 3)
+	if task.Detail != nil && task.Detail.Review != nil {
+		result = append(result, reviewSummary(task.Detail.Review))
+	}
+	result = append(result, "使用 /continue <内容> 关联继续；/accept [备注] 接受结果；/result-reject [备注] 记录问题")
 	if task.Detail == nil {
 		result = append(result, "Task is terminal, but authoritative outcome detail is not loaded")
 	} else {
@@ -1950,8 +2028,12 @@ func eventSummary(event openapi.JournalEventReadModel, mode string) string {
 func (o controlOutcome) summary(kind controlKind) string {
 	parts := []string{string(kind) + " succeeded"}
 	switch kind {
-	case controlDispatch, controlCancel:
+	case controlDispatch, controlContinue, controlCancel:
 		parts = append(parts, "task "+shortID(o.TaskID), fmt.Sprintf("version %d", o.TaskVersion), "status "+string(o.TaskStatus))
+	case controlAcceptResult, controlRejectResult:
+		if o.Review != nil {
+			parts = append(parts, reviewSummary(o.Review))
+		}
 	case controlSteer:
 		parts = append(parts, "task "+shortID(o.TaskID), fmt.Sprintf("task version %d", o.TaskVersion),
 			"status "+string(o.TaskStatus), "message "+shortID(o.MessageID), fmt.Sprintf("message version %d", o.MessageVersion))
@@ -2080,4 +2162,16 @@ func min(left, right int) int {
 		return left
 	}
 	return right
+}
+
+func reviewSummary(review *domain.TaskReview) string {
+	label := "用户已验收"
+	if review.Decision == "rejected" {
+		label = "用户标记结果有问题"
+	}
+	text := fmt.Sprintf("%s | 验收人 %s | %s | Run %s v%d | 原执行状态保留", label, review.ReviewedBy, review.CreatedAt.Local().Format(time.RFC3339), shortID(review.RunID), review.RunVersion)
+	if review.Note != "" {
+		text += " | " + boundedSafeText(review.Note, 1024)
+	}
+	return text
 }

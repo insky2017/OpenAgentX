@@ -70,7 +70,7 @@ func TestEnvironmentNamedProfileUses0600AgyConfig(t *testing.T) {
 	if err := os.WriteFile(blackPath, []byte("203.0.113.1\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	env, err := Environment([]string{"PATH=/first", "UNDECLARED_SECRET=value", "PATH=/last", "HTTP_PROXY=http://ignored.invalid", "AGY_GRAFT_CONFIG=/old", "AGY_GRAFT_REAL_BIN=/opt/agy"}, domain.NetworkPolicy{
+	env, err := Environment([]string{"PATH=/first", "UNDECLARED_SECRET=value", "PATH=/last", "HTTP_PROXY=http://ignored.invalid", "AGY_GRAFT_CONFIG=/old", "AGY_GRAFT_REAL_BIN=/opt/agy", "AGY_GRAFT_NATIVE_PROXY=1"}, domain.NetworkPolicy{
 		Mode: domain.NetworkNamedProfile, ProfileID: "proxy-main", ProfileVersion: 1, ConfigFile: path, BlackIPFile: blackPath, ProxyMode: "only_socks5",
 	}, "agy-batch", "agy-graft")
 	if err != nil {
@@ -80,7 +80,7 @@ func TestEnvironmentNamedProfileUses0600AgyConfig(t *testing.T) {
 	if !strings.Contains(joined, "AGY_GRAFT_CONFIG="+path) || !strings.Contains(joined, "AGY_GRAFT_BLACKIP_FILE="+blackPath) || !strings.Contains(joined, "AGY_GRAFT_SELECT_PROXY_MODE=only_socks5") {
 		t.Fatalf("profile environment missing: %q", joined)
 	}
-	if strings.Contains(joined, "HTTP_PROXY=") || strings.Contains(joined, "AGY_GRAFT_CONFIG=/old") || strings.Contains(joined, "UNDECLARED_SECRET=") || strings.Contains(joined, "PATH=/first") || !strings.Contains(joined, "PATH=/last") || !strings.Contains(joined, "AGY_GRAFT_REAL_BIN=/opt/agy") {
+	if strings.Contains(joined, "HTTP_PROXY=") || strings.Contains(joined, "AGY_GRAFT_CONFIG=/old") || strings.Contains(joined, "AGY_GRAFT_NATIVE_PROXY=") || strings.Contains(joined, "UNDECLARED_SECRET=") || strings.Contains(joined, "PATH=/first") || !strings.Contains(joined, "PATH=/last") || !strings.Contains(joined, "AGY_GRAFT_REAL_BIN=/opt/agy") {
 		t.Fatalf("old proxy configuration leaked: %q", joined)
 	}
 }
@@ -100,5 +100,16 @@ func TestEnvironmentRejectsInsecureProfileFile(t *testing.T) {
 	_, err := Environment(nil, domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: "p", ProfileVersion: 1, ConfigFile: path}, "agy-batch", "agy-graft")
 	if err == nil {
 		t.Fatal("expected mode 0600 validation failure")
+	}
+}
+
+func TestEnvironmentInheritPreservesNativeProxyWrapperContract(t *testing.T) {
+	env, err := Environment([]string{"AGY_GRAFT_NATIVE_PROXY=1", "HTTPS_PROXY=http://127.0.0.1:7897"}, domain.NetworkPolicy{Mode: domain.NetworkInherit}, "agy-batch", "agy-graft")
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(env, "\n")
+	if !strings.Contains(joined, "AGY_GRAFT_NATIVE_PROXY=1") || !strings.Contains(joined, "HTTPS_PROXY=http://127.0.0.1:7897") {
+		t.Fatalf("native proxy inputs lost: %q", joined)
 	}
 }

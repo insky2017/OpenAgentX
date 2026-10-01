@@ -124,6 +124,21 @@ func (h *Handler) agents(w http.ResponseWriter, r *http.Request) {
 	if page.HasMore {
 		page.NextCursor = page.Agents[len(page.Agents)-1].AgentID
 	}
+	for i := range page.Agents {
+		option := &page.Agents[i]
+		if _, ok := h.state.(consoleReadinessState); !ok {
+			continue
+		}
+		snapshot, err := h.state.ConsoleSnapshot(r.Context(), option.AgentID)
+		if err != nil {
+			option.ReadinessReason = "暂时无法确认就绪状态"
+			continue
+		}
+		if readiness := h.readiness(r.Context(), snapshot); readiness != nil {
+			option.ReadinessReason = readiness.Reason
+			option.NextAction = readiness.NextAction
+		}
+	}
 	writeJSON(w, page)
 }
 
@@ -134,6 +149,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type AttachResponse struct {
+	Readiness        *openapi.AgentReadiness              `json:"readiness,omitempty"`
 	AgentID          string                               `json:"agent_id"`
 	Mode             string                               `json:"mode"`
 	Generation       int64                                `json:"generation"`
@@ -206,7 +222,7 @@ func (h *Handler) attach(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid Console snapshot", http.StatusInternalServerError)
 		return
 	}
-	response := AttachResponse{AgentID: agentID, Mode: mode, WorkerStatus: domain.WorkerStatusOffline,
+	response := AttachResponse{Readiness: h.readiness(r.Context(), snapshot), AgentID: agentID, Mode: mode, WorkerStatus: domain.WorkerStatusOffline,
 		ObserveBasePath: "/api/observe/v1", ControlBasePath: "/api/control/v1",
 		SnapshotSequence: snapshot.SnapshotSequence}
 	if worker := snapshot.Worker; worker != nil {
@@ -406,6 +422,22 @@ func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid Console Task snapshot", http.StatusInternalServerError)
 		return
 	}
+	if reviews, ok := h.state.(interface {
+		GetTaskReview(context.Context, string) (*domain.TaskReview, error)
+	}); ok {
+		review, err := reviews.GetTaskReview(r.Context(), taskID)
+		if err != nil {
+			http.Error(w, "failed to load result review", http.StatusInternalServerError)
+			return
+		}
+		if review != nil {
+			if review.TaskID != taskID || projected.LatestRun == nil || review.RunID != projected.LatestRun.ID || review.RunVersion != projected.LatestRun.Version || review.TaskVersion > projected.Task.Version {
+				http.Error(w, "Task changed while loading result review; refresh", http.StatusConflict)
+				return
+			}
+			projected.Task.Review = review
+		}
+	}
 	writeJSON(w, projected)
 }
 
@@ -511,4 +543,32 @@ func (l *limiter) Allow(key string) bool {
 	}
 	l.seen[key] = append(values, now)
 	return true
+}
+
+type consoleReadinessState interface {
+	ListWorkerBackends(context.Context, string) ([]openruntime.BackendRegistration, error)
+}
+
+func (h *Handler) readiness(ctx context.Context, snapshot domain.ConsoleSnapshot) *openapi.AgentReadiness {
+	reader, ok := h.state.(consoleReadinessState)
+	if !ok {
+		return nil
+	}
+	var backends []openruntime.BackendRegistration
+	if snapshot.Worker != nil {
+		var err error
+		backends, err = reader.ListWorkerBackends(ctx, snapshot.Worker.ID)
+		if err != nil {
+			backends = nil
+		}
+	}
+	var tasks []domain.Task
+	if snapshot.SuggestedTask != nil {
+		tasks = append(tasks, *snapshot.SuggestedTask)
+	}
+	if snapshot.ActiveRun != nil {
+		tasks = append(tasks, domain.Task{TargetAgentID: snapshot.Agent.ID, Status: domain.TaskStatusRunning})
+	}
+	result := openapi.ProjectAgentReadiness(snapshot.Agent.ID, snapshot.Worker, tasks, backends, time.Now())
+	return &result
 }

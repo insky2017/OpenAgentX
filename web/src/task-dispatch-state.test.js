@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createdTaskID, dispatchTarget, taskProgress } from './task-dispatch-state.js'
+import { createdTaskID, dispatchTarget, taskProgress, latestTaskRun } from './task-dispatch-state.js'
 
 const now = Date.parse('2026-09-22T12:00:00Z')
 const agents = [
@@ -68,4 +68,20 @@ test('query delivery comes only from authoritative Task completion evidence', ()
     assert.doesNotMatch(taskProgress(task, { status: 'succeeded' }, quote), /查询回复已完整交付/)
   }
   assert.match(taskProgress({ status: 'uncertain', intent: 'query', error: 'query_result_unverified' }, null, quote), /证据不完整/)
+})
+
+
+test('backend readiness blocks dispatch even with an online Worker, busy allows queueing', () => {
+  const target = { ...agents[1], readiness: { ready: false, reason: '网络尚未就绪' } }
+  assert.equal(dispatchTarget([target], [quote], 'quote-service', now).ready, false)
+  assert.equal(dispatchTarget([target], [quote], 'quote-service', now).reason, '网络尚未就绪')
+  assert.equal(dispatchTarget([{ ...target, readiness: {ready: true, can_start_now: false, reason: '正在工作，新任务将排队'} }], [quote], 'quote-service', now).ready, true)
+})
+
+test('latest result belongs to the latest execution in either API ordering', () => {
+  const oldRun = {run_id:'run-old', started_at:'2026-09-22T11:00:00Z'}
+  const newRun = {run_id:'run-new', started_at:'2026-09-22T12:00:00Z'}
+  assert.equal(latestTaskRun([newRun, oldRun]), newRun)
+  assert.equal(latestTaskRun([oldRun, newRun]), newRun)
+  assert.equal(latestTaskRun([]), undefined)
 })

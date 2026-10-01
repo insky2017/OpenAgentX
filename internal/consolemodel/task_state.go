@@ -493,7 +493,12 @@ func applyTaskReference(record *taskRecord, version int64, status domain.TaskSta
 		return nil
 	}
 	if taskStatusTerminal(record.Status) {
-		return fmt.Errorf("terminal Console Task cannot advance to a different projection")
+		if status != record.Status {
+			return fmt.Errorf("terminal Console Task cannot change execution status")
+		}
+		record.Version = version
+		record.encodedSize = 0
+		return nil
 	}
 	record.Version, record.Status = version, status
 	record.Detail = nil
@@ -509,19 +514,41 @@ func applyTaskProjection(record *taskRecord, task openapi.ConsoleTaskReadModel) 
 	if record.Intent != "" && record.Intent != intent {
 		return false, false, fmt.Errorf("Console Task intent cannot change")
 	}
+	if record.Version > 0 && taskStatusTerminal(record.Status) {
+		if record.Status != task.Status {
+			return false, false, fmt.Errorf("terminal Console Task cannot change execution status")
+		}
+		if record.Detail != nil {
+			before, after := *record.Detail, task
+			before.Version, after.Version = 0, 0
+			before.UpdatedAt, after.UpdatedAt = "", ""
+			before.Review, after.Review = nil, nil
+			if !reflect.DeepEqual(before, after) {
+				return false, false, fmt.Errorf("terminal Console Task execution evidence cannot change")
+			}
+		}
+	}
 	if record.Version == task.Version {
 		if record.Status != "" && record.Status != task.Status {
 			return false, false, fmt.Errorf("Console Task status changed within version %d", task.Version)
 		}
 		if record.Detail != nil {
+			if reflect.DeepEqual(*record.Detail, task) {
+				return false, false, nil
+			}
 			previous, incoming := *record.Detail, task
+			if previous.Version < incoming.Version && taskStatusTerminal(task.Status) {
+				previous.Version = incoming.Version
+				previous.UpdatedAt = incoming.UpdatedAt
+			}
+			previous.Review, incoming.Review = nil, nil
 			if !reflect.DeepEqual(previous, incoming) {
 				return false, false, fmt.Errorf("Console Task projection changed within version %d", task.Version)
 			}
-			return false, false, nil
+			if task.Review == nil {
+				task.Review = record.Detail.Review
+			}
 		}
-	} else if record.Version > 0 && taskStatusTerminal(record.Status) {
-		return false, false, fmt.Errorf("terminal Console Task cannot be overwritten")
 	}
 	copy := cloneTask(&task)
 	record.TaskID, record.Version, record.Status = task.TaskID, task.Version, task.Status
@@ -593,6 +620,11 @@ func validateTaskProjection(task openapi.ConsoleTaskReadModel, agentID string) e
 	}
 	if task.AgentID != agentID || domain.ValidateIdentifier("agent_id", task.AgentID) != nil || task.Version <= 0 || !task.Status.Valid() {
 		return fmt.Errorf("invalid Console Task identity, version, or status")
+	}
+	if review := task.Review; review != nil {
+		if review.TaskID != task.TaskID || review.TaskVersion > task.Version || review.TaskVersion <= 0 || review.RunVersion <= 0 || domain.ValidateOpaqueID("run_id", review.RunID) != nil || (review.Decision != "accepted" && review.Decision != "rejected") || !safeText(review.Note) {
+			return fmt.Errorf("invalid Console result review")
+		}
 	}
 	if !task.Intent.Valid() {
 		return fmt.Errorf("invalid Console Task intent")
@@ -806,6 +838,11 @@ func cloneTask(source *openapi.ConsoleTaskReadModel) *openapi.ConsoleTaskReadMod
 	clone := *source
 	clone.Result = cloneString(source.Result)
 	clone.Error = cloneString(source.Error)
+	clone.ParentTaskID = cloneString(source.ParentTaskID)
+	if source.Review != nil {
+		review := *source.Review
+		clone.Review = &review
+	}
 	return &clone
 }
 

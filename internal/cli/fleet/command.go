@@ -341,6 +341,7 @@ func newWorkspace(paths fleetPaths, respawnDead bool, deps Dependencies) (fleetm
 	}
 	return fleetmodel.Workspace{
 		Runner: deps.Tmux, RespawnDead: respawnDead,
+		OverviewCommand: []string{binary, "agent", "status", "--watch", "--socket", paths.socket, "--credentials", paths.credentials, "--file", paths.manifest, "--worker-dir", paths.workerDir, "--db", paths.database},
 		ConsoleCommand: func(agentID string) []string {
 			return []string{binary, "console", "attach", "--socket", paths.socket, "--credentials", paths.credentials, "--agent", agentID}
 		},
@@ -633,7 +634,7 @@ func validateRelocatableWorkerConfig(config *workerconfig.ProcessConfig) error {
 	return nil
 }
 
-func prepare(manifestPath, workerDir, socketPath string, options map[string]domain.ConsoleAgentOption) (fleetmodel.Manifest, []preparedAgent, error) {
+func prepare(manifestPath, workerDir, socketPath string, options map[string]domain.ConsoleAgentOption, selectedIDs ...string) (fleetmodel.Manifest, []preparedAgent, error) {
 	manifestContent, err := fleetmodel.ReadSecureFile(manifestPath, fleetmodel.SecureFileOptions{MaximumBytes: maxWorkerConfigBytes, RequirePrivate: true})
 	if err != nil {
 		return fleetmodel.Manifest{}, nil, fmt.Errorf("read Fleet manifest: %w", err)
@@ -641,6 +642,22 @@ func prepare(manifestPath, workerDir, socketPath string, options map[string]doma
 	manifest, err := fleetmodel.Decode(bytes.NewReader(manifestContent))
 	if err != nil {
 		return fleetmodel.Manifest{}, nil, err
+	}
+	if len(selectedIDs) > 0 {
+		selected := make(map[string]bool, len(selectedIDs))
+		for _, id := range selectedIDs {
+			selected[id] = true
+		}
+		entries := make([]fleetmodel.Agent, 0, len(selectedIDs))
+		for _, entry := range manifest.Agents {
+			if selected[entry.AgentID] {
+				entries = append(entries, entry)
+			}
+		}
+		if len(entries) != len(selected) {
+			return fleetmodel.Manifest{}, nil, fmt.Errorf("selected Agent is not managed by this Fleet")
+		}
+		manifest.Agents = entries
 	}
 	resolver := localprofile.DefaultResolver()
 	workerOverride := localprofile.Override{Set: true, Value: workerDir}

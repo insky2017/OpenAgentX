@@ -122,3 +122,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .empty-state p{margin:0 0 10px}.empty-state small{display:block;margin:-4px 0 12px;overflow-wrap:anywhere}.error-state{color:#ffb4ab;border-color:#7d302f}.inline-loading{text-align:center;color:#8b949e;font-size:12px;padding:9px}
 .replay-error{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 28px;border-bottom:1px solid #7d302f;background:#3d1f22;color:#ffb4ab;font-size:13px}.replay-error .outline{padding:6px 10px}
 @media(max-width:760px){.task-filters{grid-template-columns:1fr 1fr}.task-filters .search-field{grid-column:1 / -1}.replay-error{padding:10px 16px}}
+
+.review-note{padding:8px 28px;border-bottom:1px solid #21262d;color:#8b949e;font-size:12px}.review-note summary{cursor:pointer}.review-note textarea{display:block;width:100%;box-sizing:border-box;margin-top:8px;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;resize:vertical}.detail-actions{flex-wrap:wrap}
+@media(max-width:640px){.review-note{padding:6px 16px}}

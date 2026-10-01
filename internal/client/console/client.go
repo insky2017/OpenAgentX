@@ -560,3 +560,17 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 func IdempotencyKey(prefix string) string {
 	return fmt.Sprintf("%s-%d", prefix, time.Now().UTC().UnixNano())
 }
+
+// ReviewTaskResult records a human assessment through the same authenticated
+// control endpoint as the Web client; it does not rewrite execution evidence.
+func (c *Client) ReviewTaskResult(ctx context.Context, taskID string, request openapi.ReviewTaskRequest) (domain.TaskReview, error) {
+	if err := domain.ValidateOpaqueID("task_id", taskID); err != nil {
+		return domain.TaskReview{}, err
+	}
+	if err := request.Validate(); err != nil {
+		return domain.TaskReview{}, err
+	}
+	var result domain.TaskReview
+	_, err := c.do(ctx, http.MethodPost, "/api/control/v1/tasks/"+url.PathEscape(taskID)+"/review", nil, request, &result, true, request.Meta.IdempotencyKey, false)
+	return result, err
+}

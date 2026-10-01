@@ -8,7 +8,7 @@ export const dispatchTarget = (agents, workers, selectedID, now) => {
     if (!current || worker.generation > current.generation) latest.set(worker.agent_id, worker)
   }
   const ready = (worker) => worker?.status === 'online' && Date.parse(worker.lease_until) > now
-  const available = agents.filter((agent) => ready(latest.get(agentID(agent))))
+  const available = agents.filter((agent) => ready(latest.get(agentID(agent))) && (agent.readiness ? agent.readiness.ready : true))
   const agent = selectedID
     ? agents.find((item) => agentID(item) === selectedID)
     : available.length === 1 ? available[0] : null
@@ -20,14 +20,14 @@ export const dispatchTarget = (agents, workers, selectedID, now) => {
   }
   const id = agentID(agent)
   const worker = latest.get(id)
-  const canStart = ready(worker)
+  const canStart = ready(worker) && (agent.readiness ? agent.readiness.ready : true)
   return {
     id, agent, worker, ready: canStart,
-    reason: canStart ? `Worker 在线 · generation ${worker.generation}`
+    reason: agent.readiness?.reason || (canStart ? `Worker 在线 · generation ${worker.generation}`
       : worker?.status === 'draining' ? 'Worker 正在退出，不接受新任务'
         : worker?.status === 'bootstrapping' ? 'Worker 正在启动，请等待就绪'
           : worker?.status === 'online' ? 'Worker 心跳已过期，请等待恢复'
-            : 'Worker 离线或未就绪，暂不能发送',
+            : 'Worker 离线或未就绪，暂不能发送'),
   }
 }
 
@@ -62,3 +62,10 @@ export const taskProgress = (task, run, worker) => {
   if (run || task.status === 'running') return 'Worker 已领取，执行过程会自动更新'
   return '请查看当前任务状态与执行结果'
 }
+
+// The API orders runs newest-first. Choose by execution time rather than UI
+// visitation history or incidental array order.
+export const latestTaskRun = (runs = []) => [...runs].sort((a, b) =>
+  Date.parse(b.started_at || b.created_at) - Date.parse(a.started_at || a.created_at) ||
+  String(b.run_id).localeCompare(String(a.run_id))
+)[0]

@@ -45,6 +45,7 @@ type WorkerReadModel struct {
 }
 
 type TaskReadModel struct {
+	Review                *domain.TaskReview      `json:"review,omitempty"`
 	Task                  TaskReadModelTask       `json:"task"`
 	Messages              []domain.Message        `json:"messages"`
 	RunAttempts           []RunAttemptReadModel   `json:"run_attempts"`
@@ -98,6 +99,9 @@ type TaskReadModelTask struct {
 // RunAttemptReadModel deliberately omits execution JSON and fencing material.
 // Those fields are control-plane evidence, not browser-facing observation data.
 type RunAttemptReadModel struct {
+	DeadlineAt             *time.Time              `json:"deadline_at,omitempty"`
+	InstructionsSHA256     string                  `json:"instructions_sha256,omitempty"`
+	InstructionsPath       string                  `json:"instructions_path,omitempty"`
 	ID                     string                  `json:"run_id"`
 	TaskID                 string                  `json:"task_id"`
 	AgentID                string                  `json:"agent_id"`
@@ -177,6 +181,8 @@ type ConsoleTaskSnapshot struct {
 }
 
 type ConsoleTaskReadModel struct {
+	Review          *domain.TaskReview         `json:"review,omitempty"`
+	ParentTaskID    *string                    `json:"parent_task_id,omitempty"`
 	CompletionBasis domain.TaskCompletionBasis `json:"completion_basis"`
 	TaskID          string                     `json:"task_id"`
 	Version         int64                      `json:"version"`

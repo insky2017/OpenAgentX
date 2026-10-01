@@ -1402,17 +1402,19 @@ func TestCLIRouteScopeRequirementsFailClosed(t *testing.T) {
 		"agent list":               {method: http.MethodGet, path: "/api/observe/v1/agents", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
 		"normal event stream":      {method: http.MethodGet, path: "/api/observe/v1/events/stream?mode=normal", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
 		"diagnostic event stream":  {method: http.MethodGet, path: "/api/observe/v1/events/stream?mode=diagnostic", role: domain.WebRoleOwner, scope: domain.CLIScopeConsoleDiagnostic},
-		"overview":                 {method: http.MethodGet, path: "/api/observe/v1/overview", role: domain.WebRoleViewer, scope: ""},
+		"overview":                 {method: http.MethodGet, path: "/api/observe/v1/overview", role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
 		"tasks":                    {method: http.MethodGet, path: "/api/observe/v1/tasks", role: domain.WebRoleViewer, scope: ""},
 		"task":                     {method: http.MethodGet, path: "/api/observe/v1/tasks/task-1", role: domain.WebRoleViewer, scope: ""},
 		"mailboxes":                {method: http.MethodGet, path: "/api/observe/v1/mailboxes", role: domain.WebRoleViewer, scope: ""},
 		"run":                      {method: http.MethodGet, path: "/api/observe/v1/run-attempts/run-1", role: domain.WebRoleViewer, scope: ""},
 		"execution options":        {method: http.MethodGet, path: openapi.ObserveExecutionOptionsPath, role: domain.WebRoleViewer, scope: ""},
-		"network profiles":         {method: http.MethodGet, path: openapi.ObserveNetworkProfilesPath, role: domain.WebRoleViewer, scope: ""},
+		"network profiles":         {method: http.MethodGet, path: openapi.ObserveNetworkProfilesPath, role: domain.WebRoleViewer, scope: domain.CLIScopeConsoleRead},
 		"dispatch":                 {method: http.MethodPost, path: "/api/control/v1/tasks", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
 		"steer":                    {method: http.MethodPost, path: "/api/control/v1/tasks/task-1/messages", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
 		"cancel":                   {method: http.MethodPost, path: "/api/control/v1/tasks/task-1/cancel", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
 		"approval":                 {method: http.MethodPost, path: "/api/control/v1/approvals/approval-1/decisions", write: true, role: domain.WebRoleOperator, scope: domain.CLIScopeConsoleControl},
+		"network mode test":        {method: http.MethodPost, path: openapi.ControlNetworkModeTestPath, write: true, role: domain.WebRoleOwner, scope: domain.CLIScopeFleetLifecycle},
+		"network mode publish":     {method: http.MethodPost, path: openapi.ControlNetworkModePublishPath, write: true, role: domain.WebRoleOwner, scope: domain.CLIScopeFleetLifecycle},
 		"unfrozen network control": {method: http.MethodPost, path: "/api/control/v1/network/profiles", write: true, role: domain.WebRoleOwner, scope: ""},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -1433,13 +1435,11 @@ func TestCLIBearerCannotReadUnfrozenObserveOrNetworkRoutes(t *testing.T) {
 		method  string
 		path    string
 	}{
-		"overview":          {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/overview"},
 		"tasks":             {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/tasks"},
 		"task":              {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/tasks/task-1"},
 		"mailboxes":         {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/mailboxes"},
 		"run":               {viewerHandler, viewerToken, http.MethodGet, "/api/observe/v1/run-attempts/run-1"},
 		"execution options": {viewerHandler, viewerToken, http.MethodGet, openapi.ObserveExecutionOptionsPath},
-		"network profiles":  {viewerHandler, viewerToken, http.MethodGet, openapi.ObserveNetworkProfilesPath},
 		"network create":    {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfilePath},
 		"network edit":      {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfileDraftPath},
 		"network secret":    {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfileSecretPath},
@@ -1447,8 +1447,6 @@ func TestCLIBearerCannotReadUnfrozenObserveOrNetworkRoutes(t *testing.T) {
 		"network publish":   {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkProfilePublishPath},
 		"network bind":      {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkBindingPath},
 		"network rollback":  {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkRollbackPath},
-		"network mode test": {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkModeTestPath},
-		"network mode set":  {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkModePublishPath},
 		"network import":    {ownerHandler, ownerToken, http.MethodPost, openapi.ControlNetworkImportPath},
 	}
 	for name, testCase := range tests {

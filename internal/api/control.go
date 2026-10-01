@@ -33,6 +33,7 @@ type CreateTaskRequest struct {
 	DispatchMode      domain.DispatchMode   `json:"dispatch_mode"`
 	Intent            domain.TaskIntent     `json:"intent"`
 	ParentTaskID      string                `json:"parent_task_id,omitempty"`
+	ContinueContext   bool                  `json:"continue_context,omitempty"`
 	Content           string                `json:"content"`
 	Execution         *domain.ExecutionSpec `json:"execution,omitempty"`
 }
@@ -312,6 +313,9 @@ func (r CreateTaskRequest) Validate() error {
 	if strings.TrimSpace(r.Content) == "" {
 		return domain.ErrInvalidInput("task content cannot be empty")
 	}
+	if r.ContinueContext && r.ParentTaskID == "" {
+		return domain.ErrInvalidInput("continue_context requires parent_task_id")
+	}
 	if r.ParentTaskID != "" {
 		if err := domain.ValidateOpaqueID("parent_task_id", r.ParentTaskID); err != nil {
 			return err
@@ -329,6 +333,7 @@ func (r CreateTaskRequest) Validate() error {
 		if !r.Execution.Network.IsZero() {
 			return domain.ErrForbidden("network policy must be selected from the registered Backend profile")
 		}
+		return domain.ErrInvalidInput("per-task execution overrides are not supported; configure the Agent runtime instead")
 	}
 	return nil
 }

@@ -40,11 +40,21 @@ func TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident(t
 			t.Skipf("%s is required for the isolated workflow", binary)
 		}
 	}
-	root, err := os.MkdirTemp("", "oax9-")
+	evidenceDir := os.Getenv("OPENAGENTX_CONSOLE_EVIDENCE_DIR")
+	if evidenceDir != "" {
+		if err := os.MkdirAll(evidenceDir, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	root, err := os.MkdirTemp(evidenceDir, "oax9-")
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = os.RemoveAll(root) })
+	if evidenceDir == "" {
+		t.Cleanup(func() { _ = os.RemoveAll(root) })
+	} else {
+		t.Logf("Persistent isolated fixture: %s", root)
+	}
 	home := filepath.Join(root, "home")
 	stateDir := filepath.Join(root, "state")
 	toolsDir := filepath.Join(root, "tools")
@@ -213,6 +223,13 @@ esac
 	tmux("select-pane", "-t", "=OAX:=quote-service.0")
 
 	terminal, stdin, attach, stopAttach := startWorkflowConsole(t, environment, tmuxBinary, tmuxSocket)
+	if evidenceDir != "" {
+		t.Cleanup(func() {
+			_ = os.WriteFile(filepath.Join(evidenceDir, "console.pty.log"), []byte(terminal.String()), 0600)
+			_ = os.WriteFile(filepath.Join(evidenceDir, "console.rendered.txt"), []byte(ansi.Strip(terminal.String())), 0600)
+			_ = os.WriteFile(filepath.Join(evidenceDir, "daemon.log"), []byte(daemonLog.String()), 0600)
+		})
+	}
 	t.Cleanup(stopAttach)
 	if !waitForRenderedTerminalText(terminal, "connection connected", 15*time.Second) ||
 		!waitForRenderedTerminalText(terminal, "> /help", 15*time.Second) {
@@ -253,6 +270,43 @@ esac
 			stopAttach()
 			t.Fatalf("Console did not show %q: %s", expected, ansi.Strip(terminal.String()))
 		}
+	}
+
+	// The earlier compact three-pane test remains above. Use the full pane for
+	// the new result workflow so its multi-line receipts are directly reviewable.
+	tmux("resize-pane", "-Z", "-t", "=OAX:=quote-service.0")
+	// The completed dispatch is already the focused Task; review it directly.
+	for _, review := range []struct{ command, decision, label string }{{"/accept PTY checked result", "accepted", "用户已验收"}, {"/result-reject PTY report needs more detail", "rejected", "用户标记结果有问题"}} {
+		offset := len(terminal.String())
+		writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, review.command)
+		if !waitForRenderedTerminalTextAfter(terminal, offset, review.label, 15*time.Second) {
+			t.Fatalf("review receipt missing: %s", ansi.Strip(terminal.String()))
+		}
+		snapshot, err := client.TaskSnapshot(context.Background(), "quote-service", firstTask.TaskID)
+		if err != nil || snapshot.Task.Review == nil || snapshot.Task.Review.Decision != review.decision || snapshot.Task.Status != domain.TaskStatusSucceeded {
+			t.Fatalf("review snapshot=%+v err=%v", snapshot, err)
+		}
+		if evidenceDir != "" {
+			body, _ := json.MarshalIndent(snapshot, "", "  ")
+			_ = os.WriteFile(filepath.Join(evidenceDir, "review-"+review.decision+".json"), body, 0600)
+		}
+		// A receipt triggers authoritative reload; wait for its focused summary.
+		if !revealWorkflowTimelineTextAfter(stdin, terminal, offset, "Focused Task") {
+			t.Fatal("review detail did not refresh")
+		}
+	}
+	writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, "/continue --intent mutation refine the prior result")
+	if !waitForRenderedTerminalText(terminal, "continue succeeded", 15*time.Second) {
+		t.Fatal("continuation receipt missing")
+	}
+	continued := waitForWorkflowTaskCount(t, client, "quote-service", 2)[0]
+	continuedDone := waitForWorkflowTaskStatus(t, client, "quote-service", continued.TaskID, domain.TaskStatusSucceeded, filepath.Join(stateDir, "worker.log"))
+	if continuedDone.Task.ParentTaskID == nil || *continuedDone.Task.ParentTaskID != firstTask.TaskID || !strings.Contains(continuedDone.Task.Content, "Previous work reference") {
+		t.Fatalf("continuation lost context: %+v", continuedDone.Task)
+	}
+	if evidenceDir != "" {
+		body, _ := json.MarshalIndent(continuedDone, "", "  ")
+		_ = os.WriteFile(filepath.Join(evidenceDir, "continuation.json"), body, 0600)
 	}
 
 	writeWorkflowConsoleCommand(t, stdin, terminal, stopAttach, "/diagnostic")
@@ -527,8 +581,8 @@ runtime_backends:
       model: fake-workflow-model
       result: final fixture reply
       provider_session_id: fake-workflow-session
-      result_status_sequence: [waiting_input, succeeded, succeeded]
-      output_sequence: [phase-one-safe-output, phase-two-safe-output, second-task-safe-output]
+      result_status_sequence: [waiting_input, succeeded, succeeded, succeeded]
+      output_sequence: [phase-one-safe-output, phase-two-safe-output, continuation-safe-output, second-task-safe-output]
 `, filepath.Join(home, ".openagentx", "run", "openagentx.sock"))
 	if err := os.WriteFile(workerSource, []byte(worker), 0o600); err != nil {
 		t.Fatal(err)

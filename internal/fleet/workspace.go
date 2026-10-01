@@ -110,9 +110,10 @@ type WorkspaceReport struct {
 }
 
 type Workspace struct {
-	Runner         CommandRunner
-	ConsoleCommand func(agentID string) []string
-	RespawnDead    bool
+	Runner          CommandRunner
+	ConsoleCommand  func(agentID string) []string
+	OverviewCommand []string
+	RespawnDead     bool
 }
 
 func (w Workspace) Inspect(ctx context.Context) ([]Window, error) {
@@ -387,6 +388,9 @@ func (w Workspace) respawnDeadPane(ctx context.Context, manifest Manifest, windo
 
 func (w Workspace) createWorkspace(ctx context.Context, manifest Manifest) (WorkspaceReport, error) {
 	args := []string{"new-session", "-d", "-P", "-F", windowIDFormat, "-s", SessionName, "-n", OverviewWindow}
+	if len(w.OverviewCommand) > 0 {
+		args = append(args, w.OverviewCommand...)
+	}
 	output, err := w.Runner.Run(ctx, args...)
 	if err != nil {
 		return WorkspaceReport{}, err
@@ -423,6 +427,8 @@ func (w Workspace) createWindow(ctx context.Context, name, insertBeforeWindowID 
 	args = append(args, "-n", name)
 	if name != OverviewWindow {
 		args = append(args, provisioningCommand...)
+	} else if len(w.OverviewCommand) > 0 {
+		args = append(args, w.OverviewCommand...)
 	}
 	output, err := w.Runner.Run(ctx, args...)
 	if err != nil {

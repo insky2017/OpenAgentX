@@ -115,6 +115,7 @@ func newHandler(state State, commands *controlplane.CommandService, authorizer r
 	h.mux.HandleFunc("POST /api/control/v1/tasks", h.createTask)
 	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/messages", h.createMessage)
 	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/cancel", h.cancelTask)
+	h.mux.HandleFunc("POST /api/control/v1/tasks/{taskID}/review", h.reviewTask)
 	h.mux.HandleFunc("POST /api/control/v1/approvals/{approvalID}/decisions", h.decideApproval)
 	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfilePath, h.createNetworkProfile)
 	h.mux.HandleFunc("POST "+openapi.ControlNetworkProfileDraftPath, h.editNetworkProfile)
@@ -151,6 +152,9 @@ func panelRequirement(r *http.Request, write bool) requestauth.Requirement {
 	requirement := requestauth.Requirement{Role: domain.WebRoleViewer, Write: write}
 	if write {
 		switch {
+		case r.URL.Path == openapi.ControlNetworkModeTestPath, r.URL.Path == openapi.ControlNetworkModePublishPath:
+			requirement.Role = domain.WebRoleOwner
+			requirement.Scope = domain.CLIScopeFleetLifecycle
 		case r.URL.Path == "/api/control/v1/tasks",
 			strings.HasPrefix(r.URL.Path, "/api/control/v1/tasks/"),
 			strings.HasPrefix(r.URL.Path, "/api/control/v1/approvals/"):
@@ -163,7 +167,7 @@ func panelRequirement(r *http.Request, write bool) requestauth.Requirement {
 		return requirement
 	}
 	switch r.URL.Path {
-	case "/api/observe/v1/agents":
+	case "/api/observe/v1/agents", openapi.ObserveOverviewPath, openapi.ObserveNetworkProfilesPath:
 		requirement.Scope = domain.CLIScopeConsoleRead
 	case openapi.ObserveEventsStreamPath:
 		if r.URL.Query().Get("mode") == consoleapi.ModeDiagnostic {
@@ -188,16 +192,36 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
 		return
 	}
-	agents, _ := h.state.ListAgents(r.Context(), 100)
-	workers, _ := h.state.ListWorkers(r.Context(), 100)
-	tasks, _ := h.state.ListTasks(r.Context(), "", 100)
-	approvals, _ := h.state.ListPendingApprovals(r.Context(), 100)
-	latestSequence, _ := h.state.LatestJournalSequence(r.Context())
+	agents, err := h.state.ListAgents(r.Context(), 100)
+	if err != nil {
+		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	workers, err := h.state.ListWorkers(r.Context(), 100)
+	if err != nil {
+		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	tasks, err := h.state.ListTasks(r.Context(), "", 100)
+	if err != nil {
+		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	approvals, err := h.state.ListPendingApprovals(r.Context(), 100)
+	if err != nil {
+		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	latestSequence, err := h.state.LatestJournalSequence(r.Context())
+	if err != nil {
+		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
+		return
+	}
 	projectedWorkers := make([]openapi.WorkerReadModel, 0, len(workers))
 	for _, worker := range workers {
 		projectedWorkers = append(projectedWorkers, workerReadModel(worker))
 	}
-	writeJSON(w, map[string]any{"agents": agents, "workers": projectedWorkers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "server_time": time.Now().UTC()})
+	writeJSON(w, map[string]any{"agents": h.projectAgentReadiness(r.Context(), agents, workers, tasks), "workers": projectedWorkers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "server_time": time.Now().UTC()})
 }
 
 func workerReadModel(worker domain.WorkerInstance) openapi.WorkerReadModel {
@@ -315,6 +339,14 @@ func (h *Handler) task(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	readModel := openapi.TaskReadModel{Task: taskReadModel(*t), Messages: m, Events: projected, SnapshotSequence: snapshotSequence}
+	if reviews, ok := h.state.(taskReviewReader); ok {
+		readModel.Review, err = reviews.GetTaskReview(r.Context(), taskID)
+		if err != nil {
+			http.Error(w, "failed to load result review", http.StatusInternalServerError)
+			return
+		}
+	}
+
 	if cursor.Mode == observeAfter {
 		readModel.HasMoreLiveEvents = hasMore
 		readModel.LiveAfterSequence = snapshotSequence
@@ -564,6 +596,16 @@ func runReadModel(run domain.RunAttempt, worker *domain.WorkerInstance) openapi.
 	if worker != nil && worker.ID == run.WorkerInstanceID {
 		generation := worker.Generation
 		readModel.WorkerGeneration = &generation
+	}
+	var resolved domain.ResolvedExecutionSpec
+	if json.Unmarshal([]byte(run.ResolvedExecutionJSON), &resolved) == nil {
+		if !resolved.DeadlineAt.IsZero() {
+			readModel.DeadlineAt = &resolved.DeadlineAt
+		}
+		if resolved.AgentInput != nil {
+			readModel.InstructionsSHA256 = resolved.AgentInput.InstructionsSHA256
+			readModel.InstructionsPath = resolved.AgentInput.InstructionsPath
+		}
 	}
 	readModel.TurnResult, readModel.TurnResultState = turnResultReadModel(run.ResultJSON)
 	return readModel

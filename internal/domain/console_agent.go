@@ -5,6 +5,8 @@ import "fmt"
 // ConsoleAgentOption is the control-plane-safe Agent selector projection.
 // It deliberately excludes principal, credential, Worker transport and runtime payload data.
 type ConsoleAgentOption struct {
+	ReadinessReason string           `json:"readiness_reason,omitempty"`
+	NextAction      string           `json:"next_action,omitempty"`
 	AgentID         string           `json:"agent_id"`
 	OrganizationID  string           `json:"organization_id"`
 	DisplayName     string           `json:"display_name"`

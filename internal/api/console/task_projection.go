@@ -26,8 +26,8 @@ func ProjectConsoleTask(task domain.Task) (openapi.ConsoleTaskReadModel, error) 
 	}
 	outcome := safeoutput.ProjectOutcome(task.IsTerminal(), task.Result, task.Error)
 	return openapi.ConsoleTaskReadModel{
-		CompletionBasis: task.CompletionBasis,
-		TaskID:          task.ID, Version: task.Version, AgentID: task.TargetAgentID, Status: task.Status, Intent: task.Intent,
+		CompletionBasis: task.CompletionBasis, ParentTaskID: task.ParentTaskID,
+		TaskID: task.ID, Version: task.Version, AgentID: task.TargetAgentID, Status: task.Status, Intent: task.Intent,
 		Content: safeoutput.RedactText(task.Content), Result: outcome.Result, ResultTruncated: outcome.ResultTruncated,
 		Error: outcome.Error, ErrorTruncated: outcome.ErrorTruncated, OutcomeState: outcome.State,
 		CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt,
@@ -118,6 +118,16 @@ func ProjectConsoleRun(run domain.RunAttempt, workerGeneration int64) (openapi.R
 	}
 	generation := workerGeneration
 	model.WorkerGeneration = &generation
+	var resolved domain.ResolvedExecutionSpec
+	if json.Unmarshal([]byte(run.ResolvedExecutionJSON), &resolved) == nil {
+		if !resolved.DeadlineAt.IsZero() {
+			model.DeadlineAt = &resolved.DeadlineAt
+		}
+		if resolved.AgentInput != nil {
+			model.InstructionsSHA256 = resolved.AgentInput.InstructionsSHA256
+			model.InstructionsPath = resolved.AgentInput.InstructionsPath
+		}
+	}
 	model.TurnResult, model.TurnResultState = consoleTurnResult(run.ResultJSON)
 	return model, nil
 }

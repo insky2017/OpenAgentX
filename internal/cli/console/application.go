@@ -468,13 +468,34 @@ func (a *consoleApplication) controlCmd(preparationID uint64, request controlReq
 		var outcome controlOutcome
 		var err error
 		switch request.Kind {
-		case controlDispatch:
+		case controlDispatch, controlContinue:
 			var response openapi.CreateTaskResponse
 			response, err = prepared.client.Dispatch(a.ctx, openapi.CreateTaskRequest{Meta: meta,
 				TargetAgentID: request.AgentID, OrganizationID: option.OrganizationID,
-				DispatchMode: domain.DispatchModeDirect, Intent: request.Intent, Content: request.Content})
+				DispatchMode: domain.DispatchModeDirect, Intent: request.Intent, Content: request.Content, ParentTaskID: request.ParentTaskID, ContinueContext: request.Kind == controlContinue})
 			if err == nil {
 				outcome, err = dispatchOutcome(response)
+			}
+		case controlAcceptResult, controlRejectResult:
+			reviewer, ok := prepared.client.(interface {
+				ReviewTaskResult(context.Context, string, openapi.ReviewTaskRequest) (domain.TaskReview, error)
+			})
+			if !ok {
+				err = fmt.Errorf("result review is unavailable in this Console client")
+				break
+			}
+			decision := "accepted"
+			if request.Kind == controlRejectResult {
+				decision = "rejected"
+			}
+			var review domain.TaskReview
+			review, err = reviewer.ReviewTaskResult(a.ctx, request.TargetID, openapi.ReviewTaskRequest{Meta: meta, RunID: request.RunID, RunVersion: request.RunVersion, Decision: decision, Note: request.Content})
+			if err == nil {
+				if review.TaskID != request.TargetID || review.RunID != request.RunID || review.RunVersion != request.RunVersion || review.Decision != decision || review.TaskVersion <= request.ExpectedVersion || review.Sequence <= 0 {
+					err = fmt.Errorf("control plane returned an invalid result review receipt")
+				} else {
+					outcome = controlOutcome{Review: &review, Sequence: review.Sequence}
+				}
 			}
 		case controlSteer:
 			var response openapi.CreateMessageResponse
@@ -559,4 +580,15 @@ type tuiActions interface {
 	taskOptionsCmd(uint64, string) tea.Cmd
 	taskSnapshotCmd(uint64, string, string, taskSnapshotPurpose) tea.Cmd
 	controlCmd(uint64, controlRequest) tea.Cmd
+}
+
+func (a *consoleApplication) statusReadinessCmd(preparationID uint64, agentID string) tea.Cmd {
+	return func() tea.Msg {
+		prepared, ok := a.preparation(preparationID)
+		if !ok {
+			return statusReadinessMsg{Err: fmt.Errorf("Console Attach preparation expired")}
+		}
+		snapshot, err := prepared.client.Attach(a.ctx, agentID, consoleapi.ModeNormal)
+		return statusReadinessMsg{Snapshot: snapshot, Err: err}
+	}
 }

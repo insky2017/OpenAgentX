@@ -8,7 +8,7 @@ import {
   mergeLiveTaskDetail,
   sseResumeAfter,
 } from './task-observation-state.js'
-import { createdTaskID, dispatchTarget, taskProgress } from './task-dispatch-state.js'
+import { createdTaskID, dispatchTarget, taskProgress, latestTaskRun } from './task-dispatch-state.js'
 import NetworkSettings from './NetworkSettings.jsx'
 import './styles.css'
 
@@ -21,9 +21,9 @@ class APIError extends Error {
 
 const api = async (path, options = {}) => {
   const response = await fetch(path, {
+    ...options,
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options,
   })
   if (!response.ok) {
     throw new APIError(response.status, (await response.text()) || response.statusText)
@@ -208,6 +208,10 @@ function App() {
   const [dispatchIntent, setDispatchIntent] = useState('mutation')
   const [selectedAgent, setSelectedAgent] = useState(() => new URLSearchParams(window.location.search).get('agent') || '')
   const [replyTask, setReplyTask] = useState(null)
+  const [continueTask, setContinueTask] = useState(null)
+  const [reviewNote, setReviewNote] = useState('')
+  const pendingCommandRef = useRef(new Map())
+  const writeInFlightRef = useRef(false)
   const [error, setError] = useState('')
   const [writing, setWriting] = useState(false)
   const [selectedTaskID, setSelectedTaskID] = useState(() => new URLSearchParams(window.location.search).get('task') || '')
@@ -271,7 +275,14 @@ function App() {
   }, [session, browserOnline])
 
   useEffect(() => {
-    api('/api/auth/v1/session').then(setSession).catch(() => setSession(false))
+    let sessionTimer
+    let cancelled = false
+    const loadSession = () => api('/api/auth/v1/session').then((value) => { if (!cancelled) setSession(value) }).catch((err) => {
+      if (cancelled) return
+      if (err.status === 401 || err.status === 403) setSession(false)
+      else sessionTimer = setTimeout(loadSession, 2000)
+    })
+    loadSession()
     const handleOnline = () => setBrowserOnline(true)
     const handleOffline = () => setBrowserOnline(false)
     const handleBeforeInstallPrompt = (event) => {
@@ -291,6 +302,8 @@ function App() {
     else if (isIOS()) setInstallState('manual')
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {})
     return () => {
+      cancelled = true
+      clearTimeout(sessionTimer)
       removeEventListener('online', handleOnline)
       removeEventListener('offline', handleOffline)
       removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -312,6 +325,7 @@ function App() {
     let disposed = false
     let source
     let refreshTimer
+    let reconnectTimer
     const refresh = async () => {
       try {
         const overview = await api('/api/observe/v1/overview')
@@ -327,7 +341,7 @@ function App() {
     }
 
     setStreamState('connecting')
-    refresh()
+    const connect = () => refresh()
       .then((overview) => {
         if (disposed) return
         const after = sseResumeAfter(lastSequenceRef.current, overview.latest_sequence)
@@ -344,15 +358,18 @@ function App() {
           }, 150)
         }
         source.onopen = () => {
+          refresh().catch(() => {})
           setStreamState('online')
           detailCatchUpRef.current()
         }
-        source.onerror = () => setStreamState('connecting')
+        source.onerror = () => { setStreamState('connecting'); refresh().catch(() => {}) }
       })
-      .catch(() => {})
+      .catch((err) => { if (!disposed && err.status !== 401) reconnectTimer = setTimeout(connect, 2000) })
+    connect()
 
     return () => {
       disposed = true
+      clearTimeout(reconnectTimer)
       clearTimeout(refreshTimer)
       source?.close()
     }
@@ -414,8 +431,7 @@ function App() {
   const onlineAgents = agents.filter((agent) => activeWorkers.get(agentID(agent))?.status === 'online').length
   const tasks = taskPage.tasks || []
   const selectedTask = taskDetail?.task || tasks.find((task) => taskID(task) === selectedTaskID)
-  const completedRuns = useMemo(() => (taskDetail?.run_attempts || []).filter((run) => run.turn_result || run.turn_result_state === 'invalid'), [taskDetail])
-  const latestRun = completedRuns[completedRuns.length - 1] || (taskDetail?.run_attempts || [])[(taskDetail?.run_attempts || []).length - 1]
+  const latestRun = latestTaskRun(taskDetail?.run_attempts)
   const resultBody = taskDetail?.task?.result || latestRun?.turn_result?.body || ''
   const followUpMessages = useMemo(() => {
     return (taskDetail?.messages || []).filter((message) => {
@@ -434,6 +450,8 @@ function App() {
     setSelectedTaskID(id)
     setTaskDetail(null)
     setReplyTask(null)
+    setContinueTask(null)
+    setReviewNote('')
     setTaskView('content')
     setShowRunLog(true)
     setNewOutput(false)
@@ -725,7 +743,12 @@ function App() {
   }
 
   const write = async (path, body, idempotencyKey) => {
-    if (!canWrite) return false
+    if (!canWrite || writeInFlightRef.current) return false
+    writeInFlightRef.current = true
+    const signature = JSON.stringify([path, { ...body, meta: { ...body.meta, idempotency_key: undefined } }])
+    const stableKey = pendingCommandRef.current.get(signature) || idempotencyKey
+    pendingCommandRef.current.set(signature, stableKey)
+    body = { ...body, meta: { ...body.meta, idempotency_key: stableKey } }
     setWriting(true)
     setError('')
     try {
@@ -733,10 +756,11 @@ function App() {
         method: 'POST',
         headers: {
           'X-CSRF-Token': session.csrf_token,
-          'Idempotency-Key': idempotencyKey,
+          'Idempotency-Key': stableKey,
         },
         body: JSON.stringify(body),
       })
+      pendingCommandRef.current.delete(signature)
       taskListRefreshRef.current()
       // The command is already accepted. An observation failure must not turn
       // this into a failed send or invite a duplicate submission.
@@ -744,9 +768,12 @@ function App() {
       if (selectedTaskRef.current) catchUpTaskDetail()
       return { receipt }
     } catch (requestError) {
+      if (requestError.status >= 400 && requestError.status < 500) pendingCommandRef.current.delete(signature)
+      if (requestError.status === 401) setSession(false)
       setError(requestError.message)
       return false
     } finally {
+      writeInFlightRef.current = false
       setWriting(false)
     }
   }
@@ -791,12 +818,14 @@ function App() {
         organization_id: organizationID,
         dispatch_mode: 'direct',
         intent: dispatchIntent,
+        ...(continueTask ? { parent_task_id: taskID(continueTask), continue_context: true } : {}),
         content,
       },
       key,
     )
     if (sent) {
       setDraft('')
+      setContinueTask(null)
       const id = createdTaskID(sent.receipt)
       if (!id) {
         setError('指令已被服务端接受，但返回的任务信息异常；请查看任务列表确认，不要重复发送。')
@@ -808,6 +837,15 @@ function App() {
       setTaskQuery('')
       selectTask(id)
     }
+  }
+
+  const reviewResult = async (decision) => {
+    if (!latestRun || !taskDetail) return
+    const key = newCommandKey('review')
+    await write(`/api/control/v1/tasks/${taskDetail.task.id}/review`, {
+      meta: { idempotency_key: key, expected_version: taskDetail.task.version },
+      run_id: latestRun.run_id, run_version: latestRun.version, decision, note: reviewNote,
+    }, key)
   }
 
   const cancelTask = async (task) => {
@@ -887,7 +925,7 @@ function App() {
                 {agents.map((agent) => {
                   const id = agentID(agent)
                   const worker = activeWorkers.get(id)
-                  const activeTask = tasks.find((task) => task.target_agent_id === id && !terminalTask(task.status))
+                  const activeTask = overviewTasks.find((task) => task.target_agent_id === id && !terminalTask(task.status))
                   const availability = activeTask?.status === 'waiting_input'
                     ? 'waiting_input'
                     : activeTask?.status === 'waiting_approval'
@@ -900,10 +938,10 @@ function App() {
                       <div className="agent-head">
                         <span className={`status-dot ${worker?.status === 'online' ? 'ready' : 'warn'}`} />
                         <strong>{agent.display_name || id}</strong>
-                        <span className="state">{worker?.status || 'offline'} · {availability}</span>
+                        <span className="state">{agent.readiness?.reason || `${worker?.status || 'offline'} · ${availability}`}</span>
                       </div>
                       <p>{id} · {worker ? `心跳 ${formatAge(worker.last_heartbeat_at)}` : '暂无有效 Worker'}</p>
-                      <button className="link" onClick={() => { setSelectedAgent(id); setReplyTask(null); setTab('tasks') }}>
+                      <button className="link" onClick={() => { setSelectedAgent(id); setReplyTask(null); setContinueTask(null); setTab('tasks') }}>
                         进入工作台 <span>↗</span>
                       </button>
                     </article>
@@ -939,7 +977,7 @@ function App() {
                   <button
                     className="outline"
                     disabled={!canWrite || task.status !== 'waiting_input'}
-                    onClick={() => { setSelectedAgent(task.target_agent_id); setReplyTask(task); setTab('tasks') }}
+                    onClick={() => { setSelectedAgent(task.target_agent_id); setContinueTask(null); setReplyTask(task); setTab('tasks') }}
                   >
                     {task.status === 'waiting_approval' ? '待审批' : '回复'}
                   </button>
@@ -1006,13 +1044,13 @@ function App() {
               <div className="composer">
                 <div className="composer-target">
                   <label htmlFor="dispatch-agent">执行 Agent</label>
-                  <select id="dispatch-agent" value={replyTask?.target_agent_id || selectedAgent} disabled={writing || !!replyTask} onChange={(event) => setSelectedAgent(event.target.value)}>
+                  <select id="dispatch-agent" value={replyTask?.target_agent_id || selectedAgent} disabled={writing || !!replyTask || !!continueTask} onChange={(event) => setSelectedAgent(event.target.value)}>
                     <option value="">请选择执行 Agent</option>
                     {selectedAgent && !agents.some((agent) => agentID(agent) === selectedAgent) && <option value={selectedAgent}>所选 Agent 不存在</option>}
                     {agents.map((agent) => {
                       const id = agentID(agent)
                       const state = dispatchTarget(agents, workers, id, now)
-                      return <option key={id} value={id}>{agent.display_name || id} ({id}) · {state.ready ? 'online' : state.worker?.status || 'offline'}</option>
+                      return <option key={id} value={id}>{agent.display_name || id} ({id}) · {state.reason}</option>
                     })}
                   </select>
                 </div>
@@ -1022,13 +1060,13 @@ function App() {
                 <div className="composer-target">
                   <label htmlFor="dispatch-intent">任务类型</label>
                   <select id="dispatch-intent" value={replyTask?.intent || (replyTask ? 'mutation' : dispatchIntent)} disabled={!canWrite || writing || !!replyTask} onChange={(event) => setDispatchIntent(event.target.value)}>
-                    <option value="mutation">变更任务（默认）</option>
-                    <option value="query">查询任务</option>
+                    <option value="mutation">执行任务（默认）</option>
+                    <option value="query">问答（以完整回复交付）</option>
                   </select>
                 </div>
                 <div className="composer-label">
-                  <label htmlFor="command">{replyTask ? `回复任务 ${taskID(replyTask)}` : `向 ${targetAgent || 'Agent'} 发送业务指令`}</label>
-                  {replyTask && <button className="text-button" type="button" onClick={() => setReplyTask(null)}>改为新任务</button>}
+                  <label htmlFor="command">{replyTask ? `补充当前任务（下轮处理）` : continueTask ? `继续 ${taskID(continueTask)}（新任务，引用上次结果）` : `向 ${targetAgent || 'Agent'} 发送业务指令`}</label>
+                  {(replyTask || continueTask) && <button className="text-button" type="button" onClick={() => { setReplyTask(null); setContinueTask(null) }}>独立新任务</button>}
                 </div>
                 <div>
                   <textarea id="command" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="输入业务指令..." disabled={!canWrite} rows={2} />
@@ -1051,12 +1089,17 @@ function App() {
                       <h2>{taskDetail.task.content?.split('\n')[0] || taskDetail.task.id}</h2>
                       <p>{taskDetail.task.id} · 更新于 {formatAge(taskDetail.task.updated_at)}</p>
                       <p>任务类型：{taskDetail.task.intent === 'query' ? '查询任务' : taskDetail.task.intent && taskDetail.task.intent !== 'mutation' ? '未知类型' : '变更任务'}</p>
-                      <p className="execution-progress" role="status">{taskProgress(taskDetail.task, latestRun, activeWorkers.get(taskDetail.task.target_agent_id))}</p>
+                      <p className="execution-progress" role="status">{taskDetail.review?.decision === 'accepted' ? '用户已验收；原始执行记录保留' : taskProgress(taskDetail.task, latestRun, activeWorkers.get(taskDetail.task.target_agent_id))}</p>
+                      {latestRun?.deadline_at && !terminalTask(taskDetail.task.status) && <p>本次运行截止：{new Date(latestRun.deadline_at).toLocaleTimeString()}</p>}
                     </div>
                     <span className={`pill status-${taskDetail.task.status}`}>{taskDetail.task.status}</span>
                   </div>
+                  {terminalTask(taskDetail.task.status) && latestRun?.status === 'succeeded' && <details className="review-note"><summary>验收备注（可选）</summary><textarea aria-label="验收备注" maxLength={4096} rows={2} value={reviewNote} disabled={!canWrite} onChange={(event) => setReviewNote(event.target.value)} placeholder="结果哪里需要修改，或已核对的文件路径" /></details>}
                   <div className="detail-actions">
-                    {taskDetail.task.status === 'waiting_input' && <button className="outline" type="button" disabled={!canWrite} onClick={() => { setSelectedAgent(taskDetail.task.target_agent_id); setReplyTask(taskDetail.task); setDraft(''); document.getElementById('command')?.focus() }}>回复</button>}
+                    {terminalTask(taskDetail.task.status) && <button className="outline" type="button" disabled={!canWrite} onClick={() => { setSelectedAgent(taskDetail.task.target_agent_id); setReplyTask(null); setContinueTask(taskDetail.task); setDispatchIntent(taskDetail.task.intent); setDraft(''); document.getElementById('command')?.focus() }}>继续此工作</button>}
+                    {terminalTask(taskDetail.task.status) && latestRun?.status === 'succeeded' && <><button className="outline" type="button" disabled={!canWrite} onClick={() => reviewResult('accepted')}>接受结果</button><button className="outline" type="button" disabled={!canWrite} onClick={() => reviewResult('rejected')}>结果有问题</button></>}
+
+                    {['waiting_input', 'running'].includes(taskDetail.task.status) && <button className="outline" type="button" disabled={!canWrite} onClick={() => { setSelectedAgent(taskDetail.task.target_agent_id); setContinueTask(null); setReplyTask(taskDetail.task); setDraft(''); document.getElementById('command')?.focus() }}>补充（下轮处理）</button>}
                     {!terminalTask(taskDetail.task.status) && taskDetail.task.status !== 'cancel_requested' && <button className="outline danger" type="button" disabled={!canWrite} onClick={() => cancelTask(taskDetail.task)}>取消任务</button>}
                     <button className={`outline ${showRunLog ? 'active' : ''}`} type="button" onClick={() => setShowRunLog((prev) => !prev)}>
                       {showRunLog ? '收起运行日志' : '查看运行日志'}
@@ -1069,6 +1112,8 @@ function App() {
                       <div className="task-section task-result-section">
                         <div className="task-section-head">
                           <h3 className="section-title">执行结果</h3>
+                          {taskDetail.review && <span className="pill">{taskDetail.review.decision === 'accepted' ? '用户已验收' : '用户指出结果有问题'}</span>}
+                          {taskDetail.review?.note && <p>{taskDetail.review.note}</p>}
                           {latestRun && (
                             <span className="run-meta-tag">
                               {latestRun.run_id} · Runtime {latestRun.turn_result?.runtime_status || latestRun.status}
@@ -1092,7 +1137,7 @@ function App() {
                         )}
                         {latestRun?.turn_result && (
                           <p className="result-evidence">
-                            副作用来源：{latestRun.turn_result.side_effects_source === 'runtime_reported' ? `Runtime 自报${latestRun.turn_result.runtime_side_effects_known ? '已知' : '未知'}` : '未记录'} · 业务核验：未记录
+                            {taskDetail.review ? `验收来源：用户确认（${taskDetail.review.decision === 'accepted' ? '接受' : '未接受'}）；不代表系统独立验证业务效果` : '执行结果可由你验收；业务效果尚未独立核验'}
                           </p>
                         )}
                         {taskDetail.task.error && (

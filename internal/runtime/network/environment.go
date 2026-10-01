@@ -25,7 +25,8 @@ var commonEnvironmentKeys = map[string]struct{}{
 }
 
 var agyEnvironmentKeys = map[string]struct{}{
-	"AGY_GRAFT_REAL_BIN": {}, "AGY_GRAFT_MGRAFTCP_BIN": {}, "AGY_GRAFT_GOMAXPROCS": {},
+	"AGY_GRAFT_NATIVE_PROXY": {},
+	"AGY_GRAFT_REAL_BIN":     {}, "AGY_GRAFT_MGRAFTCP_BIN": {}, "AGY_GRAFT_GOMAXPROCS": {},
 	"AGY_GRAFT_IPV4_ONLY": {}, "AGY_GRAFT_IPV4_ONLY_FILE": {},
 }
 
@@ -83,6 +84,11 @@ func Environment(base []string, policy domain.NetworkPolicy, adapterID, binary s
 			continue
 		}
 		if agy && adapterID != "agy-batch" {
+			continue
+		}
+		// The native-proxy wrapper branch bypasses graft configuration. It
+		// belongs only to inherit mode, never a published named profile.
+		if name == "AGY_GRAFT_NATIVE_PROXY" && mode != domain.NetworkInherit {
 			continue
 		}
 		if mode == domain.NetworkInherit && adapterID == "agy-batch" && proxy {
