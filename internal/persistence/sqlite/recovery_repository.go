@@ -11,7 +11,7 @@ import (
 	"openagentx/internal/domain"
 )
 
-// ReconcileExpired applies the daemon-start recovery policy using the
+// ReconcileExpired applies the startup and periodic recovery policy using the
 // repository clock. Expired claims become pending again; an active RunAttempt
 // whose lease expired is marked uncertain because its side effects cannot be
 // proven absent. Cancellation intent is retained but does not prove that the

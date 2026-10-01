@@ -1,0 +1,10 @@
+Restart=on-failure
+RestartUSec=3s
+TimeoutStopUSec=1min 30s
+KillMode=control-group
+KillSignal=15
+SendSIGKILL=yes
+BindsTo=
+PartOf=
+LoadState=loaded
+FragmentPath=/home/sky/.config/systemd/user/openagentx-worker@.service

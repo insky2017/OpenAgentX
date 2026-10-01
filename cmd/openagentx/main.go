@@ -142,6 +142,18 @@ func runDaemon(args []string) int {
 		fmt.Fprintf(os.Stderr, "reconcile database: %v\n", err)
 		return 1
 	}
+	// Lease expiry also happens while the daemon remains alive. Reuse the
+	// same conservative transaction and stop it before closing the repository.
+	recoveryContext, stopRecovery := context.WithCancel(ctx)
+	recoveryDone := make(chan struct{})
+	go func() {
+		defer close(recoveryDone)
+		reconcilePeriodically(recoveryContext, 10*time.Second, service.Reconcile, slog.Default())
+	}()
+	defer func() {
+		stopRecovery()
+		<-recoveryDone
+	}()
 	handler, err := workerapi.NewHandler(service, workerapi.StaticPrincipal("daemon"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Worker API: %v\n", err)

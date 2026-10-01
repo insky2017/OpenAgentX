@@ -1,0 +1,16 @@
+=== RUN   TestPeriodicRecoveryRetriesAtIntervalAndStops
+--- PASS: TestPeriodicRecoveryRetriesAtIntervalAndStops (0.09s)
+=== RUN   TestPeriodicRecoveryCancellationReachesInFlightTransaction
+--- PASS: TestPeriodicRecoveryCancellationReachesInFlightTransaction (0.00s)
+PASS
+ok  	openagentx/cmd/openagentx	1.120s
+=== RUN   TestRepeatedRecoveryPreservesHeartbeatAndNeverReplaysExpiredRun
+--- PASS: TestRepeatedRecoveryPreservesHeartbeatAndNeverReplaysExpiredRun (0.20s)
+PASS
+ok  	openagentx/internal/controlplane	1.241s
+=== RUN   TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain
+--- PASS: TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain (0.13s)
+=== RUN   TestReconcileExpiredRollsBackStateAndJournalTogether
+--- PASS: TestReconcileExpiredRollsBackStateAndJournalTogether (0.10s)
+PASS
+ok  	openagentx/internal/persistence/sqlite	1.273s

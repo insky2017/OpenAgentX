@@ -1,0 +1,40 @@
+{
+  "recorded_at": "2026-10-01T19:00:13.677657+00:00",
+  "before_fix_head": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "findings": [
+    "ReconcileExpired had only one production caller: daemon startup via cmd/openagentx/main.go.",
+    "RegisterWorker expires/fences an old Worker but does not settle old Task/Run.",
+    "TryClaimMailbox blocks work whenever any active-status Run exists, even when that Run lease expired.",
+    "BeginClaimedRunAttempt clamps initial Run lease to Worker lease; HeartbeatWorker extends active Run lease. Default 30s Worker lease is the relevant expiry bound, not 5m requested RunLease.",
+    "The existing recovery transaction selects only expired records, records actual state transitions in the same transaction, preserves accepted work, and uses uncertain rather than success/canceled. Repetition and rollback tests already exist.",
+    "Periodic loop performs no process cleanup. Bare CLI Worker SIGKILL may orphan descendants; supported user-systemd control-group cleanup must be verified separately."
+  ],
+  "selected_systemd_command": [
+    "systemctl",
+    "--user",
+    "show",
+    "openagentx-worker@quote.service",
+    "-p",
+    "LoadState",
+    "-p",
+    "KillMode",
+    "-p",
+    "KillSignal",
+    "-p",
+    "SendSIGKILL",
+    "-p",
+    "TimeoutStopUSec",
+    "-p",
+    "Restart",
+    "-p",
+    "RestartUSec",
+    "-p",
+    "FragmentPath",
+    "-p",
+    "PartOf",
+    "-p",
+    "BindsTo"
+  ],
+  "systemd_evidence_boundary": "Read-only loaded template properties, not a crash cleanup test. I acceptance must confirm actual created Agent unit and descendant termination.",
+  "minimal_fix": "10-second serial daemon recovery loop, startup fail-closed retained, context cancellation and join before repository close, errors logged and retried at next interval. No new state machine, no RegisterWorker mutation, no AGY/Worker behavior changes."
+}

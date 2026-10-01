@@ -85,9 +85,9 @@ type WorkerService struct {
 	networkWorkflow *NetworkWorkflowService
 }
 
-// Reconcile runs daemon-start recovery before Workers are allowed to claim
-// new work. It is intentionally explicit so a daemon can fail startup when
-// recovery cannot establish a consistent state.
+// Reconcile runs the shared startup and periodic lease-expiry recovery.
+// Startup callers fail closed; periodic callers retry errors at their next
+// interval without changing the conservative unknown-outcome policy.
 func (s *WorkerService) Reconcile(ctx context.Context) error {
 	return s.state.ReconcileExpired(ctx)
 }
