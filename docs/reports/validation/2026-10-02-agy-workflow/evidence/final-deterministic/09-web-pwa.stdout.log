@@ -1,0 +1,5 @@
+
+> openagentx-command-center@0.1.0 test:pwa
+> node scripts/test-pwa-install.mjs
+
+PWA install source assertions passed

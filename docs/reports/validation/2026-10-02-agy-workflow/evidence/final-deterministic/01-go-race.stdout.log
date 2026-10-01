@@ -1,0 +1,44 @@
+ok  	openagentx/cmd/openagentx	1.961s
+--- FAIL: TestControlRequestsRequireIdempotencyCASAndStructuredExecution (0.00s)
+    contracts_test.go:136: valid create request rejected: INVALID_INPUT: per-task execution overrides are not supported; configure the Agent runtime instead
+FAIL
+FAIL	openagentx/internal/api	0.025s
+ok  	openagentx/internal/api/admin	3.813s
+ok  	openagentx/internal/api/auth	3.869s
+?   	openagentx/internal/runtime/conformance	[no test files]
+?   	openagentx/internal/runtime/descriptors	[no test files]
+?   	openagentx/internal/runtime/fake	[no test files]
+?   	openagentx/internal/runtime/registry	[no test files]
+ok  	openagentx/internal/api/console	12.894s
+ok  	openagentx/internal/api/panel	52.647s
+ok  	openagentx/internal/api/workerapi	1.039s
+ok  	openagentx/internal/auth	2.158s
+ok  	openagentx/internal/auth/cli	12.113s
+ok  	openagentx/internal/auth/web	3.896s
+ok  	openagentx/internal/cli/admin	4.511s
+ok  	openagentx/internal/cli/console	35.684s
+ok  	openagentx/internal/cli/fleet	7.014s
+ok  	openagentx/internal/cli/worker	2.293s
+ok  	openagentx/internal/client/console	1.105s
+ok  	openagentx/internal/client/worker	1.036s
+ok  	openagentx/internal/consolemodel	2.055s
+ok  	openagentx/internal/controlplane	12.211s
+ok  	openagentx/internal/credentialstore	1.493s
+ok  	openagentx/internal/domain	1.026s
+ok  	openagentx/internal/fleet	13.207s
+ok  	openagentx/internal/localprofile	1.032s
+ok  	openagentx/internal/network/secretstore	1.566s
+ok  	openagentx/internal/persistence/sqlite	25.660s
+ok  	openagentx/internal/persistence/sqlite/migrations	5.961s
+ok  	openagentx/internal/runtime	1.029s
+ok  	openagentx/internal/runtime/acp	1.082s
+ok  	openagentx/internal/runtime/agy	15.681s
+ok  	openagentx/internal/runtime/codebuddy	3.165s
+ok  	openagentx/internal/runtime/network	1.501s
+ok  	openagentx/internal/runtime/spec	1.030s
+ok  	openagentx/internal/safeoutput	1.170s
+ok  	openagentx/internal/testkit	1.207s
+ok  	openagentx/internal/transport/remotehttps	1.364s
+ok  	openagentx/internal/transport/unixhttp	1.055s
+ok  	openagentx/internal/worker	2.761s
+FAIL

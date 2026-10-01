@@ -1,0 +1,54 @@
+{
+  "candidate": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "git_tree": "c14eb036be1ae5e8e0324995d459bb2e1e75a64c",
+  "clone_path": "/home/sky/.oax-e/final-source-20261002",
+  "git_directory": "/home/sky/.oax-e/final-source-20261002/.git",
+  "clone_kind": "git clone --shared with standalone .git directory",
+  "status": "",
+  "recorded_at": "2026-10-01T18:49:05.235943+00:00",
+  "source_manifest_sha256": "ba42fa3a7517c078fbfb30e8da8bdbbd8edd7ae4c99e9bae127fff8eb13b5f9d",
+  "changes_since_8655051": [
+    "internal/cli/fleet/agent.go",
+    "internal/cli/fleet/agent_test.go",
+    "internal/runtime/agy/adapter.go",
+    "internal/runtime/agy/adapter_test.go",
+    "web/src/main.jsx",
+    "web/src/task-dispatch-state.js",
+    "web/src/task-dispatch-state.test.js"
+  ],
+  "evidence_level": "D",
+  "checks": {
+    "all_go_race": "14d full run retains one outdated contract-test FAIL; other packages PASS. 865 API retest PASS. No repeated full suite.",
+    "agy_worker_sqlite_race": "active-cancel-deterministic/02 and 03 PASS with exact final adapter source hashes; Worker/sqlite source unchanged",
+    "fleet_race": "13-fleet-race-final.result.json PASS on final exact HEAD",
+    "fleet_vet": "14-fleet-vet-final.result.json PASS on final exact HEAD",
+    "other_go_vet": "02 full vet PASS; agy/worker changed scope in active-cancel-deterministic/04 PASS; fleet final PASS",
+    "mod_verify": "03 PASS; go.mod/go.sum unchanged",
+    "legacy_scanner": "04 PASS; scanner-relevant legacy paths unchanged; diff limited to adapter/fleet/Web and E2E runners",
+    "frozen_decisions": "git diff 7400806 final -- docs/decisions docs/adr empty",
+    "web_network_pwa": "07 and 09 PASS, relevant sources unchanged",
+    "web_observation": "reused-web-cancel-feedback.log PASS14 on updated dispatch logic; current source identity independently checked",
+    "go_build": "15 PASS; exact vcs.revision and vcs.modified=false",
+    "web_build": "16 PASS on exact final HEAD"
+  },
+  "web_source_reuse": {
+    "web/src/main.jsx": {
+      "unchanged_since_verified_commit": "1b91722",
+      "sha256": "e84cbaa2b4195725da10b016e6b6e96ebeeabec999781e43133495a4d4e4c93f"
+    },
+    "web/src/task-dispatch-state.js": {
+      "unchanged_since_verified_commit": "ccd6a27",
+      "sha256": "397631febb452fe1fef97c4d0a82a5f8b24e014875b01ced05ab49f6a923d4ae"
+    },
+    "web/src/task-dispatch-state.test.js": {
+      "unchanged_since_verified_commit": "ccd6a27",
+      "sha256": "13c0be6c9d42f2d4fbfbdb9a1dd5c3ca9162753ed897fd2caee82205355c787d"
+    }
+  },
+  "network_recovery_review": {
+    "findings": [],
+    "scope": "Preserves published inherit/direct mode; current Worker/generation Test+Publish with binding CAS; rejects named profile automatic recovery without modifying binding; old generation health cannot satisfy networkApplied."
+  },
+  "installed": false,
+  "real_e2e": "pending separate R/I evidence"
+}

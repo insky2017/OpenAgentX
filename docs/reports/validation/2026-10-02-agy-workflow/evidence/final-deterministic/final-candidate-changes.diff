@@ -1,0 +1,458 @@
+diff --git a/internal/cli/fleet/agent.go b/internal/cli/fleet/agent.go
+index f6b3797..69395f5 100644
+--- a/internal/cli/fleet/agent.go
++++ b/internal/cli/fleet/agent.go
+@@ -730,27 +730,28 @@ func prepareNetwork(ctx context.Context, api *agentAPI, attached consoleapi.Atta
+ 	if err != nil {
+ 		return err
+ 	}
+-	hasBinding := false
++	mode := backend.Network.Mode
++	if mode == "" {
++		mode = domain.NetworkInherit
++	}
++	var expectedVersion int64
+ 	for _, b := range current.Bindings {
+ 		if b.AgentID == attached.AgentID && b.BackendID == backend.BackendID {
+-			hasBinding = true
+ 			if networkApplied(b, attached) {
+ 				return nil
+ 			}
++			// Preserve the published choice. A new generation needs a new
++			// formal test and publish, guarded by the existing binding revision.
++			mode, expectedVersion = b.Mode, b.Version
++			break
+ 		}
+ 	}
+-	// Existing published bindings are reapplied by the new Worker generation.
+-	// Do not replace an explicit proxy profile with inherited settings.
+-	if !hasBinding {
+-		mode := backend.Network.Mode
+-		if mode == "" {
+-			mode = domain.NetworkInherit
+-		}
+-		if mode != domain.NetworkInherit && mode != domain.NetworkDirect {
+-			return fmt.Errorf("现有显式网络需要先通过工作台发布；不会改为其它模式")
+-		}
++	if mode != domain.NetworkInherit && mode != domain.NetworkDirect {
++		return fmt.Errorf("命名网络配置尚不支持自动恢复；请在工作台为当前 Worker 重新测试并发布原绑定，现有绑定未修改")
++	}
++	{
+ 		key := consoleclient.IdempotencyKey("agent-network")
+-		req := openapi.TestNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-test"}, AgentID: attached.AgentID, BackendID: backend.BackendID, Mode: mode, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
++		req := openapi.TestNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-test", ExpectedVersion: expectedVersion}, AgentID: attached.AgentID, BackendID: backend.BackendID, Mode: mode, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
+ 		var receipt openapi.NetworkCommandResponse
+ 		if err = api.call(ctx, http.MethodPost, openapi.ControlNetworkModeTestPath, req, &receipt); err != nil {
+ 			return err
+@@ -785,7 +786,7 @@ func prepareNetwork(ctx context.Context, api *agentAPI, attached consoleapi.Atta
+ 				return fmt.Errorf("等待网络测试: %w", err)
+ 			}
+ 		}
+-		publish := openapi.PublishNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-publish"}, TestID: test.TestID, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
++		publish := openapi.PublishNetworkModeRequest{Meta: openapi.CommandMeta{IdempotencyKey: key + "-publish", ExpectedVersion: expectedVersion}, TestID: test.TestID, WorkerInstanceID: attached.WorkerInstanceID, Generation: attached.Generation}
+ 		if err = api.call(ctx, http.MethodPost, openapi.ControlNetworkModePublishPath, publish, &receipt); err != nil {
+ 			return err
+ 		}
+@@ -800,9 +801,6 @@ func prepareNetwork(ctx context.Context, api *agentAPI, attached consoleapi.Atta
+ 				if networkApplied(b, attached) {
+ 					return nil
+ 				}
+-				// A failed old-generation binding is still eligible for
+-				// reapplication. Wait for this generation or the deadline.
+-
+ 			}
+ 		}
+ 		if err = deps.Wait(ctx, time.Second); err != nil {
+diff --git a/internal/cli/fleet/agent_test.go b/internal/cli/fleet/agent_test.go
+index b55debe..2482611 100644
+--- a/internal/cli/fleet/agent_test.go
++++ b/internal/cli/fleet/agent_test.go
+@@ -135,7 +135,7 @@ func TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration(t *testi
+ 	}
+ }
+ 
+-func TestAgentExistingNetworkPreservedAcrossGeneration(t *testing.T) {
++func TestAgentExistingNamedNetworkRequiresExplicitRecovery(t *testing.T) {
+ 	a := consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-2", Generation: 2}
+ 	reads := 0
+ 	api := fixtureAgentAPI(t, func(w http.ResponseWriter, r *http.Request) {
+@@ -143,17 +143,91 @@ func TestAgentExistingNetworkPreservedAcrossGeneration(t *testing.T) {
+ 			t.Fatal("existing named profile replaced")
+ 		}
+ 		reads++
+-		generation := int64(1)
+-		if reads > 1 {
+-			generation = 2
+-		}
+-		_ = json.NewEncoder(w).Encode(openapi.NetworkOverviewResponse{Bindings: []domain.NetworkBinding{{AgentID: "quote", BackendID: "agy", Mode: domain.NetworkNamedProfile, ProfileID: "existing", AppliedProfileID: "existing", AppliedMode: domain.NetworkNamedProfile, Version: 4, DesiredStatus: "applied", AppliedWorkerID: "worker-2", AppliedGeneration: generation, AppliedBindingRevision: 4}}})
++		_ = json.NewEncoder(w).Encode(openapi.NetworkOverviewResponse{Bindings: []domain.NetworkBinding{{AgentID: "quote", BackendID: "agy", Mode: domain.NetworkNamedProfile, ProfileID: "existing", Version: 4, DesiredStatus: "applied", AppliedWorkerID: "worker-1", AppliedGeneration: 1, AppliedBindingRevision: 4}}})
+ 	})
+-	if err := prepareNetwork(context.Background(), api, a, workerconfig.RuntimeBackendConfig{BackendID: "agy"}, withDefaults(Dependencies{})); err != nil {
+-		t.Fatal(err)
++	err := prepareNetwork(context.Background(), api, a, workerconfig.RuntimeBackendConfig{BackendID: "agy"}, withDefaults(Dependencies{}))
++	if err == nil || !strings.Contains(err.Error(), "现有绑定未修改") || reads != 1 {
++		t.Fatalf("err=%v reads=%d", err, reads)
+ 	}
+-	if reads != 2 {
+-		t.Fatalf("reads=%d", reads)
++}
++
++func TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP(t *testing.T) {
++	for _, mode := range []domain.NetworkMode{domain.NetworkInherit, domain.NetworkDirect} {
++		for _, conflict := range []string{"", "test", "publish"} {
++			t.Run(string(mode)+"/"+conflict, func(t *testing.T) {
++				a := consoleapi.AttachResponse{AgentID: "quote", WorkerInstanceID: "worker-new", Generation: 3}
++				posts := []string{}
++				published := false
++				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
++					if r.Header.Get("Authorization") != "Bearer test-token" {
++						t.Error("missing auth")
++					}
++					if r.Method == http.MethodGet {
++						binding := domain.NetworkBinding{AgentID: "quote", BackendID: "agy", Mode: mode, Version: 7, DesiredStatus: "applied", AppliedWorkerID: "worker-old", AppliedGeneration: 2, AppliedMode: mode, AppliedBindingRevision: 7}
++						if published {
++							binding.Version = 8
++							binding.AppliedBindingRevision = 8
++							binding.AppliedWorkerID = a.WorkerInstanceID
++							binding.AppliedGeneration = a.Generation
++						}
++						_ = json.NewEncoder(w).Encode(openapi.NetworkOverviewResponse{Bindings: []domain.NetworkBinding{binding}, ModeTests: []domain.NetworkModeTest{{ID: "test-current", State: "succeeded"}}})
++						return
++					}
++					posts = append(posts, r.URL.Path)
++					if r.Header.Get("Idempotency-Key") == "" {
++						t.Error("missing idempotency key")
++					}
++					switch r.URL.Path {
++					case openapi.ControlNetworkModeTestPath:
++						var req openapi.TestNetworkModeRequest
++						if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
++							t.Error(err)
++						}
++						if req.Mode != mode || req.Meta.ExpectedVersion != 7 || req.WorkerInstanceID != a.WorkerInstanceID || req.Generation != a.Generation {
++							t.Errorf("test changed mode or omitted CAS/current Worker: %+v", req)
++						}
++						if conflict == "test" {
++							w.WriteHeader(http.StatusConflict)
++							return
++						}
++					case openapi.ControlNetworkModePublishPath:
++						var req openapi.PublishNetworkModeRequest
++						if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
++							t.Error(err)
++						}
++						if req.Meta.ExpectedVersion != 7 || req.WorkerInstanceID != a.WorkerInstanceID || req.Generation != a.Generation || req.TestID != "test-current" {
++							t.Errorf("publish missing CAS/current Worker: %+v", req)
++						}
++						if conflict == "publish" {
++							w.WriteHeader(http.StatusConflict)
++							return
++						}
++						published = true
++					default:
++						t.Errorf("unexpected POST %s", r.URL.Path)
++					}
++					fmt.Fprint(w, `{"receipt":{"test_id":"test-current"}}`)
++				}))
++				defer server.Close()
++				transport := &http.Transport{DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
++					return (&net.Dialer{}).DialContext(ctx, "tcp", server.Listener.Addr().String())
++				}}
++				defer transport.CloseIdleConnections()
++				api := &agentAPI{token: "test-token", http: &http.Client{Transport: transport}}
++				deps := withDefaults(Dependencies{Wait: func(context.Context, time.Duration) error { return fmt.Errorf("unexpected wait") }})
++				// The local default is intentionally different from an existing direct binding.
++				err := prepareNetwork(context.Background(), api, a, workerconfig.RuntimeBackendConfig{BackendID: "agy"}, deps)
++				if conflict == "" && (err != nil || !published || len(posts) != 2) {
++					t.Fatalf("err=%v posts=%v", err, posts)
++				}
++				if conflict != "" && (err == nil || published) {
++					t.Fatalf("conflict accepted: err=%v published=%v", err, published)
++				}
++				if conflict == "test" && len(posts) != 1 {
++					t.Fatalf("publish after failed test: %v", posts)
++				}
++			})
++		}
+ 	}
+ }
+ 
+diff --git a/internal/runtime/agy/adapter.go b/internal/runtime/agy/adapter.go
+index 975e4be..69c86eb 100644
+--- a/internal/runtime/agy/adapter.go
++++ b/internal/runtime/agy/adapter.go
+@@ -416,6 +416,15 @@ func (h *turnHandle) collect() {
+ 	if runtimeErr != nil || result.Status == openruntime.TurnResultFailed || result.Status == openruntime.TurnResultUncertain {
+ 		result.Error = joinDiagnostic(result.Error, parseErr, stderr.err, waitErr, cancelErr, stderrDetail, stderr.truncated)
+ 	}
++	// An explicit cancellation proves that execution stopped, not whether work
++	// already performed had side effects. Interrupted output and signal exit
++	// errors remain diagnostics rather than invalidating a verified stop.
++	if h.cancelController.explicitCancellationStopped() {
++		result.Status = openruntime.TurnResultCanceled
++		result.SideEffectsKnown = false
++		result.FinalReply = false
++		runtimeErr = nil
++	}
+ 	h.once.Do(func() {
+ 		h.result, h.err = result, runtimeErr
+ 		close(h.done)
+@@ -518,6 +527,9 @@ type processCancelController struct {
+ 	cleanupStarted bool
+ 	cleanupDone    chan struct{}
+ 	cleanupErr     error
++	explicitCancel bool
++	timeoutCancel  bool
++	cleanupStopped bool
+ }
+ 
+ func newProcessCancelController(command *exec.Cmd, grace time.Duration) *processCancelController {
+@@ -537,8 +549,24 @@ func (c *processCancelController) getRoot() processRef {
+ }
+ 
+ func (c *processCancelController) cancel(timeout bool) error {
++	// A deadline or parent-context cancellation must never be relabeled as
++	// user cancellation, including when it races an explicit cancel request.
++	if timeout {
++		c.cleanupMu.Lock()
++		c.timeoutCancel = true
++		c.cleanupMu.Unlock()
++	}
+ 	var cancelErr error
+ 	c.once.Do(func() {
++		c.cleanupMu.Lock()
++		c.cleanupStarted = true
++		c.cleanupMu.Unlock()
++		cleanupLaunched := false
++		defer func() {
++			if !cleanupLaunched {
++				close(c.cleanupDone)
++			}
++		}()
+ 		root := c.getRoot()
+ 		if root.pid == 0 && c.command.Process != nil {
+ 			startTime, err := processStartTime(c.command.Process.Pid)
+@@ -552,11 +580,12 @@ func (c *processCancelController) cancel(timeout bool) error {
+ 			root = processRef{pid: c.command.Process.Pid, startTime: startTime}
+ 			c.setRoot(root)
+ 		}
+-		if root.pid == 0 || c.command.Process == nil {
++		if root.pid == 0 || c.command.Process == nil || !processRefAlive(root) {
++			// A late request after natural exit is not evidence of cancellation.
+ 			return
+ 		}
+ 		c.cleanupMu.Lock()
+-		c.cleanupStarted = true
++		c.explicitCancel = !timeout
+ 		c.cleanupMu.Unlock()
+ 		descendants := descendantProcesses(root.pid)
+ 		// Signal descendants deepest-first while the mgraftcp tracer remains alive.
+@@ -571,6 +600,7 @@ func (c *processCancelController) cancel(timeout bool) error {
+ 		if timeout && traceeGrace > timeoutTraceeGrace {
+ 			traceeGrace = timeoutTraceeGrace
+ 		}
++		cleanupLaunched = true
+ 		go c.finish(root, descendants, traceeGrace)
+ 	})
+ 	return cancelErr
+@@ -696,6 +726,21 @@ func (c *processCancelController) finish(root processRef, descendants []processR
+ 			c.recordError(fmt.Errorf("signal AGY process group %d with SIGKILL: %w", root.pid, groupErr))
+ 		}
+ 	}
++
++	// Sending SIGKILL alone is not proof of termination. Wait for the root and
++	// every observed descendant/group member to disappear or become zombies.
++	known = mergeProcessRefs(known, []processRef{root})
++	stopDeadline := time.Now().Add(descendantKillGrace)
++	for time.Now().Before(stopDeadline) && processRefsAlive(known) {
++		time.Sleep(cancellationPollInterval)
++	}
++	if processRefsAlive(known) {
++		c.recordError(fmt.Errorf("AGY process tree survived final cleanup grace period"))
++		return
++	}
++	c.cleanupMu.Lock()
++	c.cleanupStopped = true
++	c.cleanupMu.Unlock()
+ }
+ 
+ func mergeProcessRefs(existing, discovered []processRef) []processRef {
+@@ -785,6 +830,12 @@ func (c *processCancelController) wait() error {
+ 	return c.cleanupErr
+ }
+ 
++func (c *processCancelController) explicitCancellationStopped() bool {
++	c.cleanupMu.Lock()
++	defer c.cleanupMu.Unlock()
++	return c.explicitCancel && !c.timeoutCancel && c.cleanupStopped && c.cleanupErr == nil
++}
++
+ func processRefsAlive(processes []processRef) bool {
+ 	for _, process := range processes {
+ 		if processRefAlive(process) {
+diff --git a/internal/runtime/agy/adapter_test.go b/internal/runtime/agy/adapter_test.go
+index a6b457e..1d16729 100644
+--- a/internal/runtime/agy/adapter_test.go
++++ b/internal/runtime/agy/adapter_test.go
+@@ -373,8 +373,15 @@ while :; do sleep 0.1; done
+ 	waitContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+ 	defer cancel()
+ 	result, waitErr := handle.Wait(waitContext)
+-	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown {
+-		t.Fatalf("result=%+v err=%v", result, waitErr)
++	if timeout {
++		if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown || result.FinalReply {
++			t.Fatalf("timeout result=%+v err=%v", result, waitErr)
++		}
++	} else if waitErr != nil || result.Status != openruntime.TurnResultCanceled || result.SideEffectsKnown || result.FinalReply {
++		t.Fatalf("explicit cancel result=%+v err=%v", result, waitErr)
++	}
++	if !strings.Contains(result.Error, "AGY process exited") {
++		t.Fatalf("cancellation lost process exit diagnostic: %+v", result)
+ 	}
+ 	marker, err := os.ReadFile(markerPath)
+ 	if err != nil || !strings.Contains(string(marker), "leader-term-child-dead-late-dead") {
+@@ -410,6 +417,99 @@ while :; do sleep 0.1; done
+ 	}
+ }
+ 
++// Use a real process with a deliberately incomplete stream: cancellation can
++// interrupt a JSON record and the process can exit non-zero while still being
++// conclusively stopped. Cleanup faults and timeouts must retain uncertainty.
++func TestAgyBatchAdapterCancellationOfInterruptedStream(t *testing.T) {
++	for _, scenario := range []string{"explicit", "cleanup-error", "timeout-first", "timeout-after-explicit"} {
++		t.Run(scenario, func(t *testing.T) {
++			dir := t.TempDir()
++			readyPath := filepath.Join(dir, "ready")
++			scriptPath := filepath.Join(dir, "agy-interrupted")
++			script := fmt.Sprintf(`#!/bin/sh
++cat >/dev/null
++trap 'echo interrupted >&2; exit 1' TERM
++printf '{"event":"result","result":'
++: > %q
++while :; do sleep 0.05; done
++`, readyPath)
++			if err := os.WriteFile(scriptPath, []byte(script), 0o700); err != nil {
++				t.Fatal(err)
++			}
++			adapter := NewAdapterForTest(Config{Binary: scriptPath, WorkingDir: dir, CancelGrace: 100 * time.Millisecond})
++			handle, err := adapter.StartTurn(context.Background(), testTurnRequest(validSpec()), nil)
++			if err != nil {
++				t.Fatal(err)
++			}
++			turn := handle.(*turnHandle)
++			t.Cleanup(func() { _ = signalProcessGroup(turn.command.Process.Pid, syscall.SIGKILL) })
++			waitForFile(t, readyPath, "interrupted fixture did not start")
++			if scenario == "cleanup-error" {
++				// An isolated fault fixture: even if the real process stops, an
++				// unverified cleanup operation must prohibit a canceled result.
++				turn.cancelController.recordError(errors.New("injected cleanup verification failure"))
++			}
++			if scenario == "timeout-first" {
++				if err := turn.cancelController.cancel(true); err != nil {
++					t.Fatal(err)
++				}
++			}
++			if err := handle.RequestCancel(context.Background()); err != nil {
++				t.Fatal(err)
++			}
++			if scenario == "timeout-after-explicit" {
++				if err := turn.cancelController.cancel(true); err != nil {
++					t.Fatal(err)
++				}
++			}
++			waitContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
++			defer cancel()
++			result, waitErr := handle.Wait(waitContext)
++			if scenario == "explicit" {
++				if waitErr != nil || result.Status != openruntime.TurnResultCanceled {
++					t.Fatalf("explicit cancel result=%+v err=%v", result, waitErr)
++				}
++			} else if waitErr == nil || result.Status != openruntime.TurnResultUncertain {
++				t.Fatalf("%s must remain uncertain: result=%+v err=%v", scenario, result, waitErr)
++			}
++			if result.SideEffectsKnown || result.FinalReply || !strings.Contains(result.Error, "AGY process exited") || !strings.Contains(result.Error, "interrupted") {
++				t.Fatalf("cancellation evidence lost or overstated: %+v", result)
++			}
++			if scenario == "cleanup-error" && !strings.Contains(result.Error, "injected cleanup verification failure") {
++				t.Fatalf("cleanup failure diagnostic lost: %+v", result)
++			}
++			if processRunning(turn.command.Process.Pid) {
++				t.Fatalf("root process %d survived cancellation", turn.command.Process.Pid)
++			}
++		})
++	}
++}
++
++func TestAgyBatchAdapterLateCancelPreservesNaturalFailure(t *testing.T) {
++	dir := t.TempDir()
++	scriptPath := filepath.Join(dir, "agy-natural-failure")
++	if err := os.WriteFile(scriptPath, []byte("#!/bin/sh\ncat >/dev/null\necho natural-failure >&2\nexit 1\n"), 0o700); err != nil {
++		t.Fatal(err)
++	}
++	adapter := NewAdapterForTest(Config{Binary: scriptPath, WorkingDir: dir})
++	handle, err := adapter.StartTurn(context.Background(), testTurnRequest(validSpec()), nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	before, beforeErr := handle.Wait(context.Background())
++	if err := handle.RequestCancel(context.Background()); err != nil {
++		t.Fatal(err)
++	}
++	after, afterErr := handle.Wait(context.Background())
++	if beforeErr == nil || afterErr == nil || before.Status != openruntime.TurnResultUncertain || !reflect.DeepEqual(before, after) {
++		t.Fatalf("late cancellation changed natural failure: before=%+v (%v), after=%+v (%v)", before, beforeErr, after, afterErr)
++	}
++	turn := handle.(*turnHandle)
++	if err := turn.cancelController.wait(); err != nil || turn.cancelController.explicitCancellationStopped() {
++		t.Fatalf("late cancellation was incorrectly verified: %v", err)
++	}
++}
++
+ func TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain(t *testing.T) {
+ 	dir := t.TempDir()
+ 	scriptPath := filepath.Join(dir, "agy-no-terminal")
+diff --git a/web/src/main.jsx b/web/src/main.jsx
+index 2740590..03c75c8 100644
+--- a/web/src/main.jsx
++++ b/web/src/main.jsx
+@@ -170,8 +170,8 @@ function Login({ onLogin }) {
+         body: JSON.stringify({ username, password }),
+       })
+       onLogin(session)
+-    } catch {
+-      setError('用户名或密码错误')
++    } catch (requestError) {
++      setError(requestError.status === 401 || requestError.status === 403 ? '用户名或密码错误' : '暂时无法连接服务，请稍后重试；已填写内容保留。')
+     } finally {
+       setSubmitting(false)
+     }
+diff --git a/web/src/task-dispatch-state.js b/web/src/task-dispatch-state.js
+index 52709a4..0ff0f37 100644
+--- a/web/src/task-dispatch-state.js
++++ b/web/src/task-dispatch-state.js
+@@ -43,6 +43,9 @@ export const createdTaskID = (response) => {
+ 
+ export const taskProgress = (task, run, worker) => {
+   if (!task) return ''
++  if (task.status === 'cancel_requested') return '正在停止：请求已接受，等待运行进程确认停止'
++  if (task.status === 'canceled') return '已取消，运行已停止或尚未开始；已产生的文件修改不会自动撤销'
++  if (task.status === 'uncertain' && run?.status === 'uncertain') return '执行结果或停止状态尚未确认，请检查诊断；不会自动重跑'
+   if (task.status === 'succeeded' && task.intent === 'query' && task.completion_basis === 'query_result_delivered') {
+     return '查询回复已完整交付；不代表答案真实性或副作用已核验'
+   }
+diff --git a/web/src/task-dispatch-state.test.js b/web/src/task-dispatch-state.test.js
+index 87d6153..c3fa5a1 100644
+--- a/web/src/task-dispatch-state.test.js
++++ b/web/src/task-dispatch-state.test.js
+@@ -85,3 +85,10 @@ test('latest result belongs to the latest execution in either API ordering', ()
+   assert.equal(latestTaskRun([oldRun, newRun]), newRun)
+   assert.equal(latestTaskRun([]), undefined)
+ })
++
++
++test('cancel feedback distinguishes requested, confirmed and unknown stopping', () => {
++  assert.match(taskProgress({status:'cancel_requested'}, {status:'running'}, quote), /等待.*确认停止/)
++  assert.match(taskProgress({status:'canceled'}, {status:'canceled'}, quote), /不会自动撤销/)
++  assert.match(taskProgress({status:'uncertain'}, {status:'uncertain'}, quote), /尚未确认/)
++})

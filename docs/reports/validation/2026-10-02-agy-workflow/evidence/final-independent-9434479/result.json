@@ -1,0 +1,81 @@
+{
+  "evidence_level": "I read-only installed artifact verification; browser behavior and AGY effects separate",
+  "started_at": "2026-10-01T19:37:49.829548+00:00",
+  "finished_at": "2026-10-01T19:37:49.968157+00:00",
+  "candidate": "9434479e4fd3b6802aa2e4d57610bb710200cd01",
+  "checks": {
+    "service_active": true,
+    "binary_hash_matches": true,
+    "revision_matches": true,
+    "vcs_modified_false": true,
+    "schema_v2": true,
+    "web_disk_matches": true,
+    "web_http_matches": true,
+    "frozen_adr_unchanged": true
+  },
+  "status": "PASS",
+  "service": {
+    "MainPID": "406989",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "proc_exe": "/home/sky/.local/bin/openagentx",
+  "paths": {
+    "--db": "/home/sky/.openagentx/data/openagentx.db",
+    "--http-addr": "127.0.0.1:18100",
+    "--web-dir": "/home/sky/.openagentx/web"
+  },
+  "actual_binary_sha256": "6725f3370b3c6bf27293a0f6368cc5bfac9e92c92682cc01a8b1b862231f75c7",
+  "schema_meta": [
+    [
+      1,
+      2,
+      "2026-10-01T19:05:13.326Z"
+    ]
+  ],
+  "web_disk_sha256": {
+    "assets/app.css": "6062397da78b92b8ce49236e431f6f5a09e1a483e94e2cd61b0864f1b186b32d",
+    "assets/app.js": "45df13da90a28fc5c83ffb5dcefa2ab750343b78cbf8b6733241fbf0039ef19e",
+    "icon-192.png": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+    "icon-512.png": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+    "icon.svg": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+    "index.html": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+    "manifest.webmanifest": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+    "sw.js": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381"
+  },
+  "web_http": {
+    "assets/app.css": {
+      "status": 200,
+      "sha256": "6062397da78b92b8ce49236e431f6f5a09e1a483e94e2cd61b0864f1b186b32d"
+    },
+    "assets/app.js": {
+      "status": 200,
+      "sha256": "45df13da90a28fc5c83ffb5dcefa2ab750343b78cbf8b6733241fbf0039ef19e"
+    },
+    "icon-192.png": {
+      "status": 200,
+      "sha256": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309"
+    },
+    "icon-512.png": {
+      "status": 200,
+      "sha256": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3"
+    },
+    "icon.svg": {
+      "status": 200,
+      "sha256": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175"
+    },
+    "index.html": {
+      "status": 200,
+      "sha256": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38"
+    },
+    "manifest.webmanifest": {
+      "status": 200,
+      "sha256": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c"
+    },
+    "sw.js": {
+      "status": 200,
+      "sha256": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381"
+    }
+  },
+  "scope": "No service mutation, no tests, no credential use, no database write. Active browser/installed/lease evidence directories were not scanned."
+}

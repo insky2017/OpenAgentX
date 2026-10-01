@@ -1,0 +1,29 @@
+{
+  "evidence_level": "D",
+  "source_commit": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "source_tree": "c14eb036be1ae5e8e0324995d459bb2e1e75a64c",
+  "source_checkout": "/home/sky/.oax-e/final-source-20261002",
+  "source_clean": true,
+  "vcs_modified": false,
+  "created_at": "2026-10-01T18:46:45.067957+00:00",
+  "binary_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+  "web_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/web",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "node_version": "v20.19.4",
+  "npm_version": "10.8.2",
+  "sha256": {
+    "go-version-m.txt": "1055a121c6c3e2a6e3d0ea39aaf76cd071cdbdd275e53138a33ea4b9377d8c65",
+    "openagentx": "a17a9ef559ede808a5baf994170419a8f57470c98c7ecb6a0478aa8dd438cbac",
+    "web/assets/app.css": "6062397da78b92b8ce49236e431f6f5a09e1a483e94e2cd61b0864f1b186b32d",
+    "web/assets/app.js": "ccfb8098ff8359fb1eb75329f4aa7162ab45f6dbe15a256ee0da8341df088e7e",
+    "web/icon-192.png": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+    "web/icon-512.png": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+    "web/icon.svg": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+    "web/index.html": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+    "web/manifest.webmanifest": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+    "web/sw.js": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381"
+  },
+  "installed": false,
+  "go_build_evidence": "15-go-build-final.result.json",
+  "web_build_evidence": "16-web-build-final.result.json"
+}

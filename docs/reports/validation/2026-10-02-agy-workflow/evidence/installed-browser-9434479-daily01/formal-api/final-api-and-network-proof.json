@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "worker_instance_id": "worker-b01e4602-612b-4183-b351-5a2ed5d21a4a",
+  "generation": 4,
+  "network_applied_to_generation": 4,
+  "installed_binary_sha256": "6725f3370b3c6bf27293a0f6368cc5bfac9e92c92682cc01a8b1b862231f75c7",
+  "tasks": [
+    {
+      "task_id": "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602",
+      "run_id": "run-3ce0f785-66ad-404a-9db8-864ed1569354",
+      "task_status": "uncertain",
+      "run_status": "succeeded",
+      "review": {
+        "id": "task-review-107f4257-6309-5b3b-bcd0-89733596b355",
+        "task_id": "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602",
+        "run_id": "run-3ce0f785-66ad-404a-9db8-864ed1569354",
+        "run_version": 2,
+        "result_sha256": "6c27a595ca4c55b7aa7b620dc4706b3a16f675a4112a69019af0ba6627f8426a",
+        "decision": "accepted",
+        "reviewed_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-10-01T19:43:26.744998068Z",
+        "sequence": 267960,
+        "task_version": 4
+      },
+      "completion_basis": "",
+      "journal_events": 55,
+      "has_older_events": false,
+      "has_more_live_events": false
+    },
+    {
+      "task_id": "task-63dae86b-d09b-4649-8b74-866d8eeef6f2",
+      "run_id": "run-3cd655e5-8faf-4b4b-b196-673c83bd4536",
+      "task_status": "uncertain",
+      "run_status": "succeeded",
+      "review": {
+        "id": "task-review-ad480b1f-974a-55aa-b663-f9cb9a07857f",
+        "task_id": "task-63dae86b-d09b-4649-8b74-866d8eeef6f2",
+        "run_id": "run-3cd655e5-8faf-4b4b-b196-673c83bd4536",
+        "run_version": 2,
+        "result_sha256": "f914f6bf763b4e2d1f87883f89b62e5ae0261708833bfa980f67978f86811271",
+        "decision": "accepted",
+        "reviewed_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-10-01T19:47:10.047115436Z",
+        "sequence": 268055,
+        "task_version": 4
+      },
+      "completion_basis": "",
+      "journal_events": 69,
+      "has_older_events": false,
+      "has_more_live_events": false
+    },
+    {
+      "task_id": "task-f2633591-6978-431a-9314-a07754cab043",
+      "run_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "task_status": "succeeded",
+      "run_status": "succeeded",
+      "review": null,
+      "completion_basis": "query_result_delivered",
+      "journal_events": 14,
+      "has_older_events": false,
+      "has_more_live_events": false
+    }
+  ]
+}

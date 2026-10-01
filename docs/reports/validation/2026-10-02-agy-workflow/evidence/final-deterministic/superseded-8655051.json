@@ -1,0 +1,7 @@
+{
+  "candidate": "865505104526aa0fe3377280280333a0fe14f16c",
+  "status": "superseded_before_install",
+  "reason": "Real direct AGY cancellation reproduced uncertain despite process stop; new adapter fix and later Web changes require new candidate build.",
+  "go_build": "11-go-build.result.json",
+  "web_build": "12-web-build.result.json"
+}

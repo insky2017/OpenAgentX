@@ -1,5 +1,14 @@
 # 最终独立核对（只读快照）
 
+最新追加核对：**9434479 安装后的来源检查 PASS**（2026-10-01T19:37:49.968157+00:00）。[详细记录](final-independent-9434479/result.json)与[检查脚本/哈希清单](final-independent-9434479/README.md)独立保留，不覆盖下方17d5cd2历史快照。
+
+- 当前 `openagentx.service` MainPID=`406989`，active/running；`/proc/406989/exe` SHA-256=`6725f3370b3c6bf27293a0f6368cc5bfac9e92c92682cc01a8b1b862231f75c7`，精确revision=`9434479e4fd3b6802aa2e4d57610bb710200cd01`、`vcs.modified=false`。
+- 只读schema仍为v2；8个磁盘Web文件及从实际服务读取的8个HTTP响应SHA-256均匹配[最新SSE候选清单](final-deterministic/sse-final-artifact-manifest.json)。app.js SHA-256=`45df13da90a28fc5c83ffb5dcefa2ab750343b78cbf8b6733241fbf0039ef19e`。
+- 冻结ADR相对7400806及工作树/暂存区仍无变化。未运行测试、未改变服务/数据库，未读凭据。
+- 此次只刷新安装来源核对；浏览器SSE恢复、模型效果和仍在写入证据的脱敏结果另看对应最终验收目录。下方旧凭据扫描仅对其记录时间与文件集合有效。
+
+以下保留**17d5cd2历史独立快照**及当时的提交建议，不代表最新安装版本：
+
 核对时间：2026-10-01T19:11:52.470357+00:00。源码 HEAD 为 `17d5cd22b442fb5fd02bd661b36c5db4299fea9d`。本次不运行测试、不修改服务或业务数据库；以下结论只对应本次快照，后续仍在写入的验收材料须另行封存核对。
 
 - **安装来源一致：PASS。** `openagentx.service` 为 active/running，MainPID=`306551`。直接读取 `/proc/306551/exe` 的 SHA-256 为 `666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd`，匹配[最终构建清单](final-deterministic/recovery-final-artifact-manifest.json)与[安装记录](installation/installed.json)。进程实际文件为 `/home/sky/.local/bin/openagentx`；Go metadata revision 精确匹配候选且 `vcs.modified=false`。

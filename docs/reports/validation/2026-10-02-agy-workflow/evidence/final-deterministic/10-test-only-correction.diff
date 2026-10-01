@@ -1,0 +1,18 @@
+diff --git a/internal/api/contracts_test.go b/internal/api/contracts_test.go
+index 207fecd..d77f4f9 100644
+--- a/internal/api/contracts_test.go
++++ b/internal/api/contracts_test.go
+@@ -132,6 +132,13 @@ func TestControlRequestsRequireIdempotencyCASAndStructuredExecution(t *testing.T
+ 			Session:   domain.SessionSpec{Mode: domain.SessionModeNew}, Timeout: time.Minute,
+ 		},
+ 	}
++	if err := create.Execution.ValidateShape(); err != nil {
++		t.Fatalf("override fixture must be structurally valid: %v", err)
++	}
++	if err := create.Validate(); err == nil {
++		t.Fatal("unconsumed per-task execution override must be rejected")
++	}
++	create.Execution = nil
+ 	if err := create.Validate(); err != nil {
+ 		t.Fatalf("valid create request rejected: %v", err)
+ 	}

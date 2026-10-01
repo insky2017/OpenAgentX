@@ -1,0 +1,11 @@
+{
+  "candidate": "9434479e4fd3b6802aa2e4d57610bb710200cd01",
+  "candidate_record": "candidate-9434479.json",
+  "artifact_manifest": "sse-final-artifact-manifest.json",
+  "superseded_build_candidates": [
+    "865505104526aa0fe3377280280333a0fe14f16c",
+    "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+    "17d5cd22b442fb5fd02bd661b36c5db4299fea9d"
+  ],
+  "previous_evidence": "All failures and passes retained. Earlier R/I remains reusable only by documented scope comparison; actual installed artifact must be checked anew."
+}

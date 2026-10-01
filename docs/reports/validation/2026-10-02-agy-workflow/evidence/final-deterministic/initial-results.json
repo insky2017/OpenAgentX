@@ -1,0 +1,15 @@
+{
+  "candidate": "14d7350b86125f299615d4a8db61d844ce866758",
+  "go_race": "FAIL: one outdated internal/api test expects unsupported per-task execution overrides to be accepted",
+  "failed_test": "TestControlRequestsRequireIdempotencyCASAndStructuredExecution",
+  "failed_location": "internal/api/contracts_test.go:136",
+  "other_go_packages": "PASS, including Console PTY; no Go race report",
+  "go_vet": "PASS",
+  "go_mod_verify": "PASS",
+  "legacy_release_scanner": "PASS",
+  "frozen_decisions": "unchanged versus 7400806",
+  "web_network": "PASS",
+  "web_observation": "PASS",
+  "web_pwa": "PASS",
+  "next": "root updates contract test; independently inspect diff and rerun affected packages before building final candidate"
+}

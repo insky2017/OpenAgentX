@@ -1,0 +1,109 @@
+{
+  "connection_uri": "file:/home/sky/.openagentx/data/openagentx.db?mode=ro",
+  "queries": [
+    {
+      "sql": "SELECT task_id,parent_task_id,status,intent,completion_basis,version FROM tasks WHERE task_id=?",
+      "parameters": [
+        "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602"
+      ]
+    },
+    {
+      "sql": "SELECT run_id,status,worker_instance_id,started_at,finished_at FROM run_attempts WHERE task_id=? ORDER BY started_at,run_id",
+      "parameters": [
+        "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602"
+      ]
+    },
+    {
+      "sql": "SELECT task_id,parent_task_id,status,intent,completion_basis,version FROM tasks WHERE task_id=?",
+      "parameters": [
+        "task-f2633591-6978-431a-9314-a07754cab043"
+      ]
+    },
+    {
+      "sql": "SELECT run_id,status,worker_instance_id,started_at,finished_at FROM run_attempts WHERE task_id=? ORDER BY started_at,run_id",
+      "parameters": [
+        "task-f2633591-6978-431a-9314-a07754cab043"
+      ]
+    },
+    {
+      "sql": "SELECT task_id,parent_task_id,status,intent,completion_basis,version FROM tasks WHERE task_id=?",
+      "parameters": [
+        "task-63dae86b-d09b-4649-8b74-866d8eeef6f2"
+      ]
+    },
+    {
+      "sql": "SELECT run_id,status,worker_instance_id,started_at,finished_at FROM run_attempts WHERE task_id=? ORDER BY started_at,run_id",
+      "parameters": [
+        "task-63dae86b-d09b-4649-8b74-866d8eeef6f2"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task": {
+        "task_id": "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602",
+        "parent_task_id": null,
+        "status": "uncertain",
+        "intent": "mutation",
+        "completion_basis": "",
+        "version": 4
+      },
+      "run_count": 1,
+      "runs": [
+        {
+          "run_id": "run-3ce0f785-66ad-404a-9db8-864ed1569354",
+          "status": "succeeded",
+          "worker_instance_id": "worker-b01e4602-612b-4183-b351-5a2ed5d21a4a",
+          "started_at": "2026-10-01T19:41:52.261085942Z",
+          "finished_at": "2026-10-01T19:42:25.862345324Z"
+        }
+      ],
+      "official_api_status_and_run_count_agree": true,
+      "parent_evidence": "SQLite mode=ro; Observe Task DTO omits parent_task_id"
+    },
+    {
+      "task": {
+        "task_id": "task-f2633591-6978-431a-9314-a07754cab043",
+        "parent_task_id": null,
+        "status": "succeeded",
+        "intent": "query",
+        "completion_basis": "query_result_delivered",
+        "version": 3
+      },
+      "run_count": 1,
+      "runs": [
+        {
+          "run_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+          "status": "succeeded",
+          "worker_instance_id": "worker-b01e4602-612b-4183-b351-5a2ed5d21a4a",
+          "started_at": "2026-10-01T19:47:58.034966901Z",
+          "finished_at": "2026-10-01T19:48:16.790406677Z"
+        }
+      ],
+      "official_api_status_and_run_count_agree": true,
+      "parent_evidence": "SQLite mode=ro; Observe Task DTO omits parent_task_id"
+    },
+    {
+      "task": {
+        "task_id": "task-63dae86b-d09b-4649-8b74-866d8eeef6f2",
+        "parent_task_id": "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602",
+        "status": "uncertain",
+        "intent": "mutation",
+        "completion_basis": "",
+        "version": 4
+      },
+      "run_count": 1,
+      "runs": [
+        {
+          "run_id": "run-3cd655e5-8faf-4b4b-b196-673c83bd4536",
+          "status": "succeeded",
+          "worker_instance_id": "worker-b01e4602-612b-4183-b351-5a2ed5d21a4a",
+          "started_at": "2026-10-01T19:44:17.966363069Z",
+          "finished_at": "2026-10-01T19:45:31.572919149Z"
+        }
+      ],
+      "official_api_status_and_run_count_agree": true,
+      "parent_evidence": "SQLite mode=ro; Observe Task DTO omits parent_task_id"
+    }
+  ]
+}

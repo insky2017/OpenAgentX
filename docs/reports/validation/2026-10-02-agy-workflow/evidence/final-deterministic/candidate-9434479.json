@@ -1,0 +1,33 @@
+{
+  "candidate": "9434479e4fd3b6802aa2e4d57610bb710200cd01",
+  "git_tree": "063a9d1d883eb0ee7d02f5c76a67ae2b107127bd",
+  "source_clean": true,
+  "source_checkout": "/home/sky/.oax-e/final-source-20261002",
+  "recorded_at": "2026-10-01T19:36:18.777430+00:00",
+  "source_manifest_sha256": "447ed0282a8f105a7cc0f7a1452d8fc8f400eae97bf7640f5a1a5b0221b86930",
+  "changes_since_17d5cd2": [
+    "internal/api/panel/handler.go",
+    "internal/api/panel/overview_cursor_test.go",
+    "web/src/main.jsx",
+    "web/src/task-observation-state.js",
+    "web/src/task-observation-state.test.js"
+  ],
+  "affected_scope": "Web bootstrap/reconnect and Overview safe pre-read cursor only. No AGY, Worker, periodic recovery, persistence or dependency changes.",
+  "source_hash_verification": "Five SSE source hashes match sse-bootstrap-deterministic/source-SHA256SUMS exactly.",
+  "reused_checks": {
+    "sse": "sse-bootstrap-deterministic: original failing first cursor regression, fixed Web15 checks, targeted Overview/SSE race, full panel race, vet and final Web build all retained",
+    "other": "candidate-17d5cd2.json and prior manifests remain source of unaffected checks; no repeated tests",
+    "R_I": "Earlier AGY/cancellation/timeout/systemd recovery evidence may be reused after scope review. Installed historical DB browser bootstrap and updated /proc/Web provenance require new I verification."
+  },
+  "build_evidence": [
+    "19-go-build-sse-final.result.json",
+    "20-web-build-sse-final.result.json"
+  ],
+  "artifact_manifest": "sse-final-artifact-manifest.json",
+  "artifact_sha256_file": "sse-final-artifact-SHA256SUMS",
+  "go_binary_sha256": "6725f3370b3c6bf27293a0f6368cc5bfac9e92c92682cc01a8b1b862231f75c7",
+  "web_app_js_sha256": "45df13da90a28fc5c83ffb5dcefa2ab750343b78cbf8b6733241fbf0039ef19e",
+  "vcs_modified": false,
+  "frozen_adr": "No diff from7400806 for docs/decisions and docs/adr",
+  "installed": false
+}

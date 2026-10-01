@@ -1,0 +1,269 @@
+diff --git a/internal/api/panel/handler.go b/internal/api/panel/handler.go
+index 2e9dc0d..5c81345 100644
+--- a/internal/api/panel/handler.go
++++ b/internal/api/panel/handler.go
+@@ -192,6 +192,14 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
+ 	if _, ok := h.session(w, r, false); !ok {
+ 		return
+ 	}
++	// Capture a lower bound before reading any projection. These independent
++	// reads are not an atomic snapshot: events committed during them must still
++	// be replayed. The later display watermark is not a safe bootstrap cursor.
++	liveAfterSequence, err := h.state.LatestJournalSequence(r.Context())
++	if err != nil {
++		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
++		return
++	}
+ 	agents, err := h.state.ListAgents(r.Context(), 100)
+ 	if err != nil {
+ 		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
+@@ -221,7 +229,7 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
+ 	for _, worker := range workers {
+ 		projectedWorkers = append(projectedWorkers, workerReadModel(worker))
+ 	}
+-	writeJSON(w, map[string]any{"agents": h.projectAgentReadiness(r.Context(), agents, workers, tasks), "workers": projectedWorkers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "server_time": time.Now().UTC()})
++	writeJSON(w, map[string]any{"agents": h.projectAgentReadiness(r.Context(), agents, workers, tasks), "workers": projectedWorkers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "live_after_sequence": liveAfterSequence, "server_time": time.Now().UTC()})
+ }
+ 
+ func workerReadModel(worker domain.WorkerInstance) openapi.WorkerReadModel {
+diff --git a/internal/api/panel/overview_cursor_test.go b/internal/api/panel/overview_cursor_test.go
+new file mode 100644
+index 0000000..815e54c
+--- /dev/null
++++ b/internal/api/panel/overview_cursor_test.go
+@@ -0,0 +1,129 @@
++package panel
++
++import (
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++	"time"
++
++	openapi "openagentx/internal/api"
++	"openagentx/internal/auth/web"
++	"openagentx/internal/domain"
++)
++
++type overviewCursorState struct {
++	*testPanelState
++	afterTaskRead func()
++	cursorError   error
++	reads         []string
++}
++
++func (s *overviewCursorState) LatestJournalSequence(ctx context.Context) (int64, error) {
++	s.reads = append(s.reads, "cursor")
++	if s.cursorError != nil {
++		return 0, s.cursorError
++	}
++	return s.testPanelState.LatestJournalSequence(ctx)
++}
++
++func (s *overviewCursorState) ListAgents(ctx context.Context, limit int) ([]domain.AgentIdentity, error) {
++	s.reads = append(s.reads, "agents")
++	return s.testPanelState.ListAgents(ctx, limit)
++}
++
++func (s *overviewCursorState) ListTasks(ctx context.Context, agent string, limit int) ([]domain.Task, error) {
++	tasks, err := s.testPanelState.ListTasks(ctx, agent, limit)
++	copy := append([]domain.Task(nil), tasks...)
++	if s.afterTaskRead != nil {
++		s.afterTaskRead()
++		s.afterTaskRead = nil
++	}
++	return copy, err
++}
++
++func TestOverviewBootstrapCursorPrecedesProjectionsAndReplaysConcurrentUpdate(t *testing.T) {
++	const historicalTail = 267814
++	task := validSSETask("task-bootstrap", "quote")
++	task.Status = domain.TaskStatusQueued
++	state := &overviewCursorState{testPanelState: &testPanelState{
++		tasks: []domain.Task{task},
++		// Historical rows may no longer have a readable projection. Bootstrap
++		// must not attempt to reconstruct this entire history from sequence 0.
++		journal: []domain.JournalEvent{{Sequence: historicalTail, ID: "old-worker-event", AggregateType: "worker_instance", AggregateID: "missing-old-worker", EventType: "worker.heartbeat"}},
++	}}
++	state.afterTaskRead = func() {
++		state.tasks[0].Status = domain.TaskStatusRunning
++		state.tasks[0].Version++
++		state.journal = append(state.journal, domain.JournalEvent{Sequence: historicalTail + 1, ID: "concurrent-update", AggregateType: "task", AggregateID: task.ID, EventType: "task.running"})
++	}
++	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
++	request := httptest.NewRequest(http.MethodGet, openapi.ObserveOverviewPath, nil)
++	request.AddCookie(panel.cookie)
++	response := httptest.NewRecorder()
++	panel.handler.ServeHTTP(response, request)
++	var overview struct {
++		LiveAfterSequence int64         `json:"live_after_sequence"`
++		LatestSequence    int64         `json:"latest_sequence"`
++		Tasks             []domain.Task `json:"tasks"`
++	}
++	if err := json.Unmarshal(response.Body.Bytes(), &overview); err != nil || response.Code != http.StatusOK {
++		t.Fatalf("overview status=%d err=%v body=%s", response.Code, err, response.Body.String())
++	}
++	if overview.LiveAfterSequence != historicalTail || overview.LatestSequence != historicalTail+1 || len(overview.Tasks) != 1 || overview.Tasks[0].Status != domain.TaskStatusQueued {
++		t.Fatalf("bootstrap cursor skipped a concurrent update: %+v", overview)
++	}
++	if len(state.reads) < 3 || state.reads[0] != "cursor" || state.reads[1] != "agents" {
++		t.Fatalf("bootstrap cursor was not captured before projection reads: %v", state.reads)
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	defer cancel()
++	stream := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s?mode=normal&after_sequence=%d", openapi.ObserveEventsStreamPath, overview.LiveAfterSequence), nil).WithContext(ctx)
++	stream.AddCookie(panel.cookie)
++	streamResponse := &cancelingRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
++	panel.handler.ServeHTTP(streamResponse, stream)
++	if !strings.Contains(streamResponse.Body.String(), "id: 267815\n") || !strings.Contains(streamResponse.Body.String(), "task.running") || strings.Contains(streamResponse.Body.String(), "old-worker-event") {
++		t.Fatalf("bootstrap replay lost concurrent event or replayed old history: %s", streamResponse.Body.String())
++	}
++}
++
++func TestOverviewBootstrapCursorFailureDoesNotInventZero(t *testing.T) {
++	state := &overviewCursorState{testPanelState: &testPanelState{}, cursorError: errors.New("cursor unavailable")}
++	panel := newAuthenticatedPanel(t, web.RoleOwner, state)
++	request := httptest.NewRequest(http.MethodGet, openapi.ObserveOverviewPath, nil)
++	request.AddCookie(panel.cookie)
++	response := httptest.NewRecorder()
++	panel.handler.ServeHTTP(response, request)
++	if response.Code != http.StatusServiceUnavailable || strings.Contains(response.Body.String(), "live_after_sequence") || len(state.reads) != 1 {
++		t.Fatalf("failed cursor lookup produced usable snapshot: status=%d reads=%v body=%s", response.Code, state.reads, response.Body.String())
++	}
++}
++
++type bootstrapFlushRecorder struct {
++	*httptest.ResponseRecorder
++	cancel context.CancelFunc
++}
++
++func (r *bootstrapFlushRecorder) Flush() {
++	r.ResponseRecorder.Flush()
++	r.cancel()
++}
++
++func TestSSEEmptyBootstrapFlushesWithoutWaitingForKeepalive(t *testing.T) {
++	panel := newAuthenticatedPanel(t, web.RoleOwner, &testPanelState{journal: []domain.JournalEvent{{Sequence: 267814}}})
++	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
++	defer cancel()
++	request := httptest.NewRequest(http.MethodGet, openapi.ObserveEventsStreamPath+"?mode=normal&after_sequence=267814", nil).WithContext(ctx)
++	request.AddCookie(panel.cookie)
++	response := &bootstrapFlushRecorder{ResponseRecorder: httptest.NewRecorder(), cancel: cancel}
++	// The recorder cancels as soon as the first flush occurs, so this test
++	// proves that an empty first page flushes without waiting for an event.
++	panel.handler.ServeHTTP(response, request)
++	if !response.Flushed || response.Code != http.StatusOK || response.Header().Get("Content-Type") != "text/event-stream" || response.Body.Len() != 0 {
++		t.Fatalf("empty bootstrap was not ready: status=%d body=%s", response.Code, response.Body.String())
++	}
++}
+diff --git a/web/src/main.jsx b/web/src/main.jsx
+index 03c75c8..ce9b5e1 100644
+--- a/web/src/main.jsx
++++ b/web/src/main.jsx
+@@ -231,7 +231,7 @@ function App() {
+   const [showRunLog, setShowRunLog] = useState(() => new URLSearchParams(window.location.search).has('task'))
+   const [newOutput, setNewOutput] = useState(false)
+   const [loadingMoreEvents, setLoadingMoreEvents] = useState(false)
+-  const lastSequenceRef = useRef(0)
++  const lastSequenceRef = useRef(null)
+   const selectedTaskRef = useRef('')
+   const taskDetailRef = useRef(null)
+   const detailSelectionRef = useRef(0)
+@@ -318,6 +318,7 @@ function App() {
+ 
+   useEffect(() => {
+     if (!session || !browserOnline) {
++      if (!session) lastSequenceRef.current = null
+       setStreamState(browserOnline ? 'connecting' : 'offline')
+       return undefined
+     }
+@@ -344,7 +345,10 @@ function App() {
+     const connect = () => refresh()
+       .then((overview) => {
+         if (disposed) return
+-        const after = sseResumeAfter(lastSequenceRef.current, overview.latest_sequence)
++        const after = sseResumeAfter(lastSequenceRef.current, overview.live_after_sequence)
++        // The initial snapshot confirms this prefix. Preserve it even if the
++        // first stream receives no events before a disconnect.
++        lastSequenceRef.current = after
+         source = new EventSource(`/api/observe/v1/events/stream?mode=normal&after_sequence=${after}`)
+         source.onmessage = (event) => {
+           const sequence = Number(event.lastEventId) || 0
+@@ -360,11 +364,19 @@ function App() {
+         source.onopen = () => {
+           refresh().catch(() => {})
+           setStreamState('online')
++          // These views may have loaded before the overview bootstrap cursor
++          // or missed their deferred refresh while the stream disconnected.
++          taskListRefreshRef.current()
+           detailCatchUpRef.current()
+         }
+         source.onerror = () => { setStreamState('connecting'); refresh().catch(() => {}) }
+       })
+-      .catch((err) => { if (!disposed && err.status !== 401) reconnectTimer = setTimeout(connect, 2000) })
++      .catch((err) => {
++        if (!disposed && err.status !== 401) {
++          setError(err.message)
++          reconnectTimer = setTimeout(connect, 2000)
++        }
++      })
+     connect()
+ 
+     return () => {
+diff --git a/web/src/task-observation-state.js b/web/src/task-observation-state.js
+index e7e456b..28c9205 100644
+--- a/web/src/task-observation-state.js
++++ b/web/src/task-observation-state.js
+@@ -24,11 +24,13 @@ export const mergeHistoryTaskDetail = (current, incoming) => {
+   }
+ }
+ 
+-// Overview is not a transactional snapshot. Its latest sequence is only a
+-// display hint and must never advance the reconnect cursor.
+-export const sseResumeAfter = (confirmedSequence, _overviewLatestSequence) => {
+-  const sequence = Number(confirmedSequence)
+-  return Number.isSafeInteger(sequence) && sequence > 0 ? sequence : 0
++// The server captures live_after_sequence before reading overview projections.
++// It is safe only for bootstrap. Later snapshots must never skip events after
++// the last confirmed cursor; zero is a valid confirmed empty-journal cursor.
++export const sseResumeAfter = (confirmedSequence, overviewLiveAfterSequence) => {
++  if (Number.isSafeInteger(confirmedSequence) && confirmedSequence >= 0) return confirmedSequence
++  if (confirmedSequence === null && Number.isSafeInteger(overviewLiveAfterSequence) && overviewLiveAfterSequence >= 0) return overviewLiveAfterSequence
++  throw new Error('服务未返回有效的事件续接游标，请刷新后重试')
+ }
+ 
+ export const isCurrentObservation = (expected, current) => (
+diff --git a/web/src/task-observation-state.test.js b/web/src/task-observation-state.test.js
+index eb38491..fc1610a 100644
+--- a/web/src/task-observation-state.test.js
++++ b/web/src/task-observation-state.test.js
+@@ -41,11 +41,19 @@ test('live response merges against history that completed after live was sent',
+   assert.equal(afterLive.live_after_sequence, 201)
+ })
+ 
+-test('SSE resume ignores an overview watermark that may cover stale projections', () => {
+-  const confirmedSequence = 41
+-  const overviewReadBeforeEventButWatermarkAfterEvent = 42
+-  assert.equal(sseResumeAfter(confirmedSequence, overviewReadBeforeEventButWatermarkAfterEvent), 41)
+-  assert.equal(sseResumeAfter(0, overviewReadBeforeEventButWatermarkAfterEvent), 0)
++test('SSE bootstrap uses the safe pre-read overview cursor, including large histories', () => {
++  assert.equal(sseResumeAfter(null, 267814), 267814)
++  assert.equal(sseResumeAfter(null, 0), 0)
++  for (const invalid of [undefined, null, -1, '267814', 0.5, Number.MAX_SAFE_INTEGER + 1]) {
++    assert.throws(() => sseResumeAfter(null, invalid), /游标/)
++  }
++})
++
++test('SSE reconnect preserves the confirmed cursor even when a fresh overview is newer', () => {
++  assert.equal(sseResumeAfter(41, 42), 41)
++  // A confirmed empty journal is different from an uninitialized stream.
++  assert.equal(sseResumeAfter(0, 42), 0)
++  assert.equal(sseResumeAfter(267814, 267999), 267814)
+ })
+ 
+ test('deferred UI work rejects a changed task, request, or view', () => {

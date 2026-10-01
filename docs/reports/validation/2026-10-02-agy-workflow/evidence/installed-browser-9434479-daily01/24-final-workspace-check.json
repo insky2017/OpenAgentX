@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-01T19:51:32.276268+00:00",
+  "status": "PASS",
+  "original_inputs_unchanged": true,
+  "report_unchanged_after_query": true,
+  "service_disposition": "Daemon and dedicated demo Worker intentionally left active/ready with no active Run for user reuse. Other pre-existing business Workers remain stopped. Completed Runtime processes are not left running."
+}

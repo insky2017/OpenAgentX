@@ -1,0 +1,62 @@
+{
+  "agents": [
+    {
+      "agent_id": "agy-onboarding-e2e",
+      "principal_id": "agent-agy-onboarding-e2e",
+      "organization_id": "default",
+      "display_name": "AGY 入口验收",
+      "status": "active",
+      "version": 1,
+      "created_at": "2026-10-01T19:06:52.654023272Z",
+      "updated_at": "2026-10-01T19:06:52.654023272Z",
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      }
+    }
+  ],
+  "workers": [
+    {
+      "worker_instance_id": "worker-b01e4602-612b-4183-b351-5a2ed5d21a4a",
+      "agent_id": "agy-onboarding-e2e",
+      "generation": 4,
+      "status": "online",
+      "last_heartbeat_at": "2026-10-01T19:47:37.632246272Z",
+      "lease_until": "2026-10-01T19:48:07.632246272Z",
+      "started_at": "2026-10-01T19:40:27.621108543Z",
+      "updated_at": "2026-10-01T19:47:37.632246272Z"
+    },
+    {
+      "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+      "agent_id": "agy-onboarding-e2e",
+      "generation": 3,
+      "status": "offline",
+      "last_heartbeat_at": "2026-10-01T19:31:00.533803701Z",
+      "lease_until": "2026-10-01T19:31:00.536237284Z",
+      "started_at": "2026-10-01T19:12:49.669087297Z",
+      "updated_at": "2026-10-01T19:31:00.536237284Z"
+    },
+    {
+      "worker_instance_id": "worker-61a2f595-4f9c-475e-9218-33c9c44cbdf8",
+      "agent_id": "agy-onboarding-e2e",
+      "generation": 2,
+      "status": "offline",
+      "last_heartbeat_at": "2026-10-01T19:12:16.906957707Z",
+      "lease_until": "2026-10-01T19:12:46.906957707Z",
+      "started_at": "2026-10-01T19:11:16.899657173Z",
+      "updated_at": "2026-10-01T19:12:49.669087297Z"
+    },
+    {
+      "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+      "agent_id": "agy-onboarding-e2e",
+      "generation": 1,
+      "status": "offline",
+      "last_heartbeat_at": "2026-10-01T19:08:43.846351518Z",
+      "lease_until": "2026-10-01T19:08:49.861433771Z",
+      "started_at": "2026-10-01T19:06:53.624140326Z",
+      "updated_at": "2026-10-01T19:08:49.861433771Z"
+    }
+  ],
+  "latest_sequence": 268058
+}

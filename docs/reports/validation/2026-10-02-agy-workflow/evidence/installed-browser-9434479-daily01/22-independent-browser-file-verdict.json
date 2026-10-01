@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-01T19:49:54.458450+00:00",
+  "initial_cursor": 267881,
+  "acknowledged_before_offline": 267966,
+  "reconnect_cursor": 267966,
+  "replayed_min": 267967,
+  "replayed_max": 268049,
+  "new_overview_lower_bound": 268049,
+  "initial_file_bytes": 1249,
+  "continued_file_bytes": 2306,
+  "original_bytes_preserved": true,
+  "browser_offline_write_disabled": true,
+  "completed_before_browser_reconnected": true,
+  "refresh_preserved_review": true,
+  "boundary": "Real browser + actual installed AGY effects. Formal Task/Run/Journal, process provenance and exact query are checked separately in formal-api. Offline affects the whole browser network, not only SSE. No retention-boundary or native Last-Event-ID-only fault claim."
+}

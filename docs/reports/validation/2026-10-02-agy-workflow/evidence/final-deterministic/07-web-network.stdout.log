@@ -1,0 +1,49 @@
+
+> openagentx-command-center@0.1.0 test:network
+> node --test src/network-binding-state.test.js
+
+TAP version 13
+# Subtest: historical gen 47 receipt is not current for gen 51
+ok 1 - historical gen 47 receipt is not current for gen 51
+  ---
+  duration_ms: 2.678554
+  ...
+# Subtest: same generation receipt from another Worker is not current
+ok 2 - same generation receipt from another Worker is not current
+  ---
+  duration_ms: 0.290652
+  ...
+# Subtest: receipt revision and mode-specific policy must match the current binding
+ok 3 - receipt revision and mode-specific policy must match the current binding
+  ---
+  duration_ms: 0.275033
+  ...
+# Subtest: pending and failed bindings do not claim current application
+ok 4 - pending and failed bindings do not claim current application
+  ---
+  duration_ms: 0.248606
+  ...
+# Subtest: a current successful mode test remains publishable with its CAS revision
+ok 5 - a current successful mode test remains publishable with its CAS revision
+  ---
+  duration_ms: 1.721022
+  ...
+# Subtest: only a complete exact receipt is current applied
+ok 6 - only a complete exact receipt is current applied
+  ---
+  duration_ms: 0.390841
+  ...
+# Subtest: named profile application requires the exact profile receipt
+ok 7 - named profile application requires the exact profile receipt
+  ---
+  duration_ms: 0.312272
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 121.210259

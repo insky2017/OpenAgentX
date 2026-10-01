@@ -1,0 +1,320 @@
+diff --git a/cmd/openagentx/main.go b/cmd/openagentx/main.go
+index a026a30..62b7312 100644
+--- a/cmd/openagentx/main.go
++++ b/cmd/openagentx/main.go
+@@ -142,6 +142,18 @@ func runDaemon(args []string) int {
+ 		fmt.Fprintf(os.Stderr, "reconcile database: %v\n", err)
+ 		return 1
+ 	}
++	// Lease expiry also happens while the daemon remains alive. Reuse the
++	// same conservative transaction and stop it before closing the repository.
++	recoveryContext, stopRecovery := context.WithCancel(ctx)
++	recoveryDone := make(chan struct{})
++	go func() {
++		defer close(recoveryDone)
++		reconcilePeriodically(recoveryContext, 10*time.Second, service.Reconcile, slog.Default())
++	}()
++	defer func() {
++		stopRecovery()
++		<-recoveryDone
++	}()
+ 	handler, err := workerapi.NewHandler(service, workerapi.StaticPrincipal("daemon"))
+ 	if err != nil {
+ 		fmt.Fprintf(os.Stderr, "create Worker API: %v\n", err)
+diff --git a/cmd/openagentx/recovery.go b/cmd/openagentx/recovery.go
+new file mode 100644
+index 0000000..ecccc74
+--- /dev/null
++++ b/cmd/openagentx/recovery.go
+@@ -0,0 +1,28 @@
++package main
++
++import (
++	"context"
++	"log/slog"
++	"time"
++)
++
++// reconcilePeriodically never overlaps recovery transactions or retries errors
++// in a tight loop. The startup reconciliation remains a separate fail-closed
++// check; ongoing failures are diagnosed and retried at the next interval.
++func reconcilePeriodically(ctx context.Context, interval time.Duration, reconcile func(context.Context) error, logger *slog.Logger) {
++	ticker := time.NewTicker(interval)
++	defer ticker.Stop()
++	for {
++		select {
++		case <-ctx.Done():
++			return
++		case <-ticker.C:
++			if ctx.Err() != nil {
++				return
++			}
++			if err := reconcile(ctx); err != nil && ctx.Err() == nil {
++				logger.Error("periodic lease recovery failed", "error", err)
++			}
++		}
++	}
++}
+diff --git a/cmd/openagentx/recovery_test.go b/cmd/openagentx/recovery_test.go
+new file mode 100644
+index 0000000..43d65b1
+--- /dev/null
++++ b/cmd/openagentx/recovery_test.go
+@@ -0,0 +1,89 @@
++package main
++
++import (
++	"bytes"
++	"context"
++	"errors"
++	"log/slog"
++	"strings"
++	"sync/atomic"
++	"testing"
++	"time"
++)
++
++func TestPeriodicRecoveryRetriesAtIntervalAndStops(t *testing.T) {
++	ctx, cancel := context.WithCancel(context.Background())
++	defer cancel()
++	var log bytes.Buffer
++	var calls atomic.Int64
++	observed := make(chan time.Time, 8)
++	done := make(chan struct{})
++	const interval = 30 * time.Millisecond
++	go func() {
++		defer close(done)
++		reconcilePeriodically(ctx, interval, func(context.Context) error {
++			calls.Add(1)
++			observed <- time.Now()
++			return errors.New("injected recovery failure")
++		}, slog.New(slog.NewTextHandler(&log, nil)))
++	}()
++	var first time.Time
++	for i := 0; i < 3; i++ {
++		select {
++		case when := <-observed:
++			if i == 0 {
++				first = when
++			}
++			if i == 2 && when.Sub(first) < interval {
++				t.Fatal("failed recovery retried without waiting for the interval")
++			}
++		case <-time.After(5 * time.Second):
++			t.Fatal("periodic recovery did not retry")
++		}
++	}
++	cancel()
++	select {
++	case <-done:
++	case <-time.After(time.Second):
++		t.Fatal("recovery loop did not stop")
++	}
++	if !strings.Contains(log.String(), "periodic lease recovery failed") || !strings.Contains(log.String(), "injected recovery failure") {
++		t.Fatalf("missing recovery failure diagnostic: %s", log.String())
++	}
++	if got := calls.Load(); got < 3 || got > 4 {
++		t.Fatalf("unexpected recovery call count: %d", got)
++	}
++}
++
++func TestPeriodicRecoveryCancellationReachesInFlightTransaction(t *testing.T) {
++	ctx, cancel := context.WithCancel(context.Background())
++	defer cancel()
++	started := make(chan struct{})
++	done := make(chan struct{})
++	var calls atomic.Int64
++	go func() {
++		defer close(done)
++		reconcilePeriodically(ctx, time.Millisecond, func(callContext context.Context) error {
++			if calls.Add(1) != 1 {
++				return errors.New("unexpected overlapping or repeated recovery")
++			}
++			close(started)
++			<-callContext.Done()
++			return callContext.Err()
++		}, slog.Default())
++	}()
++	select {
++	case <-started:
++	case <-time.After(time.Second):
++		t.Fatal("recovery did not start")
++	}
++	cancel()
++	select {
++	case <-done:
++	case <-time.After(time.Second):
++		t.Fatal("in-flight recovery did not receive cancellation")
++	}
++	if got := calls.Load(); got != 1 {
++		t.Fatalf("recovery continued after shutdown: %d calls", got)
++	}
++}
+diff --git a/internal/cli/console/tui.go b/internal/cli/console/tui.go
+index b2cf982..7da3b3f 100644
+--- a/internal/cli/console/tui.go
++++ b/internal/cli/console/tui.go
+@@ -1649,7 +1649,8 @@ func (m tuiModel) overlayView() string {
+ 			"/continue [--intent query|mutation] <继续内容>", "/accept [验收备注]", "/result-reject [问题说明]",
+ 			"/steer <content>（执行中补充，下轮处理）", "/cancel", "/steer --task <task-id> --version <n> <content>",
+ 			"/cancel --task <task-id> --version <n>",
+-			"/approve <approval-id> <expected-version>", "/reject <approval-id> <expected-version>",
++			"AGY 默认任务无可发起的 preflight/原生审批入口",
++			"/approve <approval-id> <expected-version>（仅已有审批）", "/reject <approval-id> <expected-version>（仅已有审批）",
+ 			"/diagnostic", "/normal", "/help", "/quit", "/foreground",
+ 			"PgUp/PgDown/Home/End scroll Timeline"}, "\n")
+ 	case overlayDiagnostic:
+diff --git a/internal/controlplane/worker_recovery_test.go b/internal/controlplane/worker_recovery_test.go
+new file mode 100644
+index 0000000..d1103a0
+--- /dev/null
++++ b/internal/controlplane/worker_recovery_test.go
+@@ -0,0 +1,118 @@
++package controlplane
++
++import (
++	"context"
++	"encoding/json"
++	"testing"
++	"time"
++
++	"openagentx/internal/api"
++	"openagentx/internal/domain"
++	openruntime "openagentx/internal/runtime"
++)
++
++func TestRepeatedRecoveryPreservesHeartbeatAndNeverReplaysExpiredRun(t *testing.T) {
++	ctx := context.Background()
++	env := newWorkerTestEnvironment(t, nil)
++	if err := env.repository.CreatePrincipal(ctx, &domain.Principal{ID: "recovery-daemon", Kind: domain.PrincipalSystem, DisplayName: "Recovery", Status: domain.IdentityActive}, &domain.JournalEvent{
++		ID: "event-recovery-daemon", EventType: "principal.created", ActorPrincipalID: env.ownerID, Payload: json.RawMessage(`{}`),
++	}); err != nil {
++		t.Fatal(err)
++	}
++	old := env.register(t, "worker-before-crash")
++	env.heartbeat(t, old)
++	created := env.createTask(t, "before-crash")
++	item, err := env.service.ClaimMailbox(ctx, env.workerID, old.SessionToken, claimRequest(old, 1))
++	if err != nil || item == nil {
++		t.Fatalf("claim before crash: item=%+v err=%v", item, err)
++	}
++	begin, err := env.service.BeginAttempt(ctx, env.workerID, old.SessionToken, item.ID, api.BeginAttemptRequest{
++		WorkerInstanceID: old.Worker.ID, AgentID: env.agentID, Generation: old.Worker.Generation,
++		FencingToken: old.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
++	})
++	if err != nil {
++		t.Fatal(err)
++	}
++	// Run past both original Worker and Run leases while normal heartbeats
++	// extend the active lease. Repeated recovery must leave the run untouched.
++	for i := 0; i < 4; i++ {
++		env.clock.Advance(45 * time.Second)
++		env.heartbeat(t, old)
++		if err := env.service.Reconcile(ctx); err != nil {
++			t.Fatal(err)
++		}
++		run, err := env.repository.GetRunAttempt(ctx, begin.Turn.RunAttempt.ID)
++		if err != nil || run.Status != begin.Turn.RunAttempt.Status || run.Version != begin.Turn.RunAttempt.Version || !run.LeaseUntil.After(env.clock.Now()) {
++			t.Fatalf("healthy run was recovered: %+v err=%v", run, err)
++		}
++		task, err := env.repository.GetTask(ctx, created.Task.ID)
++		if err != nil || task.Status != domain.TaskStatusRunning || task.Version != begin.Turn.Task.Version {
++			t.Fatalf("healthy task was recovered: %+v err=%v", task, err)
++		}
++	}
++	// Simulate a lost Worker by stopping its heartbeats; no DB mutation or
++	// daemon restart is needed to make its expired execution uncertain.
++	env.clock.Advance(time.Minute + time.Second)
++	for i := 0; i < 3; i++ {
++		if err := env.service.Reconcile(ctx); err != nil {
++			t.Fatal(err)
++		}
++	}
++	run, err := env.repository.GetRunAttempt(ctx, begin.Turn.RunAttempt.ID)
++	if err != nil || run.Status != domain.RunAttemptUncertain || run.Version != begin.Turn.RunAttempt.Version+1 {
++		t.Fatalf("expired run not settled once: %+v err=%v", run, err)
++	}
++	var result openruntime.TurnResult
++	if err := json.Unmarshal([]byte(run.ResultJSON), &result); err != nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown {
++		t.Fatalf("recovery overstated side effects: %+v err=%v", result, err)
++	}
++	task, err := env.repository.GetTask(ctx, created.Task.ID)
++	if err != nil || task.Status != domain.TaskStatusUncertain || task.Version != begin.Turn.Task.Version+1 {
++		t.Fatalf("expired task not settled once: %+v err=%v", task, err)
++	}
++	mailbox, err := env.repository.GetMailboxItem(ctx, item.ID)
++	if err != nil || mailbox.State != domain.MailboxStateAccepted {
++		t.Fatalf("previously executed work was requeued: %+v err=%v", mailbox, err)
++	}
++	events, err := env.repository.ListTaskJournal(ctx, created.Task.ID, 0, 500)
++	if err != nil {
++		t.Fatal(err)
++	}
++	uncertainEvents := 0
++	for _, event := range events {
++		if event.EventType == "task.uncertain" {
++			uncertainEvents++
++		}
++	}
++	if uncertainEvents != 1 {
++		t.Fatalf("repeated recovery wrote %d task.uncertain events", uncertainEvents)
++	}
++
++	current := env.register(t, "worker-after-crash")
++	env.heartbeat(t, current)
++	if current.Worker.Generation <= old.Worker.Generation {
++		t.Fatal("recovery did not allocate a new generation")
++	}
++	if err := env.service.AppendEvents(ctx, env.workerID, old.SessionToken, run.ID, api.EventBatch{
++		WorkerInstanceID: old.Worker.ID, Generation: old.Worker.Generation, FencingToken: old.Worker.FencingToken,
++		ExpectedRunVersion: begin.Turn.RunAttempt.Version,
++		Events:             []openruntime.RuntimeEvent{{Type: "turn.output", Payload: json.RawMessage(`{"text":"late"}`), OccurredAt: env.clock.Now()}},
++	}); err == nil {
++		t.Fatal("old generation wrote a late event after recovery")
++	}
++	claimed, err := env.service.ClaimMailbox(ctx, env.workerID, current.SessionToken, claimRequest(current, 1))
++	if err != nil || claimed != nil {
++		t.Fatalf("uncertain work was automatically replayed: %+v err=%v", claimed, err)
++	}
++	next := env.createTask(t, "independent-after-crash")
++	claimed, err = env.service.ClaimMailbox(ctx, env.workerID, current.SessionToken, claimRequest(current, 1))
++	if err != nil || claimed == nil || claimed.TaskID != next.Task.ID {
++		t.Fatalf("expired execution blocked independent new work: %+v err=%v", claimed, err)
++	}
++	if _, err := env.service.BeginAttempt(ctx, env.workerID, current.SessionToken, claimed.ID, api.BeginAttemptRequest{
++		WorkerInstanceID: current.Worker.ID, AgentID: env.agentID, Generation: current.Worker.Generation,
++		FencingToken: current.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed,
++	}); err != nil {
++		t.Fatalf("new generation cannot begin independent work: %v", err)
++	}
++}
+diff --git a/internal/controlplane/worker_service.go b/internal/controlplane/worker_service.go
+index 88cfc62..bef33fe 100644
+--- a/internal/controlplane/worker_service.go
++++ b/internal/controlplane/worker_service.go
+@@ -85,9 +85,9 @@ type WorkerService struct {
+ 	networkWorkflow *NetworkWorkflowService
+ }
+ 
+-// Reconcile runs daemon-start recovery before Workers are allowed to claim
+-// new work. It is intentionally explicit so a daemon can fail startup when
+-// recovery cannot establish a consistent state.
++// Reconcile runs the shared startup and periodic lease-expiry recovery.
++// Startup callers fail closed; periodic callers retry errors at their next
++// interval without changing the conservative unknown-outcome policy.
+ func (s *WorkerService) Reconcile(ctx context.Context) error {
+ 	return s.state.ReconcileExpired(ctx)
+ }
+diff --git a/internal/persistence/sqlite/recovery_repository.go b/internal/persistence/sqlite/recovery_repository.go
+index 0b14e66..439b78d 100644
+--- a/internal/persistence/sqlite/recovery_repository.go
++++ b/internal/persistence/sqlite/recovery_repository.go
+@@ -11,7 +11,7 @@ import (
+ 	"openagentx/internal/domain"
+ )
+ 
+-// ReconcileExpired applies the daemon-start recovery policy using the
++// ReconcileExpired applies the startup and periodic recovery policy using the
+ // repository clock. Expired claims become pending again; an active RunAttempt
+ // whose lease expired is marked uncertain because its side effects cannot be
+ // proven absent. Cancellation intent is retained but does not prove that the

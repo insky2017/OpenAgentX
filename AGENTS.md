@@ -6,7 +6,7 @@
 
 ## 当前实施约定（2026-10-02）
 
-- 本轮执行[AGY 工作流修复计划](docs/plans/2026-10-02-agy-workflow-repair.md)和[端到端用例](docs/plans/2026-10-02-agy-workflow-e2e.md)，进度及具体证据写入[执行记录](docs/reports/validation/2026-10-02-agy-workflow/EXECUTION-LOG.md)。用户已授权：更新规则/文档并提交，随后直接实施、测试和安装验收；不要重复询问是否开始。
+- 本轮执行[AGY 工作流修复计划](docs/plans/2026-10-02-agy-workflow-repair.md)和[端到端用例](docs/plans/2026-10-02-agy-workflow-e2e.md)，当前交付见[落地与使用入口](docs/reports/validation/2026-10-02-agy-workflow/DELIVERY.md)，进度及具体证据写入[执行记录](docs/reports/validation/2026-10-02-agy-workflow/EXECUTION-LOG.md)。用户已授权：更新规则/文档并提交，随后直接实施、测试和安装验收；不要重复询问是否开始。
 - 优先交付“添加/导入领域 Agent → 服务及网络就绪 → AGY 执行 → 正确结果/产物 → 取消/继续/返回/恢复”。Fleet、Worker/service、Token、tmux 和内部配置下沉；复用 Task/Run/Journal，不另建平台。WorkBuddy/CodeBuddy 保留，不增专项覆盖或真实模型验收。
 - 真实 E2E 必须有持久强证据：实际命令/版本/时间、daemon/Worker/Runtime 日志或服务 journal、正式 API 的 Task/Run/Journal、浏览器/PTY操作记录及独立文件/进程效果核验。仅 mock、单测、结论JSON、截图或exit0不构成真实端到端通过；D/R/I证据等级分别记录。
 - 原始资料保留在本机持久目录，脱敏可复核副本及带 SHA-256 的 manifest 入库到当批 `evidence/<run-id>/`，清理测试进程不删除证据。首次失败、超时及复验各自保留；报告必须链接实际文件，证据缺失不得写PASS。

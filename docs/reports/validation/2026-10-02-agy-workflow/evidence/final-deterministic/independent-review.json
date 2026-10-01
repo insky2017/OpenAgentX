@@ -1,0 +1,29 @@
+{
+  "evidence_level": "D",
+  "reviewed_at": "2026-10-01T18:18:16.909305+00:00",
+  "source_head_at_review": "2d3fbcdd7183c9cb2b3979c12f880a02644f4f4e",
+  "source_sha256": {
+    "web/src/main.jsx": "2befc053d7c9d1d7cf5d8210e934f55cece3bbac43eb675db596d4a1a26fd092",
+    "web/src/task-dispatch-state.js": "7f406a57b6b1344647fd6a7813ec224840ab1722211107632f661b53c7922729",
+    "web/src/task-observation-state.js": "17d97e31adf304e8dc6af09645de4dc39b67584bf01c32247edde9052f6baa38",
+    "internal/persistence/sqlite/task_review_repository.go": "d6e4c1448e5157e8293f42c0eafe987fc1b912cdbd67a422d84f321d129225a7",
+    "internal/controlplane/command_service.go": "2bfb66754da0080fca9c6bd784e815a142a2597b7c7bd0c4fd7417447325055f",
+    "internal/api/panel/readiness.go": "9adf23989d3ca09892c5911e159a968fd932605adca8ea401f86099faa522f98",
+    "internal/api/readiness.go": "ecd72c16b593aacab2d96ce0b5fd1ba19b60fe7a5c0d86d361d5a647863fe377"
+  },
+  "blocking_findings": [],
+  "checks": [
+    "review preserves original Task status/result/error/completion and Run evidence; version CAS and Journal same transaction; active/uncertain/noRun rejected",
+    "review HTTP binding and live/history merge preserve latest review; obsolete acceptance replay does not replace later rejection",
+    "continue_context creates new linked Task; parent must be terminal with same Agent and organization; unsupported overrides rejected",
+    "latest Worker generation selected; expired lease and unavailable scheduler-filtered backend fail closed; busy Agent remains queueable",
+    "write in-flight guard and stable idempotency key retained on ambiguous network/5xx errors; accepted write refresh failures do not present failed send"
+  ],
+  "nonblocking_observations": [
+    "closeTaskDetail keeps replyTask/continueTask composer context; label remains explicit and independent-task button exits. Root notified to adjudicate whether returning should reset it."
+  ],
+  "limits": [
+    "bounded source audit only, not browser/runtime/installed artifact evidence",
+    "generation/healthy projection tests do not establish real network application"
+  ]
+}

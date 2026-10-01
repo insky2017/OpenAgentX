@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "resume",
+    "agy-onboarding-e2e",
+    "--no-open",
+    "--wait",
+    "5m"
+  ],
+  "started": "2026-10-01T19:40:26.697455+00:00"
+}

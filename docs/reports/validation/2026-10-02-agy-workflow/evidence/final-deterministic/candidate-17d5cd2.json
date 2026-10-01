@@ -1,0 +1,38 @@
+{
+  "candidate": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "git_tree": "bdabe448db8c3f5e1bea0ea8ba360c85a0db5dec",
+  "clone_path": "/home/sky/.oax-e/final-source-20261002",
+  "git_directory": "/home/sky/.oax-e/final-source-20261002/.git",
+  "source_clean": true,
+  "recorded_at": "2026-10-01T19:05:41.316816+00:00",
+  "source_manifest_sha256": "cc1768be384cafb3f708fe393fe926bad100480e1979e51d0d887cf1ef005a03",
+  "changes_since_f3cd7a3": [
+    "cmd/openagentx/main.go",
+    "cmd/openagentx/recovery.go",
+    "cmd/openagentx/recovery_test.go",
+    "internal/cli/console/tui.go",
+    "internal/controlplane/worker_recovery_test.go",
+    "internal/controlplane/worker_service.go",
+    "internal/persistence/sqlite/recovery_repository.go"
+  ],
+  "evidence_level": "D",
+  "affected_scope": {
+    "daemon_recovery": "cmd main + serial recovery helper; two explanatory comment edits; no SQL changes",
+    "console": "help overlay text only, no control command behavior changes"
+  },
+  "reused_checks": {
+    "periodic_recovery": "../periodic-recovery-deterministic/01-focused-race, 02-daemon-race, 03-daemon-vet all PASS; all six source hashes exactly match final candidate",
+    "console_help": "../e19-help-deterministic/01-help.result.json PASS, original logs now durable; source HEAD and four hashes exactly match final candidate; no need for repeat package tests",
+    "go_and_web_previous": "See candidate-f3cd7a3.json and original logs; unaffected source unchanged. No repeated all-package suite.",
+    "real_agy": "f3cd7a3 main and timeout PASS reported by evidence_preflight; AGY/Worker/Web sources unchanged. Scope reuse decided by root; periodic crash recovery requires separate new R/I."
+  },
+  "final_builds": {
+    "go": "17-go-build-recovery-final.result.json PASS; exact vcs.revision and vcs.modified=false",
+    "web": "18-web-build-recovery-final.result.json PASS; all output hashes identical to f3cd7a3"
+  },
+  "artifact_manifest": "recovery-final-artifact-manifest.json",
+  "artifact_sha256_file": "recovery-final-artifact-SHA256SUMS",
+  "binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd",
+  "installed": false,
+  "frozen_decisions": "unchanged vs 7400806"
+}

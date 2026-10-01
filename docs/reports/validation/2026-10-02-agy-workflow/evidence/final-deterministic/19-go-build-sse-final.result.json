@@ -1,0 +1,24 @@
+{
+  "evidence_level": "D",
+  "real_e2e": false,
+  "command": [
+    "go",
+    "build",
+    "-trimpath",
+    "-buildvcs=true",
+    "-o",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/9434479e4fd3b6802aa2e4d57610bb710200cd01/openagentx",
+    "./cmd/openagentx"
+  ],
+  "cwd": "/home/sky/.oax-e/final-source-20261002",
+  "started_at": "2026-10-01T19:33:09.196274+00:00",
+  "git_head": "9434479e4fd3b6802aa2e4d57610bb710200cd01",
+  "git_tree": "063a9d1d883eb0ee7d02f5c76a67ae2b107127bd",
+  "git_status_before": "",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "exit_code": 0,
+  "finished_at": "2026-10-01T19:33:12.606937+00:00",
+  "git_status_after": "",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

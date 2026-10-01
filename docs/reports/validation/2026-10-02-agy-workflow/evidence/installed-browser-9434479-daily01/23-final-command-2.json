@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-01T19:51:32.275438+00:00",
+  "argv": [
+    "journalctl",
+    "--user",
+    "-u",
+    "openagentx.service",
+    "-u",
+    "openagentx-worker@agy-onboarding-e2e.service",
+    "--since",
+    "2026-10-01 19:40:00 UTC",
+    "--no-pager",
+    "-o",
+    "short-iso"
+  ],
+  "exit_code": 0,
+  "stdout": "2026-10-02T03:40:26+08:00 sky-LEGION-REN9000K-34IRZ systemd[1722]: Started openagentx-worker@agy-onboarding-e2e.service - OpenAgentX user Worker (agy-onboarding-e2e).\n",
+  "stderr": ""
+}

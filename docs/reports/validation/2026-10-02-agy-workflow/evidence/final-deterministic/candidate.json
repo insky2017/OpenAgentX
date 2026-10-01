@@ -1,0 +1,11 @@
+{
+  "candidate": "14d7350b86125f299615d4a8db61d844ce866758",
+  "git_tree": "2b31a0723bf0a39764c20857bd991226f54e2e21",
+  "clone_path": "/home/sky/.oax-e/final-source-20261002",
+  "git_directory": "/home/sky/.oax-e/final-source-20261002/.git",
+  "clone_kind": "git clone --shared with standalone .git directory",
+  "status": "",
+  "recorded_at": "2026-10-01T18:24:18.421173+00:00",
+  "source_manifest_sha256": "5e9cdba023b36e194e1170ef3af9b890c343516f2f5136b26a057ab20428d491",
+  "source_files": 294
+}

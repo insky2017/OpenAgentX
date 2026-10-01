@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-01T19:51:32.248930+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status"
+  ],
+  "exit_code": 0,
+  "stdout": "AGY 入口验收 (agy-onboarding-e2e) · 可开始工作\n  当前：无\n  最近：DAILY-WORKFLOW-20261002 OAX-ROLE-NEW-ff09d70390\n  打开：openagentx agent open agy-onboarding-e2e\n  恢复：openagentx agent resume agy-onboarding-e2e\n\nOrchestrator (orchestrator) · 后台未运行\n  当前：task-17beccd5-0c86-4a26-b699-85294132a0e7 · queued\n  最近：task-17beccd5-0c86-4a26-b699-85294132a0e7 · queued\n  打开：openagentx agent open orchestrator\n  恢复：openagentx agent resume orchestrator\n\nQuote Service (quote-service) · 后台未运行\n  当前：无\n  最近：验收 OAX-20260922-1938：2026-09-22 22:29:01 +0800\n  打开：openagentx agent open quote-service\n  恢复：openagentx agent resume quote-service\n\nTest Fake Agent (test-fake-agent) · 后台未运行\n  当前：无\n  最近：fake turn completed\n  打开：openagentx agent open test-fake-agent\n  恢复：openagentx agent resume test-fake-agent\n\nTest Fake Multi-turn Agent (test-fake-multiturn) · 后台未运行\n  当前：task-ce82f045-e675-4ba4-a819-e3d14bd29479 · queued\n  最近：task-ce82f045-e675-4ba4-a819-e3d14bd29479 · queued\n  打开：openagentx agent open test-fake-multiturn\n  恢复：openagentx agent resume test-fake-multiturn\n\nVerification Runner (verification-runner) · 后台未运行\n  当前：无\n  最近：## Task result **`CLI_CONTRACT_MISMATCH`** 报告路径：`OpenAgentX/docs/reports/validation/2026-08-31-openagentx-t04-agy-graft-…\n  打开：openagentx agent open verification-runner\n  恢复：openagentx agent resume verification-runner\n\n",
+  "stderr": ""
+}

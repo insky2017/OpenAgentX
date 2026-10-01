@@ -1,0 +1,213 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-f2633591-6978-431a-9314-a07754cab043",
+    "version": 3,
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "读取 workflow-review.md，确认原报告的三个问题及新增的“下一步验收”都存在。只回复两行：第一行为文件中的工作流验证标记，第二行为你职责说明中的角色验证码。不要改文件，不要回复其它内容。",
+    "status": "succeeded",
+    "result": "DAILY-WORKFLOW-20261002\nOAX-ROLE-NEW-ff09d70390",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T19:47:58.031911527Z",
+    "updated_at": "2026-10-01T19:48:16.790406677Z"
+  },
+  "messages": [
+    {
+      "id": "message-61aaaa6b-aac8-4ebf-ab7d-33fbb731f403",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-f2633591-6978-431a-9314-a07754cab043",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "target_agent_id": "agy-onboarding-e2e",
+      "kind": "instruction",
+      "content": "读取 workflow-review.md，确认原报告的三个问题及新增的“下一步验收”都存在。只回复两行：第一行为文件中的工作流验证标记，第二行为你职责说明中的角色验证码。不要改文件，不要回复其它内容。",
+      "created_at": "2026-10-01T19:47:58.031911527Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-01T20:17:58.034966901Z",
+      "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+      "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+      "run_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "task_id": "task-f2633591-6978-431a-9314-a07754cab043",
+      "agent_id": "agy-onboarding-e2e",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-b01e4602-612b-4183-b351-5a2ed5d21a4a",
+      "worker_generation": 4,
+      "execution_spec_version": 1,
+      "adapter_id": "agy-batch",
+      "backend_id": "agy",
+      "model": "gemini-3.7-flash-low",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 4,
+      "network_binding_revision": 4,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "DAILY-WORKFLOW-20261002\nOAX-ROLE-NEW-ff09d70390",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-01T19:47:58.034966901Z",
+      "finished_at": "2026-10-01T19:48:16.790406677Z",
+      "created_at": "2026-10-01T19:47:58.034966901Z",
+      "updated_at": "2026-10-01T19:48:16.790406677Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 268061,
+      "event_id": "event-8f55c116-d6e8-40a1-8b27-9ec5ad412fc6",
+      "aggregate_type": "task",
+      "aggregate_id": "task-f2633591-6978-431a-9314-a07754cab043",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T19:47:58.031911527Z"
+    },
+    {
+      "sequence": 268063,
+      "event_id": "event-task-7cfd94ff-4c8f-4597-9e4b-b9826a4b019e",
+      "aggregate_type": "task",
+      "aggregate_id": "task-f2633591-6978-431a-9314-a07754cab043",
+      "event_type": "task.running",
+      "created_at": "2026-10-01T19:47:58.035887144Z"
+    },
+    {
+      "sequence": 268064,
+      "event_id": "event-run-e0ac5441-0310-4fe1-9077-7dbc0681aa44",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-01T19:47:58.035891201Z"
+    },
+    {
+      "sequence": 268066,
+      "event_id": "event-runtime-a680055b-20d7-4e11-9739-e56f90db7762",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.init",
+      "created_at": "2026-10-01T19:48:05.891308691Z",
+      "output": {
+        "stage": "init"
+      }
+    },
+    {
+      "sequence": 268067,
+      "event_id": "event-runtime-23255d14-3d38-4f87-99b0-e8bb457f8dc4",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:48:05.976632245Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 268069,
+      "event_id": "event-runtime-b4c2ddc7-aed5-4a63-9250-6a64450bc1b0",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:48:09.228482224Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 268070,
+      "event_id": "event-runtime-6d4d4c0e-2b2f-4c7b-89cd-bae28522bbec",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:48:09.229824361Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 268071,
+      "event_id": "event-runtime-45f0f10b-7277-49d5-907e-e3bfaf7c4075",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:48:09.253985358Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 268072,
+      "event_id": "event-runtime-56f21b9d-131d-4e32-8402-50f2a19cc5a6",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:48:11.559830879Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 268073,
+      "event_id": "event-runtime-4b2ca4ca-1983-4e9e-9f13-3dfaae38275d",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:48:11.585249679Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 268074,
+      "event_id": "event-runtime-938bea56-7331-46b4-bb6c-3007b6c43c3f",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:48:11.610553279Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 268075,
+      "event_id": "event-runtime-1e2d6d8b-ce6b-4f70-a465-65882ca5d302",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "runtime.agy.result",
+      "created_at": "2026-10-01T19:48:11.636043239Z",
+      "output": {
+        "stage": "result",
+        "status": "succeeded",
+        "text": "DAILY-WORKFLOW-20261002\nOAX-ROLE-NEW-ff09d70390\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 268077,
+      "event_id": "event-run-273ca233-a068-4e51-a5d2-8352e307f037",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-5e929cf3-41e8-4e18-a50f-e9194a8fc18d",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-01T19:48:16.790434545Z"
+    },
+    {
+      "sequence": 268078,
+      "event_id": "event-task-fe53c5ec-91c1-485f-a010-8ab50c65c1b0",
+      "aggregate_type": "task",
+      "aggregate_id": "task-f2633591-6978-431a-9314-a07754cab043",
+      "event_type": "task.settled",
+      "created_at": "2026-10-01T19:48:16.790438161Z"
+    }
+  ],
+  "snapshot_sequence": 268081,
+  "live_after_sequence": 268081,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

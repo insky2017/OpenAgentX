@@ -1,0 +1,20 @@
+{
+  "evidence_level": "D",
+  "real_e2e": false,
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "/home/sky/.oax-e/final-source-20261002/web",
+  "started_at": "2026-10-01T19:33:09.259255+00:00",
+  "git_head": "9434479e4fd3b6802aa2e4d57610bb710200cd01",
+  "git_tree": "063a9d1d883eb0ee7d02f5c76a67ae2b107127bd",
+  "git_status_before": "",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "exit_code": 0,
+  "finished_at": "2026-10-01T19:33:10.408834+00:00",
+  "git_status_after": "",
+  "stdout_sha256": "39ccc13c77bf07d2762516557b1cd52d16df9fb92b087d379bef22729bbe51bf",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

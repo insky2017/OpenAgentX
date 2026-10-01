@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-01T19:46:48.433832+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/run-attempts/run-3cd655e5-8faf-4b4b-b196-673c83bd4536",
+  "request": null,
+  "status": 200,
+  "response": {
+    "deadline_at": "2026-10-01T20:14:17.966363069Z",
+    "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+    "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+    "run_id": "run-3cd655e5-8faf-4b4b-b196-673c83bd4536",
+    "task_id": "task-63dae86b-d09b-4649-8b74-866d8eeef6f2",
+    "agent_id": "agy-onboarding-e2e",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-b01e4602-612b-4183-b351-5a2ed5d21a4a",
+    "worker_generation": 4,
+    "execution_spec_version": 1,
+    "adapter_id": "agy-batch",
+    "backend_id": "agy",
+    "model": "gemini-3.7-flash-low",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 4,
+    "network_binding_revision": 4,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "正在后台执行 `sleep 40`，请稍候……\n已按要求完成 `sleep 40` 等待，并在保持原报告内容及所有验证标记不变的前提下，在文件末尾成功追加了“下一步验收”清单。\n\n### 产物路径\n- [`workflow-review.md`](file:///home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/workflow-review.md)\n\n---\n\n### 追加的“下一步验收”清单内容\n1. **验证“客户请求人工复制与任务编号缺失”问题**：\n   - 提交新请求，检查系统入口是否自动生成并持久化唯一 Task ID。\n   - 检查请求是否由系统自动推送到执行工具，确认全链路无需人工手动复制。\n2. **验证“产物报告分散与查找困难”问题**：\n   - 检查任务完成后报告是否统一归档至标准目录。\n   - 检查最新文件索引列表是否自动更新，确认可通过索引或链接快速定位最新报告。\n3. **验证“后续修改未继承前序结果导致重复工作”问题**：\n   - 发起迭代修改请求，检查是否自动绑定前序任务 ID。\n   - 检查是否自动继承并加载前次产物基准，确认修改为增量式且无重复劳动。",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-01T19:44:17.966363069Z",
+    "finished_at": "2026-10-01T19:45:31.572919149Z",
+    "created_at": "2026-10-01T19:44:17.966363069Z",
+    "updated_at": "2026-10-01T19:45:31.572919149Z"
+  }
+}

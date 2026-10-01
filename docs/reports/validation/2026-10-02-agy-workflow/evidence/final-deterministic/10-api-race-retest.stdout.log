@@ -1,0 +1,24 @@
+=== RUN   TestDecodeStrictJSON
+=== PAUSE TestDecodeStrictJSON
+=== RUN   TestCommandMetaRequiresIdempotencyAndVersion
+=== PAUSE TestCommandMetaRequiresIdempotencyAndVersion
+=== RUN   TestAPIBoundariesAreVersionedAndSeparated
+=== PAUSE TestAPIBoundariesAreVersionedAndSeparated
+=== RUN   TestWorkerRequestsRejectStaleOrUnknownContractValues
+=== PAUSE TestWorkerRequestsRejectStaleOrUnknownContractValues
+=== RUN   TestControlRequestsRequireIdempotencyCASAndStructuredExecution
+=== PAUSE TestControlRequestsRequireIdempotencyCASAndStructuredExecution
+=== RUN   TestCreateTaskRejectsUnboundNetworkOverride
+--- PASS: TestCreateTaskRejectsUnboundNetworkOverride (0.00s)
+=== CONT  TestDecodeStrictJSON
+=== CONT  TestWorkerRequestsRejectStaleOrUnknownContractValues
+--- PASS: TestDecodeStrictJSON (0.00s)
+=== CONT  TestCommandMetaRequiresIdempotencyAndVersion
+=== CONT  TestControlRequestsRequireIdempotencyCASAndStructuredExecution
+=== CONT  TestAPIBoundariesAreVersionedAndSeparated
+--- PASS: TestCommandMetaRequiresIdempotencyAndVersion (0.00s)
+--- PASS: TestAPIBoundariesAreVersionedAndSeparated (0.00s)
+--- PASS: TestWorkerRequestsRejectStaleOrUnknownContractValues (0.00s)
+--- PASS: TestControlRequestsRequireIdempotencyCASAndStructuredExecution (0.00s)
+PASS
+ok  	openagentx/internal/api	1.027s

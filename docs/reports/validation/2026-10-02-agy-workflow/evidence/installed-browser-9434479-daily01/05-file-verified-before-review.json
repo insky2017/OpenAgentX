@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-01T19:43:26.642546+00:00",
+  "files": {
+    "project-notes.md": {
+      "size": 427,
+      "sha256": "d8df01d5dcd6b4cba274031610916a6931347878019b53ace7f5cb29aef1c849"
+    },
+    "input.txt": {
+      "size": 20,
+      "sha256": "f483d367a862ecdcad610af12a203dac2dbbf6ebd088c3a90ed07897eb2d5438"
+    },
+    "workflow-review.md": {
+      "size": 1249,
+      "sha256": "214ffd0e7c55a7451f6b6766acb37a237cf8490599d4f88aba0f7cf20e07b3b0"
+    }
+  },
+  "verdict": "PASS",
+  "review": "Independent disk read: both source markers, 3 matching problems and actionable responses. Actual artifact archived before any human acceptance."
+}

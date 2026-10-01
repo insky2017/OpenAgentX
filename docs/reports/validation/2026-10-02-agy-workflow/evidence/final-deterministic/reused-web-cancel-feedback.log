@@ -1,0 +1,84 @@
+
+> openagentx-command-center@0.1.0 test:observation
+> node --test src/task-observation-state.test.js src/task-dispatch-state.test.js
+
+TAP version 13
+# Subtest: direct entry chooses the sole online Worker, never the offline first Agent
+ok 1 - direct entry chooses the sole online Worker, never the offline first Agent
+  ---
+  duration_ms: 2.992454
+  ...
+# Subtest: explicit and restored URL targets are authoritative and never silently replaced
+ok 2 - explicit and restored URL targets are authoritative and never silently replaced
+  ---
+  duration_ms: 0.463872
+  ...
+# Subtest: no Worker, multiple ready Workers, draining and expired leases require a choice or recovery
+ok 3 - no Worker, multiple ready Workers, draining and expired leases require a choice or recovery
+  ---
+  duration_ms: 0.460931
+  ...
+# Subtest: an offline replacement never falls back to an older online generation
+ok 4 - an offline replacement never falls back to an older online generation
+  ---
+  duration_ms: 0.692983
+  ...
+# Subtest: only the official create receipt can open the accepted Task
+ok 5 - only the official create receipt can open the accepted Task
+  ---
+  duration_ms: 0.498183
+  ...
+# Subtest: progress distinguishes not started, actual Runtime reply and unverified business outcome
+ok 6 - progress distinguishes not started, actual Runtime reply and unverified business outcome
+  ---
+  duration_ms: 0.605819
+  ...
+# Subtest: query delivery comes only from authoritative Task completion evidence
+ok 7 - query delivery comes only from authoritative Task completion evidence
+  ---
+  duration_ms: 0.41863
+  ...
+# Subtest: backend readiness blocks dispatch even with an online Worker, busy allows queueing
+ok 8 - backend readiness blocks dispatch even with an online Worker, busy allows queueing
+  ---
+  duration_ms: 0.392276
+  ...
+# Subtest: latest result belongs to the latest execution in either API ordering
+ok 9 - latest result belongs to the latest execution in either API ordering
+  ---
+  duration_ms: 0.523658
+  ...
+# Subtest: cancel feedback distinguishes requested, confirmed and unknown stopping
+ok 10 - cancel feedback distinguishes requested, confirmed and unknown stopping
+  ---
+  duration_ms: 0.743915
+  ...
+# Subtest: live response merges against history that completed after live was sent
+ok 11 - live response merges against history that completed after live was sent
+  ---
+  duration_ms: 6.823594
+  ...
+# Subtest: SSE resume ignores an overview watermark that may cover stale projections
+ok 12 - SSE resume ignores an overview watermark that may cover stale projections
+  ---
+  duration_ms: 0.360106
+  ...
+# Subtest: deferred UI work rejects a changed task, request, or view
+ok 13 - deferred UI work rejects a changed task, request, or view
+  ---
+  duration_ms: 0.382691
+  ...
+# Subtest: deferred close focus rejects a task reopened before the next frame
+ok 14 - deferred close focus rejects a task reopened before the next frame
+  ---
+  duration_ms: 0.30992
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 154.478235

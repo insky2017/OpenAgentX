@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "scope": "read-only formal Observe capture and independent mode=ro SQLite parent/Run-count agreement; no model dispatch, no service mutation",
+  "task_statuses": {
+    "task-63dae86b-d09b-4649-8b74-866d8eeef6f2": "uncertain",
+    "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602": "uncertain"
+  },
+  "tasks": [
+    "task-1a805ec2-0939-4dd5-9c94-eda6fbc36602",
+    "task-63dae86b-d09b-4649-8b74-866d8eeef6f2"
+  ]
+}

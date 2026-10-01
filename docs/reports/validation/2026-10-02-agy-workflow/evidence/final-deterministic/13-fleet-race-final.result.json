@@ -1,0 +1,22 @@
+{
+  "evidence_level": "D",
+  "real_e2e": false,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/cli/fleet",
+    "-count=1"
+  ],
+  "cwd": "/home/sky/.oax-e/final-source-20261002",
+  "started_at": "2026-10-01T18:45:39.172768+00:00",
+  "git_head": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "git_tree": "c14eb036be1ae5e8e0324995d459bb2e1e75a64c",
+  "git_status_before": "",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "exit_code": 0,
+  "finished_at": "2026-10-01T18:45:49.412169+00:00",
+  "git_status_after": "",
+  "stdout_sha256": "2bbea0420a8dee30394243b4c24f7b3eb47f7022bb531d4a639aab3aa917f752",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
