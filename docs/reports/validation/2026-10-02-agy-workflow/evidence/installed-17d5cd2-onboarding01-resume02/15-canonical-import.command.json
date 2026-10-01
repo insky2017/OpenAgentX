@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "add",
+    "--identity",
+    "/home/sky/.openagentx/workers/identities/agy-onboarding-e2e.yaml",
+    "--worker-config",
+    "/home/sky/.openagentx/workers/agy-onboarding-e2e.yaml",
+    "--no-open",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/installation/owner-password"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 0.33460633098729886,
+  "prompts_remaining": 0
+}

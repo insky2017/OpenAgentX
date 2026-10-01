@@ -1,0 +1,36 @@
+{
+  "audit_at_utc": "2026-10-01T19:11:10.618836+00:00",
+  "verdict": "PASS for bounded long-renewal and query-supplement assertions; original runner FAIL retained",
+  "long_renewal": "PASS",
+  "query_supplement": "PASS",
+  "worker_instance_id": "worker-39267579-14f1-4f7e-97eb-e965a1df7519",
+  "first_run_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+  "second_run_id": "run-04211b9e-bed9-4cf5-af28-59121d103713",
+  "first_run_elapsed_seconds": 116.94591307640076,
+  "tool_delay_seconds": 95,
+  "checkpoint_span_seconds": 90.01338513000519,
+  "run_lease_advance_seconds": 89.9987370967865,
+  "worker_heartbeat_advance_seconds": 89.9987370967865,
+  "exact_file_bytes_repr": "b'late\\n'",
+  "exact_file_sha256": "f152945b358aa26a9e72e25381deff94e254c547089bd690dccd218e9414d148",
+  "invocations": [
+    {
+      "pid": 312429,
+      "at": 1790881570.1925228
+    }
+  ],
+  "supplement_mailbox_read_only_sqlite": [
+    {
+      "mailbox_item_id": "mailbox-9d8f4744-b2c6-528a-af54-cbcb3b4278d7",
+      "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+      "message_id": "message-676b01bd-6d6b-5833-a93e-3e34f91d4205",
+      "kind": "message",
+      "lane": "work",
+      "state": "accepted",
+      "attempts": 1,
+      "accepted_at": "2026-10-01T19:07:53.021257892Z"
+    }
+  ],
+  "same_worker_followup": "Supplement query consumed successfully as the second Run; separate new Task query was not reached by this runner",
+  "first_reply_note": "AGY included progress text followed by LONG-LEASE-DONE; pure-marker harness assertion was unnecessarily strict."
+}

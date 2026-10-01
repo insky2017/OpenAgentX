@@ -1,0 +1,20 @@
+{
+  "checked_at": 1790879553.8965123,
+  "original_delay_seconds": 30,
+  "elapsed_since_tool_started_seconds": 84.68935012817383,
+  "processes": [
+    {
+      "pid": 147575,
+      "starttime": "9789741",
+      "alive_now": false
+    },
+    {
+      "pid": 147577,
+      "starttime": "9789746",
+      "alive_now": false
+    }
+  ],
+  "late_file_exists": false,
+  "task_status": "uncertain",
+  "verdict": "FAIL: expected canceled, actual uncertain"
+}

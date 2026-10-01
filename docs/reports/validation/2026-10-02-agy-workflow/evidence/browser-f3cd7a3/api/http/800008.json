@@ -1,0 +1,429 @@
+{
+  "at": "2026-10-01T19:11:19.162410+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+      "version": 6,
+      "target_agent_id": "live-agy-3-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run python3 browser-queued.py exactly once in your assigned workspace. Wait for it to finish and then report BROWSER-QUEUED-FIRST. Do not run any other script.",
+      "status": "uncertain",
+      "result": "BROWSER-QUEUED-CONSUMED",
+      "error": "business_effect_unverified",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T19:02:31.197466673Z",
+      "updated_at": "2026-10-01T19:05:17.685360727Z"
+    },
+    "messages": [
+      {
+        "id": "message-d6e0fe3c-651d-4518-96e1-f0cc89aa8f91",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+        "target_agent_id": "live-agy-3-main01",
+        "kind": "instruction",
+        "content": "Run python3 browser-queued.py exactly once in your assigned workspace. Wait for it to finish and then report BROWSER-QUEUED-FIRST. Do not run any other script.",
+        "created_at": "2026-10-01T19:02:31.197466673Z"
+      },
+      {
+        "id": "message-a62717f1-40bb-5b86-babb-0eabe3d00a34",
+        "version": 1,
+        "sequence": 2,
+        "task_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+        "target_agent_id": "live-agy-3-main01",
+        "kind": "supplement",
+        "content": "After the running script completes, create browser-supplement.txt with exactly b'BROWSER-SUPPLEMENT\\n'. Do not run browser-queued.py again. Reply BROWSER-QUEUED-CONSUMED.",
+        "created_at": "2026-10-01T19:03:21.046722735Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:08:01.391135948Z",
+        "instructions_sha256": "0f94c08866a90e84bdc8199fb36f01c9e52001b5731074df34fe65a1ec2ac24d",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/ROLE.md",
+        "run_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "task_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "agent_id": "live-agy-3-main01",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-8d73bb15-de22-4aea-af09-e46f9aa77e90",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "BROWSER-QUEUED-CONSUMED",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T19:05:01.391135948Z",
+        "finished_at": "2026-10-01T19:05:17.685360727Z",
+        "created_at": "2026-10-01T19:05:01.391135948Z",
+        "updated_at": "2026-10-01T19:05:17.685360727Z"
+      },
+      {
+        "deadline_at": "2026-10-01T19:05:31.200757798Z",
+        "instructions_sha256": "0f94c08866a90e84bdc8199fb36f01c9e52001b5731074df34fe65a1ec2ac24d",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/ROLE.md",
+        "run_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "task_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "agent_id": "live-agy-3-main01",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-8d73bb15-de22-4aea-af09-e46f9aa77e90",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "I have launched `python3 browser-queued.py` in the workspace and will wait for it to complete.\nBROWSER-QUEUED-FIRST",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T19:02:31.200757798Z",
+        "finished_at": "2026-10-01T19:05:01.386942117Z",
+        "created_at": "2026-10-01T19:02:31.200757798Z",
+        "updated_at": "2026-10-01T19:05:01.386942117Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 1060,
+        "event_id": "event-1b732a2a-ff41-4ca5-8f3f-97c568620ee8",
+        "aggregate_type": "task",
+        "aggregate_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:02:31.197466673Z"
+      },
+      {
+        "sequence": 1062,
+        "event_id": "event-task-5bbdf5cd-d8be-474a-97ba-07d8cca1edeb",
+        "aggregate_type": "task",
+        "aggregate_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:02:31.202433134Z"
+      },
+      {
+        "sequence": 1063,
+        "event_id": "event-run-778064a0-15d6-45b2-b94e-1bd889ebc540",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:02:31.202439526Z"
+      },
+      {
+        "sequence": 1114,
+        "event_id": "event-4798658a-9387-457f-ba82-547fa069f8f5",
+        "aggregate_type": "task",
+        "aggregate_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "event_type": "task.message_created",
+        "created_at": "2026-10-01T19:03:21.046711773Z"
+      },
+      {
+        "sequence": 1134,
+        "event_id": "event-runtime-986ed37e-0de6-45c3-a22d-690afe7e14c8",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T19:03:39.324543205Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 1135,
+        "event_id": "event-runtime-0ae4679e-7e82-4e8d-9f35-562439d3fa2e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:03:39.415375234Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1140,
+        "event_id": "event-runtime-6b5f408a-7032-41b4-b90a-7b7ac147f8a8",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:03:43.838403887Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1141,
+        "event_id": "event-runtime-db1f7e75-bf34-4069-be42-3568ea106fa0",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:03:43.839631675Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1212,
+        "event_id": "event-runtime-6eb6d7f3-f05b-4fe5-aecf-a9e98f3effab",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:04:53.926880312Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1213,
+        "event_id": "event-runtime-589826a8-042b-4a19-8839-abebfc3f9893",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:04:53.928944469Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1214,
+        "event_id": "event-runtime-e2d35dfc-e43f-4441-8bd9-a480a1b29ff0",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:04:53.977533353Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1218,
+        "event_id": "event-runtime-7257e1c5-d2aa-4f8e-bb3b-2375ed7ffe47",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:04:56.158042089Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1219,
+        "event_id": "event-runtime-35079daa-4f5b-4058-a916-ad97493659df",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:04:56.209625905Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1220,
+        "event_id": "event-runtime-30cc4af1-f1af-4900-b6ab-e53748b1f704",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:04:56.261143195Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1221,
+        "event_id": "event-runtime-7d9a185f-ffd4-4f97-b889-70d1278518e5",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T19:04:56.262878789Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "I have launched `python3 browser-queued.py` in the workspace and will wait for it to complete.\nBROWSER-QUEUED-FIRST\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 1228,
+        "event_id": "event-run-d9510ac0-df4d-43a3-8d83-9d3f89f84614",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-f46dc1a7-dee9-4ee0-ac69-520d4e83652f",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T19:05:01.38696679Z"
+      },
+      {
+        "sequence": 1229,
+        "event_id": "event-task-b9e16314-2d7d-496d-8b64-8ba5c716d977",
+        "aggregate_type": "task",
+        "aggregate_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T19:05:01.386970074Z"
+      },
+      {
+        "sequence": 1231,
+        "event_id": "event-task-75fc5bdc-37b8-4b12-8c3e-7908aa7ddc69",
+        "aggregate_type": "task",
+        "aggregate_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:05:01.394010787Z"
+      },
+      {
+        "sequence": 1232,
+        "event_id": "event-run-9b3d348e-6c83-46ae-8cc0-fd3c960208f1",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:05:01.394038479Z"
+      },
+      {
+        "sequence": 1242,
+        "event_id": "event-runtime-2c9f26c6-6527-4640-8b1d-a9a87a698594",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T19:05:09.68009846Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 1243,
+        "event_id": "event-runtime-032382ee-d067-4482-a0c4-b8a524e82b2f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:05:09.778540067Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1244,
+        "event_id": "event-runtime-353b31f7-d55f-4c77-83e4-e5f909dbddd9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:05:09.803763902Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1249,
+        "event_id": "event-runtime-cc3ad022-62a2-4831-a0ba-d57fc9ee4114",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:05:13.479209418Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1250,
+        "event_id": "event-runtime-802409b8-2a7a-47a3-a7e4-5e218e9faf73",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:05:13.480196282Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1251,
+        "event_id": "event-runtime-98856d09-5967-4d78-be29-9669585829ed",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:05:13.505163063Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1255,
+        "event_id": "event-runtime-d8ae0e84-8748-4620-9217-f4e8278d0044",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:05:16.268267394Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1256,
+        "event_id": "event-runtime-e0114939-ddf9-492d-82d3-acdb7d13218e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:05:16.344205191Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 1257,
+        "event_id": "event-runtime-9586227e-727e-468c-b951-13703b519858",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T19:05:16.347731538Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "BROWSER-QUEUED-CONSUMED\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 1260,
+        "event_id": "event-run-0b1d9d72-65f4-4fbc-8dcd-8fd28a352f88",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-04f1f68c-a8c4-4679-aea3-c37201085a4a",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T19:05:17.685388057Z"
+      },
+      {
+        "sequence": 1261,
+        "event_id": "event-task-c7d596b8-da3e-4cd5-a369-37357efb3ef9",
+        "aggregate_type": "task",
+        "aggregate_id": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T19:05:17.685392515Z"
+      }
+    ],
+    "snapshot_sequence": 1642,
+    "live_after_sequence": 1642,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

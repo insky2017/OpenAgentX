@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "candidate": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "completed": {
+    "role": "task-948b3ad4-f197-4b1d-a29f-521b836e9475",
+    "mutation": [
+      "task-fc523622-3db5-4ea0-9d6c-99752c550182",
+      "task-6d290894-8f28-4078-a7f2-46ded95b0483"
+    ],
+    "queued": "task-fa18fac4-45b8-49c8-971b-242c4c74624e",
+    "cancel": {
+      "running_task": "task-fd023db7-ba66-49e5-9f57-5c1707fdc307",
+      "queued_task": "task-b9f0d0fd-71dd-486a-a893-ec706f3fb48f"
+    },
+    "next": "task-ff87f458-50fb-454a-8a3a-edd26ad50550"
+  },
+  "wizard": "not tested",
+  "installed": "not tested"
+}

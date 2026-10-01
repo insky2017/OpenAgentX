@@ -1,0 +1,111 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-e8006fa1-a174-49d3-98bb-9d76de7d1517",
+    "version": 3,
+    "target_agent_id": "live-agy-d7350-r1",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "OAX-E20-CASE:empty",
+    "status": "uncertain",
+    "error": "AGY stream-json was empty\nAGY stream-json ended without a terminal event",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T18:31:39.08688279Z",
+    "updated_at": "2026-10-01T18:31:40.03917843Z"
+  },
+  "messages": [
+    {
+      "id": "message-4cc8cbd4-9a6e-4211-940a-4968d5d05a26",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-e8006fa1-a174-49d3-98bb-9d76de7d1517",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-4010b2b8-0a26-49c8-a090-64ff740320a9",
+      "target_agent_id": "live-agy-d7350-r1",
+      "kind": "instruction",
+      "content": "OAX-E20-CASE:empty",
+      "created_at": "2026-10-01T18:31:39.08688279Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-01T18:31:49.090224747Z",
+      "instructions_sha256": "925dcc704248ce215f4b8a09d9401f79afa18de8dba71c5450724eb8a6c553cd",
+      "instructions_path": "/home/sky/.oax-e/e20-14d7350-r1/workspace/ROLE.md",
+      "run_id": "run-7565f9a8-9ee9-46da-bbe7-c223d0e61d62",
+      "task_id": "task-e8006fa1-a174-49d3-98bb-9d76de7d1517",
+      "agent_id": "live-agy-d7350-r1",
+      "version": 2,
+      "status": "uncertain",
+      "worker_instance_id": "worker-65e91098-a4e1-451c-85fa-22d2f78e5d92",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "agy-batch",
+      "backend_id": "primary",
+      "model": "default",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": false,
+        "runtime_status": "uncertain",
+        "error": "AGY stream-json was empty\nAGY stream-json ended without a terminal event",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-01T18:31:39.090224747Z",
+      "finished_at": "2026-10-01T18:31:40.03917843Z",
+      "created_at": "2026-10-01T18:31:39.090224747Z",
+      "updated_at": "2026-10-01T18:31:40.03917843Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 18,
+      "event_id": "event-45068c42-3cea-4a47-9a58-a2b2acf7784b",
+      "aggregate_type": "task",
+      "aggregate_id": "task-e8006fa1-a174-49d3-98bb-9d76de7d1517",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T18:31:39.08688279Z"
+    },
+    {
+      "sequence": 20,
+      "event_id": "event-task-bbdd3cc7-9ddb-4c82-8c54-0046c2705c1d",
+      "aggregate_type": "task",
+      "aggregate_id": "task-e8006fa1-a174-49d3-98bb-9d76de7d1517",
+      "event_type": "task.running",
+      "created_at": "2026-10-01T18:31:39.091892979Z"
+    },
+    {
+      "sequence": 21,
+      "event_id": "event-run-53b6583b-2977-43ae-a3a6-41fc0a2107c2",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-7565f9a8-9ee9-46da-bbe7-c223d0e61d62",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-01T18:31:39.091897835Z"
+    },
+    {
+      "sequence": 24,
+      "event_id": "event-run-45b2832b-d80f-4c98-b7fe-3cca17da2287",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-7565f9a8-9ee9-46da-bbe7-c223d0e61d62",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-01T18:31:40.039269361Z"
+    },
+    {
+      "sequence": 25,
+      "event_id": "event-task-ad8e6b6e-a166-4a28-8111-e1b6ba1a7c8b",
+      "aggregate_type": "task",
+      "aggregate_id": "task-e8006fa1-a174-49d3-98bb-9d76de7d1517",
+      "event_type": "task.settled",
+      "created_at": "2026-10-01T18:31:40.039272314Z"
+    }
+  ],
+  "snapshot_sequence": 26,
+  "live_after_sequence": 26,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

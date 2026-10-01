@@ -1,0 +1,24 @@
+{
+  "coverage": "D: official daemon/API + real Worker + executable AGY fixture; no real model or installed service",
+  "source_commit": "14d7350b86125f299615d4a8db61d844ce866758",
+  "binary": "/tmp/oax-live-14d7350/openagentx",
+  "binary_sha256": "0eb375a82202055cbee60f4a32dc6237f5c60ec0601d6f75ee9f65037e2b96a3",
+  "fixture_sha256": "6795307703a880e16061f2ae6c6deb34444ca14f38d693b310ee3c36b169b2e7",
+  "script_sha256": "19bb350d6f524ea73200040f628eba7c81de44f5c3eda690feb426aedf186020",
+  "created_at_utc": "2026-10-01T18:31:30.111112+00:00",
+  "private_profile": "/home/sky/.oax-e/e20-14d7350-r1",
+  "url": "http://127.0.0.1:43859",
+  "argv": [
+    "scripts/e2e/agy_malformed.py",
+    "--profile",
+    "/home/sky/.oax-e/e20-14d7350-r1",
+    "--evidence",
+    "docs/reports/validation/2026-10-02-agy-workflow/evidence/e20-14d7350-r1",
+    "--binary",
+    "/tmp/oax-live-14d7350/openagentx",
+    "--web",
+    "/tmp/oax-live-14d7350/web/dist",
+    "--commit",
+    "14d7350b86125f299615d4a8db61d844ce866758"
+  ]
+}

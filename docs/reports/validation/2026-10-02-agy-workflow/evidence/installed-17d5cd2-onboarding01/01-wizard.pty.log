@@ -1,0 +1,13 @@
+Agent 名称: AGY 入口验收
+工作目录: /home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace
+职责文档路径或职责描述: /home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md
+OpenAgentX is already initialized; no changes were made
+Created Agent "agy-onboarding-e2e" in Organization "default"
+Agent agy-onboarding-e2e 已纳管，工作目录 /home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace，职责 /home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md
+Agent agy-onboarding-e2e 服务在线，当前代 1 网络已应用。
+AGY 入口验收 (agy-onboarding-e2e) · 可开始工作
+  当前：无
+  最近：暂无结果
+  打开：openagentx agent open agy-onboarding-e2e
+  恢复：openagentx agent resume agy-onboarding-e2e
+

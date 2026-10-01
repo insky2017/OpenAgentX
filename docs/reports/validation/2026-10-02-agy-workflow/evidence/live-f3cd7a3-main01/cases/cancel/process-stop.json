@@ -1,0 +1,38 @@
+{
+  "stop_seconds": 4.005282529004035,
+  "processes": [
+    {
+      "pid": 241135,
+      "starttime": "9909493",
+      "alive": false
+    },
+    {
+      "pid": 241136,
+      "starttime": "9909499",
+      "alive": false
+    }
+  ],
+  "runtime_tree": [
+    {
+      "pid": 239693,
+      "ppid": 222623,
+      "starttime": "9907585",
+      "comm": "agy",
+      "alive": false
+    },
+    {
+      "pid": 241135,
+      "ppid": 239693,
+      "starttime": "9909493",
+      "comm": "python3",
+      "alive": false
+    },
+    {
+      "pid": 241136,
+      "ppid": 241135,
+      "starttime": "9909499",
+      "comm": "sleep",
+      "alive": false
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "cancel.py",
+    "bytes": 526,
+    "sha256": "b0279ea8751624d202079d65569e99ec64ebe53c5cdf7a0bb8616839a8aeff67"
+  },
+  {
+    "path": "cancel.started.json",
+    "bytes": 127,
+    "sha256": "72190e4b9b57f1fb04cb07b58aa67a0a830e955fd4e60e8805707256dcfcec4c"
+  },
+  {
+    "path": "cancel.invocations.jsonl",
+    "bytes": 42,
+    "sha256": "515257c6c22120bfb6ea2fb2a140d04928f9e374804e81f38732c9e2d10cce91"
+  },
+  {
+    "path": "ROLE.md",
+    "bytes": 327,
+    "sha256": "dc6ba6cc3b0740fd7ef5c64c2fc003ae9ed498f6e0a5d68ab161336a914d67a0"
+  }
+]

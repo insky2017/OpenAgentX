@@ -1,0 +1,203 @@
+{
+  "at": "2026-10-01T18:26:02.367286+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-93747bae-1fd2-477d-bc22-0fb4a9baa5fa",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-93747bae-1fd2-477d-bc22-0fb4a9baa5fa",
+      "version": 2,
+      "target_agent_id": "live-agy-0-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Create result.txt in your assigned workspace with exactly these bytes: b'OAX-E2E\\n'. Use a tool to write the file. Do not change any other file. Report after the write.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:25:50.322785511Z",
+      "updated_at": "2026-10-01T18:25:50.325006491Z"
+    },
+    "messages": [
+      {
+        "id": "message-611d3392-5914-4c2d-8da6-01a954162e00",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-93747bae-1fd2-477d-bc22-0fb4a9baa5fa",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-b30be6a0-ed7e-475c-8bc6-ee7933fd3a75",
+        "target_agent_id": "live-agy-0-main01",
+        "kind": "instruction",
+        "content": "Create result.txt in your assigned workspace with exactly these bytes: b'OAX-E2E\\n'. Use a tool to write the file. Do not change any other file. Report after the write.",
+        "created_at": "2026-10-01T18:25:50.322785511Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:28:50.325006491Z",
+        "instructions_sha256": "4de4d30f83b68b1ab43335ee60d8b7b4d62404c892d8b7c11ef89a19571ff16a",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-14d7350-main01/workspace/ROLE.md",
+        "run_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "task_id": "task-93747bae-1fd2-477d-bc22-0fb4a9baa5fa",
+        "agent_id": "live-agy-0-main01",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-55e179cf-8a9d-41b4-b2e0-6b7f89b1d51a",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T18:25:50.325006491Z",
+        "created_at": "2026-10-01T18:25:50.325006491Z",
+        "updated_at": "2026-10-01T18:26:02.031223148Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 47,
+        "event_id": "event-73a0c28b-3f67-43e9-9339-0c37776b00a4",
+        "aggregate_type": "task",
+        "aggregate_id": "task-93747bae-1fd2-477d-bc22-0fb4a9baa5fa",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:25:50.322785511Z"
+      },
+      {
+        "sequence": 49,
+        "event_id": "event-task-f0aa8852-6dc9-4297-a544-5589b06376f1",
+        "aggregate_type": "task",
+        "aggregate_id": "task-93747bae-1fd2-477d-bc22-0fb4a9baa5fa",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:25:50.325944976Z"
+      },
+      {
+        "sequence": 50,
+        "event_id": "event-run-66b1c1b0-8c0a-4669-ac84-e02ebd5062c8",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:25:50.325949698Z"
+      },
+      {
+        "sequence": 58,
+        "event_id": "event-runtime-38cbf286-fd1c-42d7-a417-01681ff3e118",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:25:56.775378415Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 59,
+        "event_id": "event-runtime-42ecc647-80a6-4fb3-8cdc-da8e2db34130",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:25:56.893985611Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 63,
+        "event_id": "event-runtime-58a31ed6-0ac9-4780-be30-ade46437d668",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:25:59.458845629Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 64,
+        "event_id": "event-runtime-2147d2d7-6146-4d93-a684-09063e7e60bc",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:25:59.459980509Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 65,
+        "event_id": "event-runtime-07717b04-2312-417f-b663-5988b08560fe",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:25:59.484685234Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 69,
+        "event_id": "event-runtime-8b3c5f9f-e391-401c-b58c-50f781b95150",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:02.196404248Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 70,
+        "event_id": "event-runtime-02cb31cf-2b5d-4e6d-a9b0-cfe6201b61a4",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:02.273035277Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 71,
+        "event_id": "event-runtime-031e6b9c-2147-4b05-8bbf-82c5cbd34488",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:02.298731834Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 72,
+        "event_id": "event-runtime-5b040ee8-a886-4646-8471-4513d6ab5f6f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:02.324504134Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 73,
+        "event_id": "event-runtime-a0914006-b658-4196-808a-11a43732e577",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-0ffd2282-8987-4b26-a260-873a0dadf858",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:02.350162993Z",
+        "output": {
+          "stage": "step_update"
+        }
+      }
+    ],
+    "snapshot_sequence": 73,
+    "live_after_sequence": 73,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

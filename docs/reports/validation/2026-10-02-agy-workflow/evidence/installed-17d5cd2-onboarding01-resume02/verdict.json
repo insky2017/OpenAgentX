@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "candidate": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "original_crash_evidence": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01",
+  "physical_stop_upper_bound_seconds": 2.0125579833984375,
+  "automatic_reconcile_seconds": 32.66020393371582,
+  "daemon_pid_unchanged": 306551,
+  "worker_generation": 3,
+  "task_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+  "invocations": 1,
+  "task_status": "uncertain",
+  "installed_entry_role_queue_evidence": [
+    "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01",
+    "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01"
+  ]
+}

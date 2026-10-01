@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:31:47.155898+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-d7350-r1",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "OAX-E20-CASE:missing-terminal",
+    "meta": {
+      "idempotency_key": "d54e15809d9481fb326b8687"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-631e660f-3264-4e77-bee8-4e9b4a56531a",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 5
+  }
+}

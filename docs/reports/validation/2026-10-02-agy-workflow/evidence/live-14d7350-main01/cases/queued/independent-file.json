@@ -1,0 +1,8 @@
+{
+  "path": "supplement.txt",
+  "actual_bytes": 16,
+  "expected_bytes": 16,
+  "sha256": "d6c36db50ee4bb21d9214634bb11de027ebb70b9224bfcaae88cc76c2142c665",
+  "expected_sha256": "d6c36db50ee4bb21d9214634bb11de027ebb70b9224bfcaae88cc76c2142c665",
+  "exact": true
+}

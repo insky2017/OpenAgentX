@@ -1,0 +1,2 @@
+{"event": "result", "result": {"status": "SUCCESS", "response": "answer"}}
+{"event": "result", "result": {"status": "FAILED", "response": "contradiction"}}

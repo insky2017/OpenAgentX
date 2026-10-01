@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "## Network requests\nShowing 1-2 of 2 (Page 1 of 1).\nreqid=4 GET http://127.0.0.1:48623/api/auth/v1/session [401]\nreqid=6 POST http://127.0.0.1:48623/api/auth/v1/login [net::ERR_CONNECTION_REFUSED]"
+    }
+  ]
+}

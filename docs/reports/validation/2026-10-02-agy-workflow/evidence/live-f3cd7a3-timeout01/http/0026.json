@@ -1,0 +1,200 @@
+{
+  "at": "2026-10-01T18:49:08.460196+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-114a735c-237e-4c91-a2b9-f257977de899",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-114a735c-237e-4c91-a2b9-f257977de899",
+      "version": 3,
+      "target_agent_id": "live-agy-imeout01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run python3 timeout.py in your assigned workspace and wait until it completes. Do not run any other script.",
+      "status": "uncertain",
+      "result": "I have launched `python3 timeout.py` in the workspace. Waiting for the script execution to complete.",
+      "error": "AGY process exited: signal: killed",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T18:48:30.383657915Z",
+      "updated_at": "2026-10-01T18:49:07.613745487Z"
+    },
+    "messages": [
+      {
+        "id": "message-4e78b341-4ee4-470e-9393-e140e1f6f7af",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-114a735c-237e-4c91-a2b9-f257977de899",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-47ee8d2d-895a-48a6-a4ba-241eebc5ced7",
+        "target_agent_id": "live-agy-imeout01",
+        "kind": "instruction",
+        "content": "Run python3 timeout.py in your assigned workspace and wait until it completes. Do not run any other script.",
+        "created_at": "2026-10-01T18:48:30.383657915Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:49:05.386808472Z",
+        "instructions_sha256": "9bc6889f57c67b65cdf0ec66f899a47bc82a190a7df197d39454e75d77b27ed3",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-timeout01/workspace/ROLE.md",
+        "run_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "task_id": "task-114a735c-237e-4c91-a2b9-f257977de899",
+        "agent_id": "live-agy-imeout01",
+        "version": 2,
+        "status": "uncertain",
+        "worker_instance_id": "worker-8cf7512d-dad7-46ac-9169-cf80cc8d9413",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": false,
+          "runtime_status": "uncertain",
+          "body": "I have launched `python3 timeout.py` in the workspace. Waiting for the script execution to complete.",
+          "error": "AGY process exited: signal: killed",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T18:48:30.386808472Z",
+        "finished_at": "2026-10-01T18:49:07.613745487Z",
+        "created_at": "2026-10-01T18:48:30.386808472Z",
+        "updated_at": "2026-10-01T18:49:07.613745487Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 18,
+        "event_id": "event-7bdb0894-f1a8-4556-bdc5-a7261bbacf0a",
+        "aggregate_type": "task",
+        "aggregate_id": "task-114a735c-237e-4c91-a2b9-f257977de899",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:48:30.383657915Z"
+      },
+      {
+        "sequence": 20,
+        "event_id": "event-task-36f3fbd7-b58d-487b-97cc-602cbab50698",
+        "aggregate_type": "task",
+        "aggregate_id": "task-114a735c-237e-4c91-a2b9-f257977de899",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:48:30.388440037Z"
+      },
+      {
+        "sequence": 21,
+        "event_id": "event-run-e9c08c26-c239-42ca-a6b0-6bf533e5030e",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:48:30.388444389Z"
+      },
+      {
+        "sequence": 32,
+        "event_id": "event-runtime-fb36343f-e6c6-4b2d-97b3-aff41b5af6d5",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:48:39.946416883Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 33,
+        "event_id": "event-runtime-4306869f-f37c-45af-8790-0122930a6fe0",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:48:40.030256561Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 38,
+        "event_id": "event-runtime-edc33804-79f6-4d40-9ab0-511cbd3af72e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:48:44.094770133Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 39,
+        "event_id": "event-runtime-0a4a36ab-bcf6-4573-ad32-067801f89bf3",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:48:44.096146718Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 62,
+        "event_id": "event-runtime-c543a2e4-9089-45d6-9dda-79a51ec990d4",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:49:05.470699778Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 63,
+        "event_id": "event-runtime-30633f65-e149-4df6-81ec-e120a76d0b9f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:49:05.47246358Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 64,
+        "event_id": "event-runtime-421866ef-5dea-47c9-b95c-be173fc7795f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T18:49:05.474420521Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "I have launched `python3 timeout.py` in the workspace. Waiting for the script execution to complete.\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 68,
+        "event_id": "event-run-ae325b08-7a1b-4bf2-ba50-049fe1049e74",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-38e6f3e9-3f13-4b4c-9b10-c2040c67345c",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T18:49:07.613809113Z"
+      },
+      {
+        "sequence": 69,
+        "event_id": "event-task-af023b95-4c0f-4e53-b281-17eaee36bc7a",
+        "aggregate_type": "task",
+        "aggregate_id": "task-114a735c-237e-4c91-a2b9-f257977de899",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T18:49:07.613812204Z"
+      }
+    ],
+    "snapshot_sequence": 70,
+    "live_after_sequence": 70,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

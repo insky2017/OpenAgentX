@@ -1,0 +1,40 @@
+{
+  "unit": "openagentx-worker@agy-onboarding-e2e.service",
+  "properties": {
+    "MainPID": "336964",
+    "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/app-openagentx\\x2dworker.slice/openagentx-worker@agy-onboarding-e2e.service",
+    "KillMode": "control-group"
+  },
+  "main": {
+    "pid": 336964,
+    "state": "S",
+    "ppid": 1722,
+    "pgid": 336964,
+    "starttime": "10030442"
+  },
+  "signal": "SIGKILL",
+  "at": 1790881940.685997,
+  "tool_delay_seconds": 120,
+  "started": {
+    "started": 1790881939.507985,
+    "processes": [
+      {
+        "pid": 341959,
+        "starttime": "10036771"
+      },
+      {
+        "pid": 341960,
+        "starttime": "10036777"
+      }
+    ]
+  },
+  "daemon": {
+    "pid": 306551,
+    "state": "S",
+    "ppid": 1722,
+    "pgid": 306551,
+    "starttime": "9994153"
+  },
+  "process_cleanup_deadline_seconds": 25,
+  "task_reconcile_deadline_seconds": 75
+}

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "scripts/e2e/agy_recovery.py",
+    "--profile",
+    "/home/sky/.local/state/openagentx/evidence/recovery-14d7350-02",
+    "--evidence",
+    "docs/reports/validation/2026-10-02-agy-workflow/evidence/recovery-14d7350-02",
+    "--binary",
+    "/tmp/oax-live-14d7350/openagentx",
+    "--web",
+    "/tmp/oax-live-14d7350/web/dist",
+    "--commit",
+    "14d7350b86125f299615d4a8db61d844ce866758"
+  ],
+  "script_sha256": "604dc9908e7a433ce1b12009ed2d7407f8489252e8898d1cf4cb22c91c6fa614",
+  "at": "2026-10-01T18:30:11.675472+00:00"
+}

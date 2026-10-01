@@ -1,0 +1,161 @@
+{
+  "at": "2026-10-01T18:48:30.185754+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+      "version": 3,
+      "target_agent_id": "live-agy-d7350-02",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run python3 worker-sigkill.py in your assigned workspace exactly once and wait for it to finish. Do not run any other script or retry this command.",
+      "status": "uncertain",
+      "outcome_state": "not_recorded",
+      "created_at": "2026-10-01T18:43:08.564287563Z",
+      "updated_at": "2026-10-01T18:48:27.998342212Z"
+    },
+    "messages": [
+      {
+        "id": "message-c5a575d8-d1b5-42f3-b756-2e43c318a801",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-f879f2e0-93ea-49c8-9d58-f3dabfab3e31",
+        "target_agent_id": "live-agy-d7350-02",
+        "kind": "instruction",
+        "content": "Run python3 worker-sigkill.py in your assigned workspace exactly once and wait for it to finish. Do not run any other script or retry this command.",
+        "created_at": "2026-10-01T18:43:08.564287563Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:54:48.567068609Z",
+        "instructions_sha256": "22ce498fa9c0f3633b3c0edce14e84022da23dd6e617ab9b195fc8df8bc1e4e1",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/recovery-14d7350-02/workspace/ROLE.md",
+        "run_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+        "task_id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+        "agent_id": "live-agy-d7350-02",
+        "version": 2,
+        "status": "uncertain",
+        "worker_instance_id": "worker-6b96dc47-59ef-4cd5-b551-df940a00dbb4",
+        "worker_generation": 3,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result": {
+          "final_reply": false,
+          "runtime_status": "uncertain",
+          "error": "RunAttempt lease expired during recovery",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T18:43:08.567068609Z",
+        "finished_at": "2026-10-01T18:48:27.998342212Z",
+        "created_at": "2026-10-01T18:43:08.567068609Z",
+        "updated_at": "2026-10-01T18:48:27.998342212Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 137,
+        "event_id": "event-5bfdd4c2-3755-4b37-8ae8-b6cc45285b5a",
+        "aggregate_type": "task",
+        "aggregate_id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:43:08.564287563Z"
+      },
+      {
+        "sequence": 139,
+        "event_id": "event-task-ec7f5b9e-5ee3-419f-8772-3ea7ea0b31f4",
+        "aggregate_type": "task",
+        "aggregate_id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:43:08.568592479Z"
+      },
+      {
+        "sequence": 140,
+        "event_id": "event-run-3acda1c4-d46f-4899-8faa-5474b1681169",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:43:08.568597794Z"
+      },
+      {
+        "sequence": 151,
+        "event_id": "event-runtime-a93d812b-b585-43fd-9861-790d81a6700f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:43:17.227008599Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 152,
+        "event_id": "event-runtime-35f474ba-4c59-4f8a-81f4-bd6cf47ae116",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:43:17.351437816Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 157,
+        "event_id": "event-runtime-62b26e03-dd6e-4425-9450-ed799380fae2",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:43:21.971211285Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 158,
+        "event_id": "event-runtime-48b31a7d-17c8-4cdc-b02e-f91ac5b506b8",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:43:21.973329913Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 161,
+        "event_id": "event-recovery-5462006e-a945-4d54-8497-33aef5a1825b",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+        "event_type": "run_attempt.uncertain",
+        "created_at": "2026-10-01T18:48:27.998342212Z"
+      },
+      {
+        "sequence": 162,
+        "event_id": "event-recovery-37d3f288-d11b-4e7e-b717-b8e37dbc101e",
+        "aggregate_type": "task",
+        "aggregate_id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+        "event_type": "task.uncertain",
+        "created_at": "2026-10-01T18:48:27.998342212Z"
+      }
+    ],
+    "snapshot_sequence": 162,
+    "live_after_sequence": 162,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

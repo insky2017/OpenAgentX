@@ -1,0 +1,1806 @@
+{
+  "at": "2026-10-01T19:07:15.170917+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/network-profiles?agent_id=agy-onboarding-e2e",
+  "request": null,
+  "status": 200,
+  "response": {
+    "profiles": [
+      {
+        "profile_id": "proxy-local-7897",
+        "current_content_version": 1,
+        "state": "ready",
+        "state_revision": 26,
+        "ready_test_id": "network-test-0b605457-bfd8-47ab-b5e9-543cb70859f0",
+        "updated_at": "2026-09-22T08:21:29.57787182Z",
+        "mode": "only_http_proxy",
+        "host": "127.0.0.1",
+        "port": 7897,
+        "secret_present": "[REDACTED]",
+        "manifest_digest": "5d8dae1356786b1dae5e208a2fc67e1d1438eaa819ffd33cc096140b75fbac23"
+      },
+      {
+        "profile_id": "proxy-server-http",
+        "current_content_version": 1,
+        "state": "draft",
+        "state_revision": 6,
+        "updated_at": "2026-09-22T08:20:39.707510255Z",
+        "mode": "only_http_proxy",
+        "host": "server",
+        "port": 28081,
+        "secret_present": "[REDACTED]",
+        "manifest_digest": "81020037ab7f8fa225b6059e895fd86224f94639e4cb8713302431cb8bb78f68"
+      },
+      {
+        "profile_id": "proxy-server-socks5",
+        "current_content_version": 2,
+        "state": "ready",
+        "state_revision": 4,
+        "ready_test_id": "network-test-68c646f6-b92c-4aa8-a776-521e419f5b45",
+        "updated_at": "2026-09-05T18:58:12.896069338Z",
+        "mode": "only_socks5",
+        "host": "server",
+        "port": 28080,
+        "secret_present": "[REDACTED]",
+        "manifest_digest": "b980025034653e204d85bf9bd12198b4ad1731e3c9be44c88caff5c6e1b96d63"
+      }
+    ],
+    "versions": [
+      {
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "mode": "only_http_proxy",
+        "host": "127.0.0.1",
+        "port": 7897,
+        "manifest_digest": "5d8dae1356786b1dae5e208a2fc67e1d1438eaa819ffd33cc096140b75fbac23",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:52:24.325715134Z",
+        "secret_present": "[REDACTED]",
+        "published": true,
+        "current_published": false,
+        "published_at": "2026-09-05T18:58:43.138599476Z"
+      },
+      {
+        "profile_id": "proxy-server-http",
+        "content_version": 1,
+        "mode": "only_http_proxy",
+        "host": "server",
+        "port": 28081,
+        "manifest_digest": "81020037ab7f8fa225b6059e895fd86224f94639e4cb8713302431cb8bb78f68",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:52:24.353410756Z",
+        "secret_present": "[REDACTED]",
+        "published": false,
+        "current_published": false
+      },
+      {
+        "profile_id": "proxy-server-socks5",
+        "content_version": 2,
+        "mode": "only_socks5",
+        "host": "server",
+        "port": 28080,
+        "manifest_digest": "b980025034653e204d85bf9bd12198b4ad1731e3c9be44c88caff5c6e1b96d63",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:52:24.336612476Z",
+        "secret_present": "[REDACTED]",
+        "published": false,
+        "current_published": false
+      },
+      {
+        "profile_id": "proxy-server-socks5",
+        "content_version": 1,
+        "mode": "only_socks5",
+        "host": "server",
+        "port": 28080,
+        "manifest_digest": "d466f941e8b80d94fb4fad944d0227f4189f7e65bd71e93f6bbeac46115b7529",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:52:24.335541224Z",
+        "secret_present": "[REDACTED]",
+        "published": false,
+        "current_published": false
+      }
+    ],
+    "tests": [
+      {
+        "test_id": "network-test-7c4e9494-3bf4-4991-8958-46bb38c0795b",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:21:07.360345194Z"
+      },
+      {
+        "test_id": "network-test-281615ae-e53b-42be-9bdb-a8ccdc513ae3",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:21:06.428107798Z"
+      },
+      {
+        "test_id": "network-test-db9d797a-795e-4458-b073-8f20d44e8de3",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:21:05.31921703Z"
+      },
+      {
+        "test_id": "network-test-47a35215-5470-490e-91ff-bae4c093fd52",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:21:03.85370757Z"
+      },
+      {
+        "test_id": "network-test-0b605457-bfd8-47ab-b5e9-543cb70859f0",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 769,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 321
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:21:01.927893741Z",
+        "finished_at": "2026-09-22T08:21:29.57787182Z"
+      },
+      {
+        "test_id": "network-test-e92d8c68-6867-4de2-8779-a60f591bc720",
+        "profile_id": "proxy-server-http",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:20:39.438893918Z"
+      },
+      {
+        "test_id": "network-test-cded6a26-386d-4be5-ba2c-a62c51e3f043",
+        "profile_id": "proxy-server-http",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:20:24.773365161Z"
+      },
+      {
+        "test_id": "network-test-a4f351e9-9d31-4cd7-b5d1-f718e8f9c4a7",
+        "profile_id": "proxy-server-http",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:20:18.434025672Z"
+      },
+      {
+        "test_id": "network-test-3fb32ecf-6285-4eed-bd81-a48122fee942",
+        "profile_id": "proxy-server-http",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "failed",
+        "diagnostic_code": "PROXY_AUTHENTICATION_REQUIRED",
+        "duration_ms": 895,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed",
+            "duration_ms": 22
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "failed",
+            "diagnostic_code": "PROXY_AUTHENTICATION_REQUIRED",
+            "duration_ms": 895
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:20:16.171707763Z",
+        "finished_at": "2026-09-22T08:20:39.707510255Z"
+      },
+      {
+        "test_id": "network-test-e4b24878-099a-45e9-9caf-5fb090dc706f",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:20:08.522762521Z"
+      },
+      {
+        "test_id": "network-test-38c3cb63-583b-493b-8730-58daf0a9f840",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 755,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed",
+            "duration_ms": 13
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 307
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:20:05.729180382Z",
+        "finished_at": "2026-09-22T08:20:19.598148292Z"
+      },
+      {
+        "test_id": "network-test-3b28221d-de8d-482d-99a7-678c0737988b",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cc5cf872-284e-4f56-a181-7f6128da98de",
+        "generation": 41,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 711,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 304
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:22:06.344752025Z",
+        "finished_at": "2026-09-05T19:22:16.439348927Z"
+      },
+      {
+        "test_id": "network-test-8e190873-8dd8-41c8-be21-2243876237e9",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cc5cf872-284e-4f56-a181-7f6128da98de",
+        "generation": 41,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 778,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 283
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:21:31.551286574Z",
+        "finished_at": "2026-09-05T19:21:36.503803539Z"
+      },
+      {
+        "test_id": "network-test-bbf379fb-4733-4457-a4d9-4c53e917bb17",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-cc5cf872-284e-4f56-a181-7f6128da98de",
+        "generation": 41,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 812,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed",
+            "duration_ms": 8
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed",
+            "duration_ms": 1
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 302
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:20:53.823713376Z",
+        "finished_at": "2026-09-05T19:20:56.53806489Z"
+      },
+      {
+        "test_id": "network-test-780722d7-6e1d-4fb2-8338-5818afef4df0",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-1eedc2b3-c700-41bc-b35d-eb5b5285f0f6",
+        "generation": 40,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 810,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 305
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:15:03.1502883Z",
+        "finished_at": "2026-09-05T19:15:09.400365697Z"
+      },
+      {
+        "test_id": "network-test-bcf1ea3f-5ebf-485a-aad7-8341bc11cf66",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-85c8d1a0-8f96-4b91-83e3-8a56ec40fc2a",
+        "generation": 39,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "pending",
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:13:45.786386477Z"
+      },
+      {
+        "test_id": "network-test-121bc30e-d1fe-477b-883f-cb84679b7a93",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-85c8d1a0-8f96-4b91-83e3-8a56ec40fc2a",
+        "generation": 39,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 720,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed",
+            "duration_ms": 8
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed",
+            "duration_ms": 1
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 297
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:13:33.812436405Z",
+        "finished_at": "2026-09-05T19:13:42.544874281Z"
+      },
+      {
+        "test_id": "network-test-b037f422-1351-46c6-85c9-a5fdec5c6224",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-f3c27d46-36a7-4576-a956-6ae71eb55222",
+        "generation": 37,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 871,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 300
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:04:23.89019925Z",
+        "finished_at": "2026-09-05T19:04:34.297522617Z"
+      },
+      {
+        "test_id": "network-test-9ca94956-8eef-4d9e-96a1-fe27a4532103",
+        "profile_id": "proxy-local-7897",
+        "content_version": 1,
+        "worker_instance_id": "worker-feae1f02-c563-45e1-a074-006de8f70c24",
+        "generation": 36,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 817,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed",
+            "duration_ms": 22
+          },
+          {
+            "layer": "secret",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 303
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:58:31.025733701Z",
+        "finished_at": "2026-09-05T18:58:32.398146711Z"
+      },
+      {
+        "test_id": "network-test-68c646f6-b92c-4aa8-a776-521e419f5b45",
+        "profile_id": "proxy-server-socks5",
+        "content_version": 2,
+        "worker_instance_id": "worker-feae1f02-c563-45e1-a074-006de8f70c24",
+        "generation": 36,
+        "backend_id": "primary",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "state": "succeeded",
+        "duration_ms": 1297,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed",
+            "duration_ms": 22
+          },
+          {
+            "layer": "secret",
+            "state": "passed"
+          },
+          {
+            "layer": "endpoint",
+            "state": "passed",
+            "duration_ms": 460
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 246
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:58:05.12792312Z",
+        "finished_at": "2026-09-05T18:58:12.896069338Z"
+      }
+    ],
+    "mode_tests": [
+      {
+        "test_id": "network-mode-test-51c41c57-dd21-4441-9ebf-707f09075be5",
+        "agent_id": "agy-onboarding-e2e",
+        "backend_id": "agy",
+        "policy_version": 1,
+        "mode": "inherit",
+        "manifest_digest": "a60785c250e048ab631117606b18cd1a450084bdf115461e577a4b2128aaf884",
+        "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+        "generation": 1,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "0d0d3eba22daf29504dd290151c7ed9a4d33b0c6aa0acfc5da27bc3b01d2f029",
+          "wrapper_sha256": "ae0955533c13c1ca05f2944efc0a5db4bbfc1cceb8b0fdd8d83c2aa0d539ba88",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 0,
+        "state": "succeeded",
+        "duration_ms": 720,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 199
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-10-01T19:06:53.910202562Z",
+        "finished_at": "2026-10-01T19:07:04.362545367Z"
+      },
+      {
+        "test_id": "network-mode-test-779ad2d6-b937-4e09-93e3-c6dbb44b2fe5",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 14,
+        "mode": "inherit",
+        "manifest_digest": "2f3b9a44666653d5d7f5c95e645d9c1e08a73787bc74b12c3121da6f81ddfc3a",
+        "worker_instance_id": "worker-e14b0b6d-5db6-443a-aa19-9edd21ed7be6",
+        "generation": 52,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "c20434f0b9278196498069dac5a0a2e72bc0b5f8aebdf17c5d535b5369b76f67",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 6,
+        "state": "succeeded",
+        "duration_ms": 730,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 295
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T11:37:43.129073891Z",
+        "finished_at": "2026-09-22T11:37:47.394956101Z"
+      },
+      {
+        "test_id": "network-mode-test-e6c1f208-4511-413a-803d-5a2f0050f255",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 13,
+        "mode": "inherit",
+        "manifest_digest": "12147a3a7d147cbcfc518a43d7c19badcf7eee54e6267349b24ff699cb7c0193",
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 5,
+        "state": "succeeded",
+        "duration_ms": 910,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 303
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T09:37:43.395189178Z",
+        "finished_at": "2026-09-22T09:37:49.719318108Z"
+      },
+      {
+        "test_id": "network-mode-test-ffe58ac5-a58f-483e-aaee-af8781869ff7",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 12,
+        "mode": "inherit",
+        "manifest_digest": "a224f2ec3cab1d93bc97efe03ab132d6dcd66a583d8783c7dd8f15f993084a75",
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 5,
+        "state": "succeeded",
+        "duration_ms": 911,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 298
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:57:01.415833554Z",
+        "finished_at": "2026-09-22T08:57:09.721019326Z"
+      },
+      {
+        "test_id": "network-mode-test-6cdd5031-dbfc-4df0-9496-d128ffe8e9cb",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 11,
+        "mode": "inherit",
+        "manifest_digest": "b622d935e5945fd2bbe691b2d22467ca80e2439424231e2d041032331ba641e3",
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 5,
+        "state": "succeeded",
+        "duration_ms": 880,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 297
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:48:06.723213555Z",
+        "finished_at": "2026-09-22T08:48:09.691089306Z"
+      },
+      {
+        "test_id": "network-mode-test-7d6f6a75-f1be-4a78-9ecf-d65532edbf15",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 10,
+        "mode": "inherit",
+        "manifest_digest": "2dc11a4f7ff9521dc8d1e6ecf7e381406388a426dcab964ae54c48df4f238978",
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 5,
+        "state": "succeeded",
+        "duration_ms": 722,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 305
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:21:43.611540208Z",
+        "finished_at": "2026-09-22T08:22:19.530580374Z"
+      },
+      {
+        "test_id": "network-mode-test-5f25bdf4-9133-4004-b783-a4f7b1452921",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 9,
+        "mode": "inherit",
+        "manifest_digest": "413bc5bf804a2939ed1f3ce06af8db6009d3db451ba5a2e180a6798bdf298b6d",
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 5,
+        "state": "succeeded",
+        "duration_ms": 737,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 302
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:20:55.230458995Z",
+        "finished_at": "2026-09-22T08:21:19.548650813Z"
+      },
+      {
+        "test_id": "network-mode-test-0944cd25-96a8-4262-b4ad-97c0533ce931",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 8,
+        "mode": "inherit",
+        "manifest_digest": "c786033f34ec65fc48e173eaff21d28341fead11cb2b508647654c2fb6601535",
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 5,
+        "state": "succeeded",
+        "duration_ms": 818,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 295
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:19:57.375243792Z",
+        "finished_at": "2026-09-22T08:20:09.626527464Z"
+      },
+      {
+        "test_id": "network-mode-test-03bc14d3-e942-45d9-ad44-b89f0f68c463",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 7,
+        "mode": "inherit",
+        "manifest_digest": "ead431a384f6aa3f287ef3a8ceaf3318370d3801f427e4f183f7d0541f3233db",
+        "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "generation": 51,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "9991515b6d5307bcf701069622b0537b6b206e605f3c891c0cf3a3d208dea8b0",
+          "wrapper_sha256": "31935c961ea76532962068c0e1a8d0a258c80d2f74940dcff3532705ca38b8de",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 5,
+        "state": "succeeded",
+        "duration_ms": 901,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 295
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-22T08:19:51.035372679Z",
+        "finished_at": "2026-09-22T08:19:59.711788808Z"
+      },
+      {
+        "test_id": "network-mode-test-d1b9bdc4-e2c0-431d-a1a7-8ef637dc22f4",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 6,
+        "mode": "inherit",
+        "manifest_digest": "249aaa2e918a7ec382093fb8a4e8aae264028b15b1f9570b79e07033499011a7",
+        "worker_instance_id": "worker-dfdc5c20-d395-467f-a634-e7580b243624",
+        "generation": 46,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "38f130cdd0757e1d22e151baa48ace4074a5bd3d960eb2dcc7f44bdf2ad4c0fd",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 4,
+        "state": "succeeded",
+        "duration_ms": 812,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 302
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-11T18:05:40.381154615Z",
+        "finished_at": "2026-09-11T18:05:44.020912283Z"
+      },
+      {
+        "test_id": "network-mode-test-8be6b4b3-7813-401e-9d5a-cd3eab15e850",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 5,
+        "mode": "inherit",
+        "manifest_digest": "859ab1e7c7f09629bea67850ba0ff682a91b94dc387bee475b9cded9b8315818",
+        "worker_instance_id": "worker-07bd31bf-ee8e-4c18-ba6e-b59a2ba42de3",
+        "generation": 43,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "195bf11b249deebe67028305a9b7b1d19ac38e9ab281b786a163a7d2fc8ff428",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 3,
+        "state": "succeeded",
+        "duration_ms": 817,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 305
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-11T18:01:07.423479998Z",
+        "finished_at": "2026-09-11T18:01:08.461402094Z"
+      },
+      {
+        "test_id": "network-mode-test-2cc34e29-c463-41fd-a54d-de181768e8b8",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 4,
+        "mode": "inherit",
+        "manifest_digest": "ae5b6f259818877ceca07204da31975747de8d6658e7f52890302df5b97b144a",
+        "worker_instance_id": "worker-cc5cf872-284e-4f56-a181-7f6128da98de",
+        "generation": 41,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 3,
+        "state": "failed",
+        "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+        "duration_ms": 415,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "failed",
+            "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+            "duration_ms": 415
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:21:48.753902266Z",
+        "finished_at": "2026-09-05T19:21:56.14393121Z"
+      },
+      {
+        "test_id": "network-mode-test-698b135d-5aa4-4b37-857e-6a57822e73e1",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 3,
+        "mode": "inherit",
+        "manifest_digest": "c61745e03c7e9bf00f403cc91652ad2d0a3eac04f78793f570a4e5e058a0201a",
+        "worker_instance_id": "worker-f3c27d46-36a7-4576-a956-6ae71eb55222",
+        "generation": 37,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 3,
+        "state": "failed",
+        "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+        "duration_ms": 509,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "failed",
+            "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+            "duration_ms": 509
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T19:00:05.997418502Z",
+        "finished_at": "2026-09-05T19:00:13.928126723Z"
+      },
+      {
+        "test_id": "network-mode-test-e72f2336-acec-40b0-8462-7fda4a763ab3",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 2,
+        "mode": "inherit",
+        "manifest_digest": "5b1b4f47038b2843a918cd5896c8b4f150b21be217d00fea9005e75059e5b5dd",
+        "worker_instance_id": "worker-f924a800-888e-4309-a0e6-c54bd2c6b524",
+        "generation": 33,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 0,
+        "state": "failed",
+        "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+        "duration_ms": 566,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "failed",
+            "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+            "duration_ms": 566
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:32:37.08524568Z",
+        "finished_at": "2026-09-05T18:32:46.053359997Z"
+      },
+      {
+        "test_id": "network-mode-test-f63775ce-f015-4196-9de7-dd0e2e7a87fa",
+        "agent_id": "quote-service",
+        "backend_id": "primary",
+        "policy_version": 1,
+        "mode": "inherit",
+        "manifest_digest": "230f4dc75e1e496939c044518d3351eb306cf0530b07ccd233088c3490be70a1",
+        "worker_instance_id": "worker-e1d53a54-93a6-4068-bea1-66d273f82a58",
+        "generation": 29,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "93eb2118b778a4005700b54cdd7e08b896fbe665d5ff338e38e9e53da9a091ea",
+          "wrapper_sha256": "8ed1310cc4db2410c6b0ae94637b652449f9e7effff17a6d6a39b0c9a69bb968",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 0,
+        "state": "failed",
+        "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+        "duration_ms": 506,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "failed",
+            "diagnostic_code": "RUNTIME_HEALTH_FAILED",
+            "duration_ms": 506
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "created_at": "2026-09-05T18:01:00.432873921Z",
+        "finished_at": "2026-09-05T18:01:08.874688446Z"
+      }
+    ],
+    "bindings": [
+      {
+        "agent_id": "agy-onboarding-e2e",
+        "backend_id": "agy",
+        "mode": "inherit",
+        "policy_version": 1,
+        "test_id": "network-mode-test-51c41c57-dd21-4441-9ebf-707f09075be5",
+        "manifest_digest": "a60785c250e048ab631117606b18cd1a450084bdf115461e577a4b2128aaf884",
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "0d0d3eba22daf29504dd290151c7ed9a4d33b0c6aa0acfc5da27bc3b01d2f029",
+          "wrapper_sha256": "ae0955533c13c1ca05f2944efc0a5db4bbfc1cceb8b0fdd8d83c2aa0d539ba88",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "version": 1,
+        "desired_status": "applied",
+        "applied_worker_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+        "applied_generation": 1,
+        "applied_mode": "inherit",
+        "applied_policy_version": 1,
+        "applied_binding_revision": 1,
+        "updated_at": "2026-10-01T19:07:14.209491482Z"
+      }
+    ],
+    "active_runs": []
+  }
+}

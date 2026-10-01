@@ -1,0 +1,35 @@
+{
+  "agents": [
+    {
+      "agent_id": "live-agy-cancel01",
+      "principal_id": "agent-live-agy-cancel01",
+      "organization_id": "default",
+      "display_name": "Live AGY verification",
+      "status": "active",
+      "version": 1,
+      "created_at": "2026-10-01T18:30:53.01142369Z",
+      "updated_at": "2026-10-01T18:30:53.01142369Z",
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      }
+    }
+  ],
+  "approvals": [],
+  "latest_sequence": 17,
+  "server_time": "2026-10-01T18:31:01.374066756Z",
+  "tasks": [],
+  "workers": [
+    {
+      "worker_instance_id": "worker-80f047b7-a23e-430a-8449-54b7217ac4f8",
+      "agent_id": "live-agy-cancel01",
+      "generation": 1,
+      "status": "online",
+      "last_heartbeat_at": "2026-10-01T18:31:01.076948287Z",
+      "lease_until": "2026-10-01T18:31:31.076948287Z",
+      "started_at": "2026-10-01T18:30:56.069441932Z",
+      "updated_at": "2026-10-01T18:31:01.076948287Z"
+    }
+  ]
+}

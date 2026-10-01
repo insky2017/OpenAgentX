@@ -1,0 +1,75 @@
+{
+  "at": "2026-10-01T18:31:37.063001+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/network-profiles?agent_id=live-agy-d7350-r1",
+  "request": null,
+  "status": 200,
+  "response": {
+    "profiles": [],
+    "versions": [],
+    "tests": [],
+    "mode_tests": [
+      {
+        "test_id": "network-mode-test-d32b6eca-2323-4712-96d1-0c4a4f4c4919",
+        "agent_id": "live-agy-d7350-r1",
+        "backend_id": "primary",
+        "policy_version": 1,
+        "mode": "inherit",
+        "manifest_digest": "7b0ecf60d963de4d747d47d417256a878154add5716320d37fe9c67fdf651b21",
+        "worker_instance_id": "worker-65e91098-a4e1-451c-85fa-22d2f78e5d92",
+        "generation": 1,
+        "runtime_identity": {
+          "adapter_id": "agy-batch",
+          "adapter_version": "1",
+          "executable_sha256": "0d0d3eba22daf29504dd290151c7ed9a4d33b0c6aa0acfc5da27bc3b01d2f029",
+          "wrapper_sha256": "6795307703a880e16061f2ae6c6deb34444ca14f38d693b310ee3c36b169b2e7",
+          "helper_version": "mgraftcp version v0.7.4-28-g6b8e7e6-fix-inode",
+          "helper_sha256": "0e63ad80c491795a5e448cde3712bb57272ff249d464fb76ccdb0ae3f463f678"
+        },
+        "binding_revision": 0,
+        "state": "succeeded",
+        "duration_ms": 584,
+        "probe_results": [
+          {
+            "layer": "configuration",
+            "state": "passed"
+          },
+          {
+            "layer": "secret",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "endpoint",
+            "state": "not_verified",
+            "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+          },
+          {
+            "layer": "direct_rules",
+            "state": "not_applicable"
+          },
+          {
+            "layer": "runtime_health",
+            "state": "passed",
+            "duration_ms": 75
+          },
+          {
+            "layer": "network_effect",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          },
+          {
+            "layer": "model_call",
+            "state": "not_verified",
+            "diagnostic_code": "NOT_VERIFIED"
+          }
+        ],
+        "created_by": "human-owner-4010b2b8-0a26-49c8-a090-64ff740320a9",
+        "created_at": "2026-10-01T18:31:35.051087655Z",
+        "finished_at": "2026-10-01T18:31:36.2602119Z"
+      }
+    ],
+    "bindings": [],
+    "active_runs": []
+  }
+}

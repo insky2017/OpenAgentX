@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "scripts/e2e/agy_lease_recovery.py",
+    "--profile",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-17d5cd2-lease02",
+    "--evidence",
+    "docs/reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-lease02",
+    "--binary",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/17d5cd22b442fb5fd02bd661b36c5db4299fea9d/openagentx",
+    "--web",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/17d5cd22b442fb5fd02bd661b36c5db4299fea9d/web",
+    "--commit",
+    "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+    "--build-manifest",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/17d5cd22b442fb5fd02bd661b36c5db4299fea9d/manifest.json"
+  ],
+  "at": "2026-10-01T19:05:45.866313+00:00",
+  "harness_files_sha256": {
+    "agy_lease_recovery.py": "152ce0cd86f12949e90e9e41573bd68f0c8b6fd093b3ffd40d577dd2b79c1264",
+    "agy_recovery.py": "9133123260e5f89a7edb731c89b9f5e8d0cea154f98ebada9491bf1d83d181b9",
+    "agy_workflow.py": "03701530f35061ac9a2039f57ddd05cb3af82358cb61ac55a6617904a33ca619",
+    "agy_live.py": "3bde9210c4c39eb78fc2ac1726b2795a46c57d2ff3cee1361f4246cc50c5a6d1"
+  }
+}

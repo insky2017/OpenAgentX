@@ -1,0 +1,185 @@
+[?1049h[22;0;0t[?1h=[H[2J[?12l[?25h[?1000l[?1002l[?1003l[?1006l[?1005l[?2004h(B[m[?12l[?25h[?1006l[?1000l[?1002l[?1003l[1;1H[1;24r[c[>c[>q]10;?\]11;?\[5;1H[?25l
+[32m────────────────────────────────────────────────────────────────────────────────[12;1H[39m────────────────────────────────────────────────────────────────────────────────(B[m[1;1H                                                                              [K
+Task none | Worker worker-406ed32c... gen 1 online | timeline 3/76 bytes[K
+> /help                                                                       [K
+>                                                                             [K
+>                                                                             [K[7;1H[K
+[K
+[K
+[K
+[K[2B[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[30m[42m
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:15 02-Oct-26(B[m[5;1H(B[m[?12l[?25h[?1006l[?1000l[?1002l[?1003l[1;1H[1;24r[5;1H[?25l
+[32m────────────────────────────────────────────────────────────────────────────────[12;1H[39m────────────────────────────────────────────────────────────────────────────────(B[m[1;1H                                                                              [K
+Task none | Worker worker-406ed32c... gen 1 online | timeline 3/76 bytes[K
+> /help                                                                       [K
+>                                                                             [K
+>                                                                             [K[7;1H[K
+[K
+[K
+[K
+[K[2B[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[30m[42m
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:15 02-Oct-26(B[m[5;1H[HAgent quote-service | mode normal | connection connected | cursor 11[K
+Attaching to quote-service                                                    [K
+Snapshot applied at cursor 6                                                  [K
+Task none | Worker worker-406ed32c... gen 1 online | timeline 3/76 bytes[K
+> /help                                                                       [K[1;5r[5;79H[K[1;24r[5;1H> /d                                                                          [K> /di                                                                         [K> /disp                                                                       [K> /dispat                                                                     [K> /dispatc                                                                    [K> /dispatch                                                                   [K> /dispatch f                                                                 [K> /dispatch fir                                                               [K> /dispatch firs                                                              [K> /dispatch first                                                             [K> /dispatch first is                                                          [K> /dispatch first iso                                                         [K> /dispatch first isola                                                       [K> /dispatch first isolat                                                      [K> /dispatch first isolated                                                    [K> /dispatch first isolated w                                                  [K> /dispatch first isolated wo                                                 [K> /dispatch first isolated work                                               [K> /dispatch first isolated workf                                              [K> /dispatch first isolated workflo                                            [K> /dispatch first isolated workflow                                           [K> /dispatch first isolated workflow t                                         [K> /dispatch first isolated workflow tas                                       [K> /dispatch first isolated workflow task                                      [K[HAgent quote-service | mode normal | connection connected | cursor 25[K[4;1HTask none | Worker worker-406ed32c... gen 1 online | timeline 4/97 bytes[K
+[2ddispatch pending                                                              [K
+dispatch succeeded | task task-194bc22a-4... | version 1 | status queued |    [K
+Task task-194bc22a-4... v1 queued (queued) | Worker worker-406ed32c... gen 1 ...[5;1H> /help                                                                       [K[HAgent quote-service | mode normal | connection connected | cursor 44[K
+Runtime reply: final fixture reply                                            [K
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+Task task-194bc22a-4... v3 waiting_input (run succeeded) | Worker worker-406e...[5;1H> /                                                                           [K> /st                                                                         [K> /ste                                                                        [K> /steer                                                                      [K> /steer co                                                                   [K> /steer cont                                                                 [K> /steer conti                                                                [K> /steer continu                                                              [K> /steer continue                                                             [K> /steer continue w                                                           [K> /steer continue wit                                                         [K> /steer continue with                                                        [K> /steer continue with t                                                      [K> /steer continue with th                                                     [K> /steer continue with the                                                    [K> /steer continue with the fi                                                 [K> /steer continue with the fin                                                [K> /steer continue with the final                                              [K> /steer continue with the final re                                           [K> /steer continue with the final repl                                         [K> /steer continue with the final reply                                        [K[2dsteer pending                                                                 [K
+steer succeeded | task task-194bc22a-4... | task version 4 | status           [K
+Task task-194bc22a-4... v4 waiting_input (run succeeded) | Worker worker-406e...[5;1H> /help                                                                       [K[HAgent quote-service | mode normal | connection connected | cursor 63[K
+Runtime reply: final fixture reply                                            [K
+#54 runtime.turn.output | fixture | running | phase-two-safe-output           [K
+Task task-194bc22a-4... v6 succeeded (run succeeded) | Worker worker-406ed32c...[5;1H[2dTask outcome result: final fixture reply                                      [K
+#52 run_attempt.started | Task task-194bc22a-4... | Run run-e8f2f2cb-52... |  [K[5;1H[2dsteer succeeded | task task-194bc22a-4... | task version 4 | status           [K
+waiting_input | message message-0e57db4... | message version 1 | sequence 2   [K[5;1H[HAgent quote-service | mode normal | connection connected | cursor 73[K[5;1H[2d#31 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+steer pending                                                                 [K[5;1H[2d#29 run_attempt.started | Task task-194bc22a-4... | Run run-b86f2198-ac... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K[5;1H[HAgent quote-service | mode normal | connection connected | cursor 73[K
+#29 run_attempt.started | Task task-194bc22a-4... | Run run-b86f2198-ac... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Task task-194bc22a-4... v6 succeeded (run succeeded) | Worker worker-406ed32c...[5;1H> /help                                                                       [K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[30m[42m
+[OAX] 0:overview- 1:quote-service*Z      "sky-LEGION-REN9000K-3" 02:15 02-Oct-26(B[m[5;1H[HAgent quote-service | mode normal | connection connected | cursor 73[K
+#29 run_attempt.started | Task task-194bc22a-4... | Run run-b86f2198-ac... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Runtime reply: final fixture reply                                            [K
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+steer pending                                                                 [K
+steer succeeded | task task-194bc22a-4... | task version 4 | status           [K
+waiting_input | message message-0e57db4... | message version 1 | sequence 2   [K
+#49 task.message_created | Task task-194bc22a-4... | version 6 | status       [K
+succeeded                                                                     [K
+Task outcome result: final fixture reply                                      [K
+#52 run_attempt.started | Task task-194bc22a-4... | Run run-e8f2f2cb-52... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Runtime reply: final fixture reply                                            [K
+#54 runtime.turn.output | fixture | running | phase-two-safe-output           [K
+                                                                              [K
+                                                                              [K
+                                                                              [K
+                                                                              [K
+Task task-194bc22a-4... v6 succeeded (run succeeded) | Worker worker-406ed32c...[21;1H> /                                                                           [K
+>                                                                             [K
+>                                                                             [K[2A> /ta                                                                         [K[23;1H[2A> /tas                                                                        [K[23;1H[2A> /tasks                                                                      [K[23;1H[H   Tasks: 0 active, 1 recent (bounded)            [K
+                                                  [K
+  1 item                                          [K
+                                                  [K
+│ task-194bc22a-4918-4dda-80be-670ea2f5febb       [K
+│ succeeded version 6 first isolated workflow task[K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+                                                  [K
+  ↑/k up • ↓/j down • / filter • q quit • ? more  [K[HAgent quote-service | mode normal | connection connected | cursor 73[K
+dispatch pending                                                              [K
+dispatch succeeded | task task-194bc22a-4... | version 1 | status queued |    [K
+sequence 1                                                                    [K
+#26 task.created | Task task-194bc22a-4... | version 3 | status waiting_input [K
+#27 mailbox.claimed | Task task-194bc22a-4... | version 3 | status            [K
+waiting_input | task/work delivery accepted                                   [K
+#29 run_attempt.started | Task task-194bc22a-4... | Run run-b86f2198-ac... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Runtime reply: final fixture reply                                            [K
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+steer pending                                                                 [K
+steer succeeded | task task-194bc22a-4... | task version 4 | status           [K
+waiting_input | message message-0e57db4... | message version 1 | sequence 2   [K
+#49 task.message_created | Task task-194bc22a-4... | version 6 | status       [K
+succeeded                                                                     [K
+Task outcome result: final fixture reply                                      [K
+#52 run_attempt.started | Task task-194bc22a-4... | Run run-e8f2f2cb-52... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Task task-194bc22a-4... v6 succeeded (run succeeded) | Worker worker-406ed32c...[21;1H> /help                                                                       [K
+>                                                                             [K
+>                                                                             [K[2A> ac                                                                          [K[23;1H[2A> acc                                                                         [K[23;1H[2A> accep                                                                       [K[23;1H[2A> accept                                                                      [K[23;1H[2A> accept P                                                                    [K[23;1H[2A> accept PTY                                                                  [K[23;1H[2A> accept PTY ch                                                               [K[23;1H[2A> accept PTY che                                                              [K[23;1H[2A> accept PTY check                                                            [K[23;1H[2A> accept PTY checked                                                          [K[23;1H[2A> accept PTY checked r                                                        [K[23;1H[2A> accept PTY checked re                                                       [K[23;1H[2A> accept PTY checked resu                                                     [K[23;1H[2A> accept PTY checked resul                                                    [K[23;1H[2A> accept PTY checked result                                                   [K[23;1H[2ddispatch succeeded | task task-194bc22a-4... | version 1 | status queued |    [K
+sequence 1                                                                    [K
+#26 task.created | Task task-194bc22a-4... | version 3 | status waiting_input [K
+#27 mailbox.claimed | Task task-194bc22a-4... | version 3 | status            [K
+waiting_input | task/work delivery accepted                                   [K
+#29 run_attempt.started | Task task-194bc22a-4... | Run run-b86f2198-ac... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Runtime reply: final fixture reply                                            [K
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+steer pending                                                                 [K
+steer succeeded | task task-194bc22a-4... | task version 4 | status           [K
+waiting_input | message message-0e57db4... | message version 1 | sequence 2   [K
+#49 task.message_created | Task task-194bc22a-4... | version 6 | status       [K
+succeeded                                                                     [K
+Task outcome result: final fixture reply                                      [K
+#52 run_attempt.started | Task task-194bc22a-4... | Run run-e8f2f2cb-52... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Runtime reply: final fixture reply                                            [K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 83[K[23;1H[?7727h(B[m[?12l[?25h[?1006l[?1000l[?1002l[?1003l[1;1H[1;24r[23;1H[?25l[HAgent quote-service | mode normal | connection connected | cursor 83[K
+dispatch succeeded | task task-194bc22a-4... | version 1 | status queued |    [K
+sequence 1                                                                    [K
+#26 task.created | Task task-194bc22a-4... | version 3 | status waiting_input [K
+#27 mailbox.claimed | Task task-194bc22a-4... | version 3 | status            [K
+waiting_input | task/work delivery accepted                                   [K
+#29 run_attempt.started | Task task-194bc22a-4... | Run run-b86f2198-ac... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Runtime reply: final fixture reply                                            [K
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+steer pending                                                                 [K
+steer succeeded | task task-194bc22a-4... | task version 4 | status           [K
+waiting_input | message message-0e57db4... | message version 1 | sequence 2   [K
+#49 task.message_created | Task task-194bc22a-4... | version 6 | status       [K
+succeeded                                                                     [K
+Task outcome result: final fixture reply                                      [K
+#52 run_attempt.started | Task task-194bc22a-4... | Run run-e8f2f2cb-52... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Runtime reply: final fixture reply                                            [K
+Task task-194bc22a-4... v6 succeeded (run succeeded) | Worker worker-406ed32c...[21;1H> accept PTY checked result                                                   [K
+>                                                                             [K
+>                                                                             [K[30m[42m
+[OAX] 0:overview- 1:quote-service*Z      "sky-LEGION-REN9000K-3" 02:15 02-Oct-26(B[m[23;1H[HAgent quote-service | mode normal | connection connected | cursor 93[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 103[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 113[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 123[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 130[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 133[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 143[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 151[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 153[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 163[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 171[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 173[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 183[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 193[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 203[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 212[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 213[K[23;1H[HAgent quote-service | mode normal | connection connected | cursor 223[K[23;1H

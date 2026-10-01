@@ -1,0 +1,18 @@
+{
+  "task_id": "task-fc7babc9-c397-4433-b569-3a78781f07db",
+  "run_id": "run-96261dfe-5b40-4ca2-a8f3-5bf274b266c2",
+  "fixture_pid": 151030,
+  "raw_path": "/home/sky/.oax-e/e20-14d7350-r1/runtime-raw/run-151030",
+  "worker_instance_id": "worker-65e91098-a4e1-451c-85fa-22d2f78e5d92",
+  "worker_generation": 1,
+  "task_status": "uncertain",
+  "completion_basis": "",
+  "turn_result": {
+    "final_reply": false,
+    "runtime_status": "uncertain",
+    "body": "answercontradiction",
+    "error": "AGY reported an execution event after its terminal result",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  }
+}

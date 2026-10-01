@@ -1,0 +1,24 @@
+{
+  "target": {
+    "label": "worker-daemon-sigkill",
+    "pid": 196841,
+    "starttime": "9858667"
+  },
+  "signal": "SIGKILL",
+  "at": 1790880202.6419544,
+  "started": {
+    "started": 1790880202.0913663,
+    "processes": [
+      {
+        "pid": 201305,
+        "starttime": "9863023"
+      },
+      {
+        "pid": 201324,
+        "starttime": "9863035"
+      }
+    ]
+  },
+  "lease_wait_bound_seconds": 305,
+  "lease_bound_basis": "worker_service.go RunLease=5m; heartbeat max(existing,now+30s)"
+}

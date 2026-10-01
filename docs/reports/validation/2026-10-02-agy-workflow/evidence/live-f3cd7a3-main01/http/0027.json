@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:48:54.468922+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-3-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Create result.txt in your assigned workspace with exactly these bytes: b'OAX-E2E\\n'. Use a tool to write the file. Do not change any other file. Report after the write.",
+    "meta": {
+      "idempotency_key": "ecbed6ad89b29f8be91facc7"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-fc523622-3db5-4ea0-9d6c-99752c550182",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

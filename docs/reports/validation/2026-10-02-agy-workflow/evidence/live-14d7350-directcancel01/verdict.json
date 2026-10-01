@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "stage": "cancel",
+  "completed": {},
+  "error": "{'completion_basis': '', 'id': 'task-a1f2c61c-9c0a-4881-beb9-577156157e25', 'version': 4, 'target_agent_id': 'live-agy-cancel01', 'organization_id': 'default', 'dispatch_mode': 'direct', 'intent': 'mutation', 'content': 'Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.', 'status': 'uncertain', 'error': 'interrupted; AGY stderr: error: interrupted; AGY process exited: signal: killed; AGY stderr: error: interrupted', 'outcome_state': 'available', 'created_at': '2026-10-01T18:31:01.377763114Z', 'updated_at': '2026-10-01T18:31:11.907456787Z'}"
+}

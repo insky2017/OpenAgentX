@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-01T18:27:03.959104+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-7e1224ad-74f0-48c2-a0f8-77527e471347",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-7e1224ad-74f0-48c2-a0f8-77527e471347",
+      "version": 1,
+      "target_agent_id": "live-agy-imeout01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with exactly OAX-LIVE-imeout01-after-effects. Do not call tools or read files.",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:27:03.953514514Z",
+      "updated_at": "2026-10-01T18:27:03.953514514Z"
+    },
+    "messages": [
+      {
+        "id": "message-b051213f-2456-49b4-8ba3-c7fef60928da",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-7e1224ad-74f0-48c2-a0f8-77527e471347",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-b3f90985-df00-4040-b952-61f16420f500",
+        "target_agent_id": "live-agy-imeout01",
+        "kind": "instruction",
+        "content": "Reply with exactly OAX-LIVE-imeout01-after-effects. Do not call tools or read files.",
+        "created_at": "2026-10-01T18:27:03.953514514Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 101,
+        "event_id": "event-2d451e5a-0cdc-46ed-8bdd-5aeca4e962a4",
+        "aggregate_type": "task",
+        "aggregate_id": "task-7e1224ad-74f0-48c2-a0f8-77527e471347",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:27:03.953514514Z"
+      }
+    ],
+    "snapshot_sequence": 102,
+    "live_after_sequence": 102,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "prior": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01",
+  "candidate": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd",
+  "at": "2026-10-01T19:11:15.673131+00:00",
+  "scope": "No A/B redispatch. Assert unchanged old role digest and final marker, then finish queued B and systemd crash."
+}

@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-01T19:21:31.424845+00:00",
+  "scope": [
+    "installed-17d5cd2-onboarding01",
+    "installed-17d5cd2-onboarding01-resume01",
+    "installed-17d5cd2-onboarding01-resume02"
+  ],
+  "known_password_source": "installation/owner-password (read privately, never printed)",
+  "scanned_files": 177,
+  "known_password_matches": 0,
+  "removed_generated_cache_directories": [
+    "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/__pycache__",
+    "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/harness-source/__pycache__"
+  ],
+  "scan_limit": "Exact known password check, not a universal secret detector."
+}

@@ -1,0 +1,122 @@
+{
+  "at": "2026-10-01T18:48:37.901733+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "live-agy-d7350-02",
+        "principal_id": "agent-live-agy-d7350-02",
+        "organization_id": "default",
+        "display_name": "Live AGY verification",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-01T18:30:13.486394704Z",
+        "updated_at": "2026-10-01T18:30:13.486394704Z",
+        "readiness": {
+          "ready": true,
+          "can_start_now": true,
+          "reason": "可开始工作"
+        }
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 173,
+    "server_time": "2026-10-01T18:48:37.900537792Z",
+    "tasks": [
+      {
+        "id": "task-7df6a3b3-860b-4e42-a9b7-66562bac59e7",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-f879f2e0-93ea-49c8-9d58-f3dabfab3e31",
+        "target_agent_id": "live-agy-d7350-02",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "mutation",
+        "completion_basis": "",
+        "idempotency_key": "1d86af408bb05837e775bf0a",
+        "content": "Run python3 daemon-sigkill.py in your assigned workspace exactly once and wait for it to finish. Do not run any other script or retry this command.",
+        "status": "uncertain",
+        "created_at": "2026-10-01T18:30:21.872378514Z",
+        "updated_at": "2026-10-01T18:35:37.015005422Z"
+      },
+      {
+        "id": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-f879f2e0-93ea-49c8-9d58-f3dabfab3e31",
+        "target_agent_id": "live-agy-d7350-02",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "query",
+        "completion_basis": "query_result_delivered",
+        "idempotency_key": "958403e9851afe5da9203da5",
+        "content": "Reply with exactly OAX-LIVE-d7350-02-after-daemon-sigkill-continuation. Do not call tools or read files.",
+        "status": "succeeded",
+        "result": "OAX-LIVE-d7350-02-after-daemon-sigkill-continuation",
+        "created_at": "2026-10-01T18:42:44.466568992Z",
+        "updated_at": "2026-10-01T18:43:07.905460964Z"
+      },
+      {
+        "id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-f879f2e0-93ea-49c8-9d58-f3dabfab3e31",
+        "target_agent_id": "live-agy-d7350-02",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "mutation",
+        "completion_basis": "",
+        "idempotency_key": "6ed8733138196815f75c05ff",
+        "content": "Run python3 worker-sigkill.py in your assigned workspace exactly once and wait for it to finish. Do not run any other script or retry this command.",
+        "status": "uncertain",
+        "created_at": "2026-10-01T18:43:08.564287563Z",
+        "updated_at": "2026-10-01T18:48:27.998342212Z"
+      }
+    ],
+    "workers": [
+      {
+        "worker_instance_id": "worker-a80a3071-829a-4df4-b7f7-6ae48635a589",
+        "agent_id": "live-agy-d7350-02",
+        "generation": 4,
+        "status": "online",
+        "last_heartbeat_at": "2026-10-01T18:48:37.625076634Z",
+        "lease_until": "2026-10-01T18:49:07.625076634Z",
+        "started_at": "2026-10-01T18:48:32.618170254Z",
+        "updated_at": "2026-10-01T18:48:37.625076634Z"
+      },
+      {
+        "worker_instance_id": "worker-6b96dc47-59ef-4cd5-b551-df940a00dbb4",
+        "agent_id": "live-agy-d7350-02",
+        "generation": 3,
+        "status": "offline",
+        "last_heartbeat_at": "2026-10-01T18:43:22.180192988Z",
+        "lease_until": "2026-10-01T18:43:52.180192988Z",
+        "started_at": "2026-10-01T18:42:39.171796176Z",
+        "updated_at": "2026-10-01T18:48:27.998342212Z"
+      },
+      {
+        "worker_instance_id": "worker-a323e9f1-3a2b-4af7-bf08-1e8a194b4794",
+        "agent_id": "live-agy-d7350-02",
+        "generation": 2,
+        "status": "offline",
+        "last_heartbeat_at": "2026-10-01T18:36:25.445893143Z",
+        "lease_until": "2026-10-01T18:36:25.729882915Z",
+        "started_at": "2026-10-01T18:35:40.436071884Z",
+        "updated_at": "2026-10-01T18:36:25.729882915Z"
+      },
+      {
+        "worker_instance_id": "worker-ec544f3d-fb2e-4c31-a969-8c8c34e945e6",
+        "agent_id": "live-agy-d7350-02",
+        "generation": 1,
+        "status": "offline",
+        "last_heartbeat_at": "2026-10-01T18:30:31.681237189Z",
+        "lease_until": "2026-10-01T18:31:01.681237189Z",
+        "started_at": "2026-10-01T18:30:16.673702139Z",
+        "updated_at": "2026-10-01T18:35:37.015005422Z"
+      }
+    ]
+  }
+}

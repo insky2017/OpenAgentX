@@ -1,0 +1,187 @@
+{
+  "at": "2026-10-01T19:19:20.882477+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+      "version": 3,
+      "target_agent_id": "agy-onboarding-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with exactly OAX-LIVE-arding01-after-systemd-crash. Do not call tools or read files.",
+      "status": "succeeded",
+      "result": "OAX-LIVE-arding01-after-systemd-crash",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T19:16:10.643477514Z",
+      "updated_at": "2026-10-01T19:16:23.63391492Z"
+    },
+    "messages": [
+      {
+        "id": "message-2a37a326-5042-4411-a40a-7c13fe876a56",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "agy-onboarding-e2e",
+        "kind": "instruction",
+        "content": "Reply with exactly OAX-LIVE-arding01-after-systemd-crash. Do not call tools or read files.",
+        "created_at": "2026-10-01T19:16:10.643477514Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:46:10.647285629Z",
+        "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+        "run_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "task_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "agent_id": "agy-onboarding-e2e",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+        "worker_generation": 3,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "agy",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 3,
+        "network_binding_revision": 3,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-LIVE-arding01-after-systemd-crash",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T19:16:10.647285629Z",
+        "finished_at": "2026-10-01T19:16:23.63391492Z",
+        "created_at": "2026-10-01T19:16:10.647285629Z",
+        "updated_at": "2026-10-01T19:16:23.63391492Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 267739,
+        "event_id": "event-286cf1ba-7d31-4f36-9214-d0c0ab671cea",
+        "aggregate_type": "task",
+        "aggregate_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:16:10.643477514Z"
+      },
+      {
+        "sequence": 267741,
+        "event_id": "event-task-e8c45819-a3ad-46a2-ab7f-48bac6849989",
+        "aggregate_type": "task",
+        "aggregate_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:16:10.648831301Z"
+      },
+      {
+        "sequence": 267742,
+        "event_id": "event-run-83bc2bf1-c884-48e2-b8c7-9101231521f8",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:16:10.648837112Z"
+      },
+      {
+        "sequence": 267744,
+        "event_id": "event-runtime-cc1f7e4e-e4c4-4dfd-93d7-d44cff03e640",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T19:16:18.247932807Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 267745,
+        "event_id": "event-runtime-3b3444c0-262e-40e5-b0ae-955081dec09d",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:16:18.342360011Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267747,
+        "event_id": "event-runtime-6114f2cb-b997-4193-bf8d-dbaad90fbc3c",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:16:21.771497222Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267748,
+        "event_id": "event-runtime-300779b1-b104-4817-b868-67026fb1d19b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:16:21.796480683Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267749,
+        "event_id": "event-runtime-a5c76ac6-7f99-4f00-a975-a18930b2808c",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:16:21.898826799Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267750,
+        "event_id": "event-runtime-06ce20b8-ba75-45c4-b529-27ed3167c4b9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T19:16:21.924751482Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "OAX-LIVE-arding01-after-systemd-crash\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 267752,
+        "event_id": "event-run-331ec01e-c27b-469e-b575-097ab5feb8f9",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-8f196712-e10e-492a-8a49-ccb73d7d6c9b",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T19:16:23.633970614Z"
+      },
+      {
+        "sequence": 267753,
+        "event_id": "event-task-54f498ef-f469-4dc9-a258-efd78799441f",
+        "aggregate_type": "task",
+        "aggregate_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T19:16:23.633979194Z"
+      }
+    ],
+    "snapshot_sequence": 267771,
+    "live_after_sequence": 267771,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

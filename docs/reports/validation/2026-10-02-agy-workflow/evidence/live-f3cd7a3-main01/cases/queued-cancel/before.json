@@ -1,0 +1,45 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-b9f0d0fd-71dd-486a-a893-ec706f3fb48f",
+    "version": 1,
+    "target_agent_id": "live-agy-3-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Create queued-canceled.txt containing exactly b'QUEUED-CANCELED\\n'. Only write this file in your assigned workspace.",
+    "status": "queued",
+    "outcome_state": "pending",
+    "created_at": "2026-10-01T18:51:08.922072957Z",
+    "updated_at": "2026-10-01T18:51:08.922072957Z"
+  },
+  "messages": [
+    {
+      "id": "message-afd9ae74-5dcc-4665-b2d2-6a50e8e335e3",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-b9f0d0fd-71dd-486a-a893-ec706f3fb48f",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+      "target_agent_id": "live-agy-3-main01",
+      "kind": "instruction",
+      "content": "Create queued-canceled.txt containing exactly b'QUEUED-CANCELED\\n'. Only write this file in your assigned workspace.",
+      "created_at": "2026-10-01T18:51:08.922072957Z"
+    }
+  ],
+  "run_attempts": [],
+  "events": [
+    {
+      "sequence": 284,
+      "event_id": "event-1f932e28-34f7-4972-a5cc-9b015f8443a7",
+      "aggregate_type": "task",
+      "aggregate_id": "task-b9f0d0fd-71dd-486a-a893-ec706f3fb48f",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T18:51:08.922072957Z"
+    }
+  ],
+  "snapshot_sequence": 284,
+  "live_after_sequence": 284,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

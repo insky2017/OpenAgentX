@@ -1,0 +1,13 @@
+{
+  "status": "FAIL",
+  "stage": "cancel",
+  "completed": {
+    "role": "task-1668d573-90ac-48da-8aca-97ae5ca64d6d",
+    "mutation": [
+      "task-93747bae-1fd2-477d-bc22-0fb4a9baa5fa",
+      "task-f987e93f-e81e-4cb4-b49f-16c23ad3400a"
+    ],
+    "queued": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9"
+  },
+  "error": "{'completion_basis': '', 'id': 'task-b26fceed-af18-43cb-8c08-62cc195014ad', 'version': 4, 'target_agent_id': 'live-agy-0-main01', 'organization_id': 'default', 'dispatch_mode': 'direct', 'intent': 'mutation', 'content': 'Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.', 'status': 'uncertain', 'error': 'interrupted; AGY stderr: error: interrupted; AGY process exited: exit status 1; AGY stderr: error: interrupted', 'outcome_state': 'available', 'created_at': '2026-10-01T18:27:10.525340119Z', 'updated_at': '2026-10-01T18:27:19.486988219Z'}"
+}

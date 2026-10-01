@@ -1,0 +1,25 @@
+{
+  "at": "2026-10-01T18:30:59.354847+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/network-bindings/mode/publish",
+  "request": {
+    "test_id": "network-mode-test-5a62e31c-4f67-47ce-ad16-6a2472f43d2d",
+    "worker_instance_id": "worker-80f047b7-a23e-430a-8449-54b7217ac4f8",
+    "generation": 1,
+    "meta": {
+      "idempotency_key": "601678981df1aa9bd140274a"
+    }
+  },
+  "status": 200,
+  "response": {
+    "receipt": {
+      "agent_id": "live-agy-cancel01",
+      "backend_id": "primary",
+      "binding_revision": 1,
+      "mode": "inherit",
+      "policy_version": 1,
+      "state": "pending",
+      "work_id": "network-mode-apply-6611cf88-add4-4ed3-a6af-86c80e3fb88b"
+    }
+  }
+}

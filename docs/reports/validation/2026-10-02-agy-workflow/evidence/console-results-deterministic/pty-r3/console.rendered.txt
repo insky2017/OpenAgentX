@@ -1,0 +1,90 @@
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:13 02-Oct-26
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:13 02-Oct-26Agent quote-service | mode normal | connection connected | cursor 9
+Attaching to quote-service                                                    
+Snapshot applied at cursor 6                                                  
+Task none | Worker worker-cc922505... gen 1 online | timeline 3/76 bytes
+> /help                                                                       > /d                                                                          > /di                                                                         Agent quote-service | mode normal | connection connected | cursor 23Task none | Worker worker-cc922505... gen 1 online | timeline 4/97 bytes
+> /disp                                                                       > /dispa                                                                      > /dispatc                                                                    > /dispatch                                                                   > /dispatch f                                                                 > /dispatch fir                                                               > /dispatch firs                                                              > /dispatch first                                                             > /dispatch first i                                                           > /dispatch first iso                                                         > /dispatch first isola                                                       > /dispatch first isolat                                                      > /dispatch first isolated                                                    > /dispatch first isolated wo                                                 > /dispatch first isolated work                                               > /dispatch first isolated workf                                              > /dispatch first isolated workflo                                            > /dispatch first isolated workflow                                           > /dispatch first isolated workflow t                                         > /dispatch first isolated workflow tas                                       > /dispatch first isolated workflow task                                      dispatch pending                                                              
+dispatch succeeded | task task-8957be25-f... | version 1 | status queued |    
+Task task-8957be25-f... v1 queued (queued) | Worker worker-cc922505... gen 1 ...> /help                                                                       Agent quote-service | mode normal | connection connected | cursor 42
+Runtime reply: final fixture reply                                            
+#33 runtime.turn.output | fixture | running | phase-one-safe-output           
+Task task-8957be25-f... v3 waiting_input (run succeeded) | Worker worker-cc92...> /s                                                                          > /st                                                                         > /stee                                                                       > /steer                                                                      > /steer c                                                                    > /steer con                                                                  > /steer cont                                                                 > /steer contin                                                               > /steer continue                                                             > /steer continue wi                                                          > /steer continue wit                                                         > /steer continue with                                                        > /steer continue with th                                                     > /steer continue with the                                                    > /steer continue with the f                                                  > /steer continue with the fi                                                 > /steer continue with the fina                                               > /steer continue with the final                                              > /steer continue with the final r                                            > /steer continue with the final rep                                          > /steer continue with the final repl                                         > /steer continue with the final reply                                        steer pending                                                                 
+steer succeeded | task task-8957be25-f... | task version 4 | status           
+Task task-8957be25-f... v4 waiting_input (run succeeded) | Worker worker-cc92...> /help                                                                       Agent quote-service | mode normal | connection connected | cursor 61
+Runtime reply: final fixture reply                                            
+#53 runtime.turn.output | fixture | running | phase-two-safe-output           
+Task task-8957be25-f... v6 succeeded (run succeeded) | Worker worker-cc922505...Task outcome result: final fixture reply                                      
+#51 run_attempt.started | Task task-8957be25-f... | Run run-b1dd0beb-b2... |  steer succeeded | task task-8957be25-f... | task version 4 | status           
+waiting_input | message message-a4e0f4c... | message version 1 | sequence 2   #33 runtime.turn.output | fixture | running | phase-one-safe-output           
+steer pending                                                                 #31 run_attempt.started | Task task-8957be25-f... | Run run-4dab7bd5-9c... |  
+run version 2 | run status succeeded | Runtime reply state available          > /                                                                           > /ta                                                                         > /tas                                                                        > /tasks                                                                         Tasks: 0 active, 1 recent (bounded)            
+                                                  
+  1 item                                          
+                                                  
+│ task-8957be25-f029-41fd-8015-3cfef047d2f2       Agent quote-service | mode normal | connection connected | cursor 61
+#31 run_attempt.started | Task task-8957be25-f... | Run run-4dab7bd5-9c... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Task task-8957be25-f... v6 succeeded (run succeeded) | Worker worker-cc922505...> /help                                                                       Agent quote-service | mode normal | connection connected | cursor 71#28 task.created | Task task-8957be25-f... | version 3 | status waiting_input 
+#29 mailbox.claimed | Task task-8957be25-f... | version 3 | status            dispatch pending                                                              
+dispatch succeeded | task task-8957be25-f... | version 1 | status queued |    #7 worker.registered                                                          
+#10 worker.heartbeat                                                          Attaching to quote-service                                                    
+Snapshot applied at cursor 6                                                  Agent quote-service | mode normal | connection connected | cursor 81
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────Agent quote-service | mode normal | connection connected | cursor 81
+Attaching to quote-service                                                    
+Snapshot applied at cursor 6                                                  
+Task task-8957be25-f... v6 succeeded (run succeeded) | Worker worker-cc922505...> /help                                                                       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:13 02-Oct-26Agent quote-service | mode normal | connection connected | cursor 91Agent quote-service | mode normal | connection connected | cursor 101

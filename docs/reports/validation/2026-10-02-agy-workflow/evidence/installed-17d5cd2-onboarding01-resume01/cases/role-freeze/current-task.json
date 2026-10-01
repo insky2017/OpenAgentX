@@ -1,0 +1,235 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "version": 3,
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Run python3 role-freeze.py exactly once and wait for it to finish. Then reply only with the role verification code already supplied in your role instructions. Do not read ROLE.md or any other file.",
+    "status": "succeeded",
+    "result": "I have launched `python3 role-freeze.py` and am waiting for it to finish.\nOAX-ROLE-OLD-b84428294c",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T19:07:44.732735205Z",
+    "updated_at": "2026-10-01T19:08:49.654334911Z"
+  },
+  "messages": [
+    {
+      "id": "message-7996aebf-b75d-4805-b10c-63c5fd0da277",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "target_agent_id": "agy-onboarding-e2e",
+      "kind": "instruction",
+      "content": "Run python3 role-freeze.py exactly once and wait for it to finish. Then reply only with the role verification code already supplied in your role instructions. Do not read ROLE.md or any other file.",
+      "created_at": "2026-10-01T19:07:44.732735205Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-01T19:37:44.735270935Z",
+      "instructions_sha256": "41a3c86b63cf4bf5025cd252e0c1dc4ee577facc1f597b5bf318f13e7f9bb8d8",
+      "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+      "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+      "agent_id": "agy-onboarding-e2e",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "agy-batch",
+      "backend_id": "agy",
+      "model": "gemini-3.7-flash-low",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "I have launched `python3 role-freeze.py` and am waiting for it to finish.\nOAX-ROLE-OLD-b84428294c",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-01T19:07:44.735270935Z",
+      "finished_at": "2026-10-01T19:08:49.654334911Z",
+      "created_at": "2026-10-01T19:07:44.735270935Z",
+      "updated_at": "2026-10-01T19:08:49.654334911Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 267642,
+      "event_id": "event-a4388033-bf70-4e34-bf67-b9a75d886bca",
+      "aggregate_type": "task",
+      "aggregate_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T19:07:44.732735205Z"
+    },
+    {
+      "sequence": 267644,
+      "event_id": "event-task-1fabf9c6-4c62-473c-95f9-851f6bfe7ae6",
+      "aggregate_type": "task",
+      "aggregate_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+      "event_type": "task.running",
+      "created_at": "2026-10-01T19:07:44.736265671Z"
+    },
+    {
+      "sequence": 267645,
+      "event_id": "event-run-b7aa1d24-8dae-4d0d-971d-b95b493b23f5",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-01T19:07:44.736269723Z"
+    },
+    {
+      "sequence": 267649,
+      "event_id": "event-runtime-e9361d50-4e3f-4ab2-ba05-7633ff164858",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.init",
+      "created_at": "2026-10-01T19:08:12.09343817Z",
+      "output": {
+        "stage": "init"
+      }
+    },
+    {
+      "sequence": 267650,
+      "event_id": "event-runtime-460fa0f9-c668-4c89-b027-80c3af91ea3f",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:12.178059142Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267652,
+      "event_id": "event-runtime-a0edf67e-b70e-4425-8e2d-c5909bae3be5",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:16.043709908Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267653,
+      "event_id": "event-runtime-9d4db436-4f75-4b4d-ad7f-e05a74971416",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:16.045157385Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267660,
+      "event_id": "event-runtime-d1ab19b5-7712-4d52-9287-c1271b773e24",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:41.121141875Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267661,
+      "event_id": "event-runtime-10e002e8-ccac-4f19-91b1-dc2073402e94",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:41.122713591Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267662,
+      "event_id": "event-runtime-c8046333-56b2-41ff-a1fa-88caed85ef3f",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:41.172334538Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267666,
+      "event_id": "event-runtime-da77a343-0011-4e94-a201-b89828cc0e95",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:44.447407023Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267667,
+      "event_id": "event-runtime-33e80b3c-091d-4f76-bac8-25edff89dd69",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:44.472896141Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267668,
+      "event_id": "event-runtime-8559f62c-0e35-4c36-92d6-e5702965f4d4",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:44.498218993Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267669,
+      "event_id": "event-runtime-d56ce404-3bc0-42ff-a203-eb916c758a6c",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "runtime.agy.result",
+      "created_at": "2026-10-01T19:08:44.523974757Z",
+      "output": {
+        "stage": "result",
+        "status": "succeeded",
+        "text": "I have launched `python3 role-freeze.py` and am waiting for it to finish.\nOAX-ROLE-OLD-b84428294c\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 267671,
+      "event_id": "event-run-2aff5fbf-a4e6-4205-ad04-1a7b2085b398",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-01T19:08:49.65436163Z"
+    },
+    {
+      "sequence": 267672,
+      "event_id": "event-task-ee49aced-a01c-45ac-84ac-1fede2e325e2",
+      "aggregate_type": "task",
+      "aggregate_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+      "event_type": "task.settled",
+      "created_at": "2026-10-01T19:08:49.654365264Z"
+    }
+  ],
+  "snapshot_sequence": 267674,
+  "live_after_sequence": 267674,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

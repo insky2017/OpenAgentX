@@ -1,0 +1,5 @@
+MainPID=343986
+ExecStart={ path=/home/sky/.local/bin/openagentx ; argv[]=/home/sky/.local/bin/openagentx worker run --config /home/sky/.openagentx/workers/agy-onboarding-e2e.yaml ; ignore_errors=no ; start_time=[Fri 2026-10-02 03:12:48 CST] ; stop_time=[n/a] ; pid=343986 ; code=(null) ; status=0/0 }
+ActiveState=active
+SubState=running
+FragmentPath=/home/sky/.config/systemd/user/openagentx-worker@.service

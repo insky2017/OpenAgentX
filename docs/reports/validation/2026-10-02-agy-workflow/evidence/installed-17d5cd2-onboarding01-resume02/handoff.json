@@ -1,0 +1,24 @@
+{
+  "agent": "agy-onboarding-e2e",
+  "workspace": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace",
+  "role_marker": "OAX-ROLE-NEW-ff09d70390",
+  "input": "OAX-FILE-d85eadcfbb",
+  "worker": {
+    "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+    "agent_id": "agy-onboarding-e2e",
+    "generation": 3,
+    "status": "online",
+    "last_heartbeat_at": "2026-10-01T19:16:09.682209684Z",
+    "lease_until": "2026-10-01T19:16:39.682209684Z",
+    "started_at": "2026-10-01T19:12:49.669087297Z",
+    "updated_at": "2026-10-01T19:16:09.682209684Z"
+  },
+  "daemon": {
+    "pid": 306551,
+    "state": "S",
+    "ppid": 1722,
+    "pgid": 306551,
+    "starttime": "9994153"
+  },
+  "url": "http://127.0.0.1:18100"
+}

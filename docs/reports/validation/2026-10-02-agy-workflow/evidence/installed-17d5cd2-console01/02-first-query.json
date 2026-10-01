@@ -1,0 +1,67 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "task_id": "task-fd9c1ca3-870c-4b02-acbd-0bbaf4d53e26",
+    "version": 3,
+    "agent_id": "agy-onboarding-e2e",
+    "status": "succeeded",
+    "intent": "query",
+    "content": "Read input.txt in your assigned workspace using a tool. Reply only with its exact contents and the role verification code from your role instructions, each on its own line. Request reference: OAX-CONSOLE-364249",
+    "result": "OAX-FILE-d85eadcfbb\nOAX-ROLE-NEW-ff09d70390",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T19:19:31.659072127Z",
+    "updated_at": "2026-10-01T19:19:53.634173248Z"
+  },
+  "work_delivery": {
+    "mailbox_item_id": "mailbox-cd702e8c-a561-4396-8f22-5b542c1ae9cb",
+    "kind": "task",
+    "lane": "work",
+    "state": "accepted",
+    "attempts": 1,
+    "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+    "lease_until": "2026-10-01T19:19:59.68225845Z",
+    "created_at": "2026-10-01T19:19:31.659072127Z",
+    "accepted_at": "2026-10-01T19:19:31.661663303Z"
+  },
+  "latest_run": {
+    "deadline_at": "2026-10-01T19:49:31.661663303Z",
+    "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+    "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+    "run_id": "run-ecd1b455-7f92-4609-a642-badd2066325f",
+    "task_id": "task-fd9c1ca3-870c-4b02-acbd-0bbaf4d53e26",
+    "agent_id": "agy-onboarding-e2e",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+    "worker_generation": 3,
+    "execution_spec_version": 1,
+    "adapter_id": "agy-batch",
+    "backend_id": "agy",
+    "model": "gemini-3.7-flash-low",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 3,
+    "network_binding_revision": 3,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "OAX-FILE-d85eadcfbb\nOAX-ROLE-NEW-ff09d70390",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-01T19:19:31.661663303Z",
+    "finished_at": "2026-10-01T19:19:53.634173248Z",
+    "created_at": "2026-10-01T19:19:31.661663303Z",
+    "updated_at": "2026-10-01T19:19:53.634173248Z"
+  },
+  "latest_message": {
+    "message_id": "message-4ffa56f8-94d5-4b6e-9ed3-4e8d525f1b74",
+    "version": 1,
+    "sequence": 1,
+    "kind": "instruction",
+    "content": "Read input.txt in your assigned workspace using a tool. Reply only with its exact contents and the role verification code from your role instructions, each on its own line. Request reference: OAX-CONSOLE-364249",
+    "created_at": "2026-10-01T19:19:31.659072127Z"
+  },
+  "snapshot_sequence": 267791
+}

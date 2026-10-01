@@ -1,0 +1,17 @@
+{
+  "task_id": "task-477fdefa-7432-4970-b07f-92264beff38f",
+  "run_id": "run-c91d20f5-0ec5-4f3f-b328-395038de846b",
+  "fixture_pid": 150082,
+  "raw_path": "/home/sky/.oax-e/e20-14d7350-r1/runtime-raw/run-150082",
+  "worker_instance_id": "worker-65e91098-a4e1-451c-85fa-22d2f78e5d92",
+  "worker_generation": 1,
+  "task_status": "succeeded",
+  "completion_basis": "query_result_delivered",
+  "turn_result": {
+    "final_reply": true,
+    "runtime_status": "succeeded",
+    "body": "OAX-E20-NORMAL",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  }
+}

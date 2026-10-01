@@ -1,0 +1,24 @@
+{
+  "target": {
+    "label": "daemon",
+    "pid": 143010,
+    "starttime": "9784179"
+  },
+  "signal": "SIGKILL",
+  "at": 1790879431.9717915,
+  "started": {
+    "started": 1790879430.1537604,
+    "processes": [
+      {
+        "pid": 144601,
+        "starttime": "9785835"
+      },
+      {
+        "pid": 144602,
+        "starttime": "9785841"
+      }
+    ]
+  },
+  "lease_wait_bound_seconds": 305,
+  "lease_bound_basis": "worker_service.go RunLease=5m; heartbeat max(existing,now+30s)"
+}

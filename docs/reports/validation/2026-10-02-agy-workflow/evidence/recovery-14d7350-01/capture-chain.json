@@ -1,0 +1,10 @@
+{
+  "capture_sha256": "c390f2165f21f60eea02be9cd681cfd718bc8009983da9c5daccc15732198fee",
+  "delegation": [
+    "capture-agy",
+    "/home/sky/.local/bin/agy-graft",
+    "/home/sky/.local/bin/agy"
+  ],
+  "formal_wrapper_sha256": "ae0955533c13c1ca05f2944efc0a5db4bbfc1cceb8b0fdd8d83c2aa0d539ba88",
+  "requires_unwrapped_installed_smoke": true
+}

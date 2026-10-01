@@ -1,0 +1,27 @@
+[
+  {
+    "path": "long-lease.late.txt",
+    "bytes": 5,
+    "sha256": "f152945b358aa26a9e72e25381deff94e254c547089bd690dccd218e9414d148"
+  },
+  {
+    "path": "long-lease.py",
+    "bytes": 538,
+    "sha256": "601456e44e8ac100afdf7980e70296a5e2704fc6a12eb8582dd346f790ead50c"
+  },
+  {
+    "path": "long-lease.started.json",
+    "bytes": 128,
+    "sha256": "8e69d66424efa1256f361c52e0195b39aa3194f6d3a74498a24b06733876e02c"
+  },
+  {
+    "path": "long-lease.invocations.jsonl",
+    "bytes": 42,
+    "sha256": "c932d28a2f39e620e52a767e79de71070232d9e1b770afd47d47a76e827a41e5"
+  },
+  {
+    "path": "ROLE.md",
+    "bytes": 414,
+    "sha256": "efc91c2d5e45957abad8c8e31d287205e577add94d8f850dca375c5b2d0a34de"
+  }
+]

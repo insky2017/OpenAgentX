@@ -1,0 +1,118 @@
+{
+  "status": "PASS",
+  "cases": [
+    {
+      "case": "empty",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 5,
+      "task_status": "uncertain",
+      "final_reply": false
+    },
+    {
+      "case": "empty-recovery",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "succeeded",
+      "final_reply": true
+    },
+    {
+      "case": "bad-json",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 5,
+      "task_status": "uncertain",
+      "final_reply": false
+    },
+    {
+      "case": "bad-json-recovery",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "succeeded",
+      "final_reply": true
+    },
+    {
+      "case": "missing-terminal",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "uncertain",
+      "final_reply": false
+    },
+    {
+      "case": "missing-terminal-recovery",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "succeeded",
+      "final_reply": true
+    },
+    {
+      "case": "truncated-json",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 5,
+      "task_status": "uncertain",
+      "final_reply": false
+    },
+    {
+      "case": "truncated-json-recovery",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "succeeded",
+      "final_reply": true
+    },
+    {
+      "case": "oversized-result",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "uncertain",
+      "final_reply": false
+    },
+    {
+      "case": "oversized-result-recovery",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "succeeded",
+      "final_reply": true
+    },
+    {
+      "case": "conflicting-terminal",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 7,
+      "task_status": "uncertain",
+      "final_reply": false
+    },
+    {
+      "case": "conflicting-terminal-recovery",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "succeeded",
+      "final_reply": true
+    },
+    {
+      "case": "exit-zero-stderr",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "uncertain",
+      "final_reply": false
+    },
+    {
+      "case": "exit-zero-stderr-recovery",
+      "byte_exact_process_hashes": true,
+      "journal_event_count": 6,
+      "task_status": "succeeded",
+      "final_reply": true
+    }
+  ],
+  "private_owner_password_absent_from_evidence": true,
+  "same_worker_instance_count": 1,
+  "same_generation_count": 1,
+  "owned_cleanup": [
+    {
+      "pid": 149257,
+      "stop_sent": true,
+      "alive_after": false
+    },
+    {
+      "pid": 149091,
+      "stop_sent": true,
+      "alive_after": false
+    }
+  ]
+}

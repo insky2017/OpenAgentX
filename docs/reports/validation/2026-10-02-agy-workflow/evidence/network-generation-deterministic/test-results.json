@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "command": "go test ./internal/cli/fleet -run 'TestAgent(Network|Existing)' -count=1 -v",
+      "exit_code": 0,
+      "result": "PASS",
+      "package_seconds": 0.024,
+      "cases": [
+        "initial publish succeeded/failed",
+        "named profile explicit recovery required",
+        "inherit/current generation and binding CAS",
+        "direct/current generation and binding CAS",
+        "inherit/direct test HTTP 409",
+        "inherit/direct publish HTTP 409"
+      ]
+    },
+    {
+      "command": "go test ./internal/cli/fleet -count=1",
+      "exit_code": 0,
+      "stdout": "ok  \topenagentx/internal/cli/fleet\t3.646s\n"
+    },
+    {
+      "command": "git diff --check -- internal/cli/fleet/agent.go internal/cli/fleet/agent_test.go",
+      "exit_code": 0,
+      "stdout": ""
+    }
+  ],
+  "capture_note": "Persisted from exec tool outputs; no installed-service claim.",
+  "source_sha256": {
+    "internal/cli/fleet/agent.go": "e2a559efda63dd20e591efdde1a653a00ee726e1abe1aef787b77d59bdcd695e",
+    "internal/cli/fleet/agent_test.go": "0a8f37b64f2ed89b060f908f4814b9de9e6f1890dfa974ae250093223ad6ccdf"
+  }
+}

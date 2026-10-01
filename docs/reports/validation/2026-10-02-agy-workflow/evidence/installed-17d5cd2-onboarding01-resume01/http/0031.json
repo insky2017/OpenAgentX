@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-01T19:11:15.993574+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/mailboxes?agent_id=agy-onboarding-e2e",
+  "request": null,
+  "status": 200,
+  "response": [
+    {
+      "sequence": 73,
+      "mailbox_item_id": "mailbox-87b90bc1-dbd8-48b4-8920-d6bda2b079b8",
+      "target_agent_id": "agy-onboarding-e2e",
+      "kind": "task",
+      "lane": "work",
+      "task_id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+      "state": "accepted",
+      "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+      "fencing_token": "[REDACTED]",
+      "lease_until": "2026-10-01T19:07:43.638166686Z",
+      "attempts": 1,
+      "created_at": "2026-10-01T19:07:22.643767341Z",
+      "accepted_at": "2026-10-01T19:07:22.647717036Z"
+    },
+    {
+      "sequence": 74,
+      "mailbox_item_id": "mailbox-5f6c1208-ed3c-4ad3-a175-3959f12da4a4",
+      "target_agent_id": "agy-onboarding-e2e",
+      "kind": "task",
+      "lane": "work",
+      "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+      "state": "accepted",
+      "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+      "fencing_token": "[REDACTED]",
+      "lease_until": "2026-10-01T19:08:13.631772709Z",
+      "attempts": 1,
+      "created_at": "2026-10-01T19:07:44.732735205Z",
+      "accepted_at": "2026-10-01T19:07:44.735270935Z"
+    },
+    {
+      "sequence": 75,
+      "mailbox_item_id": "mailbox-4fdc0dda-8192-4a58-a748-df3bfd4e86b4",
+      "target_agent_id": "agy-onboarding-e2e",
+      "kind": "task",
+      "lane": "work",
+      "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "state": "pending",
+      "attempts": 0,
+      "created_at": "2026-10-01T19:08:16.745986413Z"
+    }
+  ]
+}

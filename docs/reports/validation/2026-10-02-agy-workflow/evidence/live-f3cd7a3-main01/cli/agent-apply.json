@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/identity.yaml"
+  ],
+  "exit_code": 0,
+  "output": "Owner password: \r\nCreated Agent \"live-agy-3-main01\" in Organization \"default\"\r\n"
+}

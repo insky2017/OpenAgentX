@@ -1,0 +1,21 @@
+{
+  "task": {
+    "id": "task-a1f2c61c-9c0a-4881-beb9-577156157e25",
+    "version": 3,
+    "sender_agent_id": "",
+    "sender_principal_id": "human-owner-551bb71f-563d-4e69-b39a-4fc77587f261",
+    "target_agent_id": "live-agy-cancel01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "completion_basis": "",
+    "idempotency_key": "9478dd8389136a879435531e",
+    "content": "Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.",
+    "status": "cancel_requested",
+    "cancel_requested_by": "human-owner-551bb71f-563d-4e69-b39a-4fc77587f261",
+    "cancel_requested_at": "2026-10-01T18:31:09.390223814Z",
+    "created_at": "2026-10-01T18:31:01.377763114Z",
+    "updated_at": "2026-10-01T18:31:09.390223814Z"
+  },
+  "sequence": 2
+}

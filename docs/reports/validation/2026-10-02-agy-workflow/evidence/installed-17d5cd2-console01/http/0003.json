@@ -1,0 +1,26 @@
+{
+  "at": 1790882350.2334795,
+  "method": "GET",
+  "path": "/api/console/v1/attach?agent_id=agy-onboarding-e2e&mode=normal",
+  "status": 200,
+  "response": {
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    },
+    "agent_id": "agy-onboarding-e2e",
+    "mode": "normal",
+    "generation": 3,
+    "worker_status": "online",
+    "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+    "last_heartbeat_at": "2026-10-01T19:19:09.682413113Z",
+    "lease_until": "2026-10-01T19:19:39.682413113Z",
+    "backend_health": {
+      "agy": "healthy"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 267770
+  }
+}

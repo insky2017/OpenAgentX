@@ -1,0 +1,132 @@
+{
+  "at": "2026-10-01T18:32:03.334838+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-524bd5c7-dc9e-41f5-bb74-9cb41a032fed",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-524bd5c7-dc9e-41f5-bb74-9cb41a032fed",
+      "version": 3,
+      "target_agent_id": "live-agy-d7350-r1",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "OAX-E20-CASE:normal",
+      "status": "succeeded",
+      "result": "OAX-E20-NORMAL",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T18:32:01.320119394Z",
+      "updated_at": "2026-10-01T18:32:02.648893372Z"
+    },
+    "messages": [
+      {
+        "id": "message-ac7c15f0-fcc5-41cc-b986-6b7bbb97fb43",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-524bd5c7-dc9e-41f5-bb74-9cb41a032fed",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-4010b2b8-0a26-49c8-a090-64ff740320a9",
+        "target_agent_id": "live-agy-d7350-r1",
+        "kind": "instruction",
+        "content": "OAX-E20-CASE:normal",
+        "created_at": "2026-10-01T18:32:01.320119394Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:32:11.323678153Z",
+        "instructions_sha256": "925dcc704248ce215f4b8a09d9401f79afa18de8dba71c5450724eb8a6c553cd",
+        "instructions_path": "/home/sky/.oax-e/e20-14d7350-r1/workspace/ROLE.md",
+        "run_id": "run-75d418bf-37b3-4f17-b1b4-7203a40ca79f",
+        "task_id": "task-524bd5c7-dc9e-41f5-bb74-9cb41a032fed",
+        "agent_id": "live-agy-d7350-r1",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-65e91098-a4e1-451c-85fa-22d2f78e5d92",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "default",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-E20-NORMAL",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T18:32:01.323678153Z",
+        "finished_at": "2026-10-01T18:32:02.648893372Z",
+        "created_at": "2026-10-01T18:32:01.323678153Z",
+        "updated_at": "2026-10-01T18:32:02.648893372Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 126,
+        "event_id": "event-f1907924-e302-43d6-a2c9-a16aa11efbd1",
+        "aggregate_type": "task",
+        "aggregate_id": "task-524bd5c7-dc9e-41f5-bb74-9cb41a032fed",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:32:01.320119394Z"
+      },
+      {
+        "sequence": 128,
+        "event_id": "event-task-134742b4-a6a1-416a-a685-877d3dfe1f29",
+        "aggregate_type": "task",
+        "aggregate_id": "task-524bd5c7-dc9e-41f5-bb74-9cb41a032fed",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:32:01.326401591Z"
+      },
+      {
+        "sequence": 129,
+        "event_id": "event-run-b30a1421-3dcd-47ee-b628-46a43471110c",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-75d418bf-37b3-4f17-b1b4-7203a40ca79f",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:32:01.326406646Z"
+      },
+      {
+        "sequence": 132,
+        "event_id": "event-runtime-1370a2ed-12cd-4540-9deb-19fece58efc5",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-75d418bf-37b3-4f17-b1b4-7203a40ca79f",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T18:32:02.639495043Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "OAX-E20-NORMAL",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 133,
+        "event_id": "event-run-d603cc73-d399-4fb1-b34f-dbeb3cd0dfb2",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-75d418bf-37b3-4f17-b1b4-7203a40ca79f",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T18:32:02.648922513Z"
+      },
+      {
+        "sequence": 134,
+        "event_id": "event-task-a3003c2e-7e1d-47d8-8abf-ca1a51692997",
+        "aggregate_type": "task",
+        "aggregate_id": "task-524bd5c7-dc9e-41f5-bb74-9cb41a032fed",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T18:32:02.648941382Z"
+      }
+    ],
+    "snapshot_sequence": 135,
+    "live_after_sequence": 135,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

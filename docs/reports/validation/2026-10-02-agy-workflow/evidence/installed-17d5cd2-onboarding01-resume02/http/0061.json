@@ -1,0 +1,194 @@
+{
+  "at": "2026-10-01T19:15:56.344708+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-75772a38-2188-4f81-836a-0471af82b0b4",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+      "version": 3,
+      "target_agent_id": "agy-onboarding-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run python3 systemd-crash.py exactly once and wait for it to finish. Do not retry this script or execute other scripts.",
+      "status": "uncertain",
+      "outcome_state": "not_recorded",
+      "created_at": "2026-10-01T19:11:54.672426153Z",
+      "updated_at": "2026-10-01T19:12:53.346201811Z"
+    },
+    "messages": [
+      {
+        "id": "message-dbd751e9-c848-4e97-80d6-85128f137a72",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "agy-onboarding-e2e",
+        "kind": "instruction",
+        "content": "Run python3 systemd-crash.py exactly once and wait for it to finish. Do not retry this script or execute other scripts.",
+        "created_at": "2026-10-01T19:11:54.672426153Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:41:54.674989601Z",
+        "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+        "run_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "task_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+        "agent_id": "agy-onboarding-e2e",
+        "version": 2,
+        "status": "uncertain",
+        "worker_instance_id": "worker-61a2f595-4f9c-475e-9218-33c9c44cbdf8",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "agy",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result": {
+          "final_reply": false,
+          "runtime_status": "uncertain",
+          "error": "RunAttempt lease expired during recovery",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T19:11:54.674989601Z",
+        "finished_at": "2026-10-01T19:12:53.346201811Z",
+        "created_at": "2026-10-01T19:11:54.674989601Z",
+        "updated_at": "2026-10-01T19:12:53.346201811Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 267696,
+        "event_id": "event-e6283e91-1668-4ed9-b2d6-badcf02f41e1",
+        "aggregate_type": "task",
+        "aggregate_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:11:54.672426153Z"
+      },
+      {
+        "sequence": 267698,
+        "event_id": "event-task-3c643ee8-faab-4802-a1f7-e2e07ae722ad",
+        "aggregate_type": "task",
+        "aggregate_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:11:54.675959101Z"
+      },
+      {
+        "sequence": 267699,
+        "event_id": "event-run-d3d80af1-d86f-4b99-a4b3-a83fcea97097",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:11:54.675963206Z"
+      },
+      {
+        "sequence": 267702,
+        "event_id": "event-runtime-bec6fe48-27f2-4bf8-9e16-f5c4fca8230a",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T19:12:05.304766419Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 267703,
+        "event_id": "event-runtime-9547cb76-cfa6-4f04-9df7-15c3640d8117",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:12:05.390840539Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267705,
+        "event_id": "event-runtime-94e0e058-3817-425b-8287-6f33154ffbfb",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:12:16.363754045Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267706,
+        "event_id": "event-runtime-aa8fb622-bb01-4b4d-a934-211a2f00d359",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:12:16.365142706Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267707,
+        "event_id": "event-runtime-86ab1366-0d5a-421d-8744-9195ff0c1824",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:12:16.38915397Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267709,
+        "event_id": "event-runtime-f297e7d5-c975-46bf-aaf3-3736b43b5cbb",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:12:19.453995531Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267710,
+        "event_id": "event-runtime-60e7677c-b21b-495f-a7f7-aba7904770fd",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:12:19.455276597Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267713,
+        "event_id": "event-recovery-12f628a8-c715-4b6d-8245-b692c5566c0e",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-fbdb7772-b797-4ff4-a880-6e16b3d4f371",
+        "event_type": "run_attempt.uncertain",
+        "created_at": "2026-10-01T19:12:53.346201811Z"
+      },
+      {
+        "sequence": 267714,
+        "event_id": "event-recovery-2b97a52e-3363-4b0b-b8a3-27f74d5dc42a",
+        "aggregate_type": "task",
+        "aggregate_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+        "event_type": "task.uncertain",
+        "created_at": "2026-10-01T19:12:53.346201811Z"
+      }
+    ],
+    "snapshot_sequence": 267732,
+    "live_after_sequence": 267732,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

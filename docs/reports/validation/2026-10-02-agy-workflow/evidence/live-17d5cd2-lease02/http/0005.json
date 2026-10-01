@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-01T19:05:52.039421+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/network-bindings/mode/tests",
+  "request": {
+    "agent_id": "live-agy--lease02",
+    "backend_id": "primary",
+    "mode": "inherit",
+    "worker_instance_id": "worker-39267579-14f1-4f7e-97eb-e965a1df7519",
+    "generation": 1,
+    "meta": {
+      "idempotency_key": "adb56a86d1f7e02d9ba206a6"
+    }
+  },
+  "status": 200,
+  "response": {
+    "receipt": {
+      "agent_id": "live-agy--lease02",
+      "backend_id": "primary",
+      "binding_revision": 0,
+      "manifest_digest": "de7ee1d454d2d77acf77d2a2e20eb7cec9346ba6b7930473a5aaede7ce3b8535",
+      "mode": "inherit",
+      "policy_version": 1,
+      "state": "pending",
+      "test_id": "network-mode-test-99c071fe-f49a-4147-813e-ef88d553aa3d"
+    }
+  }
+}

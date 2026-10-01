@@ -1,0 +1,22 @@
+[
+  {
+    "path": "daemon-sigkill.py",
+    "bytes": 551,
+    "sha256": "17c0495373801bfa578fb0c72ce817b6b0eeafb6472ba98a789e1bfc3a6a2079"
+  },
+  {
+    "path": "daemon-sigkill.started.json",
+    "bytes": 128,
+    "sha256": "bc46986f2e5d8085947dc3f7e1ec7006e5460e6be78988dc9b3ec0a4e85fd9fa"
+  },
+  {
+    "path": "daemon-sigkill.invocations.jsonl",
+    "bytes": 42,
+    "sha256": "ce2556ef7f6dba5b31e7e2db46dd84c384c387395015ff92e63a9a4e43b09768"
+  },
+  {
+    "path": "ROLE.md",
+    "bytes": 327,
+    "sha256": "bb489b152f596d97481daf3d4b39398de3075bfb219769591049075c8e09f1fb"
+  }
+]

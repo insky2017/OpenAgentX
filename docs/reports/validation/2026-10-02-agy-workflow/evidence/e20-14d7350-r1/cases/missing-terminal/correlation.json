@@ -1,0 +1,17 @@
+{
+  "task_id": "task-631e660f-3264-4e77-bee8-4e9b4a56531a",
+  "run_id": "run-0eaf4f0a-8232-4c54-8bae-fdc4bf720d81",
+  "fixture_pid": 150220,
+  "raw_path": "/home/sky/.oax-e/e20-14d7350-r1/runtime-raw/run-150220",
+  "worker_instance_id": "worker-65e91098-a4e1-451c-85fa-22d2f78e5d92",
+  "worker_generation": 1,
+  "task_status": "uncertain",
+  "completion_basis": "",
+  "turn_result": {
+    "final_reply": false,
+    "runtime_status": "uncertain",
+    "error": "AGY stream-json ended without a terminal event",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  }
+}

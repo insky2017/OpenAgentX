@@ -1,0 +1,14 @@
+{"query": "after-daemon-sigkill-continuation", "task_id": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b", "status": "succeeded"}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 305}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 275}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 245}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 215}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 185}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 155}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 125}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 95}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 65}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 35}
+{"case": "worker-sigkill", "waiting_for_run_lease_seconds": 5}
+{"query": "after-worker-sigkill", "task_id": "task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5", "status": "succeeded"}
+{"case": "worker-sigkill", "status": "PASS", "task_id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7"}

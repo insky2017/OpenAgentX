@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:05:56.070129+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy--lease02",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Run python3 long-lease.py in your assigned workspace exactly once and wait for it to finish. This query explicitly authorizes this one diagnostic tool. Do not run any other script or retry this command. After it completes reply exactly LONG-LEASE-DONE.",
+    "meta": {
+      "idempotency_key": "65c7cab865479261e843c839"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 1
+  }
+}

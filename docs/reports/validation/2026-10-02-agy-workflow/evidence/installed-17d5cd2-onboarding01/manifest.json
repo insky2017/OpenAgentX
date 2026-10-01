@@ -1,0 +1,10 @@
+{
+  "candidate": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "binary": "/home/sky/.local/bin/openagentx",
+  "binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd",
+  "script_sha256": "53a7208f548cf72a0e4cadb9b2d2e6c954d4ac643b88cd58762f02a21d266ae1",
+  "at": "2026-10-01T19:06:52.076892+00:00",
+  "coverage": "I actual user-systemd, formal unwrapped agy-graft, PTY onboarding, roles, pause/resume",
+  "profile": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01",
+  "url": "http://127.0.0.1:18100"
+}

@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-01T18:49:18.556503+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks/task-fc523622-3db5-4ea0-9d6c-99752c550182/review",
+  "request": {
+    "meta": {
+      "idempotency_key": "review-69b8e498940e8319",
+      "expected_version": 3
+    },
+    "run_id": "run-49d2a3b0-9ef7-4b99-8087-8f9ad6fd7abe",
+    "run_version": 2,
+    "decision": "accepted",
+    "note": "Independent harness verified exact result.txt bytes and SHA-256."
+  },
+  "status": 200,
+  "response": {
+    "id": "task-review-093f0086-9f66-5ef3-92b9-27ce3a0e6639",
+    "task_id": "task-fc523622-3db5-4ea0-9d6c-99752c550182",
+    "run_id": "run-49d2a3b0-9ef7-4b99-8087-8f9ad6fd7abe",
+    "run_version": 2,
+    "result_sha256": "6a623741eed795148f10257c101e107629da73fd7a25b5eecb44a3918ffb4fa4",
+    "decision": "accepted",
+    "note": "Independent harness verified exact result.txt bytes and SHA-256.",
+    "reviewed_by": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+    "created_at": "2026-10-01T18:49:18.55527438Z",
+    "sequence": 100,
+    "task_version": 4
+  }
+}

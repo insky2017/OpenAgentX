@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-01T19:10:04.296042+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/network-profiles?agent_id=live-agy-riodic01",
+  "request": null,
+  "status": 200,
+  "response": {
+    "profiles": [],
+    "versions": [],
+    "tests": [],
+    "mode_tests": [],
+    "bindings": [],
+    "active_runs": []
+  }
+}

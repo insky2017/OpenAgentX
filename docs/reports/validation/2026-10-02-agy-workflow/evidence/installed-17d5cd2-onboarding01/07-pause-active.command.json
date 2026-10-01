@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "pause",
+    "agy-onboarding-e2e"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 33.16659318099846,
+  "prompts_remaining": 0
+}

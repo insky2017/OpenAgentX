@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:10:08.336869+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-riodic01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run python3 worker-periodic-recovery.py in your assigned workspace exactly once and wait for it to finish. Do not run any other script or retry this command.",
+    "meta": {
+      "idempotency_key": "ecd4dd6ba8547a2e647dc15e"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-11c02b4c-b313-4d17-82ee-eea7e2e19a67",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 1
+  }
+}

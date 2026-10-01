@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-01T19:04:32.369993+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "live-agy--lease01",
+        "principal_id": "agent-live-agy--lease01",
+        "organization_id": "default",
+        "display_name": "Live AGY verification",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-01T19:04:30.100701208Z",
+        "updated_at": "2026-10-01T19:04:30.100701208Z",
+        "readiness": {
+          "ready": false,
+          "can_start_now": false,
+          "reason": "后台未运行",
+          "next_action": "openagentx agent resume live-agy--lease01"
+        }
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 6,
+    "server_time": "2026-10-01T19:04:32.368759921Z",
+    "tasks": [],
+    "workers": []
+  }
+}

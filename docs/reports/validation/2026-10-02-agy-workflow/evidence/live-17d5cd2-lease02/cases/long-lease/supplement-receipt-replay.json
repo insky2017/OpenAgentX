@@ -1,0 +1,18 @@
+{
+  "receipt": {
+    "message_id": "message-676b01bd-6d6b-5833-a93e-3e34f91d4205",
+    "message_version": 1,
+    "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+    "task_version": 3,
+    "task_status": "running",
+    "sequence": 2
+  },
+  "replay": {
+    "message_id": "message-676b01bd-6d6b-5833-a93e-3e34f91d4205",
+    "message_version": 1,
+    "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+    "task_version": 3,
+    "task_status": "running",
+    "sequence": 2
+  }
+}

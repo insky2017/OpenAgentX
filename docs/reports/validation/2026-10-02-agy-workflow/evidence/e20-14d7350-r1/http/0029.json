@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:31:51.201480+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-d7350-r1",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "OAX-E20-CASE:truncated-json",
+    "meta": {
+      "idempotency_key": "f87fd81dc20cfa09091341ae"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-8e0f8339-03ae-49d3-bf4f-dc1b9d6531fd",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 7
+  }
+}

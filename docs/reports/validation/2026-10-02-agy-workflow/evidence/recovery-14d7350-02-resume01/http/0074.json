@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:42:44.468357+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-d7350-02",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-LIVE-d7350-02-after-daemon-sigkill-continuation. Do not call tools or read files.",
+    "meta": {
+      "idempotency_key": "958403e9851afe5da9203da5"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

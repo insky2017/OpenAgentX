@@ -1,0 +1,23 @@
+   Tasks: 0 active, 7 recent (bounded)
+
+  “task-d153…” 7 items
+
+│ task-d1538e2a-e0fd-4253-b670-f5b9f722701f
+│ succeeded version 3 Reply with exactly OAX-CONSOLE-364249-CONTINUED. Do not u…
+
+  task-fd9c1ca3-870c-4b02-acbd-0bbaf4d53e26
+  succeeded version 5 Read input.txt in your assigned workspace using a tool. R…
+
+  task-641729f8-6f4a-432c-85e4-6eebe7919be0
+  succeeded version 3 Reply with exactly OAX-LIVE-arding01-after-systemd-crash.…
+
+  task-75772a38-2188-4f81-836a-0471af82b0b4
+  uncertain version 3 Run python3 systemd-crash.py exactly once and wait for it…
+
+  task-37b0c997-8544-4e58-a69e-014e9b7dea1c
+  succeeded version 3 Reply with only your role verification code from your rol…
+
+
+  ••
+
+  ↑/k up • ↓/j down • / filter • esc clear filter • q quit • ? more

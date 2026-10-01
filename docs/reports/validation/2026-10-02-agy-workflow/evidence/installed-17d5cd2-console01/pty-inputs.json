@@ -1,0 +1,128 @@
+[
+  {
+    "at": 1790882366.8178387,
+    "label": "launch installed Console",
+    "text": "exec /home/sky/.local/bin/openagentx console attach --agent agy-onboarding-e2e",
+    "enter": true
+  },
+  {
+    "at": 1790882368.6448667,
+    "label": "Console command",
+    "text": "/dispatch --intent query Read input.txt in your assigned workspace using a tool. Reply only with its exact contents and the role verification code from your role instructions, each on its own line. Request reference: OAX-CONSOLE-364249",
+    "enter": true
+  },
+  {
+    "at": 1790882394.055184,
+    "label": "timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882394.4989402,
+    "label": "restore timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882395.0503573,
+    "label": "Console command",
+    "text": "/accept Independently checked input file and role marker",
+    "enter": true
+  },
+  {
+    "at": 1790882396.1898663,
+    "label": "timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882396.6351871,
+    "label": "restore timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882397.186411,
+    "label": "Console command",
+    "text": "/result-reject Please produce the requested follow-up marker",
+    "enter": true
+  },
+  {
+    "at": 1790882398.3742645,
+    "label": "timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882398.8193789,
+    "label": "restore timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882399.3740287,
+    "label": "Console command",
+    "text": "/continue --intent query Reply with exactly OAX-CONSOLE-364249-CONTINUED. Do not use tools.",
+    "enter": true
+  },
+  {
+    "at": 1790882412.99064,
+    "label": "timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882413.4353137,
+    "label": "restore timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882413.9867346,
+    "label": "Console command",
+    "text": "/quit",
+    "enter": true
+  },
+  {
+    "at": 1790882416.060419,
+    "label": "Console command",
+    "text": "/tasks",
+    "enter": true
+  },
+  {
+    "at": 1790882416.7991612,
+    "label": "filter completed Task by exact ID",
+    "text": "/task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+    "enter": false
+  },
+  {
+    "at": 1790882418.6126037,
+    "label": "finish task-list filter",
+    "text": "",
+    "enter": true
+  },
+  {
+    "at": 1790882419.170635,
+    "label": "select completed Task",
+    "text": "",
+    "enter": true
+  },
+  {
+    "at": 1790882419.836793,
+    "label": "timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882420.282121,
+    "label": "restore timeline End",
+    "text": "\u001b[F",
+    "enter": false
+  },
+  {
+    "at": 1790882420.842682,
+    "label": "Console command",
+    "text": "/quit",
+    "enter": true
+  }
+]

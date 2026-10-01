@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-01T18:59:55.502Z",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Emulating viewport: {\"deviceScaleFactor\":1,\"isMobile\":true,\"hasTouch\":true,\"isLandscape\":false,\"width\":320,\"height\":740}\n## Latest page snapshot\nuid=8_0 RootWebArea \"OpenAgentX 指挥台\" url=\"http://127.0.0.1:60573/?agent=live-agy-3-main01&view=tasks&task=task-930546d2-50eb-49f5-9d54-2a23c30143e2\"\n  uid=20_0 main\n    uid=20_1 StaticText \"OPENAGENTX\"\n    uid=20_2 heading \"指挥台\" level=\"1\"\n    uid=20_3 StaticText \"用户名\"\n    uid=20_4 textbox \"用户名\" value=\"owner\"\n    uid=20_5 StaticText \"密码\"\n    uid=20_6 textbox \"密码\"\n    uid=20_7 button \"登录\"\n"
+      }
+    ]
+  }
+}

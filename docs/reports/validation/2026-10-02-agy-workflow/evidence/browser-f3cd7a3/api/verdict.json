@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "ids": {
+    "mutation": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+    "continue": "task-930546d2-50eb-49f5-9d54-2a23c30143e2",
+    "auth": "task-25699755-5361-42f2-be52-2aeaec5241b0",
+    "supplement": "task-f5121528-686f-4e4f-8af9-9e1acce2e2bb",
+    "cancel": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec"
+  },
+  "source_commit": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "web_identical_to_installed_17d5cd2": true,
+  "browser_tool": "Chrome DevTools real actions",
+  "at": "2026-10-01T19:13:45.008772+00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-01T19:11:13.638692+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/network-bindings/mode/publish",
+  "request": {
+    "meta": {
+      "expected_version": 1,
+      "idempotency_key": "3febdb155b602e3b2d9d189d"
+    },
+    "test_id": "network-mode-test-d981e357-a9af-4fba-a72c-3e7fd449784f",
+    "worker_instance_id": "worker-b69acb72-ce50-4a1c-9b60-54ee13a77233",
+    "generation": 2
+  },
+  "status": 200,
+  "response": {
+    "receipt": {
+      "agent_id": "live-agy-riodic01",
+      "backend_id": "primary",
+      "binding_revision": 2,
+      "mode": "inherit",
+      "policy_version": 2,
+      "state": "pending",
+      "work_id": "network-mode-apply-881ec548-c9c5-434d-bc5e-c747a2661061"
+    }
+  }
+}

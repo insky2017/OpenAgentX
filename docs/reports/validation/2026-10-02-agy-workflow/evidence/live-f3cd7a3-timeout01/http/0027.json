@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:49:46.141369+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-imeout01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-LIVE-imeout01-after-effects. Do not call tools or read files.",
+    "meta": {
+      "idempotency_key": "54c8b0b9008c2ab31cf4fb6b"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

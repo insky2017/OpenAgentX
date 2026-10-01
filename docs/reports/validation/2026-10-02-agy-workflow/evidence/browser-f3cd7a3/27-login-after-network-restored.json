@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-01T19:15:36.897Z",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "## Latest page snapshot\nuid=31_0 RootWebArea \"OpenAgentX 指挥台\" url=\"http://127.0.0.1:60573/?agent=live-agy-3-main01\"\n  uid=35_0 banner\n    uid=35_1 StaticText \"OPENAGENTX\"\n    uid=35_2 heading \"指挥台\" level=\"1\"\n    uid=35_3 StaticText \"在线\"\n    uid=35_4 button \"退出\" description=\"退出\"\n  uid=35_5 main\n    uid=35_6 StaticText \"组织态势\"\n    uid=35_7 heading \"1 个 Agent 在线\" level=\"2\"\n    uid=35_8 StaticText \"0\"\n    uid=35_9 StaticText \" 个审批待处理 · \"\n    uid=35_10 StaticText \"1\"\n    uid=35_11 StaticText \" 个有效 Worker\"\n    uid=35_12 button \"查看任务 →\"\n    uid=35_13 heading \"Agent 状态\" level=\"3\"\n    uid=35_14 button \"组织视图\"\n    uid=35_15 StaticText \"Live AGY verification\"\n    uid=35_16 StaticText \"可开始工作\"\n    uid=35_17 StaticText \"live-agy-3-main01\"\n    uid=35_18 StaticText \" · \"\n    uid=35_19 StaticText \"心跳 0 秒前\"\n    uid=35_20 button \"进入工作台 ↗\"\n    uid=35_21 heading \"需要你处理\" level=\"3\"\n    uid=35_22 StaticText \"0\"\n  uid=35_23 navigation \"主导航\"\n    uid=35_24 button \"⌂ 指挥\"\n    uid=35_25 button \"▣ 任务\"\n    uid=35_26 button \"⌘ 组织\"\n    uid=35_27 button \"⚙ Runtime\"\n"
+      }
+    ]
+  }
+}

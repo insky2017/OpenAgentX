@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/continuation.py", line 37, in <module>
+    crash=r.systemd_crash()
+          ^^^^^^^^^^^^^^^^^
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/agy_installed.py", line 119, in systemd_crash
+    new=self.wait(recovered,25)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/agy_live.py", line 99, in wait
+    raise TimeoutError('live condition deadline exceeded')
+TimeoutError: live condition deadline exceeded

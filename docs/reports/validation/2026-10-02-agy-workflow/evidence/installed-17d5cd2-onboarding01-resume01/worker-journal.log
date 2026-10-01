@@ -1,0 +1,29 @@
+Oct 02 03:11:16 sky-LEGION-REN9000K-34IRZ systemd[1722]: Started openagentx-worker@agy-onboarding-e2e.service - OpenAgentX user Worker (agy-onboarding-e2e).
+Oct 02 03:12:20 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Main process exited, code=killed, status=9/KILL
+Oct 02 03:12:25 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Failed with result 'signal'.
+Oct 02 03:12:25 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Consumed 24.320s CPU time, 1.1G memory peak, 0B memory swap peak.
+Oct 02 03:12:28 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Scheduled restart job, restart counter is at 1.
+Oct 02 03:12:28 sky-LEGION-REN9000K-34IRZ systemd[1722]: Started openagentx-worker@agy-onboarding-e2e.service - OpenAgentX user Worker (agy-onboarding-e2e).
+Oct 02 03:12:29 sky-LEGION-REN9000K-34IRZ openagentx[342598]: Error: Worker stopped abnormally: register Worker: Worker API error (409 CONFLICT): logical Agent already has a valid Active Worker
+Oct 02 03:12:29 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Main process exited, code=exited, status=1/FAILURE
+Oct 02 03:12:29 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Failed with result 'exit-code'.
+Oct 02 03:12:32 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Scheduled restart job, restart counter is at 2.
+Oct 02 03:12:32 sky-LEGION-REN9000K-34IRZ systemd[1722]: Started openagentx-worker@agy-onboarding-e2e.service - OpenAgentX user Worker (agy-onboarding-e2e).
+Oct 02 03:12:33 sky-LEGION-REN9000K-34IRZ openagentx[342853]: Error: Worker stopped abnormally: register Worker: Worker API error (409 CONFLICT): logical Agent already has a valid Active Worker
+Oct 02 03:12:33 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Main process exited, code=exited, status=1/FAILURE
+Oct 02 03:12:33 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Failed with result 'exit-code'.
+Oct 02 03:12:36 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Scheduled restart job, restart counter is at 3.
+Oct 02 03:12:36 sky-LEGION-REN9000K-34IRZ systemd[1722]: Started openagentx-worker@agy-onboarding-e2e.service - OpenAgentX user Worker (agy-onboarding-e2e).
+Oct 02 03:12:37 sky-LEGION-REN9000K-34IRZ openagentx[343098]: Error: Worker stopped abnormally: register Worker: Worker API error (409 CONFLICT): logical Agent already has a valid Active Worker
+Oct 02 03:12:37 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Main process exited, code=exited, status=1/FAILURE
+Oct 02 03:12:37 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Failed with result 'exit-code'.
+Oct 02 03:12:40 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Scheduled restart job, restart counter is at 4.
+Oct 02 03:12:40 sky-LEGION-REN9000K-34IRZ systemd[1722]: Started openagentx-worker@agy-onboarding-e2e.service - OpenAgentX user Worker (agy-onboarding-e2e).
+Oct 02 03:12:41 sky-LEGION-REN9000K-34IRZ openagentx[343412]: Error: Worker stopped abnormally: register Worker: Worker API error (409 CONFLICT): logical Agent already has a valid Active Worker
+Oct 02 03:12:41 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Main process exited, code=exited, status=1/FAILURE
+Oct 02 03:12:41 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Failed with result 'exit-code'.
+Oct 02 03:12:44 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Scheduled restart job, restart counter is at 5.
+Oct 02 03:12:44 sky-LEGION-REN9000K-34IRZ systemd[1722]: Started openagentx-worker@agy-onboarding-e2e.service - OpenAgentX user Worker (agy-onboarding-e2e).
+Oct 02 03:12:45 sky-LEGION-REN9000K-34IRZ openagentx[343691]: Error: Worker stopped abnormally: register Worker: Worker API error (409 CONFLICT): logical Agent already has a valid Active Worker
+Oct 02 03:12:45 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Main process exited, code=exited, status=1/FAILURE
+Oct 02 03:12:45 sky-LEGION-REN9000K-34IRZ systemd[1722]: openagentx-worker@agy-onboarding-e2e.service: Failed with result 'exit-code'.

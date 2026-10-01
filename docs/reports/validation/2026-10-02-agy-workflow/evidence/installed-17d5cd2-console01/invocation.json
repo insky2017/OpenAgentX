@@ -1,0 +1,62 @@
+{
+  "argv": [
+    "python3",
+    "scripts/e2e/installed_console.py",
+    "--evidence",
+    "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-console01",
+    "--raw",
+    "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-console01",
+    "--workspace",
+    "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace",
+    "--role-marker",
+    "OAX-ROLE-NEW-ff09d70390",
+    "--commit",
+    "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+    "--idle-seconds",
+    "15"
+  ],
+  "cwd": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree",
+  "exit_code": 0,
+  "harness_sha256": "2103bc835b0a07e4dea58a19814335c38bcf9c80944ee9334efb1a5d7b012585",
+  "raw_harness": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-console01/installed_console.py",
+  "started_at_utc": "2026-10-01T19:19:10.072868+00:00",
+  "finished_at_utc": "2026-10-01T19:20:20.627507+00:00",
+  "journal_commands": [
+    {
+      "argv": [
+        "journalctl",
+        "--user",
+        "-u",
+        "openagentx.service",
+        "--since",
+        "@1790882350",
+        "--until",
+        "@1790882421",
+        "--no-pager",
+        "-o",
+        "short-iso"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 17,
+      "stderr_bytes": 0
+    },
+    {
+      "argv": [
+        "journalctl",
+        "--user",
+        "-u",
+        "openagentx-worker@agy-onboarding-e2e.service",
+        "--since",
+        "@1790882350",
+        "--until",
+        "@1790882421",
+        "--no-pager",
+        "-o",
+        "short-iso"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 17,
+      "stderr_bytes": 0
+    }
+  ]
+}

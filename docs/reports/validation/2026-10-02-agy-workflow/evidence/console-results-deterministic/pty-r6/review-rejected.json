@@ -1,0 +1,77 @@
+{
+  "task": {
+    "review": {
+      "id": "task-review-1522b5ec-e4cf-5bb3-8cb3-c4a6f8511267",
+      "task_id": "task-2df00a96-8c9c-4cf1-8bfb-6defe43247be",
+      "run_id": "run-ebd0ac82-21ff-48a7-b6f4-3eec12eff14e",
+      "run_version": 2,
+      "result_sha256": "45f7b3affcbea043578daec99647291d9036e21523d0fc39ea0532d7179e9009",
+      "decision": "rejected",
+      "note": "PTY report needs more detail",
+      "reviewed_by": "human-owner-ef22deb9-6d01-4f2d-b2f2-f4daf8787e1f",
+      "created_at": "2026-10-01T18:22:35.885034748Z",
+      "sequence": 90,
+      "task_version": 8
+    },
+    "completion_basis": "mutation_effects_known",
+    "task_id": "task-2df00a96-8c9c-4cf1-8bfb-6defe43247be",
+    "version": 8,
+    "agent_id": "quote-service",
+    "status": "succeeded",
+    "intent": "mutation",
+    "content": "first isolated workflow task",
+    "result": "final fixture reply",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T18:22:31.474256209Z",
+    "updated_at": "2026-10-01T18:22:35.885034748Z"
+  },
+  "work_delivery": {
+    "mailbox_item_id": "mailbox-6053bd29-ef32-4f68-b647-75d61f228378",
+    "kind": "task",
+    "lane": "work",
+    "state": "accepted",
+    "attempts": 1,
+    "worker_instance_id": "worker-64d537f1-cf5f-49bf-a3cd-398c70ef4bc5",
+    "lease_until": "2026-10-01T18:23:01.425261523Z",
+    "created_at": "2026-10-01T18:22:31.474256209Z",
+    "accepted_at": "2026-10-01T18:22:31.47706721Z"
+  },
+  "latest_run": {
+    "run_id": "run-ebd0ac82-21ff-48a7-b6f4-3eec12eff14e",
+    "task_id": "task-2df00a96-8c9c-4cf1-8bfb-6defe43247be",
+    "agent_id": "quote-service",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-64d537f1-cf5f-49bf-a3cd-398c70ef4bc5",
+    "worker_generation": 1,
+    "execution_spec_version": 1,
+    "adapter_id": "fake",
+    "backend_id": "local",
+    "model": "fake-workflow-model",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 1,
+    "network_binding_revision": 1,
+    "turn_result": {
+      "final_reply": false,
+      "runtime_status": "succeeded",
+      "body": "final fixture reply",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-01T18:22:32.80798398Z",
+    "finished_at": "2026-10-01T18:22:32.814431382Z",
+    "created_at": "2026-10-01T18:22:32.80798398Z",
+    "updated_at": "2026-10-01T18:22:32.814431382Z"
+  },
+  "latest_message": {
+    "message_id": "message-e9a7d927-49f1-54ed-bb4c-0db1b301686f",
+    "version": 1,
+    "sequence": 2,
+    "kind": "supplement",
+    "content": "continue with the final reply",
+    "created_at": "2026-10-01T18:22:32.805426207Z"
+  },
+  "snapshot_sequence": 95
+}

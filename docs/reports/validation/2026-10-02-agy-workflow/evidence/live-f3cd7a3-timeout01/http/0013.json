@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:48:30.385643+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-imeout01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run python3 timeout.py in your assigned workspace and wait until it completes. Do not run any other script.",
+    "meta": {
+      "idempotency_key": "6e9cb42d7fc2ff4f1c15a01e"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-114a735c-237e-4c91-a2b9-f257977de899",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 1
+  }
+}

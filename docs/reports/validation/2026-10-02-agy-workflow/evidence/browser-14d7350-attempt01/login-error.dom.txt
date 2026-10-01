@@ -1,0 +1,12 @@
+## Latest page snapshot
+uid=1_0 RootWebArea "OpenAgentX 指挥台" url="http://127.0.0.1:48623/?view=tasks&agent=live-agy-0-main01"
+  uid=1_1 main
+    uid=1_2 StaticText "OPENAGENTX"
+    uid=1_3 heading "指挥台" level="1"
+    uid=1_4 StaticText "用户名"
+    uid=1_5 textbox "用户名" value="owner"
+    uid=1_6 StaticText "密码"
+    uid=1_7 textbox "密码" value="•••••••••••••••••••••••••••••••••••••••••••"
+    uid=2_0 StaticText "用户名或密码错误"
+    uid=1_8 button "登录"
+

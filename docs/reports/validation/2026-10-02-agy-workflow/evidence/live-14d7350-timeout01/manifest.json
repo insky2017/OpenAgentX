@@ -1,0 +1,27 @@
+{
+  "source_commit": "14d7350b86125f299615d4a8db61d844ce866758",
+  "binary": "/tmp/oax-live-14d7350/openagentx",
+  "binary_sha256": "0eb375a82202055cbee60f4a32dc6237f5c60ec0601d6f75ee9f65037e2b96a3",
+  "source_kind": "git archive snapshot",
+  "coverage": "R formal API configuration; NOT first-use wizard or installed-service proof",
+  "url": "http://127.0.0.1:49909",
+  "profile": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-14d7350-timeout01",
+  "agent": "live-agy-imeout01",
+  "proxy_mode": "explicit HTTP proxy via formal agy-graft; Runtime environment allowlist applies",
+  "model": "gemini-3.7-flash-low",
+  "agy_version": "1.2.14",
+  "agy-graft_version": "1.2.14",
+  "created_at_utc": "2026-10-01T18:25:44.012805+00:00",
+  "agy_sha256": "0d0d3eba22daf29504dd290151c7ed9a4d33b0c6aa0acfc5da27bc3b01d2f029",
+  "formal_wrapper_sha256": "ae0955533c13c1ca05f2944efc0a5db4bbfc1cceb8b0fdd8d83c2aa0d539ba88",
+  "web_files_sha256": {
+    "icon-512.png": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+    "sw.js": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381",
+    "icon-192.png": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+    "manifest.webmanifest": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+    "icon.svg": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+    "index.html": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+    "assets/app.css": "6062397da78b92b8ce49236e431f6f5a09e1a483e94e2cd61b0864f1b186b32d",
+    "assets/app.js": "2ec44ff0d3f05dbd4ad538b210d365659a2d7a2773d5a691f11baf0760599893"
+  }
+}

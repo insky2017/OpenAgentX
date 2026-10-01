@@ -1,0 +1,7 @@
+Agent agy-onboarding-e2e 服务在线，当前代 2 网络已应用。
+AGY 入口验收 (agy-onboarding-e2e) · 正在工作，新任务将排队
+  当前：task-37b0c997-8544-4e58-a69e-014e9b7dea1c · starting
+  最近：task-37b0c997-8544-4e58-a69e-014e9b7dea1c · running
+  打开：openagentx agent open agy-onboarding-e2e
+  恢复：openagentx agent resume agy-onboarding-e2e
+

@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-01T18:25:34.274086+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-1668d573-90ac-48da-8aca-97ae5ca64d6d",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-1668d573-90ac-48da-8aca-97ae5ca64d6d",
+      "version": 1,
+      "target_agent_id": "live-agy-0-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "What is your role verification code? Reply with only the code from your role instructions. Do not read files or use tools.",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:25:34.267609177Z",
+      "updated_at": "2026-10-01T18:25:34.267609177Z"
+    },
+    "messages": [
+      {
+        "id": "message-a62a2d98-6202-4b8f-a294-fd886042fec0",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-1668d573-90ac-48da-8aca-97ae5ca64d6d",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-b30be6a0-ed7e-475c-8bc6-ee7933fd3a75",
+        "target_agent_id": "live-agy-0-main01",
+        "kind": "instruction",
+        "content": "What is your role verification code? Reply with only the code from your role instructions. Do not read files or use tools.",
+        "created_at": "2026-10-01T18:25:34.267609177Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 18,
+        "event_id": "event-90c0fda1-0cea-4117-9cb2-67ab3fb616ac",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1668d573-90ac-48da-8aca-97ae5ca64d6d",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:25:34.267609177Z"
+      }
+    ],
+    "snapshot_sequence": 19,
+    "live_after_sequence": 19,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

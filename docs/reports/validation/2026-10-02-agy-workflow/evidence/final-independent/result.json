@@ -1,0 +1,127 @@
+{
+  "started_at": "2026-10-01T19:11:51.240857+00:00",
+  "finished_at": "2026-10-01T19:11:52.470357+00:00",
+  "source_head": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "installation": {
+    "service": {
+      "MainPID": "306551",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "proc_exe": "/home/sky/.local/bin/openagentx",
+    "actual_binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd",
+    "expected_binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd",
+    "binary_matches": true,
+    "vcs_revision_matches": true,
+    "vcs_modified_false": true,
+    "paths": {
+      "--db": "/home/sky/.openagentx/data/openagentx.db",
+      "--http-addr": "127.0.0.1:18100",
+      "--web-dir": "/home/sky/.openagentx/web"
+    },
+    "schema_meta": [
+      [
+        1,
+        2,
+        "2026-10-01T19:05:13.326Z"
+      ]
+    ],
+    "schema_matches_installation": true,
+    "web_files": {
+      "assets/app.css": "6062397da78b92b8ce49236e431f6f5a09e1a483e94e2cd61b0864f1b186b32d",
+      "assets/app.js": "ccfb8098ff8359fb1eb75329f4aa7162ab45f6dbe15a256ee0da8341df088e7e",
+      "icon-192.png": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+      "icon-512.png": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+      "icon.svg": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+      "index.html": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+      "manifest.webmanifest": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+      "sw.js": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381"
+    },
+    "disk_web_matches": true,
+    "served_web": {
+      "assets/app.css": {
+        "status": 200,
+        "sha256": "6062397da78b92b8ce49236e431f6f5a09e1a483e94e2cd61b0864f1b186b32d"
+      },
+      "assets/app.js": {
+        "status": 200,
+        "sha256": "ccfb8098ff8359fb1eb75329f4aa7162ab45f6dbe15a256ee0da8341df088e7e"
+      },
+      "icon-192.png": {
+        "status": 200,
+        "sha256": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309"
+      },
+      "icon-512.png": {
+        "status": 200,
+        "sha256": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3"
+      },
+      "icon.svg": {
+        "status": 200,
+        "sha256": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175"
+      },
+      "index.html": {
+        "status": 200,
+        "sha256": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38"
+      },
+      "manifest.webmanifest": {
+        "status": 200,
+        "sha256": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c"
+      },
+      "sw.js": {
+        "status": 200,
+        "sha256": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381"
+      }
+    },
+    "served_web_matches": true
+  },
+  "frozen_adr": {
+    "head_vs_7400806_unchanged": true,
+    "worktree_unchanged": true,
+    "worktree_and_index_vs_head_unchanged": true,
+    "additional_command": [
+      "git",
+      "diff",
+      "--exit-code",
+      "HEAD",
+      "--",
+      "docs/decisions",
+      "docs/adr"
+    ]
+  },
+  "secret_scan": {
+    "scanned_files": 1422,
+    "additional_pending_worktree_files": [
+      "docs/reports/assessment/2026-10-02-summary.md",
+      "docs/reports/validation/2026-10-02-agy-workflow/COVERAGE.md",
+      "docs/reports/validation/2026-10-02-agy-workflow/EXECUTION-LOG.md",
+      "scripts/e2e/agy_installed.py",
+      "scripts/e2e/agy_lease_recovery.py"
+    ],
+    "binary_files_exact_bytes_only": 0,
+    "known_secret_source_files": 21,
+    "exact_secret_matches": [],
+    "pattern_candidates": [],
+    "files_changed_during_scan": [],
+    "excluded_top_level": [
+      "browser-14d7350-attempt01",
+      "browser-7400806-1002f",
+      "browser-f3cd7a3",
+      "installed-17d5cd2-onboarding01",
+      "installed-17d5cd2-onboarding01-resume01",
+      "live-17d5cd2-lease01",
+      "live-17d5cd2-lease02"
+    ],
+    "excluded_files": 297,
+    "limits": "Known secret exact bytes and text patterns only. Binary files are not OCR inspected. Active browser/installed/lease directories excluded; no claim about their final contents."
+  },
+  "untracked_audit": {
+    "file_count": 1408,
+    "suspicious_files": [
+      "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/__pycache__/agy_installed.cpython-312.pyc",
+      "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/__pycache__/agy_live.cpython-312.pyc",
+      "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/__pycache__/agy_recovery.cpython-312.pyc",
+      "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume01/harness-source/__pycache__/agy_workflow.cpython-312.pyc"
+    ],
+    "oversized_files": []
+  }
+}

@@ -1,0 +1,23 @@
+Agent agy-onboarding-e2e | mode normal | connection connected | cursor 267771
+Attaching to agy-onboarding-e2e
+Snapshot applied at cursor 267771
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task none | Worker worker-49949502... gen 3 online | timeline 2/65 bytes
+> /help
+>
+>

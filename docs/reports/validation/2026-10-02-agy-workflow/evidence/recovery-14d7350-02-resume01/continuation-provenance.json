@@ -1,0 +1,6 @@
+{
+  "prior_evidence": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/recovery-14d7350-02",
+  "private_profile": "/home/sky/.local/state/openagentx/evidence/recovery-14d7350-02",
+  "candidate": "14d7350b86125f299615d4a8db61d844ce866758",
+  "scope": "Continue completed daemon reconciliation using preserved DB, then independent Worker SIGKILL. No old Task re-execution."
+}

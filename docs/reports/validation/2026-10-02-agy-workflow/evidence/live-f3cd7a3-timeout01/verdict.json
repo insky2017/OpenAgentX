@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "candidate": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "completed": {
+    "timeout": "task-114a735c-237e-4c91-a2b9-f257977de899",
+    "next": "task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0"
+  },
+  "wizard": "not tested",
+  "installed": "not tested"
+}

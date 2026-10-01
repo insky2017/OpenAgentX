@@ -1,0 +1,39 @@
+{
+  "candidate": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "console",
+    "attach",
+    "--agent",
+    "agy-onboarding-e2e"
+  ],
+  "binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd",
+  "workspace": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace",
+  "input_sha256": "f483d367a862ecdcad610af12a203dac2dbbf6ebd088c3a90ed07897eb2d5438",
+  "input_expected": "OAX-FILE-d85eadcfbb",
+  "role_expected": "OAX-ROLE-NEW-ff09d70390",
+  "created_at_utc": "2026-10-01T19:19:25.271754+00:00",
+  "coverage": "I/R: installed Console + real PTY/tmux + existing real services/AGY",
+  "tmux_server": "oax-installed-console-364249",
+  "terminal": "80x24",
+  "initial_worker": {
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    },
+    "agent_id": "agy-onboarding-e2e",
+    "mode": "normal",
+    "generation": 3,
+    "worker_status": "online",
+    "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+    "last_heartbeat_at": "2026-10-01T19:19:09.682413113Z",
+    "lease_until": "2026-10-01T19:19:39.682413113Z",
+    "backend_health": {
+      "agy": "healthy"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 267770
+  }
+}

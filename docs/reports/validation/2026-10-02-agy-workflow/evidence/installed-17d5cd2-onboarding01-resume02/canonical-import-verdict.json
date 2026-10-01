@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+  "generation": 3,
+  "task_count": 5,
+  "run_count": 5,
+  "identity_worker_bytes_unchanged": true,
+  "task_run_sets_unchanged": true
+}

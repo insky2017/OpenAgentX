@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-01T19:18:57.222680+00:00",
+  "profile": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01",
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 222316,
+      "starttime": "9893034"
+    },
+    {
+      "label": "worker",
+      "pid": 222623,
+      "starttime": "9893258"
+    }
+  ],
+  "results": [
+    {
+      "pid": 222623,
+      "already_stopped": true
+    },
+    {
+      "pid": 222316,
+      "already_stopped": true
+    }
+  ],
+  "owned_stop_sha256": "9c0635fc72e7908f973840471596c76e7dcad4b62d6b6121e5fd686d6772e052",
+  "previous_failure": "ProcessLookupError while reading /proc after existence check; retained separately by root",
+  "all_recorded_processes_stopped": true
+}

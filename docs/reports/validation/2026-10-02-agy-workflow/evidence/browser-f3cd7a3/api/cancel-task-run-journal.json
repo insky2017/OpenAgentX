@@ -1,0 +1,201 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec",
+    "version": 4,
+    "target_agent_id": "live-agy-3-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run python3 browser-cancel.py exactly once in your assigned workspace and wait for completion. Do not run any other script.",
+    "status": "canceled",
+    "result": "I have started `python3 browser-cancel.py` in the workspace and will wait for it to finish.",
+    "error": "AGY process exited: signal: killed",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T19:07:10.834695476Z",
+    "updated_at": "2026-10-01T19:08:05.296387456Z"
+  },
+  "messages": [
+    {
+      "id": "message-5371c2d4-612e-441c-8bbf-ed3d4d75b0db",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+      "target_agent_id": "live-agy-3-main01",
+      "kind": "instruction",
+      "content": "Run python3 browser-cancel.py exactly once in your assigned workspace and wait for completion. Do not run any other script.",
+      "created_at": "2026-10-01T19:07:10.834695476Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-01T19:10:10.838061296Z",
+      "instructions_sha256": "0f94c08866a90e84bdc8199fb36f01c9e52001b5731074df34fe65a1ec2ac24d",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/ROLE.md",
+      "run_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "task_id": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec",
+      "agent_id": "live-agy-3-main01",
+      "version": 2,
+      "status": "canceled",
+      "worker_instance_id": "worker-8d73bb15-de22-4aea-af09-e46f9aa77e90",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "agy-batch",
+      "backend_id": "primary",
+      "model": "gemini-3.7-flash-low",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": false,
+        "runtime_status": "canceled",
+        "body": "I have started `python3 browser-cancel.py` in the workspace and will wait for it to finish.",
+        "error": "AGY process exited: signal: killed",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-01T19:07:10.838061296Z",
+      "finished_at": "2026-10-01T19:08:05.296387456Z",
+      "created_at": "2026-10-01T19:07:10.838061296Z",
+      "updated_at": "2026-10-01T19:08:05.296387456Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 1375,
+      "event_id": "event-1a2f62b2-3a15-44ce-8a6a-7e2e05e9b150",
+      "aggregate_type": "task",
+      "aggregate_id": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T19:07:10.834695476Z"
+    },
+    {
+      "sequence": 1377,
+      "event_id": "event-task-7375409a-3f9c-48f0-8cf3-db639e176c47",
+      "aggregate_type": "task",
+      "aggregate_id": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec",
+      "event_type": "task.running",
+      "created_at": "2026-10-01T19:07:10.839434838Z"
+    },
+    {
+      "sequence": 1378,
+      "event_id": "event-run-4dd685ce-6ed5-47c7-aa5f-063dd3b05c0b",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-01T19:07:10.839438942Z"
+    },
+    {
+      "sequence": 1388,
+      "event_id": "event-runtime-f1bc6ec8-a42b-4fe2-80f0-4933cfcb6b02",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "runtime.agy.init",
+      "created_at": "2026-10-01T19:07:18.795032914Z",
+      "output": {
+        "stage": "init"
+      }
+    },
+    {
+      "sequence": 1389,
+      "event_id": "event-runtime-639376d2-b565-4321-b99f-06fd5c7a9a18",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:07:18.88455871Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 1393,
+      "event_id": "event-runtime-2b387755-8265-417b-a766-1df51329e4f2",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:07:22.036928071Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 1394,
+      "event_id": "event-runtime-15a71cd9-c6d8-433e-bb4c-db18907c8092",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:07:22.038123619Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 1436,
+      "event_id": "event-df2b6be8-b709-499e-8413-6a3a55d3cbc4",
+      "aggregate_type": "task",
+      "aggregate_id": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec",
+      "event_type": "task.cancel_requested",
+      "created_at": "2026-10-01T19:08:02.833275525Z"
+    },
+    {
+      "sequence": 1440,
+      "event_id": "event-runtime-36c9d3c4-79b3-4ae7-ae3b-d97c7ac30e6e",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:02.899243082Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 1441,
+      "event_id": "event-runtime-5ff8a5bd-2460-49f4-919a-279773db5756",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:08:02.900481684Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 1442,
+      "event_id": "event-runtime-a2edc007-82b6-48ff-a104-d999937d0eb4",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "runtime.agy.result",
+      "created_at": "2026-10-01T19:08:02.901861227Z",
+      "output": {
+        "stage": "result",
+        "status": "succeeded",
+        "text": "I have started `python3 browser-cancel.py` in the workspace and will wait for it to finish.\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 1447,
+      "event_id": "event-run-5b9b40a4-05c7-4502-b479-c3fa53e3f58f",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-146b00e8-5c78-4d59-a8e3-7791ff5650ee",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-01T19:08:05.296409055Z"
+    },
+    {
+      "sequence": 1448,
+      "event_id": "event-task-c7e87b45-ffd7-435b-a2fe-76c507801d63",
+      "aggregate_type": "task",
+      "aggregate_id": "task-019cca0a-9541-4d25-a4b7-1ff3c022e9ec",
+      "event_type": "task.settled",
+      "created_at": "2026-10-01T19:08:05.296411973Z"
+    }
+  ],
+  "snapshot_sequence": 1642,
+  "live_after_sequence": 1642,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-01T19:16:10.649763+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+      "version": 1,
+      "target_agent_id": "agy-onboarding-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with exactly OAX-LIVE-arding01-after-systemd-crash. Do not call tools or read files.",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T19:16:10.643477514Z",
+      "updated_at": "2026-10-01T19:16:10.643477514Z"
+    },
+    "messages": [
+      {
+        "id": "message-2a37a326-5042-4411-a40a-7c13fe876a56",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "agy-onboarding-e2e",
+        "kind": "instruction",
+        "content": "Reply with exactly OAX-LIVE-arding01-after-systemd-crash. Do not call tools or read files.",
+        "created_at": "2026-10-01T19:16:10.643477514Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 267739,
+        "event_id": "event-286cf1ba-7d31-4f36-9214-d0c0ab671cea",
+        "aggregate_type": "task",
+        "aggregate_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:16:10.643477514Z"
+      }
+    ],
+    "snapshot_sequence": 267740,
+    "live_after_sequence": 267740,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

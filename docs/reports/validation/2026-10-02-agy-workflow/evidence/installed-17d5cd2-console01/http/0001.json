@@ -1,0 +1,9 @@
+{
+  "at": 1790882350.072868,
+  "method": "GET",
+  "path": "/api/auth/v1/cli/installation",
+  "status": 200,
+  "response": {
+    "installation_id": "rVbjXrYX2sxnpda-Ad6RRSM32fTJpuNLL-bcXwUh_28"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "at": "2026-10-01T19:11:44.507407+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "version": 2,
+      "target_agent_id": "agy-onboarding-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T19:08:16.745986413Z",
+      "updated_at": "2026-10-01T19:11:37.976989804Z"
+    },
+    "messages": [
+      {
+        "id": "message-197f30d4-a5db-41eb-b406-9df84916a231",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "agy-onboarding-e2e",
+        "kind": "instruction",
+        "content": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+        "created_at": "2026-10-01T19:08:16.745986413Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:41:37.976989804Z",
+        "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+        "run_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+        "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+        "agent_id": "agy-onboarding-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-61a2f595-4f9c-475e-9218-33c9c44cbdf8",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "agy",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T19:11:37.976989804Z",
+        "created_at": "2026-10-01T19:11:37.976989804Z",
+        "updated_at": "2026-10-01T19:11:37.976989804Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 267654,
+        "event_id": "event-af316766-a690-4258-9337-18a145c3b6ce",
+        "aggregate_type": "task",
+        "aggregate_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:08:16.745986413Z"
+      },
+      {
+        "sequence": 267684,
+        "event_id": "event-task-8c3f403f-6407-4159-bf33-0e621d1d98fe",
+        "aggregate_type": "task",
+        "aggregate_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:11:37.978387904Z"
+      },
+      {
+        "sequence": 267685,
+        "event_id": "event-run-639bb977-b125-4463-93ef-cea8aef5d908",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:11:37.978392893Z"
+      }
+    ],
+    "snapshot_sequence": 267686,
+    "live_after_sequence": 267686,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

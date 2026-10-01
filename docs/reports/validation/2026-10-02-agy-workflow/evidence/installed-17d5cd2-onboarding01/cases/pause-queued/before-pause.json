@@ -1,0 +1,45 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+    "version": 1,
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+    "status": "queued",
+    "outcome_state": "pending",
+    "created_at": "2026-10-01T19:08:16.745986413Z",
+    "updated_at": "2026-10-01T19:08:16.745986413Z"
+  },
+  "messages": [
+    {
+      "id": "message-197f30d4-a5db-41eb-b406-9df84916a231",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "target_agent_id": "agy-onboarding-e2e",
+      "kind": "instruction",
+      "content": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+      "created_at": "2026-10-01T19:08:16.745986413Z"
+    }
+  ],
+  "run_attempts": [],
+  "events": [
+    {
+      "sequence": 267654,
+      "event_id": "event-af316766-a690-4258-9337-18a145c3b6ce",
+      "aggregate_type": "task",
+      "aggregate_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T19:08:16.745986413Z"
+    }
+  ],
+  "snapshot_sequence": 267654,
+  "live_after_sequence": 267654,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

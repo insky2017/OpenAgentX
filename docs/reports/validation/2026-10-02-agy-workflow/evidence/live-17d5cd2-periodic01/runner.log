@@ -1,0 +1,3 @@
+{"ready": true, "url": "http://127.0.0.1:39435", "evidence": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-periodic01", "private_profile": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-17d5cd2-periodic01"}
+{"query": "after-worker-periodic-recovery", "task_id": "task-65176473-bb01-4f07-8cc8-300c948c0b48", "status": "succeeded"}
+{"case": "worker-periodic-recovery", "status": "PASS"}

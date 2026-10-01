@@ -1,0 +1,169 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+    "version": 3,
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+    "status": "succeeded",
+    "result": "OAX-ROLE-NEW-ff09d70390",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T19:08:16.745986413Z",
+    "updated_at": "2026-10-01T19:11:53.408744787Z"
+  },
+  "messages": [
+    {
+      "id": "message-197f30d4-a5db-41eb-b406-9df84916a231",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "target_agent_id": "agy-onboarding-e2e",
+      "kind": "instruction",
+      "content": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+      "created_at": "2026-10-01T19:08:16.745986413Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-01T19:41:37.976989804Z",
+      "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+      "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+      "run_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "agent_id": "agy-onboarding-e2e",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-61a2f595-4f9c-475e-9218-33c9c44cbdf8",
+      "worker_generation": 2,
+      "execution_spec_version": 1,
+      "adapter_id": "agy-batch",
+      "backend_id": "agy",
+      "model": "gemini-3.7-flash-low",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 2,
+      "network_binding_revision": 2,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX-ROLE-NEW-ff09d70390",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-01T19:11:37.976989804Z",
+      "finished_at": "2026-10-01T19:11:53.408744787Z",
+      "created_at": "2026-10-01T19:11:37.976989804Z",
+      "updated_at": "2026-10-01T19:11:53.408744787Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 267654,
+      "event_id": "event-af316766-a690-4258-9337-18a145c3b6ce",
+      "aggregate_type": "task",
+      "aggregate_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "event_type": "task.created",
+      "created_at": "2026-10-01T19:08:16.745986413Z"
+    },
+    {
+      "sequence": 267684,
+      "event_id": "event-task-8c3f403f-6407-4159-bf33-0e621d1d98fe",
+      "aggregate_type": "task",
+      "aggregate_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "event_type": "task.running",
+      "created_at": "2026-10-01T19:11:37.978387904Z"
+    },
+    {
+      "sequence": 267685,
+      "event_id": "event-run-639bb977-b125-4463-93ef-cea8aef5d908",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-01T19:11:37.978392893Z"
+    },
+    {
+      "sequence": 267688,
+      "event_id": "event-runtime-e6df7903-ce9a-49df-855e-ebe1b5cd7fad",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "event_type": "runtime.agy.init",
+      "created_at": "2026-10-01T19:11:47.653742986Z",
+      "output": {
+        "stage": "init"
+      }
+    },
+    {
+      "sequence": 267689,
+      "event_id": "event-runtime-69f45ea2-b4e9-4c6a-bf16-f9005a3c2494",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:11:47.768561372Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267690,
+      "event_id": "event-runtime-d496c2ed-6460-4804-bf8e-88e627b6b840",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:11:51.837706103Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267691,
+      "event_id": "event-runtime-c6f806ad-6f0e-4cdc-b114-f4c864cb5961",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "event_type": "runtime.agy.step_update",
+      "created_at": "2026-10-01T19:11:51.862804934Z",
+      "output": {
+        "stage": "step_update"
+      }
+    },
+    {
+      "sequence": 267692,
+      "event_id": "event-runtime-df02b713-dac2-447a-b7ba-23145ffad8fc",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "event_type": "runtime.agy.result",
+      "created_at": "2026-10-01T19:11:51.888421666Z",
+      "output": {
+        "stage": "result",
+        "status": "succeeded",
+        "text": "OAX-ROLE-NEW-ff09d70390\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 267694,
+      "event_id": "event-run-43d703cd-289c-48a2-8574-792a037643f7",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-9f62b31b-ea8e-45f8-9345-9e4102c51e82",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-01T19:11:53.408772006Z"
+    },
+    {
+      "sequence": 267695,
+      "event_id": "event-task-ef7f52d3-9ac5-4eb1-9074-5c3eadd0672a",
+      "aggregate_type": "task",
+      "aggregate_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+      "event_type": "task.settled",
+      "created_at": "2026-10-01T19:11:53.408775386Z"
+    }
+  ],
+  "snapshot_sequence": 267695,
+  "live_after_sequence": 267695,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

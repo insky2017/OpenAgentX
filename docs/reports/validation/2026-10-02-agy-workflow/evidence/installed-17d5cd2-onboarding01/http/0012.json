@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-01T19:07:30.683591+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+      "version": 2,
+      "target_agent_id": "agy-onboarding-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Read input.txt in your assigned workspace. Reply with exactly your role verification code, then a vertical bar, then the file contents with no trailing newline. Do not read ROLE.md.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T19:07:22.643767341Z",
+      "updated_at": "2026-10-01T19:07:22.647717036Z"
+    },
+    "messages": [
+      {
+        "id": "message-d5732a53-20ef-44a2-849b-367200a99e97",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "agy-onboarding-e2e",
+        "kind": "instruction",
+        "content": "Read input.txt in your assigned workspace. Reply with exactly your role verification code, then a vertical bar, then the file contents with no trailing newline. Do not read ROLE.md.",
+        "created_at": "2026-10-01T19:07:22.643767341Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:37:22.647717036Z",
+        "instructions_sha256": "41a3c86b63cf4bf5025cd252e0c1dc4ee577facc1f597b5bf318f13e7f9bb8d8",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+        "run_id": "run-79ff36cb-c5c5-4bc5-861a-1222c270d3eb",
+        "task_id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+        "agent_id": "agy-onboarding-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "agy",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T19:07:22.647717036Z",
+        "created_at": "2026-10-01T19:07:22.647717036Z",
+        "updated_at": "2026-10-01T19:07:23.63244571Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 267622,
+        "event_id": "event-520a6385-0cf5-4528-a5e3-4e37d06a6e4f",
+        "aggregate_type": "task",
+        "aggregate_id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:07:22.643767341Z"
+      },
+      {
+        "sequence": 267624,
+        "event_id": "event-task-93958f76-7bfe-4100-b4bd-9594a81afa79",
+        "aggregate_type": "task",
+        "aggregate_id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:07:22.6489788Z"
+      },
+      {
+        "sequence": 267625,
+        "event_id": "event-run-1dfe6769-ce73-42b6-9f79-e063748c2333",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-79ff36cb-c5c5-4bc5-861a-1222c270d3eb",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:07:22.648983088Z"
+      },
+      {
+        "sequence": 267628,
+        "event_id": "event-runtime-f20a1338-c60b-4a1f-9d14-878e5af37e26",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-79ff36cb-c5c5-4bc5-861a-1222c270d3eb",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T19:07:30.336665776Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 267629,
+        "event_id": "event-runtime-6aed8a07-952a-4603-a40e-9787f22902ea",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-79ff36cb-c5c5-4bc5-861a-1222c270d3eb",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:07:30.423965119Z",
+        "output": {
+          "stage": "step_update"
+        }
+      }
+    ],
+    "snapshot_sequence": 267629,
+    "live_after_sequence": 267629,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

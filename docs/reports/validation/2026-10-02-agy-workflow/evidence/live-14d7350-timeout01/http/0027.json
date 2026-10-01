@@ -1,0 +1,176 @@
+{
+  "at": "2026-10-01T18:26:29.795557+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-1e768962-5c20-4337-85d4-b70804edfb91",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-1e768962-5c20-4337-85d4-b70804edfb91",
+      "version": 3,
+      "target_agent_id": "live-agy-imeout01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run python3 timeout.py in your assigned workspace and wait until it completes. Do not run any other script.",
+      "status": "uncertain",
+      "error": "interrupted; AGY stderr: error: interrupted; AGY process exited: exit status 247; AGY stderr: error: interrupted",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T18:25:53.712380565Z",
+      "updated_at": "2026-10-01T18:26:29.095216501Z"
+    },
+    "messages": [
+      {
+        "id": "message-8e507136-893c-4e9f-a7cd-f1b989106ea4",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-1e768962-5c20-4337-85d4-b70804edfb91",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-b3f90985-df00-4040-b952-61f16420f500",
+        "target_agent_id": "live-agy-imeout01",
+        "kind": "instruction",
+        "content": "Run python3 timeout.py in your assigned workspace and wait until it completes. Do not run any other script.",
+        "created_at": "2026-10-01T18:25:53.712380565Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:26:28.715726488Z",
+        "instructions_sha256": "9bc6889f57c67b65cdf0ec66f899a47bc82a190a7df197d39454e75d77b27ed3",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-14d7350-timeout01/workspace/ROLE.md",
+        "run_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "task_id": "task-1e768962-5c20-4337-85d4-b70804edfb91",
+        "agent_id": "live-agy-imeout01",
+        "version": 2,
+        "status": "uncertain",
+        "worker_instance_id": "worker-7b257fb5-15a0-4f2f-a72c-7ed883d7a598",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": false,
+          "runtime_status": "uncertain",
+          "error": "interrupted; AGY stderr: error: interrupted; AGY process exited: exit status 247; AGY stderr: error: interrupted",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T18:25:53.715726488Z",
+        "finished_at": "2026-10-01T18:26:29.095216501Z",
+        "created_at": "2026-10-01T18:25:53.715726488Z",
+        "updated_at": "2026-10-01T18:26:29.095216501Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 18,
+        "event_id": "event-d8f0a425-f030-4ed6-8b2f-5204c04ae033",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1e768962-5c20-4337-85d4-b70804edfb91",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:25:53.712380565Z"
+      },
+      {
+        "sequence": 20,
+        "event_id": "event-task-dc38f974-cce6-403c-9415-3a507bda767b",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1e768962-5c20-4337-85d4-b70804edfb91",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:25:53.716761433Z"
+      },
+      {
+        "sequence": 21,
+        "event_id": "event-run-507e19bd-92e9-4376-8500-b96568785cb4",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:25:53.7167652Z"
+      },
+      {
+        "sequence": 29,
+        "event_id": "event-runtime-39fc9f41-5c7e-4fa3-936a-f6685ec67a4c",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:25:59.838733447Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 30,
+        "event_id": "event-runtime-f06137a4-b51f-4b80-a59d-0e1cd453a88d",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:25:59.927246389Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 33,
+        "event_id": "event-runtime-4166e0d4-6aa4-4627-b096-de2fd532b50a",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:01.87620373Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 34,
+        "event_id": "event-runtime-dd03f213-ec03-4a43-b94f-c7c8f1b87124",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:01.877956413Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 62,
+        "event_id": "event-runtime-bd81852e-4804-4289-b2e9-6aaaccaf11cf",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T18:26:28.754056006Z",
+        "output": {
+          "stage": "result",
+          "status": "failed",
+          "diagnostic": "interrupted",
+          "has_error": true
+        }
+      },
+      {
+        "sequence": 64,
+        "event_id": "event-run-2ccc4d53-0dae-4e2c-b67b-9c473e2e846f",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-ccde4557-96fd-4d98-9b48-66663c5daae1",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T18:26:29.095274063Z"
+      },
+      {
+        "sequence": 65,
+        "event_id": "event-task-64325695-7752-4820-b7e0-c9ecf6aa61df",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1e768962-5c20-4337-85d4-b70804edfb91",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T18:26:29.095277557Z"
+      }
+    ],
+    "snapshot_sequence": 66,
+    "live_after_sequence": 66,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

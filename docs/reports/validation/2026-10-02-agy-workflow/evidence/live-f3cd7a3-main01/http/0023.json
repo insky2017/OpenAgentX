@@ -1,0 +1,151 @@
+{
+  "at": "2026-10-01T18:48:48.447122+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-948b3ad4-f197-4b1d-a29f-521b836e9475",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-948b3ad4-f197-4b1d-a29f-521b836e9475",
+      "version": 2,
+      "target_agent_id": "live-agy-3-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "What is your role verification code? Reply with only the code from your role instructions. Do not read files or use tools.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:48:30.383531209Z",
+      "updated_at": "2026-10-01T18:48:30.386701183Z"
+    },
+    "messages": [
+      {
+        "id": "message-fa8532fd-d98e-447f-8534-0a52d212693a",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-948b3ad4-f197-4b1d-a29f-521b836e9475",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+        "target_agent_id": "live-agy-3-main01",
+        "kind": "instruction",
+        "content": "What is your role verification code? Reply with only the code from your role instructions. Do not read files or use tools.",
+        "created_at": "2026-10-01T18:48:30.383531209Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:51:30.386701183Z",
+        "instructions_sha256": "0f94c08866a90e84bdc8199fb36f01c9e52001b5731074df34fe65a1ec2ac24d",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/ROLE.md",
+        "run_id": "run-c266cc15-dbe4-4365-bb40-77b37e0a3bb0",
+        "task_id": "task-948b3ad4-f197-4b1d-a29f-521b836e9475",
+        "agent_id": "live-agy-3-main01",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-8d73bb15-de22-4aea-af09-e46f9aa77e90",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T18:48:30.386701183Z",
+        "created_at": "2026-10-01T18:48:30.386701183Z",
+        "updated_at": "2026-10-01T18:48:48.120438675Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 18,
+        "event_id": "event-ce06eedb-434c-4e3e-8784-a309c154859a",
+        "aggregate_type": "task",
+        "aggregate_id": "task-948b3ad4-f197-4b1d-a29f-521b836e9475",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:48:30.383531209Z"
+      },
+      {
+        "sequence": 20,
+        "event_id": "event-task-c18c54fe-386b-42c5-80ad-183c3f467367",
+        "aggregate_type": "task",
+        "aggregate_id": "task-948b3ad4-f197-4b1d-a29f-521b836e9475",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:48:30.388288722Z"
+      },
+      {
+        "sequence": 21,
+        "event_id": "event-run-fdcd6ab3-101b-4bb2-9d5e-d206b976cec4",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-c266cc15-dbe4-4365-bb40-77b37e0a3bb0",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:48:30.388295233Z"
+      },
+      {
+        "sequence": 34,
+        "event_id": "event-runtime-df07bc97-2636-4f9e-afec-c61e9919292b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c266cc15-dbe4-4365-bb40-77b37e0a3bb0",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:48:41.875367217Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 35,
+        "event_id": "event-runtime-295e3bdb-810d-4ab5-b72d-cbaa72a85d53",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c266cc15-dbe4-4365-bb40-77b37e0a3bb0",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:48:41.960413325Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 42,
+        "event_id": "event-runtime-11f70f06-c02e-4ef1-bc92-2545b1424e23",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c266cc15-dbe4-4365-bb40-77b37e0a3bb0",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:48:47.299798641Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 43,
+        "event_id": "event-runtime-18e8bf1c-28b5-4e70-9221-f89e31578edb",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c266cc15-dbe4-4365-bb40-77b37e0a3bb0",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:48:48.042196907Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 44,
+        "event_id": "event-runtime-423e698d-b0e1-418a-9f36-195ce7599ed7",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-c266cc15-dbe4-4365-bb40-77b37e0a3bb0",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T18:48:48.068218317Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "OAX-ROLE-3-main01\n",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 45,
+    "live_after_sequence": 45,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

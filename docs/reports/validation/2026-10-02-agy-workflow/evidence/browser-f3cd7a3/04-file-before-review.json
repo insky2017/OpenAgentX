@@ -1,0 +1,8 @@
+{
+  "path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/browser-result.txt",
+  "bytes": 12,
+  "sha256": "a11045017e5727a6d70953b028bf52bc0550cd82aecebe6ad23854ff2bdfcbc6",
+  "exact_bytes_repr": "b'BROWSER-E2E\\n'",
+  "task": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+  "pass": true
+}

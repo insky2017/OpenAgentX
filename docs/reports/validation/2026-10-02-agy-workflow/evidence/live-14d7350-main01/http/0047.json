@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:26:24.477060+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-0-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run python3 queued.py in your assigned workspace and wait for it to finish. Report after completion. Do not run any other script.",
+    "meta": {
+      "idempotency_key": "c629a1fb99fdbb109444e085"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 4
+  }
+}

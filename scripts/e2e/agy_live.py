@@ -44,14 +44,22 @@ def owned_stop(root):
     state=json.loads((root/'processes.json').read_text());results=[]
     for entry in reversed(state):
         pid=entry['pid'];proc=P('/proc')/str(pid)
-        if not proc.exists(): results.append({'pid':pid,'already_stopped':True});continue
-        if proc.joinpath('stat').read_text().split()[21]!=entry['starttime']: raise RuntimeError('PID reuse; refusing cleanup')
-        os.killpg(pid,signal.SIGTERM)
+        def process_state():
+            try: fields=proc.joinpath('stat').read_text().rsplit(')',1)[1].split()
+            except (FileNotFoundError,ProcessLookupError): return None
+            if fields[19]!=str(entry['starttime']): raise RuntimeError('PID reuse; refusing cleanup')
+            return fields[0]
+        if process_state() in [None,'Z']: results.append({'pid':pid,'already_stopped':True});continue
+        try: os.killpg(pid,signal.SIGTERM)
+        except ProcessLookupError: results.append({'pid':pid,'already_stopped':True});continue
         for _ in range(100):
-            if not proc.exists() or proc.joinpath('stat').read_text().split()[2]=='Z':break
+            if process_state() in [None,'Z']:break
             time.sleep(.1)
-        else: os.killpg(pid,signal.SIGKILL)
-        results.append({'pid':pid,'stop_sent':True,'alive_after':proc.exists() and proc.joinpath('stat').read_text().split()[2]!='Z'})
+        else:
+            if process_state() not in [None,'Z']:
+                try: os.killpg(pid,signal.SIGKILL)
+                except ProcessLookupError: pass
+        results.append({'pid':pid,'stop_sent':True,'alive_after':process_state() not in [None,'Z']})
     return results
 
 class Live:

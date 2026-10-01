@@ -1,0 +1,54 @@
+{
+  "status": "PARTIAL",
+  "candidate": "14d7350b86125f299615d4a8db61d844ce866758",
+  "completed": {
+    "daemon": {
+      "task_id": "task-7df6a3b3-860b-4e42-a9b7-66562bac59e7",
+      "old_run_id": "run-a26b6136-ef7a-4e3d-9095-cd8bee5d1098",
+      "invocations": 1,
+      "late_effect_exists": false,
+      "new_worker": {
+        "worker_instance_id": "worker-6b96dc47-59ef-4cd5-b551-df940a00dbb4",
+        "agent_id": "live-agy-d7350-02",
+        "generation": 3,
+        "status": "online",
+        "last_heartbeat_at": "2026-10-01T18:42:44.182372759Z",
+        "lease_until": "2026-10-01T18:43:14.182372759Z",
+        "started_at": "2026-10-01T18:42:39.171796176Z",
+        "updated_at": "2026-10-01T18:42:44.182372759Z"
+      },
+      "query_task": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b"
+    },
+    "worker": {
+      "task_id": "task-fee3338f-1fad-4b73-99d3-5ed54ae342d7",
+      "run_id": "run-c812c13a-2d45-4e58-a63b-9aefcfa92f07",
+      "invocations": 1,
+      "invocation_records": [
+        {
+          "pid": 201305,
+          "at": 1790880202.089543
+        }
+      ],
+      "late_effect_exists": false,
+      "new_worker": {
+        "worker_instance_id": "worker-a80a3071-829a-4df4-b7f7-6ae48635a589",
+        "agent_id": "live-agy-d7350-02",
+        "generation": 4,
+        "status": "online",
+        "last_heartbeat_at": "2026-10-01T18:48:37.625076634Z",
+        "lease_until": "2026-10-01T18:49:07.625076634Z",
+        "started_at": "2026-10-01T18:48:32.618170254Z",
+        "updated_at": "2026-10-01T18:48:37.625076634Z"
+      },
+      "query_task": "task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5",
+      "recovery_requires_daemon_startup": true
+    }
+  },
+  "scope": "R E17 daemon evidence spans 02 and continuation; Worker complete here; not installed proof",
+  "limitations": [
+    "Reconciliation requires daemon restart after lease expiry.",
+    "New Worker generation requires formal network test and publish with binding CAS."
+  ],
+  "bounded_assertions": "PASS: operator-assisted restart, precise process cleanup, no repeat, and new-generation query",
+  "e17_gap": "Worker SIGKILL leaves child processes alive and active Run unreconciled until explicit daemon restart; automatic recovery unproven."
+}

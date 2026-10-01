@@ -1,0 +1,83 @@
+{
+  "status": "PASS",
+  "evidence_level": "I installation, model/UI acceptance separate",
+  "started": "2026-10-01T19:05:12.659768+00:00",
+  "finished": "2026-10-01T19:05:14.165584+00:00",
+  "commit": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd",
+  "pid": 306551,
+  "service": "MainPID=306551\nNRestarts=0\nActiveState=active\nSubState=running\n",
+  "web_sha256": {
+    "manifest.webmanifest": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+    "index.html": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+    "icon.svg": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+    "sw.js": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381",
+    "icon-192.png": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+    "icon-512.png": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+    "assets/app.js": "ccfb8098ff8359fb1eb75329f4aa7162ab45f6dbe15a256ee0da8341df088e7e",
+    "assets/app.css": "6062397da78b92b8ce49236e431f6f5a09e1a483e94e2cd61b0864f1b186b32d"
+  },
+  "served_app_js_matches": true,
+  "schema_before": [
+    [
+      1,
+      1,
+      "2026-08-30T04:47:07.563Z"
+    ]
+  ],
+  "schema_after": [
+    [
+      1,
+      2,
+      "2026-10-01T19:05:13.326Z"
+    ]
+  ],
+  "historical_counts_before": [
+    [
+      "canceled",
+      9
+    ],
+    [
+      "failed",
+      2
+    ],
+    [
+      "queued",
+      2
+    ],
+    [
+      "succeeded",
+      28
+    ],
+    [
+      "uncertain",
+      18
+    ]
+  ],
+  "historical_counts_after": [
+    [
+      "canceled",
+      9
+    ],
+    [
+      "failed",
+      2
+    ],
+    [
+      "queued",
+      2
+    ],
+    [
+      "succeeded",
+      28
+    ],
+    [
+      "uncertain",
+      18
+    ]
+  ],
+  "quick_check": "ok",
+  "backup": "/home/sky/.openagentx/backups/agy-installed-20261001T190512Z",
+  "production_agent_workers_started": false,
+  "url": "http://127.0.0.1:18100"
+}

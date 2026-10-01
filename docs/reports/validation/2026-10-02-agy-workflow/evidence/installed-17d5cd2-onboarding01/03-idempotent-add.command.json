@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "add",
+    "--id",
+    "agy-onboarding-e2e",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/installation/owner-password",
+    "--model",
+    "gemini-3.7-flash-low",
+    "--runtime-binary",
+    "/home/sky/.local/bin/agy-graft",
+    "--no-open",
+    "--wait",
+    "5m",
+    "--name",
+    "AGY 入口验收",
+    "--workspace",
+    "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace",
+    "--role",
+    "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 0.2949166259932099,
+  "prompts_remaining": 0
+}

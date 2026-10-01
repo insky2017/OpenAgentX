@@ -1,0 +1,30 @@
+[
+  {
+    "unit": "openagentx.service",
+    "properties": {
+      "MainPID": "306551",
+      "ExecStart": "{ path=/home/sky/.local/bin/openagentx ; argv[]=/home/sky/.local/bin/openagentx serve --db /home/sky/.openagentx/data/openagentx.db --socket /home/sky/.openagentx/run/openagentx.sock --http-addr ${OPENAGENTX_HTTP_ADDR} --web-dir /home/sky/.openagentx/web ; ignore_errors=no ; start_time=[Fri 2026-10-02 03:05:13 CST] ; stop_time=[n/a] ; pid=306551 ; code=(null) ; status=0/0 }",
+      "ActiveState": "active",
+      "SubState": "running",
+      "FragmentPath": "/home/sky/.config/systemd/user/openagentx.service"
+    },
+    "pid": 306551,
+    "starttime": "9994153",
+    "exe": "/home/sky/.local/bin/openagentx",
+    "binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd"
+  },
+  {
+    "unit": "openagentx-worker@agy-onboarding-e2e.service",
+    "properties": {
+      "MainPID": "343986",
+      "ExecStart": "{ path=/home/sky/.local/bin/openagentx ; argv[]=/home/sky/.local/bin/openagentx worker run --config /home/sky/.openagentx/workers/agy-onboarding-e2e.yaml ; ignore_errors=no ; start_time=[Fri 2026-10-02 03:12:48 CST] ; stop_time=[n/a] ; pid=343986 ; code=(null) ; status=0/0 }",
+      "ActiveState": "active",
+      "SubState": "running",
+      "FragmentPath": "/home/sky/.config/systemd/user/openagentx-worker@.service"
+    },
+    "pid": 343986,
+    "starttime": "10039721",
+    "exe": "/home/sky/.local/bin/openagentx",
+    "binary_sha256": "666cbd876c540d63b1214f81e0e65b7922b9a41f987ba21364d03718c7e22ccd"
+  }
+]

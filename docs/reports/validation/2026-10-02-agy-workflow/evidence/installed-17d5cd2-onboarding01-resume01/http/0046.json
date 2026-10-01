@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:11:54.673919+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run python3 systemd-crash.py exactly once and wait for it to finish. Do not retry this script or execute other scripts.",
+    "meta": {
+      "idempotency_key": "85b39d2e47b328c22868c3b0"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 76
+  }
+}

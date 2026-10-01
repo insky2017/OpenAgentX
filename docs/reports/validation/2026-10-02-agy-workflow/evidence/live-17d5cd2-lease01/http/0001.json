@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-01T19:04:32.364459+00:00",
+  "method": "POST",
+  "path": "/api/auth/v1/login",
+  "request": {
+    "login": "omitted"
+  },
+  "status": 200,
+  "response": {
+    "principal": {
+      "user_id": "human-owner-74fa3a2b-878c-466b-94de-c7be87ca487c",
+      "username": "owner",
+      "roles": [
+        "owner"
+      ]
+    },
+    "csrf_token": "[REDACTED]",
+    "idle_expires_at": "2026-10-01T19:34:32.353468295Z",
+    "absolute_expires_at": "2026-10-02T19:04:32.353468295Z"
+  }
+}

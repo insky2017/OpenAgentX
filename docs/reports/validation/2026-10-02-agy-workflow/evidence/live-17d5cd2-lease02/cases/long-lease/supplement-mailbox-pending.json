@@ -1,0 +1,29 @@
+[
+  {
+    "sequence": 1,
+    "mailbox_item_id": "mailbox-f33f3396-1613-45f1-83a4-f358b42aad71",
+    "target_agent_id": "live-agy--lease02",
+    "kind": "task",
+    "lane": "work",
+    "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+    "state": "accepted",
+    "worker_instance_id": "worker-39267579-14f1-4f7e-97eb-e965a1df7519",
+    "fencing_token": "[REDACTED]",
+    "lease_until": "2026-10-01T19:06:25.787513501Z",
+    "attempts": 1,
+    "created_at": "2026-10-01T19:05:56.068446916Z",
+    "accepted_at": "2026-10-01T19:05:56.071507881Z"
+  },
+  {
+    "sequence": 2,
+    "mailbox_item_id": "mailbox-9d8f4744-b2c6-528a-af54-cbcb3b4278d7",
+    "target_agent_id": "live-agy--lease02",
+    "kind": "message",
+    "lane": "work",
+    "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+    "message_id": "message-676b01bd-6d6b-5833-a93e-3e34f91d4205",
+    "state": "pending",
+    "attempts": 0,
+    "created_at": "2026-10-01T19:06:12.132532295Z"
+  }
+]

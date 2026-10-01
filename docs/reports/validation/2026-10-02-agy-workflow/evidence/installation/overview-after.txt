@@ -1,0 +1,37 @@
+AGY 入口验收 (agy-onboarding-e2e) · 后台未运行
+  当前：task-37b0c997-8544-4e58-a69e-014e9b7dea1c · queued
+  最近：I have launched `python3 role-freeze.py` and am waiting for it to finish. OAX-ROLE-OLD-b84428294c
+  打开：openagentx agent open agy-onboarding-e2e
+  恢复：openagentx agent resume agy-onboarding-e2e
+
+Orchestrator (orchestrator) · 后台未运行
+  当前：task-17beccd5-0c86-4a26-b699-85294132a0e7 · queued
+  最近：task-17beccd5-0c86-4a26-b699-85294132a0e7 · queued
+  打开：openagentx agent open orchestrator
+  恢复：openagentx agent resume orchestrator
+
+Quote Service (quote-service) · 后台未运行
+  当前：无
+  最近：验收 OAX-20260922-1938：2026-09-22 22:29:01 +0800
+  打开：openagentx agent open quote-service
+  恢复：openagentx agent resume quote-service
+
+Test Fake Agent (test-fake-agent) · 后台未运行
+  当前：无
+  最近：fake turn completed
+  打开：openagentx agent open test-fake-agent
+  恢复：openagentx agent resume test-fake-agent
+
+Test Fake Multi-turn Agent (test-fake-multiturn) · 后台未运行
+  当前：task-ce82f045-e675-4ba4-a819-e3d14bd29479 · queued
+  最近：task-ce82f045-e675-4ba4-a819-e3d14bd29479 · queued
+  打开：openagentx agent open test-fake-multiturn
+  恢复：openagentx agent resume test-fake-multiturn
+
+Verification Runner (verification-runner) · 后台未运行
+  当前：无
+  最近：## Task result **`CLI_CONTRACT_MISMATCH`** 报告路径：`OpenAgentX/docs/reports/validation/2026-08-31-openagentx-t04-agy-graft-…
+  打开：openagentx agent open verification-runner
+  恢复：openagentx agent resume verification-runner
+
+

@@ -1,0 +1,8 @@
+{
+  "at": 1790881656.2214243,
+  "pane": "OAX:overview.0",
+  "old_idle_shell_pid": 30743,
+  "child_processes_before": "",
+  "command": "/home/sky/.local/bin/openagentx agent status --watch",
+  "method": "type command into verified idle shell, no pane forced termination"
+}

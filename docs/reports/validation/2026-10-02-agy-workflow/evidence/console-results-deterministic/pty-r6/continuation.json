@@ -1,0 +1,65 @@
+{
+  "task": {
+    "parent_task_id": "task-2df00a96-8c9c-4cf1-8bfb-6defe43247be",
+    "completion_basis": "mutation_effects_known",
+    "task_id": "task-f1846faa-3155-433b-8c20-811d7ce442fe",
+    "version": 3,
+    "agent_id": "quote-service",
+    "status": "succeeded",
+    "intent": "mutation",
+    "content": "refine the prior result\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-2df00a96-8c9c-4cf1-8bfb-6defe43247be\nObjective:\nfirst isolated workflow task\nResult:\nfinal fixture reply",
+    "result": "final fixture reply",
+    "outcome_state": "available",
+    "created_at": "2026-10-01T18:22:36.981306228Z",
+    "updated_at": "2026-10-01T18:22:36.988423451Z"
+  },
+  "work_delivery": {
+    "mailbox_item_id": "mailbox-43e709dd-f3de-433d-bae0-38ad1a0a95ca",
+    "kind": "task",
+    "lane": "work",
+    "state": "accepted",
+    "attempts": 1,
+    "worker_instance_id": "worker-64d537f1-cf5f-49bf-a3cd-398c70ef4bc5",
+    "lease_until": "2026-10-01T18:23:06.923728865Z",
+    "created_at": "2026-10-01T18:22:36.981306228Z",
+    "accepted_at": "2026-10-01T18:22:36.983120191Z"
+  },
+  "latest_run": {
+    "run_id": "run-e6628bff-6daa-4fb8-ae9a-b04729182780",
+    "task_id": "task-f1846faa-3155-433b-8c20-811d7ce442fe",
+    "agent_id": "quote-service",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-64d537f1-cf5f-49bf-a3cd-398c70ef4bc5",
+    "worker_generation": 1,
+    "execution_spec_version": 1,
+    "adapter_id": "fake",
+    "backend_id": "local",
+    "model": "fake-workflow-model",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 1,
+    "network_binding_revision": 1,
+    "turn_result": {
+      "final_reply": false,
+      "runtime_status": "succeeded",
+      "body": "final fixture reply",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-01T18:22:36.983120191Z",
+    "finished_at": "2026-10-01T18:22:36.988423451Z",
+    "created_at": "2026-10-01T18:22:36.983120191Z",
+    "updated_at": "2026-10-01T18:22:36.988423451Z"
+  },
+  "latest_message": {
+    "message_id": "message-7476e429-821a-4f88-85fe-971df44ce4d3",
+    "version": 1,
+    "sequence": 1,
+    "kind": "instruction",
+    "content": "refine the prior result\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-2df00a96-8c9c-4cf1-8bfb-6defe43247be\nObjective:\nfirst isolated workflow task\nResult:\nfinal fixture reply",
+    "created_at": "2026-10-01T18:22:36.981306228Z"
+  },
+  "snapshot_sequence": 114
+}

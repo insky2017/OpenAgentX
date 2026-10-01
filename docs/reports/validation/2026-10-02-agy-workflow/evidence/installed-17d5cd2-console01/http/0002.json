@@ -1,0 +1,25 @@
+{
+  "at": 1790882350.0750563,
+  "method": "GET",
+  "path": "/api/auth/v1/cli/session",
+  "status": 200,
+  "response": {
+    "principal": {
+      "token_id": "[REDACTED]",
+      "user_id": "web-user-fee5c5af-4bda-4b11-8ea2-557303a27a05",
+      "principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "username": "owner",
+      "roles": [
+        "owner"
+      ],
+      "scopes": [
+        "console.read",
+        "console.control",
+        "console.diagnostic",
+        "fleet.lifecycle"
+      ]
+    },
+    "installation_id": "rVbjXrYX2sxnpda-Ad6RRSM32fTJpuNLL-bcXwUh_28",
+    "absolute_expires_at": "2026-10-18T12:53:47.836907432Z"
+  }
+}

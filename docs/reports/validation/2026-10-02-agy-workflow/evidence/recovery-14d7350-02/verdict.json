@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "stage": "daemon",
+  "completed": {},
+  "error": "live condition deadline exceeded"
+}

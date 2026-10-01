@@ -1,0 +1,8 @@
+{
+  "path": "result.txt",
+  "actual_bytes": 8,
+  "expected_bytes": 8,
+  "sha256": "428ae200a9f46175a432342bcb75ef8b8f0b1d364f8a21762bb1223c329a3ca7",
+  "expected_sha256": "428ae200a9f46175a432342bcb75ef8b8f0b1d364f8a21762bb1223c329a3ca7",
+  "exact": true
+}

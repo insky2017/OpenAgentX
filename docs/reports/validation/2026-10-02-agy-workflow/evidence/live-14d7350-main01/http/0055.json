@@ -1,0 +1,137 @@
+{
+  "at": "2026-10-01T18:27:18.534919+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-b26fceed-af18-43cb-8c08-62cc195014ad",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-b26fceed-af18-43cb-8c08-62cc195014ad",
+      "version": 2,
+      "target_agent_id": "live-agy-0-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:27:10.525340119Z",
+      "updated_at": "2026-10-01T18:27:10.528586864Z"
+    },
+    "messages": [
+      {
+        "id": "message-95e5df6f-8681-48c4-b50b-8cfc9fdced2e",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-b26fceed-af18-43cb-8c08-62cc195014ad",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-b30be6a0-ed7e-475c-8bc6-ee7933fd3a75",
+        "target_agent_id": "live-agy-0-main01",
+        "kind": "instruction",
+        "content": "Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.",
+        "created_at": "2026-10-01T18:27:10.525340119Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:30:10.528586864Z",
+        "instructions_sha256": "4de4d30f83b68b1ab43335ee60d8b7b4d62404c892d8b7c11ef89a19571ff16a",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-14d7350-main01/workspace/ROLE.md",
+        "run_id": "run-a2763974-903b-461d-9cde-aa8ee75424b2",
+        "task_id": "task-b26fceed-af18-43cb-8c08-62cc195014ad",
+        "agent_id": "live-agy-0-main01",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-55e179cf-8a9d-41b4-b2e0-6b7f89b1d51a",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T18:27:10.528586864Z",
+        "created_at": "2026-10-01T18:27:10.528586864Z",
+        "updated_at": "2026-10-01T18:27:18.031825666Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 214,
+        "event_id": "event-b080bf65-60a8-4e09-9dd6-de366152042f",
+        "aggregate_type": "task",
+        "aggregate_id": "task-b26fceed-af18-43cb-8c08-62cc195014ad",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:27:10.525340119Z"
+      },
+      {
+        "sequence": 216,
+        "event_id": "event-task-53472fdf-5811-49b0-a4f0-adc64f2d7349",
+        "aggregate_type": "task",
+        "aggregate_id": "task-b26fceed-af18-43cb-8c08-62cc195014ad",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:27:10.529745243Z"
+      },
+      {
+        "sequence": 217,
+        "event_id": "event-run-f06a6d5c-4e2f-4f69-b65b-f16d013d0f7b",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-a2763974-903b-461d-9cde-aa8ee75424b2",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:27:10.52974986Z"
+      },
+      {
+        "sequence": 224,
+        "event_id": "event-runtime-1d8f559f-0b89-45e4-8e54-b8eee31bcca0",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-a2763974-903b-461d-9cde-aa8ee75424b2",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:27:15.90608117Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 225,
+        "event_id": "event-runtime-9b2fe029-0311-4fdb-880e-dd9df3c8281b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-a2763974-903b-461d-9cde-aa8ee75424b2",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:15.996422657Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 228,
+        "event_id": "event-runtime-0747123b-0626-413c-bc9d-777912703980",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-a2763974-903b-461d-9cde-aa8ee75424b2",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:17.916278659Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 229,
+        "event_id": "event-runtime-67672a24-e126-42b4-90b5-9e41bcde6042",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-a2763974-903b-461d-9cde-aa8ee75424b2",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:17.917893251Z",
+        "output": {
+          "stage": "step_update"
+        }
+      }
+    ],
+    "snapshot_sequence": 230,
+    "live_after_sequence": 230,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

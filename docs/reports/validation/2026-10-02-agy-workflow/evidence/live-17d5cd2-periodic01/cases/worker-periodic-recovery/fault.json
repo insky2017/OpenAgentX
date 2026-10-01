@@ -1,0 +1,17 @@
+{
+  "worker": {
+    "label": "worker",
+    "pid": 331606,
+    "starttime": "10023054"
+  },
+  "daemon_must_remain": {
+    "label": "daemon",
+    "pid": 331481,
+    "starttime": "10022832"
+  },
+  "signal": "SIGKILL",
+  "at": 1790881822.4067664,
+  "observed_remaining_run_lease_seconds": 29.61533260345459,
+  "recovery_wait_bound_seconds": 59.61533260345459,
+  "periodic_reconcile_seconds": 10
+}

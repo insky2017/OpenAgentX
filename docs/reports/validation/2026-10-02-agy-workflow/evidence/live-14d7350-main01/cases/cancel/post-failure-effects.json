@@ -1,0 +1,21 @@
+{
+  "checked_at": 1790879387.1626472,
+  "original_delay_seconds": 30,
+  "elapsed_since_tool_started_seconds": 149.19891810417175,
+  "processes": [
+    {
+      "pid": 128559,
+      "starttime": "9766616",
+      "alive_now": false
+    },
+    {
+      "pid": 128560,
+      "starttime": "9766622",
+      "alive_now": false
+    }
+  ],
+  "late_file_exists": false,
+  "independent_stop_within_5s": "runner passed this assertion before failing Task canceled assertion; exact elapsed was not persisted",
+  "task_status": "uncertain",
+  "verdict": "FAIL: expected canceled, actual uncertain"
+}

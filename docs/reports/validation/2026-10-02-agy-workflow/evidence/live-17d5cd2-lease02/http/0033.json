@@ -1,0 +1,190 @@
+{
+  "at": "2026-10-01T19:07:46.176313+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+      "version": 3,
+      "target_agent_id": "live-agy--lease02",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Run python3 long-lease.py in your assigned workspace exactly once and wait for it to finish. This query explicitly authorizes this one diagnostic tool. Do not run any other script or retry this command. After it completes reply exactly LONG-LEASE-DONE.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T19:05:56.068446916Z",
+      "updated_at": "2026-10-01T19:06:12.132540302Z"
+    },
+    "messages": [
+      {
+        "id": "message-af244a9c-e5b8-4494-814a-d34881e64479",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-662a5914-2483-4cec-b25f-0d0d5c345dfe",
+        "target_agent_id": "live-agy--lease02",
+        "kind": "instruction",
+        "content": "Run python3 long-lease.py in your assigned workspace exactly once and wait for it to finish. This query explicitly authorizes this one diagnostic tool. Do not run any other script or retry this command. After it completes reply exactly LONG-LEASE-DONE.",
+        "created_at": "2026-10-01T19:05:56.068446916Z"
+      },
+      {
+        "id": "message-676b01bd-6d6b-5833-a93e-3e34f91d4205",
+        "version": 1,
+        "sequence": 2,
+        "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-662a5914-2483-4cec-b25f-0d0d5c345dfe",
+        "target_agent_id": "live-agy--lease02",
+        "kind": "supplement",
+        "content": "For the next turn only: reply exactly QUERY-SUPPLEMENT--lease02. Do not use tools or rerun long-lease.py; the first turn already handles the diagnostic.",
+        "created_at": "2026-10-01T19:06:12.132540302Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:11:56.071507881Z",
+        "instructions_sha256": "efc91c2d5e45957abad8c8e31d287205e577add94d8f850dca375c5b2d0a34de",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-17d5cd2-lease02/workspace/ROLE.md",
+        "run_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+        "agent_id": "live-agy--lease02",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-39267579-14f1-4f7e-97eb-e965a1df7519",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T19:05:56.071507881Z",
+        "created_at": "2026-10-01T19:05:56.071507881Z",
+        "updated_at": "2026-10-01T19:07:45.788329635Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 18,
+        "event_id": "event-11f3ea9e-b6a0-4dbe-8f0f-ba1b6a53c77c",
+        "aggregate_type": "task",
+        "aggregate_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:05:56.068446916Z"
+      },
+      {
+        "sequence": 20,
+        "event_id": "event-task-a0f499e2-c6e0-4d38-a1da-9770d42f1c63",
+        "aggregate_type": "task",
+        "aggregate_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:05:56.072722338Z"
+      },
+      {
+        "sequence": 21,
+        "event_id": "event-run-f757389f-025b-4bdd-a62e-5331aea87c78",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:05:56.07272614Z"
+      },
+      {
+        "sequence": 33,
+        "event_id": "event-runtime-7ec4ea8d-550c-459d-9c5b-b02882d3a969",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T19:06:06.399433396Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 34,
+        "event_id": "event-runtime-d7f0e7c2-80b2-406c-97a3-5b9b7916e5c8",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:06:06.484270747Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 39,
+        "event_id": "event-runtime-88a5b8a7-926f-4a1f-b7f3-01bf7a2db30c",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:06:10.148595721Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 40,
+        "event_id": "event-runtime-3c364765-1e69-4183-a91f-b001dadadfcd",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:06:10.150030375Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 43,
+        "event_id": "event-4046c96d-b9f1-411f-80b8-82d92e066f19",
+        "aggregate_type": "task",
+        "aggregate_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+        "event_type": "task.message_created",
+        "created_at": "2026-10-01T19:06:12.132532725Z"
+      },
+      {
+        "sequence": 137,
+        "event_id": "event-runtime-ef172989-34f8-4332-aa22-9903d8d6f8ef",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:07:45.246727229Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 138,
+        "event_id": "event-runtime-e231968c-3423-44a8-8454-9ad7397c07dc",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:07:45.24846184Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 139,
+        "event_id": "event-runtime-0fdf5cdd-745c-446b-b9e9-f0d9931ceb2b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-e6e17073-7760-4f92-a1d8-563225beb9ae",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:07:45.297232526Z",
+        "output": {
+          "stage": "step_update"
+        }
+      }
+    ],
+    "snapshot_sequence": 140,
+    "live_after_sequence": 140,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

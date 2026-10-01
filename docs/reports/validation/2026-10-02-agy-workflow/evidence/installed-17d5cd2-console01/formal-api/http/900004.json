@@ -1,0 +1,187 @@
+{
+  "at": "2026-10-01T19:23:30.269040+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+      "version": 3,
+      "target_agent_id": "agy-onboarding-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with exactly OAX-CONSOLE-364249-CONTINUED. Do not use tools.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-fd9c1ca3-870c-4b02-acbd-0bbaf4d53e26\nObjective:\nRead input.txt in your assigned workspace using a tool. Reply only with its exact contents and the role verification code from your role instructions, each on its own line. Request reference: OAX-CONSOLE-364249\nResult:\nOAX-FILE-d85eadcfbb\nOAX-ROLE-NEW-ff09d70390",
+      "status": "succeeded",
+      "result": "OAX-CONSOLE-364249-CONTINUED",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T19:20:00.634501684Z",
+      "updated_at": "2026-10-01T19:20:12.615437584Z"
+    },
+    "messages": [
+      {
+        "id": "message-c561e15d-76a6-4814-8c36-1ea52bcf9065",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "agy-onboarding-e2e",
+        "kind": "instruction",
+        "content": "Reply with exactly OAX-CONSOLE-364249-CONTINUED. Do not use tools.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-fd9c1ca3-870c-4b02-acbd-0bbaf4d53e26\nObjective:\nRead input.txt in your assigned workspace using a tool. Reply only with its exact contents and the role verification code from your role instructions, each on its own line. Request reference: OAX-CONSOLE-364249\nResult:\nOAX-FILE-d85eadcfbb\nOAX-ROLE-NEW-ff09d70390",
+        "created_at": "2026-10-01T19:20:00.634501684Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:50:00.637632004Z",
+        "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+        "run_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "task_id": "task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+        "agent_id": "agy-onboarding-e2e",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+        "worker_generation": 3,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "agy",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 3,
+        "network_binding_revision": 3,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-CONSOLE-364249-CONTINUED",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T19:20:00.637632004Z",
+        "finished_at": "2026-10-01T19:20:12.615437584Z",
+        "created_at": "2026-10-01T19:20:00.637632004Z",
+        "updated_at": "2026-10-01T19:20:12.615437584Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 267795,
+        "event_id": "event-06dd9649-2f89-4cd9-8e60-74233db237aa",
+        "aggregate_type": "task",
+        "aggregate_id": "task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T19:20:00.634501684Z"
+      },
+      {
+        "sequence": 267797,
+        "event_id": "event-task-a09aaef1-792e-49bb-9ed6-2bff8386c174",
+        "aggregate_type": "task",
+        "aggregate_id": "task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T19:20:00.638608275Z"
+      },
+      {
+        "sequence": 267798,
+        "event_id": "event-run-b3af0208-9346-4805-887a-7593bc9711db",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T19:20:00.638611841Z"
+      },
+      {
+        "sequence": 267800,
+        "event_id": "event-runtime-3fa58a2f-4dc8-4841-b7d9-2909102bfdab",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T19:20:08.076926759Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 267801,
+        "event_id": "event-runtime-e27951ac-20ea-49fe-b05f-027085bc215c",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:20:08.161003821Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267803,
+        "event_id": "event-runtime-f4e51c95-1f6c-4056-bf97-5133c2c1cd49",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:20:11.034282474Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267804,
+        "event_id": "event-runtime-23626410-294a-4337-b13a-1c263f5ded7e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:20:11.060082319Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267805,
+        "event_id": "event-runtime-3f462bcc-5346-4c38-852e-22e16be27cbb",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T19:20:11.110485858Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 267806,
+        "event_id": "event-runtime-78bfb8ee-922e-48df-97c9-3d9df398af01",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T19:20:11.136990375Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "OAX-CONSOLE-364249-CONTINUED\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 267808,
+        "event_id": "event-run-79ad6cee-9a44-48a5-8861-7c1cf1c4b317",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-8945eeaa-798f-4aed-93e6-2045a46f1a2a",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T19:20:12.615465557Z"
+      },
+      {
+        "sequence": 267809,
+        "event_id": "event-task-35fb9e35-f90f-4657-a1cf-1cc094ddd156",
+        "aggregate_type": "task",
+        "aggregate_id": "task-d1538e2a-e0fd-4253-b670-f5b9f722701f",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T19:20:12.61549275Z"
+      }
+    ],
+    "snapshot_sequence": 267829,
+    "live_after_sequence": 267829,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

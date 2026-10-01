@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/tmp/oax-live-14d7350/openagentx",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-14d7350-timeout01/identity.yaml"
+  ],
+  "exit_code": 0,
+  "output": "Owner password: \r\nCreated Agent \"live-agy-imeout01\" in Organization \"default\"\r\n"
+}

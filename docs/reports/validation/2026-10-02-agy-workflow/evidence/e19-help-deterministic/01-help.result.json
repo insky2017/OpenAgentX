@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "go",
+    "test",
+    "./internal/cli/console",
+    "-run",
+    "TestHelpOverlayIncludesFocusedControlsAndTimelineNavigation|TestControlCommands",
+    "-count=1"
+  ],
+  "cwd": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree",
+  "started_at_utc": "2026-10-01T19:03:34.613261+00:00",
+  "finished_at_utc": "2026-10-01T19:03:35.232228+00:00",
+  "elapsed_seconds": 0.619,
+  "exit_code": 0,
+  "source_commit": "17d5cd22b442fb5fd02bd661b36c5db4299fea9d",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "source_sha256": {
+    "internal/cli/console/tui.go": "d6d0362e88ab9d33f125bd3ea522991a55f300a2fd70fe856e82b04268907d3e",
+    "internal/cli/console/tui_test.go": "4b9b301e86f46750450ab5fb63f4d4753dcf5cf470442c01be300ec4f5489b8e",
+    "README.md": "57d05438d34b139baeeadab5ed9aeb96f77d847709d3a74e95b0a16117726776",
+    "docs/operations/openagentx-user-install-guide.md": "073d065d4dec2af234ce7c48f84ec3b96d189e4a729eacb3ec96a861832cd23c"
+  },
+  "stdout_sha256": "0795dddb092a18c3a158bc4adeee85c97861a94fe46bf20eee538d2e6e6581f9",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "boundary": "D existing help overlay regression; no new AGY/native approval support, no model call, no installed service",
+  "prior_attempt": "Previous identical test returned PASS 0.018s in tool output; no separately persisted raw log. This rerun exists solely to save durable original stdout/stderr."
+}

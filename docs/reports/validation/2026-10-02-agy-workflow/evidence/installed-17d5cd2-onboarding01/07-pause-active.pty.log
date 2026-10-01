@@ -1,0 +1,604 @@
+stop queued for agy-onboarding-e2e generation 1 (pending); intent is persistent
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "online",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:13.63198615Z"
+  },
+  "elapsed": "0s",
+  "recent_status": "2026-10-01T19:08:13.63198615Z",
+  "no_new_tasks": false,
+  "message": "graceful stop pending; waiting for Worker to enter draining"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:16.774584311Z"
+  },
+  "elapsed": "1s",
+  "recent_status": "2026-10-01T19:08:16.774584311Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:16.774584311Z"
+  },
+  "elapsed": "2s",
+  "recent_status": "2026-10-01T19:08:16.774584311Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:16.774584311Z"
+  },
+  "elapsed": "3s",
+  "recent_status": "2026-10-01T19:08:16.774584311Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:16.774584311Z"
+  },
+  "elapsed": "4s",
+  "recent_status": "2026-10-01T19:08:16.774584311Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:16.774584311Z"
+  },
+  "elapsed": "5s",
+  "recent_status": "2026-10-01T19:08:16.774584311Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:16.774584311Z"
+  },
+  "elapsed": "6s",
+  "recent_status": "2026-10-01T19:08:16.774584311Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "7s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "8s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "9s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "10s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "11s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "12s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "13s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "14s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "15s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:23.631327102Z"
+  },
+  "elapsed": "16s",
+  "recent_status": "2026-10-01T19:08:23.631327102Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "17s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "18s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "19s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "20s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "21s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "22s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "23s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "24s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "25s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:33.632306891Z"
+  },
+  "elapsed": "26s",
+  "recent_status": "2026-10-01T19:08:33.632306891Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:43.846351518Z"
+  },
+  "elapsed": "27s",
+  "recent_status": "2026-10-01T19:08:43.846351518Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:43.846351518Z"
+  },
+  "elapsed": "28s",
+  "recent_status": "2026-10-01T19:08:43.846351518Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:43.846351518Z"
+  },
+  "elapsed": "29s",
+  "recent_status": "2026-10-01T19:08:43.846351518Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:43.846351518Z"
+  },
+  "elapsed": "30s",
+  "recent_status": "2026-10-01T19:08:43.846351518Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:43.846351518Z"
+  },
+  "elapsed": "31s",
+  "recent_status": "2026-10-01T19:08:43.846351518Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "generation": 1,
+  "worker_status": "draining",
+  "run_attempt": {
+    "run_id": "run-053f5c0e-6bcb-4ca6-94e9-c4f1f8c05db5",
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "status": "starting",
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "worker_generation": 1,
+    "started_at": "2026-10-01T19:07:44.735270935Z",
+    "updated_at": "2026-10-01T19:08:43.846351518Z"
+  },
+  "elapsed": "32s",
+  "recent_status": "2026-10-01T19:08:43.846351518Z",
+  "no_new_tasks": true,
+  "message": "draining; current RunAttempt may finish naturally; Worker will not claim new tasks"
+}
+{
+  "agent_id": "agy-onboarding-e2e",
+  "worker_status": "offline",
+  "elapsed": "33s",
+  "recent_status": "0001-01-01T00:00:00Z",
+  "no_new_tasks": false,
+  "message": "offline; graceful stop completed"
+}
+Agent agy-onboarding-e2e 已暂停；恢复: openagentx agent resume agy-onboarding-e2e

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "add",
+    "--id",
+    "agy-onboarding-e2e",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/installation/owner-password",
+    "--model",
+    "gemini-3.7-flash-low",
+    "--runtime-binary",
+    "/home/sky/.local/bin/agy-graft",
+    "--no-open",
+    "--wait",
+    "5m"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 22.772048922008253,
+  "prompts_remaining": 0
+}

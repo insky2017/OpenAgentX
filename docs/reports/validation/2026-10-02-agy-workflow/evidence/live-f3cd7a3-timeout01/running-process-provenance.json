@@ -1,0 +1,31 @@
+[
+  {
+    "label": "daemon",
+    "pid": 222308,
+    "starttime": "9893033",
+    "executable": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+    "sha256": "a17a9ef559ede808a5baf994170419a8f57470c98c7ecb6a0478aa8dd438cbac",
+    "argv": [
+      "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+      "serve",
+      "--http-addr",
+      "127.0.0.1:59623",
+      "--web-dir",
+      "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/web"
+    ]
+  },
+  {
+    "label": "worker",
+    "pid": 222629,
+    "starttime": "9893259",
+    "executable": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+    "sha256": "a17a9ef559ede808a5baf994170419a8f57470c98c7ecb6a0478aa8dd438cbac",
+    "argv": [
+      "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+      "worker",
+      "run",
+      "--config",
+      "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-timeout01/worker.yaml"
+    ]
+  }
+]

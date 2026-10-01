@@ -1,0 +1,16 @@
+{
+  "source_commit": "14d7350b86125f299615d4a8db61d844ce866758",
+  "url": "http://127.0.0.1:48623/?view=tasks&agent=live-agy-0-main01",
+  "browser": "Chrome DevTools isolated context oax-final-14d7350",
+  "actions": [
+    "Open actual login page",
+    "Fill owner and private fixture password via official form",
+    "Click login",
+    "Cross-check latest network requests"
+  ],
+  "actual": "POST /api/auth/v1/login net::ERR_CONNECTION_REFUSED; UI displayed username or password error",
+  "cause": "Concurrent AGY cancel assertion failed; runner automatically stopped its own daemon before login. No bad password evidence.",
+  "product_fix": "Login now distinguishes transport/server errors from 401/403; browser recheck pending.",
+  "status": "FAIL; no browser end-to-end pass claimed",
+  "at": "2026-10-01T18:32:06.173417+00:00"
+}

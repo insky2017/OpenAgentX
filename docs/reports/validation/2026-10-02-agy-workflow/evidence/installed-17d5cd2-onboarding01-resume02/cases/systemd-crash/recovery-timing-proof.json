@@ -1,0 +1,22 @@
+{
+  "fault_at": 1790881940.685997,
+  "physical_stop_upper_bound_seconds": 2.0125579833984375,
+  "physical_stop_evidence": "Prior HTTP 0048 overview only called after source recovered() verified all tracked old PIDs stopped; control-flow-derived bound, not separately saved liveness snapshot.",
+  "task_updated_at": "2026-10-01T19:12:53.346201811Z",
+  "automatic_reconcile_seconds": 32.66020393371582,
+  "daemon_before": {
+    "pid": 306551,
+    "state": "S",
+    "ppid": 1722,
+    "pgid": 306551,
+    "starttime": "9994153"
+  },
+  "daemon_after": {
+    "pid": 306551,
+    "state": "S",
+    "ppid": 1722,
+    "pgid": 306551,
+    "starttime": "9994153"
+  },
+  "old_processes_now_alive": false
+}

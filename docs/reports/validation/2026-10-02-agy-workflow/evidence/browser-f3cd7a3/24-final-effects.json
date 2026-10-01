@@ -1,0 +1,14 @@
+{
+  "cancel": {
+    "started": 1790881642.0868435,
+    "checked_at": 1790881802.5349941,
+    "late_exists": false,
+    "original_delay": 70
+  },
+  "supplement": {
+    "exact": true,
+    "bytes": "b'BROWSER-SUPPLEMENT\\n'",
+    "sha256": "d63c98031c4631fe734fd469dfba596aa6dcc469dffeee2f07689fdbf96f90d4",
+    "original_script_invocations": 1
+  }
+}

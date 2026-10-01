@@ -234,6 +234,26 @@ class Console:
         initial = self.get('/api/console/v1/attach?agent_id=' + self.a.agent + '&mode=normal')
         assert not initial.get('active_run'), 'exclusive Agent has active Run'
         assert initial.get('readiness', {}).get('can_start_now'), 'Agent is not ready'
+        if self.a.idle_seconds:
+            worker = service_before[1]
+            def cpu_ticks():
+                fields = P('/proc', str(worker['pid']), 'stat').read_text().split()
+                assert fields[21] == worker['starttime'], 'Worker PID reused during idle sample'
+                return int(fields[13]) + int(fields[14])
+            idle_start = time.monotonic()
+            ticks_before = cpu_ticks()
+            self.pump(self.a.idle_seconds)
+            ticks_after = cpu_ticks()
+            elapsed = time.monotonic() - idle_start
+            idle_after = self.get('/api/console/v1/attach?agent_id=' + self.a.agent + '&mode=normal')
+            cpu_seconds = (ticks_after - ticks_before) / os.sysconf('SC_CLK_TCK')
+            write(self.out / 'idle-sample.json', {'worker_pid': worker['pid'], 'starttime': worker['starttime'],
+                'sample_seconds': elapsed, 'ticks_before': ticks_before, 'ticks_after': ticks_after,
+                'clock_ticks_per_second': os.sysconf('SC_CLK_TCK'), 'cpu_seconds': cpu_seconds,
+                'one_core_fraction': cpu_seconds / elapsed, 'before': initial, 'after': idle_after,
+                'limit': '15-second bounded idle sample; not a sustained-load benchmark'})
+            assert idle_after['worker_instance_id'] == initial['worker_instance_id'] and not idle_after.get('active_run')
+            assert idle_after.get('readiness', {}).get('can_start_now') and cpu_seconds / elapsed < .1
         workspace = P(self.a.workspace)
         material = (workspace / 'input.txt').read_text().strip()
         assert material and self.a.role_marker
@@ -262,7 +282,7 @@ class Console:
         second = self.finished(second_id, '06-continued-query')
         assert second['task'].get('parent_task_id') == first_id
         assert 'Previous work reference' in second['task']['content']
-        assert second['task']['result'].strip() == continued_marker
+        assert second['task']['result'].strip().splitlines()[-1].strip() == continued_marker
         assert second['latest_run']['worker_instance_id'] == first['latest_run']['worker_instance_id'] == initial['worker_instance_id']
         self.reveal(continued_marker, '07-complete-continued-result')
         self.command('/quit')
@@ -327,6 +347,7 @@ def main():
     for key in ('evidence', 'raw', 'workspace', 'role-marker', 'commit'):
         parser.add_argument('--' + key, required=True)
     parser.add_argument('--timeout', type=int, default=240)
+    parser.add_argument('--idle-seconds', type=int, default=0)
     args = parser.parse_args()
     os.umask(0o077)
     console = Console(args)

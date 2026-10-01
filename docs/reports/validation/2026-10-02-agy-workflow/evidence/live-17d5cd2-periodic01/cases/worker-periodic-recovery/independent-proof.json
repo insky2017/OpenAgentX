@@ -1,0 +1,41 @@
+{
+  "task_id": "task-11c02b4c-b313-4d17-82ee-eea7e2e19a67",
+  "run_id": "run-e6cb2bb7-3c28-49ce-9835-c8349cdcb8bd",
+  "recovery_seconds": 42.11978363990784,
+  "daemon": {
+    "label": "daemon",
+    "pid": 331481,
+    "starttime": "10022832"
+  },
+  "daemon_restarted": false,
+  "old_runtime_alive_before_test_cleanup": 5,
+  "runtime_cleanup": "explicit test cleanup, not product automatic termination",
+  "invocation_records": [
+    {
+      "pid": 333463,
+      "at": 1790881821.662154
+    }
+  ],
+  "late_effect_exists": false,
+  "old_worker": {
+    "worker_instance_id": "worker-ad238247-11ce-4e54-b37b-a4fbdeb13d54",
+    "agent_id": "live-agy-riodic01",
+    "generation": 1,
+    "status": "online",
+    "last_heartbeat_at": "2026-10-01T19:10:04.022548226Z",
+    "lease_until": "2026-10-01T19:10:34.022548226Z",
+    "started_at": "2026-10-01T19:10:03.015192069Z",
+    "updated_at": "2026-10-01T19:10:04.022548226Z"
+  },
+  "new_worker": {
+    "worker_instance_id": "worker-b69acb72-ce50-4a1c-9b60-54ee13a77233",
+    "agent_id": "live-agy-riodic01",
+    "generation": 2,
+    "status": "online",
+    "last_heartbeat_at": "2026-10-01T19:11:15.340894084Z",
+    "lease_until": "2026-10-01T19:11:45.340894084Z",
+    "started_at": "2026-10-01T19:11:10.333788771Z",
+    "updated_at": "2026-10-01T19:11:15.340894084Z"
+  },
+  "new_generation_query_task_id": "task-65176473-bb01-4f07-8cc8-300c948c0b48"
+}

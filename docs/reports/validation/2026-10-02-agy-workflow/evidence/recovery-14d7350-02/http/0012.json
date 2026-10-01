@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:30:21.874317+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-d7350-02",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run python3 daemon-sigkill.py in your assigned workspace exactly once and wait for it to finish. Do not run any other script or retry this command.",
+    "meta": {
+      "idempotency_key": "1d86af408bb05837e775bf0a"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-7df6a3b3-860b-4e42-a9b7-66562bac59e7",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 1
+  }
+}

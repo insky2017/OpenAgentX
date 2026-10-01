@@ -1,0 +1,8 @@
+{
+  "running_task_id": "task-fd023db7-ba66-49e5-9f57-5c1707fdc307",
+  "queued_task_id": "task-b9f0d0fd-71dd-486a-a893-ec706f3fb48f",
+  "queued_task_status": "canceled",
+  "run_count": 0,
+  "effect_exists": false,
+  "checked_after_original_delay": true
+}

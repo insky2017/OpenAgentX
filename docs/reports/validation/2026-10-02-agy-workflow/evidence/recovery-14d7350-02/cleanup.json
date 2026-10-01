@@ -1,0 +1,20 @@
+[
+  {
+    "pid": 165932,
+    "stop_sent": true,
+    "alive_after": false
+  },
+  {
+    "pid": 165810,
+    "stop_sent": true,
+    "alive_after": false
+  },
+  {
+    "pid": 143189,
+    "already_stopped": true
+  },
+  {
+    "pid": 143010,
+    "already_stopped": true
+  }
+]

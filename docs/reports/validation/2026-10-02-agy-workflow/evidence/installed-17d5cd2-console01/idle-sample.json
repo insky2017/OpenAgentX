@@ -1,0 +1,51 @@
+{
+  "worker_pid": 343986,
+  "starttime": "10039721",
+  "sample_seconds": 15.000556522994884,
+  "ticks_before": 265,
+  "ticks_after": 265,
+  "clock_ticks_per_second": 100,
+  "cpu_seconds": 0.0,
+  "one_core_fraction": 0.0,
+  "before": {
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    },
+    "agent_id": "agy-onboarding-e2e",
+    "mode": "normal",
+    "generation": 3,
+    "worker_status": "online",
+    "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+    "last_heartbeat_at": "2026-10-01T19:19:09.682413113Z",
+    "lease_until": "2026-10-01T19:19:39.682413113Z",
+    "backend_health": {
+      "agy": "healthy"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 267770
+  },
+  "after": {
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    },
+    "agent_id": "agy-onboarding-e2e",
+    "mode": "normal",
+    "generation": 3,
+    "worker_status": "online",
+    "worker_instance_id": "worker-49949502-6067-466b-8901-d41da1a48261",
+    "last_heartbeat_at": "2026-10-01T19:19:19.68128203Z",
+    "lease_until": "2026-10-01T19:19:49.68128203Z",
+    "backend_health": {
+      "agy": "healthy"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 267771
+  },
+  "limit": "15-second bounded idle sample; not a sustained-load benchmark"
+}

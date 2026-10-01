@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:50:46.726281+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-3-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.",
+    "meta": {
+      "idempotency_key": "056ba8a83f6972c06841d2ed"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-fd023db7-ba66-49e5-9f57-5c1707fdc307",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 6
+  }
+}

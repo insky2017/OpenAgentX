@@ -1,0 +1,22 @@
+[
+  {
+    "path": "worker-periodic-recovery.invocations.jsonl",
+    "bytes": 41,
+    "sha256": "d9bbfac26c99ff37e225209274400455092b6a6d2c1ca8e49b4a1c512958bd15"
+  },
+  {
+    "path": "worker-periodic-recovery.started.json",
+    "bytes": 129,
+    "sha256": "8f81fcc19c09f4cbd2dfde7f6860781bc5949ba5b20757f79e2826a48844d1e5"
+  },
+  {
+    "path": "worker-periodic-recovery.py",
+    "bytes": 581,
+    "sha256": "6e502f24afac2ae7f716f5c01428efb9aee600ae3b343d885e7971bc2176cf51"
+  },
+  {
+    "path": "ROLE.md",
+    "bytes": 414,
+    "sha256": "4dc66f87238f9b52a6bc5a1760dd66cfff7991888a2548c35b14d429fafdb4dd"
+  }
+]

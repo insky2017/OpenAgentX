@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-01T18:49:18.571047+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-3-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Continue the previous result. Add one line 'continued' to result.txt, ending in a real newline. The complete file must be exactly b'OAX-E2E\\ncontinued\\n'. Do not duplicate the line.",
+    "parent_task_id": "task-fc523622-3db5-4ea0-9d6c-99752c550182",
+    "continue_context": true,
+    "meta": {
+      "idempotency_key": "9ce628afb4aa88ee2e398ca4"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 3
+  }
+}

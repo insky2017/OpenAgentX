@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-01T18:31:33.044950+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "live-agy-d7350-r1",
+        "principal_id": "agent-live-agy-d7350-r1",
+        "organization_id": "default",
+        "display_name": "Deterministic AGY protocol verification",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-01T18:31:30.707510728Z",
+        "updated_at": "2026-10-01T18:31:30.707510728Z",
+        "readiness": {
+          "ready": false,
+          "can_start_now": false,
+          "reason": "后台未运行",
+          "next_action": "openagentx agent resume live-agy-d7350-r1"
+        }
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 6,
+    "server_time": "2026-10-01T18:31:33.043611031Z",
+    "tasks": [],
+    "workers": []
+  }
+}

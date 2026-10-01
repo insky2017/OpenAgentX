@@ -1,0 +1,27 @@
+{"ready": true, "url": "http://127.0.0.1:35337", "evidence": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/evidence/recovery-14d7350-02", "private_profile": "/home/sky/.local/state/openagentx/evidence/recovery-14d7350-02"}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 305}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 275}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 245}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 215}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 185}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 155}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 125}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 95}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 65}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 35}
+{"case": "daemon-sigkill", "waiting_for_run_lease_seconds": 5}
+Traceback (most recent call last):
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/e2e/agy_recovery.py", line 147, in <module>
+    if __name__ == '__main__': main()
+                               ^^^^^^
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/e2e/agy_recovery.py", line 136, in main
+    for stage in ['daemon', 'worker']: completed[stage] = live.recovery_case(stage)
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/e2e/agy_recovery.py", line 110, in recovery_case
+    self.worker_restart(label, old_worker)
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/e2e/agy_recovery.py", line 74, in worker_restart
+    write(self.out/'cases'/label/'new-generation-ready.json', self.wait(ready, 45))
+                                                              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/e2e/agy_live.py", line 99, in wait
+    raise TimeoutError('live condition deadline exceeded')
+TimeoutError: live condition deadline exceeded

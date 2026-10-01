@@ -1,0 +1,30 @@
+{
+  "old_sha256": "41a3c86b63cf4bf5025cd252e0c1dc4ee577facc1f597b5bf318f13e7f9bb8d8",
+  "new_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+  "current_task": "task-99187fbd-b274-405f-b213-49a4b447db10",
+  "next_task": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+  "invocations": 1,
+  "old_role": "OAX-ROLE-OLD-b84428294c",
+  "new_role": "OAX-ROLE-NEW-ff09d70390",
+  "paused_worker": {
+    "worker_instance_id": "worker-83a30890-60e3-4d19-9b0e-30a3db1ee820",
+    "agent_id": "agy-onboarding-e2e",
+    "generation": 1,
+    "status": "offline",
+    "last_heartbeat_at": "2026-10-01T19:08:43.846351518Z",
+    "lease_until": "2026-10-01T19:08:49.861433771Z",
+    "started_at": "2026-10-01T19:06:53.624140326Z",
+    "updated_at": "2026-10-01T19:08:49.861433771Z"
+  },
+  "resumed_worker": {
+    "worker_instance_id": "worker-61a2f595-4f9c-475e-9218-33c9c44cbdf8",
+    "agent_id": "agy-onboarding-e2e",
+    "generation": 2,
+    "status": "online",
+    "last_heartbeat_at": "2026-10-01T19:11:36.905945808Z",
+    "lease_until": "2026-10-01T19:12:06.905945808Z",
+    "started_at": "2026-10-01T19:11:16.899657173Z",
+    "updated_at": "2026-10-01T19:11:36.905945808Z"
+  },
+  "role_assertion": "Role SHA256 unchanged; final response line is old marker and new marker absent; extra progress sentence retained."
+}

@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:08:16.747656+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+    "meta": {
+      "idempotency_key": "bab9699b8db2a8ed0c274465"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 75
+  }
+}

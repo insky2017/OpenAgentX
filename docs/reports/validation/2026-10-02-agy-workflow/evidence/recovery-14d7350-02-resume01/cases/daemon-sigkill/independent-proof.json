@@ -1,0 +1,17 @@
+{
+  "task_id": "task-7df6a3b3-860b-4e42-a9b7-66562bac59e7",
+  "old_run_id": "run-a26b6136-ef7a-4e3d-9095-cd8bee5d1098",
+  "invocations": 1,
+  "late_effect_exists": false,
+  "new_worker": {
+    "worker_instance_id": "worker-6b96dc47-59ef-4cd5-b551-df940a00dbb4",
+    "agent_id": "live-agy-d7350-02",
+    "generation": 3,
+    "status": "online",
+    "last_heartbeat_at": "2026-10-01T18:42:44.182372759Z",
+    "lease_until": "2026-10-01T18:43:14.182372759Z",
+    "started_at": "2026-10-01T18:42:39.171796176Z",
+    "updated_at": "2026-10-01T18:42:44.182372759Z"
+  },
+  "query_task": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b"
+}

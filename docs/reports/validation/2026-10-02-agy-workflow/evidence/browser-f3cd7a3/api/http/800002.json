@@ -1,0 +1,285 @@
+{
+  "at": "2026-10-01T19:11:19.131960+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+  "request": null,
+  "status": 200,
+  "response": {
+    "review": {
+      "id": "task-review-63acb1ce-91f6-5099-9ec8-572d601638e9",
+      "task_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+      "run_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+      "run_version": 2,
+      "result_sha256": "6b82b09273968cc6c1c2fc7961ac204a1be7aaed2590fd148bde01cebf066e4b",
+      "decision": "accepted",
+      "reviewed_by": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+      "created_at": "2026-10-01T18:57:46.655278348Z",
+      "sequence": 729,
+      "task_version": 4
+    },
+    "task": {
+      "completion_basis": "",
+      "id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+      "version": 4,
+      "target_agent_id": "live-agy-3-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Create browser-result.txt with exactly b'BROWSER-E2E\\n' in your assigned workspace. Use a tool to write it; report after completion. Change no other file.",
+      "status": "uncertain",
+      "result": "The file [`browser-result.txt`](file:///home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/browser-result.txt) has been created with the exact content `BROWSER-E2E\\n`. No other files were modified.",
+      "error": "business_effect_unverified",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T18:55:38.356677991Z",
+      "updated_at": "2026-10-01T18:57:46.655278348Z"
+    },
+    "messages": [
+      {
+        "id": "message-6285e053-ed39-4de8-90b7-93f52800b481",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+        "target_agent_id": "live-agy-3-main01",
+        "kind": "instruction",
+        "content": "Create browser-result.txt with exactly b'BROWSER-E2E\\n' in your assigned workspace. Use a tool to write it; report after completion. Change no other file.",
+        "created_at": "2026-10-01T18:55:38.356677991Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:58:38.3593764Z",
+        "instructions_sha256": "0f94c08866a90e84bdc8199fb36f01c9e52001b5731074df34fe65a1ec2ac24d",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/ROLE.md",
+        "run_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "task_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+        "agent_id": "live-agy-3-main01",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-8d73bb15-de22-4aea-af09-e46f9aa77e90",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "The file [`browser-result.txt`](file:///home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/browser-result.txt) has been created with the exact content `BROWSER-E2E\\n`. No other files were modified.",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T18:55:38.3593764Z",
+        "finished_at": "2026-10-01T18:56:05.481900279Z",
+        "created_at": "2026-10-01T18:55:38.3593764Z",
+        "updated_at": "2026-10-01T18:56:05.481900279Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 580,
+        "event_id": "event-46ac07f2-7509-49ba-9527-f9129fb7ec92",
+        "aggregate_type": "task",
+        "aggregate_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:55:38.356677991Z"
+      },
+      {
+        "sequence": 582,
+        "event_id": "event-task-7869ce41-de4b-4329-8007-7815432d2bb2",
+        "aggregate_type": "task",
+        "aggregate_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:55:38.360378786Z"
+      },
+      {
+        "sequence": 583,
+        "event_id": "event-run-b2f6cc81-2c86-4f0e-9ff5-6daafb3cbb92",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:55:38.360384924Z"
+      },
+      {
+        "sequence": 600,
+        "event_id": "event-runtime-e1e019ea-7f96-48e5-a32f-14a8db20b2b6",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:55:53.786964653Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 601,
+        "event_id": "event-runtime-dc1219e9-3075-4954-8b83-f9e99d886069",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:55:53.874740078Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 606,
+        "event_id": "event-runtime-f6eaa0db-ec0e-4daa-8bcf-7add68c72364",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:55:58.039254949Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 607,
+        "event_id": "event-runtime-4931d140-c367-4768-a71c-d7aae6693f6b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:55:58.04043619Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 608,
+        "event_id": "event-runtime-eac44a7f-0d59-49ea-ac1a-53ff9c96ede0",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:55:58.041656613Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 612,
+        "event_id": "event-runtime-7b9876b8-b47c-41d4-b742-6461a45fa0a9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:56:00.174084827Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 613,
+        "event_id": "event-runtime-c72ff851-b352-4b39-ab4e-9d9a6c48286e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:56:00.199126739Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 614,
+        "event_id": "event-runtime-44877ac4-4bdf-448e-8eb1-074223fe0e68",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:56:00.22446602Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 615,
+        "event_id": "event-runtime-1a205cd0-3133-4dc2-9743-d29caa4da184",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:56:00.250640483Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 616,
+        "event_id": "event-runtime-96f66308-62c6-4c6f-9cf1-df9a83c7e472",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:56:00.276173503Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 617,
+        "event_id": "event-runtime-083dd97c-c4b0-4a00-ac11-f6ccce992989",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:56:00.302141285Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 618,
+        "event_id": "event-runtime-8db3a491-07e6-4e4e-960c-a7e424c81dee",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:56:00.328413615Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 619,
+        "event_id": "event-runtime-dad4288e-9d50-4fee-8353-54ca342c44da",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T18:56:00.330437461Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "The file [`browser-result.txt`](file:///home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/browser-result.txt) has been created with the exact content `BROWSER-E2E\\n`. No other files were modified.\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 626,
+        "event_id": "event-run-a57f0a21-a34e-41a8-aece-94f9174f7b13",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-14e01ef9-111e-4eaa-97cd-92beab4b071a",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T18:56:05.481927455Z"
+      },
+      {
+        "sequence": 627,
+        "event_id": "event-task-1063900d-86f1-4990-ab1e-373623117cb2",
+        "aggregate_type": "task",
+        "aggregate_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T18:56:05.481930923Z"
+      },
+      {
+        "sequence": 729,
+        "event_id": "task-review-63acb1ce-91f6-5099-9ec8-572d601638e9",
+        "aggregate_type": "task",
+        "aggregate_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6",
+        "event_type": "task.result_reviewed",
+        "created_at": "2026-10-01T18:57:46.655278348Z"
+      }
+    ],
+    "snapshot_sequence": 1642,
+    "live_after_sequence": 1642,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

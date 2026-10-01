@@ -1,0 +1,59 @@
+{
+  "at": 1790882371.9606957,
+  "method": "GET",
+  "path": "/api/console/v1/agents/agy-onboarding-e2e/tasks?limit=100",
+  "status": 200,
+  "response": {
+    "tasks": [
+      {
+        "task_id": "task-fd9c1ca3-870c-4b02-acbd-0bbaf4d53e26",
+        "version": 2,
+        "status": "running",
+        "intent": "query",
+        "summary": "Read input.txt in your assigned workspace using a tool. Reply only with its exact contents and the role verification code from your role instructions, each on its own line. Request reference: OAX-CONSOLE-364249",
+        "updated_at": "2026-10-01T19:19:31.661663303Z"
+      },
+      {
+        "task_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+        "version": 3,
+        "status": "succeeded",
+        "intent": "query",
+        "summary": "Reply with exactly OAX-LIVE-arding01-after-systemd-crash. Do not call tools or read files.",
+        "updated_at": "2026-10-01T19:16:23.63391492Z"
+      },
+      {
+        "task_id": "task-75772a38-2188-4f81-836a-0471af82b0b4",
+        "version": 3,
+        "status": "uncertain",
+        "intent": "mutation",
+        "summary": "Run python3 systemd-crash.py exactly once and wait for it to finish. Do not retry this script or execute other scripts.",
+        "updated_at": "2026-10-01T19:12:53.346201811Z"
+      },
+      {
+        "task_id": "task-37b0c997-8544-4e58-a69e-014e9b7dea1c",
+        "version": 3,
+        "status": "succeeded",
+        "intent": "query",
+        "summary": "Reply with only your role verification code from your role instructions. Do not read files or use tools.",
+        "updated_at": "2026-10-01T19:11:53.408744787Z"
+      },
+      {
+        "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+        "version": 3,
+        "status": "succeeded",
+        "intent": "query",
+        "summary": "Run python3 role-freeze.py exactly once and wait for it to finish. Then reply only with the role verification code already supplied in your role instructions. Do not read ROLE.md or any other file.",
+        "updated_at": "2026-10-01T19:08:49.654334911Z"
+      },
+      {
+        "task_id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+        "version": 3,
+        "status": "succeeded",
+        "intent": "query",
+        "summary": "Read input.txt in your assigned workspace. Reply with exactly your role verification code, then a vertical bar, then the file contents with no trailing newline. Do not read ROLE.md.",
+        "updated_at": "2026-10-01T19:07:43.331157043Z"
+      }
+    ],
+    "has_more": false
+  }
+}

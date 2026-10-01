@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:16:10.644965+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-LIVE-arding01-after-systemd-crash. Do not call tools or read files.",
+    "meta": {
+      "idempotency_key": "6e5dafc62f872e272ed5e192"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-641729f8-6f4a-432c-85e4-6eebe7919be0",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 77
+  }
+}

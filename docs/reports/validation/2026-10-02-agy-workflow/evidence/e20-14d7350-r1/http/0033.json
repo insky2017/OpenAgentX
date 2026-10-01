@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-01T18:31:53.227374+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-367cbbbc-dca4-49b1-a73f-afea55d3ccf1",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-367cbbbc-dca4-49b1-a73f-afea55d3ccf1",
+      "version": 1,
+      "target_agent_id": "live-agy-d7350-r1",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "OAX-E20-CASE:normal",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:31:53.2202194Z",
+      "updated_at": "2026-10-01T18:31:53.2202194Z"
+    },
+    "messages": [
+      {
+        "id": "message-4becaaf5-0421-4201-91ed-0ac134c116ec",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-367cbbbc-dca4-49b1-a73f-afea55d3ccf1",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-4010b2b8-0a26-49c8-a090-64ff740320a9",
+        "target_agent_id": "live-agy-d7350-r1",
+        "kind": "instruction",
+        "content": "OAX-E20-CASE:normal",
+        "created_at": "2026-10-01T18:31:53.2202194Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 85,
+        "event_id": "event-b3e2ef04-319b-475b-9aa5-cdeb4909b252",
+        "aggregate_type": "task",
+        "aggregate_id": "task-367cbbbc-dca4-49b1-a73f-afea55d3ccf1",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:31:53.2202194Z"
+      }
+    ],
+    "snapshot_sequence": 86,
+    "live_after_sequence": 86,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

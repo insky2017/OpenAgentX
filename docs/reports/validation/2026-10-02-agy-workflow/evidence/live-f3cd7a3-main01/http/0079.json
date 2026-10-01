@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:51:38.740065+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-3-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-LIVE-3-main01-after-effects. Do not call tools or read files.",
+    "meta": {
+      "idempotency_key": "7e124b710e190381151146c2"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-ff87f458-50fb-454a-8a3a-edd26ad50550",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 9
+  }
+}

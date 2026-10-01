@@ -1,0 +1,90 @@
+[?1049h[22;0;0t[?1h=[H[2J[?12l[?25h[?1000l[?1002l[?1003l[?1006l[?1005l[?2004h(B[m[?12l[?25h[?1006l[?1000l[?1002l[?1003l[1;1H[1;24r[c[>c[>q]10;?\]11;?\[5;1H[?25l
+[32m────────────────────────────────────────────────────────────────────────────────[12;1H[39m────────────────────────────────────────────────────────────────────────────────(B[m[1;1H[K
+[K
+[K
+[K
+[K[2B[K
+[K
+[K
+[K
+[K[2B[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[30m[42m
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:13 02-Oct-26(B[m[5;1H(B[m[?12l[?25h[?1006l[?1000l[?1002l[?1003l[1;1H[1;24r[5;1H[?25l
+[32m────────────────────────────────────────────────────────────────────────────────[12;1H[39m────────────────────────────────────────────────────────────────────────────────(B[m[1;1H[K
+[K
+[K
+[K
+[K[2B[K
+[K
+[K
+[K
+[K[2B[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[30m[42m
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:13 02-Oct-26(B[m[5;1H[HAgent quote-service | mode normal | connection connected | cursor 9[K
+Attaching to quote-service                                                    [K
+Snapshot applied at cursor 6                                                  [K
+Task none | Worker worker-cc922505... gen 1 online | timeline 3/76 bytes[K
+> /help                                                                       [K[1;5r[5;79H[K[1;24r[5;1H> /d                                                                          [K> /di                                                                         [K[HAgent quote-service | mode normal | connection connected | cursor 23[K[4;1HTask none | Worker worker-cc922505... gen 1 online | timeline 4/97 bytes[K
+> /disp                                                                       [K> /dispa                                                                      [K> /dispatc                                                                    [K> /dispatch                                                                   [K> /dispatch f                                                                 [K> /dispatch fir                                                               [K> /dispatch firs                                                              [K> /dispatch first                                                             [K> /dispatch first i                                                           [K> /dispatch first iso                                                         [K> /dispatch first isola                                                       [K> /dispatch first isolat                                                      [K> /dispatch first isolated                                                    [K> /dispatch first isolated wo                                                 [K> /dispatch first isolated work                                               [K> /dispatch first isolated workf                                              [K> /dispatch first isolated workflo                                            [K> /dispatch first isolated workflow                                           [K> /dispatch first isolated workflow t                                         [K> /dispatch first isolated workflow tas                                       [K> /dispatch first isolated workflow task                                      [K[2ddispatch pending                                                              [K
+dispatch succeeded | task task-8957be25-f... | version 1 | status queued |    [K
+Task task-8957be25-f... v1 queued (queued) | Worker worker-cc922505... gen 1 ...[5;1H> /help                                                                       [K[HAgent quote-service | mode normal | connection connected | cursor 42[K
+Runtime reply: final fixture reply                                            [K
+#33 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+Task task-8957be25-f... v3 waiting_input (run succeeded) | Worker worker-cc92...[5;1H> /s                                                                          [K> /st                                                                         [K> /stee                                                                       [K> /steer                                                                      [K> /steer c                                                                    [K> /steer con                                                                  [K> /steer cont                                                                 [K> /steer contin                                                               [K> /steer continue                                                             [K> /steer continue wi                                                          [K> /steer continue wit                                                         [K> /steer continue with                                                        [K> /steer continue with th                                                     [K> /steer continue with the                                                    [K> /steer continue with the f                                                  [K> /steer continue with the fi                                                 [K> /steer continue with the fina                                               [K> /steer continue with the final                                              [K> /steer continue with the final r                                            [K> /steer continue with the final rep                                          [K> /steer continue with the final repl                                         [K> /steer continue with the final reply                                        [K[2dsteer pending                                                                 [K
+steer succeeded | task task-8957be25-f... | task version 4 | status           [K
+Task task-8957be25-f... v4 waiting_input (run succeeded) | Worker worker-cc92...[5;1H> /help                                                                       [K[HAgent quote-service | mode normal | connection connected | cursor 61[K
+Runtime reply: final fixture reply                                            [K
+#53 runtime.turn.output | fixture | running | phase-two-safe-output           [K
+Task task-8957be25-f... v6 succeeded (run succeeded) | Worker worker-cc922505...[5;1H[2dTask outcome result: final fixture reply                                      [K
+#51 run_attempt.started | Task task-8957be25-f... | Run run-b1dd0beb-b2... |  [K[5;1H[2dsteer succeeded | task task-8957be25-f... | task version 4 | status           [K
+waiting_input | message message-a4e0f4c... | message version 1 | sequence 2   [K[5;1H[2d#33 runtime.turn.output | fixture | running | phase-one-safe-output           [K
+steer pending                                                                 [K[5;1H[2d#31 run_attempt.started | Task task-8957be25-f... | Run run-4dab7bd5-9c... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K[5;1H> /                                                                           [K> /ta                                                                         [K> /tas                                                                        [K> /tasks                                                                      [K[H   Tasks: 0 active, 1 recent (bounded)            [K
+                                                  [K
+  1 item                                          [K
+                                                  [K
+│ task-8957be25-f029-41fd-8015-3cfef047d2f2       [K[HAgent quote-service | mode normal | connection connected | cursor 61[K
+#31 run_attempt.started | Task task-8957be25-f... | Run run-4dab7bd5-9c... |  [K
+run version 2 | run status succeeded | Runtime reply state available          [K
+Task task-8957be25-f... v6 succeeded (run succeeded) | Worker worker-cc922505...[5;1H> /help                                                                       [K[HAgent quote-service | mode normal | connection connected | cursor 71[K[5;1H[2d#28 task.created | Task task-8957be25-f... | version 3 | status waiting_input [K
+#29 mailbox.claimed | Task task-8957be25-f... | version 3 | status            [K[5;1H[2ddispatch pending                                                              [K
+dispatch succeeded | task task-8957be25-f... | version 1 | status queued |    [K[5;1H[2d#7 worker.registered                                                          [K
+#10 worker.heartbeat                                                          [K[5;1H[2dAttaching to quote-service                                                    [K
+Snapshot applied at cursor 6                                                  [K[5;1H[HAgent quote-service | mode normal | connection connected | cursor 81[K[5;1H[?7727h(B[m[?12l[?25h[?1006l[?1000l[?1002l[?1003l[1;1H[1;24r[5;1H[?25l
+[32m────────────────────────────────────────────────────────────────────────────────[12;1H[39m────────────────────────────────────────────────────────────────────────────────(B[m[1;1HAgent quote-service | mode normal | connection connected | cursor 81[K
+Attaching to quote-service                                                    [K
+Snapshot applied at cursor 6                                                  [K
+Task task-8957be25-f... v6 succeeded (run succeeded) | Worker worker-cc922505...[5;1H> /help                                                                       [K[7;1H[K
+[K
+[K
+[K
+[K[2B[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[30m[42m
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:13 02-Oct-26(B[m[5;1H[HAgent quote-service | mode normal | connection connected | cursor 91[K[5;1H[HAgent quote-service | mode normal | connection connected | cursor 101[K[5;1H

@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-01T18:49:18.575183+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-6d290894-8f28-4078-a7f2-46ded95b0483",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+      "version": 1,
+      "target_agent_id": "live-agy-3-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Continue the previous result. Add one line 'continued' to result.txt, ending in a real newline. The complete file must be exactly b'OAX-E2E\\ncontinued\\n'. Do not duplicate the line.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-fc523622-3db5-4ea0-9d6c-99752c550182\nObjective:\nCreate result.txt in your assigned workspace with exactly these bytes: b'OAX-E2E\\n'. Use a tool to write the file. Do not change any other file. Report after the write.\nResult:\n[result.txt](file:///home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/result.txt) has been created with the exact bytes `b'OAX-E2E\\n'`. No other files were modified.",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:49:18.569029358Z",
+      "updated_at": "2026-10-01T18:49:18.569029358Z"
+    },
+    "messages": [
+      {
+        "id": "message-035167d8-3a4d-4217-8e08-2f07d40522cb",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+        "target_agent_id": "live-agy-3-main01",
+        "kind": "instruction",
+        "content": "Continue the previous result. Add one line 'continued' to result.txt, ending in a real newline. The complete file must be exactly b'OAX-E2E\\ncontinued\\n'. Do not duplicate the line.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-fc523622-3db5-4ea0-9d6c-99752c550182\nObjective:\nCreate result.txt in your assigned workspace with exactly these bytes: b'OAX-E2E\\n'. Use a tool to write the file. Do not change any other file. Report after the write.\nResult:\n[result.txt](file:///home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/result.txt) has been created with the exact bytes `b'OAX-E2E\\n'`. No other files were modified.",
+        "created_at": "2026-10-01T18:49:18.569029358Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 101,
+        "event_id": "event-c235b4f3-8215-49eb-9a30-c133a2207f1b",
+        "aggregate_type": "task",
+        "aggregate_id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:49:18.569029358Z"
+      }
+    ],
+    "snapshot_sequence": 102,
+    "live_after_sequence": 102,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

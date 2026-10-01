@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:07:22.646432+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Read input.txt in your assigned workspace. Reply with exactly your role verification code, then a vertical bar, then the file contents with no trailing newline. Do not read ROLE.md.",
+    "meta": {
+      "idempotency_key": "5a251b67567dce8678e9bfc3"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-92193e6f-8d29-4cd1-b416-2632df500b8f",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 73
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-01T18:31:51.207183+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-8e0f8339-03ae-49d3-bf4f-dc1b9d6531fd",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-8e0f8339-03ae-49d3-bf4f-dc1b9d6531fd",
+      "version": 1,
+      "target_agent_id": "live-agy-d7350-r1",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "OAX-E20-CASE:truncated-json",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:31:51.199245003Z",
+      "updated_at": "2026-10-01T18:31:51.199245003Z"
+    },
+    "messages": [
+      {
+        "id": "message-438c5db2-319e-41cc-a98c-5f2090754f15",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-8e0f8339-03ae-49d3-bf4f-dc1b9d6531fd",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-4010b2b8-0a26-49c8-a090-64ff740320a9",
+        "target_agent_id": "live-agy-d7350-r1",
+        "kind": "instruction",
+        "content": "OAX-E20-CASE:truncated-json",
+        "created_at": "2026-10-01T18:31:51.199245003Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 76,
+        "event_id": "event-b1ebaf00-f8c5-4c4a-a605-e82b4c9e011d",
+        "aggregate_type": "task",
+        "aggregate_id": "task-8e0f8339-03ae-49d3-bf4f-dc1b9d6531fd",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:31:51.199245003Z"
+      }
+    ],
+    "snapshot_sequence": 77,
+    "live_after_sequence": 77,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

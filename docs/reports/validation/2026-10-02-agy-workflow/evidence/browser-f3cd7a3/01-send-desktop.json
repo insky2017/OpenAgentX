@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-01T18:54:05.651Z",
+  "action": "Desktop actual browser form and send; real AGY mutation",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Error: Failed to interact with the element with uid 7_89. The element did not become interactive within the configured timeout."
+      }
+    ],
+    "isError": true
+  }
+}

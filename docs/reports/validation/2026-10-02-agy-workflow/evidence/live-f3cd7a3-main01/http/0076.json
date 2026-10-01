@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-01T18:51:08.950170+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks/task-fd023db7-ba66-49e5-9f57-5c1707fdc307/cancel",
+  "request": {
+    "meta": {
+      "expected_version": 2,
+      "idempotency_key": "5a09da54176b791d2bad9d39"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task": {
+      "id": "task-fd023db7-ba66-49e5-9f57-5c1707fdc307",
+      "version": 3,
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+      "target_agent_id": "live-agy-3-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "completion_basis": "",
+      "idempotency_key": "056ba8a83f6972c06841d2ed",
+      "content": "Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.",
+      "status": "cancel_requested",
+      "cancel_requested_by": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+      "cancel_requested_at": "2026-10-01T18:51:08.948305458Z",
+      "created_at": "2026-10-01T18:50:46.724759755Z",
+      "updated_at": "2026-10-01T18:51:08.948305458Z"
+    },
+    "sequence": 8
+  }
+}

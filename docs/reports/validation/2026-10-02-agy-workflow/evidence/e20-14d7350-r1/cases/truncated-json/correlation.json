@@ -1,0 +1,17 @@
+{
+  "task_id": "task-8e0f8339-03ae-49d3-bf4f-dc1b9d6531fd",
+  "run_id": "run-18608f85-f419-4367-935b-9af42b1799a1",
+  "fixture_pid": 150468,
+  "raw_path": "/home/sky/.oax-e/e20-14d7350-r1/runtime-raw/run-150468",
+  "worker_instance_id": "worker-65e91098-a4e1-451c-85fa-22d2f78e5d92",
+  "worker_generation": 1,
+  "task_status": "uncertain",
+  "completion_basis": "",
+  "turn_result": {
+    "final_reply": false,
+    "runtime_status": "uncertain",
+    "error": "decode AGY stream-json line: unexpected end of JSON input\nAGY stream-json was empty\nAGY stream-json ended without a terminal event",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  }
+}

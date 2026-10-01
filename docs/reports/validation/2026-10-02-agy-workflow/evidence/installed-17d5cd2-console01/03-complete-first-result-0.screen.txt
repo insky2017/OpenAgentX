@@ -1,0 +1,23 @@
+Agent agy-onboarding-e2e | mode normal | connection connected | cursor 267791
+dispatch pending
+dispatch succeeded | task task-fd9c1ca3-8... | version 1 | status queued |
+sequence 78
+#267773 task.created | Task task-fd9c1ca3-8... | version 2 | status running
+#267774 mailbox.claimed | Task task-fd9c1ca3-8... | version 2 | status running
+| task/work delivery accepted
+#267776 run_attempt.started | Task task-fd9c1ca3-8... | Run run-ecd1b455-7f...
+| run version 1 | run status starting
+#267779 runtime.agy.init | init
+#267780 runtime.agy.step_update | step_update
+#267781 runtime.agy.step_update | step_update
+#267782 runtime.agy.step_update | step_update
+#267783 runtime.agy.step_update | step_update
+#267784 runtime.agy.step_update | step_update
+#267785 runtime.agy.step_update | step_update
+#267786 runtime.agy.step_update | step_update
+#267787 runtime.agy.result | result | succeeded | OAX-FILE-d85eadcfbb OAX-
+ROLE-NEW-ff09d70390
+Task task-fd9c1ca3-8... v3 succeeded (run succeeded) | Worker worker-49949502...
+> /help
+>
+>

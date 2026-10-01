@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-01T18:49:34.618801+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-6d290894-8f28-4078-a7f2-46ded95b0483",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+      "version": 2,
+      "target_agent_id": "live-agy-3-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Continue the previous result. Add one line 'continued' to result.txt, ending in a real newline. The complete file must be exactly b'OAX-E2E\\ncontinued\\n'. Do not duplicate the line.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-fc523622-3db5-4ea0-9d6c-99752c550182\nObjective:\nCreate result.txt in your assigned workspace with exactly these bytes: b'OAX-E2E\\n'. Use a tool to write the file. Do not change any other file. Report after the write.\nResult:\n[result.txt](file:///home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/result.txt) has been created with the exact bytes `b'OAX-E2E\\n'`. No other files were modified.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:49:18.569029358Z",
+      "updated_at": "2026-10-01T18:49:18.571638794Z"
+    },
+    "messages": [
+      {
+        "id": "message-035167d8-3a4d-4217-8e08-2f07d40522cb",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-ee13a7ea-ddc0-4cad-ad2f-7a6f6f7c7503",
+        "target_agent_id": "live-agy-3-main01",
+        "kind": "instruction",
+        "content": "Continue the previous result. Add one line 'continued' to result.txt, ending in a real newline. The complete file must be exactly b'OAX-E2E\\ncontinued\\n'. Do not duplicate the line.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-fc523622-3db5-4ea0-9d6c-99752c550182\nObjective:\nCreate result.txt in your assigned workspace with exactly these bytes: b'OAX-E2E\\n'. Use a tool to write the file. Do not change any other file. Report after the write.\nResult:\n[result.txt](file:///home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/result.txt) has been created with the exact bytes `b'OAX-E2E\\n'`. No other files were modified.",
+        "created_at": "2026-10-01T18:49:18.569029358Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:52:18.571638794Z",
+        "instructions_sha256": "0f94c08866a90e84bdc8199fb36f01c9e52001b5731074df34fe65a1ec2ac24d",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-main01/workspace/ROLE.md",
+        "run_id": "run-a7b2b5f6-0726-42c7-844a-1885dc48858f",
+        "task_id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+        "agent_id": "live-agy-3-main01",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-8d73bb15-de22-4aea-af09-e46f9aa77e90",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T18:49:18.571638794Z",
+        "created_at": "2026-10-01T18:49:18.571638794Z",
+        "updated_at": "2026-10-01T18:49:34.11905285Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 101,
+        "event_id": "event-c235b4f3-8215-49eb-9a30-c133a2207f1b",
+        "aggregate_type": "task",
+        "aggregate_id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:49:18.569029358Z"
+      },
+      {
+        "sequence": 103,
+        "event_id": "event-task-55ec9f21-ae9b-4941-9df2-c93ad2aa69c3",
+        "aggregate_type": "task",
+        "aggregate_id": "task-6d290894-8f28-4078-a7f2-46ded95b0483",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:49:18.572576227Z"
+      },
+      {
+        "sequence": 104,
+        "event_id": "event-run-a406be31-a577-413e-a3be-0ff1340b122c",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-a7b2b5f6-0726-42c7-844a-1885dc48858f",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:49:18.572579956Z"
+      },
+      {
+        "sequence": 115,
+        "event_id": "event-runtime-bb7d3007-eae3-431f-a797-6cc4c9cfb083",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-a7b2b5f6-0726-42c7-844a-1885dc48858f",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:49:27.259574279Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 116,
+        "event_id": "event-runtime-7aebbc2f-373b-49ff-b67e-3cf3f5340ca9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-a7b2b5f6-0726-42c7-844a-1885dc48858f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:49:27.346390491Z",
+        "output": {
+          "stage": "step_update"
+        }
+      }
+    ],
+    "snapshot_sequence": 123,
+    "live_after_sequence": 123,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

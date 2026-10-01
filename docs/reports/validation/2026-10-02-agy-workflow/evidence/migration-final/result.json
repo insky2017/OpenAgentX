@@ -1,0 +1,90 @@
+{
+  "level": "D real historical database copy, no mock",
+  "source_commit": "f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9",
+  "binary_sha256": "a17a9ef559ede808a5baf994170419a8f57470c98c7ecb6a0478aa8dd438cbac",
+  "at": "2026-10-01T18:49:10.457608+00:00",
+  "schema_before": [
+    [
+      1,
+      1,
+      "2026-08-30T04:47:07.563Z"
+    ]
+  ],
+  "original_columns_history": {
+    "tasks": {
+      "rows": 59,
+      "sha256": "2d054dfae226dded6872cfa14ae9335897d8bd928ac37924dd7f14d5bfe66f37"
+    },
+    "agents": {
+      "rows": 5,
+      "sha256": "1e8ffa16893a6efa624b6bc7cc60274b57e6305be9e8a58d6985bdf6203201be"
+    },
+    "agent_profiles": {
+      "rows": 5,
+      "sha256": "1667868cdd5231b3415af885804b5607b6c5ccc3838cdd0631cae444ae0b1d6c"
+    },
+    "run_attempts": {
+      "rows": 61,
+      "sha256": "824cf87994d0bc3d1e028a6419a338557067a5fbaa690b311aa28167103f23d9"
+    },
+    "event_journal": {
+      "rows": 267611,
+      "sha256": "2448ee79705c309612e948bd29c1d79bf042337ed3f95b892114d0265f4d19b8"
+    }
+  },
+  "boots": [
+    {
+      "attempt": 1,
+      "argv": [
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+        "serve",
+        "--db",
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/migration-final/historical.db",
+        "--socket",
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/migration-final/run1.sock",
+        "--http-addr",
+        "127.0.0.1:0",
+        "--web-dir",
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/web"
+      ],
+      "pid": 228875,
+      "schema": [
+        [
+          1,
+          2,
+          "2026-10-01T18:49:05.062Z"
+        ]
+      ],
+      "history_unchanged": true,
+      "quick_check": "ok"
+    },
+    {
+      "attempt": 2,
+      "argv": [
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+        "serve",
+        "--db",
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/migration-final/historical.db",
+        "--socket",
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/migration-final/run2.sock",
+        "--http-addr",
+        "127.0.0.1:0",
+        "--web-dir",
+        "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/web"
+      ],
+      "pid": 229391,
+      "schema": [
+        [
+          1,
+          2,
+          "2026-10-01T18:49:05.062Z"
+        ]
+      ],
+      "history_unchanged": true,
+      "quick_check": "ok"
+    }
+  ],
+  "raw": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/migration-final",
+  "status": "PASS",
+  "boundary": "Migration and repeat reopen of actual historical snapshot; production installation is separate."
+}

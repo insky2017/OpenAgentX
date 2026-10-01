@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:25:34.269653+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-0-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "What is your role verification code? Reply with only the code from your role instructions. Do not read files or use tools.",
+    "meta": {
+      "idempotency_key": "686ed43406b1ade3570a2c86"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-1668d573-90ac-48da-8aca-97ae5ca64d6d",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 1
+  }
+}

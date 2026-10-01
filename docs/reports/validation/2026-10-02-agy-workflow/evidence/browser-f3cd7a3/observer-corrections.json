@@ -1,0 +1,7 @@
+{
+  "first_errors": [
+    "KeyError: parent_task_id",
+    "sqlite3.OperationalError: unable to open database file"
+  ],
+  "correction": "Observe DTO omits parent field; checked durable parent with read-only SQLite at profile/data/openagentx.db. No model work repeated."
+}

@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-01T18:49:01.982768+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5",
+      "version": 2,
+      "target_agent_id": "live-agy-d7350-02",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with exactly OAX-LIVE-d7350-02-after-worker-sigkill. Do not call tools or read files.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:48:37.910042611Z",
+      "updated_at": "2026-10-01T18:48:37.912915042Z"
+    },
+    "messages": [
+      {
+        "id": "message-b636c443-fdaf-497a-98f7-b6fb71e08568",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-f879f2e0-93ea-49c8-9d58-f3dabfab3e31",
+        "target_agent_id": "live-agy-d7350-02",
+        "kind": "instruction",
+        "content": "Reply with exactly OAX-LIVE-d7350-02-after-worker-sigkill. Do not call tools or read files.",
+        "created_at": "2026-10-01T18:48:37.910042611Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T19:00:17.912915042Z",
+        "instructions_sha256": "22ce498fa9c0f3633b3c0edce14e84022da23dd6e617ab9b195fc8df8bc1e4e1",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/recovery-14d7350-02/workspace/ROLE.md",
+        "run_id": "run-011e5eda-361b-45ad-867d-4bb23fe4e82f",
+        "task_id": "task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5",
+        "agent_id": "live-agy-d7350-02",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-a80a3071-829a-4df4-b7f7-6ae48635a589",
+        "worker_generation": 4,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 3,
+        "network_binding_revision": 3,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T18:48:37.912915042Z",
+        "created_at": "2026-10-01T18:48:37.912915042Z",
+        "updated_at": "2026-10-01T18:49:01.62467464Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 174,
+        "event_id": "event-80294689-cbf4-4225-8872-582576f04c80",
+        "aggregate_type": "task",
+        "aggregate_id": "task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:48:37.910042611Z"
+      },
+      {
+        "sequence": 176,
+        "event_id": "event-task-1b5d1d44-9098-4484-ac50-cffbe9f8e530",
+        "aggregate_type": "task",
+        "aggregate_id": "task-6e69eea6-5104-4d78-b6a0-d7ff70d5ecb5",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:48:37.914316053Z"
+      },
+      {
+        "sequence": 177,
+        "event_id": "event-run-060351c7-0a28-4bb8-a9c2-66e4db258107",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-011e5eda-361b-45ad-867d-4bb23fe4e82f",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:48:37.914320939Z"
+      },
+      {
+        "sequence": 194,
+        "event_id": "event-runtime-8f6e9127-d9e6-4f22-849a-d58ef7050643",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-011e5eda-361b-45ad-867d-4bb23fe4e82f",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:48:53.417278707Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 195,
+        "event_id": "event-runtime-1251a0c5-4444-4d11-b9e4-10860a491994",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-011e5eda-361b-45ad-867d-4bb23fe4e82f",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:48:53.528165413Z",
+        "output": {
+          "stage": "step_update"
+        }
+      }
+    ],
+    "snapshot_sequence": 204,
+    "live_after_sequence": 204,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

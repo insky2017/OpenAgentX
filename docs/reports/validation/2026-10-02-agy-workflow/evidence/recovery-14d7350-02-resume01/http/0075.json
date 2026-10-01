@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-01T18:42:44.471712+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b",
+      "version": 1,
+      "target_agent_id": "live-agy-d7350-02",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with exactly OAX-LIVE-d7350-02-after-daemon-sigkill-continuation. Do not call tools or read files.",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:42:44.466568992Z",
+      "updated_at": "2026-10-01T18:42:44.466568992Z"
+    },
+    "messages": [
+      {
+        "id": "message-82bc0bd8-0f4d-4175-9057-9da5d26e7430",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-f879f2e0-93ea-49c8-9d58-f3dabfab3e31",
+        "target_agent_id": "live-agy-d7350-02",
+        "kind": "instruction",
+        "content": "Reply with exactly OAX-LIVE-d7350-02-after-daemon-sigkill-continuation. Do not call tools or read files.",
+        "created_at": "2026-10-01T18:42:44.466568992Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 99,
+        "event_id": "event-83c4c6b5-4eb4-43bf-a23b-7f55b1a4dcda",
+        "aggregate_type": "task",
+        "aggregate_id": "task-fb2f9e14-784d-4a96-b655-c1e7ac5d3c0b",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:42:44.466568992Z"
+      }
+    ],
+    "snapshot_sequence": 100,
+    "live_after_sequence": 100,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

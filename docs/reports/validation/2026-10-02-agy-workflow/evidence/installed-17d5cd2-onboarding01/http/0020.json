@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:07:44.734520+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Run python3 role-freeze.py exactly once and wait for it to finish. Then reply only with the role verification code already supplied in your role instructions. Do not read ROLE.md or any other file.",
+    "meta": {
+      "idempotency_key": "44abbbb4b573741643283b10"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-99187fbd-b274-405f-b213-49a4b447db10",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 74
+  }
+}

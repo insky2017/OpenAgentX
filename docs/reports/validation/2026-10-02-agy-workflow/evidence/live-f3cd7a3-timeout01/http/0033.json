@@ -1,0 +1,93 @@
+{
+  "at": "2026-10-01T18:49:56.171345+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0",
+      "version": 2,
+      "target_agent_id": "live-agy-imeout01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Reply with exactly OAX-LIVE-imeout01-after-effects. Do not call tools or read files.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-01T18:49:46.138947933Z",
+      "updated_at": "2026-10-01T18:49:46.141976935Z"
+    },
+    "messages": [
+      {
+        "id": "message-87b28b8e-aaef-4144-ae6c-1f35365819cd",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-47ee8d2d-895a-48a6-a4ba-241eebc5ced7",
+        "target_agent_id": "live-agy-imeout01",
+        "kind": "instruction",
+        "content": "Reply with exactly OAX-LIVE-imeout01-after-effects. Do not call tools or read files.",
+        "created_at": "2026-10-01T18:49:46.138947933Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:50:21.141976935Z",
+        "instructions_sha256": "9bc6889f57c67b65cdf0ec66f899a47bc82a190a7df197d39454e75d77b27ed3",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-f3cd7a3-timeout01/workspace/ROLE.md",
+        "run_id": "run-63e00633-69ec-428c-8525-060e02eae4e2",
+        "task_id": "task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0",
+        "agent_id": "live-agy-imeout01",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-8cf7512d-dad7-46ac-9169-cf80cc8d9413",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-01T18:49:46.141976935Z",
+        "created_at": "2026-10-01T18:49:46.141976935Z",
+        "updated_at": "2026-10-01T18:49:56.12279285Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 109,
+        "event_id": "event-dd34ad02-e94c-414a-b5f9-b35c88dbaa41",
+        "aggregate_type": "task",
+        "aggregate_id": "task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:49:46.138947933Z"
+      },
+      {
+        "sequence": 111,
+        "event_id": "event-task-6d31d9cb-cfda-4dba-bf69-09984849b9c8",
+        "aggregate_type": "task",
+        "aggregate_id": "task-03c30606-4cbd-457c-b3e0-9fa9cbba70a0",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:49:46.143033094Z"
+      },
+      {
+        "sequence": 112,
+        "event_id": "event-run-ed206804-f789-4b93-bb33-d5ecb49633e1",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-63e00633-69ec-428c-8525-060e02eae4e2",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:49:46.143036689Z"
+      }
+    ],
+    "snapshot_sequence": 123,
+    "live_after_sequence": 123,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

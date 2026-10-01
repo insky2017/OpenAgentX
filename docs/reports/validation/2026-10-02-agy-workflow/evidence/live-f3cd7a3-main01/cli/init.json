@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/artifacts/f3cd7a32fe54bf1c02bad41d6c6ef8bfc97ddec9/openagentx",
+    "init"
+  ],
+  "exit_code": 0,
+  "output": "Owner password: \r\nConfirm owner password: \r\nInitialized OpenAgentX owner \"owner\" and Organization \"default\"\r\n"
+}

@@ -1,0 +1,169 @@
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────                                                                              
+Task none | Worker worker-a83c6bae... gen 1 online | timeline 3/76 bytes
+> /help                                                                       
+>                                                                             
+>                                                                             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:17 02-Oct-26
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────                                                                              
+Task none | Worker worker-a83c6bae... gen 1 online | timeline 3/76 bytes
+> /help                                                                       
+>                                                                             
+>                                                                             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 02:17 02-Oct-26Agent quote-service | mode normal | connection connected | cursor 11
+Attaching to quote-service                                                    
+Snapshot applied at cursor 6                                                  
+Task none | Worker worker-a83c6bae... gen 1 online | timeline 3/76 bytes
+> /help                                                                       > /                                                                           > /di                                                                         > /disp                                                                       > /dispa                                                                      > /dispatc                                                                    > /dispatch                                                                   > /dispatch f                                                                 > /dispatch fir                                                               > /dispatch firs                                                              > /dispatch first                                                             > /dispatch first i                                                           > /dispatch first iso                                                         > /dispatch first isola                                                       > /dispatch first isolat                                                      > /dispatch first isolated                                                    > /dispatch first isolated wo                                                 > /dispatch first isolated work                                               > /dispatch first isolated workf                                              > /dispatch first isolated workflo                                            > /dispatch first isolated workflow                                           > /dispatch first isolated workflow t                                         > /dispatch first isolated workflow tas                                       > /dispatch first isolated workflow task                                      Agent quote-service | mode normal | connection connected | cursor 25Task none | Worker worker-a83c6bae... gen 1 online | timeline 4/97 bytes
+dispatch pending                                                              
+dispatch succeeded | task task-de53c1be-0... | version 1 | status queued |    
+Task task-de53c1be-0... v1 queued (queued) | Worker worker-a83c6bae... gen 1 ...> /help                                                                       Agent quote-service | mode normal | connection connected | cursor 44
+Runtime reply: final fixture reply                                            
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           
+Task task-de53c1be-0... v3 waiting_input (run succeeded) | Worker worker-a83c...> /                                                                           > /st                                                                         > /ste                                                                        > /steer                                                                      > /steer c                                                                    > /steer co                                                                   > /steer cont                                                                 > /steer conti                                                                > /steer continu                                                              > /steer continue                                                             > /steer continue w                                                           > /steer continue wit                                                         > /steer continue with                                                        > /steer continue with t                                                      > /steer continue with th                                                     > /steer continue with the                                                    > /steer continue with the fi                                                 > /steer continue with the fin                                                > /steer continue with the final                                              > /steer continue with the final r                                            > /steer continue with the final re                                           > /steer continue with the final repl                                         > /steer continue with the final reply                                        steer pending                                                                 
+steer succeeded | task task-de53c1be-0... | task version 4 | status           
+Task task-de53c1be-0... v4 waiting_input (run succeeded) | Worker worker-a83c...> /help                                                                       Agent quote-service | mode normal | connection connected | cursor 63
+Runtime reply: final fixture reply                                            
+#55 runtime.turn.output | fixture | running | phase-two-safe-output           
+Task task-de53c1be-0... v6 succeeded (run succeeded) | Worker worker-a83c6bae...Task outcome result: final fixture reply                                      
+#53 run_attempt.started | Task task-de53c1be-0... | Run run-fceeae5e-f8... |  Agent quote-service | mode normal | connection connected | cursor 73
+steer succeeded | task task-de53c1be-0... | task version 4 | status           
+waiting_input | message message-1e02b16... | message version 1 | sequence 2   #31 runtime.turn.output | fixture | running | phase-one-safe-output           
+steer pending                                                                 #29 run_attempt.started | Task task-de53c1be-0... | Run run-f0b3b5c0-1f... |  
+run version 2 | run status succeeded | Runtime reply state available          Agent quote-service | mode normal | connection connected | cursor 73
+#29 run_attempt.started | Task task-de53c1be-0... | Run run-f0b3b5c0-1f... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Task task-de53c1be-0... v6 succeeded (run succeeded) | Worker worker-a83c6bae...> /help                                                                       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[OAX] 0:overview- 1:quote-service*Z      "sky-LEGION-REN9000K-3" 02:17 02-Oct-26Agent quote-service | mode normal | connection connected | cursor 73
+#29 run_attempt.started | Task task-de53c1be-0... | Run run-f0b3b5c0-1f... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Runtime reply: final fixture reply                                            
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           
+steer pending                                                                 
+steer succeeded | task task-de53c1be-0... | task version 4 | status           
+waiting_input | message message-1e02b16... | message version 1 | sequence 2   
+#50 task.message_created | Task task-de53c1be-0... | version 6 | status       
+succeeded                                                                     
+Task outcome result: final fixture reply                                      
+#53 run_attempt.started | Task task-de53c1be-0... | Run run-fceeae5e-f8... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Runtime reply: final fixture reply                                            
+#55 runtime.turn.output | fixture | running | phase-two-safe-output           
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+Task task-de53c1be-0... v6 succeeded (run succeeded) | Worker worker-a83c6bae...> /                                                                           
+>                                                                             
+>                                                                             > /ta                                                                         > /task                                                                       > /tasks                                                                         Tasks: 0 active, 1 recent (bounded)            
+                                                  
+  1 item                                          
+                                                  
+│ task-de53c1be-006b-49b0-b972-b3e2556c540d       
+│ succeeded version 6 first isolated workflow task
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+  ↑/k up • ↓/j down • / filter • q quit • ? more  Agent quote-service | mode normal | connection connected | cursor 73
+dispatch pending                                                              
+dispatch succeeded | task task-de53c1be-0... | version 1 | status queued |    
+sequence 1                                                                    
+#26 task.created | Task task-de53c1be-0... | version 3 | status waiting_input 
+#27 mailbox.claimed | Task task-de53c1be-0... | version 3 | status            
+waiting_input | task/work delivery accepted                                   
+#29 run_attempt.started | Task task-de53c1be-0... | Run run-f0b3b5c0-1f... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Runtime reply: final fixture reply                                            
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           
+steer pending                                                                 
+steer succeeded | task task-de53c1be-0... | task version 4 | status           
+waiting_input | message message-1e02b16... | message version 1 | sequence 2   
+#50 task.message_created | Task task-de53c1be-0... | version 6 | status       
+succeeded                                                                     
+Task outcome result: final fixture reply                                      
+#53 run_attempt.started | Task task-de53c1be-0... | Run run-fceeae5e-f8... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Task task-de53c1be-0... v6 succeeded (run succeeded) | Worker worker-a83c6bae...> /help                                                                       
+>                                                                             
+>                                                                             Agent quote-service | mode normal | connection connected | cursor 83Agent quote-service | mode normal | connection connected | cursor 83
+dispatch pending                                                              
+dispatch succeeded | task task-de53c1be-0... | version 1 | status queued |    
+sequence 1                                                                    
+#26 task.created | Task task-de53c1be-0... | version 3 | status waiting_input 
+#27 mailbox.claimed | Task task-de53c1be-0... | version 3 | status            
+waiting_input | task/work delivery accepted                                   
+#29 run_attempt.started | Task task-de53c1be-0... | Run run-f0b3b5c0-1f... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Runtime reply: final fixture reply                                            
+#31 runtime.turn.output | fixture | running | phase-one-safe-output           
+steer pending                                                                 
+steer succeeded | task task-de53c1be-0... | task version 4 | status           
+waiting_input | message message-1e02b16... | message version 1 | sequence 2   
+#50 task.message_created | Task task-de53c1be-0... | version 6 | status       
+succeeded                                                                     
+Task outcome result: final fixture reply                                      
+#53 run_attempt.started | Task task-de53c1be-0... | Run run-fceeae5e-f8... |  
+run version 2 | run status succeeded | Runtime reply state available          
+Task task-de53c1be-0... v6 succeeded (run succeeded) | Worker worker-a83c6bae...> /help                                                                       
+>                                                                             
+>                                                                             
+[OAX] 0:overview- 1:quote-service*Z      "sky-LEGION-REN9000K-3" 02:17 02-Oct-26Agent quote-service | mode normal | connection connected | cursor 93Agent quote-service | mode normal | connection connected | cursor 103Agent quote-service | mode normal | connection connected | cursor 113Agent quote-service | mode normal | connection connected | cursor 123Agent quote-service | mode normal | connection connected | cursor 133Agent quote-service | mode normal | connection connected | cursor 143Agent quote-service | mode normal | connection connected | cursor 153Agent quote-service | mode normal | connection connected | cursor 163Agent quote-service | mode normal | connection connected | cursor 167Agent quote-service | mode normal | connection connected | cursor 173Agent quote-service | mode normal | connection connected | cursor 183Agent quote-service | mode normal | connection connected | cursor 193Agent quote-service | mode normal | connection connected | cursor 203Agent quote-service | mode normal | connection connected | cursor 213Agent quote-service | mode normal | connection connected | cursor 223

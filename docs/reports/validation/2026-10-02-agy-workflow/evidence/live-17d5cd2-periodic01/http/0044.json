@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T19:11:15.659660+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-riodic01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Reply with exactly OAX-LIVE-riodic01-after-worker-periodic-recovery. Do not call tools or read files.",
+    "meta": {
+      "idempotency_key": "41f22325cdb00b47611395f6"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-65176473-bb01-4f07-8cc8-300c948c0b48",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

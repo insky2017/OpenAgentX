@@ -1,0 +1,1 @@
+["/home/sky/.local/bin/agy-graft", "--input-format", "stream-json", "--output-format", "stream-json", "--print-timeout", "35s", "--dangerously-skip-permissions", "--model", "gemini-3.7-flash-low", "--print", ""]

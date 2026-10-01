@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-01T18:51:08.923862+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "live-agy-3-main01",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Create queued-canceled.txt containing exactly b'QUEUED-CANCELED\\n'. Only write this file in your assigned workspace.",
+    "meta": {
+      "idempotency_key": "8b13e9d3711204a5e19fea39"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-b9f0d0fd-71dd-486a-a893-ec706f3fb48f",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 7
+  }
+}

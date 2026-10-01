@@ -1,0 +1,8 @@
+{
+  "source": "SQLite mode=ro; Observe TaskSummary omits parent_task_id, context reference also checked in official API",
+  "counts": {
+    "BROWSER-AUTH-RECOVERY": 1,
+    "BROWSER-OFFLINE-DRAFT": 0
+  },
+  "continue_parent_task_id": "task-99af50ad-c5f5-4f0c-9297-cdf275e145a6"
+}

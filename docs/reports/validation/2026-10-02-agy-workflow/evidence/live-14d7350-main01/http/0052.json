@@ -1,0 +1,451 @@
+{
+  "at": "2026-10-01T18:27:10.513420+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+      "version": 6,
+      "target_agent_id": "live-agy-0-main01",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run python3 queued.py in your assigned workspace and wait for it to finish. Report after completion. Do not run any other script.",
+      "status": "uncertain",
+      "result": "QUEUED-CONSUMED",
+      "error": "business_effect_unverified",
+      "outcome_state": "available",
+      "created_at": "2026-10-01T18:26:24.475341819Z",
+      "updated_at": "2026-10-01T18:27:09.91070638Z"
+    },
+    "messages": [
+      {
+        "id": "message-b0b0ebcb-551e-4f3e-887d-8239643de34b",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-b30be6a0-ed7e-475c-8bc6-ee7933fd3a75",
+        "target_agent_id": "live-agy-0-main01",
+        "kind": "instruction",
+        "content": "Run python3 queued.py in your assigned workspace and wait for it to finish. Report after completion. Do not run any other script.",
+        "created_at": "2026-10-01T18:26:24.475341819Z"
+      },
+      {
+        "id": "message-8fd8ab14-4f35-568d-b122-fda7a56bbd4f",
+        "version": 1,
+        "sequence": 2,
+        "task_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-b30be6a0-ed7e-475c-8bc6-ee7933fd3a75",
+        "target_agent_id": "live-agy-0-main01",
+        "kind": "supplement",
+        "content": "Additional instruction for the next turn: create supplement.txt with exact bytes b'QUEUED-CONSUMED\\n'. Do not run queued.py again; the first run already completed it. Reply with QUEUED-CONSUMED after writing the file.",
+        "created_at": "2026-10-01T18:26:32.486705556Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-01T18:29:59.177531552Z",
+        "instructions_sha256": "4de4d30f83b68b1ab43335ee60d8b7b4d62404c892d8b7c11ef89a19571ff16a",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-14d7350-main01/workspace/ROLE.md",
+        "run_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "task_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "agent_id": "live-agy-0-main01",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-55e179cf-8a9d-41b4-b2e0-6b7f89b1d51a",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "QUEUED-CONSUMED",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T18:26:59.177531552Z",
+        "finished_at": "2026-10-01T18:27:09.91070638Z",
+        "created_at": "2026-10-01T18:26:59.177531552Z",
+        "updated_at": "2026-10-01T18:27:09.91070638Z"
+      },
+      {
+        "deadline_at": "2026-10-01T18:29:24.477582249Z",
+        "instructions_sha256": "4de4d30f83b68b1ab43335ee60d8b7b4d62404c892d8b7c11ef89a19571ff16a",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/live-14d7350-main01/workspace/ROLE.md",
+        "run_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "task_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "agent_id": "live-agy-0-main01",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-55e179cf-8a9d-41b4-b2e0-6b7f89b1d51a",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "primary",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "The command `python3 queued.py` has been launched in the workspace directory. I will wait for it to complete.\nThe command `python3 queued.py` has completed successfully (exit code 0).",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-01T18:26:24.477582249Z",
+        "finished_at": "2026-10-01T18:26:59.173654436Z",
+        "created_at": "2026-10-01T18:26:24.477582249Z",
+        "updated_at": "2026-10-01T18:26:59.173654436Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 130,
+        "event_id": "event-eb8449e9-9d77-4e59-9d1a-283e9768dd54",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "event_type": "task.created",
+        "created_at": "2026-10-01T18:26:24.475341819Z"
+      },
+      {
+        "sequence": 132,
+        "event_id": "event-task-d087bd9f-30f8-4058-8fb1-fbc01e88b88d",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:26:24.478686275Z"
+      },
+      {
+        "sequence": 133,
+        "event_id": "event-run-37d45b15-27a5-407a-9f6d-9ae56893287d",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:26:24.478690168Z"
+      },
+      {
+        "sequence": 140,
+        "event_id": "event-runtime-a321a88a-b360-4565-95bc-40154804f5b9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:26:29.309094575Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 141,
+        "event_id": "event-runtime-9ca58288-a65c-425a-9109-056959799a57",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:29.395256561Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 144,
+        "event_id": "event-runtime-6f9df5f4-c0a1-4eb8-a66b-6d16c97ee02e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:31.990233097Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 145,
+        "event_id": "event-runtime-22d1f03c-edbf-4685-89f2-ef75c364a763",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:31.991571284Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 147,
+        "event_id": "event-3935922b-c476-4a96-ac1b-9cbe9c197a24",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "event_type": "task.message_created",
+        "created_at": "2026-10-01T18:26:32.486696789Z"
+      },
+      {
+        "sequence": 168,
+        "event_id": "event-runtime-0925af29-5eb9-4d23-94b2-fa6d67b5aead",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:52.082623838Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 169,
+        "event_id": "event-runtime-d4e3c4ed-764e-4d17-b9b0-62589935369d",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:52.084062371Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 170,
+        "event_id": "event-runtime-868deb8e-060d-4e16-ad0d-a00681895de3",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:52.134004484Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 172,
+        "event_id": "event-runtime-3a8f0856-c7cd-4487-8102-2afab6d6059c",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:53.892526373Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 173,
+        "event_id": "event-runtime-9bd617f2-8107-4d82-9b54-cca9ba0a78b8",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:53.943092378Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 174,
+        "event_id": "event-runtime-badbe9dc-7ba0-4c13-9d2e-66e33ebeee48",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:53.968974643Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 175,
+        "event_id": "event-runtime-b691cd47-e090-4911-b123-e82665287fd2",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:26:53.99363235Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 176,
+        "event_id": "event-runtime-69ede522-5029-4da2-a06f-f46c3b6c9180",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T18:26:54.019853796Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "The command `python3 queued.py` has been launched in the workspace directory. I will wait for it to complete.\nThe command `python3 queued.py` has completed successfully (exit code 0).\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 184,
+        "event_id": "event-run-96b52dc6-3f72-41ed-9f98-989d7fdc132b",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-03aa20f0-afe2-4ab6-a219-522521a0ac92",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T18:26:59.173681152Z"
+      },
+      {
+        "sequence": 185,
+        "event_id": "event-task-c6c03f21-45b7-4ee9-903f-0dab504c000e",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T18:26:59.173684743Z"
+      },
+      {
+        "sequence": 187,
+        "event_id": "event-task-c0b73d7b-1128-46ae-8660-c0d1f41cfb54",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "event_type": "task.running",
+        "created_at": "2026-10-01T18:26:59.178908617Z"
+      },
+      {
+        "sequence": 188,
+        "event_id": "event-run-713a2519-6b0c-4b56-8f95-aa1266c2a0fb",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-01T18:26:59.178913266Z"
+      },
+      {
+        "sequence": 195,
+        "event_id": "event-runtime-d53dd99c-a5cc-4d35-85c8-f7c44b4a02b4",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.init",
+        "created_at": "2026-10-01T18:27:04.801948407Z",
+        "output": {
+          "stage": "init"
+        }
+      },
+      {
+        "sequence": 196,
+        "event_id": "event-runtime-b9edfa93-e0d5-4d6b-b0a9-c75a571a7c06",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:04.888624173Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 197,
+        "event_id": "event-runtime-debe0a91-3bc3-4c3d-ab2b-aafd740a7a06",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:04.914161026Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 200,
+        "event_id": "event-runtime-891e6147-8dc6-42a7-bb7f-207392ff7810",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:07.000728803Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 201,
+        "event_id": "event-runtime-78a219e5-bb8f-4cfc-bed3-36a2ce31f0d9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:07.00201016Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 202,
+        "event_id": "event-runtime-d3544878-cbe6-4c12-9e23-510adc53fbab",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:07.0031438Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 206,
+        "event_id": "event-runtime-1a83f7d6-08b2-42f6-b7d9-880affb77530",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:09.127777153Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 207,
+        "event_id": "event-runtime-7a716194-0a0e-494e-9705-985be72cd7f3",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:09.205154864Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 208,
+        "event_id": "event-runtime-df8aaf12-64b9-4cf3-a2ab-c26b123dd36b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.step_update",
+        "created_at": "2026-10-01T18:27:09.230433162Z",
+        "output": {
+          "stage": "step_update"
+        }
+      },
+      {
+        "sequence": 209,
+        "event_id": "event-runtime-2c64d44d-40ad-460c-bd2a-dfe620c8bebb",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "runtime.agy.result",
+        "created_at": "2026-10-01T18:27:09.256383981Z",
+        "output": {
+          "stage": "result",
+          "status": "succeeded",
+          "text": "QUEUED-CONSUMED\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 211,
+        "event_id": "event-run-dca08ffc-346d-483e-8274-49a5f0e2103e",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-871eed64-905b-40bd-8650-6a54269d6951",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-01T18:27:09.91073145Z"
+      },
+      {
+        "sequence": 212,
+        "event_id": "event-task-1b85eaa9-69d4-468e-bdd9-631fd32bc6cb",
+        "aggregate_type": "task",
+        "aggregate_id": "task-1ccc661d-aaa1-48e6-bf19-0f42c446bcd9",
+        "event_type": "task.settled",
+        "created_at": "2026-10-01T18:27:09.910734802Z"
+      }
+    ],
+    "snapshot_sequence": 213,
+    "live_after_sequence": 213,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

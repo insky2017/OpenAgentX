@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-01T19:06:12.134129+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks/task-9faab806-2d5b-4d8c-9e04-109d1d33baac/messages",
+  "request": {
+    "meta": {
+      "expected_version": 2,
+      "idempotency_key": "query-supplement-ebb6484794123344"
+    },
+    "content": "For the next turn only: reply exactly QUERY-SUPPLEMENT--lease02. Do not use tools or rerun long-lease.py; the first turn already handles the diagnostic."
+  },
+  "status": 200,
+  "response": {
+    "message_id": "message-676b01bd-6d6b-5833-a93e-3e34f91d4205",
+    "message_version": 1,
+    "task_id": "task-9faab806-2d5b-4d8c-9e04-109d1d33baac",
+    "task_version": 3,
+    "task_status": "running",
+    "sequence": 2
+  }
+}
