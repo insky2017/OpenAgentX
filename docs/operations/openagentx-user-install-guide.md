@@ -458,6 +458,8 @@ Attach 是全屏 TUI，包含实时状态、bounded Timeline、固定输入区�
 /foreground
 ```
 
+`/approve`、`/reject` 只处理已有审批记录，保留用于兼容其它已接通的工作流。当前 AGY 默认任务没有可发起的 preflight 审批入口，也不支持原生审批或即时 steer；`/steer` 是排队到下轮的补充，`/cancel` 通过进程信号请求停止。任务结果的人工验收使用 `/accept`、`/result-reject`，不会触发执行审批。单次 Task execution override 及 AGY `approval_policy` 尚未接通，提交会明确拒绝。
+
 一次日常任务可以直接按以下顺序操作：
 
 ```text

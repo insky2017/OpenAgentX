@@ -149,7 +149,7 @@ def main():
     try:
         live.setup()
         for stage in ['daemon', 'worker']: completed[stage] = live.recovery_case(stage)
-        write(live.out/'verdict.json', {'status': 'PASS', 'coverage': 'R real AGY isolated E17 daemon and Worker SIGKILL; not installed service', 'candidate': args.commit, 'completed': completed, 'limitation': 'Expired runs reconcile at daemon startup; Worker lease expiry alone does not trigger reconciliation.'})
+        write(live.out/'verdict.json', {'status': 'PARTIAL', 'bounded_assertions': 'PASS; explicit daemon restart and harness child cleanup required', 'coverage': 'R real AGY isolated E17 daemon and Worker SIGKILL; not installed service', 'candidate': args.commit, 'completed': completed, 'limitation': 'Expired runs reconcile at daemon startup; Worker lease expiry alone does not trigger reconciliation.'})
     except Exception as error:
         write(live.out/'verdict.json', {'status': 'FAIL', 'stage': stage, 'completed': completed, 'error': str(error).replace(live.password, '[REDACTED]')})
         raise

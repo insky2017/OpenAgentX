@@ -1649,7 +1649,8 @@ func (m tuiModel) overlayView() string {
 			"/continue [--intent query|mutation] <继续内容>", "/accept [验收备注]", "/result-reject [问题说明]",
 			"/steer <content>（执行中补充，下轮处理）", "/cancel", "/steer --task <task-id> --version <n> <content>",
 			"/cancel --task <task-id> --version <n>",
-			"/approve <approval-id> <expected-version>", "/reject <approval-id> <expected-version>",
+			"AGY 默认任务无可发起的 preflight/原生审批入口",
+			"/approve <approval-id> <expected-version>（仅已有审批）", "/reject <approval-id> <expected-version>（仅已有审批）",
 			"/diagnostic", "/normal", "/help", "/quit", "/foreground",
 			"PgUp/PgDown/Home/End scroll Timeline"}, "\n")
 	case overlayDiagnostic:

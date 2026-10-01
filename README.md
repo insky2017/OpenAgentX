@@ -94,6 +94,8 @@ runtime_backends:
 
 Worker 完成一个 Task 后释放当前 RunAttempt，继续等待 Mailbox 中的下一项工作。取消、审批和补充消息通过控制面持久化，不依赖 Worker 所在主机的终端布局。
 
+当前 AGY 默认任务支持排队补充和进程信号取消，不提供可发起的 preflight 审批或原生交互审批入口。Console `/approve`、`/reject` 仅兼容已有审批记录；结果验收使用 `/accept`、`/result-reject`。未接通的单次 Task execution override 和 `approval_policy` 会被明确拒绝。
+
 ## Fleet 与终端 Console
 
 Fleet 清单显式列出受管 Agent，不扫描目录推断启动对象：
