@@ -1,0 +1,66 @@
+=== RUN   TestCancelAndFinishLinearizeInBothOrders100Times
+--- PASS: TestCancelAndFinishLinearizeInBothOrders100Times (1.15s)
+=== RUN   TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent
+=== RUN   TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/finish
+=== RUN   TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/cancel-before-finish
+--- PASS: TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent (0.25s)
+    --- PASS: TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/finish (0.12s)
+    --- PASS: TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/cancel-before-finish (0.12s)
+=== RUN   TestUnknownSuccessfulEffectsSupersedePendingMessageWithoutReplay
+--- PASS: TestUnknownSuccessfulEffectsSupersedePendingMessageWithoutReplay (0.14s)
+=== RUN   TestConcurrentCancelAndFinishBarrierBothOrders100Times
+=== RUN   TestConcurrentCancelAndFinishBarrierBothOrders100Times/cancel-first
+=== RUN   TestConcurrentCancelAndFinishBarrierBothOrders100Times/finish-first
+--- PASS: TestConcurrentCancelAndFinishBarrierBothOrders100Times (1.56s)
+    --- PASS: TestConcurrentCancelAndFinishBarrierBothOrders100Times/cancel-first (0.95s)
+    --- PASS: TestConcurrentCancelAndFinishBarrierBothOrders100Times/finish-first (0.61s)
+=== RUN   TestSupersededControlMessageDefersSameMailboxItem
+--- PASS: TestSupersededControlMessageDefersSameMailboxItem (0.13s)
+=== RUN   TestQueuedCompleteReplyKeepsUnknownEffectsAndConsumesOnlyNewMessage
+--- PASS: TestQueuedCompleteReplyKeepsUnknownEffectsAndConsumesOnlyNewMessage (0.13s)
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-final
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/truncated
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/runtime-error
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/actual-uncertain
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/cancel-requested
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/native-control
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-message
+--- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn (0.85s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-final (0.13s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/truncated (0.11s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/runtime-error (0.11s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/actual-uncertain (0.11s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/cancel-requested (0.12s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/native-control (0.13s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-message (0.12s)
+=== RUN   TestFinishRunCompletionContractAndControlPriority
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-no-final
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-empty
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-truncated
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-error
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-cancel
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-cancel-uncertain
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-pending
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-pending-uncertain
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-failed
+=== RUN   TestFinishRunCompletionContractAndControlPriority/query-waiting
+=== RUN   TestFinishRunCompletionContractAndControlPriority/mutation-unknown
+=== RUN   TestFinishRunCompletionContractAndControlPriority/mutation-known
+--- PASS: TestFinishRunCompletionContractAndControlPriority (1.53s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query (0.12s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-no-final (0.11s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-empty (0.11s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-truncated (0.11s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-error (0.11s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-cancel (0.13s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-cancel-uncertain (0.12s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-pending (0.12s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-pending-uncertain (0.12s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-failed (0.11s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/query-waiting (0.11s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/mutation-unknown (0.12s)
+    --- PASS: TestFinishRunCompletionContractAndControlPriority/mutation-known (0.12s)
+PASS
+ok  	openagentx/internal/persistence/sqlite	6.822s

@@ -1,0 +1,22 @@
+=== RUN   TestQueuedCompleteReplyKeepsUnknownEffectsAndConsumesOnlyNewMessage
+    queued_unverified_reply_test.go:75: queued complete reply task=&{ID:task-queued-complete Version:4 SenderAgentID: SenderPrincipalID:human-owner TargetAgentID:quote OrganizationID:org-main DispatchMode:direct Intent:mutation CompletionBasis: ParentTaskID:<nil> IdempotencyKey:idem-queued-complete Content:work queued-complete Status:uncertain Result:0xc0001f04e0 Error:0xc0001f04f8 CancelRequestedBy:<nil> CancelRequestedAt:<nil> CreatedAt:2026-08-30T12:00:00Z UpdatedAt:2026-08-30T12:00:00Z} err=<nil>
+--- FAIL: TestQueuedCompleteReplyKeepsUnknownEffectsAndConsumesOnlyNewMessage (0.11s)
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-final
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/truncated
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/runtime-error
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/actual-uncertain
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/cancel-requested
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/native-control
+=== RUN   TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-message
+--- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn (0.62s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-final (0.09s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/truncated (0.10s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/runtime-error (0.09s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/actual-uncertain (0.09s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/cancel-requested (0.09s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/native-control (0.08s)
+    --- PASS: TestQueuedMessageDoesNotReviveUnconfirmedOrCanceledTurn/no-message (0.09s)
+FAIL
+FAIL	openagentx/internal/persistence/sqlite	0.740s
+FAIL

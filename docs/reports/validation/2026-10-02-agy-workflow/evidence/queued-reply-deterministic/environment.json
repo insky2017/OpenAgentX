@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-10-01T18:16:26.001140+00:00",
+  "evidence_level": "D",
+  "real_e2e": false,
+  "raw_directory": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/queued-reply-deterministic",
+  "git_head": "76b72a9cfedf8db92f5fdd311797df20b24457ff",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "source_sha256": {
+    "internal/persistence/sqlite/worker_execution_repository.go": "c697a039f9cdc115600e063c33cc84a723308b1cae10edd987c6cf8df7037d57",
+    "internal/persistence/sqlite/queued_unverified_reply_test.go": "995cb5f9d421db35ef3bbb9ca0cf2cba1971f60143390983f022e8e9b5aeaed1"
+  }
+}

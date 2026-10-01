@@ -1,0 +1,18 @@
+{
+  "evidence_level": "D",
+  "real_e2e": false,
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/persistence/sqlite",
+    "-run",
+    "TestQueuedCompleteReply|TestQueuedMessageDoesNotRevive|TestFinishRunCompletionContract|TestUnknownSuccessfulEffects|Test.*Cancel.*Finish|TestSupersededControlMessage",
+    "-count=1",
+    "-v"
+  ],
+  "cwd": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree",
+  "started_at": "2026-10-01T18:14:39.833586+00:00",
+  "finished_at": "2026-10-01T18:14:52.459857+00:00",
+  "exit_code": 0
+}

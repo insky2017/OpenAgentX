@@ -615,15 +615,20 @@ func (r *Repository) FinishRun(
 		return domain.ErrStaleVersion
 	}
 	hasPendingMessage := false
+	hasPendingQueuedMessage := false
 	if messageVersionDelta {
-		var pending int
+		var pending, queued int
 		if err := tx.QueryRowContext(ctx, `SELECT EXISTS(
 			SELECT 1 FROM mailbox_items
 			WHERE task_id=? AND kind='message' AND state IN ('pending', 'claimed')
-		)`, task.ID).Scan(&pending); err != nil {
+		), EXISTS(
+			SELECT 1 FROM mailbox_items
+			WHERE task_id=? AND kind='message' AND lane='work' AND state IN ('pending', 'claimed')
+		)`, task.ID, task.ID).Scan(&pending, &queued); err != nil {
 			return fmt.Errorf("check pending Message at finish: %w", err)
 		}
 		hasPendingMessage = pending == 1
+		hasPendingQueuedMessage = queued == 1
 	}
 	runStatus, taskStatus := terminalStatuses(turnResult.Status)
 	var basis domain.TaskCompletionBasis
@@ -637,11 +642,19 @@ func (r *Repository) FinishRun(
 	}
 	// A cancellation intent must not hide an uncertain physical outcome. Other
 	// determinate finish/cancel ordering semantics remain unchanged.
+	completedUnverifiedMutation := task.Status != domain.TaskStatusCancelRequested &&
+		taskStatus == domain.TaskStatusUncertain && reason == "business_effect_unverified" &&
+		turnResult.Status == openruntime.TurnResultSucceeded && turnResult.FinalReply &&
+		strings.TrimSpace(turnResult.Result) != "" && !turnResult.ResultTruncated &&
+		turnResult.Error == "" && !turnResult.ErrorTruncated
 	if task.Status == domain.TaskStatusCancelRequested && taskStatus != domain.TaskStatusUncertain {
 		taskStatus = domain.TaskStatusCanceled
-	} else if hasPendingMessage && (taskStatus == domain.TaskStatusSucceeded || taskStatus == domain.TaskStatusFailed) {
+	} else if (hasPendingMessage && (taskStatus == domain.TaskStatusSucceeded || taskStatus == domain.TaskStatusFailed)) ||
+		(hasPendingQueuedMessage && completedUnverifiedMutation) {
 		// A message committed before finish is a durable follow-up. Keep the
-		// Task open so the queued message can be consumed by the next turn.
+		// Task open so the next turn consumes that new input. A complete reply
+		// with unverified mutation effects retains its reason and original Run
+		// evidence; this is not success or an automatic retry of the old work.
 		taskStatus = domain.TaskStatusWaitingInput
 	}
 	finishedAt := guard.CheckedAt
