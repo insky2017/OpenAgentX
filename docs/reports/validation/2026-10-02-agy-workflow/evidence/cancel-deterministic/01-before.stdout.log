@@ -1,0 +1,23 @@
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=false
+    cancel_idle_repository_test.go:56: idle cancel task=<nil> control=<nil> err=find active run for cancel: resource not found
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=true
+    cancel_idle_repository_test.go:56: idle cancel task=<nil> control=<nil> err=find active run for cancel: resource not found
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=false
+    cancel_idle_repository_test.go:56: idle cancel task=<nil> control=<nil> err=find active run for cancel: resource not found
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=true
+    cancel_idle_repository_test.go:56: idle cancel task=<nil> control=<nil> err=find active run for cancel: resource not found
+--- FAIL: TestCancelIdleTaskClosesMailboxAndAllowsNextTask (0.42s)
+    --- FAIL: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=false (0.12s)
+    --- FAIL: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=true (0.09s)
+    --- FAIL: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=false (0.10s)
+    --- FAIL: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=true (0.11s)
+=== RUN   TestCancelIdleRollbackPreservesTaskMailboxAndJournal
+    cancel_idle_repository_test.go:111: expected commit fault, got find active run for cancel: resource not found
+--- FAIL: TestCancelIdleRollbackPreservesTaskMailboxAndJournal (0.07s)
+=== RUN   TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain
+    recovery_repository_test.go:114: canceled recovery task=&{ID:task-recovery-cancel Version:4 SenderAgentID: SenderPrincipalID:human-owner TargetAgentID:quote OrganizationID:org-main DispatchMode:direct Intent:mutation CompletionBasis: ParentTaskID:<nil> IdempotencyKey:idem-recovery-cancel Content:work recovery-cancel Status:canceled Result:<nil> Error:<nil> CancelRequestedBy:0xc0006a31b8 CancelRequestedAt:0xc0006a31d0 CreatedAt:2026-08-30T12:00:00Z UpdatedAt:2026-08-30T12:00:00Z} err=<nil>
+--- FAIL: TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain (0.08s)
+FAIL
+FAIL	openagentx/internal/persistence/sqlite	0.584s
+FAIL

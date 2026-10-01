@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-10-01T17:48:39.508855+00:00",
+  "evidence_level": "D",
+  "real_e2e": false,
+  "raw_directory": "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/cancel-deterministic",
+  "git_head": "740080697f3e5a1a4d6381eb6a2ea5208be6e568",
+  "git_branch": "codex/agy-workflow",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "source_sha256": {
+    "internal/persistence/sqlite/control_input_repository.go": "18f93128c4e0009254bf870f1a6cf3ae71685fb1f22b848a80c6affc72ba3358",
+    "internal/persistence/sqlite/recovery_repository.go": "260fc84eb50702c19ff438f874a3c24afa45f236565c3c26b97389d992da8494",
+    "internal/persistence/sqlite/recovery_repository_test.go": "1c66f62ea07d02ad3fa117bb644c2ed9756fb6356c618a7ba113694cf9048545",
+    "internal/persistence/sqlite/cancel_idle_repository_test.go": "ed702df2bc487c4cd13d870c42fa7e71a6021979a87f853fbc0989a9ee7f1af8"
+  },
+  "redaction": "All test identities and Run/Task values are synthetic repository fixtures. No production database, credentials or real Runtime output used. Reviewed copies retain original stdout/stderr."
+}

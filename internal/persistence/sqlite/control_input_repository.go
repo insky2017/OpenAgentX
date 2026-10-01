@@ -3,8 +3,12 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/google/uuid"
 
 	"openagentx/internal/domain"
 )
@@ -144,7 +148,7 @@ func (r *Repository) RequestTaskCancel(ctx context.Context, taskID string, expec
 	if err != nil {
 		return nil, nil, err
 	}
-	if task.Status == domain.TaskStatusCancelRequested {
+	if task.Status == domain.TaskStatusCancelRequested || (task.Status == domain.TaskStatusCanceled && task.CancelRequestedBy != nil) {
 		if task.CancelRequestedBy != nil && *task.CancelRequestedBy == requestedBy {
 			return task, nil, nil
 		}
@@ -209,7 +213,13 @@ func (r *Repository) RequestTaskCancel(ctx context.Context, taskID string, expec
 			return nil, nil, err
 		}
 		createdItem = item
-	} else if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	} else if errors.Is(err, domain.ErrNotFound) {
+		// No physical turn is active. Cancel the durable work in this same
+		// transaction so an existing claim or a later poll cannot start it.
+		if err := settleInactiveCancellation(ctx, tx, task, taskEvent, now); err != nil {
+			return nil, nil, err
+		}
+	} else if err != nil {
 		return nil, nil, fmt.Errorf("find active run for cancel: %w", err)
 	}
 	if err := r.inject(FaultBeforeCommit); err != nil {
@@ -219,6 +229,65 @@ func (r *Repository) RequestTaskCancel(ctx context.Context, taskID string, expec
 		return nil, nil, err
 	}
 	return task, createdItem, nil
+}
+
+func settleInactiveCancellation(ctx context.Context, tx *sql.Tx, task *domain.Task, source *domain.JournalEvent, now time.Time) error {
+	rows, err := tx.QueryContext(ctx, `SELECT mailbox_item_id, state FROM mailbox_items WHERE task_id=? AND state IN ('pending','claimed') ORDER BY sequence`, task.ID)
+	if err != nil {
+		return fmt.Errorf("find canceled task mailbox: %w", err)
+	}
+	type pendingItem struct{ id, state string }
+	var items []pendingItem
+	for rows.Next() {
+		var item pendingItem
+		if err := rows.Scan(&item.id, &item.state); err != nil {
+			rows.Close()
+			return err
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	appendEvent := func(aggregateType, id, eventType, from, to string) error {
+		payload, err := json.Marshal(map[string]string{"from_state": from, "to_state": to, "task_id": task.ID, "reason": "cancel_without_active_run"})
+		if err != nil {
+			return err
+		}
+		event := &domain.JournalEvent{ID: "event-cancel-" + uuid.NewString(), OrganizationID: task.OrganizationID,
+			AggregateType: aggregateType, AggregateID: id, EventType: eventType, ActorPrincipalID: source.ActorPrincipalID,
+			Payload: payload, CreatedAt: now}
+		if err := validateJournalForAggregate(event, aggregateType, id, now); err != nil {
+			return err
+		}
+		return insertJournal(ctx, tx, event)
+	}
+	for _, item := range items {
+		result, err := tx.ExecContext(ctx, `UPDATE mailbox_items SET state='superseded', worker_instance_id=NULL, fencing_token=NULL, lease_until=NULL
+			WHERE mailbox_item_id=? AND state=?`, item.id, item.state)
+		if err != nil {
+			return fmt.Errorf("supersede canceled task mailbox: %w", err)
+		}
+		if changed, err := result.RowsAffected(); err != nil || changed != 1 {
+			return domain.ErrConflict("canceled task mailbox changed")
+		}
+		if err := appendEvent("mailbox_item", item.id, "mailbox.superseded", item.state, "superseded"); err != nil {
+			return err
+		}
+	}
+	result, err := tx.ExecContext(ctx, `UPDATE tasks SET status='canceled' WHERE task_id=? AND version=? AND status='cancel_requested'`, task.ID, task.Version)
+	if err != nil {
+		return fmt.Errorf("settle inactive task cancel: %w", err)
+	}
+	if changed, err := result.RowsAffected(); err != nil || changed != 1 {
+		return domain.ErrStaleVersion
+	}
+	task.Status = domain.TaskStatusCanceled
+	return appendEvent("task", task.ID, "task.canceled", "cancel_requested", "canceled")
 }
 
 func (r *Repository) DecideApproval(ctx context.Context, requestID string, decision *domain.ApprovalDecision, item *domain.MailboxItem,

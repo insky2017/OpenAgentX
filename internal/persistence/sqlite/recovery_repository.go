@@ -14,7 +14,8 @@ import (
 // ReconcileExpired applies the daemon-start recovery policy using the
 // repository clock. Expired claims become pending again; an active RunAttempt
 // whose lease expired is marked uncertain because its side effects cannot be
-// proven absent. A cancellation intent remains authoritative.
+// proven absent. Cancellation intent is retained but does not prove that the
+// physical process stopped or that its effects are known.
 func (r *Repository) ReconcileExpired(ctx context.Context) error {
 	now := r.now().UTC()
 	tx, err := r.begin(ctx)
@@ -97,21 +98,14 @@ func (r *Repository) ReconcileExpired(ctx context.Context) error {
 			continue
 		}
 		toState := domain.TaskStatusUncertain
-		if status == domain.TaskStatusCancelRequested {
-			toState = domain.TaskStatusCanceled
-		}
 		result, err := tx.ExecContext(ctx, `UPDATE tasks SET status=?, version=version+1, updated_at=?
 			WHERE task_id=? AND status=?`, toState, nowText, row.taskID, status)
 		if err != nil {
 			return fmt.Errorf("settle task %s for expired RunAttempt: %w", row.taskID, err)
 		}
 		if changed, _ := result.RowsAffected(); changed == 1 {
-			eventType := "task.uncertain"
-			if toState == domain.TaskStatusCanceled {
-				eventType = "task.canceled"
-			}
 			if err := appendRecoveryEvent(ctx, tx, actor, row.organizationID, "task", row.taskID,
-				eventType, map[string]any{"from_state": status, "to_state": toState, "run_id": row.id, "reason": "run_lease_expired"}, now); err != nil {
+				"task.uncertain", map[string]any{"from_state": status, "to_state": toState, "run_id": row.id, "reason": "run_lease_expired"}, now); err != nil {
 				return err
 			}
 		}

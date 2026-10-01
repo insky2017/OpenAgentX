@@ -83,8 +83,8 @@ func TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain(t *testing.T) {
 		}
 	}
 
-	// A cancellation intent remains authoritative when the expired run is
-	// reconciled; the task transition is journaled as canceled.
+	// A cancellation intent is preserved, but cannot prove an expired run
+	// stopped safely; Task and Run must both remain uncertain.
 	cancelTask := createTask(t, repository, fixture, "recovery-cancel")
 	cancelWorker := &domain.WorkerInstance{ID: "worker-recovery-cancel", AgentID: fixture.agentID, Generation: 2,
 		Transport: domain.WorkerTransportUnix, AuthenticatedPrincipal: fixture.ownerPrincipal, Status: domain.WorkerStatusOnline,
@@ -100,18 +100,29 @@ func TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain(t *testing.T) {
 		journalEvent("event-run-recovery-cancel", "run_attempt.started", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repository.db.Exec(`UPDATE tasks SET status='cancel_requested' WHERE task_id=?`, cancelTask.Task.ID); err != nil {
+	if _, _, err := repository.RequestTaskCancel(context.Background(), cancelTask.Task.ID, 2, fixture.ownerPrincipal,
+		&domain.MailboxItem{ID: "cancel-recovery-control"},
+		journalEvent("event-cancel-recovery-request", "task.cancel_requested", fixture.ownerPrincipal, fixture.organizationID),
+		journalEvent("event-cancel-recovery-control", "mailbox.cancel_created", fixture.ownerPrincipal, fixture.organizationID)); err != nil {
 		t.Fatal(err)
 	}
 	if err := repository.ReconcileExpired(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	canceled, err := repository.GetTask(context.Background(), cancelTask.Task.ID)
-	if err != nil || canceled.Status != domain.TaskStatusCanceled {
+	if err != nil || canceled.Status != domain.TaskStatusUncertain || canceled.CancelRequestedBy == nil || *canceled.CancelRequestedBy != fixture.ownerPrincipal || canceled.CancelRequestedAt == nil {
 		t.Fatalf("canceled recovery task=%+v err=%v", canceled, err)
 	}
+	uncertainRun, err := repository.GetRunAttempt(context.Background(), cancelRun.ID)
+	if err != nil || uncertainRun.Status != domain.RunAttemptUncertain {
+		t.Fatalf("canceled recovery run=%+v err=%v", uncertainRun, err)
+	}
+	if err := repository.ReconcileExpired(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	assertCancelEventCount(t, repository, cancelTask.Task.ID, "task.canceled", 0)
 	var canceledEvents int
-	if err := repository.db.QueryRow(`SELECT COUNT(*) FROM event_journal WHERE aggregate_type='task' AND aggregate_id=? AND event_type='task.canceled'`, cancelTask.Task.ID).Scan(&canceledEvents); err != nil || canceledEvents != 1 {
+	if err := repository.db.QueryRow(`SELECT COUNT(*) FROM event_journal WHERE aggregate_type='task' AND aggregate_id=? AND event_type='task.uncertain'`, cancelTask.Task.ID).Scan(&canceledEvents); err != nil || canceledEvents != 1 {
 		t.Fatalf("canceled recovery event count=%d err=%v", canceledEvents, err)
 	}
 }

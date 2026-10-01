@@ -1,0 +1,48 @@
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=false
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=true
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=false
+=== RUN   TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=true
+--- PASS: TestCancelIdleTaskClosesMailboxAndAllowsNextTask (0.38s)
+    --- PASS: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=false (0.10s)
+    --- PASS: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=false/claimed=true (0.09s)
+    --- PASS: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=false (0.09s)
+    --- PASS: TestCancelIdleTaskClosesMailboxAndAllowsNextTask/waiting=true/claimed=true (0.09s)
+=== RUN   TestCancelIdleRollbackPreservesTaskMailboxAndJournal
+--- PASS: TestCancelIdleRollbackPreservesTaskMailboxAndJournal (0.06s)
+=== RUN   TestRequestTaskCancelIsTaskLevelAndIdempotent
+--- PASS: TestRequestTaskCancelIsTaskLevelAndIdempotent (0.06s)
+=== RUN   TestCommandServiceCancelHonorsExpectedVersionAndReturnsMailboxSequence
+--- PASS: TestCommandServiceCancelHonorsExpectedVersionAndReturnsMailboxSequence (0.08s)
+=== RUN   TestCancelTransactionRollsBackAndBlocksFutureRun
+--- PASS: TestCancelTransactionRollsBackAndBlocksFutureRun (0.09s)
+=== RUN   TestCancelAndFinishLinearizeInBothOrders100Times
+--- PASS: TestCancelAndFinishLinearizeInBothOrders100Times (0.63s)
+=== RUN   TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent
+=== RUN   TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/finish
+=== RUN   TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/cancel-before-finish
+--- PASS: TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent (0.19s)
+    --- PASS: TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/finish (0.10s)
+    --- PASS: TestUnknownSuccessfulEffectsRemainUncertainAcrossCancelIntent/cancel-before-finish (0.09s)
+=== RUN   TestUnknownSuccessfulEffectsSupersedePendingMessageWithoutReplay
+--- PASS: TestUnknownSuccessfulEffectsSupersedePendingMessageWithoutReplay (0.09s)
+=== RUN   TestConcurrentCancelAndFinishBarrierBothOrders100Times
+=== RUN   TestConcurrentCancelAndFinishBarrierBothOrders100Times/cancel-first
+=== RUN   TestConcurrentCancelAndFinishBarrierBothOrders100Times/finish-first
+--- PASS: TestConcurrentCancelAndFinishBarrierBothOrders100Times (0.95s)
+    --- PASS: TestConcurrentCancelAndFinishBarrierBothOrders100Times/cancel-first (0.59s)
+    --- PASS: TestConcurrentCancelAndFinishBarrierBothOrders100Times/finish-first (0.36s)
+=== RUN   TestConcurrentDuplicateCancelCreatesOneControlItem
+--- PASS: TestConcurrentDuplicateCancelCreatesOneControlItem (0.12s)
+=== RUN   TestNativeApprovalCannotOutliveTaskCancelAndRejectIsDelivered
+=== RUN   TestNativeApprovalCannotOutliveTaskCancelAndRejectIsDelivered/cancel_makes_pending_native_Approval_stale
+=== RUN   TestNativeApprovalCannotOutliveTaskCancelAndRejectIsDelivered/native_reject_reaches_current_Run_and_becomes_applied
+--- PASS: TestNativeApprovalCannotOutliveTaskCancelAndRejectIsDelivered (0.18s)
+    --- PASS: TestNativeApprovalCannotOutliveTaskCancelAndRejectIsDelivered/cancel_makes_pending_native_Approval_stale (0.09s)
+    --- PASS: TestNativeApprovalCannotOutliveTaskCancelAndRejectIsDelivered/native_reject_reaches_current_Run_and_becomes_applied (0.09s)
+=== RUN   TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain
+--- PASS: TestReconcileExpiredRequeuesClaimsAndMarksRunUncertain (0.07s)
+=== RUN   TestReconcileExpiredRollsBackStateAndJournalTogether
+--- PASS: TestReconcileExpiredRollsBackStateAndJournalTogether (0.07s)
+PASS
+ok  	openagentx/internal/persistence/sqlite	2.991s
