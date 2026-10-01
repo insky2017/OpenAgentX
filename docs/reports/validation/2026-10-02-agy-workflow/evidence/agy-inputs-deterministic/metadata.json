@@ -1,0 +1,28 @@
+{
+  "evidence_level": "D",
+  "utc": "2026-10-01T17:47:48.153252+00:00",
+  "source_head": "740080697f3e5a1a4d6381eb6a2ea5208be6e568",
+  "source_state": "Shared implementation worktree, uncommitted changes; this is not an installed artifact or real AGY validation.",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "owned_files": [
+    "internal/domain/execution_contract.go",
+    "internal/runtime/contract.go",
+    "internal/runtime/agy/adapter.go",
+    "internal/runtime/agy/inputs_test.go",
+    "internal/controlplane/worker_service.go",
+    "internal/controlplane/agy_inputs_test.go",
+    "internal/cli/worker/command.go",
+    "internal/cli/worker/command_test.go"
+  ],
+  "redaction": "Deterministic test logs contain only fixture output and test names; no production credential or model output collected.",
+  "owned_file_sha256": {
+    "internal/domain/execution_contract.go": "4bdf37ca2cb8fa27a1eeae3bb698eb7db227f409ee1c238557b4b71ef9b193ad",
+    "internal/runtime/contract.go": "b0a3b74235ed517167b24761e2ea153206877be376a7cd5089de95522f0a2b4f",
+    "internal/runtime/agy/adapter.go": "0dee65b56f9136a115f7410fa2a801248ddd957c7c2ab3d2ac494d0c2d336600",
+    "internal/runtime/agy/inputs_test.go": "6ab94e3aa802036b4d1a1baa92bc002356b3465d1cf9e142c5acc8c7b767406f",
+    "internal/controlplane/worker_service.go": "9c812e3fd7791945672e9e6bece37cfc6bc6ae3d45d0dbca87dcd75d3a8a55ab",
+    "internal/controlplane/agy_inputs_test.go": "8db0ef5a85dd0ff7105f39a1ec347823ab7a9ca56387fcf7d08534fc80f358ad",
+    "internal/cli/worker/command.go": "12fe87a9b94630483e9bfa532361cb6aef431bb94fc2c197c3660da77d1a1221",
+    "internal/cli/worker/command_test.go": "d0ebe114683711be27c7dfd5d65f478ee4703f09c78190954c49186b4e61cab3"
+  }
+}

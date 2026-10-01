@@ -40,8 +40,9 @@ func TestAGYConfigFromOptions(t *testing.T) {
 		"binary":      "agy-graft",
 		"models":      []any{"model-one", "model-two"},
 		"working_dir": "workspace",
+		"timeout":     "47s",
 	}, configDir)
-	if err != nil || config.Binary != "agy-graft" || config.WorkingDir != workingDir || !reflect.DeepEqual(config.Models, []string{"model-one", "model-two"}) {
+	if err != nil || config.Timeout != 47*time.Second || config.Binary != "agy-graft" || config.WorkingDir != workingDir || !reflect.DeepEqual(config.Models, []string{"model-one", "model-two"}) {
 		t.Fatalf("config=%+v err=%v", config, err)
 	}
 	for _, options := range []map[string]any{
@@ -52,6 +53,10 @@ func TestAGYConfigFromOptions(t *testing.T) {
 		{"models": []any{"model-one", "model-one"}},
 		{"models": []any{"model-one", 42}},
 		{"unexpected": true},
+		{"timeout": 20},
+		{"timeout": "0s"},
+		{"timeout": "-1s"},
+		{"timeout": "nonsense"},
 	} {
 		if _, err := agyConfigFromOptions(options, configDir); err == nil {
 			t.Fatalf("options=%#v unexpectedly accepted", options)

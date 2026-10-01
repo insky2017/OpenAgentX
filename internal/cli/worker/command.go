@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 	"unicode/utf8"
 
 	"github.com/google/uuid"
@@ -327,9 +328,17 @@ func fakeTurnResult(status openruntime.TurnResultStatus, config fakeAdapterConfi
 func agyConfigFromOptions(options map[string]any, configDir string) (agy.Config, error) {
 	var config agy.Config
 	for key := range options {
-		if key != "binary" && key != "models" && key != "working_dir" {
+		if key != "binary" && key != "models" && key != "working_dir" && key != "timeout" {
 			return config, domain.ErrInvalidInput("unsupported AGY option " + key)
 		}
+	}
+	if value, exists := options["timeout"]; exists {
+		raw, ok := value.(string)
+		timeout, err := time.ParseDuration(raw)
+		if !ok || err != nil || timeout <= 0 {
+			return config, domain.ErrInvalidInput("AGY option timeout must be a positive duration such as 30m")
+		}
+		config.Timeout = timeout
 	}
 	if value, exists := options["binary"]; exists {
 		binary, ok := value.(string)

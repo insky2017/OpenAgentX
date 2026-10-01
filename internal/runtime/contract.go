@@ -57,6 +57,7 @@ func (m CancelMode) Valid() bool {
 }
 
 type AdapterDescriptor struct {
+	DefaultTimeout     time.Duration          `json:"default_timeout,omitempty"`
 	AdapterID          string                 `json:"adapter_id"`
 	BackendType        string                 `json:"backend_type"`
 	Version            string                 `json:"version"`
@@ -112,6 +113,9 @@ func (r BackendRegistration) Validate() error {
 }
 
 func (d AdapterDescriptor) Validate() error {
+	if d.DefaultTimeout < 0 {
+		return domain.ErrInvalidInput("adapter default_timeout cannot be negative")
+	}
 	if err := domain.ValidateIdentifier("adapter_id", d.AdapterID); err != nil {
 		return err
 	}

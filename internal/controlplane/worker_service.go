@@ -11,9 +11,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"openagentx/internal/api"
@@ -464,6 +467,29 @@ func (s *WorkerService) BeginAttempt(ctx context.Context, principalID string, to
 			return nil, domain.ErrUnsupportedCapability
 		}
 	}
+	if plan.Execution.Spec.AdapterID == "agy-batch" {
+		reader, ok := s.state.(interface {
+			GetAgent(context.Context, string) (*domain.AgentIdentity, *domain.AgentProfileRecord, error)
+		})
+		if !ok {
+			return nil, domain.ErrInvalidInput("AGY execution requires the registered Agent profile")
+		}
+		_, profile, err := reader.GetAgent(ctx, guard.AgentID)
+		if err != nil {
+			return nil, fmt.Errorf("load AGY Agent profile: %w", err)
+		}
+		input, err := freezeAGYAgentInput(profile)
+		if err != nil {
+			return nil, err
+		}
+		plan.Execution.AgentInput = input
+		plan.Execution.DeadlineAt = guard.CheckedAt.Add(plan.Execution.Spec.Timeout)
+		if plan.Execution.Sources == nil {
+			plan.Execution.Sources = map[string]string{}
+		}
+		plan.Execution.Sources["agent_input"] = "agent_profile"
+		plan.Execution.Sources["workspace_root"] = "agent_profile"
+	}
 	requestedJSON, err := json.Marshal(plan.Execution.Spec)
 	if err != nil {
 		return nil, err
@@ -839,18 +865,24 @@ func m1PlanForBackend(task domain.Task, backend openruntime.BackendRegistration,
 	if binding != nil {
 		sessionMode = domain.SessionModeResume
 	}
+	timeout := 30 * time.Minute
+	timeoutSource := "m1_default"
+	if backend.Descriptor.AdapterID == "agy-batch" && backend.Descriptor.DefaultTimeout > 0 {
+		timeout = backend.Descriptor.DefaultTimeout
+		timeoutSource = "worker_descriptor"
+	}
 	spec := domain.ExecutionSpec{
 		AdapterID: backend.Descriptor.AdapterID, BackendID: backend.BackendID,
 		Model: backend.Descriptor.Models[0], Reasoning: reasoning,
 		Session: domain.SessionSpec{Mode: sessionMode, ContextID: task.ID},
-		Timeout: 30 * time.Minute, BackendOptions: json.RawMessage(`{}`), Network: backend.Network,
+		Timeout: timeout, BackendOptions: json.RawMessage(`{}`), Network: backend.Network,
 	}
 	if err := spec.ValidateShape(); err != nil {
 		return TurnPlan{}, err
 	}
 	return TurnPlan{Execution: domain.ResolvedExecutionSpec{
 		Version: 1, Spec: spec,
-		Sources: map[string]string{"adapter": "worker_descriptor", "backend": "worker_descriptor", "model": "m1_default"},
+		Sources: map[string]string{"adapter": "worker_descriptor", "backend": "worker_descriptor", "model": "m1_default", "timeout": timeoutSource},
 	}, SessionBinding: binding}, nil
 }
 
@@ -870,4 +902,46 @@ func containsSession(values []domain.SessionMode, target domain.SessionMode) boo
 		}
 	}
 	return false
+}
+
+// freezeAGYAgentInput reads only the authoritative local profile. The persisted
+// snapshot, never this mutable path, is sent to the Runtime for the active Run.
+func freezeAGYAgentInput(profile *domain.AgentProfileRecord) (*domain.AgentExecutionInput, error) {
+	if profile == nil {
+		return nil, domain.ErrInvalidInput("AGY Agent profile is missing")
+	}
+	if profile.Version <= 0 || !filepath.IsAbs(profile.WorkspaceRoot) || !filepath.IsAbs(profile.InstructionsPath) {
+		return nil, domain.ErrInvalidInput("AGY Agent profile requires a positive version and absolute workspace_root and instructions_path")
+	}
+	root := filepath.Clean(profile.WorkspaceRoot)
+	info, err := os.Stat(root)
+	if err != nil || !info.IsDir() {
+		return nil, domain.ErrInvalidInput("AGY Agent workspace_root is unavailable or not a directory: " + root)
+	}
+	rolePath := filepath.Clean(profile.InstructionsPath)
+	info, err = os.Stat(rolePath)
+	if err != nil {
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("AGY instructions file unavailable %q: %v", rolePath, err))
+	}
+	if !info.Mode().IsRegular() {
+		return nil, domain.ErrInvalidInput("AGY instructions_path must be a regular file: " + rolePath)
+	}
+	role, err := os.Open(rolePath)
+	if err != nil {
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("AGY instructions file unavailable %q: %v", rolePath, err))
+	}
+	defer role.Close()
+	info, err = role.Stat()
+	if err != nil || !info.Mode().IsRegular() {
+		return nil, domain.ErrInvalidInput("AGY instructions_path must be a regular file: " + rolePath)
+	}
+	content, err := io.ReadAll(io.LimitReader(role, (1<<20)+1))
+	if err != nil {
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("read AGY instructions file %q: %v", rolePath, err))
+	}
+	if len(content) > 1<<20 || !utf8.Valid(content) || strings.TrimSpace(string(content)) == "" {
+		return nil, domain.ErrInvalidInput("AGY instructions file must contain non-empty UTF-8 text up to 1 MiB: " + rolePath)
+	}
+	digest := sha256.Sum256(content)
+	return &domain.AgentExecutionInput{ProfileVersion: profile.Version, InstructionsPath: rolePath, InstructionsSHA256: hex.EncodeToString(digest[:]), InstructionsContent: string(content), WorkspaceRoot: root}, nil
 }

@@ -1,0 +1,135 @@
+Evidence level: D (deterministic fixtures; not real AGY)
+UTC: 2026-10-01T17:43:32.315721+00:00
+Command: go test -count=1 -v ./internal/runtime/agy ./internal/controlplane ./internal/cli/worker ./internal/domain ./internal/runtime
+# openagentx/internal/persistence/sqlite
+internal/persistence/sqlite/task_review_repository.go:36:63: undefined: runColumns
+FAIL	openagentx/internal/controlplane [build failed]
+FAIL	openagentx/internal/cli/worker [build failed]
+=== RUN   TestParseStreamJSONNormalizesEventsAndResult
+--- PASS: TestParseStreamJSONNormalizesEventsAndResult (0.00s)
+=== RUN   TestParseStreamJSONRejectsMalformedAndEmptyInput
+--- PASS: TestParseStreamJSONRejectsMalformedAndEmptyInput (0.00s)
+=== RUN   TestParseStreamJSONCapturesNestedAgyError
+--- PASS: TestParseStreamJSONCapturesNestedAgyError (0.00s)
+=== RUN   TestParseStreamJSONPreservesExplicitUnknownSideEffects
+--- PASS: TestParseStreamJSONPreservesExplicitUnknownSideEffects (0.00s)
+=== RUN   TestParseStreamJSONDegradesUnknownEventType
+--- PASS: TestParseStreamJSONDegradesUnknownEventType (0.00s)
+=== RUN   TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit
+--- PASS: TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit (0.39s)
+=== RUN   TestParseStreamJSONRejectsContradictoryTerminal
+--- PASS: TestParseStreamJSONRejectsContradictoryTerminal (0.00s)
+=== RUN   TestAgyBatchAdapterUsesDirectArgvConversationAndClassifiesExit
+--- PASS: TestAgyBatchAdapterUsesDirectArgvConversationAndClassifiesExit (0.01s)
+=== RUN   TestAgyBatchAdapterUsesBackendDefaultWithoutModelOrEffort
+--- PASS: TestAgyBatchAdapterUsesBackendDefaultWithoutModelOrEffort (0.00s)
+=== RUN   TestAgyBatchAdapterRejectsUnsupportedBudget
+--- PASS: TestAgyBatchAdapterRejectsUnsupportedBudget (0.00s)
+=== RUN   TestAgyBatchAdapterRejectsModelOutsideDescriptor
+--- PASS: TestAgyBatchAdapterRejectsModelOutsideDescriptor (0.00s)
+=== RUN   TestAgyBatchAdapterEnforcesExecutionTimeout
+--- PASS: TestAgyBatchAdapterEnforcesExecutionTimeout (0.36s)
+=== RUN   TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess
+--- PASS: TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess (0.01s)
+=== RUN   TestAgyBatchAdapterCancelTerminatesChildProcesses
+--- PASS: TestAgyBatchAdapterCancelTerminatesChildProcesses (4.72s)
+=== RUN   TestAgyBatchAdapterTimeoutTerminatesTraceeBeforeTracer
+--- PASS: TestAgyBatchAdapterTimeoutTerminatesTraceeBeforeTracer (1.68s)
+=== RUN   TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain
+--- PASS: TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain (0.01s)
+=== RUN   TestCaptureStderrDrainsWhileRetainingBoundedDiagnostic
+--- PASS: TestCaptureStderrDrainsWhileRetainingBoundedDiagnostic (0.00s)
+=== RUN   TestRealAgyHelpContract
+    adapter_test.go:439: set OPENAGENTX_AGY_HELP_CONTRACT=1 to run the local, no-model AGY help contract guard
+--- SKIP: TestRealAgyHelpContract (0.00s)
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/final
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_then_final
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_without_final_body
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/empty
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/missing_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/duplicate_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/status_after_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/invalid_trailing_json
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/conflicting_error
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/public_truncation
+--- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/final (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_then_final (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_without_final_body (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/empty (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/missing_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/duplicate_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/status_after_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/invalid_trailing_json (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/conflicting_error (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/public_truncation (0.00s)
+=== RUN   TestFinalReplyDoesNotIgnoreStderrAtExitZero
+--- PASS: TestFinalReplyDoesNotIgnoreStderrAtExitZero (0.00s)
+=== RUN   TestAGYFrozenInputControlsProcessCwdAndPrompt
+--- PASS: TestAGYFrozenInputControlsProcessCwdAndPrompt (0.01s)
+=== RUN   TestAGYFrozenDeadlineCannotBeExtendedByStartDelay
+--- PASS: TestAGYFrozenDeadlineCannotBeExtendedByStartDelay (0.41s)
+=== RUN   TestAGYRejectsUnconsumedExecutionFields
+--- PASS: TestAGYRejectsUnconsumedExecutionFields (0.00s)
+PASS
+ok  	openagentx/internal/runtime/agy	7.594s
+=== RUN   TestAuthorityPolicyRejectsCrossOrgAndUnauthorizedDirectDispatch
+--- PASS: TestAuthorityPolicyRejectsCrossOrgAndUnauthorizedDirectDispatch (0.00s)
+=== RUN   TestWorkerInstanceCannotBeBusinessTarget
+--- PASS: TestWorkerInstanceCannotBeBusinessTarget (0.00s)
+=== RUN   TestAssessTaskSuccessEvidenceMatrix
+--- PASS: TestAssessTaskSuccessEvidenceMatrix (0.00s)
+=== RUN   TestTaskIntentJSONRejectsExplicitInvalidValuesAndDefaultsGoZero
+--- PASS: TestTaskIntentJSONRejectsExplicitInvalidValuesAndDefaultsGoZero (0.00s)
+=== RUN   TestTargetEnumsRejectUnknownValues
+=== PAUSE TestTargetEnumsRejectUnknownValues
+=== RUN   TestLogicalAgentIdentityHasNoRuntimeAddress
+=== PAUSE TestLogicalAgentIdentityHasNoRuntimeAddress
+=== RUN   TestMailboxOrderingAndLaneConstraints
+=== PAUSE TestMailboxOrderingAndLaneConstraints
+=== RUN   TestSingleActiveRunInvariant
+=== PAUSE TestSingleActiveRunInvariant
+=== RUN   TestCancelRequestedPreventsBeginAttempt
+=== PAUSE TestCancelRequestedPreventsBeginAttempt
+=== RUN   TestApprovalScopeContracts
+=== PAUSE TestApprovalScopeContracts
+=== RUN   TestTargetTaskValidationRejectsUnknownStatus
+=== PAUSE TestTargetTaskValidationRejectsUnknownStatus
+=== RUN   TestTargetTaskAndMessageRequirePrincipalAddressing
+=== PAUSE TestTargetTaskAndMessageRequirePrincipalAddressing
+=== CONT  TestTargetEnumsRejectUnknownValues
+--- PASS: TestTargetEnumsRejectUnknownValues (0.00s)
+=== CONT  TestSingleActiveRunInvariant
+--- PASS: TestSingleActiveRunInvariant (0.00s)
+=== CONT  TestMailboxOrderingAndLaneConstraints
+=== CONT  TestCancelRequestedPreventsBeginAttempt
+--- PASS: TestMailboxOrderingAndLaneConstraints (0.00s)
+=== CONT  TestTargetTaskValidationRejectsUnknownStatus
+--- PASS: TestCancelRequestedPreventsBeginAttempt (0.00s)
+=== CONT  TestApprovalScopeContracts
+--- PASS: TestTargetTaskValidationRejectsUnknownStatus (0.00s)
+=== CONT  TestTargetTaskAndMessageRequirePrincipalAddressing
+--- PASS: TestApprovalScopeContracts (0.00s)
+--- PASS: TestTargetTaskAndMessageRequirePrincipalAddressing (0.00s)
+=== CONT  TestLogicalAgentIdentityHasNoRuntimeAddress
+--- PASS: TestLogicalAgentIdentityHasNoRuntimeAddress (0.00s)
+PASS
+ok  	openagentx/internal/domain	0.005s
+=== RUN   TestAdapterDescriptorValidation
+=== PAUSE TestAdapterDescriptorValidation
+=== RUN   TestRuntimeEventAndEventSink
+=== PAUSE TestRuntimeEventAndEventSink
+=== RUN   TestExecutionSpecRejectsRawInvalidShape
+=== PAUSE TestExecutionSpecRejectsRawInvalidShape
+=== CONT  TestAdapterDescriptorValidation
+--- PASS: TestAdapterDescriptorValidation (0.00s)
+=== CONT  TestExecutionSpecRejectsRawInvalidShape
+=== CONT  TestRuntimeEventAndEventSink
+--- PASS: TestExecutionSpecRejectsRawInvalidShape (0.00s)
+--- PASS: TestRuntimeEventAndEventSink (0.00s)
+PASS
+ok  	openagentx/internal/runtime	0.004s
+FAIL
+
+Exit code: 1

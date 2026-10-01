@@ -3,12 +3,15 @@ package agy
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -39,6 +42,7 @@ const cancellationPollInterval = 20 * time.Millisecond
 const cancellationStableScans = 3
 
 type Config struct {
+	Timeout         time.Duration
 	Binary          string
 	Models          []string
 	WorkingDir      string
@@ -65,6 +69,12 @@ type Adapter struct {
 }
 
 func NewAdapter(config Config) (*Adapter, error) {
+	if config.Timeout < 0 {
+		return nil, domain.ErrInvalidInput("AGY timeout must be positive")
+	}
+	if config.Timeout == 0 {
+		config.Timeout = 30 * time.Minute
+	}
 	if strings.TrimSpace(config.Binary) == "" {
 		config.Binary = "agy-graft"
 	}
@@ -90,6 +100,9 @@ func NewAdapter(config Config) (*Adapter, error) {
 }
 
 func NewAdapterForTest(config Config) *Adapter {
+	if config.Timeout == 0 {
+		config.Timeout = 30 * time.Minute
+	}
 	if strings.TrimSpace(config.Binary) == "" {
 		config.Binary = "agy-graft"
 	}
@@ -126,7 +139,8 @@ func (a *Adapter) configuredNetwork() domain.NetworkPolicy {
 
 func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, error) {
 	return openruntime.AdapterDescriptor{
-		AdapterID: "agy-batch", BackendType: "agy", Version: "1", LaunchProtocol: "argv",
+		DefaultTimeout: a.config.Timeout,
+		AdapterID:      "agy-batch", BackendType: "agy", Version: "1", LaunchProtocol: "argv",
 		Models: append([]string(nil), a.config.Models...), ReasoningModes: []domain.ReasoningMode{
 			domain.ReasoningBackendDefault, domain.ReasoningEffort,
 		}, SessionModes: []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume},
@@ -168,6 +182,15 @@ func (a *Adapter) Validate(_ context.Context, spec domain.ExecutionSpec) error {
 	}
 	if spec.Reasoning.Mode == domain.ReasoningBudgetTokens || spec.Budget.MaxTokens != 0 {
 		return domain.ErrUnsupportedCapability
+	}
+	if spec.ApprovalPolicy != "" || (spec.Reasoning.Mode == domain.ReasoningBackendDefault && spec.Reasoning.Value != "") {
+		return domain.ErrUnsupportedCapability
+	}
+	if len(spec.BackendOptions) != 0 {
+		var options map[string]json.RawMessage
+		if err := json.Unmarshal(spec.BackendOptions, &options); err != nil || options == nil || len(options) != 0 {
+			return domain.ErrUnsupportedCapability
+		}
 	}
 	if spec.Sandbox != "" {
 		return domain.ErrUnsupportedCapability
@@ -216,6 +239,14 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 		}
 	}
 	spec := request.Execution.Spec
+	workingDir := a.config.WorkingDir
+	if input := request.Execution.AgentInput; input != nil {
+		digest := sha256.Sum256([]byte(input.InstructionsContent))
+		if input.ProfileVersion <= 0 || !filepath.IsAbs(input.WorkspaceRoot) || !filepath.IsAbs(input.InstructionsPath) || strings.TrimSpace(input.InstructionsContent) == "" || hex.EncodeToString(digest[:]) != input.InstructionsSHA256 {
+			return nil, domain.ErrInvalidInput("invalid frozen AGY Agent input")
+		}
+		workingDir = input.WorkspaceRoot
+	}
 	args := []string{
 		"--input-format", "stream-json",
 		"--output-format", "stream-json",
@@ -234,9 +265,16 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	// --print requires a value. An explicit empty prompt selects print mode while
 	// stream-json stdin remains the sole source of turn messages.
 	args = append(args, "--print", "")
-	turnContext, cancel := context.WithTimeout(ctx, spec.Timeout)
+	deadline := time.Now().Add(spec.Timeout)
+	if !request.Execution.DeadlineAt.IsZero() && request.Execution.DeadlineAt.Before(deadline) {
+		deadline = request.Execution.DeadlineAt
+	}
+	if !deadline.After(time.Now()) {
+		return nil, domain.ErrInvalidInput("AGY execution deadline has expired")
+	}
+	turnContext, cancel := context.WithDeadline(ctx, deadline)
 	command := exec.CommandContext(turnContext, a.config.Binary, args...)
-	command.Dir = a.config.WorkingDir
+	command.Dir = workingDir
 	env, err := a.environment(spec.Network)
 	if err != nil {
 		cancel()
@@ -247,7 +285,7 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	command.WaitDelay = a.config.CancelGrace
 	cancelController := newProcessCancelController(command, a.config.CancelGrace)
 	command.Cancel = func() error { return cancelController.cancel(true) }
-	prompt := buildPrompt(request, a.config.WorkingDir)
+	prompt := buildPrompt(request, workingDir)
 	input, err := encodeStreamInput(prompt)
 	if err != nil {
 		cancel()
@@ -307,6 +345,12 @@ func encodeStreamInput(prompt string) ([]byte, error) {
 
 func buildPrompt(request openruntime.TurnRequest, workingDir string) string {
 	var builder strings.Builder
+	if input := request.Execution.AgentInput; input != nil {
+		workingDir = input.WorkspaceRoot
+		fmt.Fprintf(&builder, "OpenAgentX Agent role (frozen for this run; profile version %d, source %q, SHA-256 %s):\n", input.ProfileVersion, input.InstructionsPath, input.InstructionsSHA256)
+		builder.WriteString(input.InstructionsContent)
+		builder.WriteString("\n\nEnd of Agent role.\n\n")
+	}
 	if workingDir != "" {
 		builder.WriteString("OpenAgentX Runtime Context (authoritative):\n")
 		builder.WriteString("- Task ID: ")

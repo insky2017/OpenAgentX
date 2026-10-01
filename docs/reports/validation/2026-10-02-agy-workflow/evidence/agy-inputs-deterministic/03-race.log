@@ -1,0 +1,288 @@
+Evidence level: D (deterministic fixtures; not real AGY)
+UTC: 2026-10-01T17:46:38.570171+00:00
+Command: go test -race -count=1 -v ./internal/runtime/agy ./internal/controlplane ./internal/cli/worker ./internal/runtime
+=== RUN   TestParseStreamJSONNormalizesEventsAndResult
+--- PASS: TestParseStreamJSONNormalizesEventsAndResult (0.00s)
+=== RUN   TestParseStreamJSONRejectsMalformedAndEmptyInput
+--- PASS: TestParseStreamJSONRejectsMalformedAndEmptyInput (0.00s)
+=== RUN   TestParseStreamJSONCapturesNestedAgyError
+--- PASS: TestParseStreamJSONCapturesNestedAgyError (0.00s)
+=== RUN   TestParseStreamJSONPreservesExplicitUnknownSideEffects
+--- PASS: TestParseStreamJSONPreservesExplicitUnknownSideEffects (0.00s)
+=== RUN   TestParseStreamJSONDegradesUnknownEventType
+--- PASS: TestParseStreamJSONDegradesUnknownEventType (0.00s)
+=== RUN   TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit
+--- PASS: TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit (5.80s)
+=== RUN   TestParseStreamJSONRejectsContradictoryTerminal
+--- PASS: TestParseStreamJSONRejectsContradictoryTerminal (0.00s)
+=== RUN   TestAgyBatchAdapterUsesDirectArgvConversationAndClassifiesExit
+--- PASS: TestAgyBatchAdapterUsesDirectArgvConversationAndClassifiesExit (0.01s)
+=== RUN   TestAgyBatchAdapterUsesBackendDefaultWithoutModelOrEffort
+--- PASS: TestAgyBatchAdapterUsesBackendDefaultWithoutModelOrEffort (0.01s)
+=== RUN   TestAgyBatchAdapterRejectsUnsupportedBudget
+--- PASS: TestAgyBatchAdapterRejectsUnsupportedBudget (0.00s)
+=== RUN   TestAgyBatchAdapterRejectsModelOutsideDescriptor
+--- PASS: TestAgyBatchAdapterRejectsModelOutsideDescriptor (0.00s)
+=== RUN   TestAgyBatchAdapterEnforcesExecutionTimeout
+--- PASS: TestAgyBatchAdapterEnforcesExecutionTimeout (0.59s)
+=== RUN   TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess
+--- PASS: TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess (0.01s)
+=== RUN   TestAgyBatchAdapterCancelTerminatesChildProcesses
+--- PASS: TestAgyBatchAdapterCancelTerminatesChildProcesses (4.89s)
+=== RUN   TestAgyBatchAdapterTimeoutTerminatesTraceeBeforeTracer
+--- PASS: TestAgyBatchAdapterTimeoutTerminatesTraceeBeforeTracer (1.85s)
+=== RUN   TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain
+--- PASS: TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain (0.01s)
+=== RUN   TestCaptureStderrDrainsWhileRetainingBoundedDiagnostic
+--- PASS: TestCaptureStderrDrainsWhileRetainingBoundedDiagnostic (0.00s)
+=== RUN   TestRealAgyHelpContract
+    adapter_test.go:439: set OPENAGENTX_AGY_HELP_CONTRACT=1 to run the local, no-model AGY help contract guard
+--- SKIP: TestRealAgyHelpContract (0.00s)
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/final
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_then_final
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_without_final_body
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/empty
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/missing_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/duplicate_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/status_after_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/invalid_trailing_json
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/conflicting_error
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/public_truncation
+--- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream (0.02s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/final (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_then_final (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_without_final_body (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/empty (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/missing_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/duplicate_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/status_after_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/invalid_trailing_json (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/conflicting_error (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/public_truncation (0.02s)
+=== RUN   TestFinalReplyDoesNotIgnoreStderrAtExitZero
+--- PASS: TestFinalReplyDoesNotIgnoreStderrAtExitZero (0.01s)
+=== RUN   TestAGYFrozenInputControlsProcessCwdAndPrompt
+--- PASS: TestAGYFrozenInputControlsProcessCwdAndPrompt (0.01s)
+=== RUN   TestAGYFrozenDeadlineCannotBeExtendedByStartDelay
+--- PASS: TestAGYFrozenDeadlineCannotBeExtendedByStartDelay (0.65s)
+=== RUN   TestAGYRejectsUnconsumedExecutionFields
+--- PASS: TestAGYRejectsUnconsumedExecutionFields (0.00s)
+PASS
+ok  	openagentx/internal/runtime/agy	14.884s
+=== RUN   TestWorkerAdminServiceRequiresSharedBroker
+--- PASS: TestWorkerAdminServiceRequiresSharedBroker (0.00s)
+=== RUN   TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit
+=== RUN   TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/command_commit
+=== RUN   TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/command_rollback
+=== RUN   TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/revoke_commit
+=== RUN   TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/revoke_rollback
+--- PASS: TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit (0.00s)
+    --- PASS: TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/command_commit (0.00s)
+    --- PASS: TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/command_rollback (0.00s)
+    --- PASS: TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/revoke_commit (0.00s)
+    --- PASS: TestWorkerAdminServicePublishesOnlyAfterSuccessfulStateCommit/revoke_rollback (0.00s)
+=== RUN   TestAGYBeginFreezesProfileRoleCwdTimeoutAndNextRun
+--- PASS: TestAGYBeginFreezesProfileRoleCwdTimeoutAndNextRun (0.18s)
+=== RUN   TestAGYRoleInputRejectsMissingEmptyAndInvalidWorkspace
+--- PASS: TestAGYRoleInputRejectsMissingEmptyAndInvalidWorkspace (0.00s)
+=== RUN   TestAGYMissingRoleDoesNotCreateOrAcceptRun
+--- PASS: TestAGYMissingRoleDoesNotCreateOrAcceptRun (0.12s)
+=== RUN   TestRemoteHTTPSWorkerAPIEndToEnd
+--- PASS: TestRemoteHTTPSWorkerAPIEndToEnd (0.20s)
+=== RUN   TestRegisterWorkerRejectsUnknownLogicalAgent
+--- PASS: TestRegisterWorkerRejectsUnknownLogicalAgent (0.12s)
+=== RUN   TestHeartbeatSecurityErrorsPrecedeAckOwnershipAndRollbackUnknownBackend
+--- PASS: TestHeartbeatSecurityErrorsPrecedeAckOwnershipAndRollbackUnknownBackend (0.15s)
+=== RUN   TestRegisterAndPullIgnoreBindingForBackendRemovedFromWorkerYAML
+--- PASS: TestRegisterAndPullIgnoreBindingForBackendRemovedFromWorkerYAML (0.13s)
+=== RUN   TestWorkerServiceRegisterClaimBeginEventsAndFinish
+--- PASS: TestWorkerServiceRegisterClaimBeginEventsAndFinish (0.14s)
+=== RUN   TestRuntimeOutputCapAndTurnResultAreSafeBeforeAtomicFinish
+--- PASS: TestRuntimeOutputCapAndTurnResultAreSafeBeforeAtomicFinish (0.23s)
+=== RUN   TestPublicRuntimeProjectionRejectsNonObjectBeforePersistence
+--- PASS: TestPublicRuntimeProjectionRejectsNonObjectBeforePersistence (0.00s)
+=== RUN   TestWorkerAppendApprovalRequestedAtomicIdempotentAndApply
+--- PASS: TestWorkerAppendApprovalRequestedAtomicIdempotentAndApply (0.15s)
+=== RUN   TestWorkerFinishPersistsRuntimeDiagnosticToRunTaskAndEvents
+--- PASS: TestWorkerFinishPersistsRuntimeDiagnosticToRunTaskAndEvents (0.13s)
+=== RUN   TestHeartbeatSlidesTokenAndRenewsActiveRunLease
+--- PASS: TestHeartbeatSlidesTokenAndRenewsActiveRunLease (0.14s)
+=== RUN   TestWorkerFinishWaitingInputKeepsTaskEligibleForQueuedFollowUp
+--- PASS: TestWorkerFinishWaitingInputKeepsTaskEligibleForQueuedFollowUp (0.13s)
+=== RUN   TestBeginAttemptAtomicallyConsumesMatchingPreflightApprovalOnce
+--- PASS: TestBeginAttemptAtomicallyConsumesMatchingPreflightApprovalOnce (0.14s)
+=== RUN   TestWorkerSessionBindingCreateResumeAndUpdateAcrossTurns
+--- PASS: TestWorkerSessionBindingCreateResumeAndUpdateAcrossTurns (0.14s)
+=== RUN   TestM1TurnPlannerStartsNewSessionAfterBackendSwitch
+--- PASS: TestM1TurnPlannerStartsNewSessionAfterBackendSwitch (0.00s)
+=== RUN   TestM1TurnPlannerPrefersResumableBindingOverEarlierNewBackend
+--- PASS: TestM1TurnPlannerPrefersResumableBindingOverEarlierNewBackend (0.00s)
+=== RUN   TestWorkerFinishBindingCASFailureDoesNotSettleRunOrTask
+--- PASS: TestWorkerFinishBindingCASFailureDoesNotSettleRunOrTask (0.12s)
+=== RUN   TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles
+=== RUN   TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles/queued_work
+=== RUN   TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles/pending_native_control
+=== RUN   TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles/accepted_native_control
+--- PASS: TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles (0.36s)
+    --- PASS: TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles/queued_work (0.12s)
+    --- PASS: TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles/pending_native_control (0.12s)
+    --- PASS: TestWorkerFinishQueuedWorkMessageWaitsButAcceptedNativeMessageSettles/accepted_native_control (0.12s)
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/wrong_token
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/wrong_principal
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/wrong_Agent
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/stale_generation
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/stale_fencing
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/expired_lease
+=== RUN   TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/expired_token
+--- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed (0.79s)
+    --- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/wrong_token (0.11s)
+    --- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/wrong_principal (0.12s)
+    --- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/wrong_Agent (0.12s)
+    --- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/stale_generation (0.11s)
+    --- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/stale_fencing (0.11s)
+    --- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/expired_lease (0.11s)
+    --- PASS: TestWorkerAuthenticationLeaseGenerationFencingAndAgentBindingFailClosed/expired_token (0.11s)
+=== RUN   TestMailboxControlOrderingBackpressureAndAtLeastOnce
+--- PASS: TestMailboxControlOrderingBackpressureAndAtLeastOnce (0.13s)
+=== RUN   TestWorkerControlLongPollWaitsAndTimesOut
+--- PASS: TestWorkerControlLongPollWaitsAndTimesOut (1.12s)
+=== RUN   TestWorkerControlLongPollWakesWhenAdminCommandCommits
+--- PASS: TestWorkerControlLongPollWakesWhenAdminCommandCommits (0.12s)
+=== RUN   TestWorkerControlLongPollRechecksAfterSubscribeRace
+--- PASS: TestWorkerControlLongPollRechecksAfterSubscribeRace (0.12s)
+=== RUN   TestWorkerControlLongPollRechecksDatabaseWhenWakeupIsLost
+--- PASS: TestWorkerControlLongPollRechecksDatabaseWhenWakeupIsLost (1.11s)
+=== RUN   TestWorkerControlLongPollHonorsContextCancellation
+--- PASS: TestWorkerControlLongPollHonorsContextCancellation (0.16s)
+=== RUN   TestWorkerControlClaimAuthorityFailsClosed
+=== RUN   TestWorkerControlClaimAuthorityFailsClosed/wrong_token
+=== RUN   TestWorkerControlClaimAuthorityFailsClosed/stale_generation
+=== RUN   TestWorkerControlClaimAuthorityFailsClosed/stale_fencing
+=== RUN   TestWorkerControlClaimAuthorityFailsClosed/expired_token
+=== RUN   TestWorkerControlClaimAuthorityFailsClosed/expired_lease
+--- PASS: TestWorkerControlClaimAuthorityFailsClosed (0.65s)
+    --- PASS: TestWorkerControlClaimAuthorityFailsClosed/wrong_token (0.13s)
+    --- PASS: TestWorkerControlClaimAuthorityFailsClosed/stale_generation (0.12s)
+    --- PASS: TestWorkerControlClaimAuthorityFailsClosed/stale_fencing (0.13s)
+    --- PASS: TestWorkerControlClaimAuthorityFailsClosed/expired_token (0.13s)
+    --- PASS: TestWorkerControlClaimAuthorityFailsClosed/expired_lease (0.15s)
+=== RUN   TestWorkerControlClaimFailsClosedAfterLeaseRevoke
+--- PASS: TestWorkerControlClaimFailsClosedAfterLeaseRevoke (0.14s)
+=== RUN   TestLongPollRechecksDatabaseWhenBrokerWakeupIsLost
+--- PASS: TestLongPollRechecksDatabaseWhenBrokerWakeupIsLost (1.12s)
+=== RUN   TestExpiredWorkerCannotRaceReplacementWorkerForMailbox
+--- PASS: TestExpiredWorkerCannotRaceReplacementWorkerForMailbox (0.13s)
+=== RUN   TestWorkerAPIRejectsUnknownFieldsAndMissingBearerToken
+--- PASS: TestWorkerAPIRejectsUnknownFieldsAndMissingBearerToken (0.11s)
+=== RUN   TestUnixHTTPWorkerAPIEndToEnd
+--- PASS: TestUnixHTTPWorkerAPIEndToEnd (0.17s)
+=== RUN   TestUnixHTTPWorkerControlClaimWaitsAndWakesThroughSharedBroker
+--- PASS: TestUnixHTTPWorkerControlClaimWaitsAndWakesThroughSharedBroker (1.23s)
+PASS
+ok  	openagentx/internal/controlplane	10.701s
+=== RUN   TestAssembleCodeBuddyAdapterFromWorkerConfig
+--- PASS: TestAssembleCodeBuddyAdapterFromWorkerConfig (0.01s)
+=== RUN   TestAssembleCodeBuddyAdapterDefaults
+--- PASS: TestAssembleCodeBuddyAdapterDefaults (0.01s)
+=== RUN   TestAssembleCodeBuddyAdapterRejectsInvalidOptions
+--- PASS: TestAssembleCodeBuddyAdapterRejectsInvalidOptions (0.00s)
+=== RUN   TestOpenAgentXWorkerRunExitCodes
+Error: Worker stopped abnormally: lease lost
+Error: flag --config is required
+--- PASS: TestOpenAgentXWorkerRunExitCodes (0.00s)
+=== RUN   TestAGYConfigFromOptions
+--- PASS: TestAGYConfigFromOptions (0.00s)
+=== RUN   TestAssembleFakeAdapterScriptedResultsAndResumeCapability
+--- PASS: TestAssembleFakeAdapterScriptedResultsAndResumeCapability (0.00s)
+=== RUN   TestAssembleFakeAdapterEmitsScriptedSafeOutputBeforeCompletion
+--- PASS: TestAssembleFakeAdapterEmitsScriptedSafeOutputBeforeCompletion (0.00s)
+=== RUN   TestAssembleFakeAdapterFailsTurnWhenScriptedOutputCannotPersist
+--- PASS: TestAssembleFakeAdapterFailsTurnWhenScriptedOutputCannotPersist (0.00s)
+=== RUN   TestAssembleFakeAdapterSupportsAllContractResultStatuses
+=== RUN   TestAssembleFakeAdapterSupportsAllContractResultStatuses/succeeded
+=== RUN   TestAssembleFakeAdapterSupportsAllContractResultStatuses/waiting_input
+=== RUN   TestAssembleFakeAdapterSupportsAllContractResultStatuses/failed
+=== RUN   TestAssembleFakeAdapterSupportsAllContractResultStatuses/uncertain
+=== RUN   TestAssembleFakeAdapterSupportsAllContractResultStatuses/canceled
+--- PASS: TestAssembleFakeAdapterSupportsAllContractResultStatuses (0.00s)
+    --- PASS: TestAssembleFakeAdapterSupportsAllContractResultStatuses/succeeded (0.00s)
+    --- PASS: TestAssembleFakeAdapterSupportsAllContractResultStatuses/waiting_input (0.00s)
+    --- PASS: TestAssembleFakeAdapterSupportsAllContractResultStatuses/failed (0.00s)
+    --- PASS: TestAssembleFakeAdapterSupportsAllContractResultStatuses/uncertain (0.00s)
+    --- PASS: TestAssembleFakeAdapterSupportsAllContractResultStatuses/canceled (0.00s)
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/unknown_option
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/provider_blank
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/sequence_invalid_entry
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/model_wrong_type
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/result_wrong_type
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/provider_control_character
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/status_unsupported
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/sequence_wrong_type
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/sequence_empty
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/output_length_mismatch
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/provider_wrong_type
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/status_blank
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/output_empty
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/output_without_statuses
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/output_blank_entry
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/output_non_string_entry
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/model_blank
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/status_wrong_type
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/sequence_non_string_entry
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/status_sequence_conflict
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/output_wrong_type
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/output_oversized_entry
+=== RUN   TestAssembleFakeAdapterRejectsInvalidOptions/too_many_outputs
+--- PASS: TestAssembleFakeAdapterRejectsInvalidOptions (0.01s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/unknown_option (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/provider_blank (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/sequence_invalid_entry (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/model_wrong_type (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/result_wrong_type (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/provider_control_character (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/status_unsupported (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/sequence_wrong_type (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/sequence_empty (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/output_length_mismatch (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/provider_wrong_type (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/status_blank (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/output_empty (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/output_without_statuses (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/output_blank_entry (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/output_non_string_entry (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/model_blank (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/status_wrong_type (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/sequence_non_string_entry (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/status_sequence_conflict (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/output_wrong_type (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/output_oversized_entry (0.00s)
+    --- PASS: TestAssembleFakeAdapterRejectsInvalidOptions/too_many_outputs (0.00s)
+=== RUN   TestFakeMultiTurnFixtureLoads
+--- PASS: TestFakeMultiTurnFixtureLoads (0.00s)
+=== RUN   TestRunWorkerProcessCompletesConsecutiveTasksOverRemoteHTTPSAndStops
+--- PASS: TestRunWorkerProcessCompletesConsecutiveTasksOverRemoteHTTPSAndStops (0.33s)
+=== RUN   TestRunWorkerProcessCompletesConsecutiveTasksWithoutTerminalInput
+--- PASS: TestRunWorkerProcessCompletesConsecutiveTasksWithoutTerminalInput (0.29s)
+=== RUN   TestRunWorkerProcessCompletesMultiTurnTaskWithSessionResume
+--- PASS: TestRunWorkerProcessCompletesMultiTurnTaskWithSessionResume (0.29s)
+PASS
+ok  	openagentx/internal/cli/worker	1.980s
+=== RUN   TestAdapterDescriptorValidation
+=== PAUSE TestAdapterDescriptorValidation
+=== RUN   TestRuntimeEventAndEventSink
+=== PAUSE TestRuntimeEventAndEventSink
+=== RUN   TestExecutionSpecRejectsRawInvalidShape
+=== PAUSE TestExecutionSpecRejectsRawInvalidShape
+=== CONT  TestAdapterDescriptorValidation
+=== CONT  TestRuntimeEventAndEventSink
+=== CONT  TestExecutionSpecRejectsRawInvalidShape
+--- PASS: TestAdapterDescriptorValidation (0.00s)
+--- PASS: TestRuntimeEventAndEventSink (0.00s)
+--- PASS: TestExecutionSpecRejectsRawInvalidShape (0.00s)
+PASS
+ok  	openagentx/internal/runtime	1.023s
+
+Exit code: 0

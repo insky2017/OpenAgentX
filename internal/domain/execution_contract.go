@@ -85,8 +85,20 @@ func (s ExecutionSpec) ValidateShape() error {
 	return nil
 }
 
+// AgentExecutionInput freezes the local Agent profile and role for one Run.
+// Content is captured once; later file edits apply only to subsequent Runs.
+type AgentExecutionInput struct {
+	ProfileVersion      int64  `json:"profile_version"`
+	InstructionsPath    string `json:"instructions_path"`
+	InstructionsSHA256  string `json:"instructions_sha256"`
+	InstructionsContent string `json:"instructions_content"`
+	WorkspaceRoot       string `json:"workspace_root"`
+}
+
 type ResolvedExecutionSpec struct {
-	Version int64             `json:"version"`
-	Spec    ExecutionSpec     `json:"spec"`
-	Sources map[string]string `json:"sources"`
+	AgentInput *AgentExecutionInput `json:"agent_input,omitempty"`
+	DeadlineAt time.Time            `json:"deadline_at,omitempty"`
+	Version    int64                `json:"version"`
+	Spec       ExecutionSpec        `json:"spec"`
+	Sources    map[string]string    `json:"sources"`
 }
