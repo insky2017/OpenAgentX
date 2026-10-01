@@ -85,3 +85,10 @@ test('latest result belongs to the latest execution in either API ordering', () 
   assert.equal(latestTaskRun([oldRun, newRun]), newRun)
   assert.equal(latestTaskRun([]), undefined)
 })
+
+
+test('cancel feedback distinguishes requested, confirmed and unknown stopping', () => {
+  assert.match(taskProgress({status:'cancel_requested'}, {status:'running'}, quote), /等待.*确认停止/)
+  assert.match(taskProgress({status:'canceled'}, {status:'canceled'}, quote), /不会自动撤销/)
+  assert.match(taskProgress({status:'uncertain'}, {status:'uncertain'}, quote), /尚未确认/)
+})

@@ -43,6 +43,9 @@ export const createdTaskID = (response) => {
 
 export const taskProgress = (task, run, worker) => {
   if (!task) return ''
+  if (task.status === 'cancel_requested') return '正在停止：请求已接受，等待运行进程确认停止'
+  if (task.status === 'canceled') return '已取消，运行已停止或尚未开始；已产生的文件修改不会自动撤销'
+  if (task.status === 'uncertain' && run?.status === 'uncertain') return '执行结果或停止状态尚未确认，请检查诊断；不会自动重跑'
   if (task.status === 'succeeded' && task.intent === 'query' && task.completion_basis === 'query_result_delivered') {
     return '查询回复已完整交付；不代表答案真实性或副作用已核验'
   }
