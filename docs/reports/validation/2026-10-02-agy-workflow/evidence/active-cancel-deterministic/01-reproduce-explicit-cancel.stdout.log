@@ -1,0 +1,11 @@
+=== RUN   TestAgyBatchAdapterCancelTerminatesChildProcesses
+    adapter_test.go:298: explicit cancel result={Status:uncertain ProviderSessionID: Result: ResultTruncated:false FinalReply:false Error:AGY stderr: Terminated
+        Killed; AGY stream-json was empty
+        AGY stream-json ended without a terminal event; AGY process exited: exit status 143; AGY stderr: Terminated
+        Killed ErrorTruncated:false UsageJSON:[] SideEffectsKnown:false RuntimeSideEffectsKnown:<nil>} err=AGY stream-json was empty
+        AGY stream-json ended without a terminal event
+        exit status 143
+--- FAIL: TestAgyBatchAdapterCancelTerminatesChildProcesses (4.92s)
+FAIL
+FAIL	openagentx/internal/runtime/agy	4.956s
+FAIL

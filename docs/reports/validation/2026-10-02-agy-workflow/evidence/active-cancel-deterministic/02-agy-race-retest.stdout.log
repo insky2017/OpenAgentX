@@ -1,0 +1,81 @@
+=== RUN   TestParseStreamJSONNormalizesEventsAndResult
+--- PASS: TestParseStreamJSONNormalizesEventsAndResult (0.00s)
+=== RUN   TestParseStreamJSONRejectsMalformedAndEmptyInput
+--- PASS: TestParseStreamJSONRejectsMalformedAndEmptyInput (0.00s)
+=== RUN   TestParseStreamJSONCapturesNestedAgyError
+--- PASS: TestParseStreamJSONCapturesNestedAgyError (0.00s)
+=== RUN   TestParseStreamJSONPreservesExplicitUnknownSideEffects
+--- PASS: TestParseStreamJSONPreservesExplicitUnknownSideEffects (0.00s)
+=== RUN   TestParseStreamJSONDegradesUnknownEventType
+--- PASS: TestParseStreamJSONDegradesUnknownEventType (0.00s)
+=== RUN   TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit
+--- PASS: TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit (7.64s)
+=== RUN   TestParseStreamJSONRejectsContradictoryTerminal
+--- PASS: TestParseStreamJSONRejectsContradictoryTerminal (0.00s)
+=== RUN   TestAgyBatchAdapterUsesDirectArgvConversationAndClassifiesExit
+--- PASS: TestAgyBatchAdapterUsesDirectArgvConversationAndClassifiesExit (0.01s)
+=== RUN   TestAgyBatchAdapterUsesBackendDefaultWithoutModelOrEffort
+--- PASS: TestAgyBatchAdapterUsesBackendDefaultWithoutModelOrEffort (0.01s)
+=== RUN   TestAgyBatchAdapterRejectsUnsupportedBudget
+--- PASS: TestAgyBatchAdapterRejectsUnsupportedBudget (0.00s)
+=== RUN   TestAgyBatchAdapterRejectsModelOutsideDescriptor
+--- PASS: TestAgyBatchAdapterRejectsModelOutsideDescriptor (0.00s)
+=== RUN   TestAgyBatchAdapterEnforcesExecutionTimeout
+--- PASS: TestAgyBatchAdapterEnforcesExecutionTimeout (0.76s)
+=== RUN   TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess
+--- PASS: TestAgyBatchAdapterTimeoutAndNonZeroAreNotSuccess (0.01s)
+=== RUN   TestAgyBatchAdapterCancelTerminatesChildProcesses
+--- PASS: TestAgyBatchAdapterCancelTerminatesChildProcesses (4.82s)
+=== RUN   TestAgyBatchAdapterTimeoutTerminatesTraceeBeforeTracer
+--- PASS: TestAgyBatchAdapterTimeoutTerminatesTraceeBeforeTracer (1.63s)
+=== RUN   TestAgyBatchAdapterCancellationOfInterruptedStream
+=== RUN   TestAgyBatchAdapterCancellationOfInterruptedStream/explicit
+=== RUN   TestAgyBatchAdapterCancellationOfInterruptedStream/cleanup-error
+=== RUN   TestAgyBatchAdapterCancellationOfInterruptedStream/timeout-first
+=== RUN   TestAgyBatchAdapterCancellationOfInterruptedStream/timeout-after-explicit
+--- PASS: TestAgyBatchAdapterCancellationOfInterruptedStream (3.09s)
+    --- PASS: TestAgyBatchAdapterCancellationOfInterruptedStream/explicit (0.72s)
+    --- PASS: TestAgyBatchAdapterCancellationOfInterruptedStream/cleanup-error (0.77s)
+    --- PASS: TestAgyBatchAdapterCancellationOfInterruptedStream/timeout-first (0.77s)
+    --- PASS: TestAgyBatchAdapterCancellationOfInterruptedStream/timeout-after-explicit (0.83s)
+=== RUN   TestAgyBatchAdapterLateCancelPreservesNaturalFailure
+--- PASS: TestAgyBatchAdapterLateCancelPreservesNaturalFailure (0.01s)
+=== RUN   TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain
+--- PASS: TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain (0.01s)
+=== RUN   TestCaptureStderrDrainsWhileRetainingBoundedDiagnostic
+--- PASS: TestCaptureStderrDrainsWhileRetainingBoundedDiagnostic (0.00s)
+=== RUN   TestRealAgyHelpContract
+    adapter_test.go:539: set OPENAGENTX_AGY_HELP_CONTRACT=1 to run the local, no-model AGY help contract guard
+--- SKIP: TestRealAgyHelpContract (0.00s)
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/final
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_then_final
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_without_final_body
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/empty
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/missing_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/duplicate_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/status_after_terminal
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/invalid_trailing_json
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/conflicting_error
+=== RUN   TestFinalReplyRequiresTerminalBodyAndConsistentStream/public_truncation
+--- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream (0.04s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/final (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_then_final (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/incremental_without_final_body (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/empty (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/missing_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/duplicate_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/status_after_terminal (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/invalid_trailing_json (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/conflicting_error (0.00s)
+    --- PASS: TestFinalReplyRequiresTerminalBodyAndConsistentStream/public_truncation (0.03s)
+=== RUN   TestFinalReplyDoesNotIgnoreStderrAtExitZero
+--- PASS: TestFinalReplyDoesNotIgnoreStderrAtExitZero (0.01s)
+=== RUN   TestAGYFrozenInputControlsProcessCwdAndPrompt
+--- PASS: TestAGYFrozenInputControlsProcessCwdAndPrompt (0.01s)
+=== RUN   TestAGYFrozenDeadlineCannotBeExtendedByStartDelay
+--- PASS: TestAGYFrozenDeadlineCannotBeExtendedByStartDelay (0.73s)
+=== RUN   TestAGYRejectsUnconsumedExecutionFields
+--- PASS: TestAGYRejectsUnconsumedExecutionFields (0.00s)
+PASS
+ok  	openagentx/internal/runtime/agy	19.822s

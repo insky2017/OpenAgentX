@@ -416,6 +416,15 @@ func (h *turnHandle) collect() {
 	if runtimeErr != nil || result.Status == openruntime.TurnResultFailed || result.Status == openruntime.TurnResultUncertain {
 		result.Error = joinDiagnostic(result.Error, parseErr, stderr.err, waitErr, cancelErr, stderrDetail, stderr.truncated)
 	}
+	// An explicit cancellation proves that execution stopped, not whether work
+	// already performed had side effects. Interrupted output and signal exit
+	// errors remain diagnostics rather than invalidating a verified stop.
+	if h.cancelController.explicitCancellationStopped() {
+		result.Status = openruntime.TurnResultCanceled
+		result.SideEffectsKnown = false
+		result.FinalReply = false
+		runtimeErr = nil
+	}
 	h.once.Do(func() {
 		h.result, h.err = result, runtimeErr
 		close(h.done)
@@ -518,6 +527,9 @@ type processCancelController struct {
 	cleanupStarted bool
 	cleanupDone    chan struct{}
 	cleanupErr     error
+	explicitCancel bool
+	timeoutCancel  bool
+	cleanupStopped bool
 }
 
 func newProcessCancelController(command *exec.Cmd, grace time.Duration) *processCancelController {
@@ -537,8 +549,24 @@ func (c *processCancelController) getRoot() processRef {
 }
 
 func (c *processCancelController) cancel(timeout bool) error {
+	// A deadline or parent-context cancellation must never be relabeled as
+	// user cancellation, including when it races an explicit cancel request.
+	if timeout {
+		c.cleanupMu.Lock()
+		c.timeoutCancel = true
+		c.cleanupMu.Unlock()
+	}
 	var cancelErr error
 	c.once.Do(func() {
+		c.cleanupMu.Lock()
+		c.cleanupStarted = true
+		c.cleanupMu.Unlock()
+		cleanupLaunched := false
+		defer func() {
+			if !cleanupLaunched {
+				close(c.cleanupDone)
+			}
+		}()
 		root := c.getRoot()
 		if root.pid == 0 && c.command.Process != nil {
 			startTime, err := processStartTime(c.command.Process.Pid)
@@ -552,11 +580,12 @@ func (c *processCancelController) cancel(timeout bool) error {
 			root = processRef{pid: c.command.Process.Pid, startTime: startTime}
 			c.setRoot(root)
 		}
-		if root.pid == 0 || c.command.Process == nil {
+		if root.pid == 0 || c.command.Process == nil || !processRefAlive(root) {
+			// A late request after natural exit is not evidence of cancellation.
 			return
 		}
 		c.cleanupMu.Lock()
-		c.cleanupStarted = true
+		c.explicitCancel = !timeout
 		c.cleanupMu.Unlock()
 		descendants := descendantProcesses(root.pid)
 		// Signal descendants deepest-first while the mgraftcp tracer remains alive.
@@ -571,6 +600,7 @@ func (c *processCancelController) cancel(timeout bool) error {
 		if timeout && traceeGrace > timeoutTraceeGrace {
 			traceeGrace = timeoutTraceeGrace
 		}
+		cleanupLaunched = true
 		go c.finish(root, descendants, traceeGrace)
 	})
 	return cancelErr
@@ -696,6 +726,21 @@ func (c *processCancelController) finish(root processRef, descendants []processR
 			c.recordError(fmt.Errorf("signal AGY process group %d with SIGKILL: %w", root.pid, groupErr))
 		}
 	}
+
+	// Sending SIGKILL alone is not proof of termination. Wait for the root and
+	// every observed descendant/group member to disappear or become zombies.
+	known = mergeProcessRefs(known, []processRef{root})
+	stopDeadline := time.Now().Add(descendantKillGrace)
+	for time.Now().Before(stopDeadline) && processRefsAlive(known) {
+		time.Sleep(cancellationPollInterval)
+	}
+	if processRefsAlive(known) {
+		c.recordError(fmt.Errorf("AGY process tree survived final cleanup grace period"))
+		return
+	}
+	c.cleanupMu.Lock()
+	c.cleanupStopped = true
+	c.cleanupMu.Unlock()
 }
 
 func mergeProcessRefs(existing, discovered []processRef) []processRef {
@@ -783,6 +828,12 @@ func (c *processCancelController) wait() error {
 	c.cleanupMu.Lock()
 	defer c.cleanupMu.Unlock()
 	return c.cleanupErr
+}
+
+func (c *processCancelController) explicitCancellationStopped() bool {
+	c.cleanupMu.Lock()
+	defer c.cleanupMu.Unlock()
+	return c.explicitCancel && !c.timeoutCancel && c.cleanupStopped && c.cleanupErr == nil
 }
 
 func processRefsAlive(processes []processRef) bool {

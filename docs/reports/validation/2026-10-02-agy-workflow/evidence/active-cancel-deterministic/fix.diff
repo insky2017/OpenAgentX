@@ -1,0 +1,235 @@
+diff --git a/internal/runtime/agy/adapter.go b/internal/runtime/agy/adapter.go
+index 975e4be..69c86eb 100644
+--- a/internal/runtime/agy/adapter.go
++++ b/internal/runtime/agy/adapter.go
+@@ -416,6 +416,15 @@ func (h *turnHandle) collect() {
+ 	if runtimeErr != nil || result.Status == openruntime.TurnResultFailed || result.Status == openruntime.TurnResultUncertain {
+ 		result.Error = joinDiagnostic(result.Error, parseErr, stderr.err, waitErr, cancelErr, stderrDetail, stderr.truncated)
+ 	}
++	// An explicit cancellation proves that execution stopped, not whether work
++	// already performed had side effects. Interrupted output and signal exit
++	// errors remain diagnostics rather than invalidating a verified stop.
++	if h.cancelController.explicitCancellationStopped() {
++		result.Status = openruntime.TurnResultCanceled
++		result.SideEffectsKnown = false
++		result.FinalReply = false
++		runtimeErr = nil
++	}
+ 	h.once.Do(func() {
+ 		h.result, h.err = result, runtimeErr
+ 		close(h.done)
+@@ -518,6 +527,9 @@ type processCancelController struct {
+ 	cleanupStarted bool
+ 	cleanupDone    chan struct{}
+ 	cleanupErr     error
++	explicitCancel bool
++	timeoutCancel  bool
++	cleanupStopped bool
+ }
+ 
+ func newProcessCancelController(command *exec.Cmd, grace time.Duration) *processCancelController {
+@@ -537,8 +549,24 @@ func (c *processCancelController) getRoot() processRef {
+ }
+ 
+ func (c *processCancelController) cancel(timeout bool) error {
++	// A deadline or parent-context cancellation must never be relabeled as
++	// user cancellation, including when it races an explicit cancel request.
++	if timeout {
++		c.cleanupMu.Lock()
++		c.timeoutCancel = true
++		c.cleanupMu.Unlock()
++	}
+ 	var cancelErr error
+ 	c.once.Do(func() {
++		c.cleanupMu.Lock()
++		c.cleanupStarted = true
++		c.cleanupMu.Unlock()
++		cleanupLaunched := false
++		defer func() {
++			if !cleanupLaunched {
++				close(c.cleanupDone)
++			}
++		}()
+ 		root := c.getRoot()
+ 		if root.pid == 0 && c.command.Process != nil {
+ 			startTime, err := processStartTime(c.command.Process.Pid)
+@@ -552,11 +580,12 @@ func (c *processCancelController) cancel(timeout bool) error {
+ 			root = processRef{pid: c.command.Process.Pid, startTime: startTime}
+ 			c.setRoot(root)
+ 		}
+-		if root.pid == 0 || c.command.Process == nil {
++		if root.pid == 0 || c.command.Process == nil || !processRefAlive(root) {
++			// A late request after natural exit is not evidence of cancellation.
+ 			return
+ 		}
+ 		c.cleanupMu.Lock()
+-		c.cleanupStarted = true
++		c.explicitCancel = !timeout
+ 		c.cleanupMu.Unlock()
+ 		descendants := descendantProcesses(root.pid)
+ 		// Signal descendants deepest-first while the mgraftcp tracer remains alive.
+@@ -571,6 +600,7 @@ func (c *processCancelController) cancel(timeout bool) error {
+ 		if timeout && traceeGrace > timeoutTraceeGrace {
+ 			traceeGrace = timeoutTraceeGrace
+ 		}
++		cleanupLaunched = true
+ 		go c.finish(root, descendants, traceeGrace)
+ 	})
+ 	return cancelErr
+@@ -696,6 +726,21 @@ func (c *processCancelController) finish(root processRef, descendants []processR
+ 			c.recordError(fmt.Errorf("signal AGY process group %d with SIGKILL: %w", root.pid, groupErr))
+ 		}
+ 	}
++
++	// Sending SIGKILL alone is not proof of termination. Wait for the root and
++	// every observed descendant/group member to disappear or become zombies.
++	known = mergeProcessRefs(known, []processRef{root})
++	stopDeadline := time.Now().Add(descendantKillGrace)
++	for time.Now().Before(stopDeadline) && processRefsAlive(known) {
++		time.Sleep(cancellationPollInterval)
++	}
++	if processRefsAlive(known) {
++		c.recordError(fmt.Errorf("AGY process tree survived final cleanup grace period"))
++		return
++	}
++	c.cleanupMu.Lock()
++	c.cleanupStopped = true
++	c.cleanupMu.Unlock()
+ }
+ 
+ func mergeProcessRefs(existing, discovered []processRef) []processRef {
+@@ -785,6 +830,12 @@ func (c *processCancelController) wait() error {
+ 	return c.cleanupErr
+ }
+ 
++func (c *processCancelController) explicitCancellationStopped() bool {
++	c.cleanupMu.Lock()
++	defer c.cleanupMu.Unlock()
++	return c.explicitCancel && !c.timeoutCancel && c.cleanupStopped && c.cleanupErr == nil
++}
++
+ func processRefsAlive(processes []processRef) bool {
+ 	for _, process := range processes {
+ 		if processRefAlive(process) {
+diff --git a/internal/runtime/agy/adapter_test.go b/internal/runtime/agy/adapter_test.go
+index a6b457e..1d16729 100644
+--- a/internal/runtime/agy/adapter_test.go
++++ b/internal/runtime/agy/adapter_test.go
+@@ -373,8 +373,15 @@ while :; do sleep 0.1; done
+ 	waitContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+ 	defer cancel()
+ 	result, waitErr := handle.Wait(waitContext)
+-	if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown {
+-		t.Fatalf("result=%+v err=%v", result, waitErr)
++	if timeout {
++		if waitErr == nil || result.Status != openruntime.TurnResultUncertain || result.SideEffectsKnown || result.FinalReply {
++			t.Fatalf("timeout result=%+v err=%v", result, waitErr)
++		}
++	} else if waitErr != nil || result.Status != openruntime.TurnResultCanceled || result.SideEffectsKnown || result.FinalReply {
++		t.Fatalf("explicit cancel result=%+v err=%v", result, waitErr)
++	}
++	if !strings.Contains(result.Error, "AGY process exited") {
++		t.Fatalf("cancellation lost process exit diagnostic: %+v", result)
+ 	}
+ 	marker, err := os.ReadFile(markerPath)
+ 	if err != nil || !strings.Contains(string(marker), "leader-term-child-dead-late-dead") {
+@@ -410,6 +417,99 @@ while :; do sleep 0.1; done
+ 	}
+ }
+ 
++// Use a real process with a deliberately incomplete stream: cancellation can
++// interrupt a JSON record and the process can exit non-zero while still being
++// conclusively stopped. Cleanup faults and timeouts must retain uncertainty.
++func TestAgyBatchAdapterCancellationOfInterruptedStream(t *testing.T) {
++	for _, scenario := range []string{"explicit", "cleanup-error", "timeout-first", "timeout-after-explicit"} {
++		t.Run(scenario, func(t *testing.T) {
++			dir := t.TempDir()
++			readyPath := filepath.Join(dir, "ready")
++			scriptPath := filepath.Join(dir, "agy-interrupted")
++			script := fmt.Sprintf(`#!/bin/sh
++cat >/dev/null
++trap 'echo interrupted >&2; exit 1' TERM
++printf '{"event":"result","result":'
++: > %q
++while :; do sleep 0.05; done
++`, readyPath)
++			if err := os.WriteFile(scriptPath, []byte(script), 0o700); err != nil {
++				t.Fatal(err)
++			}
++			adapter := NewAdapterForTest(Config{Binary: scriptPath, WorkingDir: dir, CancelGrace: 100 * time.Millisecond})
++			handle, err := adapter.StartTurn(context.Background(), testTurnRequest(validSpec()), nil)
++			if err != nil {
++				t.Fatal(err)
++			}
++			turn := handle.(*turnHandle)
++			t.Cleanup(func() { _ = signalProcessGroup(turn.command.Process.Pid, syscall.SIGKILL) })
++			waitForFile(t, readyPath, "interrupted fixture did not start")
++			if scenario == "cleanup-error" {
++				// An isolated fault fixture: even if the real process stops, an
++				// unverified cleanup operation must prohibit a canceled result.
++				turn.cancelController.recordError(errors.New("injected cleanup verification failure"))
++			}
++			if scenario == "timeout-first" {
++				if err := turn.cancelController.cancel(true); err != nil {
++					t.Fatal(err)
++				}
++			}
++			if err := handle.RequestCancel(context.Background()); err != nil {
++				t.Fatal(err)
++			}
++			if scenario == "timeout-after-explicit" {
++				if err := turn.cancelController.cancel(true); err != nil {
++					t.Fatal(err)
++				}
++			}
++			waitContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
++			defer cancel()
++			result, waitErr := handle.Wait(waitContext)
++			if scenario == "explicit" {
++				if waitErr != nil || result.Status != openruntime.TurnResultCanceled {
++					t.Fatalf("explicit cancel result=%+v err=%v", result, waitErr)
++				}
++			} else if waitErr == nil || result.Status != openruntime.TurnResultUncertain {
++				t.Fatalf("%s must remain uncertain: result=%+v err=%v", scenario, result, waitErr)
++			}
++			if result.SideEffectsKnown || result.FinalReply || !strings.Contains(result.Error, "AGY process exited") || !strings.Contains(result.Error, "interrupted") {
++				t.Fatalf("cancellation evidence lost or overstated: %+v", result)
++			}
++			if scenario == "cleanup-error" && !strings.Contains(result.Error, "injected cleanup verification failure") {
++				t.Fatalf("cleanup failure diagnostic lost: %+v", result)
++			}
++			if processRunning(turn.command.Process.Pid) {
++				t.Fatalf("root process %d survived cancellation", turn.command.Process.Pid)
++			}
++		})
++	}
++}
++
++func TestAgyBatchAdapterLateCancelPreservesNaturalFailure(t *testing.T) {
++	dir := t.TempDir()
++	scriptPath := filepath.Join(dir, "agy-natural-failure")
++	if err := os.WriteFile(scriptPath, []byte("#!/bin/sh\ncat >/dev/null\necho natural-failure >&2\nexit 1\n"), 0o700); err != nil {
++		t.Fatal(err)
++	}
++	adapter := NewAdapterForTest(Config{Binary: scriptPath, WorkingDir: dir})
++	handle, err := adapter.StartTurn(context.Background(), testTurnRequest(validSpec()), nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	before, beforeErr := handle.Wait(context.Background())
++	if err := handle.RequestCancel(context.Background()); err != nil {
++		t.Fatal(err)
++	}
++	after, afterErr := handle.Wait(context.Background())
++	if beforeErr == nil || afterErr == nil || before.Status != openruntime.TurnResultUncertain || !reflect.DeepEqual(before, after) {
++		t.Fatalf("late cancellation changed natural failure: before=%+v (%v), after=%+v (%v)", before, beforeErr, after, afterErr)
++	}
++	turn := handle.(*turnHandle)
++	if err := turn.cancelController.wait(); err != nil || turn.cancelController.explicitCancellationStopped() {
++		t.Fatalf("late cancellation was incorrectly verified: %v", err)
++	}
++}
++
+ func TestAgyBatchAdapterExitZeroWithoutTerminalIsUncertain(t *testing.T) {
+ 	dir := t.TempDir()
+ 	scriptPath := filepath.Join(dir, "agy-no-terminal")
