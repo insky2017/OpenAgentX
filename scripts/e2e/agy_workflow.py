@@ -74,18 +74,49 @@ class Workflow(Live):
         calls=(self.root/'workspace/queued.invocations.jsonl').read_text().splitlines();assert len(calls)==1,calls
         write(self.out/'cases/queued/consumption-proof.json',{'first_run_id':first_run_id,'supplement_run_id':latest['run_id'],'message_id':msg['message_id'],'mailbox_state':accepted['state'],'first_script_invocation_count':len(calls)})
         return tid
+    def runtime_process_tree(self):
+        worker_pid=next(p['pid'] for p in self.procs if p['label']=='worker')
+        rows={}
+        for stat in P('/proc').glob('[0-9]*/stat'):
+            try:
+                text=stat.read_text();fields=text.rsplit(')',1)[1].split();pid=int(stat.parent.name)
+                rows[pid]={'pid':pid,'ppid':int(fields[1]),'starttime':fields[19],'comm':text.split('(',1)[1].rsplit(')',1)[0]}
+            except (FileNotFoundError,ProcessLookupError,PermissionError,ValueError,IndexError):continue
+        found=[];parents={worker_pid}
+        while parents:
+            children=[x for x in rows.values() if x['ppid'] in parents];found.extend(children);parents={x['pid'] for x in children}
+        return found
     def cancellation(self):
         self.prepare_wait('cancel',30)
         tid=self.task('Run python3 cancel.py in your assigned workspace and wait until it completes. Do not run any other script.')
-        started=self.started('cancel');d=self.detail(tid);before=time.monotonic()
+        started=self.started('cancel');runtime_tree=self.runtime_process_tree()
+        write(self.out/'cases/cancel/runtime-process-tree-before.json',runtime_tree)
+        assert runtime_tree and any(p['pid']==started['processes'][0]['pid'] for p in runtime_tree),runtime_tree
+        queued_tid=self.task("Create queued-canceled.txt containing exactly b'QUEUED-CANCELED\\n'. Only write this file in your assigned workspace.")
+        queued_before=self.detail(queued_tid);write(self.out/'cases/queued-cancel/before.json',queued_before)
+        assert queued_before['task']['status']=='queued' and not queued_before['run_attempts'],queued_before
+        queued_body={'meta':{'idempotency_key':'cancel-queued-'+secrets.token_hex(8),'expected_version':queued_before['task']['version']}}
+        queued_response=self.api('/api/control/v1/tasks/'+queued_tid+'/cancel',queued_body)
+        queued_replay=self.api('/api/control/v1/tasks/'+queued_tid+'/cancel',queued_body);assert queued_response==queued_replay,(queued_response,queued_replay)
+        queued_after=self.detail(queued_tid);write(self.out/'cases/queued-cancel/after.json',queued_after)
+        assert queued_after['task']['status']=='canceled' and not queued_after['run_attempts'],queued_after
+        mailbox=self.api('/api/observe/v1/mailboxes?agent_id='+self.aid);write(self.out/'cases/queued-cancel/mailboxes.json',mailbox)
+        work=[x for x in mailbox if x.get('task_id')==queued_tid and x['kind']=='task'];assert work and all(x['state']=='superseded' for x in work),work
+        write(self.out/'cases/queued-cancel/idempotent-receipt.json',queued_response)
+        d=self.detail(tid);before=time.monotonic()
         response=self.api('/api/control/v1/tasks/'+tid+'/cancel',{'meta':{'expected_version':d['task']['version']}});write(self.out/'cases/cancel/request.json',response)
-        self.wait(lambda:not any(alive(p) for p in started['processes']),5);elapsed=time.monotonic()-before
-        final=self.settle(tid,'cancel',timeout=15);assert final['task']['status']=='canceled',final['task']
+        self.wait(lambda:not any(alive(p) for p in started['processes']+runtime_tree),5);elapsed=time.monotonic()-before
+        write(self.out/'cases/cancel/process-stop.json',{'stop_seconds':elapsed,'processes':[{**p,'alive':alive(p)} for p in started['processes']],'runtime_tree':[{**p,'alive':alive(p)} for p in runtime_tree]})
+        final=self.settle(tid,'cancel',timeout=15)
         remaining=max(0,started['started']+32-time.time())
         while remaining>0:time.sleep(min(remaining,2));remaining=max(0,started['started']+32-time.time())
-        late=self.root/'workspace/cancel.late.txt';proof={'stop_seconds':elapsed,'processes':[{**p,'alive':alive(p)} for p in started['processes']],'delayed_effect_exists':late.exists(),'checked_at':time.time(),'original_delay_seconds':30};write(self.out/'cases/cancel/independent-stop-and-effect.json',proof)
-        assert elapsed<=5 and not late.exists() and not any(alive(p) for p in started['processes']),proof
-        return tid
+        late=self.root/'workspace/cancel.late.txt';proof={'stop_seconds':elapsed,'processes':[{**p,'alive':alive(p)} for p in started['processes']],'runtime_tree':[{**p,'alive':alive(p)} for p in runtime_tree],'delayed_effect_exists':late.exists(),'checked_at':time.time(),'original_delay_seconds':30};write(self.out/'cases/cancel/independent-stop-and-effect.json',proof)
+        assert elapsed<=5 and not late.exists() and not any(alive(p) for p in started['processes']+runtime_tree),proof
+        queued_final=self.detail(queued_tid);queued_effect=self.root/'workspace/queued-canceled.txt'
+        write(self.out/'cases/queued-cancel/final-proof.json',{'running_task_id':tid,'queued_task_id':queued_tid,'queued_task_status':queued_final['task']['status'],'run_count':len(queued_final['run_attempts']),'effect_exists':queued_effect.exists(),'checked_after_original_delay':True})
+        assert queued_final['task']['status']=='canceled' and not queued_final['run_attempts'] and not queued_effect.exists()
+        assert final['task']['status']=='canceled',final['task']
+        return {'running_task':tid,'queued_task':queued_tid}
     def timeout_case(self):
         assert self.a.worker_timeout=='35s','timeout case requires independent Worker configured --worker-timeout 35s'
         self.prepare_wait('timeout',60)
@@ -103,7 +134,7 @@ class Workflow(Live):
         return d['task']['id']
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--profile',required=True);p.add_argument('--evidence',required=True);p.add_argument('--binary',required=True);p.add_argument('--web',required=True);p.add_argument('--commit',required=True);p.add_argument('--proxy',default='http://127.0.0.1:7897');p.add_argument('--model',default='gemini-3.7-flash-low');p.add_argument('--keep',action='store_true');p.add_argument('--worker-timeout',default='180s');p.add_argument('--cases',default='role,mutation,queued,cancel,next');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--profile',required=True);p.add_argument('--evidence',required=True);p.add_argument('--binary',required=True);p.add_argument('--web',required=True);p.add_argument('--commit',required=True);p.add_argument('--proxy',default='http://127.0.0.1:7897');p.add_argument('--model',default='gemini-3.7-flash-low');p.add_argument('--keep',action='store_true');p.add_argument('--no-capture',action='store_true');p.add_argument('--worker-timeout',default='180s');p.add_argument('--cases',default='role,mutation,queued,cancel,next');a=p.parse_args()
     os.umask(0o077);live=Workflow(a);stage='setup';completed={};passed=False
     try:
         live.setup();live.initial_worker=live.worker['worker_instance_id']

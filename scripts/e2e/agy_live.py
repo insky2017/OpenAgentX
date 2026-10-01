@@ -101,6 +101,10 @@ class Live:
         manifest={'source_commit':self.a.commit,'binary':self.a.binary,'binary_sha256':hashlib.sha256(P(self.a.binary).read_bytes()).hexdigest(),'source_kind':'git archive snapshot','coverage':'R formal API configuration; NOT first-use wizard or installed-service proof','url':self.url,'profile':str(self.root),'agent':self.aid,'proxy_mode':'explicit HTTP proxy via formal agy-graft; Runtime environment allowlist applies','model':self.a.model}
         for name in ['agy','agy-graft']:
             manifest[name+'_version']=subprocess.check_output(['/home/sky/.local/bin/'+name,'--version'],text=True).strip()
+        manifest['harness_sha256']=hashlib.sha256(P(__file__).read_bytes()).hexdigest()
+        manifest['capture_enabled']=not getattr(self.a,'no_capture',False)
+        manifest['raw_agy_stream_evidence']='unmodified raw streams in private runtime-raw' if manifest['capture_enabled'] else 'No intercept: formal Worker diagnostics and API runtime events only; do not claim raw AGY byte capture'
+        manifest['harness_files_sha256']={name:hashlib.sha256(P(__file__).with_name(name).read_bytes()).hexdigest() for name in ['agy_live.py','agy_workflow.py','capture_agy.py'] if P(__file__).with_name(name).exists()}
         manifest['created_at_utc']=datetime.datetime.now(datetime.timezone.utc).isoformat()
         manifest['agy_sha256']=hashlib.sha256(P('/home/sky/.local/bin/agy').read_bytes()).hexdigest()
         manifest['formal_wrapper_sha256']=hashlib.sha256(P('/home/sky/.local/bin/agy-graft').read_bytes()).hexdigest()
@@ -118,7 +122,8 @@ class Live:
         raw=self.root/'runtime-raw';raw.mkdir(mode=0o700)
         wrapper=self.root/'capture-agy';wrapper.write_text(P(__file__).with_name('capture_agy.py').read_text());wrapper.chmod(0o700)
         self.env['OAX_CAPTURE_ROOT']=str(raw)
-        write(self.out/'capture-chain.json',{'capture_sha256':hashlib.sha256(wrapper.read_bytes()).hexdigest(),'delegation':['capture-agy','/home/sky/.local/bin/agy-graft','/home/sky/.local/bin/agy'],'formal_wrapper_sha256':hashlib.sha256(P('/home/sky/.local/bin/agy-graft').read_bytes()).hexdigest(),'requires_unwrapped_installed_smoke':True})
+        write(self.out/'capture-chain.json',{'capture_sha256':hashlib.sha256(wrapper.read_bytes()).hexdigest(),'delegation':(['/home/sky/.local/bin/agy-graft','/home/sky/.local/bin/agy'] if getattr(self.a,'no_capture',False) else ['capture-agy','/home/sky/.local/bin/agy-graft','/home/sky/.local/bin/agy']),'formal_wrapper_sha256':hashlib.sha256(P('/home/sky/.local/bin/agy-graft').read_bytes()).hexdigest(),'requires_unwrapped_installed_smoke':True,'capture_enabled':not getattr(self.a,'no_capture',False)})
+        runtime_binary='/home/sky/.local/bin/agy-graft' if getattr(self.a,'no_capture',False) else str(wrapper)
         config=self.root/'worker.yaml';config.write_text(f'''version: 1
 agent_id: {self.aid}
 transport: unix
@@ -132,7 +137,7 @@ runtime_backends:
   - backend_id: primary
     adapter_id: agy-batch
     options:
-      binary: {wrapper}
+      binary: {runtime_binary}
       models: [{self.a.model}]
       working_dir: {workspace}
       timeout: {getattr(self.a,'worker_timeout','180s')}
@@ -190,7 +195,7 @@ runtime_backends:
         (self.out/'SHA256SUMS').write_text('\n'.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p.relative_to(self.out)) for p in sorted(self.out.rglob('*')) if p.is_file() and p.name!='SHA256SUMS')+'\n')
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--cleanup');parser.add_argument('--profile');parser.add_argument('--evidence',default='docs/reports/validation/2026-10-02-agy-workflow/evidence/live-'+datetime.datetime.now().strftime('%Y%m%dT%H%M%S'));parser.add_argument('--binary');parser.add_argument('--web');parser.add_argument('--commit',default='7400806');parser.add_argument('--proxy',default='http://127.0.0.1:7897');parser.add_argument('--model',default='gemini-3.7-flash-low');parser.add_argument('--worker-timeout',default='180s');parser.add_argument('--keep',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--cleanup');parser.add_argument('--profile');parser.add_argument('--evidence',default='docs/reports/validation/2026-10-02-agy-workflow/evidence/live-'+datetime.datetime.now().strftime('%Y%m%dT%H%M%S'));parser.add_argument('--binary');parser.add_argument('--web');parser.add_argument('--commit',default='7400806');parser.add_argument('--proxy',default='http://127.0.0.1:7897');parser.add_argument('--model',default='gemini-3.7-flash-low');parser.add_argument('--no-capture',action='store_true');parser.add_argument('--worker-timeout',default='180s');parser.add_argument('--keep',action='store_true');args=parser.parse_args()
     if args.cleanup:print(json.dumps(owned_stop(P(args.cleanup))));return
     os.umask(0o077);live=Live(args)
     stage='setup';passed=False
