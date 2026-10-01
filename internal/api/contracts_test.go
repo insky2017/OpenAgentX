@@ -132,6 +132,13 @@ func TestControlRequestsRequireIdempotencyCASAndStructuredExecution(t *testing.T
 			Session:   domain.SessionSpec{Mode: domain.SessionModeNew}, Timeout: time.Minute,
 		},
 	}
+	if err := create.Execution.ValidateShape(); err != nil {
+		t.Fatalf("override fixture must be structurally valid: %v", err)
+	}
+	if err := create.Validate(); err == nil {
+		t.Fatal("unconsumed per-task execution override must be rejected")
+	}
+	create.Execution = nil
 	if err := create.Validate(); err != nil {
 		t.Fatalf("valid create request rejected: %v", err)
 	}
