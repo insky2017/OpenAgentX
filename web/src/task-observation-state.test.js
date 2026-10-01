@@ -41,11 +41,19 @@ test('live response merges against history that completed after live was sent', 
   assert.equal(afterLive.live_after_sequence, 201)
 })
 
-test('SSE resume ignores an overview watermark that may cover stale projections', () => {
-  const confirmedSequence = 41
-  const overviewReadBeforeEventButWatermarkAfterEvent = 42
-  assert.equal(sseResumeAfter(confirmedSequence, overviewReadBeforeEventButWatermarkAfterEvent), 41)
-  assert.equal(sseResumeAfter(0, overviewReadBeforeEventButWatermarkAfterEvent), 0)
+test('SSE bootstrap uses the safe pre-read overview cursor, including large histories', () => {
+  assert.equal(sseResumeAfter(null, 267814), 267814)
+  assert.equal(sseResumeAfter(null, 0), 0)
+  for (const invalid of [undefined, null, -1, '267814', 0.5, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.throws(() => sseResumeAfter(null, invalid), /游标/)
+  }
+})
+
+test('SSE reconnect preserves the confirmed cursor even when a fresh overview is newer', () => {
+  assert.equal(sseResumeAfter(41, 42), 41)
+  // A confirmed empty journal is different from an uninitialized stream.
+  assert.equal(sseResumeAfter(0, 42), 0)
+  assert.equal(sseResumeAfter(267814, 267999), 267814)
 })
 
 test('deferred UI work rejects a changed task, request, or view', () => {

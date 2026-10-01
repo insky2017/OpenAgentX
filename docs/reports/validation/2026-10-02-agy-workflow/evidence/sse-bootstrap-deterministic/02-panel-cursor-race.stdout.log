@@ -1,0 +1,94 @@
+=== RUN   TestOverviewRequiresSessionAndExposesLatestSequence
+--- PASS: TestOverviewRequiresSessionAndExposesLatestSequence (0.71s)
+=== RUN   TestSSEReplaysAfterHighestClientSequence
+--- PASS: TestSSEReplaysAfterHighestClientSequence (0.60s)
+=== RUN   TestSSERetentionGapIsStructuredBeforeStreamStarts
+--- PASS: TestSSERetentionGapIsStructuredBeforeStreamStarts (0.67s)
+=== RUN   TestSSERetentionBoundariesRemainReadable
+=== RUN   TestSSERetentionBoundariesRemainReadable/empty_journal
+=== RUN   TestSSERetentionBoundariesRemainReadable/after_zero
+=== RUN   TestSSERetentionBoundariesRemainReadable/earliest_predecessor
+=== RUN   TestSSERetentionBoundariesRemainReadable/earliest_sequence
+=== RUN   TestSSERetentionBoundariesRemainReadable/ahead_of_latest
+--- PASS: TestSSERetentionBoundariesRemainReadable (3.05s)
+    --- PASS: TestSSERetentionBoundariesRemainReadable/empty_journal (0.61s)
+    --- PASS: TestSSERetentionBoundariesRemainReadable/after_zero (0.61s)
+    --- PASS: TestSSERetentionBoundariesRemainReadable/earliest_predecessor (0.60s)
+    --- PASS: TestSSERetentionBoundariesRemainReadable/earliest_sequence (0.63s)
+    --- PASS: TestSSERetentionBoundariesRemainReadable/ahead_of_latest (0.61s)
+=== RUN   TestSSEAgentFilterIncludesOnlyMatchingSafeRuntimeEvents
+--- PASS: TestSSEAgentFilterIncludesOnlyMatchingSafeRuntimeEvents (0.61s)
+=== RUN   TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot
+--- PASS: TestSSEAgentFilterIncludesSafeWorkerDrainSnapshot (0.61s)
+=== RUN   TestSSEBackendProjectionFailureDoesNotSendOrCrossWorkerEvent
+--- PASS: TestSSEBackendProjectionFailureDoesNotSendOrCrossWorkerEvent (0.60s)
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/task
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/run
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/runtime
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/worker
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/mailbox
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/mailbox_Task
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/message
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/message_Task
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/approval
+=== RUN   TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/approval_Task
+--- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover (6.07s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/task (0.65s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/run (0.60s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/runtime (0.61s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/worker (0.59s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/mailbox (0.60s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/mailbox_Task (0.59s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/message (0.59s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/message_Task (0.61s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/approval (0.61s)
+    --- PASS: TestSSEOwnershipLookupFailuresPreserveCursorAndRecover/approval_Task (0.61s)
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Run_projection_query
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Run_Worker_generation_query
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Worker_projection_query
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Worker_Backend_projection_query
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Task_projection_query
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Mailbox_projection_query
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Message_projection_query
+=== RUN   TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Approval_projection_query
+--- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover (4.79s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Run_projection_query (0.61s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Run_Worker_generation_query (0.61s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Worker_projection_query (0.59s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Worker_Backend_projection_query (0.59s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Task_projection_query (0.60s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Mailbox_projection_query (0.59s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Message_projection_query (0.60s)
+    --- PASS: TestSSEStateProjectionLookupFailuresPreserveCursorAndRecover/Approval_projection_query (0.60s)
+=== RUN   TestSSEProjectsSafeTaskMailboxMessageAndApprovalState
+--- PASS: TestSSEProjectsSafeTaskMailboxMessageAndApprovalState (0.61s)
+=== RUN   TestSSEProjectionAndEncodingFailuresPreserveCursor
+=== RUN   TestSSEProjectionAndEncodingFailuresPreserveCursor/runtime_safe_projection
+=== RUN   TestSSEProjectionAndEncodingFailuresPreserveCursor/JSON_encoding
+--- PASS: TestSSEProjectionAndEncodingFailuresPreserveCursor (1.25s)
+    --- PASS: TestSSEProjectionAndEncodingFailuresPreserveCursor/runtime_safe_projection (0.63s)
+    --- PASS: TestSSEProjectionAndEncodingFailuresPreserveCursor/JSON_encoding (0.62s)
+=== RUN   TestSSEWriteFailureDoesNotCrossTaskEvent
+--- PASS: TestSSEWriteFailureDoesNotCrossTaskEvent (0.59s)
+=== RUN   TestSSEIncludesSafeRunProjectionForReducer
+--- PASS: TestSSEIncludesSafeRunProjectionForReducer (0.63s)
+=== RUN   TestSSEModeAuthorizationAndValidation
+=== RUN   TestSSEModeAuthorizationAndValidation/viewer_normal
+=== RUN   TestSSEModeAuthorizationAndValidation/owner_diagnostic
+--- PASS: TestSSEModeAuthorizationAndValidation (6.05s)
+    --- PASS: TestSSEModeAuthorizationAndValidation/viewer_normal (0.59s)
+    --- PASS: TestSSEModeAuthorizationAndValidation/owner_diagnostic (0.61s)
+=== RUN   TestSSEModeSeparatesNormalAndDiagnosticSafeProjection
+--- PASS: TestSSEModeSeparatesNormalAndDiagnosticSafeProjection (0.60s)
+=== RUN   TestSSEClosesAtInjectedCLIAbsoluteExpiry
+--- PASS: TestSSEClosesAtInjectedCLIAbsoluteExpiry (0.62s)
+=== RUN   TestOverviewBootstrapCursorPrecedesProjectionsAndReplaysConcurrentUpdate
+--- PASS: TestOverviewBootstrapCursorPrecedesProjectionsAndReplaysConcurrentUpdate (0.60s)
+=== RUN   TestOverviewBootstrapCursorFailureDoesNotInventZero
+--- PASS: TestOverviewBootstrapCursorFailureDoesNotInventZero (0.67s)
+=== RUN   TestSSEEmptyBootstrapFlushesWithoutWaitingForKeepalive
+--- PASS: TestSSEEmptyBootstrapFlushesWithoutWaitingForKeepalive (0.71s)
+PASS
+ok  	openagentx/internal/api/panel	31.173s

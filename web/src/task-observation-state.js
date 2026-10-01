@@ -24,11 +24,13 @@ export const mergeHistoryTaskDetail = (current, incoming) => {
   }
 }
 
-// Overview is not a transactional snapshot. Its latest sequence is only a
-// display hint and must never advance the reconnect cursor.
-export const sseResumeAfter = (confirmedSequence, _overviewLatestSequence) => {
-  const sequence = Number(confirmedSequence)
-  return Number.isSafeInteger(sequence) && sequence > 0 ? sequence : 0
+// The server captures live_after_sequence before reading overview projections.
+// It is safe only for bootstrap. Later snapshots must never skip events after
+// the last confirmed cursor; zero is a valid confirmed empty-journal cursor.
+export const sseResumeAfter = (confirmedSequence, overviewLiveAfterSequence) => {
+  if (Number.isSafeInteger(confirmedSequence) && confirmedSequence >= 0) return confirmedSequence
+  if (confirmedSequence === null && Number.isSafeInteger(overviewLiveAfterSequence) && overviewLiveAfterSequence >= 0) return overviewLiveAfterSequence
+  throw new Error('服务未返回有效的事件续接游标，请刷新后重试')
 }
 
 export const isCurrentObservation = (expected, current) => (

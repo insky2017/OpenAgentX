@@ -1,0 +1,5 @@
+5b21596857b44d117898e3ed77b76ce13c88cd505e8d27c4d72d005f0523c5ef  internal/api/panel/handler.go
+56ad48ac557f65e3539ed56a8adc6ffb6fe59175d7a1eb528a1a54b23f707c20  internal/api/panel/overview_cursor_test.go
+b02bf23628beb1c73c129b71a7d5042cb09c7a123a93caeec3b399848deed5f2  web/src/main.jsx
+b4e32aae2981521b4a1f56d65c3c6b38f0260593a4b03c7d10fd9da859eb4994  web/src/task-observation-state.js
+15bd46c2c140ff9d0517dc0f757fb799f258bbedf7dd5cf2cff5b5436d5b7abc  web/src/task-observation-state.test.js

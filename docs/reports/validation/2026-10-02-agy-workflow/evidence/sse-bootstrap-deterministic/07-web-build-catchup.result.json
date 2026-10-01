@@ -1,0 +1,20 @@
+{
+  "evidence_level": "D",
+  "real_e2e": false,
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/web",
+  "started_at": "2026-10-01T19:29:15.388224+00:00",
+  "git_head": "5ebfede39b0fec4a8a3ba89adb58cd281752e999",
+  "git_tree": "e4cbc5344bb6af640c79e5eca8f25193cb925b2e",
+  "git_status_before": "M docs/operations/agy-daily-workflow.md\n M docs/reports/assessment/2026-10-02-summary.md\n M docs/reports/validation/2026-10-02-agy-workflow/EXECUTION-LOG.md\n M internal/api/panel/handler.go\n M web/src/main.jsx\n M web/src/task-observation-state.js\n M web/src/task-observation-state.test.js\n?? docs/reports/validation/2026-10-02-agy-workflow/COVERAGE.md\n?? docs/reports/validation/2026-10-02-agy-workflow/evidence/final-deterministic/\n?? internal/api/panel/overview_cursor_test.go",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "exit_code": 0,
+  "finished_at": "2026-10-01T19:29:16.489730+00:00",
+  "git_status_after": "M docs/operations/agy-daily-workflow.md\n M docs/reports/assessment/2026-10-02-summary.md\n M docs/reports/validation/2026-10-02-agy-workflow/EXECUTION-LOG.md\n M internal/api/panel/handler.go\n M web/src/main.jsx\n M web/src/task-observation-state.js\n M web/src/task-observation-state.test.js\n?? docs/reports/validation/2026-10-02-agy-workflow/COVERAGE.md\n?? docs/reports/validation/2026-10-02-agy-workflow/evidence/final-deterministic/\n?? internal/api/panel/overview_cursor_test.go",
+  "stdout_sha256": "e507ca541f69e80205226a8fbf4eb951dda713796b7f275c49daed911e1c1a58",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

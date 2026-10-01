@@ -192,6 +192,14 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
 	if _, ok := h.session(w, r, false); !ok {
 		return
 	}
+	// Capture a lower bound before reading any projection. These independent
+	// reads are not an atomic snapshot: events committed during them must still
+	// be replayed. The later display watermark is not a safe bootstrap cursor.
+	liveAfterSequence, err := h.state.LatestJournalSequence(r.Context())
+	if err != nil {
+		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
+		return
+	}
 	agents, err := h.state.ListAgents(r.Context(), 100)
 	if err != nil {
 		http.Error(w, "overview temporarily unavailable", http.StatusServiceUnavailable)
@@ -221,7 +229,7 @@ func (h *Handler) overview(w http.ResponseWriter, r *http.Request) {
 	for _, worker := range workers {
 		projectedWorkers = append(projectedWorkers, workerReadModel(worker))
 	}
-	writeJSON(w, map[string]any{"agents": h.projectAgentReadiness(r.Context(), agents, workers, tasks), "workers": projectedWorkers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "server_time": time.Now().UTC()})
+	writeJSON(w, map[string]any{"agents": h.projectAgentReadiness(r.Context(), agents, workers, tasks), "workers": projectedWorkers, "tasks": tasks, "approvals": approvals, "latest_sequence": latestSequence, "live_after_sequence": liveAfterSequence, "server_time": time.Now().UTC()})
 }
 
 func workerReadModel(worker domain.WorkerInstance) openapi.WorkerReadModel {

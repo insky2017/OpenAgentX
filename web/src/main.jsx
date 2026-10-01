@@ -231,7 +231,7 @@ function App() {
   const [showRunLog, setShowRunLog] = useState(() => new URLSearchParams(window.location.search).has('task'))
   const [newOutput, setNewOutput] = useState(false)
   const [loadingMoreEvents, setLoadingMoreEvents] = useState(false)
-  const lastSequenceRef = useRef(0)
+  const lastSequenceRef = useRef(null)
   const selectedTaskRef = useRef('')
   const taskDetailRef = useRef(null)
   const detailSelectionRef = useRef(0)
@@ -318,6 +318,7 @@ function App() {
 
   useEffect(() => {
     if (!session || !browserOnline) {
+      if (!session) lastSequenceRef.current = null
       setStreamState(browserOnline ? 'connecting' : 'offline')
       return undefined
     }
@@ -344,7 +345,10 @@ function App() {
     const connect = () => refresh()
       .then((overview) => {
         if (disposed) return
-        const after = sseResumeAfter(lastSequenceRef.current, overview.latest_sequence)
+        const after = sseResumeAfter(lastSequenceRef.current, overview.live_after_sequence)
+        // The initial snapshot confirms this prefix. Preserve it even if the
+        // first stream receives no events before a disconnect.
+        lastSequenceRef.current = after
         source = new EventSource(`/api/observe/v1/events/stream?mode=normal&after_sequence=${after}`)
         source.onmessage = (event) => {
           const sequence = Number(event.lastEventId) || 0
@@ -360,11 +364,19 @@ function App() {
         source.onopen = () => {
           refresh().catch(() => {})
           setStreamState('online')
+          // These views may have loaded before the overview bootstrap cursor
+          // or missed their deferred refresh while the stream disconnected.
+          taskListRefreshRef.current()
           detailCatchUpRef.current()
         }
         source.onerror = () => { setStreamState('connecting'); refresh().catch(() => {}) }
       })
-      .catch((err) => { if (!disposed && err.status !== 401) reconnectTimer = setTimeout(connect, 2000) })
+      .catch((err) => {
+        if (!disposed && err.status !== 401) {
+          setError(err.message)
+          reconnectTimer = setTimeout(connect, 2000)
+        }
+      })
     connect()
 
     return () => {
