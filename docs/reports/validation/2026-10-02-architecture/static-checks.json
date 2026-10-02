@@ -1,0 +1,14 @@
+{
+  "source_commit": "b0b7e092e5116fea286892a01bb3800555269d4e",
+  "checks": [
+    "renderer reference validation: 29 files and line anchors",
+    "all node/edge/jump references valid",
+    "repeat rendering hashes identical",
+    "node --check inline script: pass",
+    "Markdown local links: pass",
+    "git diff --check: pass",
+    "frozen ADR, AGENTS and product code diff: empty"
+  ],
+  "node": "v20.19.4",
+  "python": "Python 3.12.3"
+}

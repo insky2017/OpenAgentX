@@ -1,290 +1,393 @@
----
-doc_type: architecture_snapshot
-status: current_snapshot
-owner: openagentx
-updated_at: 2026-09-23
----
+# OpenAgentX · 架构与关键流程
 
-# OpenAgentX 当前系统架构
+交互图：[打开 HTML 图册](current-architecture.html)。快照日期：2026-10-02。
+本图描述 OpenAgentX 任务后台。交易、行情等属于受管领域及业务工作区；不声称券商、交易所或真实交易执行已经接通。
 
-> 快照时间：2026-09-22 22:42–22:46（Asia/Shanghai）。本文件按**实际部署与对应源码**整理；ADR 表示决策，不能单凭 Accepted 判断功能已经上线。配套图：[离线 HTML 架构图](current-architecture.html)。
+## 要点
 
-> 2026-09-23 评估补充：部署版本未变，新增真实测试与源码核对见[全面评估](../reports/assessment/2026-09-23/README.md)。确认组织 AuthorityPolicy 尚未接入业务命令、注册的 ROLE.md 没有确定性 Runtime 注入链路；ADR-006 已有 `dcd8fd6` 开发旁支，尚未安装。本图表示模块连接，不能当作每项功能均已兑现。
+- 控制面是一个 daemon；每个领域有独立 Worker service。API、领域服务不是分别部署的微服务。
+- SQLite 保存 Task、Run、投递与审计等权威事实；内存 Broker 只用于唤醒。Worker 通过正式 API 工作，不直接写库。
+- 每次 Run 冻结角色、工作目录、输入与期限，随后启动新的 AGY 进程。tmux 和浏览器只是入口，关闭不会终止后台工作。
+- 问答成功表示完整回复已交付；执行任务的业务效果需独立核验。人工接受是独立 review，不改写原始执行事实。
+- 主链已有真实安装证据；已有外部 CLI 的一键自初始化、原生会话迁入仍是待实现能力。
 
-## 1. 本轮范围与验收
+## 当前版本与阅读方法
 
-- 用户结果：先形成可追溯的 Markdown 架构说明，再提供可离线打开、可切换视图和查看组件职责的 HTML 图。
-- 范围：OpenAgentX 的 Web/Console、控制面、持久状态、Worker、Runtime、网络配置、部署边界与 ADR 演进。Quote Service 是受管 Agent 的工作对象，不在本文件展开其业务架构。
-- 非目标：不实现新 ADR、不修复任务终态、不部署或重启服务、不操作真实任务、不更改冻结决策。
-- 验收证据：源码与安装产物只读核对；架构独立复核；Markdown 链接与 diff 检查；HTML 桌面/移动浏览器、视图切换、节点详情与离线渲染检查。
-- 工作预算：本批最多 60 分钟，一个文档/图形实现批次和一次独立验证批次；同因工具失败两次改用等价路径。交付的是架构快照，不是完整 ADR 重新验收。
+核对源码：`b0b7e09`；最近安装与真实浏览器日用验收：`9434479e4fd3b6802aa2e4d57610bb710200cd01`。本图不是服务实时监控。后续文档提交不会自动改变安装来源。
 
-## 2. 先区分三个版本
+实际安装二进制 SHA-256：`6725f3370b3c6bf27293a0f6368cc5bfac9e92c92682cc01a8b1b862231f75c7`。
 
-| 对象 | 本次核实的版本 | 含义 |
-|---|---|---|
-| 本文所在主工作树 `main`（审计起点） | `3723c7731076d3f8d4b6a31b65cbcb48394c7d8f` | 仍是 ADR-005 首轮 Console/Fleet；其中 ADR-008 计划的 pending 不能代表整台主机现状；本次文档提交不改变产品实现 |
-| ADR-008 实施工作树 | `008b2e0` / `codex/adr008-implementation` | 已有路径、CLI Token、OAX、全屏 Console、用户级 Fleet 实现；阶段记录与最终现场验收分开 |
-| ADR-009 实施与现场记录 | `34053c02042ca7448587ff8c20bdd82c11ed870c` / `codex/adr009-task-console` | 包含 ADR-008 及任务中心 Console、后续 Web 修复；尚未合入本文所在主线 |
-| 已安装 Go 程序 | `6d599aca8ce7c32fe11f23244478b495a0a78e68`，`vcs.modified=false` | daemon 与 quote-service Worker 的 `/proc/<pid>/exe` 和安装文件 SHA-256 一致 |
-| 已安装 Web | 源码 `ee46038102ebd44d387e26ab912001f26b89ade5` | JS/CSS 与 ADR-009 工作树构建产物逐字节相同；源码归属同时依据安装报告，未在本轮重建 |
+证据入口：[最终安装来源与哈希](../reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md)。历史证据按影响复用，不代表 22 组在最终安装版全部重测。
 
-后文“当前已实现”主要指上述已安装候选分支的行为，**不表示已合并 main，也不表示完整 ADR 最终验收通过**。审计报告最新状态为 `installed-task-success-pending`：真实网页发送、过程与回复已有现场记录，但 Task 成功终态仍有缺口。
+实现状态与证据强度是两条轴：**已实现**、**部分实现 / 待补**、**待实现**、**可选 / 未启用**、**外部依赖**；证据标注 **D**（确定性）、**R**（真实 Runtime）、**I**（已安装环境）。绿色不等于全部 E2E 通过。
 
-本次只读实测：用户级 daemon 和 `openagentx-worker@quote-service.service` 都是 `active/running`；`GET /api/observe/v1/health` 返回 `{"status":"ok"}`；Web 实际监听 `127.0.0.1:18100`。未发现 `18101` 监听，也没有启动远程 Worker HTTPS 的进程参数。未重做真实 Runtime 任务验收或外部 HTTPS 入口探测。
+HTML 每次只显示一个子图；点击节点可见职责、限制和引用。虚线区分控制与拟议关系，以箭头文字和节点状态为准。
 
-## 3. 总体架构
+## 01 · 总览：一项工作如何穿过整个系统
 
-OpenAgentX 的目标是组织协作控制面；当前已贯通的核心是以逻辑 `agent_id` 寻址的任务投递与执行。组织/岗位模型已保存，但完整业务授权与自主委派尚未接线。独立常驻 Worker 领取持久工作，再通过 Runtime Adapter 启动一次 turn。Web 与 Console 都是正式 API 的客户端；tmux 的布局不参与业务路由、Worker 身份或执行权判定。
+**谁接收指令，谁持有状态，谁真正执行？** 一个 daemon 保存权威状态；每个领域的 Worker 独立接单；外部 CLI 执行模型与工具。
 
-```mermaid
-flowchart TB
-  subgraph clients[交互入口]
-    Web[React / Vite PWA 指挥台]
-    Console[OAX pane 0 · 任务中心 Console TUI]
-    Fleet[Fleet CLI · 显式受管清单]
-  end
-  subgraph daemon[OpenAgentX daemon · 单控制面进程]
-    HTTP[Web HTTP · Cookie / RBAC / CSRF]
-    UDS[本地 UDS · CLI Token / Worker 协议]
-    Remote[可选 mTLS HTTPS · 当前未启用]
-    API[Observe / Console / Control / Admin / Worker API]
-    Services[Command / Worker / Admin / Network Workflow 服务]
-    DB[(SQLite · 权威状态与 Event Journal)]
-    Wake[内存 WakeupBroker · 唤醒提示]
-    Secret[受权限保护的独立 Secret 文件存储]
-    Projection[安全投影 · 快照 / cursor / SSE]
-  end
-  subgraph execution[独立执行进程]
-    Worker[Resident Worker · 心跳 / claim / lease / fencing]
-    Pool[ActiveRunManager / BackendPool]
-    Adapter[AGY Batch / CodeBuddy CLI Adapter]
-    Runtime[外部 Agent CLI · workspace / tools / 模型服务]
-  end
-  Web --> HTTP
-  Console --> UDS
-  Fleet --> UDS
-  HTTP --> API
-  UDS --> API
-  Remote -.-> API
-  API --> Services
-  Services --> DB
-  Services --> Secret
-  Services -.提交后唤醒.-> Wake
-  DB --> Projection
-  Projection -->|认证后的快照与事件| Web
-  Projection -->|认证后的快照与事件| Console
-  Worker <-->|本机 HTTP over UDS| UDS
-  Worker --> Pool --> Adapter --> Runtime
-  Fleet -.生命周期操作.-> Systemd[用户级 systemd]
-  Systemd -.启动与托管.-> Worker
-```
-
-图中的 API 和服务模块同属一个 daemon，不是独立微服务；SQLite 同时保存当前状态和审计事件。内存 Broker 没有持久消息权威，丢失唤醒后仍以 Mailbox/Journal 为准。Event Journal 是追加审计与增量观察的来源，当前状态不靠全量事件重放重建。[S1][S2]
-
-### 组件职责与边界
-
-| 组件 | 当前职责 | 关键边界 |
-|---|---|---|
-| Web PWA | 登录、选择 Agent、发任务、跟踪过程、回复/审批/取消、网络设置 | 浏览器不直接访问 DB 或 Runtime；断线/离线写入不排队、不重放 |
-| Console TUI | 当前关注 Task、Timeline、输入区、`/tasks`、`/status`、Normal/Diagnostic | Attach 要求 `OAX` 的 pane `0`；附加 pane 保留；退出 Console 不停止 Worker |
-| Fleet CLI | manifest 管理、workspace 协调、user-systemd 启停、drain 观察 | 通过正式 API 获取身份；tmux 仅是 UI 宿主；不以键盘注入控制 Runtime |
-| CommandService | dispatch、steer/message、cancel、approval | 入口有 Web/CLI RBAC、版本 CAS、幂等键；完整组织 AuthorityPolicy 未接入；领域状态和 Mailbox/Journal 在事务内一致提交 |
-| WorkerService | 注册、心跳、claim、begin attempt、事件与 finish、过期恢复 | principal、Worker instance、generation、lease 与 fencing 共同约束执行权 |
-| WorkerAdminService | drain、stop、force-stop、健康检查、lease revoke | 持久化 WorkerCommand；graceful 与强停语义分开 |
-| NetworkWorkflowService | 配置草稿、测试、发布、绑定、应用回执 | 内容版本、测试对象和当前 Worker generation 必须匹配 |
-| SQLite | 组织、身份、Task、Mailbox、RunAttempt、SessionBinding、Journal 等 | 单一权威状态库；终态、审计、session 等按各事务方法一起提交/回滚 |
-| Resident Worker | 独立的心跳、健康、网络工作、Mailbox、控制命令与执行循环 | 完成 Task 后继续在线；活动 Run 不阻断心跳与取消通道 |
-| BackendPool / Runtime Adapter | 能力、模型、推理强度、session、网络快照校验；启动/观察一次 turn | AGY 有结构化终态校验；本次发现 CodeBuddy 空成功/timeout 缺口；输出作安全投影，不能概括所有 Adapter 均已 fail closed |
-
-## 4. 一次任务如何执行
-
-```mermaid
-sequenceDiagram
-  actor User as 用户
-  participant UI as Web / Console
-  participant CP as API 与控制面
-  participant DB as SQLite + Journal
-  participant W as Resident Worker
-  participant R as Runtime Adapter / CLI
-  User->>UI: 选择 Agent 并提交任务
-  UI->>CP: authenticated dispatch + idempotency key
-  CP->>DB: 同一事务创建 Task + Message + Mailbox + Journal
-  CP-->>UI: Task ID / version（仅表示已受理）
-  W->>CP: long-poll claim（instance / generation / fencing）
-  CP->>DB: 领取持久 Mailbox
-  W->>CP: begin-attempt
-  CP->>DB: 固定 ExecutionSpec / 网络快照，记录 RunAttempt
-  CP-->>W: TurnRequest
-  W->>R: StartTurn（workspace / model / session）
-  R-->>W: 结构化事件 / 安全输出 / TurnResult
-  W->>CP: events / finish
-  CP->>DB: 提交 RunAttempt、Task outcome、SessionBinding 与 Journal
-  UI->>CP: 读取安全快照 + 从 cursor 跟随 SSE
-  CP-->>UI: Task outcome 与 Runtime reply 分别展示
-  W->>CP: 继续等待下一项工作
-```
-
-- 执行规格在 RunAttempt 中固定，包含 Adapter、Backend、模型、推理参数、session 和网络版本；运行中不会跟随 UI 的新配置漂移。
-- 补充消息、审批和取消先持久化，再由 Worker 控制通道与 Adapter 能力执行。Run 结束和新消息/取消并发时，事务里的版本与状态规则裁决，不依赖页面先后顺序。
-- SessionBinding 保存逻辑执行上下文与 provider session 的关系；不使用 pane/window ID 作为对话身份。
-- 恢复与 fencing 负责拒绝失效 Worker 的迟到写入；不能确定真实副作用时保留 `uncertain`，不能自动宣称重试成功。[S2][S3][S4]
-
-### 必须分开的三种结果
-
-| 层次 | 例子 | 能证明什么 |
-|---|---|---|
-| 控制面受理 | `queued`、`task.created` | 任务已保存，尚不证明已执行 |
-| Runtime / RunAttempt 结果 | `succeeded` 且存在回复 | 本次 Runtime turn 有终态与回复，不自动证明业务任务成功 |
-| Task outcome / 业务证据 | `succeeded` 或 `uncertain` | 按领域规则判断任务结果；当前缺少独立副作用证据可进入 `uncertain` |
-
-当前 `FinishRun` 的规则是：Runtime `succeeded` 且 `SideEffectsKnown=false` 时，RunAttempt 可以是 `succeeded`，Task 则为 `uncertain / business_effect_unverified`，回复仍保留。模型自报字段 `RuntimeSideEffectsKnown` 不会自动升级成独立验证证据。ADR-006 的 query/change intent 分流尚未安装，已有 `dcd8fd6` 开发旁支；当前只读问答仍未达到用户要求的 Task 成功终态。2026-09-23 浏览器直达真实 AGY 的两项任务再次复现此差异。[S4][S8]
-
-## 5. 网络配置是另一条控制闭环
+[打开此图](current-architecture.html#overview)
 
 ```mermaid
 flowchart LR
-  UI[Web 网络设置] --> Draft[不可变内容版本 / 草稿]
-  Draft --> Test[当前 Worker / Backend 实测]
-  Test --> Publish[发布经过测试的版本]
-  Publish --> Bind[绑定 revision / pending apply]
-  Bind --> Pull[Worker pull / materialize / apply]
-  Pull --> Ack[Heartbeat 返回应用回执]
-  Ack --> Ready[当前 instance + generation + revision 匹配]
-  Ready --> Snapshot[后续 RunAttempt 固定网络快照]
-  Secrets[独立 Secret 文件 / 受控物化] --> Pull
+  web["Web 工作台<br/>已实现"]
+  api["认证与 API<br/>已实现"]
+  service["控制面领域服务<br/>已实现"]
+  db["SQLite 权威账本<br/>已实现"]
+  console["Console / OAX<br/>已实现"]
+  worker["常驻 Worker<br/>已实现"]
+  adapter["Runtime Adapter<br/>已实现"]
+  cli["AGY CLI / wrapper<br/>已实现"]
+  entry["Agent 入口 / Fleet<br/>已实现"]
+  systemd["用户级 systemd<br/>已实现"]
+  files["工作目录与产物<br/>部分实现 / 待补"]
+  cloud["Google 模型服务<br/>外部依赖"]
+  web -->|"HTTP"| api
+  api -->|"命令"| service
+  service -->|"事务"| db
+  console -.->|"UDS"| api
+  worker -.->|"双向 UDS"| api
+  worker -->|"StartTurn"| adapter
+  adapter -->|"启动"| cli
+  entry -->|"启停"| systemd
+  systemd -.->|"托管"| worker
+  cli -->|"HTTPS"| cloud
+  cli -->|"读 / 写"| files
 ```
 
-配置模式包括 `inherit`、`direct` 与 Adapter 声明支持的代理模式。保存/发布成功不等于当前 Worker 已应用，Web 必须核对本代回执。进程网络凭据由受控文件/环境物化，不放进普通 API 观察数据、Event Journal 或图中。[S5]
+| 节点 | 状态 | 关键职责 / 限制 | 证据范围 |
+|---|---|---|---|
+| Web 工作台 | 已实现 | 浏览器通过正式 HTTP API 提交任务、查看结果与控制取消。当前安装访问入口 127.0.0.1:18100。关闭浏览器不停止 Worker。 | I＋R：最终安装版报告生成、继续、离线恢复、刷新返回。[浏览器观察与重连](../../web/src/main.jsx)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 认证与 API | 已实现 | Web 使用 Cookie、RBAC、CSRF；Console 使用本地 UDS 与 CLI Token；Worker 使用其专用注册及写入约束。API 与领域服务处于同一 daemon。 | 源码已核对；真实覆盖见所列证据。[daemon 与 API 装配](../../cmd/openagentx/main.go)、[Overview 与安全观察投影](../../internal/api/panel/handler.go) |
+| 控制面领域服务 | 已实现 | 处理任务、补充、取消、结果验收和网络工作流。服务模块共同运行在一个 daemon 内，不是独立部署的微服务。 | 源码已核对；真实覆盖见所列证据。[任务、补充与取消入口](../../internal/controlplane/command_service.go)、[网络测试、发布与应用](../../internal/controlplane/network_workflow_service.go)、[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go) |
+| SQLite 权威账本 | 已实现 | Task、Message、Mailbox、Run、SessionBinding、Worker 代次与 Journal 保存在 SQLite。复合变更由事务保持一致；内存唤醒丢失不等于工作丢失。schema v2。 | D＋I：事务测试、历史库迁移与实际安装核对。[事务化执行账本](../../internal/persistence/sqlite/worker_execution_repository.go)、[最终安装来源与哈希](../reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json) |
+| Console / OAX | 已实现 | Console 是正式 API 客户端。OAX pane 0 承载 TUI，overview 提供 Agent 导航。tmux 不承担任务路由、Runtime 身份或进程执行权。 | I：80×24 PTY，完整结果、接受/拒绝、继续与重开。[Console Attach 与工作台](../../internal/cli/console/application.go)、[真实 Console 与空闲采样](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-console01/README.md) |
+| 常驻 Worker | 已实现 | 每个领域使用受管 Worker。心跳和控制循环独立于一次模型运行；单 Agent 当前最多一个活动 Run。完成任务后继续等待下一项。 | 源码已核对；真实覆盖见所列证据。[Worker 执行与控制循环](../../internal/worker/runner.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| Runtime Adapter | 已实现 | AGY adapter 校验冻结职责、工作目录、模型、网络与期限，启动 CLI 并解析结构化输出。结束、超时和取消均向账本回报。 | 源码已核对；真实覆盖见所列证据。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md) |
+| AGY CLI / wrapper | 已实现 | 通过正式 agy-graft 启动 AGY。每个 Run 都启动受控 CLI 进程；同 Task 内可用已保存 conversation 续接。没有接管任意外部活 CLI 的入口。 | R＋I：使用真实 agy-graft 与 AGY。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| Agent 入口 / Fleet | 已实现 | 日常使用 agent add/open/status/pause/resume。身份、配置与服务协调由入口完成；Fleet 是内部配置与生命周期工具。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 用户级 systemd | 已实现 | 后台服务独立于浏览器和终端。受管服务提供进程组清理及故障重启。agent add/start 使用 start，不等于默认已经 enable 开机启动。 | I：服务启停、角色冻结、排队暂停、Worker 崩溃恢复。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 工作目录与产物 | 部分实现 / 待补 | 工具真实读写 Agent 的工作目录。业务产物在文件系统，不因模型回复就被自动验证；当前 Web 没有统一产物预览/下载入口。 **待补：产物可读写且已实测；文件浏览与验收展示仍待改善** | 源码已核对；真实覆盖见所列证据。[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[日用操作指南](../operations/agy-daily-workflow.md) |
+| Google 模型服务 | 外部依赖 | 模型推理由 AGY 依赖外部服务完成。代理与登录状态影响 Runtime 可用性；控制面并不直接代替 AGY 调用模型。图中不固定未核实的外部域名。 | 真实 AGY 链接通；供应商内部实现不在本工程内。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[网络测试、发布与应用](../../internal/controlplane/network_workflow_service.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
 
-当前 SecretStore 是 `0700` 目录与 `0600` 文件、不可变版本及受控引用/清理机制；不把它画成外部 Vault，也不凭 ADR 文字声称磁盘文件已经加密。网络策略受 Worker generation 隔离；ADR-007 提议的跨代自动连续性尚未实施。
+- 总览只画主要依赖。事件回传、SSE 与凭据边界在第 05 / 06 图展开。
+- 绿色代表能力已实现，不表示相关的所有边界用例全部通过。点击节点可见证据范围。
+- Quote Service 等是受管领域与业务工作区；本图不声称券商、交易所或交易执行已接通。
 
-2026-09-22 的已安装补丁允许 Runtime **主可执行文件**摘要变化时告警并继续；Adapter/protocol、wrapper/helper 等其他身份差异仍拒绝运行。这一补丁不等于取消网络 fencing，也不是 ADR-007 的代际继承。[S5]
+## 02 · 工作流：从用户指令到可继续的结果
 
-## 6. 身份、存储与 API
+**“已受理”“执行结束”“用户验收”分别意味着什么？** Task 表示一项工作，Run 表示一次执行。问答交付与文件变更验收采用不同完成规则。
 
-### 身份分层
+[打开此图](current-architecture.html#work)
 
-| 身份/对象 | 生命周期与用途 |
-|---|---|
-| Organization / Principal / Role / Position / AuthorityPolicy | 组织归属与授权模型；owner/operator/viewer 已用于入口，岗位/汇报链业务授权未贯通 |
-| AgentIdentity / AgentProfile | 稳定逻辑 `agent_id`、能力与 workspace；不随终端布局变动；注册 instructions_path 未形成确定性 Runtime 注入 |
-| WorkerInstance / generation / lease / fencing | 一次常驻 Worker 注册与其当前执行权；重启后的代际变化不能被旧回执掩盖 |
-| Task / Message / MailboxItem | 用户工作、补充输入与持久投递分别建模 |
-| RunAttempt / ExecutionSpec / SessionBinding | 一次执行尝试、不可变执行选择及 Runtime 会话关系 |
-| Web Session / CLI Token | Web 走 Cookie + CSRF；CLI 走本机 UDS 的可撤销 Token，绑定 installation 并限定 scope |
-
-CLI 本地 credential 文件为 `0600`；服务端保存 Token 摘要及期限/撤销状态。CLI 登录端点只挂在 UDS，Web HTTP 明确返回 404，不能互换浏览器 Cookie 与 CLI Token 的认证边界。[S1][S6]
-
-### 存储分组
-
-| 存储 | 主要内容 |
-|---|---|
-| SQLite · 组织与权限 | principals、organizations、roles、positions、agents、profiles、authority_policies |
-| SQLite · 执行与投递 | tasks、messages、mailbox_items、run_attempts、session_bindings、workspace_leases、approval_*、worker_commands |
-| SQLite · 运行与观察 | worker_instances、runtime_backend_registrations、event_journal、artifacts |
-| SQLite · 会话与网络 | web_users/sessions、installation_metadata、cli_tokens、network_profiles/tests/bindings/work_items 等 |
-| 数据库外 | 权限保护的网络 Secret 文件、Worker 配置、CLI credential、工作目录与实际业务文件 |
-
-当前 schema 标识为 `1`，但实现已对 v1 增加网络表和 CLI Token 等兼容结构；不能再沿用旧 README 的“一切旧库都不在线扩展”表述。代码仍拒绝不支持的 schema 版本，以及缺少 `schema_meta` 的既有非空 legacy schema。本次只读架构检查未打开生产 DB；schema 现场值来自安装报告，源码契约来自 migration。[S7][S8]
-
-### 传输与代表路由
-
-| 入口 | 认证与使用者 | 代表路由 |
-|---|---|---|
-| Web HTTP（当前 loopback 18100） | Web Cookie / RBAC / CSRF | `/api/auth/v1/login`、`/api/observe/v1/tasks`、`/api/control/v1/tasks` |
-| 本地 UDS · Console/Fleet | installation-bound CLI Token / scope / RBAC | `/api/auth/v1/cli/*`、`/api/console/v1/attach`、`/api/console/v1/agents/{agentID}/tasks` |
-| 观察事件 | 沿用对应 Web 或 CLI 认证 | `/api/observe/v1/events/stream`；快照 high-water cursor + 增量事件 |
-| 本地 UDS · Worker | 本地 socket 边界、Worker session 与 instance/generation/fencing | `/api/v1/workers/register`、`.../mailbox/claim`、`/api/v1/run-attempts/{run-id}/finish` |
-| 可选远程 Worker HTTPS | mTLS 证书 principal 与 Agent 绑定，再校验 Worker 执行权 | 仅 Worker handler；当前部署未启用 |
-| Worker 管理 | Owner/Admin 权限及版本条件 | `/api/admin/v1/workers/{worker-id}/drain`、`.../stop`、`.../force-stop` |
-
-## 7. 当前部署拓扑与 Runtime 支持程度
-
-```text
-用户主机 / Linux 用户级 systemd
-├─ ~/.local/bin/openagentx                         已安装二进制
-├─ openagentx.service                             daemon
-│  ├─ 127.0.0.1:18100                            Web 静态资源 + HTTP API
-│  ├─ ~/.openagentx/run/openagentx.sock           UDS：CLI + Worker API
-│  ├─ ~/.openagentx/data/openagentx.db            SQLite 权威状态
-│  └─ ~/.openagentx/web/                         已安装 Web 资源
-├─ openagentx-worker@quote-service.service         Resident Worker
-│  └─ agy-batch → agy-graft → AGY                 本机配置的真实 Runtime 路径
-│     └─ workspace / tools / 外部模型服务
-└─ tmux OAX → Agent window → pane 0 Console        独立观察与操作界面
-   └─ pane 1+ / 无关 window                       保留，不参与业务身份
-
-可选外部 HTTPS 入口：仓库有 Nginx/Tailscale 部署方案；本轮未复核其现场链路。
-可选远程 Worker：mTLS HTTPS；本轮实测未启用。
+```mermaid
+flowchart LR
+  submit["用户提交工作<br/>已实现"]
+  commit["事务保存与投递<br/>已实现"]
+  begin["Worker 领取并开始<br/>已实现"]
+  execute["执行真实 AGY<br/>已实现"]
+  finish["结束回报写账本<br/>已实现"]
+  classify["按意图判断结果<br/>已实现"]
+  query["问答已交付<br/>已实现"]
+  mutation["变更效果待验收<br/>已实现"]
+  review["用户接受 / 拒绝<br/>部分实现 / 待补"]
+  continue["继续此工作<br/>已实现"]
+  nextturn["运行中补充<br/>已实现"]
+  unknown["超时 / 崩溃 / 坏输出<br/>已实现"]
+  submit -->|"提交"| commit
+  commit -->|"领取"| begin
+  begin -->|"执行"| execute
+  execute -->|"事件 / 结果"| finish
+  finish -->|"结算"| classify
+  classify -->|"问答"| query
+  classify -->|"变更"| mutation
+  mutation -->|"检查产物"| review
+  review -->|"追加需求"| continue
+  classify -->|"符合续跑条件"| nextturn
+  finish -.->|"异常分支"| unknown
+  query -->|"终态继续"| continue
+  mutation -->|"直接继续"| continue
+  nextturn -->|"同 Task 新 Run"| begin
+  continue -->|"关联新 Task"| commit
 ```
 
-| Runtime | 代码与现场结论 |
-|---|---|
-| AGY Batch | `worker run` 已装配；当前 quote-service 配置使用 `agy-batch` 与 `agy-graft`；本轮未启动新 turn |
-| CodeBuddy CLI | `worker run` 已装配；本次未核实有活动 CodeBuddy Worker |
-| fake | 已装配，仅用于隔离测试，不代表真实 Runtime 验收 |
-| ACP / Codex / Claude / OpenCode descriptors | 通用 ACP 代码与 descriptor 存在，但当前 `assembleM1Adapter` 未装配这些 Adapter ID，会拒绝；不能画成当前可直接选用的生产后端 |
+| 节点 | 状态 | 关键职责 / 限制 | 证据范围 |
+|---|---|---|---|
+| 用户提交工作 | 已实现 | 选择问答 query 或执行任务 mutation。带幂等键提交；用户界面不直接调用模型。继续工作会携带父任务目标和结果摘要。 | 源码已核对；真实覆盖见所列证据。[任务、补充与取消入口](../../internal/controlplane/command_service.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 事务保存与投递 | 已实现 | 同一事务保存工作和投递记录并追加 Journal。返回 Task ID 只证明已受理。持久 Mailbox 是领取来源，Broker 仅加速唤醒。 | 源码已核对；真实覆盖见所列证据。[任务、补充与取消入口](../../internal/controlplane/command_service.go)、[事务化执行账本](../../internal/persistence/sqlite/worker_execution_repository.go)、[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md) |
+| Worker 领取并开始 | 已实现 | 验证当前执行权，创建 RunAttempt，冻结角色内容/hash、cwd、网络版本、参数与截止时间。后续修改职责不会改变本次 Run。 | 源码已核对；真实覆盖见所列证据。[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 执行真实 AGY | 已实现 | Adapter 启动 CLI，AGY 调用模型和工具。运行中补充排到下一 Run，不承诺即时打断模型。 | 源码已核对；真实覆盖见所列证据。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md)、[95 秒续租与补充独立复核](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-lease02/REPORT.md) |
+| 结束回报写账本 | 已实现 | Worker 上报正式 TurnResult；事务同时处理 Run、Task、会话绑定与审计。空输出、坏 JSON、缺终态不能只凭 exit 0 当成功。 | 源码已核对；真实覆盖见所列证据。[事务化执行账本](../../internal/persistence/sqlite/worker_execution_repository.go)、[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| 按意图判断结果 | 已实现 | 问答依据完整最终回复交付；执行任务还涉及实际业务效果。Runtime succeeded 与 Task succeeded 不是一个断言。 | 源码已核对；真实覆盖见所列证据。[问答与业务效果判定](../../internal/domain/task_completion.go)、[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[独立的人工结果验收](../../internal/api/panel/task_review.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 问答已交付 | 已实现 | 合法成功终态及完整 FinalReply 可结算 query_result_delivered。它证明回复交付，不证明答案正确，也不提供只读沙箱。 | I＋R：材料及职责标记的精确问答。[问答与业务效果判定](../../internal/domain/task_completion.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| 变更效果待验收 | 已实现 | 当前 AGY 未确认副作用（SideEffectsKnown=false）时，mutation 保留 uncertain/business_effect_unverified。Runtime 报告效果已知时可为 succeeded/mutation_effects_known，仍不等于系统独立业务验收。真实文件需另行检查。 | I＋R：报告实际生成；原不确定执行记录保留。[问答与业务效果判定](../../internal/domain/task_completion.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[独立的人工结果验收](../../internal/api/panel/task_review.go) |
+| 用户接受 / 拒绝 | 部分实现 / 待补 | 验收结论绑定对应 Run/版本，不改写原执行事实。当前详情可见用户已验收，列表仍可能显示 uncertain，这是已知体验欠缺。 **待补：验收落账已实现；列表与详情表达仍需统一** | 源码已核对；真实覆盖见所列证据。[独立的人工结果验收](../../internal/api/panel/task_review.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 继续此工作 | 已实现 | 继续创建关联的新 Task，复用目标与选定结果摘要；不自动继承父任务的原生 conversation，也不重跑原任务。 终态后可直接继续，不要求先接受或拒绝结果。 | I＋R：原文保留后追加，B parent=A，各一 Run。[任务、补充与取消入口](../../internal/controlplane/command_service.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 运行中补充 | 已实现 | 符合结算条件时，已提交补充由下一 Run 消费；成功或明确失败可继续，效果未确认的 mutation 另要求完整有效回复。未知停止、坏协议结果或取消中不自动续跑。 | R：query / mutation 补充与幂等消费；I 未单独重测。[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md)、[95 秒续租与补充独立复核](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-lease02/REPORT.md)、[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go) |
+| 超时 / 崩溃 / 坏输出 | 已实现 | 超时、协议异常或失联时保留可信诊断与原始账本；是否停止进程要另行取证。不会靠重发旧任务制造“恢复成功”。 | 源码已核对；真实覆盖见所列证据。[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md)、[真实超时与后续任务证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-timeout01/REPORT.md)、[周期恢复与裸进程清理边界](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-periodic01/REPORT.md) |
 
-systemd 托管 Worker 生命周期；Console/SSH 退出不等于 Worker 退出。graceful stop 是持久化停止意图：停止领新工作、等待活动 Run、释放 lease 后退出；force-stop 是单独的危险操作，可能留下 `uncertain`。[S3][S6]
+- query = 回复交付；mutation = 涉及效果。query 本身不是只读权限控制。
+- 同 Task 补充进入下一 Run；“继续此工作”新建关联 Task，无需先验收。
+- 人工接受和系统独立验证保持不同来源；文件精确字节与进程停止由验收证据核对。
 
-## 8. ADR 演进与未落地边界
+## 03 · 领域初始化：从正在工作的 CLI 到长期领域
 
-| ADR | 内容 | 本快照中的实际状态 |
-|---|---|---|
-| 001 | 组织控制面、Resident Worker、Runtime、移动指挥台 | 执行基础已贯通；组织授权/角色注入/结果收口仍有缺口；早期 T01–T10 只证明各自边界 |
-| 002 | Runtime 网络配置、测试、发布、应用与诊断 | 已实现；按当前 Worker/Backend 验证，不等于保存即生效 |
-| 003 | 任务详情、运行观察、安全内容呈现 | 主要页面存在；本批发现最新 Run 选择、详情审批与重连缺口 |
-| 004 | 简化网络配置交互 | 主要流程存在；首次就绪引导、探测解释及加密承诺尚有差距 |
-| 005 | Fleet、Console Attach、Worker 生命周期 | 首轮已实现；后续 workspace/TUI 体验由 008/009 演进 |
-| 006 | Task intent 与可验证终态语义 | 固定部署基线文档为 Proposed；另有 `dcd8fd6` 实施旁支，**尚未安装**；当前缺口仍在 |
-| 007 | 网络绑定跨 Worker generation 的连续性 | **Proposed，未授权实施**；当前仍按代际隔离 |
-| 008 | OAX、路径、可撤销 CLI Token、一致快照、全屏 TUI | 功能已存在于已安装候选分支；main 的 pending 文档落后；不据此宣称完整 ADR 最终验收 |
-| 009 | pane 0 任务工作台、Task 投影、Timeline、原位诊断 | 已安装实现；真实网页回复链路有记录，整体 Task 成功验收未完成，Diagnostic 跨 Task 旧输出问题仍待修复 |
+**哪些可以今天做到，哪些仍需补入口？** 长期保存的是领域身份、职责和工作目录。已有 CLI 对话目前通过明确交接接续。
 
-Foreground Takeover 仍是禁用规划项；自动任务规划/跨 Agent 自主编排不能仅由组织模型推导为已实现。本图只表示已见到的控制、投递与执行链路。
+[打开此图](current-architecture.html#init)
 
-## 9. 源码与证据索引
+```mermaid
+flowchart LR
+  externalcli["正在工作的 CLI<br/>外部依赖"]
+  role["明确职责与工作目录<br/>已实现"]
+  add["登记长期领域<br/>已实现"]
+  identity["稳定的 Agent 身份<br/>已实现"]
+  original["原 CLI 继续当前工作<br/>外部依赖"]
+  handoff["保存工作交接<br/>部分实现 / 待补"]
+  resume["启动或恢复服务<br/>已实现"]
+  register["Worker 注册新代<br/>已实现"]
+  selfinit["一键自初始化<br/>待实现"]
+  importsession["外部会话迁入<br/>待实现"]
+  netready["当前代网络准备<br/>部分实现 / 待补"]
+  ready["可以开始受管工作<br/>已实现"]
+  externalcli -->|"明确"| role
+  role -->|"登记"| add
+  add -->|"保存"| identity
+  externalcli -->|"当前工作"| original
+  original -->|"交接"| handoff
+  handoff -->|"之后"| resume
+  identity -.->|"使用定义"| resume
+  resume -->|"启动"| register
+  register -.->|"当前代"| netready
+  netready -->|"就绪"| ready
+  selfinit -.->|"自动整理"| handoff
+  importsession -.->|"未来接续"| ready
+```
 
-以下链接固定到已核对的 commit，避免本文所在旧 `main` 的同名文件误导。核心 Go 源使用已安装 `6d599ac`；最新现场说明用 `34053c0`；最新 Web 用 `ee46038`。
+| 节点 | 状态 | 关键职责 / 限制 | 证据范围 |
+|---|---|---|---|
+| 正在工作的 CLI | 外部依赖 | 当前外部 CLI 仍拥有自己的进程与聊天上下文。能执行本机命令时，可主动调用现有登记入口；这并不把活进程变成 Worker。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[ADR-001：Worker 与 Runtime 边界](../decisions/ADR-001-resident-agent-worker-runtime-observability.md) |
+| 明确职责与工作目录 | 已实现 | 用户或当前 Agent 编写长期职责。登记不热改现有对话的系统提示；当前 CLI 要显式读取职责，未来受管 AGY Run 自动注入。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 登记长期领域 | 已实现 | 保存身份、Profile、Worker 与 Fleet 配置，可导入已有 OpenAgentX identity / Worker YAML。此选项不启动 Worker，但可能启动 daemon 并完成登录。 | 源码＋已有入口 D/I；活 CLI 自注册专项未测。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 稳定的 Agent 身份 | 已实现 | 身份和职责可跨进程保存。相同定义重复添加幂等，冲突不会静默覆盖。长期身份不要求永远复用同一个聊天 session。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 原 CLI 继续当前工作 | 外部依赖 | 系统没有 PID/PTY 接管参数，也不会自动收集当前聊天历史。原 CLI 仍可完成当前任务；不要把登记成功当成后台已接单。 | 源码已核对；真实覆盖见所列证据。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[ADR-001：Worker 与 Runtime 边界](../decisions/ADR-001-resident-agent-worker-runtime-observability.md) |
+| 保存工作交接 | 部分实现 / 待补 | 目前可由当前 Agent 手动生成 HANDOFF.md，新受管任务显式读取它。这是可操作建议，系统尚未自动生成/加载完整交接。 **待补：支持文件交接；自动接续体验尚缺** | 源码已核对；真实覆盖见所列证据。[日用操作指南](../operations/agy-daily-workflow.md)、[登记与服务入口](../../internal/cli/fleet/agent.go) |
+| 启动或恢复服务 | 已实现 | 交接后显式启动目标 Worker，检查在线状态并准备网络。底层调用 user-systemd，不通过向终端注入业务指令执行。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| Worker 注册新代 | 已实现 | Worker 为已存在的领域身份注册实例和 generation。网络旧代回执不能证明当前代已就绪。 | 源码已核对；真实覆盖见所列证据。[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 一键自初始化 | 待实现 | 建议新增一个薄入口或技能，默认当前工作目录，整理可审阅的职责/交接，复用已有 add。尚未实现；不意味着接管原会话。 | 本轮建议，尚无实现或 E2E。[登记与服务入口](../../internal/cli/fleet/agent.go) |
+| 外部会话迁入 | 待实现 | 目前没有外部 conversation 导入入口。后续需验证可恢复条件、独占使用与归属，再将会话接到明确 Task/Agent/backend；不是只凭 PID 即可接管。 | 未实现；内部 --conversation 不等于外部导入。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go) |
+| 当前代网络准备 | 部分实现 / 待补 | inherit/direct 可由入口通过正式测试/发布/CAS应用到当前代。命名 profile 自动跨代恢复尚不完整，不能默认为已支持。 **待补：默认模式已实测；命名 profile 与误配纠正仍有边界** | 源码已核对；真实覆盖见所列证据。[网络测试、发布与应用](../../internal/controlplane/network_workflow_service.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 可以开始受管工作 | 已实现 | 身份、Worker、网络满足条件后显示可开始工作；新 Task 使用相应职责与工作目录。原外部 CLI 历史不会凭空进入新 Task。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
 
-- [S1 — daemon 组装与路由隔离](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/cmd/openagentx/main.go)：Web/UDS/可选 mTLS、共享服务与静态资源。
-- [S2 — 事务边界](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/controlplane/transaction.go)；[唤醒 Broker](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/controlplane/broker.go)；[命令服务](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/controlplane/command_service.go)。
-- [S3 — Worker 并行循环](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/worker/runner.go)；[Run 管理](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/worker/run_manager.go)；[真实 Adapter 装配](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/cli/worker/command.go)。
-- [S4 — FinishRun 终态规则](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/persistence/sqlite/worker_execution_repository.go#L628)；[AGY 结果解析](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/runtime/agy/stream.go)。
-- [S5 — 网络工作流](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/controlplane/network_workflow_service.go)；[Secret 文件存储](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/network/secretstore/file_store.go)；[Runtime 摘要变化策略](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/runtime/network/identity.go)；[Web 应用回执](https://github.com/insky2017/OpenAgentX/blob/ee46038102ebd44d387e26ab912001f26b89ade5/web/src/network-binding-state.js)。
-- [S6 — CLI 会话](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/auth/cli/service.go)；[credential store](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/credentialstore/store.go)；[Fleet workspace](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/fleet/workspace.go)；[Task reducer](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/consolemodel/task_state.go)。
-- [S7 — schema 与兼容扩展](https://github.com/insky2017/OpenAgentX/blob/6d599aca8ce7c32fe11f23244478b495a0a78e68/internal/persistence/sqlite/migrations/migrations.go)。
-- [S8 — 2026-09-22 现场安装与未完成项](https://github.com/insky2017/OpenAgentX/blob/34053c02042ca7448587ff8c20bdd82c11ed870c/docs/reports/validation/2026-09-22-openagentx-adr009-live-installation.md)；[Web dispatch/reply 修复](https://github.com/insky2017/OpenAgentX/blob/ee46038102ebd44d387e26ab912001f26b89ade5/web/src/task-dispatch-state.js)。
-- [S9 — 包含 ADR-009 的决策索引](https://github.com/insky2017/OpenAgentX/tree/34053c02042ca7448587ff8c20bdd82c11ed870c/docs/decisions)；[ADR-008 阶段执行记录](https://github.com/insky2017/OpenAgentX/blob/008b2e0/docs/plans/2026-09-14-openagentx-adr-008-implementation/EXECUTION-LOG.md)。
+- --configure-only 只抑制 Worker 启动，不代表零配置写入或 daemon 不启动。
+- 现有命令足以登记长期身份；当前 CLI 角色读取与交接仍需显式完成。
+- 虚线“拟议”路径尚未接通；旧 agent attach/bootstrap/launch 不是当前支持入口。
 
-### 本轮运行证据摘要
+## 04 · 运行与恢复：长运行、取消和崩溃如何收口
 
-- 安装文件、daemon PID `1686100`、Worker PID `1687781` 的 SHA-256 均为 `a26ebf4d84ede2fa60bd4c10aaee704056732dde9dc532cd424d85de76703e89`。
-- 已安装 `assets/app.js`：`2e173b5064a89c61ca6a5a57f3e9ea1cc3fe8479b7695c81735edeb2053b1e7c`。
-- 已安装 `assets/app.css`：`c7e9b0f8d223ff14ab76c2280ded37613bd4c06918f002c1627e9133a89b548f`。
-- 执行了 `git status/log/worktree list`、`go version -m`、定向源码读取、`systemctl --user show/list-units`、`/proc/.../exe` 摘要、监听和健康检查；未读取 token、密码、Cookie、代理凭据或原始 Runtime payload。
-- 独立只读复核覆盖 ADR-004 至 ADR-009、未合并分支、Task 终态、网络代际及 tmux 边界。历史现场任务结论引用安装报告，不冒充本轮新执行。
+**停止请求、物理停止和账本恢复分别由谁负责？** 心跳维持执行权，取消控制真实进程，恢复维护账本；三者相互配合，不能互相替代。
 
-## 10. 后续维护
+[打开此图](current-architecture.html#runtime)
 
-- 部署、ADR 实施或 Runtime 装配发生变化时，先更新版本表与证据，再同步 Markdown 图和 HTML；不能只更新某个 ADR 的状态标签。
-- 重点重评触发条件：ADR-006 实施旁支安装并验收、ADR-007 获准实施、ADR-008/009 合入主线/最终验收、ACP 正式装配、远程 Worker 启用、部署入口变更。
-- 本次交付检查结果如下；不回写历史关卡结论。
+```mermaid
+flowchart LR
+  heartbeat["独立心跳循环<br/>已实现"]
+  guard["控制面执行权<br/>已实现"]
+  active["单个活动 Run<br/>已实现"]
+  process["AGY 与工具进程树<br/>已实现"]
+  request["用户取消<br/>已实现"]
+  control["Worker 控制通道<br/>已实现"]
+  signal["取消或期限到达<br/>已实现"]
+  receipt["停止结果回执<br/>已实现"]
+  pause["暂停 Agent<br/>已实现"]
+  restart["恢复受管服务<br/>已实现"]
+  reconcile["daemon 周期恢复<br/>已实现"]
+  uncertain["保留未知事实<br/>部分实现 / 待补"]
+  heartbeat -.->|"续租"| guard
+  guard -->|"授权"| active
+  active -->|"运行"| process
+  request -->|"控制"| control
+  control -->|"取消"| signal
+  signal -->|"回执"| receipt
+  signal -.->|"停止树"| process
+  pause -->|"恢复"| restart
+  guard -.->|"过期"| reconcile
+  reconcile -->|"收口"| uncertain
+  receipt -.->|"未确认"| uncertain
+```
 
-### 本次交付验证（2026-09-22）
+| 节点 | 状态 | 关键职责 / 限制 | 证据范围 |
+|---|---|---|---|
+| 独立心跳循环 | 已实现 | Worker 不依靠模型输出证明存活；运行、控制与心跳分开。静默工具也需要保持 Worker/Run lease。 | R：95秒工具、7检查点、约90秒续租；原夹具FAIL仍保留。[Worker 执行与控制循环](../../internal/worker/runner.go)、[95 秒续租与补充独立复核](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-lease02/REPORT.md) |
+| 控制面执行权 | 已实现 | 当前代、租约和 fencing 限定有效执行权。旧实例迟到的写入必须被拒绝，不能覆盖新一代状态。 | 源码已核对；真实覆盖见所列证据。[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[事务化执行账本](../../internal/persistence/sqlite/worker_execution_repository.go) |
+| 单个活动 Run | 已实现 | 单领域的有效活动 Run受约束。默认运行期限30分钟，可配置；心跳续租不会延长这次任务的截止时间。 | 源码已核对；真实覆盖见所列证据。[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[Worker 执行与控制循环](../../internal/worker/runner.go)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| AGY 与工具进程树 | 已实现 | Adapter 启动 AGY及其工具链并保留取消控制。取消不会撤销已经写出的文件。直接强杀裸 Worker 与systemd受管清理不同。 | 源码已核对；真实覆盖见所列证据。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 用户取消 | 已实现 | 取消先记录请求。没有活动 Run 时，取消事务可同时收口 queued/waiting_input 与 Mailbox；活动 Run 经独立控制通道请求实际停止。运行补充的后续执行见工作流子图。 | 源码已核对；真实覆盖见所列证据。[任务、补充与取消入口](../../internal/controlplane/command_service.go)、[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| Worker 控制通道 | 已实现 | Worker 处理持久控制指令及任务取消，活动模型不能阻塞控制循环。queued steer和进程信号取消是当前AGY支持形式。 | 源码已核对；真实覆盖见所列证据。[Worker 执行与控制循环](../../internal/worker/runner.go)、[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go) |
+| 取消或期限到达 | 已实现 | 显式取消触发进程信号与后代清理。超时也清理进程，但不能因此把未知业务效果判为成功或一概记为用户取消。 | R：活动取消全树观测上限约4秒；35秒timeout后可接下一query。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[真实超时与后续任务证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-timeout01/REPORT.md)、[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md) |
+| 停止结果回执 | 已实现 | 显式取消且真实进程停止确认，才正确收口canceled；清理失败、失联或结果无法确认时保留uncertain。UI区分请求与确认。 | 源码已核对；真实覆盖见所列证据。[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md)、[真实超时与后续任务证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-timeout01/REPORT.md)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| 暂停 Agent | 已实现 | pause采用drain/stop语义：当前工作完成后Worker退出；排队任务保持未执行。它不是冻结一个模型进程。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| 恢复受管服务 | 已实现 | resume启动新的Worker代次。systemd受管崩溃清理已实测；恢复不会把旧不确定任务自动再执行一次。 | I：排队B无Run→恢复后单Run；崩溃后新query成功。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| daemon 周期恢复 | 已实现 | daemon启动及周期调用同一保守恢复逻辑，按失效租约收口旧Task/Run。周期仅负责账本，不保证裸Worker的孤儿子进程自动被杀。 | R：42.12秒自动收口；I服务故障约32.66秒。[daemon 周期恢复](../../cmd/openagentx/recovery.go)、[周期恢复与裸进程清理边界](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-periodic01/REPORT.md) |
+| 保留未知事实 | 部分实现 / 待补 | 副作用不确定的旧任务保留uncertain。新代就绪后可接新工作。裸进程R的遗留子进程由测试精确清理；不能画成平台自动完成。 **待补：账本恢复已实现；裸进程自动清理不受当前证据支持** | 源码已核对；真实覆盖见所列证据。[周期恢复与裸进程清理边界](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-periodic01/REPORT.md)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
 
-2026-09-23 事实修订另经真实 Chrome 离线检查：1440/390 像素 × 4 视图无横向溢出；组织授权/ADR-006 修订可见；零页面异常及外部请求。证据见评估目录 `evidence/architecture-revised-browser.json` 与移动截图。以下保留原图首次交付记录。
+- 图中的时间来自特定真实测试，不是服务等级承诺。
+- 95秒测试脚本整体因格式断言FAIL；已完成续租场景由独立审计确认，未覆盖原失败。
+- 受管systemd路径已验证清理；绕过service强杀裸Worker时仍须独立检查工具进程。
 
-| 检查 | 结果与边界 |
-|---|---|
-| 独立架构复核 | 通过；核对 ADR-004–009、认证、Task 终态、ACP 装配、Secret 与 schema；集中修正一处 legacy schema 措辞 |
-| 源码证据 | S1–S9 共 21 个固定 commit Git 对象存在；本地 Markdown/HTML 互链有效 |
-| 静态检查 | `git diff --check`、提取后 `node --check` 通过；AGENTS 与冻结 ADR 的 SHA-256 未变 |
-| 离线浏览器 | 系统 Chrome `143.0.7499.109`，真实 headless 渲染，`file://` 打开且 browser context offline；零外部 HTTP 请求、零页面异常 |
-| 响应式显示 | 1440、1024、760、390、320 像素 × 4 视图，共 20 组合；无页面横向溢出、无卡片内容裁切；桌面与 390 像素截图人工复看通过 |
-| 交互 | 24 个组件入口均打开正确详情/源码链接，Escape 与关闭按钮有效；方向键/Home/End 切换、hash 刷新、深色模式与移动宽度弹窗通过 |
-| 验证工具失败与替代 | agent-browser 默认引用缺失的 Chromium 1200；指定可执行文件又被已启动 daemon 忽略。两次同因失败后关闭该工具会话，改用 Playwright Core 显式启动系统 Chrome 完成上述真实浏览器检查 |
-| 未覆盖 | 未跑业务 Go/Web 全量回归、未重启服务、未重做 Runtime/真机 PWA/外部入口验收；本次仅交付文档和独立静态 HTML，不代表修复了已记录业务缺口 |
+## 05 · 观察与重连：页面如何得到可信的当前状态
 
-本批仅修改 README 架构入口并新增本 Markdown 与 HTML；未合并实施分支、未修改产品代码或部署。移动检查为浏览器视口模拟，不冒称手机真机验收。
+**刷新、断网和历史任务很多时，怎样避免丢结果？** 先读安全下界，再读快照；第一次从下界订阅，重连从已经确认的事件序号继续。
+
+[打开此图](current-architecture.html#observe)
+
+```mermaid
+flowchart LR
+  client["打开 Web / Console<br/>已实现"]
+  lower["读取前安全下界<br/>已实现"]
+  snapshot["读取权威快照<br/>已实现"]
+  stream["建立事件观察流<br/>已实现"]
+  journal["持久 Event Journal<br/>已实现"]
+  projection["安全投影<br/>已实现"]
+  merge["按事件推进与补读<br/>已实现"]
+  visible["用户看到结果与操作<br/>已实现"]
+  offline["浏览器离线<br/>已实现"]
+  reconnect["使用已确认 cursor<br/>已实现"]
+  catchup["重新同步页面<br/>已实现"]
+  retention["跨保留期重连等组合<br/>部分实现 / 待补"]
+  client -->|"请求"| lower
+  lower -->|"先记录"| snapshot
+  snapshot -->|"首次订阅"| stream
+  journal -->|"投影"| projection
+  projection -->|"事件"| merge
+  snapshot -.->|"快照"| merge
+  stream -.->|"增量"| merge
+  merge -->|"渲染"| visible
+  offline -->|"联网"| reconnect
+  reconnect -->|"补回"| catchup
+  catchup -.->|"扩展边界"| retention
+```
+
+| 节点 | 状态 | 关键职责 / 限制 | 证据范围 |
+|---|---|---|---|
+| 打开 Web / Console | 已实现 | 登录成功与网络可达分别判断。Web初次session/overview暂时失败可重试；离线禁写，不把请求暗中排队后重发。 | 源码已核对；真实覆盖见所列证据。[浏览器观察与重连](../../web/src/main.jsx)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| 读取前安全下界 | 已实现 | Overview在读取任何投影之前采集安全下界。该值可用于首次订阅；不能把读完后latest_sequence当作首次安全起点。 | 源码已核对；真实覆盖见所列证据。[Overview 与安全观察投影](../../internal/api/panel/handler.go)、[前端游标规则](../../web/src/task-observation-state.js)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 读取权威快照 | 已实现 | 按当前数据库状态读取界面需要的投影。不是对所有投影宣称事务级快照，读取期间出现的新事件通过回放补齐。 | 源码已核对；真实覆盖见所列证据。[Overview 与安全观察投影](../../internal/api/panel/handler.go)、[浏览器观察与重连](../../web/src/main.jsx) |
+| 建立事件观察流 | 已实现 | 第一次SSE使用live_after_sequence；后续使用已确认cursor与原生Last-Event-ID语义。旧历史数据不再强制从0回放。 | I：267881首连在线；旧from0循环失败原件保留。[前端游标规则](../../web/src/task-observation-state.js)、[浏览器观察与重连](../../web/src/main.jsx)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 持久 Event Journal | 已实现 | 事件由控制面事务持久记录。SQLite当前状态是权威；Journal用于审计与增量观察，不要求全量事件重放重建状态。 | 源码已核对；真实覆盖见所列证据。[事务化执行账本](../../internal/persistence/sqlite/worker_execution_repository.go)、[Overview 与安全观察投影](../../internal/api/panel/handler.go) |
+| 安全投影 | 已实现 | 通过认证后的Observe API输出投影。模型输出与诊断并不应携带秘密。投影错误不能被静默跳过并伪称已同步。 | 源码已核对；真实覆盖见所列证据。[Overview 与安全观察投影](../../internal/api/panel/handler.go)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| 按事件推进与补读 | 已实现 | SSE建立/恢复后重新读取Overview、列表和已选Task以补齐；页面保留确认过的游标。新快照不会跳过离线期间事件。 | 源码已核对；真实覆盖见所列证据。[浏览器观察与重连](../../web/src/main.jsx)、[前端游标规则](../../web/src/task-observation-state.js)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 用户看到结果与操作 | 已实现 | 页面分别显示Run结果、Task事实和人工验收。结果已返回并不自动等于业务验证完成；关闭再打开不创建新Task。 | 源码已核对；真实覆盖见所列证据。[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[独立的人工结果验收](../../internal/api/panel/task_review.go)、[真实 Console 与空闲采样](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-console01/README.md) |
+| 浏览器离线 | 已实现 | 真实Offline期间Worker仍可执行任务。浏览器恢复后不自动提交离线草稿；用户要明确再次发送。 | I：离线时后台完成追加；隔离R：草稿不自动提交。[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| 使用已确认 cursor | 已实现 | 已确认267966后断网，恢复仍从267966请求，而不是跳到新Overview的268049。这是该批实测数值。 | I：重连补回期间可投影事件与完整结果。[前端游标规则](../../web/src/task-observation-state.js)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 重新同步页面 | 已实现 | 恢复online后看见追加结果；刷新仍显示验收结论，同Worker随后成功完成新query。 | 源码已核对；真实覆盖见所列证据。[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 跨保留期重连等组合 | 部分实现 / 待补 | 当前真实验证覆盖整网Offline及首连暂时503。仅切断SSE、跨retention清理边界与全部多Agent切换组合仍需专项验证/完善。 **待补：未完成全组合验证，不把已测Offline扩成全部网络场景PASS** | 源码已核对；真实覆盖见所列证据。[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+
+- 这里展示观察流程，不会对正在运行的产品发请求；图本身是离线架构文档。
+- SSE是观察通道；用户命令仍走正式写API。退出浏览器或Console不停止Worker。
+- 就绪原因来自身份、Worker和当前代网络事实；HTTP 200不等于用户已经能开始工作。
+
+## 06 · 外部依赖：进程、存储、网络与部署边界
+
+**运行依赖哪些外部东西，哪些只是可选能力？** 常态运行依赖本机 daemon、SQLite、受管 Worker、AGY 与外部模型服务；远程和其他Runtime另行标注。
+
+[打开此图](current-architecture.html#dependencies)
+
+```mermaid
+flowchart LR
+  browser["浏览器 / PWA<br/>外部依赖"]
+  daemon["OpenAgentX daemon<br/>已实现"]
+  remote["远程 Worker HTTPS<br/>可选能力 / 未启用"]
+  google["Google 模型服务<br/>外部依赖"]
+  terminal["本机 CLI / tmux<br/>外部依赖"]
+  worker["领域 Worker service<br/>已实现"]
+  agy["agy-graft → AGY<br/>外部依赖"]
+  proxy["网络与代理<br/>部分实现 / 待补"]
+  systemd["user-systemd<br/>外部依赖"]
+  store["SQLite + 本地配置<br/>已实现"]
+  workspace["项目工作目录<br/>外部依赖"]
+  secrets["本地凭据文件<br/>外部依赖"]
+  browser -->|"HTTP"| daemon
+  remote -.->|"mTLS"| daemon
+  terminal -.->|"UDS"| daemon
+  worker -.->|"UDS"| daemon
+  worker -->|"启动"| agy
+  agy -->|"网络"| proxy
+  proxy -->|"HTTPS"| google
+  agy -->|"工具读写"| workspace
+  secrets -.->|"物化"| proxy
+  systemd -.->|"托管"| worker
+  daemon -->|"事务"| store
+  store -.->|"配置"| worker
+```
+
+| 节点 | 状态 | 关键职责 / 限制 | 证据范围 |
+|---|---|---|---|
+| 浏览器 / PWA | 外部依赖 | React前端构建后作为静态工件由daemon提供。Node/npm用于前端开发构建，不是已安装daemon执行任务所需的独立服务。 | 源码已核对；真实覆盖见所列证据。[daemon 与 API 装配](../../cmd/openagentx/main.go)、[最终安装来源与哈希](../reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json) |
+| OpenAgentX daemon | 已实现 | 本机 HTTP 服务 Web 与用户 API，UDS 服务本地 CLI / Worker 专用入口。最近安装核验快照为 9434479；监听配置以安装证据为准。 | 源码已核对；真实覆盖见所列证据。[daemon 与 API 装配](../../cmd/openagentx/main.go)、[最终安装来源与哈希](../reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json) |
+| 远程 Worker HTTPS | 可选能力 / 未启用 | 代码提供受限Worker API、mTLS身份映射和远程传输；当前本机部署未启用远程listener。本图不把它作为默认依赖。 | 有实现及既有协议测试；本轮未做远程真实验收。[远程 Worker 路由边界](../../internal/api/workerapi/handler.go)、[daemon 与 API 装配](../../cmd/openagentx/main.go) |
+| Google 模型服务 | 外部依赖 | 真实AGY调用依赖模型服务可用性、AGY登录及所选模型。图不包含供应商内部架构，也不声称所有模型/effort参数已逐一验证。 | 源码已核对；真实覆盖见所列证据。[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)、[22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md) |
+| 本机 CLI / tmux | 外部依赖 | agent命令协调配置与服务；Console通过UDS读取和控制。tmux仅在Console/OAX使用场景需要，Web+Worker执行链不靠tmux保持运行。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[真实 Console 与空闲采样](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-console01/README.md) |
+| 领域 Worker service | 已实现 | 当前入口采用一个领域身份一个受管Worker，共用daemon。Worker调用adapter，不直接绕过daemon修改SQLite。 | 源码已核对；真实覆盖见所列证据。[Worker 执行与控制循环](../../internal/worker/runner.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| agy-graft → AGY | 外部依赖 | wrapper/实际CLI是独立运行依赖；网络环境由受控配置准备。AGY执行工具、读写workspace，再回传结构化结果。 | 源码已核对；真实覆盖见所列证据。[AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)、[真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md) |
+| 网络与代理 | 部分实现 / 待补 | 代理不是固定必须；依所选模式及本机网络而定。配置经过test/publish/applied，当前代回执必须匹配。inherit/direct重应用已实测，命名profile自动恢复仍有缺口。 **待补：网络设置保存、发布、应用是不同阶段** | 源码已核对；真实覆盖见所列证据。[网络测试、发布与应用](../../internal/controlplane/network_workflow_service.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| user-systemd | 外部依赖 | 托管daemon和Worker。日用入口启动目标service，退出页面不影响后台；开机自启/用户linger取决于实际配置。 | 源码已核对；真实覆盖见所列证据。[登记与服务入口](../../internal/cli/fleet/agent.go)、[安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md) |
+| SQLite + 本地配置 | 已实现 | SQLite schema2保存权威状态；identity、ROLE、Worker YAML、Fleet清单在本地文件。工作目录真实产物另存，不把全部文件塞进事件账本。 | 源码已核对；真实覆盖见所列证据。[事务化执行账本](../../internal/persistence/sqlite/worker_execution_repository.go)、[最终安装来源与哈希](../reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json) |
+| 项目工作目录 | 外部依赖 | 由Agent Profile固定cwd。需要额外业务API/交易工具时，它们是该任务工具链的额外依赖，是否接通要各自验收。 | 源码已核对；真实覆盖见所列证据。[Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)、[最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md) |
+| 本地凭据文件 | 外部依赖 | CLI登录、AGY登录与网络secret有各自边界。网络secret为本地受权限保护文件，不在图里展示值，不画成已接入外部Vault。 | 源码已核对；真实覆盖见所列证据。[网络测试、发布与应用](../../internal/controlplane/network_workflow_service.go)、[daemon 与 API 装配](../../cmd/openagentx/main.go) |
+
+- 当前未装配完整ACP生产路径；CodeBuddy代码保留，本轮未增加专项/真实验收。
+- 组织/岗位/AuthorityPolicy模型与入口RBAC不同；完整组织业务授权和自主委派仍未贯通。
+- 额外Nginx、公网入口、远程Worker、交易服务均不是本机AGY日用链的默认已启用依赖。
+
+## 调整优先级与未完成能力
+
+| 能力 | 当前事实 | 建议最小调整 | 重新处理的触发条件 |
+|---|---|---|---|
+| 已有CLI自初始化（待实现） | 可登记身份；当前对话不会自动接入 | 薄入口整理ROLE与HANDOFF，复用add；交接后启动 | 需要降低每个领域首次配置成本 |
+| 外部原生会话导入（待实现） | 内部同Task支持已保存conversation续接 | AGY专项验证可恢复与独占使用，再提供导入入口 | 文件交接不足以保留工作上下文 |
+| 产物与验收体验（部分实现 / 待补） | 文件真实生成；review独立记录 | 统一产物打开/下载，协调列表状态与用户验收显示 | 日常查找文件或判读结果仍繁琐 |
+| 网络与恢复组合（部分实现 / 待补） | 默认模式新代恢复、取消与超时已有真实证据 | 命名profile、误配纠正、仅断SSE/retention组合补测 | 扩大网络模式或进入更长时程使用 |
+| 组织治理与自主委派（部分实现 / 待补） | 基础模型与入口RBAC已在；完整业务授权未贯通 | 独立定义领域授权与委派闭环后再开放 | 开始真实多人/跨领域任务委派 |
+| 其他Runtime与远程执行（可选能力 / 未启用） | CodeBuddy保留、ACP组件存在、mTLS通道可选 | 逐项装配和真实验收；不套用AGY通过结论 | 明确需要第二种Runtime或远程机器 |
+
+## 源码与证据索引
+
+- [登记与服务入口](../../internal/cli/fleet/agent.go)：`internal/cli/fleet/agent.go:73`。
+- [AGY 进程与角色输入](../../internal/runtime/agy/adapter.go)：`internal/runtime/agy/adapter.go:241`。
+- [Task 内会话与输入冻结](../../internal/controlplane/worker_service.go)：`internal/controlplane/worker_service.go:818`。
+- [Worker 执行与控制循环](../../internal/worker/runner.go)：`internal/worker/runner.go:1`。
+- [任务、补充与取消入口](../../internal/controlplane/command_service.go)：`internal/controlplane/command_service.go:53`。
+- [事务化执行账本](../../internal/persistence/sqlite/worker_execution_repository.go)：`internal/persistence/sqlite/worker_execution_repository.go:1`。
+- [Overview 与安全观察投影](../../internal/api/panel/handler.go)：`internal/api/panel/handler.go:164`。
+- [前端游标规则](../../web/src/task-observation-state.js)：`web/src/task-observation-state.js:27`。
+- [浏览器观察与重连](../../web/src/main.jsx)：`web/src/main.jsx:348`。
+- [独立的人工结果验收](../../internal/api/panel/task_review.go)：`internal/api/panel/task_review.go:1`。
+- [网络测试、发布与应用](../../internal/controlplane/network_workflow_service.go)：`internal/controlplane/network_workflow_service.go:1`。
+- [daemon 周期恢复](../../cmd/openagentx/recovery.go)：`cmd/openagentx/recovery.go:12`。
+- [实际装配的 Runtime](../../internal/cli/worker/command.go)：`internal/cli/worker/command.go:120`。
+- [Console Attach 与工作台](../../internal/cli/console/application.go)：`internal/cli/console/application.go:190`。
+- [daemon 与 API 装配](../../cmd/openagentx/main.go)：`cmd/openagentx/main.go:1`。
+- [远程 Worker 路由边界](../../internal/api/workerapi/handler.go)：`internal/api/workerapi/handler.go:76`。
+- [ADR-001：Worker 与 Runtime 边界](../decisions/ADR-001-resident-agent-worker-runtime-observability.md)：`docs/decisions/ADR-001-resident-agent-worker-runtime-observability.md:1042`。
+- [22 组证据覆盖与未测边界](../reports/validation/2026-10-02-agy-workflow/COVERAGE.md)：`docs/reports/validation/2026-10-02-agy-workflow/COVERAGE.md:1`。
+- [最终安装 Web 日用证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md:1`。
+- [安装入口、角色与故障恢复证据](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md:1`。
+- [真实 AGY 主链与取消证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md:1`。
+- [95 秒续租与补充独立复核](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-lease02/REPORT.md)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-lease02/REPORT.md:1`。
+- [真实超时与后续任务证据](../reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-timeout01/REPORT.md)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-timeout01/REPORT.md:1`。
+- [周期恢复与裸进程清理边界](../reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-periodic01/REPORT.md)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-periodic01/REPORT.md:1`。
+- [最终安装来源与哈希](../reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json:1`。
+- [真实 Console 与空闲采样](../reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-console01/README.md)：`docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-console01/README.md:1`。
+- [组织、岗位与授权模型](../../internal/domain/organization_contract.go)：`internal/domain/organization_contract.go:55`。
+- [日用操作指南](../operations/agy-daily-workflow.md)：`docs/operations/agy-daily-workflow.md:1`。
+- [问答与业务效果判定](../../internal/domain/task_completion.go)：`internal/domain/task_completion.go:26`。
+
+## 下一步与维护
+
+1. 先读总览，再按实际问题进入工作流、初始化、运行恢复、观察或依赖子图。不要把待实现路径当作可直接运行的命令。
+2. 日用优先解决已有 CLI 交接、产物打开和验收状态展示；扩展 Runtime、远程执行与完整组织治理按明确需求推进。
+3. 编辑 `docs/design/architecture-map.json` 后运行 `python3 docs/design/render_architecture.py`，同时更新两份输出；需要同步阅读入口时追加 `--reading-dir /home/sky/Documents/ChatGPT/OpenAgentX`。更新节点时同步来源、证据版本与限制，避免架构文档再次落后实现。
+
+本轮仅更新架构文档与渲染工具，未修改产品实现、配置或业务服务。原架构快照由 Git 历史保留。

@@ -5,8 +5,11 @@ OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持�
 ## 架构
 
 最新部署与 ADR 演进见 [当前系统架构（Markdown）](docs/design/CURRENT_ARCHITECTURE.md)
-和 [离线 HTML 架构图](docs/design/current-architecture.html)。该快照区分当前主线、
-ADR-008/009 实施分支与实际安装版本；下面的简图仅说明基础控制面关系。
+和 [离线 HTML 架构图](docs/design/current-architecture.html)。2026-10-02 快照按当前
+AGY 工作流源码与实际安装证据整理，分为总览、工作流、领域初始化、运行恢复、
+事件观察、外部依赖六个视图；区分已实现、待补、待实现及未启用能力。
+图册自身的浏览器检查见[验证记录](docs/reports/validation/2026-10-02-architecture/README.md)。
+下面的简图仅说明基础控制面关系。
 
 逐模块测试、功能缺口、过度设计判断与 Paseo / Multica 借鉴建议见
 [2026-09-23 全面评估](docs/reports/assessment/2026-09-23/README.md)。

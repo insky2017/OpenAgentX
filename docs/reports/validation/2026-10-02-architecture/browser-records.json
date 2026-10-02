@@ -1,0 +1,82 @@
+{
+  "oax_initial_browser_checks": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"results\":[{\"view\":\"overview\",\"nodes\":12,\"overflow\":[],\"lineHits\":[],\"labelHits\":[],\"detailsOK\":true},{\"view\":\"work\",\"nodes\":12,\"overflow\":[],\"lineHits\":[],\"labelHits\":[],\"detailsOK\":true},{\"view\":\"init\",\"nodes\":12,\"overflow\":[],\"lineHits\":[],\"labelHits\":[],\"detailsOK\":true},{\"view\":\"runtime\",\"nodes\":12,\"overflow\":[],\"lineHits\":[],\"labelHits\":[{\"label\":\"结束后恢复\",\"node\":\"pause\"},{\"label\":\"结束后恢复\",\"node\":\"restart\"},{\"label\":\"过期\",\"node\":\"signal\"}],\"detailsOK\":true},{\"view\":\"observe\",\"nodes\":12,\"overflow\":[],\"lineHits\":[],\"labelHits\":[],\"detailsOK\":true},{\"view\":\"dependencies\",\"nodes\":12,\"overflow\":[],\"lineHits\":[],\"labelHits\":[{\"label\":\"事务\",\"node\":\"agy\"}],\"detailsOK\":true}],\"viewport\":{\"width\":1440,\"scrollWidth\":1425},\"resources\":[]}\n```"
+      }
+    ]
+  },
+  "oax_final_browser_checks": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"checkedAt\":\"2026-10-02T05:16:38.464Z\",\"userAgent\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"views\":[{\"view\":\"overview\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true},{\"view\":\"work\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true},{\"view\":\"init\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true},{\"view\":\"runtime\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true},{\"view\":\"observe\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true},{\"view\":\"dependencies\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true}],\"externalResources\":[],\"width\":1440,\"pageWidth\":1425}\n```\nPage navigated to file:///home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/design/current-architecture.html#overview."
+      }
+    ]
+  },
+  "oax_layout_followup": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"checkedAt\":\"2026-10-02T05:20:14.661Z\",\"userAgent\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"views\":[{\"view\":\"runtime\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true},{\"view\":\"observe\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true},{\"view\":\"dependencies\",\"nodes\":12,\"textOverflow\":[],\"labelOverlaps\":[],\"lineOverlaps\":[],\"allDetails\":true}],\"externalResources\":[],\"width\":1440,\"pageWidth\":1425}\n```\nPage navigated to file:///home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/design/current-architecture.html#overview."
+      }
+    ]
+  },
+  "oax_controls_highlight_zoom": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"highlight\":true,\"zoom\":true,\"diagramWidth\":1928.5,\"pageWidth\":1425,\"width\":1440}\n```"
+      }
+    ]
+  },
+  "oax_keyboard_tab": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"selected\":\"tab-work\",\"focused\":\"tab-work\"}\n```"
+      }
+    ]
+  },
+  "oax_jump": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"jumpVisible\":true,\"jumpTarget\":\"runtime\",\"focus\":\"guard\"}\n```\nPage navigated to file:///home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/design/current-architecture.html#runtime."
+      }
+    ]
+  },
+  "oax_keyboard_node": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"detail\":\"控制面执行权\",\"selected\":\"guard\"}\n```"
+      }
+    ]
+  },
+  "oax_export": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"bytes\":19238,\"type\":\"image/svg+xml;charset=utf-8\",\"xmlErrors\":0,\"nodes\":12,\"view\":\"runtime\",\"filename\":\"openagentx-runtime-2026-10-02.svg\"}\n```"
+      }
+    ]
+  },
+  "oax_mobile_offline": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Script ran on page and returned:\n```json\n{\"offline\":true,\"views\":[{\"view\":\"overview\",\"window\":390,\"page\":390,\"diagram\":1050,\"scrollArea\":356},{\"view\":\"work\",\"window\":390,\"page\":390,\"diagram\":1050,\"scrollArea\":356},{\"view\":\"init\",\"window\":390,\"page\":390,\"diagram\":1050,\"scrollArea\":356},{\"view\":\"runtime\",\"window\":390,\"page\":390,\"diagram\":1050,\"scrollArea\":356},{\"view\":\"observe\",\"window\":390,\"page\":390,\"diagram\":1050,\"scrollArea\":356},{\"view\":\"dependencies\",\"window\":390,\"page\":390,\"diagram\":1050,\"scrollArea\":356}],\"expandedWidth\":390,\"diagramScrolled\":true,\"resources\":[],\"references\":29}\n```"
+      }
+    ]
+  },
+  "oax_console_final": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Emulating viewport: {\"deviceScaleFactor\":1,\"isMobile\":false,\"hasTouch\":false,\"isLandscape\":false,\"width\":1440,\"height\":1100}\n## Console messages\n<no console messages found>"
+      }
+    ]
+  }
+}

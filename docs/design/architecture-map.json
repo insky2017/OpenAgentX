@@ -1,0 +1,2570 @@
+{
+  "title": "OpenAgentX · 架构与关键流程",
+  "date": "2026-10-02",
+  "source_commit": "b0b7e09",
+  "installed_commit": "9434479e4fd3b6802aa2e4d57610bb710200cd01",
+  "binary_sha256": "6725f3370b3c6bf27293a0f6368cc5bfac9e92c92682cc01a8b1b862231f75c7",
+  "scope": "当前 OpenAgentX 任务后台与领域 Agent 工作流。交易业务、券商或交易所的实现不在本次工程边界内。",
+  "refs": {
+    "entry": {
+      "label": "登记与服务入口",
+      "path": "internal/cli/fleet/agent.go",
+      "line": 73
+    },
+    "runtime": {
+      "label": "AGY 进程与角色输入",
+      "path": "internal/runtime/agy/adapter.go",
+      "line": 241
+    },
+    "planner": {
+      "label": "Task 内会话与输入冻结",
+      "path": "internal/controlplane/worker_service.go",
+      "line": 818
+    },
+    "worker": {
+      "label": "Worker 执行与控制循环",
+      "path": "internal/worker/runner.go",
+      "line": 1
+    },
+    "commands": {
+      "label": "任务、补充与取消入口",
+      "path": "internal/controlplane/command_service.go",
+      "line": 53
+    },
+    "ledger": {
+      "label": "事务化执行账本",
+      "path": "internal/persistence/sqlite/worker_execution_repository.go",
+      "line": 1
+    },
+    "panel": {
+      "label": "Overview 与安全观察投影",
+      "path": "internal/api/panel/handler.go",
+      "line": 164
+    },
+    "cursor": {
+      "label": "前端游标规则",
+      "path": "web/src/task-observation-state.js",
+      "line": 27
+    },
+    "web": {
+      "label": "浏览器观察与重连",
+      "path": "web/src/main.jsx",
+      "line": 348
+    },
+    "review": {
+      "label": "独立的人工结果验收",
+      "path": "internal/api/panel/task_review.go",
+      "line": 1
+    },
+    "network": {
+      "label": "网络测试、发布与应用",
+      "path": "internal/controlplane/network_workflow_service.go",
+      "line": 1
+    },
+    "recovery": {
+      "label": "daemon 周期恢复",
+      "path": "cmd/openagentx/recovery.go",
+      "line": 12
+    },
+    "assembly": {
+      "label": "实际装配的 Runtime",
+      "path": "internal/cli/worker/command.go",
+      "line": 120
+    },
+    "console": {
+      "label": "Console Attach 与工作台",
+      "path": "internal/cli/console/application.go",
+      "line": 190
+    },
+    "main": {
+      "label": "daemon 与 API 装配",
+      "path": "cmd/openagentx/main.go",
+      "line": 1
+    },
+    "remote": {
+      "label": "远程 Worker 路由边界",
+      "path": "internal/api/workerapi/handler.go",
+      "line": 76
+    },
+    "adr1": {
+      "label": "ADR-001：Worker 与 Runtime 边界",
+      "path": "docs/decisions/ADR-001-resident-agent-worker-runtime-observability.md",
+      "line": 1042
+    },
+    "scope": {
+      "label": "22 组证据覆盖与未测边界",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/COVERAGE.md",
+      "line": 1
+    },
+    "daily": {
+      "label": "最终安装 Web 日用证据",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md",
+      "line": 1
+    },
+    "onboarding": {
+      "label": "安装入口、角色与故障恢复证据",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-onboarding01-resume02/README.md",
+      "line": 1
+    },
+    "live": {
+      "label": "真实 AGY 主链与取消证据",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-main01/REPORT.md",
+      "line": 1
+    },
+    "lease": {
+      "label": "95 秒续租与补充独立复核",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-lease02/REPORT.md",
+      "line": 1
+    },
+    "timeout": {
+      "label": "真实超时与后续任务证据",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/live-f3cd7a3-timeout01/REPORT.md",
+      "line": 1
+    },
+    "crash": {
+      "label": "周期恢复与裸进程清理边界",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/live-17d5cd2-periodic01/REPORT.md",
+      "line": 1
+    },
+    "installed": {
+      "label": "最终安装来源与哈希",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json",
+      "line": 1
+    },
+    "consoleproof": {
+      "label": "真实 Console 与空闲采样",
+      "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-17d5cd2-console01/README.md",
+      "line": 1
+    },
+    "governance": {
+      "label": "组织、岗位与授权模型",
+      "path": "internal/domain/organization_contract.go",
+      "line": 55
+    },
+    "usage": {
+      "label": "日用操作指南",
+      "path": "docs/operations/agy-daily-workflow.md",
+      "line": 1
+    },
+    "completion": {
+      "label": "问答与业务效果判定",
+      "path": "internal/domain/task_completion.go",
+      "line": 26
+    }
+  },
+  "views": [
+    {
+      "id": "overview",
+      "tag": "01 · 总览",
+      "title": "一项工作如何穿过整个系统",
+      "question": "谁接收指令，谁持有状态，谁真正执行？",
+      "takeaway": "一个 daemon 保存权威状态；每个领域的 Worker 独立接单；外部 CLI 执行模型与工具。",
+      "nodes": [
+        {
+          "id": "web",
+          "title": "Web 工作台",
+          "sub": "发工作 · 看结果 · 验收",
+          "x": 30,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "浏览器通过正式 HTTP API 提交任务、查看结果与控制取消。当前安装访问入口 127.0.0.1:18100。关闭浏览器不停止 Worker。",
+          "refs": [
+            "web",
+            "daily"
+          ],
+          "proof": "I＋R：最终安装版报告生成、继续、离线恢复、刷新返回",
+          "risk": "",
+          "jump": "observe"
+        },
+        {
+          "id": "api",
+          "title": "认证与 API",
+          "sub": "HTTP / UDS / 安全投影",
+          "x": 320,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Web 使用 Cookie、RBAC、CSRF；Console 使用本地 UDS 与 CLI Token；Worker 使用其专用注册及写入约束。API 与领域服务处于同一 daemon。",
+          "refs": [
+            "main",
+            "panel"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": "observe"
+        },
+        {
+          "id": "service",
+          "title": "控制面领域服务",
+          "sub": "任务 · Worker · 网络",
+          "x": 610,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "处理任务、补充、取消、结果验收和网络工作流。服务模块共同运行在一个 daemon 内，不是独立部署的微服务。",
+          "refs": [
+            "commands",
+            "network",
+            "planner"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": "work"
+        },
+        {
+          "id": "db",
+          "title": "SQLite 权威账本",
+          "sub": "状态 + 投递 + 审计",
+          "x": 900,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Task、Message、Mailbox、Run、SessionBinding、Worker 代次与 Journal 保存在 SQLite。复合变更由事务保持一致；内存唤醒丢失不等于工作丢失。schema v2。",
+          "refs": [
+            "ledger",
+            "installed"
+          ],
+          "proof": "D＋I：事务测试、历史库迁移与实际安装核对",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "console",
+          "title": "Console / OAX",
+          "sub": "终端查看与控制",
+          "x": 30,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Console 是正式 API 客户端。OAX pane 0 承载 TUI，overview 提供 Agent 导航。tmux 不承担任务路由、Runtime 身份或进程执行权。",
+          "refs": [
+            "console",
+            "consoleproof"
+          ],
+          "proof": "I：80×24 PTY，完整结果、接受/拒绝、继续与重开",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "worker",
+          "title": "常驻 Worker",
+          "sub": "领任务 · 心跳 · 控制",
+          "x": 320,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "每个领域使用受管 Worker。心跳和控制循环独立于一次模型运行；单 Agent 当前最多一个活动 Run。完成任务后继续等待下一项。",
+          "refs": [
+            "worker",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": "runtime"
+        },
+        {
+          "id": "adapter",
+          "title": "Runtime Adapter",
+          "sub": "固定输入 · 解析 · 停止",
+          "x": 610,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "AGY adapter 校验冻结职责、工作目录、模型、网络与期限，启动 CLI 并解析结构化输出。结束、超时和取消均向账本回报。",
+          "refs": [
+            "runtime",
+            "live"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": "runtime"
+        },
+        {
+          "id": "cli",
+          "title": "AGY CLI / wrapper",
+          "sub": "模型调用 + 工具执行",
+          "x": 900,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "通过正式 agy-graft 启动 AGY。每个 Run 都启动受控 CLI 进程；同 Task 内可用已保存 conversation 续接。没有接管任意外部活 CLI 的入口。",
+          "refs": [
+            "runtime",
+            "planner",
+            "daily"
+          ],
+          "proof": "R＋I：使用真实 agy-graft 与 AGY",
+          "risk": "",
+          "jump": "dependencies"
+        },
+        {
+          "id": "entry",
+          "title": "Agent 入口 / Fleet",
+          "sub": "登记 · 启动 · 暂停 · 恢复",
+          "x": 30,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "日常使用 agent add/open/status/pause/resume。身份、配置与服务协调由入口完成；Fleet 是内部配置与生命周期工具。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": "init"
+        },
+        {
+          "id": "systemd",
+          "title": "用户级 systemd",
+          "sub": "托管 daemon 与 Worker",
+          "x": 320,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "后台服务独立于浏览器和终端。受管服务提供进程组清理及故障重启。agent add/start 使用 start，不等于默认已经 enable 开机启动。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "I：服务启停、角色冻结、排队暂停、Worker 崩溃恢复",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "files",
+          "title": "工作目录与产物",
+          "sub": "项目文件 · 工具实际效果",
+          "x": 610,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "工具真实读写 Agent 的工作目录。业务产物在文件系统，不因模型回复就被自动验证；当前 Web 没有统一产物预览/下载入口。",
+          "refs": [
+            "daily",
+            "usage"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "产物可读写且已实测；文件浏览与验收展示仍待改善",
+          "jump": ""
+        },
+        {
+          "id": "cloud",
+          "title": "Google 模型服务",
+          "sub": "经当前配置的网络访问",
+          "x": 900,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "模型推理由 AGY 依赖外部服务完成。代理与登录状态影响 Runtime 可用性；控制面并不直接代替 AGY 调用模型。图中不固定未核实的外部域名。",
+          "refs": [
+            "runtime",
+            "network",
+            "daily"
+          ],
+          "proof": "真实 AGY 链接通；供应商内部实现不在本工程内",
+          "risk": "",
+          "jump": ""
+        }
+      ],
+      "edges": [
+        {
+          "a": "web",
+          "b": "api",
+          "label": "HTTP",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "api",
+          "b": "service",
+          "label": "命令",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "service",
+          "b": "db",
+          "label": "事务",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "console",
+          "b": "api",
+          "label": "UDS",
+          "kind": "control",
+          "points": [
+            [
+              266,
+              394
+            ],
+            [
+              295,
+              394
+            ],
+            [
+              295,
+              174
+            ],
+            [
+              320,
+              174
+            ]
+          ]
+        },
+        {
+          "a": "worker",
+          "b": "api",
+          "label": "双向 UDS",
+          "kind": "control",
+          "points": null
+        },
+        {
+          "a": "worker",
+          "b": "adapter",
+          "label": "StartTurn",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "adapter",
+          "b": "cli",
+          "label": "启动",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "entry",
+          "b": "systemd",
+          "label": "启停",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "systemd",
+          "b": "worker",
+          "label": "托管",
+          "kind": "control",
+          "points": null
+        },
+        {
+          "a": "cli",
+          "b": "cloud",
+          "label": "HTTPS",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "cli",
+          "b": "files",
+          "label": "读 / 写",
+          "kind": "data",
+          "points": [
+            [
+              1018,
+              448
+            ],
+            [
+              1018,
+              504
+            ],
+            [
+              728,
+              504
+            ],
+            [
+              728,
+              580
+            ]
+          ]
+        }
+      ],
+      "notes": [
+        "总览只画主要依赖。事件回传、SSE 与凭据边界在第 05 / 06 图展开。",
+        "绿色代表能力已实现，不表示相关的所有边界用例全部通过。点击节点可见证据范围。",
+        "Quote Service 等是受管领域与业务工作区；本图不声称券商、交易所或交易执行已接通。"
+      ],
+      "rows": [
+        [
+          70,
+          "入口与控制面"
+        ],
+        [
+          310,
+          "Worker / Runtime"
+        ],
+        [
+          550,
+          "配置与外部依赖"
+        ]
+      ],
+      "width": 1180,
+      "height": 750,
+      "groups": [
+        {
+          "x": 308,
+          "y": 86,
+          "w": 550,
+          "h": 148,
+          "label": "同一 daemon 进程内",
+          "ly": 225
+        },
+        {
+          "x": 308,
+          "y": 326,
+          "w": 550,
+          "h": 148,
+          "label": "同一 Worker 进程内",
+          "ly": 465
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "tag": "02 · 工作流",
+      "title": "从用户指令到可继续的结果",
+      "question": "“已受理”“执行结束”“用户验收”分别意味着什么？",
+      "takeaway": "Task 表示一项工作，Run 表示一次执行。问答交付与文件变更验收采用不同完成规则。",
+      "nodes": [
+        {
+          "id": "submit",
+          "title": "用户提交工作",
+          "sub": "明确 Agent 与任务类型",
+          "x": 30,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "选择问答 query 或执行任务 mutation。带幂等键提交；用户界面不直接调用模型。继续工作会携带父任务目标和结果摘要。",
+          "refs": [
+            "commands",
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "commit",
+          "title": "事务保存与投递",
+          "sub": "Task / Message / Mailbox",
+          "x": 320,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "同一事务保存工作和投递记录并追加 Journal。返回 Task ID 只证明已受理。持久 Mailbox 是领取来源，Broker 仅加速唤醒。",
+          "refs": [
+            "commands",
+            "ledger",
+            "live"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "begin",
+          "title": "Worker 领取并开始",
+          "sub": "Run + 不变输入快照",
+          "x": 610,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "验证当前执行权，创建 RunAttempt，冻结角色内容/hash、cwd、网络版本、参数与截止时间。后续修改职责不会改变本次 Run。",
+          "refs": [
+            "planner",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "execute",
+          "title": "执行真实 AGY",
+          "sub": "结构化事件与最终回复",
+          "x": 900,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Adapter 启动 CLI，AGY 调用模型和工具。运行中补充排到下一 Run，不承诺即时打断模型。",
+          "refs": [
+            "runtime",
+            "live",
+            "lease"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "finish",
+          "title": "结束回报写账本",
+          "sub": "Run / Session / Journal",
+          "x": 900,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Worker 上报正式 TurnResult；事务同时处理 Run、Task、会话绑定与审计。空输出、坏 JSON、缺终态不能只凭 exit 0 当成功。",
+          "refs": [
+            "ledger",
+            "planner",
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "classify",
+          "title": "按意图判断结果",
+          "sub": "query 与 mutation 分开",
+          "x": 610,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "问答依据完整最终回复交付；执行任务还涉及实际业务效果。Runtime succeeded 与 Task succeeded 不是一个断言。",
+          "refs": [
+            "completion",
+            "planner",
+            "review",
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "query",
+          "title": "问答已交付",
+          "sub": "succeeded + 完整回复",
+          "x": 320,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "合法成功终态及完整 FinalReply 可结算 query_result_delivered。它证明回复交付，不证明答案正确，也不提供只读沙箱。",
+          "refs": [
+            "completion",
+            "daily",
+            "scope"
+          ],
+          "proof": "I＋R：材料及职责标记的精确问答",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "mutation",
+          "title": "变更效果待验收",
+          "sub": "当前 AGY：uncertain + 回复",
+          "x": 30,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "当前 AGY 未确认副作用（SideEffectsKnown=false）时，mutation 保留 uncertain/business_effect_unverified。Runtime 报告效果已知时可为 succeeded/mutation_effects_known，仍不等于系统独立业务验收。真实文件需另行检查。",
+          "refs": [
+            "completion",
+            "daily",
+            "review"
+          ],
+          "proof": "I＋R：报告实际生成；原不确定执行记录保留",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "review",
+          "title": "用户接受 / 拒绝",
+          "sub": "可选 review · 独立留痕",
+          "x": 30,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "验收结论绑定对应 Run/版本，不改写原执行事实。当前详情可见用户已验收，列表仍可能显示 uncertain，这是已知体验欠缺。",
+          "refs": [
+            "review",
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "验收落账已实现；列表与详情表达仍需统一",
+          "jump": ""
+        },
+        {
+          "id": "continue",
+          "title": "继续此工作",
+          "sub": "新 Task + parent + 摘要",
+          "x": 320,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "继续创建关联的新 Task，复用目标与选定结果摘要；不自动继承父任务的原生 conversation，也不重跑原任务。 终态后可直接继续，不要求先接受或拒绝结果。",
+          "refs": [
+            "commands",
+            "daily"
+          ],
+          "proof": "I＋R：原文保留后追加，B parent=A，各一 Run",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "nextturn",
+          "title": "运行中补充",
+          "sub": "同 Task 的下一 Run",
+          "x": 610,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "符合结算条件时，已提交补充由下一 Run 消费；成功或明确失败可继续，效果未确认的 mutation 另要求完整有效回复。未知停止、坏协议结果或取消中不自动续跑。",
+          "refs": [
+            "live",
+            "lease",
+            "planner"
+          ],
+          "proof": "R：query / mutation 补充与幂等消费；I 未单独重测",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "unknown",
+          "title": "超时 / 崩溃 / 坏输出",
+          "sub": "保留不确定，拒绝误成功",
+          "x": 900,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "超时、协议异常或失联时保留可信诊断与原始账本；是否停止进程要另行取证。不会靠重发旧任务制造“恢复成功”。",
+          "refs": [
+            "scope",
+            "timeout",
+            "crash"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": "runtime"
+        }
+      ],
+      "edges": [
+        {
+          "a": "submit",
+          "b": "commit",
+          "label": "提交",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "commit",
+          "b": "begin",
+          "label": "领取",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "begin",
+          "b": "execute",
+          "label": "执行",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "execute",
+          "b": "finish",
+          "label": "事件 / 结果",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "finish",
+          "b": "classify",
+          "label": "结算",
+          "kind": "data",
+          "points": null,
+          "label_pos": {
+            "x": 848,
+            "y": 383,
+            "anchor": "start"
+          }
+        },
+        {
+          "a": "classify",
+          "b": "query",
+          "label": "问答",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "classify",
+          "b": "mutation",
+          "label": "变更",
+          "kind": "data",
+          "points": [
+            [
+              728,
+              340
+            ],
+            [
+              728,
+              285
+            ],
+            [
+              148,
+              285
+            ],
+            [
+              148,
+              340
+            ]
+          ]
+        },
+        {
+          "a": "mutation",
+          "b": "review",
+          "label": "检查产物",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "review",
+          "b": "continue",
+          "label": "追加需求",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "classify",
+          "b": "nextturn",
+          "label": "符合续跑条件",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "finish",
+          "b": "unknown",
+          "label": "异常分支",
+          "kind": "control",
+          "points": null
+        },
+        {
+          "a": "query",
+          "b": "continue",
+          "label": "终态继续",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "mutation",
+          "b": "continue",
+          "label": "直接继续",
+          "kind": "data",
+          "points": [
+            [
+              148,
+              448
+            ],
+            [
+              148,
+              490
+            ],
+            [
+              438,
+              490
+            ],
+            [
+              438,
+              580
+            ]
+          ],
+          "label_pos": {
+            "x": 293,
+            "y": 481,
+            "anchor": "middle"
+          }
+        },
+        {
+          "a": "nextturn",
+          "b": "begin",
+          "label": "同 Task 新 Run",
+          "kind": "data",
+          "points": [
+            [
+              846,
+              634
+            ],
+            [
+              872,
+              634
+            ],
+            [
+              872,
+              250
+            ],
+            [
+              728,
+              250
+            ],
+            [
+              728,
+              208
+            ]
+          ],
+          "label_pos": {
+            "x": 881,
+            "y": 484,
+            "anchor": "start"
+          }
+        },
+        {
+          "a": "continue",
+          "b": "commit",
+          "label": "关联新 Task",
+          "kind": "data",
+          "points": [
+            [
+              438,
+              688
+            ],
+            [
+              438,
+              724
+            ],
+            [
+              12,
+              724
+            ],
+            [
+              12,
+              38
+            ],
+            [
+              438,
+              38
+            ],
+            [
+              438,
+              100
+            ]
+          ],
+          "label_pos": {
+            "x": 220,
+            "y": 715,
+            "anchor": "middle"
+          }
+        }
+      ],
+      "notes": [
+        "query = 回复交付；mutation = 涉及效果。query 本身不是只读权限控制。",
+        "同 Task 补充进入下一 Run；“继续此工作”新建关联 Task，无需先验收。",
+        "人工接受和系统独立验证保持不同来源；文件精确字节与进程停止由验收证据核对。"
+      ],
+      "rows": [
+        [
+          70,
+          "受理与执行"
+        ],
+        [
+          310,
+          "结果分流"
+        ],
+        [
+          550,
+          "验收与继续"
+        ]
+      ],
+      "width": 1180,
+      "height": 750
+    },
+    {
+      "id": "init",
+      "tag": "03 · 领域初始化",
+      "title": "从正在工作的 CLI 到长期领域",
+      "question": "哪些可以今天做到，哪些仍需补入口？",
+      "takeaway": "长期保存的是领域身份、职责和工作目录。已有 CLI 对话目前通过明确交接接续。",
+      "nodes": [
+        {
+          "id": "externalcli",
+          "title": "正在工作的 CLI",
+          "sub": "已有上下文 / 可能无角色",
+          "x": 30,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "当前外部 CLI 仍拥有自己的进程与聊天上下文。能执行本机命令时，可主动调用现有登记入口；这并不把活进程变成 Worker。",
+          "refs": [
+            "entry",
+            "adr1"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "role",
+          "title": "明确职责与工作目录",
+          "sub": "ROLE.md / workspace",
+          "x": 320,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "用户或当前 Agent 编写长期职责。登记不热改现有对话的系统提示；当前 CLI 要显式读取职责，未来受管 AGY Run 自动注入。",
+          "refs": [
+            "entry",
+            "planner",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "add",
+          "title": "登记长期领域",
+          "sub": "agent add --configure-only",
+          "x": 610,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "保存身份、Profile、Worker 与 Fleet 配置，可导入已有 OpenAgentX identity / Worker YAML。此选项不启动 Worker，但可能启动 daemon 并完成登录。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "源码＋已有入口 D/I；活 CLI 自注册专项未测",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "identity",
+          "title": "稳定的 Agent 身份",
+          "sub": "agent_id / ROLE / cwd",
+          "x": 900,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "身份和职责可跨进程保存。相同定义重复添加幂等，冲突不会静默覆盖。长期身份不要求永远复用同一个聊天 session。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "original",
+          "title": "原 CLI 继续当前工作",
+          "sub": "不自动接收 OAX 工作",
+          "x": 30,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "系统没有 PID/PTY 接管参数，也不会自动收集当前聊天历史。原 CLI 仍可完成当前任务；不要把登记成功当成后台已接单。",
+          "refs": [
+            "runtime",
+            "adr1"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "handoff",
+          "title": "保存工作交接",
+          "sub": "目标 · 进展 · 文件 · 待办",
+          "x": 320,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "目前可由当前 Agent 手动生成 HANDOFF.md，新受管任务显式读取它。这是可操作建议，系统尚未自动生成/加载完整交接。",
+          "refs": [
+            "usage",
+            "entry"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "支持文件交接；自动接续体验尚缺",
+          "jump": ""
+        },
+        {
+          "id": "resume",
+          "title": "启动或恢复服务",
+          "sub": "agent resume <id>",
+          "x": 610,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "交接后显式启动目标 Worker，检查在线状态并准备网络。底层调用 user-systemd，不通过向终端注入业务指令执行。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "register",
+          "title": "Worker 注册新代",
+          "sub": "身份 + lease + backend",
+          "x": 900,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Worker 为已存在的领域身份注册实例和 generation。网络旧代回执不能证明当前代已就绪。",
+          "refs": [
+            "planner",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "selfinit",
+          "title": "一键自初始化",
+          "sub": "拟议：整理职责 + 交接",
+          "x": 30,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "planned",
+          "detail": "建议新增一个薄入口或技能，默认当前工作目录，整理可审阅的职责/交接，复用已有 add。尚未实现；不意味着接管原会话。",
+          "refs": [
+            "entry"
+          ],
+          "proof": "本轮建议，尚无实现或 E2E",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "importsession",
+          "title": "外部会话迁入",
+          "sub": "拟议：AGY 专项导入",
+          "x": 320,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "planned",
+          "detail": "目前没有外部 conversation 导入入口。后续需验证可恢复条件、独占使用与归属，再将会话接到明确 Task/Agent/backend；不是只凭 PID 即可接管。",
+          "refs": [
+            "runtime",
+            "planner"
+          ],
+          "proof": "未实现；内部 --conversation 不等于外部导入",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "netready",
+          "title": "当前代网络准备",
+          "sub": "test → publish → applied",
+          "x": 610,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "inherit/direct 可由入口通过正式测试/发布/CAS应用到当前代。命名 profile 自动跨代恢复尚不完整，不能默认为已支持。",
+          "refs": [
+            "network",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "默认模式已实测；命名 profile 与误配纠正仍有边界",
+          "jump": "dependencies"
+        },
+        {
+          "id": "ready",
+          "title": "可以开始受管工作",
+          "sub": "agent open / 工作台",
+          "x": 900,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "身份、Worker、网络满足条件后显示可开始工作；新 Task 使用相应职责与工作目录。原外部 CLI 历史不会凭空进入新 Task。",
+          "refs": [
+            "entry",
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        }
+      ],
+      "edges": [
+        {
+          "a": "externalcli",
+          "b": "role",
+          "label": "明确",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "role",
+          "b": "add",
+          "label": "登记",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "add",
+          "b": "identity",
+          "label": "保存",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "externalcli",
+          "b": "original",
+          "label": "当前工作",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "original",
+          "b": "handoff",
+          "label": "交接",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "handoff",
+          "b": "resume",
+          "label": "之后",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "identity",
+          "b": "resume",
+          "label": "使用定义",
+          "kind": "control",
+          "points": [
+            [
+              1018,
+              208
+            ],
+            [
+              1018,
+              272
+            ],
+            [
+              728,
+              272
+            ],
+            [
+              728,
+              340
+            ]
+          ]
+        },
+        {
+          "a": "resume",
+          "b": "register",
+          "label": "启动",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "register",
+          "b": "netready",
+          "label": "当前代",
+          "kind": "control",
+          "points": [
+            [
+              1018,
+              448
+            ],
+            [
+              1018,
+              506
+            ],
+            [
+              728,
+              506
+            ],
+            [
+              728,
+              580
+            ]
+          ]
+        },
+        {
+          "a": "netready",
+          "b": "ready",
+          "label": "就绪",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "selfinit",
+          "b": "handoff",
+          "label": "自动整理",
+          "kind": "plan",
+          "points": [
+            [
+              148,
+              580
+            ],
+            [
+              148,
+              524
+            ],
+            [
+              438,
+              524
+            ],
+            [
+              438,
+              448
+            ]
+          ]
+        },
+        {
+          "a": "importsession",
+          "b": "ready",
+          "label": "未来接续",
+          "kind": "plan",
+          "points": [
+            [
+              438,
+              688
+            ],
+            [
+              438,
+              724
+            ],
+            [
+              1018,
+              724
+            ],
+            [
+              1018,
+              688
+            ]
+          ]
+        }
+      ],
+      "notes": [
+        "--configure-only 只抑制 Worker 启动，不代表零配置写入或 daemon 不启动。",
+        "现有命令足以登记长期身份；当前 CLI 角色读取与交接仍需显式完成。",
+        "虚线“拟议”路径尚未接通；旧 agent attach/bootstrap/launch 不是当前支持入口。"
+      ],
+      "rows": [
+        [
+          70,
+          "持久登记"
+        ],
+        [
+          310,
+          "工作交接"
+        ],
+        [
+          550,
+          "缺口与就绪"
+        ]
+      ],
+      "width": 1180,
+      "height": 750
+    },
+    {
+      "id": "runtime",
+      "tag": "04 · 运行与恢复",
+      "title": "长运行、取消和崩溃如何收口",
+      "question": "停止请求、物理停止和账本恢复分别由谁负责？",
+      "takeaway": "心跳维持执行权，取消控制真实进程，恢复维护账本；三者相互配合，不能互相替代。",
+      "nodes": [
+        {
+          "id": "heartbeat",
+          "title": "独立心跳循环",
+          "sub": "任务运行时持续续租",
+          "x": 30,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Worker 不依靠模型输出证明存活；运行、控制与心跳分开。静默工具也需要保持 Worker/Run lease。",
+          "refs": [
+            "worker",
+            "lease"
+          ],
+          "proof": "R：95秒工具、7检查点、约90秒续租；原夹具FAIL仍保留",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "guard",
+          "title": "控制面执行权",
+          "sub": "instance / generation / lease",
+          "x": 320,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "当前代、租约和 fencing 限定有效执行权。旧实例迟到的写入必须被拒绝，不能覆盖新一代状态。",
+          "refs": [
+            "planner",
+            "ledger"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "active",
+          "title": "单个活动 Run",
+          "sub": "固定输入与截止时间",
+          "x": 610,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "单领域的有效活动 Run受约束。默认运行期限30分钟，可配置；心跳续租不会延长这次任务的截止时间。",
+          "refs": [
+            "planner",
+            "worker",
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "process",
+          "title": "AGY 与工具进程树",
+          "sub": "受控进程组 / 实际副作用",
+          "x": 900,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Adapter 启动 AGY及其工具链并保留取消控制。取消不会撤销已经写出的文件。直接强杀裸 Worker 与systemd受管清理不同。",
+          "refs": [
+            "runtime",
+            "live",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "request",
+          "title": "用户取消",
+          "sub": "先写持久取消请求",
+          "x": 30,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "取消先记录请求。没有活动 Run 时，取消事务可同时收口 queued/waiting_input 与 Mailbox；活动 Run 经独立控制通道请求实际停止。运行补充的后续执行见工作流子图。",
+          "refs": [
+            "commands",
+            "live",
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "control",
+          "title": "Worker 控制通道",
+          "sub": "独立于模型输出",
+          "x": 320,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Worker 处理持久控制指令及任务取消，活动模型不能阻塞控制循环。queued steer和进程信号取消是当前AGY支持形式。",
+          "refs": [
+            "worker",
+            "runtime"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "signal",
+          "title": "取消或期限到达",
+          "sub": "请求停止并检查清理",
+          "x": 610,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "显式取消触发进程信号与后代清理。超时也清理进程，但不能因此把未知业务效果判为成功或一概记为用户取消。",
+          "refs": [
+            "runtime",
+            "timeout",
+            "live"
+          ],
+          "proof": "R：活动取消全树观测上限约4秒；35秒timeout后可接下一query",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "receipt",
+          "title": "停止结果回执",
+          "sub": "显式取消确认 / 超时未知",
+          "x": 900,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "显式取消且真实进程停止确认，才正确收口canceled；清理失败、失联或结果无法确认时保留uncertain。UI区分请求与确认。",
+          "refs": [
+            "live",
+            "timeout",
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "pause",
+          "title": "暂停 Agent",
+          "sub": "停止接新工作",
+          "x": 30,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "pause采用drain/stop语义：当前工作完成后Worker退出；排队任务保持未执行。它不是冻结一个模型进程。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "restart",
+          "title": "恢复受管服务",
+          "sub": "新代注册与网络准备",
+          "x": 320,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "resume启动新的Worker代次。systemd受管崩溃清理已实测；恢复不会把旧不确定任务自动再执行一次。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "I：排队B无Run→恢复后单Run；崩溃后新query成功",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "reconcile",
+          "title": "daemon 周期恢复",
+          "sub": "每10秒检查过期执行",
+          "x": 610,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "daemon启动及周期调用同一保守恢复逻辑，按失效租约收口旧Task/Run。周期仅负责账本，不保证裸Worker的孤儿子进程自动被杀。",
+          "refs": [
+            "recovery",
+            "crash"
+          ],
+          "proof": "R：42.12秒自动收口；I服务故障约32.66秒",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "uncertain",
+          "title": "保留未知事实",
+          "sub": "旧工作不重派",
+          "x": 900,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "副作用不确定的旧任务保留uncertain。新代就绪后可接新工作。裸进程R的遗留子进程由测试精确清理；不能画成平台自动完成。",
+          "refs": [
+            "crash",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "账本恢复已实现；裸进程自动清理不受当前证据支持",
+          "jump": ""
+        }
+      ],
+      "edges": [
+        {
+          "a": "heartbeat",
+          "b": "guard",
+          "label": "续租",
+          "kind": "control",
+          "points": null
+        },
+        {
+          "a": "guard",
+          "b": "active",
+          "label": "授权",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "active",
+          "b": "process",
+          "label": "运行",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "request",
+          "b": "control",
+          "label": "控制",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "control",
+          "b": "signal",
+          "label": "取消",
+          "kind": "data",
+          "points": null,
+          "label_pos": {
+            "x": 558,
+            "y": 383,
+            "anchor": "start"
+          }
+        },
+        {
+          "a": "signal",
+          "b": "receipt",
+          "label": "回执",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "signal",
+          "b": "process",
+          "label": "停止树",
+          "kind": "control",
+          "points": [
+            [
+              728,
+              340
+            ],
+            [
+              728,
+              280
+            ],
+            [
+              1018,
+              280
+            ],
+            [
+              1018,
+              208
+            ]
+          ]
+        },
+        {
+          "a": "pause",
+          "b": "restart",
+          "label": "恢复",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "guard",
+          "b": "reconcile",
+          "label": "过期",
+          "kind": "control",
+          "points": [
+            [
+              438,
+              208
+            ],
+            [
+              438,
+              267
+            ],
+            [
+              586,
+              267
+            ],
+            [
+              586,
+              634
+            ],
+            [
+              610,
+              634
+            ]
+          ],
+          "label_pos": {
+            "x": 595,
+            "y": 496,
+            "anchor": "start"
+          }
+        },
+        {
+          "a": "reconcile",
+          "b": "uncertain",
+          "label": "收口",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "receipt",
+          "b": "uncertain",
+          "label": "未确认",
+          "kind": "control",
+          "points": null
+        }
+      ],
+      "notes": [
+        "图中的时间来自特定真实测试，不是服务等级承诺。",
+        "95秒测试脚本整体因格式断言FAIL；已完成续租场景由独立审计确认，未覆盖原失败。",
+        "受管systemd路径已验证清理；绕过service强杀裸Worker时仍须独立检查工具进程。"
+      ],
+      "rows": [
+        [
+          70,
+          "执行与租约"
+        ],
+        [
+          310,
+          "取消与停止"
+        ],
+        [
+          550,
+          "暂停与恢复"
+        ]
+      ],
+      "width": 1180,
+      "height": 750
+    },
+    {
+      "id": "observe",
+      "tag": "05 · 观察与重连",
+      "title": "页面如何得到可信的当前状态",
+      "question": "刷新、断网和历史任务很多时，怎样避免丢结果？",
+      "takeaway": "先读安全下界，再读快照；第一次从下界订阅，重连从已经确认的事件序号继续。",
+      "nodes": [
+        {
+          "id": "client",
+          "title": "打开 Web / Console",
+          "sub": "先验证自己的登录",
+          "x": 30,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "登录成功与网络可达分别判断。Web初次session/overview暂时失败可重试；离线禁写，不把请求暗中排队后重发。",
+          "refs": [
+            "web",
+            "daily",
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "lower",
+          "title": "读取前安全下界",
+          "sub": "live_after_sequence",
+          "x": 320,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Overview在读取任何投影之前采集安全下界。该值可用于首次订阅；不能把读完后latest_sequence当作首次安全起点。",
+          "refs": [
+            "panel",
+            "cursor",
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "snapshot",
+          "title": "读取权威快照",
+          "sub": "Agent / Task / readiness",
+          "x": 610,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "按当前数据库状态读取界面需要的投影。不是对所有投影宣称事务级快照，读取期间出现的新事件通过回放补齐。",
+          "refs": [
+            "panel",
+            "web"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "stream",
+          "title": "建立事件观察流",
+          "sub": "首次从安全下界开始",
+          "x": 900,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "第一次SSE使用live_after_sequence；后续使用已确认cursor与原生Last-Event-ID语义。旧历史数据不再强制从0回放。",
+          "refs": [
+            "cursor",
+            "web",
+            "daily"
+          ],
+          "proof": "I：267881首连在线；旧from0循环失败原件保留",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "journal",
+          "title": "持久 Event Journal",
+          "sub": "已提交的领域事件",
+          "x": 30,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "事件由控制面事务持久记录。SQLite当前状态是权威；Journal用于审计与增量观察，不要求全量事件重放重建状态。",
+          "refs": [
+            "ledger",
+            "panel"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "projection",
+          "title": "安全投影",
+          "sub": "过滤可见范围与敏感内容",
+          "x": 320,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "通过认证后的Observe API输出投影。模型输出与诊断并不应携带秘密。投影错误不能被静默跳过并伪称已同步。",
+          "refs": [
+            "panel",
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "merge",
+          "title": "按事件推进与补读",
+          "sub": "更新列表和任务详情",
+          "x": 610,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "SSE建立/恢复后重新读取Overview、列表和已选Task以补齐；页面保留确认过的游标。新快照不会跳过离线期间事件。",
+          "refs": [
+            "web",
+            "cursor",
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "visible",
+          "title": "用户看到结果与操作",
+          "sub": "终态 · 回复 · review",
+          "x": 900,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "页面分别显示Run结果、Task事实和人工验收。结果已返回并不自动等于业务验证完成；关闭再打开不创建新Task。",
+          "refs": [
+            "daily",
+            "review",
+            "consoleproof"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "offline",
+          "title": "浏览器离线",
+          "sub": "草稿保留，写操作暂停",
+          "x": 30,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "真实Offline期间Worker仍可执行任务。浏览器恢复后不自动提交离线草稿；用户要明确再次发送。",
+          "refs": [
+            "daily",
+            "scope"
+          ],
+          "proof": "I：离线时后台完成追加；隔离R：草稿不自动提交",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "reconnect",
+          "title": "使用已确认 cursor",
+          "sub": "不使用新水位跳过旧事件",
+          "x": 320,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "已确认267966后断网，恢复仍从267966请求，而不是跳到新Overview的268049。这是该批实测数值。",
+          "refs": [
+            "cursor",
+            "daily"
+          ],
+          "proof": "I：重连补回期间可投影事件与完整结果",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "catchup",
+          "title": "重新同步页面",
+          "sub": "事件 + 当前快照共同补齐",
+          "x": 610,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "恢复online后看见追加结果；刷新仍显示验收结论，同Worker随后成功完成新query。",
+          "refs": [
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "retention",
+          "title": "跨保留期重连等组合",
+          "sub": "409 / 仅断SSE / 复杂切换",
+          "x": 900,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "当前真实验证覆盖整网Offline及首连暂时503。仅切断SSE、跨retention清理边界与全部多Agent切换组合仍需专项验证/完善。",
+          "refs": [
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "未完成全组合验证，不把已测Offline扩成全部网络场景PASS",
+          "jump": ""
+        }
+      ],
+      "edges": [
+        {
+          "a": "client",
+          "b": "lower",
+          "label": "请求",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "lower",
+          "b": "snapshot",
+          "label": "先记录",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "snapshot",
+          "b": "stream",
+          "label": "首次订阅",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "journal",
+          "b": "projection",
+          "label": "投影",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "projection",
+          "b": "merge",
+          "label": "事件",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "snapshot",
+          "b": "merge",
+          "label": "快照",
+          "kind": "control",
+          "points": null,
+          "label_pos": {
+            "x": 738,
+            "y": 320,
+            "anchor": "start"
+          }
+        },
+        {
+          "a": "stream",
+          "b": "merge",
+          "label": "增量",
+          "kind": "control",
+          "points": [
+            [
+              1018,
+              208
+            ],
+            [
+              1018,
+              270
+            ],
+            [
+              728,
+              270
+            ],
+            [
+              728,
+              340
+            ]
+          ]
+        },
+        {
+          "a": "merge",
+          "b": "visible",
+          "label": "渲染",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "offline",
+          "b": "reconnect",
+          "label": "联网",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "reconnect",
+          "b": "catchup",
+          "label": "补回",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "catchup",
+          "b": "retention",
+          "label": "扩展边界",
+          "kind": "plan",
+          "points": null
+        }
+      ],
+      "notes": [
+        "这里展示观察流程，不会对正在运行的产品发请求；图本身是离线架构文档。",
+        "SSE是观察通道；用户命令仍走正式写API。退出浏览器或Console不停止Worker。",
+        "就绪原因来自身份、Worker和当前代网络事实；HTTP 200不等于用户已经能开始工作。"
+      ],
+      "rows": [
+        [
+          70,
+          "初次连接"
+        ],
+        [
+          310,
+          "持续观察"
+        ],
+        [
+          550,
+          "离线与恢复"
+        ]
+      ],
+      "width": 1180,
+      "height": 750
+    },
+    {
+      "id": "dependencies",
+      "tag": "06 · 外部依赖",
+      "title": "进程、存储、网络与部署边界",
+      "question": "运行依赖哪些外部东西，哪些只是可选能力？",
+      "takeaway": "常态运行依赖本机 daemon、SQLite、受管 Worker、AGY 与外部模型服务；远程和其他Runtime另行标注。",
+      "nodes": [
+        {
+          "id": "browser",
+          "title": "浏览器 / PWA",
+          "sub": "本机 HTTP :18100",
+          "x": 30,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "React前端构建后作为静态工件由daemon提供。Node/npm用于前端开发构建，不是已安装daemon执行任务所需的独立服务。",
+          "refs": [
+            "main",
+            "installed"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "daemon",
+          "title": "OpenAgentX daemon",
+          "sub": "单 Go 进程 / HTTP + UDS",
+          "x": 320,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "本机 HTTP 服务 Web 与用户 API，UDS 服务本地 CLI / Worker 专用入口。最近安装核验快照为 9434479；监听配置以安装证据为准。",
+          "refs": [
+            "main",
+            "installed"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "remote",
+          "title": "远程 Worker HTTPS",
+          "sub": "可选 mTLS 通道",
+          "x": 610,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "optional",
+          "detail": "代码提供受限Worker API、mTLS身份映射和远程传输；当前本机部署未启用远程listener。本图不把它作为默认依赖。",
+          "refs": [
+            "remote",
+            "main"
+          ],
+          "proof": "有实现及既有协议测试；本轮未做远程真实验收",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "google",
+          "title": "Google 模型服务",
+          "sub": "外部网络与AGY认证",
+          "x": 900,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "真实AGY调用依赖模型服务可用性、AGY登录及所选模型。图不包含供应商内部架构，也不声称所有模型/effort参数已逐一验证。",
+          "refs": [
+            "daily",
+            "scope"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "terminal",
+          "title": "本机 CLI / tmux",
+          "sub": "人工终端与Console载体",
+          "x": 30,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "agent命令协调配置与服务；Console通过UDS读取和控制。tmux仅在Console/OAX使用场景需要，Web+Worker执行链不靠tmux保持运行。",
+          "refs": [
+            "entry",
+            "consoleproof"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "worker",
+          "title": "领域 Worker service",
+          "sub": "UDS / generation / backend",
+          "x": 320,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "当前入口采用一个领域身份一个受管Worker，共用daemon。Worker调用adapter，不直接绕过daemon修改SQLite。",
+          "refs": [
+            "worker",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "agy",
+          "title": "agy-graft → AGY",
+          "sub": "结构化stdin/stdout与工具",
+          "x": 610,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "wrapper/实际CLI是独立运行依赖；网络环境由受控配置准备。AGY执行工具、读写workspace，再回传结构化结果。",
+          "refs": [
+            "runtime",
+            "live"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "proxy",
+          "title": "网络与代理",
+          "sub": "inherit / direct / profile",
+          "x": 900,
+          "y": 340,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "代理不是固定必须；依所选模式及本机网络而定。配置经过test/publish/applied，当前代回执必须匹配。inherit/direct重应用已实测，命名profile自动恢复仍有缺口。",
+          "refs": [
+            "network",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "网络设置保存、发布、应用是不同阶段",
+          "jump": ""
+        },
+        {
+          "id": "systemd",
+          "title": "user-systemd",
+          "sub": "后台生命周期与进程组",
+          "x": 30,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "托管daemon和Worker。日用入口启动目标service，退出页面不影响后台；开机自启/用户linger取决于实际配置。",
+          "refs": [
+            "entry",
+            "onboarding"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "store",
+          "title": "SQLite + 本地配置",
+          "sub": "任务库 / identity / Worker",
+          "x": 320,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "SQLite schema2保存权威状态；identity、ROLE、Worker YAML、Fleet清单在本地文件。工作目录真实产物另存，不把全部文件塞进事件账本。",
+          "refs": [
+            "ledger",
+            "installed"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "workspace",
+          "title": "项目工作目录",
+          "sub": "源码、材料、实际产物",
+          "x": 610,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "由Agent Profile固定cwd。需要额外业务API/交易工具时，它们是该任务工具链的额外依赖，是否接通要各自验收。",
+          "refs": [
+            "planner",
+            "daily"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "secrets",
+          "title": "本地凭据文件",
+          "sub": "受控引用 / 环境物化",
+          "x": 900,
+          "y": 580,
+          "w": 236,
+          "h": 108,
+          "status": "external",
+          "detail": "CLI登录、AGY登录与网络secret有各自边界。网络secret为本地受权限保护文件，不在图里展示值，不画成已接入外部Vault。",
+          "refs": [
+            "network",
+            "main"
+          ],
+          "proof": "源码已核对；真实覆盖见所列证据",
+          "risk": "",
+          "jump": ""
+        }
+      ],
+      "edges": [
+        {
+          "a": "browser",
+          "b": "daemon",
+          "label": "HTTP",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "remote",
+          "b": "daemon",
+          "label": "mTLS",
+          "kind": "optional",
+          "points": null
+        },
+        {
+          "a": "terminal",
+          "b": "daemon",
+          "label": "UDS",
+          "kind": "control",
+          "points": [
+            [
+              266,
+              394
+            ],
+            [
+              294,
+              394
+            ],
+            [
+              294,
+              174
+            ],
+            [
+              320,
+              174
+            ]
+          ]
+        },
+        {
+          "a": "worker",
+          "b": "daemon",
+          "label": "UDS",
+          "kind": "control",
+          "points": null
+        },
+        {
+          "a": "worker",
+          "b": "agy",
+          "label": "启动",
+          "kind": "data",
+          "points": null,
+          "label_pos": {
+            "x": 557,
+            "y": 383,
+            "anchor": "start"
+          }
+        },
+        {
+          "a": "agy",
+          "b": "proxy",
+          "label": "网络",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "proxy",
+          "b": "google",
+          "label": "HTTPS",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "agy",
+          "b": "workspace",
+          "label": "工具读写",
+          "kind": "data",
+          "points": null
+        },
+        {
+          "a": "secrets",
+          "b": "proxy",
+          "label": "物化",
+          "kind": "control",
+          "points": null
+        },
+        {
+          "a": "systemd",
+          "b": "worker",
+          "label": "托管",
+          "kind": "control",
+          "points": [
+            [
+              148,
+              580
+            ],
+            [
+              148,
+              516
+            ],
+            [
+              438,
+              516
+            ],
+            [
+              438,
+              448
+            ]
+          ]
+        },
+        {
+          "a": "daemon",
+          "b": "store",
+          "label": "事务",
+          "kind": "data",
+          "points": [
+            [
+              556,
+              190
+            ],
+            [
+              582,
+              190
+            ],
+            [
+              582,
+              634
+            ],
+            [
+              556,
+              634
+            ]
+          ],
+          "label_pos": {
+            "x": 593,
+            "y": 492,
+            "anchor": "start"
+          }
+        },
+        {
+          "a": "store",
+          "b": "worker",
+          "label": "配置",
+          "kind": "control",
+          "points": null
+        }
+      ],
+      "notes": [
+        "当前未装配完整ACP生产路径；CodeBuddy代码保留，本轮未增加专项/真实验收。",
+        "组织/岗位/AuthorityPolicy模型与入口RBAC不同；完整组织业务授权和自主委派仍未贯通。",
+        "额外Nginx、公网入口、远程Worker、交易服务均不是本机AGY日用链的默认已启用依赖。"
+      ],
+      "rows": [
+        [
+          70,
+          "入口与控制面"
+        ],
+        [
+          310,
+          "工作进程与网络"
+        ],
+        [
+          550,
+          "OS 与持久数据"
+        ]
+      ],
+      "width": 1180,
+      "height": 750
+    }
+  ],
+  "gaps": [
+    {
+      "name": "已有CLI自初始化",
+      "status": "planned",
+      "view": "init",
+      "current": "可登记身份；当前对话不会自动接入",
+      "next": "薄入口整理ROLE与HANDOFF，复用add；交接后启动",
+      "trigger": "需要降低每个领域首次配置成本"
+    },
+    {
+      "name": "外部原生会话导入",
+      "status": "planned",
+      "view": "init",
+      "current": "内部同Task支持已保存conversation续接",
+      "next": "AGY专项验证可恢复与独占使用，再提供导入入口",
+      "trigger": "文件交接不足以保留工作上下文"
+    },
+    {
+      "name": "产物与验收体验",
+      "status": "partial",
+      "view": "work",
+      "current": "文件真实生成；review独立记录",
+      "next": "统一产物打开/下载，协调列表状态与用户验收显示",
+      "trigger": "日常查找文件或判读结果仍繁琐"
+    },
+    {
+      "name": "网络与恢复组合",
+      "status": "partial",
+      "view": "runtime",
+      "current": "默认模式新代恢复、取消与超时已有真实证据",
+      "next": "命名profile、误配纠正、仅断SSE/retention组合补测",
+      "trigger": "扩大网络模式或进入更长时程使用"
+    },
+    {
+      "name": "组织治理与自主委派",
+      "status": "partial",
+      "view": "dependencies",
+      "current": "基础模型与入口RBAC已在；完整业务授权未贯通",
+      "next": "独立定义领域授权与委派闭环后再开放",
+      "trigger": "开始真实多人/跨领域任务委派"
+    },
+    {
+      "name": "其他Runtime与远程执行",
+      "status": "optional",
+      "view": "dependencies",
+      "current": "CodeBuddy保留、ACP组件存在、mTLS通道可选",
+      "next": "逐项装配和真实验收；不套用AGY通过结论",
+      "trigger": "明确需要第二种Runtime或远程机器"
+    }
+  ]
+}
