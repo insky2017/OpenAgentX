@@ -1,0 +1,10 @@
+{
+  "endpoint": "unix:///tmp/oax-codex-3471844482/server.sock",
+  "thread_id": "01a0fba5-2d5e-7b83-90c9-944e765e7a9a",
+  "turn_id": "01a0fba6-4dec-7441-a29e-f06ebfe08abe",
+  "task_id": "task-after-real-cancel",
+  "run_id": "run-after-real-cancel",
+  "state": "closed",
+  "pid": 2353062,
+  "updated_at": "2026-10-02T08:06:58.806607922Z"
+}

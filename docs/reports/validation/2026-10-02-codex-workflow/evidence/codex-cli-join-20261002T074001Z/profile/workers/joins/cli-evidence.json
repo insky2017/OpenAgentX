@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "state": "local_prepared",
+  "ready": false,
+  "agent_id": "cli-evidence",
+  "runtime": "codex",
+  "identity_file": "<RAW_DIR>/profile/workers/identities/cli-evidence.yaml",
+  "workspace": "<RAW_DIR>/workspace",
+  "role_file": "<RAW_DIR>/profile/workers/identities/cli-evidence.role.md",
+  "handoff_file": "<RAW_DIR>/profile/workers/joins/cli-evidence.handoff.md"
+}

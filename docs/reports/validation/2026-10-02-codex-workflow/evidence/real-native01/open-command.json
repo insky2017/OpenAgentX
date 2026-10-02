@@ -1,0 +1,17 @@
+[
+  "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate02/openagentx",
+  "agent",
+  "open",
+  "codex-local-e2e",
+  "--native",
+  "--db",
+  "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/data/openagentx.db",
+  "--socket",
+  "/tmp/oax-codex-d3bc2f3008.sock",
+  "--file",
+  "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/fleet.yaml",
+  "--worker-dir",
+  "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers",
+  "--credentials",
+  "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/credentials.json"
+]

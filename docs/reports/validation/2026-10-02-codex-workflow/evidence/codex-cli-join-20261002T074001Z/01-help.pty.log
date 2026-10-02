@@ -1,0 +1,81 @@
+PTY stdin=True stdout=True
+Usage: openagentx agent add [--runtime agy|codex] [--name NAME --workspace DIR --role FILE | --identity FILE] [--id ID] [--worker-config FILE] [--environment-file FILE] [--password-file FILE] [--configure-only]
+       openagentx agent join --id ID --name NAME --workspace DIR --role FILE [--thread-id ID --endpoint URL] [--handoff-file FILE] [--prepare]
+       openagentx agent <open|pause|resume|status> [AGENT] [--console|--native] [--no-open] [--watch] [--json] [--web-url URL]
+       Path overrides: --db --socket --file (Fleet manifest) --worker-dir --credentials
+
+自初始化（当前 CLI 可直接执行，无需人工粘贴终端输入）：
+  先确认用户授权的职责和工作目录；只记录已知的 thread ID，不猜测 live 绑定。
+  openagentx agent join --id research --name Research --workspace "$PWD" --role ./ROLE.md --handoff-file ./HANDOFF.md --prepare
+  openagentx agent join --id research --name Research --workspace "$PWD" --role ./ROLE.md --thread-id <known-thread-id> --endpoint <managed-endpoint> --prepare
+  当前轮结束后，由用户运行 openagentx agent resume research。
+
+join 默认仅离线准备（--prepare=true）：记录本地身份、角色、目录、交接、私密环境和 receipt。
+不启动 Worker 或服务，不领取任务，不宣称原 CLI 已绑定或 ready；重复相同输入幂等，冲突拒绝。
+不要让当前 CLI 调用 resume 来接管自己；也不要通过模型反复 poll 维持监听。
+角色由 Runtime adapter 注入；宿主负责总线监听。原生入口：openagentx agent open research --native。
+--prepare=false 只适用于原 CLI 已结束且明确授权注册/启动的场景。
+  -configure-only
+    	Register/configure without starting Worker
+  -console
+    	Open terminal Console
+  -credentials value
+    	Credential store
+  -db value
+    	Database path
+  -endpoint string
+    	Managed Codex app-server endpoint
+  -environment-file string
+    	Existing private Worker environment file to import
+  -file value
+    	Fleet manifest
+  -handoff-file string
+    	Existing Markdown handoff to snapshot privately
+  -id string
+    	Stable Agent ID (default derived from name)
+  -identity string
+    	Existing identity YAML to import
+  -json
+    	Full diagnostic JSON instead of concise navigation
+  -model string
+    	Runtime model
+  -name string
+    	Display name
+  -native
+    	Open managed native terminal through the OAX arbitration bridge
+  -no-open
+    	Print status without opening UI
+  -organization-id string
+    	Organization ID (default "default")
+  -owner-username string
+    	Owner username (default "owner")
+  -password-file string
+    	Private password file; content is never printed
+  -prepare
+    	Prepare locally only; do not start or dispatch (join default) (default true)
+  -role string
+    	Role Markdown file
+  -role-text string
+    	Role text to save as Markdown
+  -runtime string
+    	Runtime: agy or codex (default "codex")
+  -runtime-binary string
+    	Runtime executable (agy-graft or codex by runtime)
+  -socket value
+    	Daemon socket
+  -thread-id string
+    	Explicit existing Codex thread ID; never inferred
+  -timeout duration
+    	Per-run timeout (default 30m0s)
+  -wait duration
+    	Startup/network readiness deadline (default 3m0s)
+  -watch
+    	Refresh read-only status every five seconds
+  -web-url string
+    	Web origin (otherwise discover from user service)
+  -worker-config string
+    	Existing Worker YAML to import
+  -worker-dir value
+    	Worker config directory
+  -workspace string
+    	Working directory

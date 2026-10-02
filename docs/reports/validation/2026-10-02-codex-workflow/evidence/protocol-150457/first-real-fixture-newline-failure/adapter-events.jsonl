@@ -1,0 +1,8 @@
+{"type":"session.bound","payload":{"provider_session_id":"01a0fb8c-ed39-76e0-b1de-4463c94c2c26","source":"new"},"occurred_at":"2026-10-02T07:38:32.221590647Z"}
+{"type":"turn.output","payload":{"has_output":true,"stage":"output","status":"running","text":"Codex completed userMessage"},"occurred_at":"2026-10-02T07:39:12.331283479Z"}
+{"type":"turn.output","payload":{"has_output":true,"stage":"output","status":"running","text":"I’ll create `adapter-proof.txt` in the supplied workspace.\n"},"occurred_at":"2026-10-02T07:39:18.56955972Z"}
+{"type":"turn.output","payload":{"has_output":true,"stage":"output","status":"running","text":"Codex completed commandExecution"},"occurred_at":"2026-10-02T07:39:20.239929128Z"}
+{"type":"turn.output","payload":{"has_output":true,"stage":"output","status":"running","text":"OAX_REAL_FILE_COMPLETE"},"occurred_at":"2026-10-02T07:39:30.580822084Z"}
+{"type":"session.bound","payload":{"provider_session_id":"01a0fb8c-ed39-76e0-b1de-4463c94c2c26","source":"resume"},"occurred_at":"2026-10-02T07:39:30.637467609Z"}
+{"type":"turn.output","payload":{"has_output":true,"stage":"output","status":"running","text":"Codex completed userMessage"},"occurred_at":"2026-10-02T07:39:35.752235625Z"}
+{"type":"turn.output","payload":{"has_output":true,"stage":"output","status":"running","text":"OAX_REAL_ADAPTER_OK\n"},"occurred_at":"2026-10-02T07:39:40.9193778Z"}

@@ -1,0 +1,4 @@
+{
+  "status": "FAIL",
+  "reason": "Go 1.22 worktree build embedded enclosing repository revision and modified=true; not installed. Rebuilding independent clone with .git directory."
+}

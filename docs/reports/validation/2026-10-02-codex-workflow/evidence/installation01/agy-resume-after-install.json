@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-02T08:36:58.580728+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "resume",
+    "agy-onboarding-e2e",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "output": "Agent agy-onboarding-e2e 服务在线，当前代 5 网络已应用。\nAGY 入口验收 (agy-onboarding-e2e) · 可开始工作\n  当前：无\n  最近：现在北京时间是 **2026年10月2日 上午 08:02:11**（UTC+8）。\n  打开：openagentx agent open agy-onboarding-e2e\n  恢复：openagentx agent resume agy-onboarding-e2e\n\n"
+}

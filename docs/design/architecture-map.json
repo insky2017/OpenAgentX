@@ -1,9 +1,9 @@
 {
   "title": "OpenAgentX · 架构与关键流程",
   "date": "2026-10-02",
-  "source_commit": "b0b7e09",
-  "installed_commit": "9434479e4fd3b6802aa2e4d57610bb710200cd01",
-  "binary_sha256": "6725f3370b3c6bf27293a0f6368cc5bfac9e92c92682cc01a8b1b862231f75c7",
+  "source_commit": "6b68eeb810c2b65d629cd8a817bad25a21483d5c",
+  "installed_commit": "6b68eeb810c2b65d629cd8a817bad25a21483d5c",
+  "binary_sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366",
   "scope": "当前 OpenAgentX 任务后台与领域 Agent 工作流。交易业务、券商或交易所的实现不在本次工程边界内。",
   "refs": {
     "entry": {
@@ -92,12 +92,12 @@
       "line": 1042
     },
     "scope": {
-      "label": "22 组证据覆盖与未测边界",
+      "label": "AGY 22 组覆盖与未测边界",
       "path": "docs/reports/validation/2026-10-02-agy-workflow/COVERAGE.md",
       "line": 1
     },
     "daily": {
-      "label": "最终安装 Web 日用证据",
+      "label": "AGY 历史安装 Web 日用证据",
       "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/installed-browser-9434479-daily01/README.md",
       "line": 1
     },
@@ -127,7 +127,7 @@
       "line": 1
     },
     "installed": {
-      "label": "最终安装来源与哈希",
+      "label": "AGY 历史安装来源（9434479）",
       "path": "docs/reports/validation/2026-10-02-agy-workflow/evidence/final-independent-9434479/result.json",
       "line": 1
     },
@@ -150,6 +150,116 @@
       "label": "问答与业务效果判定",
       "path": "internal/domain/task_completion.go",
       "line": 26
+    },
+    "codexruntime": {
+      "label": "Codex app-server 与取消边界",
+      "path": "internal/runtime/codex/adapter.go",
+      "line": 509
+    },
+    "codexbridge": {
+      "label": "原生终端写入桥接",
+      "path": "internal/nativebridge/bridge.go",
+      "line": 339
+    },
+    "codexevents": {
+      "label": "原生通知过滤与响应排序",
+      "path": "internal/nativebridge/event_order.go",
+      "line": 27
+    },
+    "codexjoin": {
+      "label": "离线准备与交接入口",
+      "path": "internal/cli/fleet/agent_join.go",
+      "line": 1
+    },
+    "codexenv": {
+      "label": "持久代理与私密环境",
+      "path": "internal/cli/fleet/agent_environment.go",
+      "line": 1
+    },
+    "codexnative": {
+      "label": "原生终端入口",
+      "path": "internal/cli/fleet/agent_native.go",
+      "line": 1
+    },
+    "codexskill": {
+      "label": "领域 Agent 自初始化薄技能",
+      "path": "skills/openagentx-join/SKILL.md",
+      "line": 1
+    },
+    "codexusage": {
+      "label": "Codex 登记与使用说明",
+      "path": "docs/operations/codex-agent-entry.md",
+      "line": 1
+    },
+    "codexcoverage": {
+      "label": "Codex 当前验收覆盖",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/COVERAGE.md",
+      "line": 1
+    },
+    "codexdelivery": {
+      "label": "Codex 交付与安装边界",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/DELIVERY.md",
+      "line": 1
+    },
+    "codexlog": {
+      "label": "Codex 失败及复验执行记录",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/EXECUTION-LOG.md",
+      "line": 1
+    },
+    "codexlive": {
+      "label": "真实 Codex 主链独立核验",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/real-workflow02/independent-verification.json",
+      "line": 1
+    },
+    "codexprepare": {
+      "label": "真实 PTY 离线准备证据",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/codex-cli-join-20261002T074001Z/README.md",
+      "line": 1
+    },
+    "codexnext": {
+      "label": "关闭原生终端后同线程接单",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/real-native-next01/verdict.json",
+      "line": 1
+    },
+    "codexnetwork": {
+      "label": "实际 Worker 与 app-server 环境核验",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/network-live01/README.md",
+      "line": 1
+    },
+    "codexd": {
+      "label": "原生桥接确定性验证与首败",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/deterministic-native/README.md",
+      "line": 1
+    },
+    "codexinstalled": {
+      "label": "6b68eeb 安装来源、Web 与网络重启核验",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/installed-provenance01/README.md",
+      "line": 1
+    },
+    "codexcancel": {
+      "label": "Codex 工具终止与自有宿主边界",
+      "path": "internal/runtime/codex/tool_cancel.go",
+      "line": 1
+    },
+    "codexprocess": {
+      "label": "自有宿主进程身份与全树清理",
+      "path": "internal/runtime/codex/process.go",
+      "line": 1
+    },
+    "codexinstalledapi": {
+      "label": "Codex 正式API与实际取消",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/installed-api01/README.md",
+      "line": 1
+    },
+    "codexinstallednative": {
+      "label": "Codex 正式原生终端与重连",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/installed-native01/SUMMARY.md",
+      "line": 1
+    },
+    "codexinstalledbrowser": {
+      "label": "Codex 正式桌面/窄屏与断线",
+      "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/browser-installed01/README.md",
+      "line": 1
     }
   },
   "views": [
@@ -172,9 +282,11 @@
           "detail": "浏览器通过正式 HTTP API 提交任务、查看结果与控制取消。当前安装访问入口 127.0.0.1:18100。关闭浏览器不停止 Worker。",
           "refs": [
             "web",
-            "daily"
+            "daily",
+            "codexinstalled",
+            "codexcoverage"
           ],
-          "proof": "I＋R：最终安装版报告生成、继续、离线恢复、刷新返回",
+          "proof": "AGY 既有 I＋R 日用；6b68eeb 的8项Web静态工件与HTTP响应 I 匹配；新版本交互验收另记",
           "risk": "",
           "jump": "observe"
         },
@@ -229,7 +341,7 @@
             "ledger",
             "installed"
           ],
-          "proof": "D＋I：事务测试、历史库迁移与实际安装核对",
+          "proof": "AGY 既有证据：D＋I：事务测试、历史库迁移与实际安装核对",
           "risk": "",
           "jump": ""
         },
@@ -247,7 +359,7 @@
             "console",
             "consoleproof"
           ],
-          "proof": "I：80×24 PTY，完整结果、接受/拒绝、继续与重开",
+          "proof": "AGY 既有证据：I：80×24 PTY，完整结果、接受/拒绝、继续与重开",
           "risk": "",
           "jump": ""
         },
@@ -278,14 +390,18 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "AGY adapter 校验冻结职责、工作目录、模型、网络与期限，启动 CLI 并解析结构化输出。结束、超时和取消均向账本回报。",
+          "detail": "AGY 与 Codex adapter 共用冻结输入、Worker 与账本。AGY 每 Run 启动 CLI；Codex 由常驻 app-server 管理 thread/turn。6b68eeb 已安装；来源、网络重启、正式任务、空闲迁入与原生交互 I 主链均已核验；完整矩阵仍有部分项。",
           "refs": [
             "runtime",
-            "live"
+            "codexruntime",
+            "assembly",
+            "codexlive",
+            "codexinstalled",
+            "codexdelivery"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY：既有 R＋I；Codex：D＋隔离 R 主链，安装来源/环境 I",
           "risk": "",
-          "jump": "runtime"
+          "jump": "native"
         },
         {
           "id": "cli",
@@ -315,12 +431,15 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "日常使用 agent add/open/status/pause/resume。身份、配置与服务协调由入口完成；Fleet 是内部配置与生命周期工具。",
+          "detail": "日常使用 agent add/open/status/pause/resume。新增 Codex join --prepare 与 open --native；离线准备不启动服务，原生写入仍进入正式调度。",
           "refs": [
             "entry",
-            "onboarding"
+            "codexjoin",
+            "codexusage",
+            "codexprepare",
+            "codexinstalled"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY：既有 I；Codex：D＋真实 PTY 准备，已安装help与服务来源 I",
           "risk": "",
           "jump": "init"
         },
@@ -338,7 +457,7 @@
             "entry",
             "onboarding"
           ],
-          "proof": "I：服务启停、角色冻结、排队暂停、Worker 崩溃恢复",
+          "proof": "AGY 既有证据：I：服务启停、角色冻结、排队暂停、Worker 崩溃恢复",
           "risk": "",
           "jump": ""
         },
@@ -597,22 +716,23 @@
         },
         {
           "id": "execute",
-          "title": "执行真实 AGY",
-          "sub": "结构化事件与最终回复",
+          "title": "执行模型与工具",
+          "sub": "AGY CLI / Codex app-server",
           "x": 900,
           "y": 100,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "Adapter 启动 CLI，AGY 调用模型和工具。运行中补充排到下一 Run，不承诺即时打断模型。",
+          "detail": "AGY 启动 CLI；Codex 在明确 thread 中启动 turn。运行中补充进入正式控制与账本路径，不用向终端注入按键代替调度。",
           "refs": [
             "runtime",
-            "live",
-            "lease"
+            "codexruntime",
+            "codexbridge",
+            "codexlive"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY：既有 R＋I；Codex：隔离正式 API 三轮及独立产物核验",
           "risk": "",
-          "jump": ""
+          "jump": "native"
         },
         {
           "id": "finish",
@@ -668,7 +788,7 @@
             "daily",
             "scope"
           ],
-          "proof": "I＋R：材料及职责标记的精确问答",
+          "proof": "AGY 既有证据：I＋R：材料及职责标记的精确问答",
           "risk": "",
           "jump": ""
         },
@@ -687,7 +807,7 @@
             "daily",
             "review"
           ],
-          "proof": "I＋R：报告实际生成；原不确定执行记录保留",
+          "proof": "AGY 既有证据：I＋R：报告实际生成；原不确定执行记录保留",
           "risk": "",
           "jump": ""
         },
@@ -723,7 +843,7 @@
             "commands",
             "daily"
           ],
-          "proof": "I＋R：原文保留后追加，B parent=A，各一 Run",
+          "proof": "AGY 既有证据：I＋R：原文保留后追加，B parent=A，各一 Run",
           "risk": "",
           "jump": ""
         },
@@ -742,7 +862,7 @@
             "lease",
             "planner"
           ],
-          "proof": "R：query / mutation 补充与幂等消费；I 未单独重测",
+          "proof": "AGY 既有证据：R：query / mutation 补充与幂等消费；I 未单独重测",
           "risk": "",
           "jump": ""
         },
@@ -1011,12 +1131,13 @@
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "当前外部 CLI 仍拥有自己的进程与聊天上下文。能执行本机命令时，可主动调用现有登记入口；这并不把活进程变成 Worker。",
+          "detail": "外部 CLI 可读取仓库薄技能并执行 join --prepare，保存领域职责和交接。当前 turn 仍由原 CLI 完成；不得在忙碌时让新 Worker 争抢执行权。",
           "refs": [
-            "entry",
-            "adr1"
+            "codexskill",
+            "codexjoin",
+            "codexprepare"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "Codex：真实 PTY prepare；活跃 turn 不自动接管",
           "risk": "",
           "jump": ""
         },
@@ -1029,11 +1150,11 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "用户或当前 Agent 编写长期职责。登记不热改现有对话的系统提示；当前 CLI 要显式读取职责，未来受管 AGY Run 自动注入。",
+          "detail": "用户或当前 Agent 编写长期职责与交接文件。prepare 保存私密快照，受管 Run 冻结角色/cwd；不热改当前对话的系统提示。",
           "refs": [
-            "entry",
             "planner",
-            "onboarding"
+            "codexjoin",
+            "codexusage"
           ],
           "proof": "源码已核对；真实覆盖见所列证据",
           "risk": "",
@@ -1053,7 +1174,7 @@
             "entry",
             "onboarding"
           ],
-          "proof": "源码＋已有入口 D/I；活 CLI 自注册专项未测",
+          "proof": "AGY 既有证据：源码＋已有入口 D/I；活 CLI 自注册专项未测",
           "risk": "",
           "jump": ""
         },
@@ -1084,12 +1205,12 @@
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "系统没有 PID/PTY 接管参数，也不会自动收集当前聊天历史。原 CLI 仍可完成当前任务；不要把登记成功当成后台已接单。",
+          "detail": "原 CLI 完成当前 turn 后进入空闲交接。原 thread 必须显式选择，不能猜测 Desktop 会话或只凭 PID 接管；任意 PTY 迁移仍未支持。",
           "refs": [
-            "runtime",
-            "adr1"
+            "codexusage",
+            "codexruntime"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY 既有证据：源码约束；不宣称任意活 CLI 接管",
           "risk": "",
           "jump": ""
         },
@@ -1102,13 +1223,14 @@
           "w": 236,
           "h": 108,
           "status": "partial",
-          "detail": "目前可由当前 Agent 手动生成 HANDOFF.md，新受管任务显式读取它。这是可操作建议，系统尚未自动生成/加载完整交接。",
+          "detail": "join --prepare 保存 ROLE/HANDOFF 私密快照及 local_prepared 回执；身份/Fleet 暂不就绪。当前轮结束后显式 resume，Worker 和网络通过后才启用 Fleet。",
           "refs": [
-            "usage",
-            "entry"
+            "codexjoin",
+            "codexprepare",
+            "codexusage"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
-          "risk": "支持文件交接；自动接续体验尚缺",
+          "proof": "R：离线准备幂等、零 connect/子程序启动；激活全链按覆盖表",
+          "risk": "完整自动总结与任意 CLI 历史迁移不在本轮能力内",
           "jump": ""
         },
         {
@@ -1149,38 +1271,43 @@
         },
         {
           "id": "selfinit",
-          "title": "一键自初始化",
-          "sub": "拟议：整理职责 + 交接",
+          "title": "薄入口自初始化",
+          "sub": "join --prepare · 仓库技能",
           "x": 30,
           "y": 580,
           "w": 236,
           "h": 108,
-          "status": "planned",
-          "detail": "建议新增一个薄入口或技能，默认当前工作目录，整理可审阅的职责/交接，复用已有 add。尚未实现；不意味着接管原会话。",
+          "status": "done",
+          "detail": "Codex join 复用既有领域登记，默认只离线准备；薄技能指导职责、HANDOFF 和空闲交接。常驻监听由宿主承担，无需模型每轮 poll。",
           "refs": [
-            "entry"
+            "codexskill",
+            "codexjoin",
+            "codexprepare"
           ],
-          "proof": "本轮建议，尚无实现或 E2E",
+          "proof": "源码＋D；R：真实 PTY prepare 及重复调用；技能未全局安装",
           "risk": "",
-          "jump": ""
+          "jump": "native"
         },
         {
           "id": "importsession",
-          "title": "外部会话迁入",
-          "sub": "拟议：AGY 专项导入",
+          "title": "显式原生线程选择",
+          "sub": "thread ID · 空闲交接",
           "x": 320,
           "y": 580,
           "w": 236,
           "h": 108,
-          "status": "planned",
-          "detail": "目前没有外部 conversation 导入入口。后续需验证可恢复条件、独占使用与归属，再将会话接到明确 Task/Agent/backend；不是只凭 PID 即可接管。",
+          "status": "partial",
+          "detail": "Codex 可显式选择 thread/endpoint；Task 的 native session 选择与投递同事务，thread 创建后受 fencing 保护持久绑定。同一会话写入经 Worker 仲裁。AGY 外部 conversation 迁入仍待实现。",
           "refs": [
-            "runtime",
-            "planner"
+            "codexruntime",
+            "codexbridge",
+            "ledger",
+            "codexnext",
+            "codexd"
           ],
-          "proof": "未实现；内部 --conversation 不等于外部导入",
-          "risk": "",
-          "jump": ""
+          "proof": "D：会话选择与竞争；R：同 thread 后续任务",
+          "risk": "不自动发现 Desktop 活会话；不承诺任意外部 CLI 接管",
+          "jump": "native"
         },
         {
           "id": "netready",
@@ -1191,13 +1318,15 @@
           "w": 236,
           "h": 108,
           "status": "partial",
-          "detail": "inherit/direct 可由入口通过正式测试/发布/CAS应用到当前代。命名 profile 自动跨代恢复尚不完整，不能默认为已支持。",
+          "detail": "inherit/direct 经正式测试与当前代应用。Codex 从持久代理配置保存私密 env；重启后 Worker/app-server 环境、CODEX_HOME 和 NO_PROXY 保持，正式网络绑定匹配新代且ready。",
           "refs": [
             "network",
-            "onboarding"
+            "codexenv",
+            "codexnetwork",
+            "codexinstalled"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
-          "risk": "默认模式已实测；命名 profile 与误配纠正仍有边界",
+          "proof": "R＋I：实际进程环境及一次Worker重启持久性；不代表外网流量",
+          "risk": "Codex named_profile 仍拒绝；坏代理修复和其他网络组合按覆盖表",
           "jump": "dependencies"
         },
         {
@@ -1209,10 +1338,11 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "身份、Worker、网络满足条件后显示可开始工作；新 Task 使用相应职责与工作目录。原外部 CLI 历史不会凭空进入新 Task。",
+          "detail": "身份、Worker 和网络满足条件后接受工作；默认新 Task 不猜测旧原生历史，选择已有 native thread 必须显式传入并由账本约束。",
           "refs": [
             "entry",
-            "daily"
+            "codexruntime",
+            "codexlive"
           ],
           "proof": "源码已核对；真实覆盖见所列证据",
           "risk": "",
@@ -1397,10 +1527,10 @@
     },
     {
       "id": "runtime",
-      "tag": "04 · 运行与恢复",
-      "title": "长运行、取消和崩溃如何收口",
+      "tag": "04 · AGY 运行",
+      "title": "AGY 的运行、取消与恢复",
       "question": "停止请求、物理停止和账本恢复分别由谁负责？",
-      "takeaway": "心跳维持执行权，取消控制真实进程，恢复维护账本；三者相互配合，不能互相替代。",
+      "takeaway": "本子图展示 AGY 已实测的控制和恢复路径。Codex 共用控制面，但取消及未决状态的限制须另看 Codex 原生子图。",
       "nodes": [
         {
           "id": "heartbeat",
@@ -1416,7 +1546,7 @@
             "worker",
             "lease"
           ],
-          "proof": "R：95秒工具、7检查点、约90秒续租；原夹具FAIL仍保留",
+          "proof": "AGY 既有证据：R：95秒工具、7检查点、约90秒续租；原夹具FAIL仍保留",
           "risk": "",
           "jump": ""
         },
@@ -1472,7 +1602,7 @@
             "live",
             "onboarding"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY：源码已核对；真实覆盖见所列证据",
           "risk": "",
           "jump": ""
         },
@@ -1509,7 +1639,7 @@
             "worker",
             "runtime"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY：源码已核对；真实覆盖见所列证据",
           "risk": "",
           "jump": ""
         },
@@ -1528,7 +1658,7 @@
             "timeout",
             "live"
           ],
-          "proof": "R：活动取消全树观测上限约4秒；35秒timeout后可接下一query",
+          "proof": "AGY：R：活动取消全树观测上限约4秒；35秒timeout后可接下一query",
           "risk": "",
           "jump": ""
         },
@@ -1547,7 +1677,7 @@
             "timeout",
             "scope"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY：源码已核对；真实覆盖见所列证据",
           "risk": "",
           "jump": ""
         },
@@ -1565,7 +1695,7 @@
             "entry",
             "onboarding"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY：源码已核对；真实覆盖见所列证据",
           "risk": "",
           "jump": ""
         },
@@ -1578,14 +1708,16 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "resume启动新的Worker代次。systemd受管崩溃清理已实测；恢复不会把旧不确定任务自动再执行一次。",
+          "detail": "AGY 的 resume 启动新 Worker 代次；systemd受管崩溃清理已实测，不重放旧不确定任务。Codex 只能由空闲/正常关闭状态恢复；未决执行会持续隔离。",
           "refs": [
             "entry",
-            "onboarding"
+            "onboarding",
+            "codexruntime",
+            "codexinstalled"
           ],
-          "proof": "I：排队B无Run→恢复后单Run；崩溃后新query成功",
+          "proof": "AGY 既有证据：I：排队B无Run→恢复后单Run；崩溃后新query成功",
           "risk": "",
-          "jump": ""
+          "jump": "native"
         },
         {
           "id": "reconcile",
@@ -1601,7 +1733,7 @@
             "recovery",
             "crash"
           ],
-          "proof": "R：42.12秒自动收口；I服务故障约32.66秒",
+          "proof": "AGY 既有证据：R：42.12秒自动收口；I服务故障约32.66秒",
           "risk": "",
           "jump": ""
         },
@@ -1614,14 +1746,16 @@
           "w": 236,
           "h": 108,
           "status": "partial",
-          "detail": "副作用不确定的旧任务保留uncertain。新代就绪后可接新工作。裸进程R的遗留子进程由测试精确清理；不能画成平台自动完成。",
+          "detail": "AGY 旧任务保留uncertain，新代就绪后可接新工作；裸进程R遗留子进程曾由测试精确清理。Codex 的 running/starting/uncertain 状态重启后会持续隔离，普通resume不可清除。",
           "refs": [
             "crash",
-            "onboarding"
+            "onboarding",
+            "codexruntime",
+            "codexcoverage"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
-          "risk": "账本恢复已实现；裸进程自动清理不受当前证据支持",
-          "jump": ""
+          "proof": "AGY：源码已核对；真实覆盖见所列证据",
+          "risk": "AGY裸进程自动清理未证明；Codex未决状态的受控恢复入口待补",
+          "jump": "native"
         }
       ],
       "edges": [
@@ -1752,9 +1886,9 @@
         }
       ],
       "notes": [
-        "图中的时间来自特定真实测试，不是服务等级承诺。",
-        "95秒测试脚本整体因格式断言FAIL；已完成续租场景由独立审计确认，未覆盖原失败。",
-        "受管systemd路径已验证清理；绕过service强杀裸Worker时仍须独立检查工具进程。"
+        "本图取消、超时、崩溃恢复和耗时数据均来自 AGY 既有证据，不套用到 Codex。",
+        "Codex 已验证空闲 Worker 重启后的来源与网络持久性；这不等于异常执行后解除隔离。",
+        "Codex 的精确取消和异常恢复缺口见原生子图及覆盖矩阵。"
       ],
       "rows": [
         [
@@ -1851,7 +1985,7 @@
             "web",
             "daily"
           ],
-          "proof": "I：267881首连在线；旧from0循环失败原件保留",
+          "proof": "AGY 既有证据：I：267881首连在线；旧from0循环失败原件保留",
           "risk": "",
           "jump": ""
         },
@@ -1943,7 +2077,7 @@
             "daily",
             "scope"
           ],
-          "proof": "I：离线时后台完成追加；隔离R：草稿不自动提交",
+          "proof": "AGY 既有证据：I：离线时后台完成追加；隔离R：草稿不自动提交",
           "risk": "",
           "jump": ""
         },
@@ -1961,7 +2095,7 @@
             "cursor",
             "daily"
           ],
-          "proof": "I：重连补回期间可投影事件与完整结果",
+          "proof": "AGY 既有证据：I：重连补回期间可投影事件与完整结果",
           "risk": "",
           "jump": ""
         },
@@ -2142,9 +2276,11 @@
           "detail": "React前端构建后作为静态工件由daemon提供。Node/npm用于前端开发构建，不是已安装daemon执行任务所需的独立服务。",
           "refs": [
             "main",
-            "installed"
+            "codexinstalled",
+            "daily",
+            "codexcoverage"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "6b68eeb Web静态工件 I；AGY旧版日用交互证据保留；新版本交互逐项验收",
           "risk": "",
           "jump": ""
         },
@@ -2157,12 +2293,12 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "本机 HTTP 服务 Web 与用户 API，UDS 服务本地 CLI / Worker 专用入口。最近安装核验快照为 9434479；监听配置以安装证据为准。",
+          "detail": "本机 HTTP 服务 Web 与用户 API，UDS 服务本地 CLI / Worker。6b68eeb 已安装；daemon、AGY Worker、Codex Worker 的 /proc/exe SHA 均匹配发布工件，Web 静态资源匹配 release-clone。",
           "refs": [
             "main",
-            "installed"
+            "codexinstalled"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "I：实际进程、构建来源和8项Web文件/HTTP响应SHA一致",
           "risk": "",
           "jump": ""
         },
@@ -2211,14 +2347,16 @@
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "agent命令协调配置与服务；Console通过UDS读取和控制。tmux仅在Console/OAX使用场景需要，Web+Worker执行链不靠tmux保持运行。",
+          "detail": "Console 使用 UDS；受管 Codex TUI 连接本地原生桥接。业务写入走 Control API/Task/Run，tmux 和 TUI 退出均不承担 Worker 存活责任。",
           "refs": [
-            "entry",
-            "consoleproof"
+            "console",
+            "codexnative",
+            "codexbridge",
+            "codexnext"
           ],
           "proof": "源码已核对；真实覆盖见所列证据",
           "risk": "",
-          "jump": ""
+          "jump": "native"
         },
         {
           "id": "worker",
@@ -2265,13 +2403,15 @@
           "w": 236,
           "h": 108,
           "status": "partial",
-          "detail": "代理不是固定必须；依所选模式及本机网络而定。配置经过test/publish/applied，当前代回执必须匹配。inherit/direct重应用已实测，命名profile自动恢复仍有缺口。",
+          "detail": "网络设置保存、正式测试和当前代应用是独立阶段。Codex 代理从持久配置进入私密 env，实际 Worker/app-server 已匹配；本地 provider 被 NO_PROXY 覆盖。AGY 命名 profile 恢复边界保留。",
           "refs": [
             "network",
-            "onboarding"
+            "codexenv",
+            "codexnetwork",
+            "codexinstalled"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
-          "risk": "网络设置保存、发布、应用是不同阶段",
+          "proof": "AGY：既有证据；Codex：隔离 R 与正式 I 重启前后进程环境",
+          "risk": "配置覆盖不能替代实际流量证明；Codex named_profile 未开放",
           "jump": ""
         },
         {
@@ -2515,24 +2655,279 @@
       ],
       "width": 1180,
       "height": 750
+    },
+    {
+      "id": "native",
+      "tag": "07 · Codex 原生",
+      "description": "会话与受管写入",
+      "title": "保留原生交互，写入进入正式调度",
+      "question": "原生 TUI 如何共享线程而不绕过 Task / Run？",
+      "takeaway": "准备、空闲交接、明确线程、受管执行；界面可以关闭，Worker 继续接单。取消必须核验实际工具停止。",
+      "nodes": [
+        {
+          "id": "tui",
+          "title": "受管 Codex TUI",
+          "sub": "原生交互 · 显式 thread",
+          "x": 30,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "agent open --native 打开原生 Codex 终端，连接本地桥接。thread 由受管状态或明确选择确定；关闭终端后 Worker 继续在线。",
+          "refs": [
+            "codexnative",
+            "codexusage",
+            "codexnext",
+            "codexcoverage",
+            "codexinstalledapi",
+            "codexinstallednative"
+          ],
+          "proof": "源码；R：终端关闭后同 thread 正式 query 继续成功；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "bridge",
+          "title": "原生桥接",
+          "sub": "写入调度 · 幂等与排序",
+          "x": 320,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "turn/start 转正式任务，steer/interrupt 转控制入口。写请求幂等、相同 RPC ID 不可换内容；新 turn 通知等待 start 响应，按 thread 过滤广播。",
+          "refs": [
+            "codexbridge",
+            "codexevents",
+            "codexd",
+            "codexcoverage",
+            "codexinstalledapi",
+            "codexinstallednative"
+          ],
+          "proof": "D：重复输入、跨线程、快速终态及排序；R 边界按覆盖表；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "control",
+          "title": "Control API",
+          "sub": "认证 · CAS · 当前执行权",
+          "x": 610,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "原生终端沿用正式身份、幂等与 CAS，不直接调用 app-server 写方法绕过 OAX；server requests 仍由执行端处理。",
+          "refs": [
+            "commands",
+            "codexbridge",
+            "codexd",
+            "codexcoverage",
+            "codexinstalledapi",
+            "codexinstallednative"
+          ],
+          "proof": "源码＋D；隔离正式 API 主链 R；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "ledger",
+          "title": "Task / Run / Journal",
+          "sub": "线程选择与投递同事务",
+          "x": 900,
+          "y": 100,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "显式 native thread 选择与 Task/Message/Mailbox 同事务；session.bound 在执行权校验后保存 Task binding，Journal 只记录安全摘要。",
+          "refs": [
+            "planner",
+            "ledger",
+            "codexd",
+            "codexlive",
+            "codexcoverage",
+            "codexinstalledapi",
+            "codexinstallednative"
+          ],
+          "proof": "D：事务/绑定/重放；R：正式 Task、Run、Journal 与实际文件；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "worker",
+          "title": "常驻 Worker",
+          "sub": "单活动 Run · 冻结输入",
+          "x": 900,
+          "y": 350,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Worker持续领取任务并冻结角色、cwd、网络与期限，外部thread忙碌时不抢占。正常空闲重启已验证；running/starting/uncertain 恢复时持续隔离，不盲重放，也不由普通resume清除。",
+          "refs": [
+            "worker",
+            "codexruntime",
+            "codexlive",
+            "codexinstalled",
+            "codexinstalledapi",
+            "codexinstallednative"
+          ],
+          "proof": "R：同Worker三轮及产物；I：发布SHA、重启后第2代ready/网络回执",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "appserver",
+          "title": "Codex app-server",
+          "sub": "持久宿主 · thread / turn",
+          "x": 610,
+          "y": 350,
+          "w": 236,
+          "h": 108,
+          "status": "partial",
+          "detail": "Worker 经 Unix WebSocket 管理 app-server。取消先尝试匹配本轮工具并核验OS进程；无法证明停止时，自有专属host可全树清理兜底，可能影响同Agent旧后台工具。外部host不被终止，工具停止未确认则uncertain；ACK或interrupted均不足以证明停止。",
+          "refs": [
+            "codexruntime",
+            "codexcancel",
+            "codexprocess",
+            "codexlog",
+            "codexcoverage",
+            "codexinstalled",
+            "codexinstalledapi",
+            "codexinstallednative"
+          ],
+          "proof": "R：模型、精确产物、上下文和取消兜底复验；I：实际长工具取消、延迟效果核验与下一query；完整组合按覆盖表",
+          "risk": "C08：仅目标turn的精确取消仍有缺口。C09：未知状态持续隔离，普通resume/restart不可清除；受控恢复入口待补",
+          "jump": ""
+        },
+        {
+          "id": "broadcast",
+          "title": "原生事件广播",
+          "sub": "进度 · 工具 · 完整结果",
+          "x": 320,
+          "y": 350,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "app-server 推送原生通知，bridge 过滤到选定 thread 并保持响应/通知顺序。界面仅观察，不持有 Worker 生命周期；真实结果仍由账本与独立效果核验。",
+          "refs": [
+            "codexevents",
+            "codexbridge",
+            "codexnext",
+            "codexcoverage",
+            "codexinstalledapi",
+            "codexinstallednative"
+          ],
+          "proof": "D：线程过滤、缓冲上限与排序；R：原生关闭后继续接单；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "risk": "",
+          "jump": ""
+        }
+      ],
+      "edges": [
+        {
+          "a": "tui",
+          "b": "bridge",
+          "label": "原生 RPC",
+          "kind": "data"
+        },
+        {
+          "a": "bridge",
+          "b": "control",
+          "label": "正式命令",
+          "kind": "data"
+        },
+        {
+          "a": "control",
+          "b": "ledger",
+          "label": "事务保存",
+          "kind": "data"
+        },
+        {
+          "a": "ledger",
+          "b": "worker",
+          "label": "领取 Run",
+          "kind": "data"
+        },
+        {
+          "a": "worker",
+          "b": "appserver",
+          "label": "唯一写入者",
+          "kind": "data"
+        },
+        {
+          "a": "appserver",
+          "b": "broadcast",
+          "label": "原生通知",
+          "kind": "data"
+        },
+        {
+          "a": "broadcast",
+          "b": "tui",
+          "label": "经桥接返回 TUI",
+          "kind": "control",
+          "points": [
+            [
+              320,
+              404
+            ],
+            [
+              148,
+              404
+            ],
+            [
+              148,
+              208
+            ]
+          ],
+          "label_pos": {
+            "x": 235,
+            "y": 393,
+            "anchor": "middle"
+          }
+        }
+      ],
+      "width": 1180,
+      "height": 515,
+      "rows": [
+        [
+          65,
+          "原生输入 → 正式调度与权威账本"
+        ],
+        [
+          315,
+          "原生观察 ← 常驻宿主与 Worker"
+        ]
+      ],
+      "notes": [
+        "join --prepare 只离线保存身份、职责和交接；当前 turn 完成后再显式 resume。",
+        "thread 必须明确选择；不猜测 Desktop 会话，不把 turn/start 用作抢占活跃 turn。",
+        "6b68eeb 已安装，来源、Web静态工件及环境重启 I 已通过；API、迁入和native交互 I 已完成主链验收，安装不等于全矩阵通过。"
+      ]
     }
   ],
   "gaps": [
     {
       "name": "已有CLI自初始化",
-      "status": "planned",
+      "status": "partial",
       "view": "init",
-      "current": "可登记身份；当前对话不会自动接入",
-      "next": "薄入口整理ROLE与HANDOFF，复用add；交接后启动",
-      "trigger": "需要降低每个领域首次配置成本"
+      "current": "Codex prepare/薄技能、空闲thread迁入、新角色与原生历史 I 已核验；准备不等于live绑定",
+      "next": "继续改善当前工作Agent的自说明入口；不接管活动中的任意PID",
+      "trigger": "本轮 Codex 日用交付"
     },
     {
-      "name": "外部原生会话导入",
-      "status": "planned",
-      "view": "init",
-      "current": "内部同Task支持已保存conversation续接",
-      "next": "AGY专项验证可恢复与独占使用，再提供导入入口",
-      "trigger": "文件交接不足以保留工作上下文"
+      "name": "原生线程与外部会话",
+      "status": "partial",
+      "view": "native",
+      "current": "Codex 已知thread迁入及原生界面重连 I 通过；AGY外部conversation导入未实现",
+      "next": "按明确需求补AGY外部导入，不自动猜测外部会话",
+      "trigger": "需要保留已有会话上下文"
+    },
+    {
+      "name": "Codex 精确取消与异常恢复",
+      "status": "partial",
+      "view": "native",
+      "current": "自有host全树兜底已实测，可能影响旧后台工具；外部host停止未确认为uncertain，未决状态持续隔离",
+      "next": "补足仅目标turn的精确取消和受控解除隔离入口；普通resume不清除未决状态",
+      "trigger": "需要保留同host旧后台任务或恢复异常Agent接单"
     },
     {
       "name": "产物与验收体验",
@@ -2546,8 +2941,8 @@
       "name": "网络与恢复组合",
       "status": "partial",
       "view": "runtime",
-      "current": "默认模式新代恢复、取消与超时已有真实证据",
-      "next": "命名profile、误配纠正、仅断SSE/retention组合补测",
+      "current": "AGY默认模式恢复/取消/超时有既有证据；Codex空闲重启环境及当前代网络 I 已通过",
+      "next": "按需求补命名profile、误配纠正、仅断SSE/retention；Codex异常恢复另列缺口",
       "trigger": "扩大网络模式或进入更长时程使用"
     },
     {
@@ -2562,9 +2957,9 @@
       "name": "其他Runtime与远程执行",
       "status": "optional",
       "view": "dependencies",
-      "current": "CodeBuddy保留、ACP组件存在、mTLS通道可选",
-      "next": "逐项装配和真实验收；不套用AGY通过结论",
-      "trigger": "明确需要第二种Runtime或远程机器"
+      "current": "Codex 已装配、已安装并有隔离R与来源/环境I；CodeBuddy保留，ACP和mTLS按既有边界",
+      "next": "Codex剩余用户流程按覆盖表验收；其他Runtime与远程通道按明确需求专项验证",
+      "trigger": "确有其他 Runtime 或远程机器需求"
     }
   ]
 }

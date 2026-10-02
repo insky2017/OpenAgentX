@@ -1,0 +1,17 @@
+{
+  "file": "profile/workers/cli-evidence.env",
+  "mode": "0o600",
+  "keys": [
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "ALL_PROXY",
+    "http_proxy",
+    "https_proxy",
+    "all_proxy",
+    "CODEX_HOME",
+    "NO_PROXY",
+    "no_proxy"
+  ],
+  "sha256": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04",
+  "contents_exported": false
+}

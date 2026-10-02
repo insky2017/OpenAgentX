@@ -1,0 +1,1 @@
+First real adapter test: both provider turns succeeded; independent artifact matched. Test assertion rejected valid terminal newline in exact recalled content (OAX_REAL_ADAPTER_OK\n). Adjusted assertion to trim surrounding whitespace; full two-turn rerun required.

@@ -1,0 +1,57 @@
+{
+  "at": "2026-10-02T08:45:00.687665+00:00",
+  "processes": [
+    {
+      "pid": 2472259,
+      "ppid": 2459787,
+      "starttime": "14882540",
+      "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "version": {
+        "exit": 0,
+        "stdout": "codex-cli 0.160.0\n",
+        "stderr": ""
+      }
+    },
+    {
+      "pid": 2476502,
+      "ppid": 2472259,
+      "starttime": "14891096",
+      "exe": "/usr/lib/chatgpt/resources/cua_node/bin/node",
+      "sha256": "bc17c508ffeed0ec622934f9b7fa72f8e78da65350e63c3eceb56fa688aa5e12"
+    },
+    {
+      "pid": 2476503,
+      "ppid": 2472259,
+      "starttime": "14891097",
+      "exe": "/usr/lib/chatgpt/resources/cua_node/bin/node_repl",
+      "sha256": "13e849f53dc7a9a9ae44dde27a56d1dfa55eadb6813ba3194847ad0dad79df76"
+    },
+    {
+      "pid": 2476604,
+      "ppid": 2476502,
+      "starttime": "14891105",
+      "exe": "/usr/lib/chatgpt/resources/cua_node/bin/node_repl",
+      "sha256": "13e849f53dc7a9a9ae44dde27a56d1dfa55eadb6813ba3194847ad0dad79df76"
+    },
+    {
+      "pid": 2486572,
+      "ppid": 2486570,
+      "starttime": "14909768",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366"
+    },
+    {
+      "pid": 2486580,
+      "ppid": 2486572,
+      "starttime": "14909774",
+      "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "version": {
+        "exit": 0,
+        "stdout": "codex-cli 0.160.0\n",
+        "stderr": ""
+      }
+    }
+  ]
+}

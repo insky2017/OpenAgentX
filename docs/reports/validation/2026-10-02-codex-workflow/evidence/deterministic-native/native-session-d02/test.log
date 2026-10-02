@@ -1,0 +1,48 @@
+=== RUN   TestNativeTaskAtomicBindingDeliveryAndReplay
+=== RUN   TestNativeTaskAtomicBindingDeliveryAndReplay/thread
+=== RUN   TestNativeTaskAtomicBindingDeliveryAndReplay/backend
+=== RUN   TestNativeTaskAtomicBindingDeliveryAndReplay/remove-session
+=== RUN   TestNativeTaskAtomicBindingDeliveryAndReplay/content
+--- PASS: TestNativeTaskAtomicBindingDeliveryAndReplay (0.12s)
+    --- PASS: TestNativeTaskAtomicBindingDeliveryAndReplay/thread (0.00s)
+    --- PASS: TestNativeTaskAtomicBindingDeliveryAndReplay/backend (0.00s)
+    --- PASS: TestNativeTaskAtomicBindingDeliveryAndReplay/remove-session (0.00s)
+    --- PASS: TestNativeTaskAtomicBindingDeliveryAndReplay/content (0.00s)
+=== RUN   TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents
+=== RUN   TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents/after_state_write
+=== RUN   TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents/after_delivery_write
+=== RUN   TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents/before_commit
+--- PASS: TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents (0.29s)
+    --- PASS: TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents/after_state_write (0.10s)
+    --- PASS: TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents/after_delivery_write (0.09s)
+    --- PASS: TestNativeTaskRollbackIncludesEarlyBindingAndBothJournalEvents/before_commit (0.09s)
+=== RUN   TestNativeTaskRejectsThreadAlreadyOwnedByOtherAgent
+--- PASS: TestNativeTaskRejectsThreadAlreadyOwnedByOtherAgent (0.09s)
+=== RUN   TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding
+=== RUN   TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/active-source
+=== RUN   TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/other-agent
+=== RUN   TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/other-org
+=== RUN   TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/missing-binding
+=== RUN   TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/invalid-binding
+=== RUN   TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/finished-source
+--- PASS: TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding (0.53s)
+    --- PASS: TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/active-source (0.08s)
+    --- PASS: TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/other-agent (0.10s)
+    --- PASS: TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/other-org (0.09s)
+    --- PASS: TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/missing-binding (0.09s)
+    --- PASS: TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/invalid-binding (0.08s)
+    --- PASS: TestNativeTaskSourceRequiresTerminalMatchingIdentityAndActiveBinding/finished-source (0.08s)
+=== RUN   TestNativeTaskOrdinaryReplayCompatibility
+=== RUN   TestNativeTaskOrdinaryReplayCompatibility/task.created
+=== RUN   TestNativeTaskOrdinaryReplayCompatibility/task.queued
+--- PASS: TestNativeTaskOrdinaryReplayCompatibility (0.16s)
+    --- PASS: TestNativeTaskOrdinaryReplayCompatibility/task.created (0.08s)
+    --- PASS: TestNativeTaskOrdinaryReplayCompatibility/task.queued (0.08s)
+=== RUN   TestNativeTaskReferenceValidationRejectsAmbiguousRouting
+--- PASS: TestNativeTaskReferenceValidationRejectsAmbiguousRouting (0.00s)
+=== RUN   TestCreateTaskRollbackAndIdempotency
+--- PASS: TestCreateTaskRollbackAndIdempotency (0.08s)
+=== RUN   TestTaskIntentDefaultsIsImmutableAndScopesIdempotency
+--- PASS: TestTaskIntentDefaultsIsImmutableAndScopesIdempotency (0.08s)
+PASS
+ok  	openagentx/internal/persistence/sqlite	2.406s

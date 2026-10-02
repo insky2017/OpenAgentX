@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-02T08:05:27.274897+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-local-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "runtime_session": {
+      "backend_id": "codex",
+      "provider_session_id": "01a0fb9b-4097-79d3-902f-6603a844fa15"
+    },
+    "content": "Do not call tools. Reply with exactly NATIVE-CLOSED-BUS-NEXT01.",
+    "meta": {
+      "idempotency_key": "d652f13c813a34c54bbe265d5fccd700"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-0843fa23-65fe-45f6-8f89-250e9e75f7e7",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 5
+  }
+}

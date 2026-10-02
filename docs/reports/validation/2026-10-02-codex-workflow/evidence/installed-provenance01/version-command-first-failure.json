@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "version"
+  ],
+  "exit_code": 1,
+  "output": "Unknown command: version\n",
+  "next": "Use go version -m and supported --help; no product change required."
+}

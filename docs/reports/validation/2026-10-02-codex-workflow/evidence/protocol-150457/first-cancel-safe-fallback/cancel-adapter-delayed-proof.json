@@ -1,0 +1,8 @@
+{
+  "checked_at": "2026-10-02T08:06:14.872069296Z",
+  "host_still_alive": false,
+  "original_host_pid": 2346792,
+  "sentinel_absent": true,
+  "tool_started_at": "2026-10-02T16:05:51.853995998+08:00",
+  "waited_past_tool_deadline": true
+}

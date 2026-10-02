@@ -1,0 +1,4 @@
+{
+  "empty_resume_error": "{\"error\": {\"code\": -32600, \"message\": \"no rollout found for thread id 01a0fb86-e692-74c3-bedb-3af4a54d3c15\"}, \"id\": \"g2-2\"}",
+  "error": "Traceback (most recent call last):\n  File \"<stdin>\", line 10, in <module>\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/codex_protocol_probe.py\", line 172, in request\n    raise RuntimeError(json.dumps(response))\nRuntimeError: {\"error\": {\"code\": -32603, \"message\": \"failed to read thread: thread-store internal error: failed to read session metadata /home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/home/sessions/2026/10/02/rollout-2026-10-02T15-31-57-01a0fb86-e692-74c3-bedb-3af4a54d3c15.jsonl: rollout at /home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/home/sessions/2026/10/02/rollout-2026-10-02T15-31-57-01a0fb86-e692-74c3-bedb-3af4a54d3c15.jsonl is empty\"}, \"id\": \"g2-3\"}\n"
+}

@@ -1,0 +1,3 @@
+{
+  "error": "Traceback (most recent call last):\n  File \"<stdin>\", line 7, in <module>\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/codex_protocol_probe.py\", line 172, in request\n    raise RuntimeError(json.dumps(response))\nRuntimeError: {\"error\": {\"code\": -32600, \"message\": \"no rollout found for thread id 01a0fb7b-95b7-7891-90d7-e30b11b894f7\"}, \"id\": \"g-2\"}\n"
+}

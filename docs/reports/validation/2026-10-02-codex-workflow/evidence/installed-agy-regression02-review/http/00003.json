@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-02T08:41:16.327446+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/run-attempts/run-c1244e8f-d2e8-4df3-a779-53de928b9a19",
+  "request": null,
+  "status": 200,
+  "response": {
+    "deadline_at": "2026-10-02T09:08:37.273096954Z",
+    "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+    "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+    "run_id": "run-c1244e8f-d2e8-4df3-a779-53de928b9a19",
+    "task_id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+    "agent_id": "agy-onboarding-e2e",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-d6ca3564-1302-47b3-a220-e9f967486032",
+    "worker_generation": 5,
+    "execution_spec_version": 1,
+    "adapter_id": "agy-batch",
+    "backend_id": "agy",
+    "model": "gemini-3.7-flash-low",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 5,
+    "network_binding_revision": 5,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "OAX-AGY-CODEX-REGRESSION01",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-02T08:38:37.273096954Z",
+    "finished_at": "2026-10-02T08:38:49.998766936Z",
+    "created_at": "2026-10-02T08:38:37.273096954Z",
+    "updated_at": "2026-10-02T08:38:49.998766936Z"
+  }
+}

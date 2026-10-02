@@ -1,0 +1,21 @@
+{
+  "classification": "browser tooling failures, not product defects",
+  "failures": [
+    {
+      "action": "resize_page",
+      "error": "Protocol error (Browser.setContentsSize): Restore window to normal state before setting content size",
+      "recovery": "emulate viewport 1440x1000 and 390x844 succeeded"
+    },
+    {
+      "action": "snapshot/screenshot/evaluate filePath",
+      "error": "Access denied: requested paths not within configured workspace roots",
+      "recovery": "stopped filePath saving after repeated denial; saved returned text/image data via filesystem tools"
+    },
+    {
+      "action": "persist full screenshot in one exec argv",
+      "error": "Argument list too long (os error 7)",
+      "recovery": "saved viewport screenshots using 40000-character chunks"
+    }
+  ],
+  "intermediate_observation": "03-narrow-state was captured during viewport reflow before details mounted; settled evidence is 04-narrow-settled-state."
+}

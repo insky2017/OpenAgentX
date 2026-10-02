@@ -1,0 +1,1 @@
+{"content":[{"type":"text","text":"Script ran on page and returned:\n```json\n{\"url\":\"http://127.0.0.1:42423/?agent=codex-local-e2e\",\"viewport\":{\"width\":1440,\"height\":1000},\"cards\":[{\"text\":\"Codex 实际链路验收\\n可开始工作\\n\\ncodex-local-e2e · 心跳 2 秒前\\n\\n进入工作台 ↗\",\"dot\":\"status-dot ready\",\"dotColor\":\"rgb(63, 185, 80)\"}],\"pageWidth\":1440}\n```"}]}

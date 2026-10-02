@@ -1,0 +1,96 @@
+{
+  "at": "2026-10-02T07:54:39.988208+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "codex-local-e2e",
+        "principal_id": "agent-codex-local-e2e",
+        "organization_id": "default",
+        "display_name": "Codex 实际链路验收",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-02T07:45:02.058486023Z",
+        "updated_at": "2026-10-02T07:45:02.058486023Z",
+        "readiness": {
+          "ready": true,
+          "can_start_now": true,
+          "reason": "可开始工作"
+        }
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 109,
+    "live_after_sequence": 109,
+    "server_time": "2026-10-02T07:54:39.987512973Z",
+    "tasks": [
+      {
+        "id": "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "query",
+        "completion_basis": "query_result_delivered",
+        "idempotency_key": "dc340be4d1735f5a43bbe9b834fc5a21",
+        "content": "Read OAX-CODEX-163f4d11a213312a-input.txt in the assigned workspace. Reply with its contents (without newline), then | then the role verification code supplied in your role instructions. Do not read role files.",
+        "status": "succeeded",
+        "result": "OAX-CODEX-163f4d11a213312a|OAX-CODEX-ROLE",
+        "created_at": "2026-10-02T07:53:09.920635378Z",
+        "updated_at": "2026-10-02T07:53:34.279105931Z"
+      },
+      {
+        "id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "mutation",
+        "completion_basis": "",
+        "idempotency_key": "011b3983814238374274bea5377e0c7e",
+        "content": "Create OAX-CODEX-163f4d11a213312a-result.txt in the assigned workspace with exactly the bytes b'OAX-CODEX-163f4d11a213312a\\n'. Write once using a tool. Do not change other files. Report completion.",
+        "status": "uncertain",
+        "result": "已完成：文件 `OAX-CODEX-163f4d11a213312a-result.txt` 已写入一次，内容核对完全一致，未修改其他文件。",
+        "error": "business_effect_unverified",
+        "created_at": "2026-10-02T07:53:39.939904549Z",
+        "updated_at": "2026-10-02T07:54:01.387572327Z"
+      },
+      {
+        "id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+        "version": 3,
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "organization_id": "default",
+        "dispatch_mode": "direct",
+        "intent": "query",
+        "completion_basis": "query_result_delivered",
+        "idempotency_key": "412ed49ec9fe707d641480589fc4f769",
+        "content": "Do not call tools. Reply with exactly this text: OAX-CODEX-163f4d11a213312a-NEXT",
+        "status": "succeeded",
+        "result": "OAX-CODEX-163f4d11a213312a-NEXT",
+        "created_at": "2026-10-02T07:54:09.963927007Z",
+        "updated_at": "2026-10-02T07:54:17.993005547Z"
+      }
+    ],
+    "workers": [
+      {
+        "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+        "agent_id": "codex-local-e2e",
+        "generation": 1,
+        "status": "online",
+        "last_heartbeat_at": "2026-10-02T07:54:30.669320978Z",
+        "lease_until": "2026-10-02T07:55:00.669320978Z",
+        "started_at": "2026-10-02T07:45:10.658587642Z",
+        "updated_at": "2026-10-02T07:54:30.669320978Z"
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-02T08:15:55.485981+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-local-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "runtime_session": {
+      "backend_id": "codex",
+      "provider_session_id": "01a0fb9b-4097-79d3-902f-6603a844fa15"
+    },
+    "content": "Read native-queue-result01.txt in the assigned workspace. Reply with exactly its contents without trailing newline, then |BUS-AFTER-NATIVE01. Do not change any file.",
+    "meta": {
+      "idempotency_key": "8cb9ca181c3b1b9d40f13d4a681afb9e"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 7
+  }
+}

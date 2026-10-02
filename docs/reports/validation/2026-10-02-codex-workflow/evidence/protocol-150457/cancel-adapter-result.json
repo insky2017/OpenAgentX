@@ -1,0 +1,25 @@
+{
+  "status": "canceled",
+  "provider_session_id": "01a0fbaa-4bfb-72d0-a8a6-93e070398439",
+  "final_reply": false,
+  "usage": {
+    "total": {
+      "totalTokens": 18498,
+      "inputTokens": 18431,
+      "cachedInputTokens": 3968,
+      "cacheWriteInputTokens": 0,
+      "outputTokens": 67,
+      "reasoningOutputTokens": 0
+    },
+    "last": {
+      "totalTokens": 18498,
+      "inputTokens": 18431,
+      "cachedInputTokens": 3968,
+      "cacheWriteInputTokens": 0,
+      "outputTokens": 67,
+      "reasoningOutputTokens": 0
+    },
+    "modelContextWindow": 258400
+  },
+  "side_effects_known": false
+}

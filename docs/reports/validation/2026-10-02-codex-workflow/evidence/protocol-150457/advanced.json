@@ -1,0 +1,122 @@
+{
+  "native": {
+    "method": "turn/completed",
+    "params": {
+      "threadId": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+      "turn": {
+        "id": "01a0fb78-9083-7dd3-a334-6e2c283395a1",
+        "items": [
+          {
+            "type": "agentMessage",
+            "id": "msg_0829fb406c5b5733016abf5a4eef1487d183196840040f6641",
+            "text": "OAX_NATIVE_INPUT_OK.",
+            "phase": "final_answer",
+            "memoryCitation": null,
+            "delivery": null,
+            "questions": null
+          }
+        ],
+        "itemsView": "summary",
+        "status": "completed",
+        "error": null,
+        "startedAt": 1790925377,
+        "completedAt": 1790925392,
+        "durationMs": 14555
+      }
+    },
+    "emittedAtMs": 1790925392239
+  },
+  "tui_detached_active_turn": "01a0fb78-c974-7781-8cc7-e99d286101fc",
+  "steer_wrong_id_error": "{\"error\": {\"code\": -32600, \"message\": \"expected active turn id `wrong-turn-id` but found `01a0fb78-c974-7781-8cc7-e99d286101fc`\"}, \"id\": \"e-3\"}",
+  "concurrent_start": {
+    "first_turn_id": "01a0fb78-c974-7781-8cc7-e99d286101fc",
+    "second_result": {
+      "turn": {
+        "id": "01a0fb78-c974-7781-8cc7-e99d286101fc",
+        "items": [],
+        "itemsView": "notLoaded",
+        "status": "inProgress",
+        "error": null,
+        "startedAt": null,
+        "completedAt": null,
+        "durationMs": null
+      }
+    }
+  },
+  "detach_completion": {
+    "method": "turn/completed",
+    "params": {
+      "threadId": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+      "turn": {
+        "id": "01a0fb78-c974-7781-8cc7-e99d286101fc",
+        "items": [
+          {
+            "type": "agentMessage",
+            "id": "msg_0829fb406c5b5733016abf5a7bd3e487d1a28c5af9e8573f8c",
+            "text": "DETACH_OK\nACTIVE_START_STEERED",
+            "phase": "final_answer",
+            "memoryCitation": null,
+            "delivery": null,
+            "questions": null
+          }
+        ],
+        "itemsView": "summary",
+        "status": "completed",
+        "error": null,
+        "startedAt": 1790925392,
+        "completedAt": 1790925437,
+        "durationMs": 45015
+      }
+    },
+    "emittedAtMs": 1790925437273
+  },
+  "detach_artifact": "OAX_AFTER_DETACH_OK\n",
+  "cancel_started": {
+    "method": "item/started",
+    "params": {
+      "item": {
+        "type": "commandExecution",
+        "id": "exec-eca5875b-1af5-45a6-96c0-257fd44b427c",
+        "pluginId": null,
+        "scriptPath": null,
+        "command": "/usr/bin/zsh -lc 'sleep 60; printf SHOULD_NOT_EXIST > cancel-sentinel.txt'",
+        "cwd": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/workspace",
+        "processId": "5143",
+        "source": "unifiedExecStartup",
+        "status": "inProgress",
+        "commandActions": [
+          {
+            "type": "unknown",
+            "command": "sleep 60; printf SHOULD_NOT_EXIST > cancel-sentinel.txt"
+          }
+        ],
+        "aggregatedOutput": null,
+        "exitCode": null,
+        "durationMs": null
+      },
+      "threadId": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+      "turnId": "01a0fb79-795e-7bd1-853e-461df355458f",
+      "startedAtMs": 1790925455345
+    },
+    "emittedAtMs": 1790925455345
+  },
+  "cancel_ack": {},
+  "cancel_terminal": {
+    "method": "turn/completed",
+    "params": {
+      "threadId": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+      "turn": {
+        "id": "01a0fb79-795e-7bd1-853e-461df355458f",
+        "items": [],
+        "itemsView": "notLoaded",
+        "status": "interrupted",
+        "error": null,
+        "startedAt": 1790925437,
+        "completedAt": 1790925455,
+        "durationMs": 18052
+      }
+    },
+    "emittedAtMs": 1790925455373
+  },
+  "cancel_sentinel_absent": true
+}

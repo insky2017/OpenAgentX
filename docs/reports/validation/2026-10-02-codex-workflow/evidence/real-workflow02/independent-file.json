@@ -1,0 +1,7 @@
+{
+  "path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/workspace/OAX-CODEX-163f4d11a213312a-result.txt",
+  "actual_bytes": 27,
+  "sha256": "02b3a500b8b22a828dbd44d97b21ec70f54c424462aae5f9e6f34c2664bd7856",
+  "expected_sha256": "02b3a500b8b22a828dbd44d97b21ec70f54c424462aae5f9e6f34c2664bd7856",
+  "exact": true
+}

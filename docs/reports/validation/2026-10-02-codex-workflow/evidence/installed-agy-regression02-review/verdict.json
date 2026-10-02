@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "scope": "read-only re-observation of original task; no repeated model call",
+  "prior_harness_failure": "post-validation summary used task_id field instead of API task.id; original failure retained",
+  "task_id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+  "worker_instance_id": "worker-d6ca3564-1302-47b3-a220-e9f967486032",
+  "generation": 5
+}

@@ -1,0 +1,3 @@
+[2m2026-10-02T07:45:10.591444Z[0m [31mERROR[0m [2mcodex_app_server[0m[2m:[0m Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/sky/.codex/config.toml): `disable_response_storage` is ignored.
+  user (/home/sky/.codex/config.toml): `mcp_servers.chrome-devtools.type` is ignored.

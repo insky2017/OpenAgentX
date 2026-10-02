@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/usr/bin/strace",
+    "-f",
+    "-o",
+    "<RAW_DIR>/04-status.strace",
+    "-e",
+    "trace=process,connect",
+    "<RAW_DIR>/bin/openagentx",
+    "agent",
+    "status",
+    "cli-evidence",
+    "--db",
+    "<RAW_DIR>/profile/oax.db",
+    "--socket",
+    "<RAW_DIR>/profile/oax.sock",
+    "--file",
+    "<RAW_DIR>/profile/fleet.yaml",
+    "--worker-dir",
+    "<RAW_DIR>/profile/workers",
+    "--credentials",
+    "<RAW_DIR>/profile/credentials.json"
+  ],
+  "environment_overrides": {
+    "OPENAGENTX_HOME": "<RAW_DIR>/profile"
+  },
+  "started_at": "2026-10-02T07:41:55.799575+00:00"
+}

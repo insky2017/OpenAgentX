@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-02T08:07:32.091503+00:00",
+  "native_session1_banner": "0.153.1",
+  "native_session1_exited": true,
+  "path_codex": "/home/sky/.local/bin/codex",
+  "path_version": "codex-cli 0.160.0",
+  "local_bin_version": "codex-cli 0.160.0",
+  "backend_process_tree": [
+    {
+      "pid": 2255934,
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+    }
+  ]
+}

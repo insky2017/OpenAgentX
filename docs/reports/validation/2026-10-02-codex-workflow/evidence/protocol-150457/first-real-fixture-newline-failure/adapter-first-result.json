@@ -1,0 +1,26 @@
+{
+  "status": "succeeded",
+  "provider_session_id": "01a0fb8c-ed39-76e0-b1de-4463c94c2c26",
+  "result": "OAX_REAL_FILE_COMPLETE",
+  "final_reply": true,
+  "usage": {
+    "total": {
+      "totalTokens": 37132,
+      "inputTokens": 37030,
+      "cachedInputTokens": 22272,
+      "cacheWriteInputTokens": 0,
+      "outputTokens": 102,
+      "reasoningOutputTokens": 0
+    },
+    "last": {
+      "totalTokens": 18599,
+      "inputTokens": 18590,
+      "cachedInputTokens": 18304,
+      "cacheWriteInputTokens": 0,
+      "outputTokens": 9,
+      "reasoningOutputTokens": 0
+    },
+    "modelContextWindow": 258400
+  },
+  "side_effects_known": false
+}

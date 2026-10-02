@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-02T08:41:21.435473+00:00",
+  "fixture": {
+    "started_epoch": 1790930386.434904,
+    "write_due_epoch": 1790930476.434904,
+    "parent": {
+      "pid": 2471672,
+      "starttime": "14881455",
+      "state": "R"
+    },
+    "child": {
+      "pid": 2471692,
+      "starttime": "14881469",
+      "state": "R"
+    }
+  },
+  "observed": {
+    "parent": {
+      "pid": 2471672,
+      "absent": true
+    },
+    "child": {
+      "pid": 2471692,
+      "absent": true
+    }
+  },
+  "sentinel_exists": false,
+  "invocation_count": 1,
+  "checked_epoch": 1790930481.4355557,
+  "task_status": "canceled"
+}

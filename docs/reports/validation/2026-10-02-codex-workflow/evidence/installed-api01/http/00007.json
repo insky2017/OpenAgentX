@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-02T08:38:42.172634+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-80e82fd3-c490-46a1-8c18-91365a2fcc05",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-80e82fd3-c490-46a1-8c18-91365a2fcc05",
+      "version": 2,
+      "target_agent_id": "codex-domain-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Do not call any tools or read files. Recall the exact file contents previously written to native-queue-result01.txt in this native thread before it joined this new Agent. Treat those contents as the old verification code. Reply with exactly that code, then |, then the role verification code supplied in your current role instructions. No other text.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T08:38:33.138096495Z",
+      "updated_at": "2026-10-02T08:38:33.141190562Z"
+    },
+    "messages": [
+      {
+        "id": "message-d7ed7842-b884-4255-8280-5391053547e2",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-80e82fd3-c490-46a1-8c18-91365a2fcc05",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "codex-domain-e2e",
+        "kind": "instruction",
+        "content": "Do not call any tools or read files. Recall the exact file contents previously written to native-queue-result01.txt in this native thread before it joined this new Agent. Treat those contents as the old verification code. Reply with exactly that code, then |, then the role verification code supplied in your current role instructions. No other text.",
+        "created_at": "2026-10-02T08:38:33.138096495Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T09:08:33.141190562Z",
+        "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+        "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+        "run_id": "run-3172733d-df20-4f6e-bb63-50b5c12ceeb4",
+        "task_id": "task-80e82fd3-c490-46a1-8c18-91365a2fcc05",
+        "agent_id": "codex-domain-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-02T08:38:33.141190562Z",
+        "created_at": "2026-10-02T08:38:33.141190562Z",
+        "updated_at": "2026-10-02T08:38:37.121267793Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 272777,
+        "event_id": "event-4d01d81c-acbc-445f-8a74-4d39a99a2d73",
+        "aggregate_type": "task",
+        "aggregate_id": "task-80e82fd3-c490-46a1-8c18-91365a2fcc05",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:38:33.138096495Z"
+      },
+      {
+        "sequence": 272779,
+        "event_id": "event-task-f7d60ead-9686-4c42-bb71-5239af0f353d",
+        "aggregate_type": "task",
+        "aggregate_id": "task-80e82fd3-c490-46a1-8c18-91365a2fcc05",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:38:33.142463046Z"
+      },
+      {
+        "sequence": 272780,
+        "event_id": "event-run-63751d48-40c3-4d43-8b65-fda51b96ea41",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-3172733d-df20-4f6e-bb63-50b5c12ceeb4",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:38:33.142467808Z"
+      },
+      {
+        "sequence": 272782,
+        "event_id": "event-runtime-3eb87cf1-81d7-4116-9d7b-01ff4529495a",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-3172733d-df20-4f6e-bb63-50b5c12ceeb4",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:38:35.303900738Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 272789,
+    "live_after_sequence": 272789,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

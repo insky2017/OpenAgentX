@@ -1,0 +1,28 @@
+{
+  "fixture": {
+    "started_epoch": 1790930386.434904,
+    "write_due_epoch": 1790930476.434904,
+    "parent": {
+      "pid": 2471672,
+      "starttime": "14881455",
+      "state": "R"
+    },
+    "child": {
+      "pid": 2471692,
+      "starttime": "14881469",
+      "state": "R"
+    }
+  },
+  "observed": {
+    "parent": {
+      "pid": 2471672,
+      "starttime": "14881455",
+      "state": "S"
+    },
+    "child": {
+      "pid": 2471692,
+      "starttime": "14881469",
+      "state": "S"
+    }
+  }
+}

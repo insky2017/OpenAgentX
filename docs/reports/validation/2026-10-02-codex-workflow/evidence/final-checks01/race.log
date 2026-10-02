@@ -1,0 +1,5 @@
+ok  	openagentx/internal/runtime/codex	(cached)
+ok  	openagentx/internal/nativebridge	1.358s
+ok  	openagentx/internal/cli/worker	1.992s
+ok  	openagentx/internal/worker	(cached)
+ok  	openagentx/internal/cli/fleet	7.334s

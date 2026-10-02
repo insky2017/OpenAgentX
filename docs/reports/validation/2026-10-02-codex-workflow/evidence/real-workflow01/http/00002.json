@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-02T07:48:37.751463+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 401,
+  "response": {
+    "body_text": "unauthorized\n"
+  }
+}

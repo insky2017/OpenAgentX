@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-02T08:00:29.647096+00:00",
+  "frontend_binary": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate02/openagentx",
+  "frontend_sha256": "4abd882bf295fe09690a1cec17c809a6790a796b025ce02578e0607f4a6056d1",
+  "backend_candidate_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+  "agent": "codex-local-e2e",
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+  "backend_state_before": {
+    "endpoint": "unix:///tmp/oax-codex-214904957/server.sock",
+    "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+    "turn_id": "01a0fb9b-4129-78d3-9532-a3a00e97b264",
+    "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+    "run_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+    "state": "idle",
+    "pid": 2255999,
+    "updated_at": "2026-10-02T08:00:20.688515764Z"
+  },
+  "scope": "managed native CLI through OAX bridge; no direct Codex resume, no cancellation of tools"
+}

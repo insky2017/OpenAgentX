@@ -1,0 +1,6 @@
+{
+  "started": 1790924846.543508,
+  "server_pid": 2112166,
+  "error": "Traceback (most recent call last):\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/codex_protocol_probe.py\", line 104, in main\n    a = Client(root, sockpath, 'a'); clients.append(a)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/codex_protocol_probe.py\", line 29, in __init__\n    self.request('initialize', {'clientInfo': {'name': 'oax_probe_' + name, 'version': '1'},\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/codex_protocol_probe.py\", line 70, in request\n    response = self.wait(lambda m: m.get('id') == rid and 'method' not in m, timeout)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/codex_protocol_probe.py\", line 60, in wait\n    raise RuntimeError(self.name + ' connection closed')\nRuntimeError: a connection closed\n",
+  "server_exit": 0
+}

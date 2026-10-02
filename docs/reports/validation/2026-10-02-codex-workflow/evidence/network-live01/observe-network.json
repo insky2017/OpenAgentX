@@ -1,0 +1,83 @@
+{
+  "method": "GET",
+  "path": "/api/observe/v1/network-profiles",
+  "transport": "unix-domain-socket",
+  "http_status": 200,
+  "binding": {
+    "agent_id": "codex-local-e2e",
+    "backend_id": "codex",
+    "mode": "inherit",
+    "policy_version": 1,
+    "test_id": "network-mode-test-314911c6-76b5-4792-9374-325c45032889",
+    "manifest_digest": "5c74c19c0bd9f27a377bf6170d4f12dd516e28e7d6681fa6c7e5abe945c174b5",
+    "runtime_identity": {
+      "adapter_id": "codex-app-server",
+      "adapter_version": "1",
+      "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad"
+    },
+    "version": 1,
+    "desired_status": "applied",
+    "applied_worker_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+    "applied_generation": 1,
+    "applied_mode": "inherit",
+    "applied_policy_version": 1,
+    "applied_binding_revision": 1,
+    "updated_at": "2026-10-02T07:45:31.2414301Z"
+  },
+  "mode_test": {
+    "test_id": "network-mode-test-314911c6-76b5-4792-9374-325c45032889",
+    "agent_id": "codex-local-e2e",
+    "backend_id": "codex",
+    "policy_version": 1,
+    "mode": "inherit",
+    "manifest_digest": "5c74c19c0bd9f27a377bf6170d4f12dd516e28e7d6681fa6c7e5abe945c174b5",
+    "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+    "generation": 1,
+    "runtime_identity": {
+      "adapter_id": "codex-app-server",
+      "adapter_version": "1",
+      "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad"
+    },
+    "binding_revision": 0,
+    "state": "succeeded",
+    "duration_ms": 915,
+    "probe_results": [
+      {
+        "layer": "configuration",
+        "state": "passed"
+      },
+      {
+        "layer": "secret",
+        "state": "not_verified",
+        "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+      },
+      {
+        "layer": "endpoint",
+        "state": "not_verified",
+        "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+      },
+      {
+        "layer": "direct_rules",
+        "state": "not_applicable"
+      },
+      {
+        "layer": "runtime_health",
+        "state": "passed",
+        "duration_ms": 255
+      },
+      {
+        "layer": "network_effect",
+        "state": "not_verified",
+        "diagnostic_code": "NOT_VERIFIED"
+      },
+      {
+        "layer": "model_call",
+        "state": "not_verified",
+        "diagnostic_code": "NOT_VERIFIED"
+      }
+    ],
+    "created_by": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+    "created_at": "2026-10-02T07:45:17.216854336Z",
+    "finished_at": "2026-10-02T07:45:21.695271719Z"
+  }
+}

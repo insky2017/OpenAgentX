@@ -1,0 +1,32 @@
+{
+  "started": 1790924894.5779943,
+  "server_pid": 2114761,
+  "thread_id": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+  "first_turn": {
+    "method": "turn/completed",
+    "params": {
+      "threadId": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+      "turn": {
+        "id": "01a0fb71-324a-7f70-9be0-9721949370c7",
+        "items": [
+          {
+            "type": "agentMessage",
+            "id": "msg_0829fb406c5b5733016abf588c195487d18bbf9bb1398bb174",
+            "text": "OAX_PROTOCOL_QUERY_OK",
+            "phase": "final_answer",
+            "memoryCitation": null,
+            "delivery": null,
+            "questions": null
+          }
+        ],
+        "itemsView": "summary",
+        "status": "completed",
+        "error": null,
+        "startedAt": 1790924894,
+        "completedAt": 1790924942,
+        "durationMs": 48191
+      }
+    },
+    "emittedAtMs": 1790924942994
+  }
+}

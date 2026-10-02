@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-02T08:31:34.227851+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status",
+    "codex-domain-e2e"
+  ],
+  "exit": 0,
+  "transcript": "Codex 领域工作台 (codex-domain-e2e) · 可开始工作\r\n  当前：无\r\n  最近：暂无结果\r\n  打开：openagentx agent open codex-domain-e2e\r\n  恢复：openagentx agent resume codex-domain-e2e\r\n\r\n"
+}

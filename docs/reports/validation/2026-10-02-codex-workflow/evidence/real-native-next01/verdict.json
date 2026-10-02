@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "scope": "formal API query after managed native TUI closed; explicit same thread",
+  "task_id": "task-0843fa23-65fe-45f6-8f89-250e9e75f7e7",
+  "run_id": "run-670f2189-9dff-4b9c-8c30-a295c1c98774",
+  "worker": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+  "generation": 1,
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15"
+}

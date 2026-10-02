@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-02T08:36:36.180559+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "resume",
+    "codex-domain-e2e",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "output": "Agent codex-domain-e2e 服务在线，当前代 2 网络已应用。\nCodex 领域工作台 (codex-domain-e2e) · 可开始工作\n  当前：无\n  最近：暂无结果\n  打开：openagentx agent open codex-domain-e2e\n  恢复：openagentx agent resume codex-domain-e2e\n\n"
+}

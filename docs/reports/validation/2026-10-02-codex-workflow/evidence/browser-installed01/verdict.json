@@ -1,0 +1,22 @@
+{
+  "status": "PASS_WITH_STATED_SCOPE",
+  "read_only_browser": true,
+  "desktop": [
+    1440,
+    1000
+  ],
+  "narrow": [
+    390,
+    844
+  ],
+  "query_mutation_cancel_next_semantics": true,
+  "no_horizontal_overflow": true,
+  "authenticated_reload_and_network_restoration": true,
+  "assets_match_previous_verified_build": true,
+  "not_claimed": [
+    "same-page disabled write buttons",
+    "in-flight task across disconnect",
+    "physical mobile device",
+    "busy indicator color"
+  ]
+}

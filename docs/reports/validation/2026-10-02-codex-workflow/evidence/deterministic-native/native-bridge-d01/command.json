@@ -1,0 +1,1 @@
+{"argv": ["go", "test", "-race", "./internal/nativebridge", "-count=1", "-v", "-timeout", "30s"], "started_at": "2026-10-02T07:35:24.005387+00:00", "evidence_level": "D isolated control and WebSocket fixtures; not native Codex E2E"}

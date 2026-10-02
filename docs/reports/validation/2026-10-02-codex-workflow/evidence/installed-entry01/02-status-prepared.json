@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-02T08:31:11.109569+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status",
+    "codex-domain-e2e"
+  ],
+  "exit": 0,
+  "transcript": "codex-domain-e2e · 本地交接已准备，尚未通过此入口激活；运行态未核实。\r\n当前轮结束后运行 openagentx agent resume codex-domain-e2e。\r\n"
+}

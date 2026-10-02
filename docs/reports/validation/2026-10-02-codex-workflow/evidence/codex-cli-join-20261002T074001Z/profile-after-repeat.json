@@ -1,0 +1,34 @@
+{
+  "fleet.yaml": {
+    "sha256": "729628bf4591c787554521f3c82f8be9149dcd7f4decb037059884d264677bd6",
+    "mode": "0o600"
+  },
+  "fleet.yaml.lock": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mode": "0o600"
+  },
+  "workers/cli-evidence.env": {
+    "sha256": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04",
+    "mode": "0o600"
+  },
+  "workers/cli-evidence.yaml": {
+    "sha256": "b90fa7a2abf4234d88194b0e7dcdb9f0a64c0514f27e28e09d92e227be516aca",
+    "mode": "0o600"
+  },
+  "workers/identities/cli-evidence.role.md": {
+    "sha256": "2bacfe2cd460e4ebf38fb5acdf26e6cd9be060e72a6b423422f923f1026a3da6",
+    "mode": "0o600"
+  },
+  "workers/identities/cli-evidence.yaml": {
+    "sha256": "0075ca540231d4ef1fb00dd932a05ea68a1aba05e5a5a128f7661bc205e6394f",
+    "mode": "0o600"
+  },
+  "workers/joins/cli-evidence.handoff.md": {
+    "sha256": "4fe6057f82a2a0824860fce6b7d6e22fbc4bc41810e50d4e023a9a45492226a8",
+    "mode": "0o600"
+  },
+  "workers/joins/cli-evidence.json": {
+    "sha256": "691a0bbe3f0a5fba1b36bbb42a4b114edf21bf667243d9906429a66fb948f611",
+    "mode": "0o600"
+  }
+}

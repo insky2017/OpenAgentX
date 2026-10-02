@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-02T08:39:21.339601+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-domain-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Run exactly this command once in a shell tool: python3 /home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace/OAX-INSTALLED-d20953aa00045552-cancel/long_shell.py. Wait for its completion in the foreground; do not background, replace, edit, rerun or manually terminate the script. It is a bounded cancellation acceptance fixture. Do not call any other tools or change files yourself.",
+    "runtime_session": {
+      "backend_id": "codex",
+      "source_task_id": "task-bfa32f92-2401-4cfb-91c1-3a32eb204848"
+    },
+    "meta": {
+      "idempotency_key": "e39b5e654604900dbe3d9e0aa1717682"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-2fd909f7-9dfb-4a4a-97e4-f39257939d72",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 88
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "stage": "before",
+  "captured_at": "2026-10-02T08:35:43.359430+00:00",
+  "expected_commit": "6b68eeb810c2b65d629cd8a817bad25a21483d5c",
+  "expected_binary_sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366",
+  "release_clone_head": "6b68eeb810c2b65d629cd8a817bad25a21483d5c",
+  "units": {
+    "daemon": {
+      "argv": [
+        "systemctl",
+        "--user",
+        "show",
+        "openagentx.service",
+        "--property=Id,MainPID,ExecStart,FragmentPath,EnvironmentFiles,ActiveState,SubState"
+      ],
+      "exit_code": 0,
+      "output": "MainPID=2439715\nExecStart={ path=/home/sky/.local/bin/openagentx ; argv[]=/home/sky/.local/bin/openagentx serve --db /home/sky/.openagentx/data/openagentx.db --socket /home/sky/.openagentx/run/openagentx.sock --http-addr ${OPENAGENTX_HTTP_ADDR} --web-dir /home/sky/.openagentx/web ; ignore_errors=no ; start_time=[Fri 2026-10-02 16:30:22 CST] ; stop_time=[n/a] ; pid=2439715 ; code=(null) ; status=0/0 }\nEnvironmentFiles=/home/sky/.openagentx/openagentx.env (ignore_errors=yes)\nId=openagentx.service\nActiveState=active\nSubState=running\nFragmentPath=/home/sky/.config/systemd/user/openagentx.service\n"
+    },
+    "agy_worker": {
+      "argv": [
+        "systemctl",
+        "--user",
+        "show",
+        "openagentx-worker@agy-onboarding-e2e.service",
+        "--property=Id,MainPID,ExecStart,FragmentPath,EnvironmentFiles,ActiveState,SubState"
+      ],
+      "exit_code": 0,
+      "output": "MainPID=2440442\nExecStart={ path=/home/sky/.local/bin/openagentx ; argv[]=/home/sky/.local/bin/openagentx worker run --config /home/sky/.openagentx/workers/agy-onboarding-e2e.yaml ; ignore_errors=no ; start_time=[Fri 2026-10-02 16:30:38 CST] ; stop_time=[n/a] ; pid=2440442 ; code=(null) ; status=0/0 }\nEnvironmentFiles=/home/sky/.openagentx/workers/agy-onboarding-e2e.env (ignore_errors=yes)\nId=openagentx-worker@agy-onboarding-e2e.service\nActiveState=active\nSubState=running\nFragmentPath=/home/sky/.config/systemd/user/openagentx-worker@.service\n"
+    },
+    "codex_worker": {
+      "argv": [
+        "systemctl",
+        "--user",
+        "show",
+        "openagentx-worker@codex-domain-e2e.service",
+        "--property=Id,MainPID,ExecStart,FragmentPath,EnvironmentFiles,ActiveState,SubState"
+      ],
+      "exit_code": 0,
+      "output": "MainPID=2441745\nExecStart={ path=/home/sky/.local/bin/openagentx ; argv[]=/home/sky/.local/bin/openagentx worker run --config /home/sky/.openagentx/workers/codex-domain-e2e.yaml ; ignore_errors=no ; start_time=[Fri 2026-10-02 16:31:11 CST] ; stop_time=[n/a] ; pid=2441745 ; code=(null) ; status=0/0 }\nEnvironmentFiles=/home/sky/.openagentx/workers/codex-domain-e2e.env (ignore_errors=yes)\nId=openagentx-worker@codex-domain-e2e.service\nActiveState=active\nSubState=running\nFragmentPath=/home/sky/.config/systemd/user/openagentx-worker@.service\n"
+    }
+  },
+  "processes": {
+    "daemon": {
+      "pid": 2439715,
+      "ppid": 1722,
+      "starttime_ticks": 14825118,
+      "exe": "/home/sky/.local/bin/openagentx",
+      "sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366",
+      "unit": "openagentx.service",
+      "identity_stable": true
+    },
+    "agy_worker": {
+      "pid": 2440442,
+      "ppid": 1722,
+      "starttime_ticks": 14826721,
+      "exe": "/home/sky/.local/bin/openagentx",
+      "sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366",
+      "unit": "openagentx-worker@agy-onboarding-e2e.service",
+      "identity_stable": true
+    },
+    "codex_worker": {
+      "pid": 2441745,
+      "ppid": 1722,
+      "starttime_ticks": 14830002,
+      "exe": "/home/sky/.local/bin/openagentx",
+      "sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366",
+      "unit": "openagentx-worker@codex-domain-e2e.service",
+      "identity_stable": true,
+      "environment": {
+        "HTTP_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "HTTPS_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "ALL_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "http_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "https_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "all_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "NO_PROXY": [
+          "rtx4090",
+          "localhost",
+          "127.0.0.1",
+          "::1",
+          "192.168.1.9",
+          "192.168.1.10",
+          "qt.gtimg.cn",
+          "ifzq.gtimg.cn"
+        ],
+        "no_proxy": [
+          "rtx4090",
+          "localhost",
+          "127.0.0.1",
+          "::1",
+          "192.168.1.9",
+          "192.168.1.10",
+          "qt.gtimg.cn",
+          "ifzq.gtimg.cn"
+        ],
+        "CODEX_HOME": "/home/sky/.codex"
+      }
+    },
+    "appserver": {
+      "pid": 2441875,
+      "ppid": 2441745,
+      "starttime_ticks": 14830075,
+      "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "identity_stable": true,
+      "environment": {
+        "HTTP_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "HTTPS_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "ALL_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "http_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "https_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "all_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "NO_PROXY": [
+          "rtx4090",
+          "localhost",
+          "127.0.0.1",
+          "::1",
+          "192.168.1.9",
+          "192.168.1.10",
+          "qt.gtimg.cn",
+          "ifzq.gtimg.cn"
+        ],
+        "no_proxy": [
+          "rtx4090",
+          "localhost",
+          "127.0.0.1",
+          "::1",
+          "192.168.1.9",
+          "192.168.1.10",
+          "qt.gtimg.cn",
+          "ifzq.gtimg.cn"
+        ],
+        "CODEX_HOME": "/home/sky/.codex"
+      }
+    }
+  },
+  "state_file": "/home/sky/.openagentx/workers/codex/codex-domain-e2e/state.json",
+  "state": {
+    "endpoint": "unix:///tmp/oax-codex-2606605776/server.sock",
+    "thread_id": "",
+    "state": "idle",
+    "pid": 2441875,
+    "updated_at": "2026-10-02T08:35:42.766678826Z"
+  },
+  "environment_file": {
+    "path": "/home/sky/.openagentx/workers/codex-domain-e2e.env",
+    "mode": "0o600",
+    "sha256": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04",
+    "targeted_keys": [
+      "HTTP_PROXY",
+      "HTTPS_PROXY",
+      "ALL_PROXY",
+      "http_proxy",
+      "https_proxy",
+      "all_proxy",
+      "CODEX_HOME",
+      "NO_PROXY",
+      "no_proxy"
+    ]
+  },
+  "provider": {
+    "provider": "oneaxe",
+    "base_url": {
+      "scheme": "http",
+      "host": "127.0.0.1",
+      "port": 8080,
+      "credentials_present": false
+    },
+    "requires_openai_auth": false
+  },
+  "checks": {
+    "all_oax_proc_sha_match_release": true,
+    "installed_binary_matches_release": true,
+    "all_process_identities_stable": true,
+    "appserver_child_of_codex_worker": true,
+    "appserver_sha_matches_formal_identity": true,
+    "environment_file_private": true,
+    "environment_file_matches_worker": true,
+    "worker_and_appserver_environment_match": true,
+    "both_no_proxy_include_loopback": true,
+    "provider_host_matches_no_proxy": true,
+    "network_applied_current_generation": true
+  },
+  "limitations": [
+    "No new task, model call or service action performed.",
+    "Environment assembly and NO_PROXY configuration do not prove external traffic/proxy forwarding or observed bypass.",
+    "Version provenance uses Go build info because openagentx has no version subcommand."
+  ]
+}

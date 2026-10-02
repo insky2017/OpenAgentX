@@ -1,0 +1,7 @@
+{
+  "status": "FAIL",
+  "mode": "workflow",
+  "started_at": "2026-10-02T07:48:37.474862+00:00",
+  "error": "HTTP 401 on /api/observe/v1/overview; see saved response",
+  "finished_at": "2026-10-02T07:48:37.752249+00:00"
+}

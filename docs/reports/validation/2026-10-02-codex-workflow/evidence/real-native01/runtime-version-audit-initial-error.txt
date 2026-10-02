@@ -1,0 +1,1 @@
+First read-only audit used substring codex in full executable path, misclassified candidate path openagentx as Codex and ran --version. OpenAgentX rejected Unknown command: --version (exit1). No lifecycle or task command ran. Audit corrected to basename codex.

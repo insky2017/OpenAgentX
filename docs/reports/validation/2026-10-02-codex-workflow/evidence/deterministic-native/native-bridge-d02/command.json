@@ -1,0 +1,1 @@
+{"argv": ["go", "test", "-race", "./internal/nativebridge", "-count=1", "-v", "-timeout", "30s"], "started_at": "2026-10-02T07:38:51.122411+00:00", "evidence_level": "D", "prior_failures": "d01 cross-thread notification leak is product failure; turn/start timeouts were fixture drift after per-task state paths changed"}

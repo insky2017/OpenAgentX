@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "checks": {
+    "before_after_targeted_environment_identical": true,
+    "private_environment_file_hash_unchanged": true,
+    "worker_restarted": true,
+    "appserver_restarted": true,
+    "daemon_and_agy_not_restarted_during_capture": true,
+    "network_generation_advanced": true,
+    "after_binding_matches_observed_worker": true,
+    "agent_ready_after_restart": true,
+    "all_proc_sha_after_match_release": true,
+    "codex_version_0_160_0": true,
+    "go_build_commit_matches_release": true,
+    "go_build_not_modified": true,
+    "all_help_exit_zero": true,
+    "eight_web_assets_match_release_installed_served": true,
+    "release_marker_matches_commit": true
+  },
+  "before_captured_at": "2026-10-02T08:35:43.359430+00:00",
+  "after_captured_at": "2026-10-02T08:38:18.135739+00:00",
+  "finished_at": "2026-10-02T08:40:18.196697+00:00",
+  "evidence_scope": "I installed artifact, actual process identity, served static assets and environment persistence only",
+  "fixture_note": "The BEFORE network_applied_current_generation flag only checked binding desired_status due to an absent agent generation field. Do not use that flag as independent worker-generation proof. BEFORE binding records generation 1; corrected AFTER capture explicitly includes WorkerReadModel and compares worker ID/generation 2. Both capture script versions are preserved.",
+  "limitations": [
+    "No task was dispatched and no services were changed by this verifier.",
+    "Root performed the Codex Worker restart between snapshots.",
+    "No model call, external network traversal or observed NO_PROXY bypass claim.",
+    "No product browser interaction, canceled-tool or business-effect validation in this evidence batch.",
+    "E2E can replace appserver later; these checks identify the captured process and time."
+  ]
+}

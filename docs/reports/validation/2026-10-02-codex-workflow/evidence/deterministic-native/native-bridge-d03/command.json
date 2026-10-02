@@ -1,0 +1,1 @@
+{"argv": ["go", "test", "-race", "./internal/nativebridge", "-count=1", "-v", "-timeout", "30s"], "started_at": "2026-10-02T07:45:18.416521+00:00", "evidence_level": "D", "scope": "Added native request identity and fast terminal ordering regressions; isolated WebSockets/control fixtures only"}

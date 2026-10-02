@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-02T07:53:09.921840+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-local-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Read OAX-CODEX-163f4d11a213312a-input.txt in the assigned workspace. Reply with its contents (without newline), then | then the role verification code supplied in your role instructions. Do not read role files.",
+    "meta": {
+      "idempotency_key": "dc340be4d1735f5a43bbe9b834fc5a21"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 1
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-02T08:39:12.287339+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/run-attempts/run-09a324c7-c73d-468b-ab55-8f6bf75b8db5",
+  "request": null,
+  "status": 200,
+  "response": {
+    "deadline_at": "2026-10-02T09:08:51.215981305Z",
+    "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+    "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+    "run_id": "run-09a324c7-c73d-468b-ab55-8f6bf75b8db5",
+    "task_id": "task-f341af1d-819c-44de-9d81-23173d078a3d",
+    "agent_id": "codex-domain-e2e",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+    "worker_generation": 2,
+    "execution_spec_version": 1,
+    "adapter_id": "codex-app-server",
+    "backend_id": "codex",
+    "model": "gpt-6-astra",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 2,
+    "network_binding_revision": 2,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "已创建 `OAX-INSTALLED-d20953aa00045552-result.txt`，内容为指定字节（含末尾一个换行），仅写入一次。",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-02T08:38:51.215981305Z",
+    "finished_at": "2026-10-02T08:39:11.52818454Z",
+    "created_at": "2026-10-02T08:38:51.215981305Z",
+    "updated_at": "2026-10-02T08:39:11.52818454Z"
+  }
+}

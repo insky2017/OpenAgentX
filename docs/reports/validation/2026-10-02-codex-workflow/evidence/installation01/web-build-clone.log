@@ -1,0 +1,14 @@
+
+> openagentx-command-center@0.1.0 build
+> vite build
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 268 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html        0.50 kB │ gzip:   0.33 kB
+dist/assets/app.css   30.26 kB │ gzip:   6.43 kB
+dist/assets/app.js   407.16 kB │ gzip: 124.62 kB
+
+✓ built in 453ms

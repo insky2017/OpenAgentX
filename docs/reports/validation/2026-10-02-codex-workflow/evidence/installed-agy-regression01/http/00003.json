@@ -1,0 +1,93 @@
+{
+  "at": "2026-10-02T08:38:37.279089+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+      "version": 2,
+      "target_agent_id": "agy-onboarding-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Do not call tools. Reply exactly: OAX-AGY-CODEX-REGRESSION01",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T08:38:37.269979777Z",
+      "updated_at": "2026-10-02T08:38:37.273096954Z"
+    },
+    "messages": [
+      {
+        "id": "message-32e87613-23db-45b0-9ec1-af794a5ad997",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "agy-onboarding-e2e",
+        "kind": "instruction",
+        "content": "Do not call tools. Reply exactly: OAX-AGY-CODEX-REGRESSION01",
+        "created_at": "2026-10-02T08:38:37.269979777Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T09:08:37.273096954Z",
+        "instructions_sha256": "c0e4656f96f01578b18953cffd6f2ca3b8ccb3c0f067fb632d261320288d96a4",
+        "instructions_path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace/ROLE.md",
+        "run_id": "run-c1244e8f-d2e8-4df3-a779-53de928b9a19",
+        "task_id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+        "agent_id": "agy-onboarding-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-d6ca3564-1302-47b3-a220-e9f967486032",
+        "worker_generation": 5,
+        "execution_spec_version": 1,
+        "adapter_id": "agy-batch",
+        "backend_id": "agy",
+        "model": "gemini-3.7-flash-low",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 5,
+        "network_binding_revision": 5,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-02T08:38:37.273096954Z",
+        "created_at": "2026-10-02T08:38:37.273096954Z",
+        "updated_at": "2026-10-02T08:38:37.273096954Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 272784,
+        "event_id": "event-52a7c25c-6528-43c2-9643-8b84c9b44e54",
+        "aggregate_type": "task",
+        "aggregate_id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:38:37.269979777Z"
+      },
+      {
+        "sequence": 272786,
+        "event_id": "event-task-d9185da4-73b2-4b45-95b6-2e60d7a6a527",
+        "aggregate_type": "task",
+        "aggregate_id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:38:37.274047721Z"
+      },
+      {
+        "sequence": 272787,
+        "event_id": "event-run-9cd5c21d-af4b-4903-93b3-9b0f32d9d116",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-c1244e8f-d2e8-4df3-a779-53de928b9a19",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:38:37.274051948Z"
+      }
+    ],
+    "snapshot_sequence": 272788,
+    "live_after_sequence": 272788,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

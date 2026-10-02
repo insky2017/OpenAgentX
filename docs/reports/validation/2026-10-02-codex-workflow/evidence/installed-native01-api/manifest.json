@@ -1,0 +1,9 @@
+{
+  "source_commit": "6b68eeb810c2b65d629cd8a817bad25a21483d5c",
+  "agent": "codex-domain-e2e",
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+  "command": [
+    "/usr/bin/python3",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed-native01/observe-and-next.py"
+  ]
+}

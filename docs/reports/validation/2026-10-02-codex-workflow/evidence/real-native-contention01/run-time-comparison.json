@@ -1,0 +1,138 @@
+[
+  {
+    "task_id": "task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+    "run_id": "run-8a29ec4e-19a0-4cfe-916b-5ca1699a64ca",
+    "run_fields": {
+      "status": "succeeded",
+      "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "worker_generation": 1,
+      "started_at": "2026-10-02T08:15:40.825945484Z",
+      "finished_at": "2026-10-02T08:16:29.706803952Z",
+      "created_at": "2026-10-02T08:15:40.825945484Z"
+    },
+    "events": [
+      {
+        "event_type": "task.created",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:15:40.801658236Z"
+      },
+      {
+        "event_type": "task.running",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:15:40.827375811Z"
+      },
+      {
+        "event_type": "run_attempt.started",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:15:40.827382474Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:15:42.614849652Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:15:49.990235185Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:24.905247757Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:29.673282553Z"
+      },
+      {
+        "event_type": "run_attempt.finished",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:29.706825185Z"
+      },
+      {
+        "event_type": "task.settled",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:29.706828262Z"
+      }
+    ]
+  },
+  {
+    "task_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+    "run_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+    "run_fields": {
+      "status": "succeeded",
+      "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "worker_generation": 1,
+      "started_at": "2026-10-02T08:16:29.710451529Z",
+      "finished_at": "2026-10-02T08:16:46.788575005Z",
+      "created_at": "2026-10-02T08:16:29.710451529Z"
+    },
+    "events": [
+      {
+        "event_type": "task.created",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:15:55.484251961Z"
+      },
+      {
+        "event_type": "task.running",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:29.71177689Z"
+      },
+      {
+        "event_type": "run_attempt.started",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:29.711781951Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:31.055663855Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:37.710580535Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:41.543171042Z"
+      },
+      {
+        "event_type": "runtime.turn.output",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:46.586854933Z"
+      },
+      {
+        "event_type": "run_attempt.finished",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:46.788599183Z"
+      },
+      {
+        "event_type": "task.settled",
+        "type": null,
+        "at": null,
+        "created_at": "2026-10-02T08:16:46.788602157Z"
+      }
+    ]
+  }
+]

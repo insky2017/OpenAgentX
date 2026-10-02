@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-10-02T08:11:27.861360382Z",
+  "commands": [
+    {
+      "list": {
+        "data": [
+          {
+            "processId": "62798",
+            "itemId": "exec-1aaa8bef-f67c-46cb-be32-c42790580633",
+            "osPid": null
+          }
+        ],
+        "nextCursor": null
+      }
+    }
+  ],
+  "error": "Codex background terminal omitted OS PID",
+  "method": "thread/backgroundTerminals/terminate",
+  "stopped": false,
+  "thread_id": "01a0fbaa-4bfb-72d0-a8a6-93e070398439",
+  "turn_id": "01a0fbaa-4c7a-7c12-8a6c-0ef073a1cc38"
+}

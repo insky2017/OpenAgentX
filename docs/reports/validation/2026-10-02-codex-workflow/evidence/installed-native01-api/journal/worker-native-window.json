@@ -1,0 +1,16 @@
+{
+  "command": [
+    "journalctl",
+    "--user",
+    "-u",
+    "openagentx-worker@codex-domain-e2e.service",
+    "--since",
+    "2026-10-02 08:44:00 UTC",
+    "--no-pager",
+    "-o",
+    "short-iso"
+  ],
+  "exit": 0,
+  "stdout": "-- No entries --\n",
+  "stderr": ""
+}

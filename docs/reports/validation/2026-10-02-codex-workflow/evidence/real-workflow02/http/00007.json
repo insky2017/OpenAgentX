@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-02T07:53:39.941178+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-local-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Create OAX-CODEX-163f4d11a213312a-result.txt in the assigned workspace with exactly the bytes b'OAX-CODEX-163f4d11a213312a\\n'. Write once using a tool. Do not change other files. Report completion.",
+    "meta": {
+      "idempotency_key": "011b3983814238374274bea5377e0c7e"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

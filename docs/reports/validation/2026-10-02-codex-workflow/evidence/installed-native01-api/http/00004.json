@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-02T08:47:45.651828+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-domain-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "runtime_session": {
+      "backend_id": "codex",
+      "provider_session_id": "01a0fb9b-4097-79d3-902f-6603a844fa15"
+    },
+    "content": "Do not call tools. Reply exactly: INSTALLED-NATIVE-CLOSED-NEXT01",
+    "meta": {
+      "idempotency_key": "5b3f563df432ab9176be69ab41ae7169"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 92
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "at": "2026-10-02T07:54:09.972150+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "version": 2,
+      "target_agent_id": "codex-local-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Do not call tools. Reply with exactly this text: OAX-CODEX-163f4d11a213312a-NEXT",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T07:54:09.963927007Z",
+      "updated_at": "2026-10-02T07:54:09.966481993Z"
+    },
+    "messages": [
+      {
+        "id": "message-a13781fd-14e5-4a18-8f0a-c5df01315d51",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "kind": "instruction",
+        "content": "Do not call tools. Reply with exactly this text: OAX-CODEX-163f4d11a213312a-NEXT",
+        "created_at": "2026-10-02T07:54:09.963927007Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T08:24:09.966481993Z",
+        "instructions_sha256": "49021725f68d2c39736ca7e346e58ac53217fb09c305bb9f63eb2c244c8e273f",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/identities/codex-local-e2e.role.md",
+        "run_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+        "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+        "agent_id": "codex-local-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-02T07:54:09.966481993Z",
+        "created_at": "2026-10-02T07:54:09.966481993Z",
+        "updated_at": "2026-10-02T07:54:09.966481993Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 94,
+        "event_id": "event-1db0a1a1-7e39-4634-98a8-583821cca9d5",
+        "aggregate_type": "task",
+        "aggregate_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T07:54:09.963927007Z"
+      },
+      {
+        "sequence": 96,
+        "event_id": "event-task-b3b1bbb2-92af-4390-9ec1-65e65e49467c",
+        "aggregate_type": "task",
+        "aggregate_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T07:54:09.967665834Z"
+      },
+      {
+        "sequence": 97,
+        "event_id": "event-run-37d2e22c-f07c-459a-8a52-abd535515c3a",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T07:54:09.96767073Z"
+      }
+    ],
+    "snapshot_sequence": 98,
+    "live_after_sequence": 98,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

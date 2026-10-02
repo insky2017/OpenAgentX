@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-02T08:13:04.270374+00:00",
+  "records": [
+    {
+      "pid": 2377405,
+      "starttime": "14713490",
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate02/openagentx",
+      "sha256": "4abd882bf295fe09690a1cec17c809a6790a796b025ce02578e0607f4a6056d1"
+    },
+    {
+      "pid": 2377419,
+      "starttime": "14713495",
+      "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "version_exit": 0,
+      "version": "codex-cli 0.160.0"
+    }
+  ]
+}

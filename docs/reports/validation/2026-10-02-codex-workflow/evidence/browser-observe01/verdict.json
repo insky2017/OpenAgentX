@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-02T08:04:23.266208+00:00",
+  "scope": "Real Chrome desktop/narrow read-only observation on isolated candidate instance. No dispatch, review, cancel, native TUI or installed-service proof in this browser run. Login is the only browser POST initiated by this observer.",
+  "checks": {
+    "desktop_width": true,
+    "card_matches_ready": true,
+    "query_result_visible_in_DOM": true,
+    "adapter_model_label": true,
+    "narrow_no_horizontal_overflow": true,
+    "narrow_buttons_inside_viewport": true,
+    "narrow_result_scrollable": true,
+    "mutation_not_misreported_as_business_success": true,
+    "reload_preserves_task": true
+  },
+  "assets": {
+    "/assets/app.js": {
+      "status": 200,
+      "sha256": "eefd58729fbd087a955f39131442779d20171d8d1aa0980993f56c5082285d86"
+    },
+    "/assets/app.css": {
+      "status": 200,
+      "sha256": "0160b18a815f3d2ea8dd32c4b9063514202072e9003ffc27d1411a4f435bef8a"
+    }
+  },
+  "task_ids": [
+    "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+    "task-de7672b9-c3d8-484b-881c-f9e42badd6f2"
+  ],
+  "not_measured": [
+    "busy-card color with saved screenshot",
+    "offline or SSE interruption",
+    "320px",
+    "physical mobile device"
+  ],
+  "nonblocking": "390px composer leaves about 151px for the independently scrolling result; actual result is reachable and buttons remain 44px."
+}

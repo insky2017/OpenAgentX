@@ -1,0 +1,90 @@
+{
+  "captured_at": "2026-10-02T08:40:18.195352+00:00",
+  "release_dist": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/release-clone/web/dist",
+  "installed_web": "/home/sky/.openagentx/web",
+  "origin": "http://127.0.0.1:18100",
+  "request_policy": "direct loopback HTTP, proxy disabled, no-cache",
+  "assets": [
+    {
+      "path": "assets/app.css",
+      "release_sha256": "0160b18a815f3d2ea8dd32c4b9063514202072e9003ffc27d1411a4f435bef8a",
+      "installed_sha256": "0160b18a815f3d2ea8dd32c4b9063514202072e9003ffc27d1411a4f435bef8a",
+      "served_sha256": "0160b18a815f3d2ea8dd32c4b9063514202072e9003ffc27d1411a4f435bef8a",
+      "served_status": 200,
+      "content_type": "text/css; charset=utf-8",
+      "bytes": 30260,
+      "all_match": true
+    },
+    {
+      "path": "assets/app.js",
+      "release_sha256": "eefd58729fbd087a955f39131442779d20171d8d1aa0980993f56c5082285d86",
+      "installed_sha256": "eefd58729fbd087a955f39131442779d20171d8d1aa0980993f56c5082285d86",
+      "served_sha256": "eefd58729fbd087a955f39131442779d20171d8d1aa0980993f56c5082285d86",
+      "served_status": 200,
+      "content_type": "text/javascript; charset=utf-8",
+      "bytes": 407167,
+      "all_match": true
+    },
+    {
+      "path": "icon-192.png",
+      "release_sha256": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+      "installed_sha256": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+      "served_sha256": "b2588d691abf88bc69d91e5cc9cb1f830c2b7298893843903c0f4c256639e309",
+      "served_status": 200,
+      "content_type": "image/png",
+      "bytes": 5383,
+      "all_match": true
+    },
+    {
+      "path": "icon-512.png",
+      "release_sha256": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+      "installed_sha256": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+      "served_sha256": "0b3f05577594f0863240efc3d190eae1a332c0edaa2cbf25cce003e714dd6cb3",
+      "served_status": 200,
+      "content_type": "image/png",
+      "bytes": 30848,
+      "all_match": true
+    },
+    {
+      "path": "icon.svg",
+      "release_sha256": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+      "installed_sha256": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+      "served_sha256": "631c555ca1307d6cfde05eb264a37f3fadb0c8997503668a6d2c0e4f41c44175",
+      "served_status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 270,
+      "all_match": true
+    },
+    {
+      "path": "index.html",
+      "release_sha256": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+      "installed_sha256": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+      "served_sha256": "7eedf7bd4c23834a8a57b47f1dc66db204424192ff9215db48a0ee296019be38",
+      "served_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 508,
+      "all_match": true
+    },
+    {
+      "path": "manifest.webmanifest",
+      "release_sha256": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+      "installed_sha256": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+      "served_sha256": "4a2b8f3a8773ac45410f90cd05c9412e711c8406edfdcd1c3697802f975e995c",
+      "served_status": 200,
+      "content_type": "application/manifest+json",
+      "bytes": 395,
+      "all_match": true
+    },
+    {
+      "path": "sw.js",
+      "release_sha256": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381",
+      "installed_sha256": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381",
+      "served_sha256": "d8c8313657d08152836de7f29e735da5c2704a8a7a12b781a13170ac3190f381",
+      "served_status": 200,
+      "content_type": "text/javascript; charset=utf-8",
+      "bytes": 1276,
+      "all_match": true
+    }
+  ],
+  "all_match": true
+}

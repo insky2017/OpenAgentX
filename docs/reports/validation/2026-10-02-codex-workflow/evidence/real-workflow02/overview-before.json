@@ -1,0 +1,36 @@
+{
+  "agents": [
+    {
+      "agent_id": "codex-local-e2e",
+      "principal_id": "agent-codex-local-e2e",
+      "organization_id": "default",
+      "display_name": "Codex 实际链路验收",
+      "status": "active",
+      "version": 1,
+      "created_at": "2026-10-02T07:45:02.058486023Z",
+      "updated_at": "2026-10-02T07:45:02.058486023Z",
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      }
+    }
+  ],
+  "approvals": [],
+  "latest_sequence": 59,
+  "live_after_sequence": 59,
+  "server_time": "2026-10-02T07:53:09.916987829Z",
+  "tasks": [],
+  "workers": [
+    {
+      "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "agent_id": "codex-local-e2e",
+      "generation": 1,
+      "status": "online",
+      "last_heartbeat_at": "2026-10-02T07:53:00.675423804Z",
+      "lease_until": "2026-10-02T07:53:30.675423804Z",
+      "started_at": "2026-10-02T07:45:10.658587642Z",
+      "updated_at": "2026-10-02T07:53:00.675423804Z"
+    }
+  ]
+}

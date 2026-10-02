@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-02T08:21:40.585003+00:00",
+  "records": [
+    {
+      "label": "daemon",
+      "pid": 2255555,
+      "starttime": "14553047",
+      "actual_starttime": "14553047",
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+      "same_starttime": true
+    },
+    {
+      "label": "worker",
+      "pid": 2255934,
+      "starttime": "14553793",
+      "actual_starttime": "14553793",
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+      "same_starttime": true
+    }
+  ]
+}

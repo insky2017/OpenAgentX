@@ -1,0 +1,10 @@
+{
+  "endpoint": "unix:///tmp/oax-codex-1808761272/server.sock",
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+  "turn_id": "01a0fbc6-767a-7821-9a2c-64941365bc36",
+  "task_id": "task-8b4b6b77-668f-4db6-afd3-e08fd1f371c3",
+  "run_id": "run-df36f834-cf30-41e2-82a3-415d660e9bdd",
+  "state": "idle",
+  "pid": 2472259,
+  "updated_at": "2026-10-02T08:41:29.139314536Z"
+}

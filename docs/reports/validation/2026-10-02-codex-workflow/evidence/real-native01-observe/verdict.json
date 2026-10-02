@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "mode": "observe",
+  "started_at": "2026-10-02T08:03:06.463763+00:00",
+  "observed_tasks": {
+    "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0": "uncertain"
+  },
+  "scope": "Observation completed; does not assert task success or runtime effects",
+  "finished_at": "2026-10-02T08:03:06.734990+00:00"
+}

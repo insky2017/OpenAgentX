@@ -1,0 +1,20 @@
+=== RUN   TestNativeBridgeTurnStartUsesDurableDispatchAndExactTaskTurn
+=== RUN   TestNativeBridgeTurnStartUsesDurableDispatchAndExactTaskTurn/ready
+    bridge_test.go:87: context deadline exceeded
+=== RUN   TestNativeBridgeTurnStartUsesDurableDispatchAndExactTaskTurn/queued-behind-another-task
+    bridge_test.go:87: context deadline exceeded
+--- FAIL: TestNativeBridgeTurnStartUsesDurableDispatchAndExactTaskTurn (4.01s)
+    --- FAIL: TestNativeBridgeTurnStartUsesDurableDispatchAndExactTaskTurn/ready (2.01s)
+    --- FAIL: TestNativeBridgeTurnStartUsesDurableDispatchAndExactTaskTurn/queued-behind-another-task (2.00s)
+=== RUN   TestNativeBridgeSteerAndInterruptUseControlCAS
+--- PASS: TestNativeBridgeSteerAndInterruptUseControlCAS (0.00s)
+=== RUN   TestNativeBridgeRejectsCrossThreadUnsupportedWritesAndNonText
+--- PASS: TestNativeBridgeRejectsCrossThreadUnsupportedWritesAndNonText (0.00s)
+=== RUN   TestNativeBridgeResumeStripsOverridesAndReturnsUpstreamFacts
+--- PASS: TestNativeBridgeResumeStripsOverridesAndReturnsUpstreamFacts (0.01s)
+=== RUN   TestNativeBridgeNotificationBoundaryKeepsOnlyCurrentThread
+    bridge_test.go:243: notification from another native thread reached current TUI
+--- FAIL: TestNativeBridgeNotificationBoundaryKeepsOnlyCurrentThread (0.01s)
+FAIL
+FAIL	openagentx/internal/nativebridge	4.064s
+FAIL

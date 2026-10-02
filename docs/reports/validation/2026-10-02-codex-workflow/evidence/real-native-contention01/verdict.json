@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "scope": "real managed-native input competing with formal bus input on explicitly identical thread; no tool cancellation",
+  "native_task": "task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+  "bus_task": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+  "native_run": "run-8a29ec4e-19a0-4cfe-916b-5ca1699a64ca",
+  "bus_run": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+  "native_task_status": "uncertain",
+  "bus_task_status": "succeeded",
+  "worker": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15"
+}

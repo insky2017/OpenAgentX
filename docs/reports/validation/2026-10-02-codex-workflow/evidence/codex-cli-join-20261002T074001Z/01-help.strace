@@ -1,0 +1,13 @@
+2244434 execve("<RAW_DIR>/bin/openagentx", ["<USER_HOME>/.local/state/openagent"..., "agent", "join", "--help"], 0x7ffc47ad75b0 /* 103 vars */) = 0
+2244434 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x70aa8b2ff990, parent_tid=0x70aa8b2ff990, exit_signal=0, stack=0x70aa8aaff000, stack_size=0x7fff80, tls=0x70aa8b2ff6c0} => {parent_tid=[2244435]}, 88) = 2244435
+2244434 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x70aa8aafe990, parent_tid=0x70aa8aafe990, exit_signal=0, stack=0x70aa8a2fe000, stack_size=0x7fff80, tls=0x70aa8aafe6c0} => {parent_tid=[2244436]}, 88) = 2244436
+2244434 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x70aa8a2fd990, parent_tid=0x70aa8a2fd990, exit_signal=0, stack=0x70aa89afd000, stack_size=0x7fff80, tls=0x70aa8a2fd6c0} => {parent_tid=[2244437]}, 88) = 2244437
+2244436 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x70aa89afc990, parent_tid=0x70aa89afc990, exit_signal=0, stack=0x70aa892fc000, stack_size=0x7fff80, tls=0x70aa89afc6c0} => {parent_tid=[2244438]}, 88) = 2244438
+2244434 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x70aa892fb990, parent_tid=0x70aa892fb990, exit_signal=0, stack=0x70aa88afb000, stack_size=0x7fff80, tls=0x70aa892fb6c0} => {parent_tid=[2244439]}, 88) = 2244439
+2244434 exit_group(0)                   = ?
+2244438 +++ exited with 0 +++
+2244437 +++ exited with 0 +++
+2244436 +++ exited with 0 +++
+2244435 +++ exited with 0 +++
+2244439 +++ exited with 0 +++
+2244434 +++ exited with 0 +++

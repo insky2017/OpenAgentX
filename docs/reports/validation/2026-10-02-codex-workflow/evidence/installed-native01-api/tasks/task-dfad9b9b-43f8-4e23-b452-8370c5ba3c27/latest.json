@@ -1,0 +1,168 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-dfad9b9b-43f8-4e23-b452-8370c5ba3c27",
+    "version": 3,
+    "target_agent_id": "codex-domain-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Create installed-native01.txt in this assigned workspace with exactly the bytes OAX-INSTALLED-NATIVE01 followed by one newline. Use a tool once to write it, do not modify other files. Reply exactly: INSTALLED-NATIVE01-DONE",
+    "status": "uncertain",
+    "result": "INSTALLED-NATIVE01-DONE",
+    "error": "business_effect_unverified",
+    "outcome_state": "available",
+    "created_at": "2026-10-02T08:45:34.6246985Z",
+    "updated_at": "2026-10-02T08:45:50.940733621Z"
+  },
+  "messages": [
+    {
+      "id": "message-f7c9bab6-adf7-4068-a372-9d155b9c4031",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-dfad9b9b-43f8-4e23-b452-8370c5ba3c27",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "target_agent_id": "codex-domain-e2e",
+      "kind": "instruction",
+      "content": "Create installed-native01.txt in this assigned workspace with exactly the bytes OAX-INSTALLED-NATIVE01 followed by one newline. Use a tool once to write it, do not modify other files. Reply exactly: INSTALLED-NATIVE01-DONE",
+      "created_at": "2026-10-02T08:45:34.6246985Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-02T09:15:34.629972299Z",
+      "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+      "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+      "run_id": "run-bde3ff4b-3251-4de3-b479-c600898fbc69",
+      "task_id": "task-dfad9b9b-43f8-4e23-b452-8370c5ba3c27",
+      "agent_id": "codex-domain-e2e",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+      "worker_generation": 2,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 2,
+      "network_binding_revision": 2,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "INSTALLED-NATIVE01-DONE",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-02T08:45:34.629972299Z",
+      "finished_at": "2026-10-02T08:45:50.940733621Z",
+      "created_at": "2026-10-02T08:45:34.629972299Z",
+      "updated_at": "2026-10-02T08:45:50.940733621Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 272937,
+      "event_id": "event-caffa090-a0cf-4fee-912d-c5fab999cfe1",
+      "aggregate_type": "task",
+      "aggregate_id": "task-dfad9b9b-43f8-4e23-b452-8370c5ba3c27",
+      "event_type": "task.created",
+      "created_at": "2026-10-02T08:45:34.6246985Z"
+    },
+    {
+      "sequence": 272939,
+      "event_id": "event-task-7d3560a5-8588-49f4-a65f-d6c98596d201",
+      "aggregate_type": "task",
+      "aggregate_id": "task-dfad9b9b-43f8-4e23-b452-8370c5ba3c27",
+      "event_type": "task.running",
+      "created_at": "2026-10-02T08:45:34.632146978Z"
+    },
+    {
+      "sequence": 272940,
+      "event_id": "event-run-45c5f43c-e8f3-43a5-80c2-9200e9032ad5",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-bde3ff4b-3251-4de3-b479-c600898fbc69",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-02T08:45:34.632155444Z"
+    },
+    {
+      "sequence": 272942,
+      "event_id": "event-runtime-920f1567-473d-4b4d-bea5-712c4451e81d",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-bde3ff4b-3251-4de3-b479-c600898fbc69",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-02T08:45:36.770127882Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 272945,
+      "event_id": "event-runtime-5f5ecbc7-8514-4739-bf8c-7d9c88b06cd8",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-bde3ff4b-3251-4de3-b479-c600898fbc69",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-02T08:45:42.437062111Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "我会在当前工作区写入指定文件，末尾保留一个换行。\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 272946,
+      "event_id": "event-runtime-caeaac3e-cd2f-4504-a52e-1d95ad6b837c",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-bde3ff4b-3251-4de3-b479-c600898fbc69",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-02T08:45:46.559011926Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed fileChange",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 272949,
+      "event_id": "event-runtime-151c9294-7853-4890-9d02-6d95fab30845",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-bde3ff4b-3251-4de3-b479-c600898fbc69",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-02T08:45:50.909894005Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "INSTALLED-NATIVE01-DONE",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 272951,
+      "event_id": "event-run-d9b1119d-1dd5-4b5b-b050-c1a70b61b311",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-bde3ff4b-3251-4de3-b479-c600898fbc69",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-02T08:45:50.940765064Z"
+    },
+    {
+      "sequence": 272952,
+      "event_id": "event-task-e2c98dc9-f05a-4189-81e1-7c5e22b84688",
+      "aggregate_type": "task",
+      "aggregate_id": "task-dfad9b9b-43f8-4e23-b452-8370c5ba3c27",
+      "event_type": "task.settled",
+      "created_at": "2026-10-02T08:45:50.940769336Z"
+    }
+  ],
+  "snapshot_sequence": 272974,
+  "live_after_sequence": 272974,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

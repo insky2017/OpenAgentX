@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-02T07:53:09.925954+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+      "version": 1,
+      "target_agent_id": "codex-local-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Read OAX-CODEX-163f4d11a213312a-input.txt in the assigned workspace. Reply with its contents (without newline), then | then the role verification code supplied in your role instructions. Do not read role files.",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T07:53:09.920635378Z",
+      "updated_at": "2026-10-02T07:53:09.920635378Z"
+    },
+    "messages": [
+      {
+        "id": "message-e01bea93-95d3-44ce-9530-69b7f205020a",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "kind": "instruction",
+        "content": "Read OAX-CODEX-163f4d11a213312a-input.txt in the assigned workspace. Reply with its contents (without newline), then | then the role verification code supplied in your role instructions. Do not read role files.",
+        "created_at": "2026-10-02T07:53:09.920635378Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 60,
+        "event_id": "event-2d5867d7-d3cf-4cff-9c1f-41e48f5ae350",
+        "aggregate_type": "task",
+        "aggregate_id": "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T07:53:09.920635378Z"
+      }
+    ],
+    "snapshot_sequence": 61,
+    "live_after_sequence": 61,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

@@ -1,0 +1,6 @@
+Tool executor captured command: OAX_CODEX_REAL_ROOT=/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457 go test -v ./internal/runtime/codex -run ^TestRealCodexAdapter$ -count=1
+=== RUN   TestRealCodexAdapter
+--- PASS: TestRealCodexAdapter (68.36s)
+PASS
+ok openagentx/internal/runtime/codex 68.368s
+EXIT: 0

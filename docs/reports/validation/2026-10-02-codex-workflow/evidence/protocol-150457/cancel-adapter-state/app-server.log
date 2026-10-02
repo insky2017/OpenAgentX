@@ -1,0 +1,10 @@
+[2m2026-10-02T08:10:36.817853Z[0m [31mERROR[0m [2mcodex_app_server[0m[2m:[0m Ignored unsupported project-local config keys in /home/sky/.codex/config.toml: model_provider, model_providers, notify. If you want these settings to apply, manually set them in your user-level config.toml.
+[2m2026-10-02T08:10:36.818074Z[0m [31mERROR[0m [2mcodex_app_server[0m[2m:[0m Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  project (/home/sky/.codex/config.toml): `disable_response_storage` is ignored.
+  project (/home/sky/.codex/config.toml): `mcp_servers.chrome-devtools.type` is ignored.
+[2m2026-10-02T08:11:07.002029Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when Client(HttpRequest(HttpRequest("http/request failed: error sending request for url (https://chatgpt.com/backend-api/ps/mcp)")))
+[2m2026-10-02T08:11:50.956907Z[0m [31mERROR[0m [2mcodex_app_server[0m[2m:[0m Ignored unsupported project-local config keys in /home/sky/.codex/config.toml: model_provider, model_providers, notify. If you want these settings to apply, manually set them in your user-level config.toml.
+[2m2026-10-02T08:11:50.956988Z[0m [31mERROR[0m [2mcodex_app_server[0m[2m:[0m Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  project (/home/sky/.codex/config.toml): `disable_response_storage` is ignored.
+  project (/home/sky/.codex/config.toml): `mcp_servers.chrome-devtools.type` is ignored.
+[2m2026-10-02T08:12:21.132744Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when Client(HttpRequest(HttpRequest("http/request failed: route-aware request timed out")))

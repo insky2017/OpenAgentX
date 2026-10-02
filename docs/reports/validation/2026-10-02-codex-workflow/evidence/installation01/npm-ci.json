@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "npm",
+    "ci",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund"
+  ],
+  "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/release-source/web",
+  "started_at": "2026-10-02T08:24:46.730978+00:00",
+  "exit": 0
+}

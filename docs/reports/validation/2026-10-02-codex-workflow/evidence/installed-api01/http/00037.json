@@ -1,0 +1,135 @@
+{
+  "at": "2026-10-02T08:39:45.398925+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-2fd909f7-9dfb-4a4a-97e4-f39257939d72",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-2fd909f7-9dfb-4a4a-97e4-f39257939d72",
+      "version": 2,
+      "target_agent_id": "codex-domain-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run exactly this command once in a shell tool: python3 /home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace/OAX-INSTALLED-d20953aa00045552-cancel/long_shell.py. Wait for its completion in the foreground; do not background, replace, edit, rerun or manually terminate the script. It is a bounded cancellation acceptance fixture. Do not call any other tools or change files yourself.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T08:39:21.337967539Z",
+      "updated_at": "2026-10-02T08:39:21.34073545Z"
+    },
+    "messages": [
+      {
+        "id": "message-65428477-2fb8-496f-9610-b9762c8aa756",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-2fd909f7-9dfb-4a4a-97e4-f39257939d72",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "codex-domain-e2e",
+        "kind": "instruction",
+        "content": "Run exactly this command once in a shell tool: python3 /home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace/OAX-INSTALLED-d20953aa00045552-cancel/long_shell.py. Wait for its completion in the foreground; do not background, replace, edit, rerun or manually terminate the script. It is a bounded cancellation acceptance fixture. Do not call any other tools or change files yourself.",
+        "created_at": "2026-10-02T08:39:21.337967539Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T09:09:21.34073545Z",
+        "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+        "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+        "run_id": "run-20c0797d-5a8f-44cb-ab56-ac4f23587613",
+        "task_id": "task-2fd909f7-9dfb-4a4a-97e4-f39257939d72",
+        "agent_id": "codex-domain-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-02T08:39:21.34073545Z",
+        "created_at": "2026-10-02T08:39:21.34073545Z",
+        "updated_at": "2026-10-02T08:39:37.11932508Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 272836,
+        "event_id": "event-20d9ef5b-7645-4509-bfdf-78b36da8ae94",
+        "aggregate_type": "task",
+        "aggregate_id": "task-2fd909f7-9dfb-4a4a-97e4-f39257939d72",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:39:21.337967539Z"
+      },
+      {
+        "sequence": 272838,
+        "event_id": "event-task-9a48638c-51a0-415a-a847-ffdfbb14fb67",
+        "aggregate_type": "task",
+        "aggregate_id": "task-2fd909f7-9dfb-4a4a-97e4-f39257939d72",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:39:21.342837572Z"
+      },
+      {
+        "sequence": 272839,
+        "event_id": "event-run-f5ed7136-b05d-4874-af31-a11d9cdd2fa6",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-20c0797d-5a8f-44cb-ab56-ac4f23587613",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:39:21.342841327Z"
+      },
+      {
+        "sequence": 272841,
+        "event_id": "event-runtime-ecfe7e35-0042-4e85-8a1f-ec0285c73695",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-20c0797d-5a8f-44cb-ab56-ac4f23587613",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:39:22.646670041Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 272846,
+        "event_id": "event-runtime-eab6688f-0aa0-4565-aac9-51b3c288337e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-20c0797d-5a8f-44cb-ab56-ac4f23587613",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:39:43.138423257Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 272847,
+        "event_id": "event-runtime-4d26326c-a8af-4219-9024-2e02dd4d6cfa",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-20c0797d-5a8f-44cb-ab56-ac4f23587613",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:39:43.850316361Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我会按原样执行该命令一次，并等待前台执行结束。\n",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 272847,
+    "live_after_sequence": 272847,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS_WITH_VERSION_LIMIT",
+  "case": "managed native input produced formal Task/Run and exact file; Ctrl-D exit0",
+  "frontend_banner": "0.153.1",
+  "frontend_exe_not_captured_before_exit": true,
+  "backend_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+  "task_status": "uncertain",
+  "run_status": "succeeded",
+  "scope": "initial frontend version provenance incomplete; do not label this run 0.160"
+}

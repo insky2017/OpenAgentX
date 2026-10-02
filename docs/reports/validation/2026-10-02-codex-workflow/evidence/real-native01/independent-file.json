@@ -1,0 +1,9 @@
+{
+  "path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/workspace/native-real01.txt",
+  "actual_hex": "4f41582d4e41544956452d5245414c30310a",
+  "expected_hex": "4f41582d4e41544956452d5245414c30310a",
+  "exact": true,
+  "sha256": "e52f5eb9c20979bb19bac2ac0bd14c1300a85a4e432ae80bf6b0ef6dc04a286f",
+  "task_id": "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+  "run_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1"
+}

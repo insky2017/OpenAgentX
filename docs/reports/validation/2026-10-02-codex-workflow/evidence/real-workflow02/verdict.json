@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "mode": "workflow",
+  "started_at": "2026-10-02T07:53:09.710136+00:00",
+  "cases": [
+    "query-role-file",
+    "exact-file-write",
+    "same-worker-next-query"
+  ],
+  "tasks": [
+    "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+    "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+    "task-781ed4c6-ab67-440c-948b-62a907bf51a1"
+  ],
+  "worker": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+  "generation": 1,
+  "finished_at": "2026-10-02T07:54:39.994952+00:00"
+}

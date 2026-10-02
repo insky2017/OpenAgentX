@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-02T07:54:09.965237+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-local-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Do not call tools. Reply with exactly this text: OAX-CODEX-163f4d11a213312a-NEXT",
+    "meta": {
+      "idempotency_key": "412ed49ec9fe707d641480589fc4f769"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 3
+  }
+}

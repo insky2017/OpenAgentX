@@ -1,0 +1,32 @@
+{
+  "deadline_at": "2026-10-02T09:09:12.29494095Z",
+  "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+  "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+  "run_id": "run-4002f651-3dbb-4dee-9546-511fd094d20b",
+  "task_id": "task-bfa32f92-2401-4cfb-91c1-3a32eb204848",
+  "agent_id": "codex-domain-e2e",
+  "version": 2,
+  "status": "succeeded",
+  "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+  "worker_generation": 2,
+  "execution_spec_version": 1,
+  "adapter_id": "codex-app-server",
+  "backend_id": "codex",
+  "model": "gpt-6-astra",
+  "reasoning_mode": "backend_default",
+  "network_mode": "inherit",
+  "network_policy_version": 2,
+  "network_binding_revision": 2,
+  "turn_result": {
+    "final_reply": true,
+    "runtime_status": "succeeded",
+    "body": "OAX-INSTALLED-d20953aa00045552-THIRD",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  },
+  "turn_result_state": "available",
+  "started_at": "2026-10-02T08:39:12.29494095Z",
+  "finished_at": "2026-10-02T08:39:20.571596867Z",
+  "created_at": "2026-10-02T08:39:12.29494095Z",
+  "updated_at": "2026-10-02T08:39:20.571596867Z"
+}

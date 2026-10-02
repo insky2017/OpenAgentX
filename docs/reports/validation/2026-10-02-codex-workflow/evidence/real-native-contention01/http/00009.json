@@ -1,0 +1,174 @@
+{
+  "at": "2026-10-02T08:16:55.527826+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+      "version": 3,
+      "target_agent_id": "codex-local-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Read native-queue-result01.txt in the assigned workspace. Reply with exactly its contents without trailing newline, then |BUS-AFTER-NATIVE01. Do not change any file.",
+      "status": "succeeded",
+      "result": "NATIVE-QUEUE-END01|BUS-AFTER-NATIVE01",
+      "outcome_state": "available",
+      "created_at": "2026-10-02T08:15:55.484251961Z",
+      "updated_at": "2026-10-02T08:16:46.788575005Z"
+    },
+    "messages": [
+      {
+        "id": "message-a97f4735-cf4b-452d-a057-5aa46744ad36",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "kind": "instruction",
+        "content": "Read native-queue-result01.txt in the assigned workspace. Reply with exactly its contents without trailing newline, then |BUS-AFTER-NATIVE01. Do not change any file.",
+        "created_at": "2026-10-02T08:15:55.484251961Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T08:46:29.710451529Z",
+        "instructions_sha256": "49021725f68d2c39736ca7e346e58ac53217fb09c305bb9f63eb2c244c8e273f",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/identities/codex-local-e2e.role.md",
+        "run_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+        "task_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+        "agent_id": "codex-local-e2e",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "NATIVE-QUEUE-END01|BUS-AFTER-NATIVE01",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-02T08:16:29.710451529Z",
+        "finished_at": "2026-10-02T08:16:46.788575005Z",
+        "created_at": "2026-10-02T08:16:29.710451529Z",
+        "updated_at": "2026-10-02T08:16:46.788575005Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 272,
+        "event_id": "event-70cb7eb8-0bdf-45ef-bd82-6f3123bde592",
+        "aggregate_type": "task",
+        "aggregate_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:15:55.484251961Z"
+      },
+      {
+        "sequence": 282,
+        "event_id": "event-task-ea58fd93-cfdc-4723-8410-aeb4ab254da6",
+        "aggregate_type": "task",
+        "aggregate_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:16:29.71177689Z"
+      },
+      {
+        "sequence": 283,
+        "event_id": "event-run-d37a4fea-044b-4f20-9858-d84a51b856df",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:16:29.711781951Z"
+      },
+      {
+        "sequence": 286,
+        "event_id": "event-runtime-52696211-ab97-4470-a24c-87a02dad8127",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:16:31.055663855Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 287,
+        "event_id": "event-runtime-041d75ad-23e4-496c-9de3-67051ec1fa6d",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:16:37.710580535Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我会读取指定文件，按要求返回内容和后缀。\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 289,
+        "event_id": "event-runtime-1421204d-277e-4140-9715-2b9f51bfd336",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:16:41.543171042Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed commandExecution",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 290,
+        "event_id": "event-runtime-65b1c752-3304-4636-96a9-92ba8bd54d82",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:16:46.586854933Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "NATIVE-QUEUE-END01|BUS-AFTER-NATIVE01",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 292,
+        "event_id": "event-run-2fa078b2-7be3-4609-a195-74b98ae425d4",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-02T08:16:46.788599183Z"
+      },
+      {
+        "sequence": 293,
+        "event_id": "event-task-2ae685ad-8afc-48e4-aa71-807908edea05",
+        "aggregate_type": "task",
+        "aggregate_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+        "event_type": "task.settled",
+        "created_at": "2026-10-02T08:16:46.788602157Z"
+      }
+    ],
+    "snapshot_sequence": 294,
+    "live_after_sequence": 294,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

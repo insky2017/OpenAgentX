@@ -1,0 +1,146 @@
+{
+  "at": "2026-10-02T08:48:00.666515+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+      "version": 3,
+      "target_agent_id": "codex-domain-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Do not call tools. Reply exactly: INSTALLED-NATIVE-CLOSED-NEXT01",
+      "status": "succeeded",
+      "result": "INSTALLED-NATIVE-CLOSED-NEXT01",
+      "outcome_state": "available",
+      "created_at": "2026-10-02T08:47:45.650054633Z",
+      "updated_at": "2026-10-02T08:47:52.398727893Z"
+    },
+    "messages": [
+      {
+        "id": "message-71bd1ad6-7e92-442b-b04b-27f30de64a3d",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "codex-domain-e2e",
+        "kind": "instruction",
+        "content": "Do not call tools. Reply exactly: INSTALLED-NATIVE-CLOSED-NEXT01",
+        "created_at": "2026-10-02T08:47:45.650054633Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T09:17:45.653098865Z",
+        "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+        "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+        "run_id": "run-b38e2aeb-4d35-4008-afb1-cab1122ac267",
+        "task_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+        "agent_id": "codex-domain-e2e",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "INSTALLED-NATIVE-CLOSED-NEXT01",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-02T08:47:45.653098865Z",
+        "finished_at": "2026-10-02T08:47:52.398727893Z",
+        "created_at": "2026-10-02T08:47:45.653098865Z",
+        "updated_at": "2026-10-02T08:47:52.398727893Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 272976,
+        "event_id": "event-6550afe0-6641-480c-83f6-03e980b84803",
+        "aggregate_type": "task",
+        "aggregate_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:47:45.650054633Z"
+      },
+      {
+        "sequence": 272978,
+        "event_id": "event-task-1026cc05-3b64-44ef-b29c-d0185713a173",
+        "aggregate_type": "task",
+        "aggregate_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:47:45.654093472Z"
+      },
+      {
+        "sequence": 272979,
+        "event_id": "event-run-e8c519b4-9e6e-46fb-bb59-3ff5362d69a7",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-b38e2aeb-4d35-4008-afb1-cab1122ac267",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:47:45.654097389Z"
+      },
+      {
+        "sequence": 272982,
+        "event_id": "event-runtime-7d886295-00a2-4d0f-8c61-99a9a1156542",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-b38e2aeb-4d35-4008-afb1-cab1122ac267",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:47:47.195515177Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 272984,
+        "event_id": "event-runtime-72da183d-dc8c-4e22-ae57-36cd0306ecb2",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-b38e2aeb-4d35-4008-afb1-cab1122ac267",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:47:52.367045274Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "INSTALLED-NATIVE-CLOSED-NEXT01",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 272986,
+        "event_id": "event-run-46109eba-e61b-4a33-b6ac-129b7e848f5c",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-b38e2aeb-4d35-4008-afb1-cab1122ac267",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-02T08:47:52.398748102Z"
+      },
+      {
+        "sequence": 272987,
+        "event_id": "event-task-5bb175f7-ceaa-4cc2-9b9a-a4430a8c47e2",
+        "aggregate_type": "task",
+        "aggregate_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+        "event_type": "task.settled",
+        "created_at": "2026-10-02T08:47:52.398750997Z"
+      }
+    ],
+    "snapshot_sequence": 272989,
+    "live_after_sequence": 272989,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

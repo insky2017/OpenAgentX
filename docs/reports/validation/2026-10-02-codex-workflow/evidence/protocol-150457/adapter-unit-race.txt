@@ -1,0 +1,40 @@
+COMMAND: go test -race -v ./internal/runtime/codex
+=== RUN   TestEarlyBindingBeforeTurnAndAuthoritativeReply
+--- PASS: TestEarlyBindingBeforeTurnAndAuthoritativeReply (0.07s)
+=== RUN   TestBindingFailureNeverDispatches
+--- PASS: TestBindingFailureNeverDispatches (0.01s)
+=== RUN   TestLostStartAckDoesNotRetry
+--- PASS: TestLostStartAckDoesNotRetry (0.05s)
+=== RUN   TestMalformedCompletionFailsClosed
+=== RUN   TestMalformedCompletionFailsClosed/missing-turn-id
+=== RUN   TestMalformedCompletionFailsClosed/missing-item-id
+=== RUN   TestMalformedCompletionFailsClosed/terminal-error
+=== RUN   TestMalformedCompletionFailsClosed/no-final
+=== RUN   TestMalformedCompletionFailsClosed/missing-start-id
+--- PASS: TestMalformedCompletionFailsClosed (0.33s)
+    --- PASS: TestMalformedCompletionFailsClosed/missing-turn-id (0.07s)
+    --- PASS: TestMalformedCompletionFailsClosed/missing-item-id (0.07s)
+    --- PASS: TestMalformedCompletionFailsClosed/terminal-error (0.07s)
+    --- PASS: TestMalformedCompletionFailsClosed/no-final (0.07s)
+    --- PASS: TestMalformedCompletionFailsClosed/missing-start-id (0.05s)
+=== RUN   TestNativeApprovalUsesPersistedApprovalIdentity
+--- PASS: TestNativeApprovalUsesPersistedApprovalIdentity (0.06s)
+=== RUN   TestExternalActiveThreadWaitsInsteadOfSteering
+--- PASS: TestExternalActiveThreadWaitsInsteadOfSteering (1.08s)
+=== RUN   TestHandoffNeverOverwrittenAndFrozenRoleInjected
+--- PASS: TestHandoffNeverOverwrittenAndFrozenRoleInjected (0.07s)
+=== RUN   TestCancellationWaitsForExactTerminal
+--- PASS: TestCancellationWaitsForExactTerminal (0.06s)
+=== RUN   TestExternalNetworkCannotBePretendedChanged
+--- PASS: TestExternalNetworkCannotBePretendedChanged (0.01s)
+=== RUN   TestExternalNetworkRegistrationMetadataDoesNotRestartHost
+--- PASS: TestExternalNetworkRegistrationMetadataDoesNotRestartHost (0.02s)
+=== RUN   TestExpiredFrozenDeadlinePreventsDispatch
+--- PASS: TestExpiredFrozenDeadlinePreventsDispatch (0.01s)
+=== RUN   TestRealCodexAdapter
+    real_test.go:22: set OAX_CODEX_REAL_ROOT to a private evidence directory with isolated home/
+--- SKIP: TestRealCodexAdapter (0.00s)
+PASS
+ok  	openagentx/internal/runtime/codex	2.801s
+
+EXIT: 0

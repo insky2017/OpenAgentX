@@ -1,0 +1,135 @@
+{
+  "at": "2026-10-02T08:16:25.505792+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+      "version": 2,
+      "target_agent_id": "codex-local-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Run exactly one foreground python3 command in the assigned workspace: write native-queue-start01.txt with exactly START followed by one newline; sleep 30 seconds; then write native-queue-result01.txt with exactly NATIVE-QUEUE-END01 followed by one newline. Do not spawn background processes or change any other files. Reply with exactly NATIVE-QUEUE-DONE01.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T08:15:40.801658236Z",
+      "updated_at": "2026-10-02T08:15:40.825945484Z"
+    },
+    "messages": [
+      {
+        "id": "message-4e64e5ce-76f5-4e83-a39b-478b12cb7c64",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "kind": "instruction",
+        "content": "Run exactly one foreground python3 command in the assigned workspace: write native-queue-start01.txt with exactly START followed by one newline; sleep 30 seconds; then write native-queue-result01.txt with exactly NATIVE-QUEUE-END01 followed by one newline. Do not spawn background processes or change any other files. Reply with exactly NATIVE-QUEUE-DONE01.",
+        "created_at": "2026-10-02T08:15:40.801658236Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T08:45:40.825945484Z",
+        "instructions_sha256": "49021725f68d2c39736ca7e346e58ac53217fb09c305bb9f63eb2c244c8e273f",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/identities/codex-local-e2e.role.md",
+        "run_id": "run-8a29ec4e-19a0-4cfe-916b-5ca1699a64ca",
+        "task_id": "task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+        "agent_id": "codex-local-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-02T08:15:40.825945484Z",
+        "created_at": "2026-10-02T08:15:40.825945484Z",
+        "updated_at": "2026-10-02T08:16:20.67464466Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 263,
+        "event_id": "event-c76ea04b-884b-4eee-a9ef-238f60c96c3c",
+        "aggregate_type": "task",
+        "aggregate_id": "task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:15:40.801658236Z"
+      },
+      {
+        "sequence": 265,
+        "event_id": "event-task-d10683e1-adb7-4f4c-a9be-076187a07234",
+        "aggregate_type": "task",
+        "aggregate_id": "task-948ec5a3-d25f-43f5-bfbb-a45b1aba549f",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:15:40.827375811Z"
+      },
+      {
+        "sequence": 266,
+        "event_id": "event-run-c2b8eaca-d1d0-4fbb-bc85-d01035972a13",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-8a29ec4e-19a0-4cfe-916b-5ca1699a64ca",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:15:40.827382474Z"
+      },
+      {
+        "sequence": 268,
+        "event_id": "event-runtime-91e99fab-e9d9-4f9c-9345-43e7d5cbc2da",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8a29ec4e-19a0-4cfe-916b-5ca1699a64ca",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:15:42.614849652Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 269,
+        "event_id": "event-runtime-092cc3cf-2b65-4fd0-ba6b-6b0c2d90627f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8a29ec4e-19a0-4cfe-916b-5ca1699a64ca",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:15:49.990235185Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我会执行一次前台 `python3` 命令：写入开始文件，等待 30 秒，再写入结果文件。\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 276,
+        "event_id": "event-runtime-0d7a93a8-2362-4f6a-a1de-0a2e19be042e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-8a29ec4e-19a0-4cfe-916b-5ca1699a64ca",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:16:24.905247757Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed commandExecution",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 276,
+    "live_after_sequence": 276,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

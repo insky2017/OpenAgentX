@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-02T08:28:47.369961+00:00",
+  "processes": {
+    "worker": {
+      "pid": 2255934,
+      "gone": true
+    },
+    "appserver": {
+      "pid": 2255999,
+      "gone": true
+    },
+    "daemon": {
+      "pid": 2255555,
+      "gone": true
+    }
+  }
+}

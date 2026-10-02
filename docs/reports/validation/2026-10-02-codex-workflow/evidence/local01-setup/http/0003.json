@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-02T07:45:11.924758+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/overview",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "codex-local-e2e",
+        "principal_id": "agent-codex-local-e2e",
+        "organization_id": "default",
+        "display_name": "Codex 实际链路验收",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-02T07:45:02.058486023Z",
+        "updated_at": "2026-10-02T07:45:02.058486023Z",
+        "readiness": {
+          "ready": false,
+          "can_start_now": false,
+          "reason": "运行环境或网络尚未就绪",
+          "next_action": "openagentx agent resume codex-local-e2e"
+        }
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 8,
+    "live_after_sequence": 8,
+    "server_time": "2026-10-02T07:45:11.923689551Z",
+    "tasks": [],
+    "workers": [
+      {
+        "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+        "agent_id": "codex-local-e2e",
+        "generation": 1,
+        "status": "online",
+        "last_heartbeat_at": "2026-10-02T07:45:10.661647732Z",
+        "lease_until": "2026-10-02T07:45:40.661647732Z",
+        "started_at": "2026-10-02T07:45:10.658587642Z",
+        "updated_at": "2026-10-02T07:45:10.661647732Z"
+      }
+    ]
+  }
+}

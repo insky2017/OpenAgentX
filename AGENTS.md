@@ -6,7 +6,7 @@
 
 ## 当前实施约定（2026-10-02）
 
-- 新增当前 [Codex 实施计划](docs/plans/2026-10-02-codex-workflow-repair.md) 与 [Codex E2E](docs/plans/2026-10-02-codex-workflow-e2e.md)，用户已确认继续执行。Codex 原生终端、持续接单、自初始化、默认代理及真实证据为本轮目标；进度记录于 `docs/reports/validation/2026-10-02-codex-workflow/`。AGY 基线保留。
+- 当前 [Codex 实施计划](docs/plans/2026-10-02-codex-workflow-repair.md) 与 [Codex E2E](docs/plans/2026-10-02-codex-workflow-e2e.md) 已实施主链，安装源码为 `6b68eeb`；精确来源、真实验收和未完成项见 [Codex 交付](docs/reports/validation/2026-10-02-codex-workflow/DELIVERY.md) 与 COVERAGE。已支持原生终端、持续接单、空闲 thread 迁入和默认代理；精确仅目标工具取消及未知终态一键恢复仍待补，不能报告全矩阵通过。AGY 基线保留。
 
 - 本轮执行[AGY 工作流修复计划](docs/plans/2026-10-02-agy-workflow-repair.md)和[端到端用例](docs/plans/2026-10-02-agy-workflow-e2e.md)，当前交付见[落地与使用入口](docs/reports/validation/2026-10-02-agy-workflow/DELIVERY.md)，进度及具体证据写入[执行记录](docs/reports/validation/2026-10-02-agy-workflow/EXECUTION-LOG.md)。用户已授权：更新规则/文档并提交，随后直接实施、测试和安装验收；不要重复询问是否开始。
 - 优先交付“添加/导入领域 Agent → 服务及网络就绪 → AGY 执行 → 正确结果/产物 → 取消/继续/返回/恢复”。Fleet、Worker/service、Token、tmux 和内部配置下沉；复用 Task/Run/Journal，不另建平台。WorkBuddy/CodeBuddy 保留，不增专项覆盖或真实模型验收。

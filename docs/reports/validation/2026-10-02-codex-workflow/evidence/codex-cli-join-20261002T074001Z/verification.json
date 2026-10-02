@@ -1,0 +1,57 @@
+{
+  "scope": "CLI PTY delivery plus independent persisted-file/process trace checks only; no Codex model, Worker, Control or native workflow E2E",
+  "commands": [
+    {
+      "label": "01-help",
+      "exit_code": 0,
+      "duration_seconds": 0.034,
+      "pty": true,
+      "execve_count": 1,
+      "connect_count": 0
+    },
+    {
+      "label": "02-join",
+      "exit_code": 0,
+      "duration_seconds": 0.144,
+      "pty": true,
+      "execve_count": 1,
+      "connect_count": 0
+    },
+    {
+      "label": "03-join-repeat",
+      "exit_code": 0,
+      "duration_seconds": 0.038,
+      "pty": true,
+      "execve_count": 1,
+      "connect_count": 0
+    },
+    {
+      "label": "04-status",
+      "exit_code": 0,
+      "duration_seconds": 0.034,
+      "pty": true,
+      "execve_count": 1,
+      "connect_count": 0
+    },
+    {
+      "label": "05-status-json",
+      "exit_code": 0,
+      "duration_seconds": 0.034,
+      "pty": true,
+      "execve_count": 1,
+      "connect_count": 0
+    }
+  ],
+  "checks": {
+    "all_exit_zero": true,
+    "real_pty": true,
+    "repeat_same_content_and_modes": true,
+    "receipt_local_prepared": true,
+    "fleet_disabled": true,
+    "database_absent": true,
+    "socket_absent": true,
+    "no_connect_syscalls": true,
+    "no_child_program_exec": true
+  },
+  "all_checks_pass": true
+}

@@ -1,0 +1,95 @@
+{
+  "at": "2026-10-02T08:41:30.630876+00:00",
+  "services": [
+    {
+      "unit": "openagentx.service",
+      "command": [
+        "systemctl",
+        "--user",
+        "show",
+        "openagentx.service",
+        "-p",
+        "MainPID",
+        "-p",
+        "ActiveState",
+        "-p",
+        "SubState",
+        "-p",
+        "FragmentPath",
+        "-p",
+        "KillMode"
+      ],
+      "properties": {
+        "MainPID": "2439715",
+        "KillMode": "control-group",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/sky/.config/systemd/user/openagentx.service"
+      },
+      "pid": 2439715,
+      "starttime": "14825118",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "exe_sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366"
+    },
+    {
+      "unit": "openagentx-worker@agy-onboarding-e2e.service",
+      "command": [
+        "systemctl",
+        "--user",
+        "show",
+        "openagentx-worker@agy-onboarding-e2e.service",
+        "-p",
+        "MainPID",
+        "-p",
+        "ActiveState",
+        "-p",
+        "SubState",
+        "-p",
+        "FragmentPath",
+        "-p",
+        "KillMode"
+      ],
+      "properties": {
+        "MainPID": "2440442",
+        "KillMode": "control-group",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/sky/.config/systemd/user/openagentx-worker@.service"
+      },
+      "pid": 2440442,
+      "starttime": "14826721",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "exe_sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366"
+    },
+    {
+      "unit": "openagentx-worker@codex-domain-e2e.service",
+      "command": [
+        "systemctl",
+        "--user",
+        "show",
+        "openagentx-worker@codex-domain-e2e.service",
+        "-p",
+        "MainPID",
+        "-p",
+        "ActiveState",
+        "-p",
+        "SubState",
+        "-p",
+        "FragmentPath",
+        "-p",
+        "KillMode"
+      ],
+      "properties": {
+        "MainPID": "2459787",
+        "KillMode": "control-group",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/sky/.config/systemd/user/openagentx-worker@.service"
+      },
+      "pid": 2459787,
+      "starttime": "14862442",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "exe_sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366"
+    }
+  ]
+}

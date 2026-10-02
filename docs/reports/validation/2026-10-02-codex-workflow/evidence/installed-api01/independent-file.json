@@ -1,0 +1,9 @@
+{
+  "path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace/OAX-INSTALLED-d20953aa00045552-result.txt",
+  "actual_bytes": 31,
+  "sha256": "b583fc5802513380c2ebd6329ad751e33e84e7717e01dec64a483e1da469a548",
+  "expected_sha256": "b583fc5802513380c2ebd6329ad751e33e84e7717e01dec64a483e1da469a548",
+  "exact": true,
+  "task_status": "uncertain",
+  "completion_basis": ""
+}

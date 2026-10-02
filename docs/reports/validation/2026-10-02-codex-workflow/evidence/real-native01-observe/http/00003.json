@@ -1,0 +1,183 @@
+{
+  "at": "2026-10-02T08:03:06.711776+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+      "version": 3,
+      "target_agent_id": "codex-local-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Create native-real01.txt in the assigned workspace with exactly the UTF-8 bytes OAX-NATIVE-REAL01 followed by one newline. Use a file-writing tool exactly once. Do not alter other files. Reply with exactly NATIVE-REAL01-DONE.",
+      "status": "uncertain",
+      "result": "NATIVE-REAL01-DONE",
+      "error": "business_effect_unverified",
+      "outcome_state": "available",
+      "created_at": "2026-10-02T08:01:48.460935508Z",
+      "updated_at": "2026-10-02T08:02:16.634670576Z"
+    },
+    "messages": [
+      {
+        "id": "message-4a0cd724-e81b-4e0b-bbaf-0b1751018363",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "kind": "instruction",
+        "content": "Create native-real01.txt in the assigned workspace with exactly the UTF-8 bytes OAX-NATIVE-REAL01 followed by one newline. Use a file-writing tool exactly once. Do not alter other files. Reply with exactly NATIVE-REAL01-DONE.",
+        "created_at": "2026-10-02T08:01:48.460935508Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T08:31:48.46471525Z",
+        "instructions_sha256": "49021725f68d2c39736ca7e346e58ac53217fb09c305bb9f63eb2c244c8e273f",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/identities/codex-local-e2e.role.md",
+        "run_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "task_id": "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+        "agent_id": "codex-local-e2e",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "NATIVE-REAL01-DONE",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-02T08:01:48.46471525Z",
+        "finished_at": "2026-10-02T08:02:16.634670576Z",
+        "created_at": "2026-10-02T08:01:48.46471525Z",
+        "updated_at": "2026-10-02T08:02:16.634670576Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 154,
+        "event_id": "event-beb06d70-a797-4a0e-b950-a589a1c40bd0",
+        "aggregate_type": "task",
+        "aggregate_id": "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:01:48.460935508Z"
+      },
+      {
+        "sequence": 156,
+        "event_id": "event-task-c5c2d87f-7976-4803-9e83-156985a60ee3",
+        "aggregate_type": "task",
+        "aggregate_id": "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:01:48.46640365Z"
+      },
+      {
+        "sequence": 157,
+        "event_id": "event-run-9eb22705-c35e-4972-8ff9-770b4ea2b0bc",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:01:48.466410365Z"
+      },
+      {
+        "sequence": 159,
+        "event_id": "event-runtime-fb9be406-2f5c-4b0b-89f5-9ba48c826f7b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "event_type": "runtime.event",
+        "created_at": "2026-10-02T08:01:50.226257166Z"
+      },
+      {
+        "sequence": 160,
+        "event_id": "event-runtime-46b4d7cd-04c3-4ed6-882f-3572f249dd93",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:01:50.572421239Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 162,
+        "event_id": "event-runtime-df52f030-ccac-45b3-b2be-abe5b8859cb0",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:01:57.479629739Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我会写入指定内容，并保留末尾的一个换行。\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 163,
+        "event_id": "event-runtime-9d0f3501-3879-4a54-89b6-7cc7f8f8e04b",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:02:00.341771931Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed fileChange",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 166,
+        "event_id": "event-runtime-3c642d47-d6e0-44c1-b7b0-f32f29d299ea",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:02:16.586443761Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "NATIVE-REAL01-DONE",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 168,
+        "event_id": "event-run-c6d60c1a-c5c7-4b8d-a343-abd79e5f7a88",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-f2e6803d-9005-4c3d-abad-d06e79ff9fb1",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-02T08:02:16.634692012Z"
+      },
+      {
+        "sequence": 169,
+        "event_id": "event-task-67ce9c8c-7a43-46d3-807c-204ba3016871",
+        "aggregate_type": "task",
+        "aggregate_id": "task-836f9b74-72b9-4275-9cb2-f3eb2527a8b0",
+        "event_type": "task.settled",
+        "created_at": "2026-10-02T08:02:16.634694955Z"
+      }
+    ],
+    "snapshot_sequence": 174,
+    "live_after_sequence": 174,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

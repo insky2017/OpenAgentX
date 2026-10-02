@@ -1,0 +1,17 @@
+{
+  "unit": "openagentx-worker@agy-onboarding-e2e.service",
+  "command": [
+    "journalctl",
+    "--user",
+    "-u",
+    "openagentx-worker@agy-onboarding-e2e.service",
+    "--since",
+    "2026-10-02T08:38:32.728801+00:00",
+    "--no-pager",
+    "-o",
+    "short-iso"
+  ],
+  "returncode": 0,
+  "stdout": "-- No entries --\n",
+  "stderr": ""
+}

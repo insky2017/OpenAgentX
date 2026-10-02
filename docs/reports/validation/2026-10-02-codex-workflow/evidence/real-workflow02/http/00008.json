@@ -1,0 +1,93 @@
+{
+  "at": "2026-10-02T07:53:39.946750+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+      "version": 2,
+      "target_agent_id": "codex-local-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Create OAX-CODEX-163f4d11a213312a-result.txt in the assigned workspace with exactly the bytes b'OAX-CODEX-163f4d11a213312a\\n'. Write once using a tool. Do not change other files. Report completion.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T07:53:39.939904549Z",
+      "updated_at": "2026-10-02T07:53:39.942207395Z"
+    },
+    "messages": [
+      {
+        "id": "message-140854ec-836d-4e57-b7d2-7cd1b2271290",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+        "target_agent_id": "codex-local-e2e",
+        "kind": "instruction",
+        "content": "Create OAX-CODEX-163f4d11a213312a-result.txt in the assigned workspace with exactly the bytes b'OAX-CODEX-163f4d11a213312a\\n'. Write once using a tool. Do not change other files. Report completion.",
+        "created_at": "2026-10-02T07:53:39.939904549Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T08:23:39.942207395Z",
+        "instructions_sha256": "49021725f68d2c39736ca7e346e58ac53217fb09c305bb9f63eb2c244c8e273f",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/identities/codex-local-e2e.role.md",
+        "run_id": "run-b4d5fa9c-6b30-4d9f-92d0-98fb9686a8f7",
+        "task_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+        "agent_id": "codex-local-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-02T07:53:39.942207395Z",
+        "created_at": "2026-10-02T07:53:39.942207395Z",
+        "updated_at": "2026-10-02T07:53:39.942207395Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 77,
+        "event_id": "event-18b96f8d-95aa-4a3e-9aaa-fddd99251cef",
+        "aggregate_type": "task",
+        "aggregate_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T07:53:39.939904549Z"
+      },
+      {
+        "sequence": 79,
+        "event_id": "event-task-cada3dd4-0692-43d5-b020-7930108e2338",
+        "aggregate_type": "task",
+        "aggregate_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T07:53:39.94307726Z"
+      },
+      {
+        "sequence": 80,
+        "event_id": "event-run-5a59ce33-6136-46f9-8537-9ee0ba04c980",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-b4d5fa9c-6b30-4d9f-92d0-98fb9686a8f7",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T07:53:39.943082513Z"
+      }
+    ],
+    "snapshot_sequence": 81,
+    "live_after_sequence": 81,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

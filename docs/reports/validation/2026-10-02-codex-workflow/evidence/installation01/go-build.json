@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "go",
+    "build",
+    "-trimpath",
+    "-o",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installation/openagentx",
+    "./cmd/openagentx"
+  ],
+  "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/release-source",
+  "started_at": "2026-10-02T08:24:41.479008+00:00",
+  "exit": 0
+}

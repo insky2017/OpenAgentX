@@ -1,0 +1,25 @@
+version: 1
+agent_id: cli-evidence
+transport: unix
+unix_socket: <RAW_DIR>/profile/oax.sock
+endpoint: ""
+ca_file: ""
+client_cert_file: ""
+client_key_file: ""
+server_name: ""
+capabilities: []
+heartbeat_interval: 0s
+mailbox_wait: 0s
+control_wait: 0s
+shutdown_timeout: 0s
+runtime_backends:
+    - backend_id: codex
+      adapter_id: codex-app-server
+      options:
+        binary: codex
+        handoff_file: <RAW_DIR>/profile/workers/joins/cli-evidence.handoff.md
+        state_dir: <RAW_DIR>/profile/workers/codex/cli-evidence
+        timeout: 30m0s
+        working_dir: <RAW_DIR>/workspace
+      network:
+        mode: inherit

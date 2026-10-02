@@ -1,0 +1,16 @@
+{
+  "started_at": "20261002T074001Z",
+  "scope": "real PTY CLI join prepare/status/help only; no runtime/model/service startup",
+  "source_head": "b37e2ea53ca3e7eb6f686afecec3b425427d44bd",
+  "source_status": " M go.mod\n M go.sum\n M internal/api/control.go\n M internal/cli/fleet/agent.go\n M internal/cli/fleet/agent_test.go\n M internal/cli/fleet/command.go\n M internal/cli/worker/command.go\n M internal/controlplane/command_service.go\n M internal/controlplane/worker_service.go\n M internal/persistence/sqlite/task_repository.go\n M internal/persistence/sqlite/worker_execution_repository.go\n M internal/runtime/network/environment.go\n M internal/runtime/network/environment_test.go\n M internal/runtime/network/identity.go\n M internal/runtime/network/identity_test.go\n M internal/worker/backend_pool.go\n M web/src/main.jsx\n M web/src/styles.css\n M web/src/task-dispatch-state.js\n M web/src/task-dispatch-state.test.js\n?? docs/operations/codex-agent-entry.md\n?? internal/cli/fleet/agent_enable.go\n?? internal/cli/fleet/agent_enable_test.go\n?? internal/cli/fleet/agent_environment.go\n?? internal/cli/fleet/agent_join.go\n?? internal/cli/fleet/agent_join_test.go\n?? internal/cli/fleet/agent_native.go\n?? internal/controlplane/codex_session_test.go\n?? internal/domain/runtime_session.go\n?? internal/nativebridge/\n?? internal/persistence/sqlite/native_session_task_test.go\n?? internal/persistence/sqlite/runtime_session_binding_test.go\n?? internal/runtime/codex/\n?? scripts/validation/\n?? skills/\n",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "build_command": [
+    "go",
+    "build",
+    "-o",
+    "<RAW_DIR>/bin/openagentx",
+    "./cmd/openagentx"
+  ],
+  "build_exit_code": 0,
+  "binary_sha256": "1680408b400523fab37f3025574814ae3ef5dad6479967ee0677de76bc5f3234"
+}

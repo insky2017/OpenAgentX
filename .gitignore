@@ -8,3 +8,4 @@ web/node_modules/
 web/dist/
 
 scripts/e2e/__pycache__/
+scripts/validation/__pycache__/

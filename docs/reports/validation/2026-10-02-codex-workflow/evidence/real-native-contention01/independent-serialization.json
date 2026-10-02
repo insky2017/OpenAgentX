@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-02T08:18:59.100581+00:00",
+  "native_finished_at": "2026-10-02T08:16:29.706803952Z",
+  "bus_started_at": "2026-10-02T08:16:29.710451529Z",
+  "runs_overlap": false,
+  "remaining_exact_native_tool_pids": [],
+  "same_worker": true,
+  "same_generation": true
+}

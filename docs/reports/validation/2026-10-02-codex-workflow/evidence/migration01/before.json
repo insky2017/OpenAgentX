@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-02T08:28:41.857433+00:00",
+  "processes": {
+    "worker": {
+      "pid": 2255934,
+      "starttime": "14553793",
+      "state": "S",
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "pgid": 2255934
+    },
+    "appserver": {
+      "pid": 2255999,
+      "starttime": "14553868",
+      "state": "S",
+      "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex (deleted)",
+      "pgid": 2255999
+    },
+    "daemon": {
+      "pid": 2255555,
+      "starttime": "14553047",
+      "state": "S",
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "pgid": 2255555
+    }
+  },
+  "runtime": {
+    "endpoint": "unix:///tmp/oax-codex-214904957/server.sock",
+    "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+    "turn_id": "01a0fbaf-b2ba-7590-af5a-a3f7eeb98ca1",
+    "task_id": "task-cfcfb977-c33a-4af9-b4dc-7c24ba127f5a",
+    "run_id": "run-89d133ed-70a3-44ec-b67c-15eb23e1fc9c",
+    "state": "idle",
+    "pid": 2255999,
+    "updated_at": "2026-10-02T08:28:40.694791339Z"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "argv": [
+    "/usr/bin/strace",
+    "-f",
+    "-o",
+    "<RAW_DIR>/02-join.strace",
+    "-e",
+    "trace=process,connect",
+    "<RAW_DIR>/bin/openagentx",
+    "agent",
+    "join",
+    "--id",
+    "cli-evidence",
+    "--name",
+    "CLI Evidence",
+    "--workspace",
+    "<RAW_DIR>/workspace",
+    "--role",
+    "<RAW_DIR>/workspace/ROLE.md",
+    "--handoff-file",
+    "<RAW_DIR>/workspace/HANDOFF.md",
+    "--prepare",
+    "--db",
+    "<RAW_DIR>/profile/oax.db",
+    "--socket",
+    "<RAW_DIR>/profile/oax.sock",
+    "--file",
+    "<RAW_DIR>/profile/fleet.yaml",
+    "--worker-dir",
+    "<RAW_DIR>/profile/workers",
+    "--credentials",
+    "<RAW_DIR>/profile/credentials.json"
+  ],
+  "environment_overrides": {
+    "OPENAGENTX_HOME": "<RAW_DIR>/profile"
+  },
+  "started_at": "2026-10-02T07:41:55.608948+00:00"
+}

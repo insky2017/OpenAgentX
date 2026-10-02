@@ -1,0 +1,65 @@
+{
+  "thread": {
+    "id": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+    "environments": [
+      {
+        "environmentId": "local",
+        "cwd": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/workspace",
+        "runtimeWorkspaceRoots": [
+          "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/workspace"
+        ]
+      }
+    ],
+    "extra": null,
+    "sessionId": "01a0fb71-3208-72f3-91c0-9c63d8341641",
+    "forkedFromId": null,
+    "parentThreadId": null,
+    "preview": "",
+    "ephemeral": false,
+    "section": null,
+    "sectionEnteredAt": null,
+    "projectId": null,
+    "historyMode": "paginated",
+    "modelProvider": "oneaxe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "ultra",
+    "createdAt": 1790924894,
+    "updatedAt": 1790924894,
+    "recencyAt": 1790924894,
+    "status": {
+      "type": "idle"
+    },
+    "path": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/home/sessions/2026/10/02/rollout-2026-10-02T15-08-14-01a0fb71-3208-72f3-91c0-9c63d8341641.jsonl",
+    "cwd": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/workspace",
+    "cliVersion": "0.160.0",
+    "originator": "Codex Desktop",
+    "source": "vscode",
+    "canAcceptDirectInput": true,
+    "threadSource": null,
+    "agentNickname": null,
+    "agentRole": null,
+    "gitInfo": null,
+    "name": null,
+    "daybreakEnabled": null,
+    "turns": []
+  },
+  "model": "gpt-6-astra",
+  "modelProvider": "oneaxe",
+  "serviceTier": "default",
+  "disabledPluginIds": [],
+  "cwd": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/workspace",
+  "runtimeWorkspaceRoots": [
+    "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/workspace"
+  ],
+  "instructionSources": [
+    "/home/sky/AGENTS.md"
+  ],
+  "approvalPolicy": "never",
+  "approvalsReviewer": "user",
+  "sandbox": {
+    "type": "dangerFullAccess"
+  },
+  "activePermissionProfile": null,
+  "reasoningEffort": "ultra",
+  "multiAgentMode": "explicitRequestOnly"
+}

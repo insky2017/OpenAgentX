@@ -1,0 +1,23 @@
+{
+  "pid": 2255999,
+  "exists": true,
+  "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex (deleted)",
+  "sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+  "comm": "codex",
+  "children": [
+    "2294398",
+    "2294395",
+    "2294397",
+    "2297247",
+    "2297246",
+    "2300947",
+    "2297249",
+    "2300944",
+    "2300946"
+  ],
+  "version_probe_error": "PermissionError: /proc/PID/exe --version denied; running inode is deleted",
+  "running_inode_mode": "0o600",
+  "current_path": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+  "current_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+  "current_version": "codex-cli 0.160.0"
+}

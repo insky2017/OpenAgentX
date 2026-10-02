@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-02T08:23:21.341554+00:00",
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+  "state": "idle",
+  "workspace": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/workspace",
+  "latest_native_file": "native-queue-result01.txt",
+  "latest_native_file_exact": "NATIVE-QUEUE-END01\n",
+  "latest_bus_reply": "NATIVE-QUEUE-END01|BUS-AFTER-NATIVE01",
+  "previous_native_file": "native-real01.txt",
+  "previous_native_file_exact": "OAX-NATIVE-REAL01\n",
+  "owned_processes": [
+    {
+      "label": "daemon",
+      "pid": 2255555,
+      "ppid": 1722,
+      "pgid": 2255555,
+      "starttime": "14553047",
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+    },
+    {
+      "label": "worker",
+      "pid": 2255934,
+      "ppid": 1722,
+      "pgid": 2255934,
+      "starttime": "14553793",
+      "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+    },
+    {
+      "label": "appserver",
+      "pid": 2255999,
+      "ppid": 2255934,
+      "pgid": 2255999,
+      "starttime": "14553868",
+      "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex (deleted)",
+      "exe_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad"
+    }
+  ],
+  "exited_native_foreground_pids": [
+    2324281,
+    2377405
+  ],
+  "stopped_by_this_agent": false,
+  "note": "Process ownership follows isolated setup; no arbitrary external/shared process is included."
+}

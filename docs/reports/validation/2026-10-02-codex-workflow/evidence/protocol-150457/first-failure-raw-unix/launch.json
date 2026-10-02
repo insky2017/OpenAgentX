@@ -1,0 +1,1 @@
+{"argv": ["codex", "app-server", "--listen", "unix:///home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/server.sock"], "cwd": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/workspace", "CODEX_HOME": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/home"}

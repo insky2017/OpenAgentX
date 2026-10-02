@@ -1,0 +1,10 @@
+OpenAgentX Codex workflow installed candidate
+source_revision=6b68eeb810c2b65d629cd8a817bad25a21483d5c
+vcs.modified=false
+binary_sha256=f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366
+web_source_revision=6b68eeb810c2b65d629cd8a817bad25a21483d5c
+schema_meta_version=2
+backup=/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installation/rollback
+installed_at=2026-10-02T08:37:15.012916+00:00
+acceptance=artifact identity verified; installed Codex real E2E in progress
+evidence=/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-codex-workflow/DELIVERY.md

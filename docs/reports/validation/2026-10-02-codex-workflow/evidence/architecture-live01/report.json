@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-10-02T08:19:36.258341+00:00",
+  "scope": "generated architecture documentation only",
+  "browser": "existing /usr/bin/google-chrome via isolated agent-browser session",
+  "desktop": {
+    "viewport": [
+      1440,
+      1100
+    ],
+    "tabs": 7,
+    "native_nodes": 7,
+    "selected_node_click": "原生桥接",
+    "document_overflow": false,
+    "all_native_titles_fit": true
+  },
+  "mobile": {
+    "viewport": [
+      390,
+      844
+    ],
+    "document_width": 390,
+    "diagram_scrollable": true,
+    "all_tabs_fit": true
+  },
+  "renderer": "7 views, 79 nodes; all source references checked",
+  "first_attempts": [
+    "agent-browser bundled Chromium absent",
+    "executable change ignored by already running empty daemon; isolated session restarted with system Chrome",
+    "agent-browser file URL normalized incorrectly; served docs on temporary loopback HTTP"
+  ],
+  "boundaries": [
+    "No product browser workflow claim",
+    "No installed service or binary changes",
+    "Reading-directory files not changed"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "worker": {
+    "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+    "agent_id": "codex-domain-e2e",
+    "generation": 2,
+    "status": "online",
+    "last_heartbeat_at": "2026-10-02T08:38:17.127388597Z",
+    "lease_until": "2026-10-02T08:38:47.127388597Z",
+    "started_at": "2026-10-02T08:36:37.111834049Z",
+    "updated_at": "2026-10-02T08:38:17.127388597Z"
+  },
+  "method": "GET",
+  "transport": "unix-domain-socket",
+  "paths": [
+    "/api/observe/v1/network-profiles",
+    "/api/observe/v1/overview"
+  ],
+  "binding": {
+    "agent_id": "codex-domain-e2e",
+    "backend_id": "codex",
+    "mode": "inherit",
+    "policy_version": 2,
+    "test_id": "network-mode-test-0e62e8f0-20bc-4bbb-b1d8-456250083320",
+    "manifest_digest": "9f5b86ac578518afc9a13092712c2178c75704f5b95eb08e2cc6041af0aab02c",
+    "runtime_identity": {
+      "adapter_id": "codex-app-server",
+      "adapter_version": "1",
+      "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad"
+    },
+    "version": 2,
+    "desired_status": "applied",
+    "applied_worker_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+    "applied_generation": 2,
+    "applied_mode": "inherit",
+    "applied_policy_version": 2,
+    "applied_binding_revision": 2,
+    "updated_at": "2026-10-02T08:36:57.684130645Z"
+  },
+  "agent": {
+    "agent_id": "codex-domain-e2e",
+    "principal_id": "agent-codex-domain-e2e",
+    "organization_id": "default",
+    "display_name": "Codex 领域工作台",
+    "status": "active",
+    "version": 1,
+    "created_at": "2026-10-02T08:31:11.537577823Z",
+    "updated_at": "2026-10-02T08:31:11.537577823Z",
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    }
+  }
+}

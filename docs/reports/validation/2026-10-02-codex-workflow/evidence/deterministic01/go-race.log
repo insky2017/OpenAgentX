@@ -1,0 +1,42 @@
+ok  	openagentx/cmd/openagentx	2.307s
+ok  	openagentx/internal/api	1.028s
+ok  	openagentx/internal/api/admin	4.472s
+ok  	openagentx/internal/api/auth	4.335s
+?   	openagentx/internal/runtime/conformance	[no test files]
+?   	openagentx/internal/runtime/registry	[no test files]
+?   	openagentx/internal/runtime/fake	[no test files]
+?   	openagentx/internal/runtime/descriptors	[no test files]
+ok  	openagentx/internal/api/console	13.577s
+ok  	openagentx/internal/api/panel	57.536s
+ok  	openagentx/internal/api/workerapi	1.039s
+ok  	openagentx/internal/auth	2.456s
+ok  	openagentx/internal/auth/cli	12.533s
+ok  	openagentx/internal/auth/web	4.369s
+ok  	openagentx/internal/cli/admin	5.125s
+ok  	openagentx/internal/cli/console	37.803s
+ok  	openagentx/internal/cli/fleet	9.652s
+ok  	openagentx/internal/cli/worker	2.479s
+ok  	openagentx/internal/client/console	1.136s
+ok  	openagentx/internal/client/worker	1.050s
+ok  	openagentx/internal/consolemodel	2.457s
+ok  	openagentx/internal/controlplane	13.603s
+ok  	openagentx/internal/credentialstore	1.605s
+ok  	openagentx/internal/domain	1.057s
+ok  	openagentx/internal/fleet	14.889s
+ok  	openagentx/internal/localprofile	1.045s
+ok  	openagentx/internal/nativebridge	1.441s
+ok  	openagentx/internal/network/secretstore	1.623s
+ok  	openagentx/internal/persistence/sqlite	29.546s
+ok  	openagentx/internal/persistence/sqlite/migrations	6.591s
+ok  	openagentx/internal/runtime	1.032s
+ok  	openagentx/internal/runtime/acp	1.104s
+ok  	openagentx/internal/runtime/agy	17.789s
+ok  	openagentx/internal/runtime/codebuddy	3.204s
+ok  	openagentx/internal/runtime/codex	(cached)
+ok  	openagentx/internal/runtime/network	1.533s
+ok  	openagentx/internal/runtime/spec	1.034s
+ok  	openagentx/internal/safeoutput	1.209s
+ok  	openagentx/internal/testkit	1.246s
+ok  	openagentx/internal/transport/remotehttps	1.380s
+ok  	openagentx/internal/transport/unixhttp	1.059s
+ok  	openagentx/internal/worker	2.756s

@@ -1,0 +1,54 @@
+{
+  "at": "2026-10-02T07:54:39.993387+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/mailboxes?agent_id=codex-local-e2e",
+  "request": null,
+  "status": 200,
+  "response": [
+    {
+      "sequence": 1,
+      "mailbox_item_id": "mailbox-fa8c4d4f-c5f3-447d-a4fd-b75baf8134e2",
+      "target_agent_id": "codex-local-e2e",
+      "kind": "task",
+      "lane": "work",
+      "task_id": "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+      "state": "accepted",
+      "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "fencing_token": "[REDACTED]",
+      "lease_until": "2026-10-02T07:53:30.675423804Z",
+      "attempts": 1,
+      "created_at": "2026-10-02T07:53:09.920635378Z",
+      "accepted_at": "2026-10-02T07:53:09.923758082Z"
+    },
+    {
+      "sequence": 2,
+      "mailbox_item_id": "mailbox-132dd7dc-3bea-4514-822d-fce95515af2b",
+      "target_agent_id": "codex-local-e2e",
+      "kind": "task",
+      "lane": "work",
+      "task_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+      "state": "accepted",
+      "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "fencing_token": "[REDACTED]",
+      "lease_until": "2026-10-02T07:54:00.668988665Z",
+      "attempts": 1,
+      "created_at": "2026-10-02T07:53:39.939904549Z",
+      "accepted_at": "2026-10-02T07:53:39.942207395Z"
+    },
+    {
+      "sequence": 3,
+      "mailbox_item_id": "mailbox-8f724fb9-74bc-4329-9fbc-b485f16e50f6",
+      "target_agent_id": "codex-local-e2e",
+      "kind": "task",
+      "lane": "work",
+      "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "state": "accepted",
+      "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "fencing_token": "[REDACTED]",
+      "lease_until": "2026-10-02T07:54:30.667484173Z",
+      "attempts": 1,
+      "created_at": "2026-10-02T07:54:09.963927007Z",
+      "accepted_at": "2026-10-02T07:54:09.966481993Z"
+    }
+  ]
+}

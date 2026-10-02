@@ -1,0 +1,49 @@
+{
+  "before": {
+    "at": "2026-10-02T07:48:37.275927+00:00",
+    "expected_binary_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+    "records": [
+      {
+        "label": "daemon",
+        "pid": 2255555,
+        "starttime": "14553047",
+        "actual_starttime": "14553047",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+      },
+      {
+        "label": "worker",
+        "pid": 2255934,
+        "starttime": "14553793",
+        "actual_starttime": "14553793",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+      }
+    ]
+  },
+  "after": {
+    "at": "2026-10-02T07:50:24.607002+00:00",
+    "records": [
+      {
+        "label": "daemon",
+        "pid": 2255555,
+        "actual_starttime": "14553047",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+        "same_identity": true
+      },
+      {
+        "label": "worker",
+        "pid": 2255934,
+        "actual_starttime": "14553793",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+        "same_identity": true
+      }
+    ]
+  },
+  "same_process_and_binary": true,
+  "task_dispatch_attempted": false,
+  "failure_layer": "validation-client secure-cookie policy on loopback HTTP",
+  "runtime_model_invoked": false
+}

@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/real-native-contention01-driver.py"
+  ],
+  "sha256": "5243afc57b71c832a58f4f1b2eba924caa672984374959c68eacdae38fd40848",
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+  "backend_candidate": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+}

@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-02T08:56:26.620376+00:00",
+  "evidence_files_scanned": 613,
+  "known_secret_matches": 0,
+  "manifest_entries_checked": 496,
+  "manifest_failures": [],
+  "validation_python_ast": "PASS",
+  "frozen_adr_diff": "empty",
+  "git_diff_check": "PASS",
+  "note": "Static final evidence/provenance checks; does not add model or E2E coverage"
+}

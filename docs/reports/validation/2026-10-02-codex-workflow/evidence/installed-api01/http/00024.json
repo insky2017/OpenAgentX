@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-02T08:39:15.312105+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-bfa32f92-2401-4cfb-91c1-3a32eb204848",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-bfa32f92-2401-4cfb-91c1-3a32eb204848",
+      "version": 2,
+      "target_agent_id": "codex-domain-e2e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Do not call tools. Reply with exactly: OAX-INSTALLED-d20953aa00045552-THIRD",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-02T08:39:12.291479684Z",
+      "updated_at": "2026-10-02T08:39:12.29494095Z"
+    },
+    "messages": [
+      {
+        "id": "message-85f043ee-efe0-4004-a34b-da4a9b20d66a",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-bfa32f92-2401-4cfb-91c1-3a32eb204848",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+        "target_agent_id": "codex-domain-e2e",
+        "kind": "instruction",
+        "content": "Do not call tools. Reply with exactly: OAX-INSTALLED-d20953aa00045552-THIRD",
+        "created_at": "2026-10-02T08:39:12.291479684Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-02T09:09:12.29494095Z",
+        "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+        "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+        "run_id": "run-4002f651-3dbb-4dee-9546-511fd094d20b",
+        "task_id": "task-bfa32f92-2401-4cfb-91c1-3a32eb204848",
+        "agent_id": "codex-domain-e2e",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-02T08:39:12.29494095Z",
+        "created_at": "2026-10-02T08:39:12.29494095Z",
+        "updated_at": "2026-10-02T08:39:12.29494095Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 272823,
+        "event_id": "event-4e9e24b6-40da-4966-b7a3-3c41272212a6",
+        "aggregate_type": "task",
+        "aggregate_id": "task-bfa32f92-2401-4cfb-91c1-3a32eb204848",
+        "event_type": "task.created",
+        "created_at": "2026-10-02T08:39:12.291479684Z"
+      },
+      {
+        "sequence": 272825,
+        "event_id": "event-task-1585a2c7-60d9-4f8b-86a0-78a22f300644",
+        "aggregate_type": "task",
+        "aggregate_id": "task-bfa32f92-2401-4cfb-91c1-3a32eb204848",
+        "event_type": "task.running",
+        "created_at": "2026-10-02T08:39:12.296362262Z"
+      },
+      {
+        "sequence": 272826,
+        "event_id": "event-run-f60c354d-4421-48a2-a2e2-2bb84cdb878a",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-4002f651-3dbb-4dee-9546-511fd094d20b",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-02T08:39:12.296365774Z"
+      },
+      {
+        "sequence": 272828,
+        "event_id": "event-runtime-76ac46da-3c50-41bc-ba67-8b51252e1a31",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-4002f651-3dbb-4dee-9546-511fd094d20b",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-02T08:39:13.625661202Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 272828,
+    "live_after_sequence": 272828,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

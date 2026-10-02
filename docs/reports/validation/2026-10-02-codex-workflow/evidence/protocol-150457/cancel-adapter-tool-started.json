@@ -1,0 +1,28 @@
+{
+  "method": "item/started",
+  "params": {
+    "item": {
+      "type": "commandExecution",
+      "id": "exec-1aaa8bef-f67c-46cb-be32-c42790580633",
+      "pluginId": null,
+      "scriptPath": null,
+      "command": "/usr/bin/zsh -lc 'sleep 20; printf SHOULD_NOT_EXIST \u003e late-cancel-sentinel.txt'",
+      "cwd": "/home/sky/.local/state/openagentx/evidence/codex-protocol-20261002-150457/cancel-adapter-workspace",
+      "processId": "62798",
+      "source": "unifiedExecStartup",
+      "status": "inProgress",
+      "commandActions": [
+        {
+          "type": "unknown",
+          "command": "sleep 20; printf SHOULD_NOT_EXIST \u003e late-cancel-sentinel.txt"
+        }
+      ],
+      "aggregatedOutput": null,
+      "exitCode": null,
+      "durationMs": null
+    },
+    "threadId": "01a0fbaa-4bfb-72d0-a8a6-93e070398439",
+    "turnId": "01a0fbaa-4c7a-7c12-8a6c-0ef073a1cc38",
+    "startedAtMs": 1790928687799
+  }
+}

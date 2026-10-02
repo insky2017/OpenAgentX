@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-02T08:41:21.439830+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-domain-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Do not call tools. Reply with exactly: OAX-INSTALLED-d20953aa00045552-AFTER-CANCEL",
+    "runtime_session": {
+      "backend_id": "codex",
+      "source_task_id": "task-2fd909f7-9dfb-4a4a-97e4-f39257939d72"
+    },
+    "meta": {
+      "idempotency_key": "e0ce5192d6bcae330a39deb47ddf0a14"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-8b4b6b77-668f-4db6-afd3-e08fd1f371c3",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 90
+  }
+}

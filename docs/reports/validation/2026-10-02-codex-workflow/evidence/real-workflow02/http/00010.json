@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-02T07:54:09.961134+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/run-attempts/run-b4d5fa9c-6b30-4d9f-92d0-98fb9686a8f7",
+  "request": null,
+  "status": 200,
+  "response": {
+    "deadline_at": "2026-10-02T08:23:39.942207395Z",
+    "instructions_sha256": "49021725f68d2c39736ca7e346e58ac53217fb09c305bb9f63eb2c244c8e273f",
+    "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/identities/codex-local-e2e.role.md",
+    "run_id": "run-b4d5fa9c-6b30-4d9f-92d0-98fb9686a8f7",
+    "task_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+    "agent_id": "codex-local-e2e",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+    "worker_generation": 1,
+    "execution_spec_version": 1,
+    "adapter_id": "codex-app-server",
+    "backend_id": "codex",
+    "model": "gpt-6-astra",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 1,
+    "network_binding_revision": 1,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "已完成：文件 `OAX-CODEX-163f4d11a213312a-result.txt` 已写入一次，内容核对完全一致，未修改其他文件。",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-02T07:53:39.942207395Z",
+    "finished_at": "2026-10-02T07:54:01.387572327Z",
+    "created_at": "2026-10-02T07:53:39.942207395Z",
+    "updated_at": "2026-10-02T07:54:01.387572327Z"
+  }
+}

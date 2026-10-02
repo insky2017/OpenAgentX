@@ -1,0 +1,14 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "./internal/runtime/codex",
+    "./internal/nativebridge",
+    "./internal/cli/worker",
+    "./internal/worker",
+    "./internal/cli/fleet"
+  ],
+  "started_at": "2026-10-02T08:22:35.874688+00:00",
+  "exit": 0
+}

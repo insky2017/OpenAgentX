@@ -1,0 +1,178 @@
+{
+  "captured_at": "2026-10-02T08:10:28.620831+00:00",
+  "source_head_at_capture": "370af313c5bdc5a9a62a3b2c0680372982a62d53",
+  "scope": "R: isolated local01 process and environment assembly only",
+  "handoff_file": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/handoff.json",
+  "handoff_sha256": "3eb1994f79fd834c0448602a88cde9cde986a3368915d6ecbeea88af0766eeb7",
+  "candidate_expected_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+  "agent": "codex-local-e2e",
+  "processes": {
+    "worker": {
+      "pid": 2255934,
+      "ppid": 1722,
+      "starttime_ticks": 14553793,
+      "exe_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+      "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+      "identity_stable_during_read": true,
+      "environment": {
+        "HTTP_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "HTTPS_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "ALL_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "http_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "https_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "all_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "NO_PROXY": [
+          "localhost",
+          "127.0.0.1",
+          "::1"
+        ],
+        "no_proxy": [
+          "localhost",
+          "127.0.0.1",
+          "::1"
+        ],
+        "CODEX_HOME": "/home/sky/.codex"
+      }
+    },
+    "appserver": {
+      "pid": 2255999,
+      "ppid": 2255934,
+      "starttime_ticks": 14553868,
+      "exe_path": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex (deleted)",
+      "exe_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "identity_stable_during_read": true,
+      "environment": {
+        "HTTP_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "HTTPS_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "ALL_PROXY": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "http_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "https_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "all_proxy": {
+          "scheme": "http",
+          "host": "127.0.0.1",
+          "port": 7897,
+          "credentials_present": false
+        },
+        "NO_PROXY": [
+          "localhost",
+          "127.0.0.1",
+          "::1"
+        ],
+        "no_proxy": [
+          "localhost",
+          "127.0.0.1",
+          "::1"
+        ],
+        "CODEX_HOME": "/home/sky/.codex"
+      }
+    }
+  },
+  "environment_file": {
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/codex-local-e2e.env",
+    "mode": "0o600",
+    "sha256": "0b59a7624931f0d027b860af0568012c371f59c9d6f24d1e77fd8bba85068954",
+    "keys": [
+      "HTTP_PROXY",
+      "HTTPS_PROXY",
+      "ALL_PROXY",
+      "http_proxy",
+      "https_proxy",
+      "all_proxy",
+      "CODEX_HOME",
+      "NO_PROXY",
+      "no_proxy"
+    ]
+  },
+  "persistent_proxy_source": {
+    "path": "/home/sky/.config/mihomo/config.yaml",
+    "field": "mixed-port",
+    "value": 7897,
+    "selection_implementation": "internal/cli/fleet/agent_environment.go:persistentAgentProxy"
+  },
+  "provider": {
+    "provider": "oneaxe",
+    "base_url": {
+      "scheme": "http",
+      "host": "127.0.0.1",
+      "port": 8080,
+      "credentials_present": false
+    },
+    "requires_openai_auth": false,
+    "env_key_present": false,
+    "env_http_headers_present": false
+  },
+  "checks": {
+    "worker_exe_matches_handoff": true,
+    "appserver_exe_matches_runtime_identity": true,
+    "environment_file_private": true,
+    "environment_file_matches_worker": true,
+    "worker_environment_matches_appserver": true,
+    "all_proxy_endpoints_match_persistent_mihomo_port": true,
+    "both_processes_both_no_proxy_include_loopback": true,
+    "provider_host_present_in_both_no_proxy": true
+  },
+  "result": "PASS",
+  "limitations": [
+    "No new Task or model call was sent.",
+    "No external traffic route or proxy forwarding success was measured.",
+    "NO_PROXY match proves configuration, not observed traffic bypass.",
+    "No systemd restart, enablement, installed artifact or installed service claim.",
+    "Formal inherit probe reports network_effect and model_call not_verified.",
+    "Source HEAD is a capture label; actual executable hashes identify the running candidate."
+  ]
+}

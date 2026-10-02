@@ -1,0 +1,12 @@
+CLEAN path cmd/agentbus
+CLEAN path internal/connector/tmux.go
+CLEAN path integrations/agy/hooks.json.example
+CLEAN agentbus_runtime_naming
+CLEAN agentbus_current_docs
+CLEAN tmux_control
+CLEAN pane_manifest
+CLEAN pane_lifecycle
+CLEAN agy_stop_hook
+CLEAN legacy_schema
+CLEAN legacy_runtime_paths
+Inventory complete. Matches are expected until Task 18.

@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "cases": [
+    "reopen-replays-native-file-and-closed-period-bus-query",
+    "verified-0.160-native-input",
+    "native-plus-explicit-same-thread-bus-queued-without-overlap",
+    "exact-native-file",
+    "both-turns-visible-in-native-TUI",
+    "Ctrl-D-closes-only-own-TUI"
+  ],
+  "frontend_version": "codex-cli 0.160.0",
+  "frontend_exe_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+  "oax_frontend_candidate": "candidate02",
+  "oax_backend_candidate": "candidate01",
+  "installed_claim": false,
+  "cancellation_tested": false
+}

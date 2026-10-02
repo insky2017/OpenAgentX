@@ -1,0 +1,7 @@
+COMMAND: go test -v ./internal/runtime/codex -run ^TestRealCodexCancellation$ -count=1
+=== RUN   TestRealCodexCancellation
+--- PASS: TestRealCodexCancellation (116.64s)
+PASS
+ok  	openagentx/internal/runtime/codex	116.652s
+
+EXIT: 0

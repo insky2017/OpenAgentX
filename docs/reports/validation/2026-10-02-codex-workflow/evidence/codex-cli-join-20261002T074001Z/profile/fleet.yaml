@@ -1,0 +1,7 @@
+version: 1
+session: OAX
+agents:
+    - agent_id: cli-evidence
+      identity_file: <RAW_DIR>/profile/workers/identities/cli-evidence.yaml
+      worker_config: <RAW_DIR>/profile/workers/cli-evidence.yaml
+      enabled: false

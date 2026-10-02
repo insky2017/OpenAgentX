@@ -1,0 +1,1 @@
+{"content":[{"type":"text","text":"Script ran on page and returned:\n```json\n{\"url\":\"http://127.0.0.1:42423/?agent=codex-local-e2e&view=tasks&task=task-781ed4c6-ab67-440c-948b-62a907bf51a1\",\"viewport\":{\"width\":390,\"height\":844},\"pageWidth\":390,\"buttons\":[]}\n```"}]}

@@ -1,0 +1,86 @@
+{
+  "before": {
+    "at": "2026-10-02T07:53:09.556150+00:00",
+    "expected_binary_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+    "records": [
+      {
+        "label": "daemon",
+        "pid": 2255555,
+        "starttime": "14553047",
+        "actual_starttime": "14553047",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+      },
+      {
+        "label": "worker",
+        "pid": 2255934,
+        "starttime": "14553793",
+        "actual_starttime": "14553793",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763"
+      }
+    ]
+  },
+  "after": {
+    "at": "2026-10-02T07:56:43.829801+00:00",
+    "records": [
+      {
+        "label": "daemon",
+        "pid": 2255555,
+        "starttime": "14553047",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+        "same_identity": true
+      },
+      {
+        "label": "worker",
+        "pid": 2255934,
+        "starttime": "14553793",
+        "exe": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/candidate01/openagentx",
+        "exe_sha256": "3d1518238b85b07327a64cac899c4c357d18e41a301dd9652a32842efd085763",
+        "same_identity": true
+      }
+    ]
+  },
+  "same_process_and_binary": true,
+  "independent_second_reader": {
+    "output": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/workspace/OAX-CODEX-163f4d11a213312a-result.txt",
+    "input": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/workspace/OAX-CODEX-163f4d11a213312a-input.txt",
+    "exact_bytes": true,
+    "bytes": 27,
+    "sha256": "02b3a500b8b22a828dbd44d97b21ec70f54c424462aae5f9e6f34c2664bd7856",
+    "matches_harness_hash": true
+  },
+  "tasks": [
+    {
+      "task_id": "task-7e1cc7ed-29b5-486d-928d-cd8e995e441f",
+      "task_status": "succeeded",
+      "completion_basis": "query_result_delivered",
+      "run_id": "run-4cc2ac4f-d8b3-4bcd-8b3b-4a827cbbfe38",
+      "run_status": "succeeded",
+      "worker": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "worker_generation": 1,
+      "journal_events": 11
+    },
+    {
+      "task_id": "task-de7672b9-c3d8-484b-881c-f9e42badd6f2",
+      "task_status": "uncertain",
+      "completion_basis": "",
+      "run_id": "run-b4d5fa9c-6b30-4d9f-92d0-98fb9686a8f7",
+      "run_status": "succeeded",
+      "worker": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "worker_generation": 1,
+      "journal_events": 11
+    },
+    {
+      "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "task_status": "succeeded",
+      "completion_basis": "query_result_delivered",
+      "run_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "run_status": "succeeded",
+      "worker": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "worker_generation": 1,
+      "journal_events": 10
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "command": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status",
+    "codex-domain-e2e",
+    "--json"
+  ],
+  "exit": 0,
+  "response": {
+    "active_run": null,
+    "agent_id": "codex-domain-e2e",
+    "created_at": "2026-10-02T08:31:11.537577823Z",
+    "display_name": "Codex \u9886\u57df\u5de5\u4f5c\u53f0",
+    "latest_result": {
+      "task": {
+        "completion_basis": "query_result_delivered",
+        "task_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+        "version": 3,
+        "agent_id": "codex-domain-e2e",
+        "status": "succeeded",
+        "intent": "query",
+        "content": "Do not call tools. Reply exactly: INSTALLED-NATIVE-CLOSED-NEXT01",
+        "result": "INSTALLED-NATIVE-CLOSED-NEXT01",
+        "outcome_state": "available",
+        "created_at": "2026-10-02T08:47:45.650054633Z",
+        "updated_at": "2026-10-02T08:47:52.398727893Z"
+      },
+      "work_delivery": {
+        "mailbox_item_id": "mailbox-27673966-1429-496d-8764-d6279eeb00e2",
+        "kind": "task",
+        "lane": "work",
+        "state": "accepted",
+        "attempts": 1,
+        "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+        "lease_until": "2026-10-02T08:48:07.119044007Z",
+        "created_at": "2026-10-02T08:47:45.650054633Z",
+        "accepted_at": "2026-10-02T08:47:45.653098865Z"
+      },
+      "latest_run": {
+        "deadline_at": "2026-10-02T09:17:45.653098865Z",
+        "instructions_sha256": "4a23739b5fd505dcd60b80195f4c820052133f16342a047f056ce37e4f243ab7",
+        "instructions_path": "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+        "run_id": "run-b38e2aeb-4d35-4008-afb1-cab1122ac267",
+        "task_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+        "agent_id": "codex-domain-e2e",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-958389c6-d71a-4861-812e-40eafbecf1b3",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "INSTALLED-NATIVE-CLOSED-NEXT01",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-02T08:47:45.653098865Z",
+        "finished_at": "2026-10-02T08:47:52.398727893Z",
+        "created_at": "2026-10-02T08:47:45.653098865Z",
+        "updated_at": "2026-10-02T08:47:52.398727893Z"
+      },
+      "latest_message": {
+        "message_id": "message-71bd1ad6-7e92-442b-b04b-27f30de64a3d",
+        "version": 1,
+        "sequence": 1,
+        "kind": "instruction",
+        "content": "Do not call tools. Reply exactly: INSTALLED-NATIVE-CLOSED-NEXT01",
+        "created_at": "2026-10-02T08:47:45.650054633Z"
+      },
+      "snapshot_sequence": 273021
+    },
+    "latest_task": {
+      "task_id": "task-64cf0c91-c634-4b9a-b1ea-dae18ce2a192",
+      "version": 3,
+      "status": "succeeded",
+      "intent": "query",
+      "summary": "Do not call tools. Reply exactly: INSTALLED-NATIVE-CLOSED-NEXT01",
+      "updated_at": "2026-10-02T08:47:52.398727893Z"
+    },
+    "open_command": "openagentx agent open codex-domain-e2e",
+    "organization_id": "default",
+    "pending_task": null,
+    "principal_id": "agent-codex-domain-e2e",
+    "readiness": {
+      "can_start_now": true,
+      "ready": true,
+      "reason": "\u53ef\u5f00\u59cb\u5de5\u4f5c"
+    },
+    "resume_command": "openagentx agent resume codex-domain-e2e",
+    "status": "active",
+    "updated_at": "2026-10-02T08:31:11.537577823Z",
+    "version": 1
+  },
+  "at": "2026-10-02T08:50:40.006443+00:00",
+  "frontend_pids_absent": true
+}

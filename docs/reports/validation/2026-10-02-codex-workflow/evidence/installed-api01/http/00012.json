@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-02T08:38:51.214723+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-domain-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Create OAX-INSTALLED-d20953aa00045552-result.txt in the assigned workspace with exactly these bytes: b'OAX-INSTALLED-d20953aa00045552\\n'. Use a tool to write it once. Do not change other files. Report completion.",
+    "runtime_session": {
+      "backend_id": "codex",
+      "source_task_id": "task-80e82fd3-c490-46a1-8c18-91365a2fcc05"
+    },
+    "meta": {
+      "idempotency_key": "1ba7720560257d463965273241edb0d6"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-f341af1d-819c-44de-9d81-23173d078a3d",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 86
+  }
+}

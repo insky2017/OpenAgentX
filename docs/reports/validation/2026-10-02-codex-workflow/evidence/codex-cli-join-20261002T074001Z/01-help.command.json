@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/usr/bin/strace",
+    "-f",
+    "-o",
+    "<RAW_DIR>/01-help.strace",
+    "-e",
+    "trace=process,connect",
+    "<RAW_DIR>/bin/openagentx",
+    "agent",
+    "join",
+    "--help"
+  ],
+  "environment_overrides": {
+    "OPENAGENTX_HOME": "<RAW_DIR>/profile"
+  },
+  "started_at": "2026-10-02T07:41:55.574428+00:00"
+}

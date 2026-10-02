@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-02T08:36:36.124327+00:00",
+  "argv": [
+    "systemctl",
+    "--user",
+    "restart",
+    "openagentx-worker@codex-domain-e2e.service"
+  ],
+  "exit": 0,
+  "output": ""
+}

@@ -1,0 +1,43 @@
+{
+  "request_receiver": "route-owner",
+  "request": {
+    "method": "item/tool/call",
+    "id": 1,
+    "params": {
+      "threadId": "01a0fb90-ec9f-7c53-941d-721d669c4c54",
+      "turnId": "01a0fb91-a002-79f1-ad10-4111b6843017",
+      "callId": "exec-b72e2b13-19d3-4349-b860-422d6f0cc1db",
+      "namespace": null,
+      "tool": "oax_protocol_gate",
+      "arguments": {}
+    }
+  },
+  "other_received": true,
+  "terminal": {
+    "method": "turn/completed",
+    "params": {
+      "threadId": "01a0fb90-ec9f-7c53-941d-721d669c4c54",
+      "turn": {
+        "id": "01a0fb91-a002-79f1-ad10-4111b6843017",
+        "items": [
+          {
+            "type": "agentMessage",
+            "id": "msg_04dc9e90745593ea016abf60c0a07487d299cb2f5baea80214",
+            "text": "OAX_REQUEST_ROUTE_OK",
+            "phase": "final_answer",
+            "memoryCitation": null,
+            "delivery": null,
+            "questions": null
+          }
+        ],
+        "itemsView": "summary",
+        "status": "completed",
+        "error": null,
+        "startedAt": 1790927020,
+        "completedAt": 1790927042,
+        "durationMs": 22555
+      }
+    },
+    "emittedAtMs": 1790927042614
+  }
+}

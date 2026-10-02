@@ -1,0 +1,175 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+    "version": 3,
+    "target_agent_id": "codex-local-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Do not call tools. Reply with exactly this text: OAX-CODEX-163f4d11a213312a-NEXT",
+    "status": "succeeded",
+    "result": "OAX-CODEX-163f4d11a213312a-NEXT",
+    "outcome_state": "available",
+    "created_at": "2026-10-02T07:54:09.963927007Z",
+    "updated_at": "2026-10-02T07:54:17.993005547Z"
+  },
+  "messages": [
+    {
+      "id": "message-a13781fd-14e5-4a18-8f0a-c5df01315d51",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-53cb5ab2-5c2e-41ea-853c-4f9c7ec68645",
+      "target_agent_id": "codex-local-e2e",
+      "kind": "instruction",
+      "content": "Do not call tools. Reply with exactly this text: OAX-CODEX-163f4d11a213312a-NEXT",
+      "created_at": "2026-10-02T07:54:09.963927007Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-02T08:24:09.966481993Z",
+      "instructions_sha256": "49021725f68d2c39736ca7e346e58ac53217fb09c305bb9f63eb2c244c8e273f",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/local01/profile/workers/identities/codex-local-e2e.role.md",
+      "run_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "task_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "agent_id": "codex-local-e2e",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-cede0527-f316-4d7d-9d9e-6d85ad8b7743",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX-CODEX-163f4d11a213312a-NEXT",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-02T07:54:09.966481993Z",
+      "finished_at": "2026-10-02T07:54:17.993005547Z",
+      "created_at": "2026-10-02T07:54:09.966481993Z",
+      "updated_at": "2026-10-02T07:54:17.993005547Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 94,
+      "event_id": "event-1db0a1a1-7e39-4634-98a8-583821cca9d5",
+      "aggregate_type": "task",
+      "aggregate_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "event_type": "task.created",
+      "created_at": "2026-10-02T07:54:09.963927007Z"
+    },
+    {
+      "sequence": 96,
+      "event_id": "event-task-b3b1bbb2-92af-4390-9ec1-65e65e49467c",
+      "aggregate_type": "task",
+      "aggregate_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "event_type": "task.running",
+      "created_at": "2026-10-02T07:54:09.967665834Z"
+    },
+    {
+      "sequence": 97,
+      "event_id": "event-run-37d2e22c-f07c-459a-8a52-abd535515c3a",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-02T07:54:09.96767073Z"
+    },
+    {
+      "sequence": 100,
+      "event_id": "event-runtime-519d3c7c-9cf3-47b6-a725-be59f7dec493",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "event_type": "runtime.event",
+      "created_at": "2026-10-02T07:54:10.949707724Z"
+    },
+    {
+      "sequence": 101,
+      "event_id": "event-runtime-e6b35cf3-6a72-4b56-807a-d16581f51834",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "event_type": "runtime.session.bound",
+      "created_at": "2026-10-02T07:54:11.092467995Z",
+      "output": {
+        "stage": "session",
+        "status": "bound",
+        "text": "Runtime session bound",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 102,
+      "event_id": "event-runtime-9bed93ab-b691-4aff-9590-c755fdc482b0",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-02T07:54:11.75257216Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 103,
+      "event_id": "event-runtime-f513bce8-7823-43a2-92ee-4657fcacbbad",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-02T07:54:16.57419059Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed reasoning",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 104,
+      "event_id": "event-runtime-d43b9bba-2f0c-4c7e-8709-b12445fb6587",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-02T07:54:17.348993741Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "OAX-CODEX-163f4d11a213312a-NEXT",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 106,
+      "event_id": "event-run-a907a1bf-c088-4b88-9548-060930c249a2",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-4a601f5b-319e-4153-89df-46d31b4b9681",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-02T07:54:17.993113287Z"
+    },
+    {
+      "sequence": 107,
+      "event_id": "event-task-1410cad7-789e-49c3-8b17-a3da3bb61647",
+      "aggregate_type": "task",
+      "aggregate_id": "task-781ed4c6-ab67-440c-948b-62a907bf51a1",
+      "event_type": "task.settled",
+      "created_at": "2026-10-02T07:54:17.993117268Z"
+    }
+  ],
+  "snapshot_sequence": 109,
+  "live_after_sequence": 109,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

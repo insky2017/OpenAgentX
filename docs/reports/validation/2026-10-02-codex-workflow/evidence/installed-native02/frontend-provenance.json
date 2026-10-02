@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-02T08:48:45.204020+00:00",
+  "processes": [
+    {
+      "pid": 2499373,
+      "ppid": 2499365,
+      "starttime": "14932718",
+      "exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "version": {
+        "exit": 0,
+        "stdout": "codex-cli 0.160.0\n",
+        "stderr": ""
+      }
+    }
+  ]
+}

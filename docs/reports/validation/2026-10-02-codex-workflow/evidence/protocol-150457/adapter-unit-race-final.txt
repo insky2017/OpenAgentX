@@ -1,0 +1,4 @@
+COMMAND: go test -race ./internal/runtime/codex
+ok  	openagentx/internal/runtime/codex	3.100s
+
+EXIT: 0

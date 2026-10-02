@@ -1,0 +1,7 @@
+{
+  "level": "D",
+  "scope": "Isolated SQLite fixture + production CommandService; no native Runtime or install claim",
+  "result": "FAIL: ordinary task replay with historical non-task.created Journal returns sql.ErrNoRows",
+  "source_snapshot": "captured immediately after this run; concurrent worktree, not a committed candidate",
+  "known_prior_failure": "Root reported an earlier payload vs payload_json SQL-column error; fixed before this run, original log pending root reference"
+}

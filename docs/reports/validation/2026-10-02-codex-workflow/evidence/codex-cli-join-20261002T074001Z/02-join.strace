@@ -1,0 +1,25 @@
+2244443 execve("<RAW_DIR>/bin/openagentx", ["<USER_HOME>/.local/state/openagent"..., "agent", "join", "--id", "cli-evidence", "--name", "CLI Evidence", "--workspace", "<USER_HOME>/.local/state/openagent"..., "--role", "<USER_HOME>/.local/state/openagent"..., "--handoff-file", "<USER_HOME>/.local/state/openagent"..., "--prepare", "--db", "<USER_HOME>/.local/state/openagent"..., "--socket", "<USER_HOME>/.local/state/openagent"..., "--file", "<USER_HOME>/.local/state/openagent"..., "--worker-dir", "<USER_HOME>/.local/state/openagent"..., "--credentials", "<USER_HOME>/.local/state/openagent"...], 0x7ffe7fadff50 /* 103 vars */) = 0
+2244443 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x757c4baff990, parent_tid=0x757c4baff990, exit_signal=0, stack=0x757c4b2ff000, stack_size=0x7fff80, tls=0x757c4baff6c0} => {parent_tid=[2244444]}, 88) = 2244444
+2244443 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x757c4b2fe990, parent_tid=0x757c4b2fe990, exit_signal=0, stack=0x757c4aafe000, stack_size=0x7fff80, tls=0x757c4b2fe6c0} => {parent_tid=[2244445]}, 88) = 2244445
+2244443 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x757c4aafd990, parent_tid=0x757c4aafd990, exit_signal=0, stack=0x757c4a2fd000, stack_size=0x7fff80, tls=0x757c4aafd6c0} => {parent_tid=[2244446]}, 88) = 2244446
+2244445 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x757c4a2fc990, parent_tid=0x757c4a2fc990, exit_signal=0, stack=0x757c49afc000, stack_size=0x7fff80, tls=0x757c4a2fc6c0} => {parent_tid=[2244447]}, 88) = 2244447
+2244443 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x757c49afb990, parent_tid=0x757c49afb990, exit_signal=0, stack=0x757c492fb000, stack_size=0x7fff80, tls=0x757c49afb6c0} => {parent_tid=[2244448]}, 88) = 2244448
+2244445 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x757c492fa990, parent_tid=0x757c492fa990, exit_signal=0, stack=0x757c48afa000, stack_size=0x7fff80, tls=0x757c492fa6c0} <unfinished ...>
+2244447 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x757c48af9990, parent_tid=0x757c48af9990, exit_signal=0, stack=0x757c482f9000, stack_size=0x7fff80, tls=0x757c48af96c0} <unfinished ...>
+2244445 <... clone3 resumed> => {parent_tid=[2244449]}, 88) = 2244449
+2244447 <... clone3 resumed> => {parent_tid=[2244450]}, 88) = 2244450
+2244444 tgkill(2244443, 2244446, SIGURG) = 0
+2244446 --- SIGURG {si_signo=SIGURG, si_code=SI_TKILL, si_pid=2244443, si_uid=1000} ---
+2244444 tgkill(2244443, 2244446, SIGURG) = 0
+2244446 --- SIGURG {si_signo=SIGURG, si_code=SI_TKILL, si_pid=2244443, si_uid=1000} ---
+2244444 tgkill(2244443, 2244450, SIGURG) = 0
+2244450 --- SIGURG {si_signo=SIGURG, si_code=SI_TKILL, si_pid=2244443, si_uid=1000} ---
+2244446 exit_group(0)                   = ?
+2244450 +++ exited with 0 +++
+2244446 +++ exited with 0 +++
+2244444 +++ exited with 0 +++
+2244449 +++ exited with 0 +++
+2244447 +++ exited with 0 +++
+2244445 +++ exited with 0 +++
+2244448 +++ exited with 0 +++
+2244443 +++ exited with 0 +++

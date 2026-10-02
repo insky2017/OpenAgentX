@@ -1,0 +1,6 @@
+{
+  "started_at": "2026-10-02T08:11:46.488669+00:00",
+  "purpose": "reopen existing managed native thread, verify history replay, then same-thread bus contention",
+  "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+  "frontend_sha256": "4abd882bf295fe09690a1cec17c809a6790a796b025ce02578e0607f4a6056d1"
+}

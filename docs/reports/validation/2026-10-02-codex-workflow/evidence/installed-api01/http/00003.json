@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-02T08:38:33.139728+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "codex-domain-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Do not call any tools or read files. Recall the exact file contents previously written to native-queue-result01.txt in this native thread before it joined this new Agent. Treat those contents as the old verification code. Reply with exactly that code, then |, then the role verification code supplied in your current role instructions. No other text.",
+    "runtime_session": {
+      "backend_id": "codex",
+      "provider_session_id": "01a0fb9b-4097-79d3-902f-6603a844fa15"
+    },
+    "meta": {
+      "idempotency_key": "169e57ce54f3666f8f10bb2219eb7605"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-80e82fd3-c490-46a1-8c18-91365a2fcc05",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 84
+  }
+}

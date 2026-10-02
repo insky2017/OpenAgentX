@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-02T08:38:37.271386+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "agy-onboarding-e2e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Do not call tools. Reply exactly: OAX-AGY-CODEX-REGRESSION01",
+    "meta": {
+      "idempotency_key": "2145da8234f3b5a230b31367f0875acc"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-cbb673ca-d102-42f0-a198-92e55f7fbe24",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 85
+  }
+}
