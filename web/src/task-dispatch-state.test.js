@@ -72,10 +72,15 @@ test('query delivery comes only from authoritative Task completion evidence', ()
 
 
 test('backend readiness blocks dispatch even with an online Worker, busy allows queueing', () => {
-  const target = { ...agents[1], readiness: { ready: false, reason: '网络尚未就绪' } }
+  const target = { ...agents[1], readiness: { ready: false, reason: '网络尚未就绪', next_action: 'openagentx agent resume quote-service' } }
   assert.equal(dispatchTarget([target], [quote], 'quote-service', now).ready, false)
+  assert.equal(dispatchTarget([target], [quote], 'quote-service', now).canStartNow, false)
+  assert.equal(dispatchTarget([target], [quote], 'quote-service', now).nextAction, target.readiness.next_action)
   assert.equal(dispatchTarget([target], [quote], 'quote-service', now).reason, '网络尚未就绪')
-  assert.equal(dispatchTarget([{ ...target, readiness: {ready: true, can_start_now: false, reason: '正在工作，新任务将排队'} }], [quote], 'quote-service', now).ready, true)
+  const busy = dispatchTarget([{ ...target, readiness: {ready: true, can_start_now: false, reason: '正在工作，新任务将排队'} }], [quote], 'quote-service', now)
+  assert.equal(busy.ready, true)
+  assert.equal(busy.canStartNow, false)
+  assert.equal(dispatchTarget(agents, [quote], 'quote-service', now).canStartNow, true)
 })
 
 test('latest result belongs to the latest execution in either API ordering', () => {

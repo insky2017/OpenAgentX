@@ -158,6 +158,9 @@ func (p *BackendPool) ProcessNetworkWork(ctx context.Context, envelope *openapi.
 		if err != nil {
 			return failNetworkProbe(ack, domain.NetworkProbeDirectRules, domain.NetworkDiagnosticInvalidConfig, started)
 		}
+		if closer, ok := probe.(interface{ Close() error }); ok {
+			defer closer.Close()
+		}
 		if applier, ok := probe.(openruntime.NetworkPolicyApplier); ok {
 			if err := applier.ApplyNetworkPolicy(policy); err != nil {
 				return failNetworkProbe(ack, domain.NetworkProbeDirectRules, domain.NetworkDiagnosticInvalidConfig, started)

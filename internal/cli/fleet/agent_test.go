@@ -334,11 +334,34 @@ func TestAgentParseWizardHasOnlyThreePrompts(t *testing.T) {
 }
 
 func TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks(t *testing.T) {
+	for _, adapter := range []string{"agy-batch", "codex-app-server"} {
+		t.Run(adapter, func(t *testing.T) {
+			t.Run("ready", func(t *testing.T) { testAgentResumeStartsOnlyTarget(t, adapter, true) })
+			t.Run("readiness-failed", func(t *testing.T) { testAgentResumeStartsOnlyTarget(t, adapter, false) })
+		})
+	}
+}
+func testAgentResumeStartsOnlyTarget(t *testing.T, adapter string, ready bool) {
 	f := newFleetFixture(t)
 	writeManifest(t, f, "quote", "risk")
+	manifest, err := fleetmodel.LoadFile(f.manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.Agents[0].Enabled = false
+	saved, err := fleetmodel.Encode(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(f.manifest, saved, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = writeJoinReceipt(agentOptions{id: "quote", paths: fleetPaths{workerDir: f.workerDir}}); err != nil {
+		t.Fatal(err)
+	}
 	path := filepath.Join(f.workerDir, "quote.yaml")
 	content, _ := os.ReadFile(path)
-	content = []byte(strings.ReplaceAll(string(content), "adapter_id: fake", "adapter_id: agy-batch"))
+	content = []byte(strings.ReplaceAll(string(content), "adapter_id: fake", "adapter_id: "+adapter))
 	if err := os.WriteFile(path, content, 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -373,14 +396,32 @@ func TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks(t *testing.T) {
 		case openapi.ObserveNetworkProfilesPath:
 			_ = json.NewEncoder(w).Encode(openapi.NetworkOverviewResponse{Bindings: []domain.NetworkBinding{{AgentID: "quote", BackendID: "local", Version: 1, DesiredStatus: "applied", AppliedWorkerID: "worker-q-new", AppliedGeneration: 2, AppliedBindingRevision: 1}}})
 		case openapi.ObserveOverviewPath:
+			if !ready {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				return
+			}
 			fmt.Fprint(w, `{"agents":[{"agent_id":"quote","readiness":{"ready":true}}]}`)
 		default:
 			t.Fatalf("unexpected API %s", r.URL.Path)
 		}
 	})
 	o := agentOptions{id: "quote", paths: fleetPaths{manifest: f.manifest, database: f.database, socket: f.socket, workerDir: f.workerDir, credentials: f.credentials}}
-	if err := startAgent(context.Background(), client, api, o, withDefaults(deps)); err != nil {
+	err = startAgent(context.Background(), client, api, o, withDefaults(deps))
+	if ready && err != nil {
 		t.Fatal(err)
+	}
+	if !ready && err == nil {
+		t.Fatal("failed readiness reported success")
+	}
+	finalManifest, readErr := fleetmodel.LoadFile(f.manifest)
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if finalManifest.Agents[0].Enabled != ready {
+		t.Fatalf("enabled=%t ready=%t", finalManifest.Agents[0].Enabled, ready)
+	}
+	if finalManifest.Agents[1] != manifest.Agents[1] {
+		t.Fatal("resume altered unrelated Fleet entry")
 	}
 	starts := 0
 	for _, call := range calls {

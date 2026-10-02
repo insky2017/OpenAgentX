@@ -19,6 +19,7 @@ import (
 	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/runtime/agy"
 	"openagentx/internal/runtime/codebuddy"
+	"openagentx/internal/runtime/codex"
 	"openagentx/internal/runtime/fake"
 	runtimenetwork "openagentx/internal/runtime/network"
 	"openagentx/internal/transport/remotehttps"
@@ -89,6 +90,9 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 		if err != nil {
 			return err
 		}
+		if closer, ok := adapter.(interface{ Close() error }); ok {
+			defer closer.Close()
+		}
 		backends = append(backends, residentworker.RuntimeBackend{ID: backendConfig.BackendID, Adapter: adapter, Network: backendConfig.Network})
 	}
 	pool, err := residentworker.NewBackendPool(backends)
@@ -118,6 +122,19 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 }
 
 func assembleM1Adapter(config residentworker.RuntimeBackendConfig, configDir string) (openruntime.AgentRuntimeAdapter, error) {
+	if config.AdapterID == codex.AdapterID {
+		cfg, err := codexConfigFromOptions(config.Options, configDir)
+		if err != nil {
+			return nil, err
+		}
+		cfg.Network = config.Network
+		identity, err := runtimenetwork.InspectRuntimeIdentity(context.Background(), codex.AdapterID, "1", cfg.Binary, "")
+		if err != nil {
+			return nil, err
+		}
+		cfg.RuntimeIdentity = identity
+		return codex.NewAdapter(cfg)
+	}
 	if config.AdapterID == "agy-batch" {
 		agyConfig, err := agyConfigFromOptions(config.Options, configDir)
 		if err != nil {
@@ -507,4 +524,50 @@ func codebuddyMaxTurnsOption(options map[string]any) (int, error) {
 		return 0, domain.ErrInvalidInput("CodeBuddy option max_turns must be a positive integer")
 	}
 	return turns, nil
+}
+
+func codexConfigFromOptions(options map[string]any, configDir string) (codex.Config, error) {
+	cfg := codex.Config{Binary: "codex", Models: []string{"gpt-6-astra"}}
+	common := map[string]any{}
+	for key, value := range options {
+		switch key {
+		case "binary", "models", "working_dir", "timeout":
+			common[key] = value
+		case "thread_id", "endpoint", "handoff_file", "state_dir":
+			text, ok := value.(string)
+			if !ok || strings.TrimSpace(text) == "" {
+				return cfg, domain.ErrInvalidInput("Codex option " + key + " must be non-empty text")
+			}
+			if key == "state_dir" || key == "handoff_file" {
+				if !filepath.IsAbs(text) {
+					text = filepath.Join(configDir, text)
+				}
+			}
+			switch key {
+			case "thread_id":
+				cfg.ThreadID = text
+			case "endpoint":
+				cfg.Endpoint = text
+			case "handoff_file":
+				cfg.HandoffFile = text
+			case "state_dir":
+				cfg.StateDir = text
+			}
+		default:
+			return cfg, domain.ErrInvalidInput("unsupported Codex option " + key)
+		}
+	}
+	parsed, err := agyConfigFromOptions(common, configDir)
+	if err != nil {
+		return cfg, fmt.Errorf("Codex options: %w", err)
+	}
+	if parsed.Binary != "" {
+		cfg.Binary = parsed.Binary
+	}
+	if len(parsed.Models) > 0 {
+		cfg.Models = parsed.Models
+	}
+	cfg.WorkingDir = parsed.WorkingDir
+	cfg.Timeout = parsed.Timeout
+	return cfg, nil
 }

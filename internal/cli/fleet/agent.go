@@ -40,6 +40,8 @@ type agentOptions struct {
 	id, name, workspace, role, roleText, identity, workerSource, environmentSource, passwordFile, username, organization, webURL, binary, model string
 	timeout, wait                                                                                                                               time.Duration
 	console, noOpen, watch, configureOnly, jsonOutput                                                                                           bool
+	runtime, threadID, endpoint, handoffFile                                                                                                    string
+	prepareOnly, native                                                                                                                         bool
 	paths                                                                                                                                       fleetPaths
 }
 
@@ -51,7 +53,7 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 	}
 	command := args[0]
 	switch command {
-	case "add", "open", "status", "pause", "resume", "start":
+	case "add", "join", "open", "status", "pause", "resume", "start":
 	default:
 		agentUsage(deps.Err)
 		return 2
@@ -70,16 +72,56 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 	}
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+	if command == "join" || (command == "add" && (o.prepareOnly || o.threadID != "" || o.endpoint != "" || o.handoffFile != "")) {
+		if err = prepareAgentJoin(&o, deps); err != nil {
+			fmt.Fprintln(deps.Err, err)
+			return 1
+		}
+		command = "add"
+	}
+	if command == "resume" || command == "start" {
+		if err = registerPreparedAgent(ctx, &o, deps); err != nil {
+			fmt.Fprintln(deps.Err, err)
+			return 1
+		}
+	}
 	if command == "add" {
 		if err = addAgent(ctx, &o, deps); err != nil {
 			fmt.Fprintf(deps.Err, "Agent add: %v\n", err)
 			return 1
+		}
+		if o.prepareOnly {
+			if err = writeJoinReceipt(o); err != nil {
+				fmt.Fprintln(deps.Err, err)
+				return 1
+			}
+			if o.jsonOutput {
+				data, e := os.ReadFile(joinReceiptPath(o))
+				if e != nil {
+					fmt.Fprintln(deps.Err, e)
+					return 1
+				}
+				fmt.Fprintln(deps.Out, string(data))
+				return 0
+			}
+			fmt.Fprintf(deps.Out, "Agent %s 已离线准备；未绑定 live CLI、未启动服务、未派单。当前轮结束后运行 openagentx agent resume %s。\n", o.id, o.id)
+			return 0
 		}
 		if o.configureOnly {
 			fmt.Fprintf(deps.Out, "Agent %s 已纳管；运行 agent resume %s 启动并准备网络。\n", o.id, o.id)
 			return 0
 		}
 		command = "resume"
+	}
+	if command == "status" && o.id != "" {
+		shown, e := printPreparedAgentStatus(o, deps)
+		if e != nil {
+			fmt.Fprintln(deps.Err, e)
+			return 1
+		}
+		if shown {
+			return 0
+		}
 	}
 	role, scope := domain.WebRoleViewer, domain.CLIScopeConsoleRead
 	if command == "pause" || command == "resume" || command == "start" {
@@ -138,6 +180,13 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 	if err = printAgentStatus(ctx, api, client, o, deps); err != nil {
 		fmt.Fprintln(deps.Err, err)
 		return 1
+	}
+	if o.native {
+		if err = openAgentNative(ctx, o, deps); err != nil {
+			fmt.Fprintln(deps.Err, err)
+			return 1
+		}
+		return 0
 	}
 	if o.noOpen {
 		return 0
@@ -198,7 +247,7 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 }
 
 func agentUsage(w io.Writer) {
-	fmt.Fprintln(w, "Usage: openagentx agent add [--name NAME --workspace DIR --role FILE | --identity FILE] [--id ID] [--worker-config FILE] [--password-file FILE] [--configure-only]\n       openagentx agent <open|pause|resume|status> [AGENT] [--console] [--no-open] [--watch] [--json] [--web-url URL]\n       Path overrides: --db --socket --file (Fleet manifest) --worker-dir --credentials")
+	fmt.Fprintln(w, "Usage: openagentx agent add [--runtime agy|codex] [--name NAME --workspace DIR --role FILE | --identity FILE] [--id ID] [--worker-config FILE] [--environment-file FILE] [--password-file FILE] [--configure-only]\n       openagentx agent join --id ID --name NAME --workspace DIR --role FILE [--thread-id ID --endpoint URL] [--handoff-file FILE] [--prepare]\n       openagentx agent <open|pause|resume|status> [AGENT] [--console|--native] [--no-open] [--watch] [--json] [--web-url URL]\n       Path overrides: --db --socket --file (Fleet manifest) --worker-dir --credentials")
 }
 func parseAgentOptions(command string, args []string, deps Dependencies) (agentOptions, error) {
 	var o agentOptions
@@ -215,6 +264,23 @@ func parseAgentOptions(command string, args []string, deps Dependencies) (agentO
 	f.Var(&socket, "socket", "Daemon socket")
 	f.Var(&workers, "worker-dir", "Worker config directory")
 	f.Var(&credentials, "credentials", "Credential store")
+	f.Usage = func() {
+		agentUsage(deps.Err)
+		if command == "join" {
+			agentJoinUsage(deps.Err)
+		}
+		f.PrintDefaults()
+	}
+	defaultRuntime := "agy"
+	if command == "join" {
+		defaultRuntime = "codex"
+	}
+	f.StringVar(&o.runtime, "runtime", defaultRuntime, "Runtime: agy or codex")
+	f.StringVar(&o.threadID, "thread-id", "", "Explicit existing Codex thread ID; never inferred")
+	f.StringVar(&o.endpoint, "endpoint", "", "Managed Codex app-server endpoint")
+	f.StringVar(&o.handoffFile, "handoff-file", "", "Existing Markdown handoff to snapshot privately")
+	f.BoolVar(&o.prepareOnly, "prepare", command == "join", "Prepare locally only; do not start or dispatch (join default)")
+	f.BoolVar(&o.native, "native", false, "Open managed native terminal through the OAX arbitration bridge")
 	f.StringVar(&o.id, "id", o.id, "Stable Agent ID (default derived from name)")
 	f.StringVar(&o.name, "name", "", "Display name")
 	f.StringVar(&o.workspace, "workspace", "", "Working directory")
@@ -227,8 +293,8 @@ func parseAgentOptions(command string, args []string, deps Dependencies) (agentO
 	f.StringVar(&o.username, "owner-username", "owner", "Owner username")
 	f.StringVar(&o.organization, "organization-id", "default", "Organization ID")
 	f.StringVar(&o.webURL, "web-url", os.Getenv("OPENAGENTX_WEB_URL"), "Web origin (otherwise discover from user service)")
-	f.StringVar(&o.binary, "runtime-binary", "agy-graft", "AGY wrapper")
-	f.StringVar(&o.model, "model", "", "AGY model")
+	f.StringVar(&o.binary, "runtime-binary", "", "Runtime executable (agy-graft or codex by runtime)")
+	f.StringVar(&o.model, "model", "", "Runtime model")
 	f.DurationVar(&o.timeout, "timeout", 30*time.Minute, "Per-run timeout")
 	f.DurationVar(&o.wait, "wait", 3*time.Minute, "Startup/network readiness deadline")
 	f.BoolVar(&o.console, "console", false, "Open terminal Console")
@@ -247,8 +313,32 @@ func parseAgentOptions(command string, args []string, deps Dependencies) (agentO
 	if o.wait <= 0 || o.timeout <= 0 {
 		return o, fmt.Errorf("wait and timeout must be positive")
 	}
+	if o.runtime != "agy" && o.runtime != "codex" {
+		return o, fmt.Errorf("runtime must be agy or codex")
+	}
+	if o.binary == "" {
+		o.binary = "agy-graft"
+		if o.runtime == "codex" {
+			o.binary = "codex"
+		}
+	}
+	if o.native && (command != "open" || o.console || o.noOpen) {
+		return o, fmt.Errorf("--native is only valid for open and cannot combine --console/--no-open")
+	}
+	if o.prepareOnly && command != "add" && command != "join" {
+		return o, fmt.Errorf("--prepare is only valid for add/join")
+	}
+	if o.runtime != "codex" && (o.threadID != "" || o.endpoint != "" || o.handoffFile != "") {
+		return o, fmt.Errorf("thread/endpoint/handoff require --runtime codex")
+	}
+	if command != "add" && command != "join" && (o.threadID != "" || o.endpoint != "" || o.handoffFile != "") {
+		return o, fmt.Errorf("thread/endpoint/handoff belong to add/join")
+	}
 	var err error
 	o.paths, err = resolveFleetPaths(manifest, database, socket, workers, credentials)
+	if err == nil {
+		err = validateAgentJoinTarget(o)
+	}
 	return o, err
 }
 
@@ -369,15 +459,19 @@ func addAgent(ctx context.Context, o *agentOptions, deps Dependencies) error {
 		}
 	} else if existing, readErr := readWorkerSource(canonical.Path); readErr == nil {
 		content = existing
+		if o.runtime == "codex" {
+			expected, e := agentRuntimeConfig(*o)
+			if e != nil {
+				return e
+			}
+			if !bytes.Equal(content, expected) {
+				return fmt.Errorf("existing Worker configuration conflicts with requested Codex runtime; use its exact identity/configuration")
+			}
+		}
 	} else if !errors.Is(readErr, os.ErrNotExist) {
 		return readErr
 	} else {
-		options := map[string]any{"binary": o.binary, "working_dir": o.workspace, "timeout": o.timeout.String()}
-		if o.model != "" {
-			options["models"] = []string{o.model}
-		}
-		config := workerconfig.ProcessConfig{Version: 1, AgentID: o.id, Transport: domain.WorkerTransportUnix, UnixSocket: o.paths.socket, RuntimeBackendConfig: []workerconfig.RuntimeBackendConfig{{BackendID: "agy", AdapterID: "agy-batch", Options: options, Network: domain.NetworkPolicy{Mode: domain.NetworkInherit}}}}
-		content, err = yaml.Marshal(config)
+		content, err = agentRuntimeConfig(*o)
 		if err != nil {
 			return err
 		}
@@ -417,11 +511,13 @@ func addAgent(ctx context.Context, o *agentOptions, deps Dependencies) error {
 		password, e = originalRead(prompt)
 		return password, e
 	}
-	if admincli.ExecuteInit([]string{"--db", o.paths.database, "--owner-username", o.username, "--organization-id", definition.OrganizationID}, adminDeps) != 0 {
-		return fmt.Errorf("初始化未完成")
-	}
-	if admincli.ExecuteAgent([]string{"apply", "--db", o.paths.database, "--file", o.identity, "--owner-username", o.username}, adminDeps) != 0 {
-		return fmt.Errorf("Agent identity未应用；已有冲突不会覆盖")
+	if !o.prepareOnly {
+		if admincli.ExecuteInit([]string{"--db", o.paths.database, "--owner-username", o.username, "--organization-id", definition.OrganizationID}, adminDeps) != 0 {
+			return fmt.Errorf("初始化未完成")
+		}
+		if admincli.ExecuteAgent([]string{"apply", "--db", o.paths.database, "--file", o.identity, "--owner-username", o.username}, adminDeps) != 0 {
+			return fmt.Errorf("Agent identity未应用；已有冲突不会覆盖")
+		}
 	}
 	if _, err = fleetmodel.WriteExactFileAtomic(canonical.Path, content, fleetmodel.AtomicFileOptions{}); err != nil {
 		return err
@@ -440,29 +536,15 @@ func addAgent(ctx context.Context, o *agentOptions, deps Dependencies) error {
 		}
 	}
 	if o.environmentSource == "" {
-		envPath := strings.TrimSuffix(canonical.Path, ".yaml") + ".env"
-		if _, readErr := os.Lstat(envPath); errors.Is(readErr, os.ErrNotExist) {
-			var env strings.Builder
-			for _, name := range []string{"AGY_GRAFT_NATIVE_PROXY", "AGY_GRAFT_REAL_BIN", "AGY_GRAFT_MGRAFTCP_BIN", "AGY_GRAFT_GOMAXPROCS", "AGY_GRAFT_IPV4_ONLY", "AGY_GRAFT_IPV4_ONLY_FILE", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy"} {
-				value := os.Getenv(name)
-				if value == "" {
-					continue
-				}
-				if strings.ContainsAny(value, "\r\n\x00") {
-					return fmt.Errorf("environment %s must be a single line", name)
-				}
-				value = strings.ReplaceAll(strings.ReplaceAll(value, "\\", "\\\\"), "\"", "\\\"")
-				fmt.Fprintf(&env, "%s=\"%s\"\n", name, value)
-			}
-			if _, err = fleetmodel.WriteExactFileAtomic(envPath, []byte(env.String()), fleetmodel.AtomicFileOptions{}); err != nil {
-				return err
-			}
-		} else if readErr != nil {
-			return readErr
+		if err = persistAgentEnvironment(*o, canonical.Path, deps); err != nil {
+			return err
 		}
 	}
-	if err = fleetmodel.AddAgent(o.paths.manifest, fleetmodel.Agent{AgentID: o.id, IdentityFile: o.identity, WorkerConfig: canonical.Path, Enabled: true}); err != nil {
+	if err = fleetmodel.AddAgent(o.paths.manifest, fleetmodel.Agent{AgentID: o.id, IdentityFile: o.identity, WorkerConfig: canonical.Path, Enabled: !o.prepareOnly}); err != nil {
 		return err
+	}
+	if o.prepareOnly {
+		return nil
 	}
 	if _, _, err = authenticateFleetClient(ctx, o.paths, domain.WebRoleOwner, domain.CLIScopeFleetLifecycle, deps); err != nil {
 		if _, startErr := deps.RunSystemctl(ctx, "--user", "start", "openagentx.service"); startErr != nil {
@@ -612,18 +694,18 @@ func startAgent(ctx context.Context, client consoleClient, api *agentAPI, o agen
 	if err != nil {
 		return err
 	}
-	agyCount := 0
+	backendCount := 0
 	for _, backend := range config.RuntimeBackendConfig {
-		if backend.AdapterID != "agy-batch" {
+		if backend.AdapterID != "agy-batch" && backend.AdapterID != "codex-app-server" {
 			continue
 		}
-		agyCount++
+		backendCount++
 		if err = prepareNetwork(ctx, api, attached, backend, deps); err != nil {
 			return err
 		}
 	}
-	if agyCount == 0 {
-		return fmt.Errorf("Agent configuration has no AGY backend")
+	if backendCount == 0 {
+		return fmt.Errorf("Agent configuration has no supported managed runtime backend")
 	}
 	confirmed, err := client.Attach(ctx, o.id, consoleapi.ModeNormal)
 	if err != nil {
@@ -659,6 +741,9 @@ func startAgent(ctx context.Context, client consoleClient, api *agentAPI, o agen
 		if err = deps.Wait(ctx, time.Second); err != nil {
 			return fmt.Errorf("%s: %w", reason, err)
 		}
+	}
+	if err = enablePreparedAgent(o, deps); err != nil {
+		return fmt.Errorf("服务已就绪，但持久启用 Fleet 失败；请重试 resume: %w", err)
 	}
 	fmt.Fprintf(deps.Out, "Agent %s 服务在线，当前代 %d 网络已应用。\n", o.id, attached.Generation)
 	return nil

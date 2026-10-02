@@ -64,7 +64,7 @@ func execute(args []string) int {
 	case "help", "--help", "-h":
 		fmt.Fprintln(os.Stderr, "OpenAgentX - Agent Organization Control Plane")
 		fmt.Fprintln(os.Stderr, "Usage: openagentx init [--db <path>]")
-		fmt.Fprintln(os.Stderr, "       openagentx agent <add|open|status|pause|resume> [agent] [flags]")
+		fmt.Fprintln(os.Stderr, "       openagentx agent <add|join|open|status|pause|resume> [agent] [flags]")
 		fmt.Fprintln(os.Stderr, "       openagentx agent apply [--db <path>] --file <identity.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx serve [--db <path>] [--socket <path>] [--http-addr :18100] [--web-dir web/dist]")
 		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")

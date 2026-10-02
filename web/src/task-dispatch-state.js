@@ -23,6 +23,8 @@ export const dispatchTarget = (agents, workers, selectedID, now) => {
   const canStart = ready(worker) && (agent.readiness ? agent.readiness.ready : true)
   return {
     id, agent, worker, ready: canStart,
+    canStartNow: canStart && agent.readiness?.can_start_now !== false,
+    nextAction: agent.readiness?.next_action || '',
     reason: agent.readiness?.reason || (canStart ? `Worker 在线 · generation ${worker.generation}`
       : worker?.status === 'draining' ? 'Worker 正在退出，不接受新任务'
         : worker?.status === 'bootstrapping' ? 'Worker 正在启动，请等待就绪'

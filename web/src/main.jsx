@@ -936,23 +936,17 @@ function App() {
               <div className="agent-grid">
                 {agents.map((agent) => {
                   const id = agentID(agent)
-                  const worker = activeWorkers.get(id)
-                  const activeTask = overviewTasks.find((task) => task.target_agent_id === id && !terminalTask(task.status))
-                  const availability = activeTask?.status === 'waiting_input'
-                    ? 'waiting_input'
-                    : activeTask?.status === 'waiting_approval'
-                      ? 'waiting_approval'
-                      : activeTask
-                        ? 'busy'
-                        : 'idle'
+                  const state = dispatchTarget(agents, workers, id, now)
+                  const worker = state.worker
                   return (
                     <article className="agent" key={id}>
                       <div className="agent-head">
-                        <span className={`status-dot ${worker?.status === 'online' ? 'ready' : 'warn'}`} />
+                        <span className={`status-dot ${state.ready ? state.canStartNow ? 'ready' : 'busy' : 'warn'}`} />
                         <strong>{agent.display_name || id}</strong>
-                        <span className="state">{agent.readiness?.reason || `${worker?.status || 'offline'} · ${availability}`}</span>
+                        <span className="state">{state.reason}</span>
                       </div>
                       <p>{id} · {worker ? `心跳 ${formatAge(worker.last_heartbeat_at)}` : '暂无有效 Worker'}</p>
+                      {state.nextAction && <p className="agent-next-action">下一步：<code>{state.nextAction}</code></p>}
                       <button className="link" onClick={() => { setSelectedAgent(id); setReplyTask(null); setContinueTask(null); setTab('tasks') }}>
                         进入工作台 <span>↗</span>
                       </button>
@@ -1128,7 +1122,7 @@ function App() {
                           {taskDetail.review?.note && <p>{taskDetail.review.note}</p>}
                           {latestRun && (
                             <span className="run-meta-tag">
-                              {latestRun.run_id} · Runtime {latestRun.turn_result?.runtime_status || latestRun.status}
+                              {latestRun.adapter_id} · {latestRun.model} · {latestRun.run_id} · Runtime {latestRun.turn_result?.runtime_status || latestRun.status}
                             </span>
                           )}
                         </div>

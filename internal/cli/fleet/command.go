@@ -28,12 +28,14 @@ import (
 	"openagentx/internal/domain"
 	fleetmodel "openagentx/internal/fleet"
 	"openagentx/internal/localprofile"
+	"openagentx/internal/nativebridge"
 	workerconfig "openagentx/internal/worker"
 )
 
 const maxWorkerConfigBytes = 1 << 20
 
 type Dependencies struct {
+	OpenNative         func(context.Context, NativeOpenRequest) error
 	Out                io.Writer
 	Err                io.Writer
 	In                 io.Reader
@@ -93,6 +95,9 @@ func DefaultDependencies() Dependencies {
 	}
 	return Dependencies{
 		Out: os.Stdout, Err: os.Stderr, In: os.Stdin,
+		OpenNative: func(ctx context.Context, r NativeOpenRequest) error {
+			return nativebridge.Open(ctx, nativebridge.Options{AgentID: r.AgentID, WorkerConfig: r.WorkerConfig, Socket: r.Socket, Credentials: r.Credentials, In: r.In, Out: r.Out, Err: r.Err})
+		},
 		IsInteractive: func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
 		Tmux:          fleetmodel.ExecRunner{}, Now: time.Now, UserHomeDir: os.UserHomeDir,
 		RunSystemctl: func(ctx context.Context, args ...string) (string, error) { return run(ctx, "systemctl", args...) },
@@ -295,6 +300,9 @@ func Execute(args []string, deps Dependencies) int {
 
 func withDefaults(deps Dependencies) Dependencies {
 	defaults := DefaultDependencies()
+	if deps.OpenNative == nil {
+		deps.OpenNative = defaults.OpenNative
+	}
 	if deps.Out == nil {
 		deps.Out = defaults.Out
 	}

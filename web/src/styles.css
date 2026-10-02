@@ -43,6 +43,7 @@ button:disabled{cursor:not-allowed}
 .agent-head strong{font-size:15px}
 .agent-head .state{margin-left:auto;font-size:12px;color:#8b949e}
 .agent p{margin:11px 0 15px;font-size:13px}
+.agent-next-action{overflow-wrap:anywhere}
 .status-dot.warn{background:#d29922}
 .status-dot.busy{background:#58a6ff}
 .count{background:#30363d;color:#c9d1d9;border-radius:10px;padding:2px 8px;font-size:12px}
