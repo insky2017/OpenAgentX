@@ -115,6 +115,42 @@ func TestInspectAgyRuntimeIdentityRejectsUnboundedHelperVersion(t *testing.T) {
 	}
 }
 
+func TestCodexIdentityFollowsVersionedLauncherAndDetectsUpdate(t *testing.T) {
+	dir := t.TempDir()
+	first := writeIdentityFixture(t, dir, "codex-v1", "#!/bin/sh\nexit 0\n")
+	second := writeIdentityFixture(t, dir, "codex-v2", "#!/bin/sh\nexit 0\n# updated\n")
+	launcher := filepath.Join(dir, "codex")
+	if err := os.Symlink(first, launcher); err != nil {
+		t.Fatal(err)
+	}
+	identity, err := InspectRuntimeIdentity(context.Background(), "codex-app-server", "1", launcher, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstSum, err := fileSHA(first)
+	if err != nil || identity.ExecutableSHA256 != firstSum || identity.WrapperSHA256 != "" || identity.HelperSHA256 != "" {
+		t.Fatal("Codex identity must hash the resolved executable without AGY metadata")
+	}
+	if changed, err := VerifyRuntimeIdentity(context.Background(), identity, launcher, ""); err != nil || changed {
+		t.Fatalf("unchanged launcher: changed=%t error=%v", changed, err)
+	}
+	if err := os.Remove(launcher); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(second, launcher); err != nil {
+		t.Fatal(err)
+	}
+	if changed, err := VerifyRuntimeIdentity(context.Background(), identity, launcher, ""); err != nil || !changed {
+		t.Fatalf("updated launcher target: changed=%t error=%v", changed, err)
+	}
+	if err := os.Remove(second); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := VerifyRuntimeIdentity(context.Background(), identity, launcher, ""); err == nil {
+		t.Fatal("dangling Codex launcher must be rejected")
+	}
+}
+
 func writeIdentityFixture(t *testing.T, dir, name, content string) string {
 	t.Helper()
 	path := filepath.Join(dir, name)

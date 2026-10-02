@@ -2,6 +2,8 @@ package controlplane
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -85,7 +87,48 @@ func (s *CommandService) CreateTask(ctx context.Context, principal string, req a
 	}
 	message := &domain.Message{ID: msgID, Version: 1, Sequence: 1, TaskID: taskID, SenderAgentID: "command-center", SenderPrincipalID: principal, TargetAgentID: req.TargetAgentID, Kind: domain.MessageKindInstruction, Content: req.Content, CreatedAt: now.Format(time.RFC3339Nano)}
 	item := &domain.MailboxItem{ID: itemID, TargetAgentID: req.TargetAgentID, Kind: domain.MailboxKindTask, Lane: domain.MailboxLaneWork, TaskID: taskID, State: domain.MailboxStatePending, CreatedAt: now}
-	result, err := s.state.CreateTask(ctx, task, message, item, commandEvent(taskID, "task.created", principal, "task", map[string]any{"target_agent_id": req.TargetAgentID, "intent": intent}, now))
+	payload := map[string]any{"target_agent_id": req.TargetAgentID, "intent": intent}
+	var result *domain.CreateTaskResult
+	if ref := req.RuntimeSession; ref != nil {
+		state, ok := s.state.(interface {
+			CreateTaskWithSession(context.Context, *domain.Task, *domain.Message, *domain.MailboxItem, *domain.JournalEvent, *domain.SessionBinding) (*domain.CreateTaskResult, error)
+			GetSessionBinding(context.Context, string, string, string) (*domain.SessionBinding, error)
+		})
+		if !ok {
+			return nil, domain.ErrUnsupportedCapability
+		}
+		provider := ref.ProviderSessionID
+		source := "native_terminal"
+		if ref.SourceTaskID != "" {
+			parent, err := s.state.GetTask(ctx, ref.SourceTaskID)
+			if err != nil {
+				return nil, err
+			}
+			if !parent.IsTerminal() {
+				return nil, domain.ErrInvalidInput("native session continuation requires a finished source Task")
+			}
+			if parent.TargetAgentID != req.TargetAgentID || parent.OrganizationID != req.OrganizationID {
+				return nil, domain.ErrForbidden("native continuation requires the same Agent and organization")
+			}
+			previous, err := state.GetSessionBinding(ctx, parent.ID, parent.TargetAgentID, ref.BackendID)
+			if err != nil {
+				return nil, err
+			}
+			if previous.State != domain.SessionBindingActive {
+				return nil, domain.ErrUnsupportedCapability
+			}
+			provider = previous.ProviderSessionID
+			source = parent.ID
+			task.ParentTaskID = &ref.SourceTaskID
+		}
+		digest := sha256.Sum256([]byte(ref.BackendID + "\x00" + provider + "\x00" + source))
+		payload["runtime_session_digest"] = hex.EncodeToString(digest[:])
+		payload["runtime_session_source"] = source
+		binding := &domain.SessionBinding{ID: commandID("binding"), ContextID: task.ID, AgentID: task.TargetAgentID, BackendID: ref.BackendID, ProviderSessionID: provider, State: domain.SessionBindingActive, Version: 1, CreatedAt: now, UpdatedAt: now}
+		result, err = state.CreateTaskWithSession(ctx, task, message, item, commandEvent(taskID, "task.created", principal, "task", payload, now), binding)
+	} else {
+		result, err = s.state.CreateTask(ctx, task, message, item, commandEvent(taskID, "task.created", principal, "task", payload, now))
+	}
 	if err != nil {
 		return nil, err
 	}

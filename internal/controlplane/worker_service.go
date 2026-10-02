@@ -467,16 +467,16 @@ func (s *WorkerService) BeginAttempt(ctx context.Context, principalID string, to
 			return nil, domain.ErrUnsupportedCapability
 		}
 	}
-	if plan.Execution.Spec.AdapterID == "agy-batch" {
+	if plan.Execution.Spec.AdapterID == "agy-batch" || plan.Execution.Spec.AdapterID == "codex-app-server" {
 		reader, ok := s.state.(interface {
 			GetAgent(context.Context, string) (*domain.AgentIdentity, *domain.AgentProfileRecord, error)
 		})
 		if !ok {
-			return nil, domain.ErrInvalidInput("AGY execution requires the registered Agent profile")
+			return nil, domain.ErrInvalidInput("Runtime execution requires the registered Agent profile")
 		}
 		_, profile, err := reader.GetAgent(ctx, guard.AgentID)
 		if err != nil {
-			return nil, fmt.Errorf("load AGY Agent profile: %w", err)
+			return nil, fmt.Errorf("load Runtime Agent profile: %w", err)
 		}
 		input, err := freezeAGYAgentInput(profile)
 		if err != nil {
@@ -560,7 +560,16 @@ type publicRuntimeEventEnvelope struct {
 func publicRuntimeEvent(event openruntime.RuntimeEvent, now time.Time) (string, []byte, error) {
 	publicType := "event"
 	var publicPayload json.RawMessage
-	if event.Type == "approval.requested" {
+	if event.Type == "session.bound" {
+		binding, err := decodeRuntimeSessionPayload(event.Payload)
+		if err != nil {
+			return "", nil, err
+		}
+		publicType = event.Type
+		// This internal envelope reaches only AppendRunEvents. The repository
+		// replaces it with a safe summary before inserting the Journal record.
+		publicPayload, _ = json.Marshal(binding)
+	} else if event.Type == "approval.requested" {
 		approval, err := decodeNativeApprovalPayload(event.Payload, now)
 		if err != nil {
 			return "", nil, err
@@ -585,14 +594,42 @@ func publicRuntimeEvent(event openruntime.RuntimeEvent, now time.Time) (string, 
 	return publicType, payload, err
 }
 
-// nativeApprovalPayload is the only RuntimeEvent payload that has control
-// plane semantics.  The task/run binding is deliberately not accepted from
+// Native approval and session binding payloads have control plane semantics.
+// The task/run binding is deliberately not accepted from
 // the runtime: it is derived from the authenticated active RunAttempt inside
 // the repository transaction.
 type nativeApprovalPayload struct {
 	ApprovalRequestID string    `json:"approval_request_id"`
 	ScopeDigest       string    `json:"scope_digest"`
 	ExpiresAt         time.Time `json:"expires_at"`
+}
+
+type runtimeSessionPayload struct {
+	ProviderSessionID string `json:"provider_session_id"`
+	Source            string `json:"source,omitempty"`
+}
+
+func decodeRuntimeSessionPayload(raw json.RawMessage) (runtimeSessionPayload, error) {
+	var payload runtimeSessionPayload
+	decoder := json.NewDecoder(strings.NewReader(string(raw)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&payload); err != nil {
+		return payload, domain.ErrInvalidInput("session.bound payload must be strict JSON")
+	}
+	var extra any
+	if err := decoder.Decode(&extra); err != io.EOF {
+		return payload, domain.ErrInvalidInput("session.bound payload must contain one JSON object")
+	}
+	if err := domain.ValidateOpaqueID("provider_session_id", payload.ProviderSessionID); err != nil {
+		return payload, err
+	}
+	if payload.ProviderSessionID != strings.TrimSpace(payload.ProviderSessionID) {
+		return payload, domain.ErrInvalidInput("provider_session_id cannot contain surrounding whitespace")
+	}
+	if payload.Source != "" && payload.Source != "new" && payload.Source != "resume" && payload.Source != "joined" {
+		return payload, domain.ErrInvalidInput("unsupported session.bound source")
+	}
+	return payload, nil
 }
 
 func decodeNativeApprovalPayload(raw json.RawMessage, now time.Time) (nativeApprovalPayload, error) {
@@ -672,6 +709,9 @@ func (s *WorkerService) Finish(ctx context.Context, principalID string, token st
 		switch {
 		case lookupErr == nil:
 			binding = existing
+			if run.AdapterID == "codex-app-server" && existing.ProviderSessionID != request.Result.ProviderSessionID {
+				return domain.ErrConflict("Codex SessionBinding cannot change provider session")
+			}
 			expectedBindingVersion = existing.Version
 			binding.ProviderSessionID = request.Result.ProviderSessionID
 			binding.State = domain.SessionBindingActive
@@ -867,7 +907,7 @@ func m1PlanForBackend(task domain.Task, backend openruntime.BackendRegistration,
 	}
 	timeout := 30 * time.Minute
 	timeoutSource := "m1_default"
-	if backend.Descriptor.AdapterID == "agy-batch" && backend.Descriptor.DefaultTimeout > 0 {
+	if (backend.Descriptor.AdapterID == "agy-batch" || backend.Descriptor.AdapterID == "codex-app-server") && backend.Descriptor.DefaultTimeout > 0 {
 		timeout = backend.Descriptor.DefaultTimeout
 		timeoutSource = "worker_descriptor"
 	}
@@ -908,39 +948,39 @@ func containsSession(values []domain.SessionMode, target domain.SessionMode) boo
 // snapshot, never this mutable path, is sent to the Runtime for the active Run.
 func freezeAGYAgentInput(profile *domain.AgentProfileRecord) (*domain.AgentExecutionInput, error) {
 	if profile == nil {
-		return nil, domain.ErrInvalidInput("AGY Agent profile is missing")
+		return nil, domain.ErrInvalidInput("Runtime Agent profile is missing")
 	}
 	if profile.Version <= 0 || !filepath.IsAbs(profile.WorkspaceRoot) || !filepath.IsAbs(profile.InstructionsPath) {
-		return nil, domain.ErrInvalidInput("AGY Agent profile requires a positive version and absolute workspace_root and instructions_path")
+		return nil, domain.ErrInvalidInput("Runtime Agent profile requires a positive version and absolute workspace_root and instructions_path")
 	}
 	root := filepath.Clean(profile.WorkspaceRoot)
 	info, err := os.Stat(root)
 	if err != nil || !info.IsDir() {
-		return nil, domain.ErrInvalidInput("AGY Agent workspace_root is unavailable or not a directory: " + root)
+		return nil, domain.ErrInvalidInput("Runtime Agent workspace_root is unavailable or not a directory: " + root)
 	}
 	rolePath := filepath.Clean(profile.InstructionsPath)
 	info, err = os.Stat(rolePath)
 	if err != nil {
-		return nil, domain.ErrInvalidInput(fmt.Sprintf("AGY instructions file unavailable %q: %v", rolePath, err))
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("Runtime instructions file unavailable %q: %v", rolePath, err))
 	}
 	if !info.Mode().IsRegular() {
-		return nil, domain.ErrInvalidInput("AGY instructions_path must be a regular file: " + rolePath)
+		return nil, domain.ErrInvalidInput("Runtime instructions_path must be a regular file: " + rolePath)
 	}
 	role, err := os.Open(rolePath)
 	if err != nil {
-		return nil, domain.ErrInvalidInput(fmt.Sprintf("AGY instructions file unavailable %q: %v", rolePath, err))
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("Runtime instructions file unavailable %q: %v", rolePath, err))
 	}
 	defer role.Close()
 	info, err = role.Stat()
 	if err != nil || !info.Mode().IsRegular() {
-		return nil, domain.ErrInvalidInput("AGY instructions_path must be a regular file: " + rolePath)
+		return nil, domain.ErrInvalidInput("Runtime instructions_path must be a regular file: " + rolePath)
 	}
 	content, err := io.ReadAll(io.LimitReader(role, (1<<20)+1))
 	if err != nil {
-		return nil, domain.ErrInvalidInput(fmt.Sprintf("read AGY instructions file %q: %v", rolePath, err))
+		return nil, domain.ErrInvalidInput(fmt.Sprintf("read Runtime instructions file %q: %v", rolePath, err))
 	}
 	if len(content) > 1<<20 || !utf8.Valid(content) || strings.TrimSpace(string(content)) == "" {
-		return nil, domain.ErrInvalidInput("AGY instructions file must contain non-empty UTF-8 text up to 1 MiB: " + rolePath)
+		return nil, domain.ErrInvalidInput("Runtime instructions file must contain non-empty UTF-8 text up to 1 MiB: " + rolePath)
 	}
 	digest := sha256.Sum256(content)
 	return &domain.AgentExecutionInput{ProfileVersion: profile.Version, InstructionsPath: rolePath, InstructionsSHA256: hex.EncodeToString(digest[:]), InstructionsContent: string(content), WorkspaceRoot: root}, nil

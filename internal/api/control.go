@@ -26,16 +26,17 @@ const (
 )
 
 type CreateTaskRequest struct {
-	Meta              CommandMeta           `json:"meta"`
-	SenderPrincipalID string                `json:"sender_principal_id"`
-	TargetAgentID     string                `json:"target_agent_id"`
-	OrganizationID    string                `json:"organization_id"`
-	DispatchMode      domain.DispatchMode   `json:"dispatch_mode"`
-	Intent            domain.TaskIntent     `json:"intent"`
-	ParentTaskID      string                `json:"parent_task_id,omitempty"`
-	ContinueContext   bool                  `json:"continue_context,omitempty"`
-	Content           string                `json:"content"`
-	Execution         *domain.ExecutionSpec `json:"execution,omitempty"`
+	Meta              CommandMeta                     `json:"meta"`
+	SenderPrincipalID string                          `json:"sender_principal_id"`
+	TargetAgentID     string                          `json:"target_agent_id"`
+	OrganizationID    string                          `json:"organization_id"`
+	DispatchMode      domain.DispatchMode             `json:"dispatch_mode"`
+	Intent            domain.TaskIntent               `json:"intent"`
+	ParentTaskID      string                          `json:"parent_task_id,omitempty"`
+	ContinueContext   bool                            `json:"continue_context,omitempty"`
+	RuntimeSession    *domain.RuntimeSessionReference `json:"runtime_session,omitempty"`
+	Content           string                          `json:"content"`
+	Execution         *domain.ExecutionSpec           `json:"execution,omitempty"`
 }
 
 type CreateNetworkProfileRequest struct {
@@ -292,6 +293,12 @@ type NetworkOverviewResponse struct {
 }
 
 func (r CreateTaskRequest) Validate() error {
+	if r.RuntimeSession != nil {
+		if err := r.RuntimeSession.Validate(); err != nil {
+			return err
+		}
+	}
+
 	if err := r.Meta.Validate(false); err != nil {
 		return err
 	}

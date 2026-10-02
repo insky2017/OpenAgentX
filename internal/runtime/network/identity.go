@@ -26,6 +26,15 @@ func InspectRuntimeIdentity(ctx context.Context, adapterID, adapterVersion, bina
 	if err != nil {
 		return domain.RuntimeIdentity{}, err
 	}
+	if adapterID == "codex-app-server" {
+		// Standalone Codex installations expose a stable symlink to a versioned
+		// executable. Identify the current target on every verification so an
+		// update remains visible without rejecting the normal launcher layout.
+		path, err = filepath.EvalSymlinks(path)
+		if err != nil {
+			return domain.RuntimeIdentity{}, err
+		}
+	}
 	sum, err := fileSHA(path)
 	if err != nil {
 		return domain.RuntimeIdentity{}, err

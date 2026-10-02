@@ -1,8 +1,10 @@
 package network
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -112,4 +114,92 @@ func TestEnvironmentInheritPreservesNativeProxyWrapperContract(t *testing.T) {
 	if !strings.Contains(joined, "AGY_GRAFT_NATIVE_PROXY=1") || !strings.Contains(joined, "HTTPS_PROXY=http://127.0.0.1:7897") {
 		t.Fatalf("native proxy inputs lost: %q", joined)
 	}
+}
+
+func TestCodexEnvironmentPreservesProviderAndLocalGateway(t *testing.T) {
+	base := []string{"HOME=/home/fixture", "CODEX_HOME=/tmp/codex-fixture", "OPENAI_API_KEY=fixture-key", "OPENAI_BASE_URL=http://127.0.0.1:8080", "HTTPS_PROXY=http://proxy.invalid:3128", "NO_PROXY=service.internal,localhost", "no_proxy=other.internal", "AGY_GRAFT_NATIVE_PROXY=1", "LD_PRELOAD=/tmp/inject.so", "UNRELATED_TOKEN=not-for-codex"}
+	env, err := Environment(base, domain.NetworkPolicy{Mode: domain.NetworkInherit}, "codex-app-server", "codex")
+	if err != nil {
+		t.Fatal(err)
+	}
+	values := environmentValues(env)
+	for _, name := range []string{"HOME", "CODEX_HOME", "OPENAI_API_KEY", "OPENAI_BASE_URL", "HTTPS_PROXY"} {
+		if values[name] != environmentValues(base)[name] {
+			t.Errorf("required environment key %s was not preserved", name)
+		}
+	}
+	for _, name := range []string{"AGY_GRAFT_NATIVE_PROXY", "LD_PRELOAD", "UNRELATED_TOKEN"} {
+		if _, ok := values[name]; ok {
+			t.Errorf("unrelated environment key %s leaked", name)
+		}
+	}
+	want := "service.internal,localhost,other.internal,127.0.0.1,::1"
+	if values["NO_PROXY"] != want || values["no_proxy"] != want {
+		t.Fatal("local gateway or explicit bypass destinations were lost")
+	}
+}
+
+func TestCodexDirectKeepsProviderWithoutProxyAndRejectsNamedProfile(t *testing.T) {
+	base := []string{"CODEX_HOME=/tmp/codex-fixture", "OPENAI_API_KEY=fixture-key", "OPENAI_BASE_URL=http://127.0.0.1:8080", "HTTP_PROXY=http://proxy.invalid", "https_proxy=http://proxy.invalid", "ALL_PROXY=socks5://proxy.invalid", "NO_PROXY=old.invalid"}
+	env, err := Environment(base, domain.NetworkPolicy{Mode: domain.NetworkDirect, DirectDestinations: []string{"service.internal"}}, "codex-app-server", "codex")
+	if err != nil {
+		t.Fatal(err)
+	}
+	values := environmentValues(env)
+	for _, name := range []string{"HTTP_PROXY", "https_proxy", "ALL_PROXY"} {
+		if _, ok := values[name]; ok {
+			t.Errorf("direct mode retained %s", name)
+		}
+	}
+	if values["CODEX_HOME"] == "" || values["OPENAI_API_KEY"] == "" || values["OPENAI_BASE_URL"] == "" {
+		t.Fatal("direct mode dropped provider configuration")
+	}
+	if values["NO_PROXY"] != "service.internal,localhost,127.0.0.1,::1" || values["no_proxy"] != values["NO_PROXY"] {
+		t.Fatal("direct destinations were not merged with local bypasses")
+	}
+	_, err = Environment(nil, domain.NetworkPolicy{Mode: domain.NetworkNamedProfile, ProfileID: "agy-only", ProfileVersion: 1, ConfigFile: "/not/read"}, "codex-app-server", "codex")
+	if !errors.Is(err, domain.ErrUnsupportedCapability) {
+		t.Fatalf("Codex named profile must remain unsupported, got %v", err)
+	}
+}
+
+func TestCodexEnvironmentDoesNotChangeOtherAdapters(t *testing.T) {
+	base := []string{"PATH=/bin", "NO_PROXY=explicit.internal", "CODEX_HOME=/tmp/codex-fixture", "OPENAI_API_KEY=fixture-key", "OPENAI_BASE_URL=http://127.0.0.1:8080"}
+	for _, adapterID := range []string{"agy-batch", "codebuddy-cli", "fake"} {
+		t.Run(adapterID, func(t *testing.T) {
+			env, err := Environment(base, domain.NetworkPolicy{Mode: domain.NetworkInherit}, adapterID, "fixture")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(env, base[:2]) {
+				t.Fatal("Codex environment rules changed a different adapter")
+			}
+		})
+	}
+}
+
+func TestWithLoopbackNoProxyPreservesLastValuesAndInput(t *testing.T) {
+	base := []string{"NO_PROXY=obsolete.invalid", "KEEP=value", "no_proxy=other.internal,127.0.0.1", "NO_PROXY= current.internal,localhost,current.internal, "}
+	before := append([]string(nil), base...)
+	got := WithLoopbackNoProxy(base)
+	want := []string{"KEEP=value", "NO_PROXY=current.internal,localhost,other.internal,127.0.0.1,::1", "no_proxy=current.internal,localhost,other.internal,127.0.0.1,::1"}
+	if !reflect.DeepEqual(got, want) || !reflect.DeepEqual(base, before) {
+		t.Fatal("proxy bypass normalization changed input or lost last-value semantics")
+	}
+	if !reflect.DeepEqual(WithLoopbackNoProxy(got), got) {
+		t.Fatal("proxy bypass normalization was not idempotent")
+	}
+	values := environmentValues(WithLoopbackNoProxy([]string{"NO_PROXY=*"}))
+	if !strings.HasPrefix(values["NO_PROXY"], "*,") {
+		t.Fatal("explicit all-destinations bypass was lost")
+	}
+}
+
+func environmentValues(environment []string) map[string]string {
+	values := make(map[string]string)
+	for _, entry := range environment {
+		name, value, _ := strings.Cut(entry, "=")
+		values[name] = value
+	}
+	return values
 }

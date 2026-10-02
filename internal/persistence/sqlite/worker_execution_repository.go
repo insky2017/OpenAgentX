@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"openagentx/internal/domain"
 	openruntime "openagentx/internal/runtime"
 )
@@ -457,7 +459,7 @@ func (r *Repository) AppendRunEvents(
 	var publicEventCount int
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM event_journal
 		WHERE aggregate_type='run_attempt' AND aggregate_id=?
-		AND event_type LIKE 'runtime.%' AND event_type != 'runtime.approval.requested'`, runID).Scan(&publicEventCount); err != nil {
+		AND event_type LIKE 'runtime.%' AND event_type NOT IN ('runtime.approval.requested', 'runtime.session.bound')`, runID).Scan(&publicEventCount); err != nil {
 		return fmt.Errorf("count persisted Runtime output events: %w", err)
 	}
 	approvalSeen := false
@@ -465,6 +467,16 @@ func (r *Repository) AppendRunEvents(
 		var envelope struct {
 			RuntimeEventType string          `json:"runtime_event_type"`
 			Payload          json.RawMessage `json:"payload"`
+		}
+		decodeErr := json.Unmarshal(event.Payload, &envelope)
+		if event.EventType == "runtime.session.bound" || envelope.RuntimeEventType == "session.bound" {
+			if decodeErr != nil || event.EventType != "runtime.session.bound" || envelope.RuntimeEventType != "session.bound" {
+				return domain.ErrInvalidInput("invalid session.bound envelope")
+			}
+			if err := appendRuntimeSessionBinding(ctx, tx, guard, run, task, event, envelope.Payload); err != nil {
+				return err
+			}
+			continue
 		}
 		if err := json.Unmarshal(event.Payload, &envelope); err == nil && envelope.RuntimeEventType == "approval.requested" {
 			if approvalSeen {
@@ -545,6 +557,65 @@ func (r *Repository) AppendRunEvents(
 		return err
 	}
 	return commit(tx)
+}
+
+// appendRuntimeSessionBinding runs after the Worker/run guard and before the
+// Journal commit. Provider identity is private state, never a public payload.
+func appendRuntimeSessionBinding(ctx context.Context, tx *sql.Tx, guard domain.WorkerWriteGuard, run *domain.RunAttempt, task *domain.Task, event *domain.JournalEvent, raw json.RawMessage) error {
+	if run.AdapterID != "codex-app-server" {
+		return domain.ErrUnsupportedCapability
+	}
+	var payload struct {
+		ProviderSessionID string `json:"provider_session_id"`
+		Source            string `json:"source,omitempty"`
+	}
+	decoder := json.NewDecoder(strings.NewReader(string(raw)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&payload); err != nil {
+		return domain.ErrInvalidInput("session.bound payload must be strict JSON")
+	}
+	var extra any
+	if err := decoder.Decode(&extra); err != io.EOF {
+		return domain.ErrInvalidInput("session.bound payload must contain one JSON object")
+	}
+	if payload.Source != "" && payload.Source != "new" && payload.Source != "resume" && payload.Source != "joined" {
+		return domain.ErrInvalidInput("unsupported session.bound source")
+	}
+	if err := domain.ValidateOpaqueID("provider_session_id", payload.ProviderSessionID); err != nil {
+		return err
+	}
+	if payload.ProviderSessionID != strings.TrimSpace(payload.ProviderSessionID) {
+		return domain.ErrInvalidInput("provider_session_id cannot contain surrounding whitespace")
+	}
+	var resolved domain.ResolvedExecutionSpec
+	if err := json.Unmarshal([]byte(run.ResolvedExecutionJSON), &resolved); err != nil || resolved.Spec.Session.ContextID != run.TaskID {
+		return domain.ErrConflict("session.bound requires the RunAttempt Task context")
+	}
+	if task.IsTerminal() {
+		return domain.ErrInvalidTransition
+	}
+	var provider, state string
+	err := tx.QueryRowContext(ctx, `SELECT provider_session_id, state FROM session_bindings WHERE context_id=? AND agent_id=? AND backend_id=?`, run.TaskID, run.AgentID, run.BackendID).Scan(&provider, &state)
+	if err == nil {
+		if provider != payload.ProviderSessionID || state != string(domain.SessionBindingActive) {
+			return domain.ErrConflict("Codex SessionBinding conflicts with the active provider session")
+		}
+		return nil // A repeated acknowledgement must not duplicate the Journal.
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	bindingID := "binding-" + uuid.NewString()
+	if _, err := tx.ExecContext(ctx, `INSERT INTO session_bindings (session_binding_id, context_id, agent_id, backend_id, provider_session_id, state, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`, bindingID, run.TaskID, run.AgentID, run.BackendID, payload.ProviderSessionID, domain.SessionBindingActive, formatTime(guard.CheckedAt), formatTime(guard.CheckedAt)); err != nil {
+		return fmt.Errorf("persist Runtime session binding: %w", err)
+	}
+	safe := *event
+	safe.OrganizationID = task.OrganizationID
+	safe.Payload, _ = json.Marshal(map[string]any{
+		"runtime_event_type": "session.bound", "payload": map[string]any{"stage": "session", "status": "bound", "text": "Runtime session bound"},
+		"occurred_at": guard.CheckedAt,
+	})
+	return insertJournal(ctx, tx, &safe)
 }
 
 func (r *Repository) FinishRun(
@@ -696,6 +767,16 @@ func (r *Repository) FinishRun(
 		}
 		if binding.ContextID != resolved.Spec.Session.ContextID || binding.AgentID != run.AgentID || binding.BackendID != run.BackendID {
 			return domain.ErrConflict("SessionBinding does not match RunAttempt")
+		}
+		if run.AdapterID == "codex-app-server" {
+			var provider string
+			err := tx.QueryRowContext(ctx, `SELECT provider_session_id FROM session_bindings WHERE context_id=? AND agent_id=? AND backend_id=?`, binding.ContextID, binding.AgentID, binding.BackendID).Scan(&provider)
+			if err == nil && provider != binding.ProviderSessionID {
+				return domain.ErrConflict("Codex SessionBinding cannot change provider session")
+			}
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
 		}
 		if err := validateJournalForAggregate(bindingEvent, "session_binding", binding.ID, guard.CheckedAt); err != nil {
 			return err

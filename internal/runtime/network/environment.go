@@ -30,6 +30,10 @@ var agyEnvironmentKeys = map[string]struct{}{
 	"AGY_GRAFT_IPV4_ONLY": {}, "AGY_GRAFT_IPV4_ONLY_FILE": {},
 }
 
+var codexEnvironmentKeys = map[string]struct{}{
+	"CODEX_HOME": {}, "OPENAI_API_KEY": {}, "OPENAI_BASE_URL": {},
+}
+
 var blockedKeys = map[string]struct{}{
 	"LD_PRELOAD": {}, "LD_LIBRARY_PATH": {}, "BASH_ENV": {}, "ENV": {},
 	"NODE_OPTIONS": {}, "RUBYOPT": {}, "PERL5OPT": {}, "PYTHONPATH": {},
@@ -38,8 +42,8 @@ var blockedKeys = map[string]struct{}{
 
 // Environment applies a closed NetworkPolicy to a child process environment.
 // The returned slice is detached from the input and never contains credentials
-// from a policy object. Existing non-proxy process variables are preserved so
-// runtime binaries retain their normal locale and PATH behaviour.
+// from a policy object. Only common and adapter-specific allowlisted variables
+// are preserved, including the locale and PATH needed by runtime binaries.
 func Environment(base []string, policy domain.NetworkPolicy, adapterID, binary string) ([]string, error) {
 	if err := policy.Validate(); err != nil {
 		return nil, err
@@ -80,10 +84,14 @@ func Environment(base []string, policy domain.NetworkPolicy, adapterID, binary s
 		_, common := commonEnvironmentKeys[name]
 		_, proxy := proxyKeys[name]
 		_, agy := agyEnvironmentKeys[name]
-		if !common && !proxy && !agy && !strings.HasPrefix(name, "LC_") {
+		_, codex := codexEnvironmentKeys[name]
+		if !common && !proxy && !agy && !codex && !strings.HasPrefix(name, "LC_") {
 			continue
 		}
 		if agy && adapterID != "agy-batch" {
+			continue
+		}
+		if codex && adapterID != "codex-app-server" {
 			continue
 		}
 		// The native-proxy wrapper branch bypasses graft configuration. It
@@ -132,7 +140,42 @@ func Environment(base []string, policy domain.NetworkPolicy, adapterID, binary s
 			out = append(out, "AGY_GRAFT_SELECT_PROXY_MODE="+policy.ProxyMode)
 		}
 	}
+	if adapterID == "codex-app-server" {
+		out = WithLoopbackNoProxy(out)
+	}
 	return out, nil
+}
+
+// WithLoopbackNoProxy preserves explicit bypass destinations and ensures local
+// gateways stay reachable when a Runtime and its tools inherit proxy settings.
+// Both spellings are synchronized because different tools prefer different
+// spellings. Duplicate environment keys use their last value, as Environment
+// does. No global process environment is read or changed.
+func WithLoopbackNoProxy(base []string) []string {
+	values := make(map[string]string, 2)
+	out := make([]string, 0, len(base)+2)
+	for _, entry := range base {
+		name, value, _ := strings.Cut(entry, "=")
+		if name == "NO_PROXY" || name == "no_proxy" {
+			values[name] = value
+			continue
+		}
+		out = append(out, entry)
+	}
+	seen := make(map[string]bool)
+	var destinations []string
+	for _, value := range []string{values["NO_PROXY"], values["no_proxy"], "localhost,127.0.0.1,::1"} {
+		for _, destination := range strings.Split(value, ",") {
+			destination = strings.TrimSpace(destination)
+			if destination == "" || seen[destination] {
+				continue
+			}
+			seen[destination] = true
+			destinations = append(destinations, destination)
+		}
+	}
+	value := strings.Join(destinations, ",")
+	return append(out, "NO_PROXY="+value, "no_proxy="+value)
 }
 
 func validateControlledFile(value, label string) (string, error) {

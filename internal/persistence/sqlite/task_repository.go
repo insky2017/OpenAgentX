@@ -26,6 +26,18 @@ func (r *Repository) CreateTask(
 	mailboxItem *domain.MailboxItem,
 	event *domain.JournalEvent,
 ) (*CreateTaskResult, error) {
+	return r.createTask(ctx, task, initialMessage, mailboxItem, event, nil)
+}
+
+// CreateTaskWithSession commits explicit native continuity with the Task,
+// initial message and mailbox. No process can run before all are durable.
+func (r *Repository) CreateTaskWithSession(ctx context.Context, task *domain.Task, initialMessage *domain.Message, mailboxItem *domain.MailboxItem, event *domain.JournalEvent, binding *domain.SessionBinding) (*CreateTaskResult, error) {
+	if binding == nil {
+		return nil, domain.ErrInvalidInput("native session binding is required")
+	}
+	return r.createTask(ctx, task, initialMessage, mailboxItem, event, binding)
+}
+func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialMessage *domain.Message, mailboxItem *domain.MailboxItem, event *domain.JournalEvent, binding *domain.SessionBinding) (*CreateTaskResult, error) {
 	if task == nil || mailboxItem == nil {
 		return nil, domain.ErrInvalidInput("task and mailbox item are required")
 	}
@@ -101,8 +113,43 @@ func (r *Repository) CreateTask(
 		return nil, err
 	}
 	defer tx.Rollback()
+	if binding != nil {
+		if binding.ContextID != task.ID || binding.AgentID != task.TargetAgentID {
+			return nil, domain.ErrInvalidInput("native binding must belong to new Task")
+		}
+		if err := binding.Validate(); err != nil {
+			return nil, err
+		}
+		// A native thread cannot acquire two different long-lived identities.
+		var other int
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM session_bindings WHERE provider_session_id=? AND agent_id<>?`, binding.ProviderSessionID, binding.AgentID).Scan(&other); err != nil {
+			return nil, err
+		}
+		if other != 0 {
+			return nil, domain.ErrConflict("native session already belongs to a different Agent")
+		}
+	}
 	existing, err := getTaskByIdempotency(ctx, tx, task.SenderPrincipalID, task.IdempotencyKey)
 	if err == nil {
+		var priorRaw string
+		if err := tx.QueryRowContext(ctx, `SELECT payload_json FROM event_journal WHERE aggregate_type='task' AND aggregate_id=? AND event_type='task.created' ORDER BY sequence LIMIT 1`, existing.ID).Scan(&priorRaw); err != nil {
+			if !errors.Is(err, sql.ErrNoRows) {
+				return nil, err
+			}
+			priorRaw = `{}`
+		}
+		var prior, next struct {
+			Digest string `json:"runtime_session_digest"`
+		}
+		if err := json.Unmarshal([]byte(priorRaw), &prior); err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(event.Payload, &next); err != nil {
+			return nil, err
+		}
+		if prior.Digest != next.Digest {
+			return nil, domain.ErrIdempotencyConflict
+		}
 		if !sameTaskCommand(existing, task) {
 			return nil, domain.ErrIdempotencyConflict
 		}
@@ -127,6 +174,15 @@ func (r *Repository) CreateTask(
 			return nil, domain.ErrIdempotencyConflict
 		}
 		return nil, fmt.Errorf("insert task: %w", err)
+	}
+	if binding != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO session_bindings (session_binding_id,context_id,agent_id,backend_id,provider_session_id,state,version,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)`, binding.ID, binding.ContextID, binding.AgentID, binding.BackendID, binding.ProviderSessionID, binding.State, binding.Version, formatTime(binding.CreatedAt), formatTime(binding.UpdatedAt)); err != nil {
+			return nil, err
+		}
+		bindingEvent := &domain.JournalEvent{ID: event.ID + "-session", OrganizationID: task.OrganizationID, AggregateType: "session_binding", AggregateID: binding.ID, EventType: "session_binding.selected", ActorPrincipalID: task.SenderPrincipalID, Payload: json.RawMessage(`{"source":"explicit_task_request"}`), CreatedAt: now}
+		if err := insertJournal(ctx, tx, bindingEvent); err != nil {
+			return nil, err
+		}
 	}
 	if initialMessage != nil {
 		if err := insertMessage(ctx, tx, initialMessage); err != nil {
