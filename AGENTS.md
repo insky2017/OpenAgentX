@@ -6,6 +6,8 @@
 
 ## 当前实施约定（2026-10-02）
 
+- 2026-10-03追加授权：先验证两个原Desktop thread的原生heartbeat只读协作，再实现职责owner目录、scope/接单校验、已读未完成恢复及接入Skill。用户提供原会话已咨询/回复/ACK证据，需核实后更新旧交付状态；不等于自动唤醒通过。Pay与Rhythm分别只确认自己领域，超范围明确说明并关联转交。以[追加计划](docs/plans/2026-10-03-external-session-collaboration.md)为准；不修改业务工程、不操作资金/补发/部署、不重启共享Desktop。
+
 - 2026-10-03 [原会话协作计划](docs/plans/2026-10-03-external-session-collaboration.md)已交付消息通道，当前安装 `6576c55` / schema v3，见[本轮交付](docs/reports/validation/2026-10-03-external-session/DELIVERY.md)。Rhythm 与 Pay 已登记通信身份，保留原 Codex thread/宿主；原会话未初始化，Desktop 自动排队/唤醒受阻，E04/E05 未通过。用户已授权实施和只读交接试点；不另起 Worker 抢原 thread，不重启共享宿主。持久发信、宿主接收、Agent 已读、关联回复与独立业务验收分别举证；只读历史不能证明原宿主连接，自动唤醒未验不得宣称打通。进度见[执行记录](docs/reports/validation/2026-10-03-external-session/EXECUTION-LOG.md)。
 
 - 历史 [Codex 实施计划](docs/plans/2026-10-02-codex-workflow-repair.md) 与 [Codex E2E](docs/plans/2026-10-02-codex-workflow-e2e.md) 已实施主链，当批安装源码为 `6b68eeb`；精确来源、真实验收和未完成项见 [Codex 交付](docs/reports/validation/2026-10-02-codex-workflow/DELIVERY.md) 与 COVERAGE。已支持原生终端、持续接单、空闲 thread 迁入和默认代理；精确仅目标工具取消及未知终态一键恢复仍待补，不能报告全矩阵通过。AGY 基线保留。
