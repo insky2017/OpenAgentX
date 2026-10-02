@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-10-02T18:25:47.025698+00:00",
+  "finished_at": "2026-10-02T18:25:47.280060+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "apply",
+    "--db",
+    "/home/sky/.openagentx/data/openagentx.db",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed02/private/domain-installed-a-753c7af430ad/identity.yaml",
+    "--owner-username",
+    "owner"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "Owner password: \nowner authentication failed\n",
+  "stdin": "private PTY credentials omitted"
+}

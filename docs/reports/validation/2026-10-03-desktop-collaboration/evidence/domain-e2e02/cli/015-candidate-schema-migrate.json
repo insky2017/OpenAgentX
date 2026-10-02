@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-02T18:14:53.406961+00:00",
+  "finished_at": "2026-10-02T18:14:53.508685+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "schema",
+    "verify",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/openagentx.db"
+  ],
+  "exit_code": 0,
+  "stdout": "OpenAgentX schema v4 verified\n",
+  "stderr": "",
+  "stdin": "none"
+}

@@ -1,0 +1,7 @@
+--- FAIL: TestExternalAcceptedReplayRevalidatesChangedCatalog (0.11s)
+    external_roles_repository_test.go:296: accepted legacy retry bypassed newly configured directory: <nil>
+    external_roles_repository_test.go:321: accepted retry 0 bypassed current owner: <nil>
+    external_roles_repository_test.go:321: accepted retry 1 bypassed current owner: <nil>
+FAIL
+FAIL	openagentx/internal/persistence/sqlite	0.116s
+FAIL

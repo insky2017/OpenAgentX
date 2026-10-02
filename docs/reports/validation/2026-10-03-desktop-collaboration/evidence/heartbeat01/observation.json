@@ -1,0 +1,664 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-02T18:01:15.158407+00:00",
+  "since": "2026-10-02T17:49:00+00:00",
+  "read_only_sources": true,
+  "privacy": "Content omitted; only explicit markers, structural metadata, hashes and fixed labels exported.",
+  "threads": [
+    {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "source": {
+        "path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+        "snapshot_bytes": 176794025,
+        "snapshot_sha256": "e75059fe6f09cf56acf09b5c49acedaf92538aea4a42530e333741566d54c440",
+        "initial_size": 176794025,
+        "final_size": 176794025,
+        "changed_during_read": false,
+        "inode": 83624699
+      },
+      "events": [
+        {
+          "line": 25039,
+          "timestamp": "2026-10-02T17:51:29.642Z",
+          "turn_id": "01a0fd7c-a198-71d2-8c0c-c1a6e3e3fc38",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "4aa620897848d43a8c5c0e86ab841093974bf2c1cdda4e3ed94c3ac220842644",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25040,
+          "timestamp": "2026-10-02T17:51:29.661Z",
+          "turn_id": "01a0fdbe-1b58-7350-a547-32a51d07961b",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "ec9d8f570373098322b7733becdcd733eec87a0bc631e85d9a76d5656ae62eac",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 25041,
+          "timestamp": "2026-10-02T17:51:39.808Z",
+          "turn_id": "01a0fdbe-1b58-7350-a547-32a51d07961b",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "afd9c68ccb9be46f298899c7e87e0c6e313b4b912ed8de6f6dc297b9527a8284",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25042,
+          "timestamp": "2026-10-02T17:51:39.839Z",
+          "turn_id": "01a0fdbe-1b58-7350-a547-32a51d07961b",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "b91454501a16cf70dfac43726d89212faae748428ea031f2085bb6d351032dc1",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-rhythm",
+          "trigger_time": "2026-10-02T17:51:29.615Z",
+          "matched_markers": [],
+          "content_sha256": "a7dfd48e40bc0716b1fe440d4097ea65239a70551e9a58e5c3f813c7315aaabe"
+        },
+        {
+          "line": 25048,
+          "timestamp": "2026-10-02T17:52:04.708Z",
+          "turn_id": "01a0fdbe-1b58-7350-a547-32a51d07961b",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "68a59b0dec8dc82ae932c09d79fd0bba632870631cad08020bfa8dd378f41688",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "content_bytes": 0
+        },
+        {
+          "line": 25051,
+          "timestamp": "2026-10-02T17:52:04.772Z",
+          "turn_id": "01a0fdbe-1b58-7350-a547-32a51d07961b",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "c7acaace220de778aed35e1517c2dd39c609d8e4b26a86fa222b18e9d05c03d8",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        },
+        {
+          "line": 25052,
+          "timestamp": "2026-10-02T17:54:29.616Z",
+          "turn_id": "01a0fdbe-1b58-7350-a547-32a51d07961b",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "abf69540b90944ffa839d0af9813aab2dc7ac8f2a793fb1423df21d545ef6344",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25053,
+          "timestamp": "2026-10-02T17:54:29.624Z",
+          "turn_id": "01a0fdc0-da56-7ce0-8247-23aa97cb6174",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "8a703e2367eb1cf37037f3d14b3310a1b1cd8b0fc31e01aa9fa8228bc6406b10",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 25054,
+          "timestamp": "2026-10-02T17:54:39.710Z",
+          "turn_id": "01a0fdc0-da56-7ce0-8247-23aa97cb6174",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "f901dc869748e7ebc179a2eb9a13d2fb3a3119b5eda258d6e45aa9ec9a9d3ddb",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25055,
+          "timestamp": "2026-10-02T17:54:39.736Z",
+          "turn_id": "01a0fdc0-da56-7ce0-8247-23aa97cb6174",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "4b1090ce090caba59ec5a87b43a99b6735c94c23f15fcad9b24fb51e6aadbb13",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-rhythm",
+          "trigger_time": "2026-10-02T17:54:29.585Z",
+          "matched_markers": [],
+          "content_sha256": "bb9b3422010a806409b7ba0e9981b1bce3f3ff57b3e02b8f7c31780300318393"
+        },
+        {
+          "line": 25060,
+          "timestamp": "2026-10-02T17:54:57.034Z",
+          "turn_id": "01a0fdc0-da56-7ce0-8247-23aa97cb6174",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "52e326075956f30854f602fba830c06339f09414e079ae8f11911281c96a63f3",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "ed6c2ea313129dae46360ad1a15abe52d47a485851c5d6eb6bb85cc5e73b8edf",
+          "content_bytes": 276
+        },
+        {
+          "line": 25063,
+          "timestamp": "2026-10-02T17:54:57.109Z",
+          "turn_id": "01a0fdc0-da56-7ce0-8247-23aa97cb6174",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "eece8ac255fc1ac39fa6905c54099660aa86de050898f94f81a93c9f6000d47c",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        },
+        {
+          "line": 25064,
+          "timestamp": "2026-10-02T17:56:59.615Z",
+          "turn_id": "01a0fdc0-da56-7ce0-8247-23aa97cb6174",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "f92feed05b2a734549f41c6a652fb28378ae47f6e639d41f938f2d32639f7ba0",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25065,
+          "timestamp": "2026-10-02T17:56:59.622Z",
+          "turn_id": "01a0fdc3-2445-77c0-9aa9-729d545bbe48",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "900ce1f6d488b7339ae8188ba87b237d4d19d3015868818b562e081fd79ba069",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 25066,
+          "timestamp": "2026-10-02T17:57:09.698Z",
+          "turn_id": "01a0fdc3-2445-77c0-9aa9-729d545bbe48",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "96f359ab9d923fddb24e605ca2ed2fc0d7fa086c2b7321056fbf0f953895252d",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25067,
+          "timestamp": "2026-10-02T17:57:09.722Z",
+          "turn_id": "01a0fdc3-2445-77c0-9aa9-729d545bbe48",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "58b2563e1ec64399bc4e0d6b64371d1b0344cd263e6c808013898e49def713d7",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-rhythm",
+          "trigger_time": "2026-10-02T17:56:59.585Z",
+          "matched_markers": [
+            "oax-desktop-idle-20261003-01"
+          ],
+          "content_sha256": "43d7c52680a5a69c3a5944baf3dcea3cf0d8b3f89712630ddf551a07e7c5aa49"
+        },
+        {
+          "line": 25072,
+          "timestamp": "2026-10-02T17:57:25.816Z",
+          "turn_id": "01a0fdc3-2445-77c0-9aa9-729d545bbe48",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "a94dadc83503480be09191c412b80626677733e4feb98e006a5915337afff952",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "7fd993ce2e2a84d8a2f2d3be2d525c3ffb8fa6979673344a6cdf53a28b34a013",
+          "content_bytes": 284
+        },
+        {
+          "line": 25075,
+          "timestamp": "2026-10-02T17:57:26.448Z",
+          "turn_id": "01a0fdc3-2445-77c0-9aa9-729d545bbe48",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "caad5a01c2124ffaec1686a6dbffba095a42b2ab3e16a8599ba460bd1eb6ed7b",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        },
+        {
+          "line": 25076,
+          "timestamp": "2026-10-02T17:59:29.641Z",
+          "turn_id": "01a0fdc3-2445-77c0-9aa9-729d545bbe48",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "4e9d7dc895dce4b6bc3f12e5b84974928b5831be7135f7229514d9b9b9e383ba",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25077,
+          "timestamp": "2026-10-02T17:59:29.649Z",
+          "turn_id": "01a0fdc5-6e5c-7082-82ff-9f4e568cc367",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "3389b3d09db9d17d30aa4854ea1e98ba4cf46d14d7f4e7456fed688102895aa3",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 25078,
+          "timestamp": "2026-10-02T17:59:37.574Z",
+          "turn_id": "01a0fdc5-6e5c-7082-82ff-9f4e568cc367",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "386917380a289c388e69261d4553d8f74c540b544236ec37bf17589978953e73",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 25079,
+          "timestamp": "2026-10-02T17:59:37.610Z",
+          "turn_id": "01a0fdc5-6e5c-7082-82ff-9f4e568cc367",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "108b045c09d4b007086fb98e15f259983d92a24807e3fb3bddbdb912a0682222",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-rhythm",
+          "trigger_time": "2026-10-02T17:59:29.624Z",
+          "matched_markers": [
+            "oax-desktop-idle-20261003-01"
+          ],
+          "content_sha256": "b5c8e9a49885940f8f4d8a9640778fb62217cedeb41b7bba462704ad2ccb892b"
+        },
+        {
+          "line": 25084,
+          "timestamp": "2026-10-02T17:59:50.737Z",
+          "turn_id": "01a0fdc5-6e5c-7082-82ff-9f4e568cc367",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "c39ff53f2d499c902aa11478dda468158a1e033225890079ecd128d710125126",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "35b22a812b74bf299efacf9756b4cacb66496f42203b4a04e7504cb483933ae5",
+          "content_bytes": 273
+        },
+        {
+          "line": 25087,
+          "timestamp": "2026-10-02T17:59:51.159Z",
+          "turn_id": "01a0fdc5-6e5c-7082-82ff-9f4e568cc367",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "bcdf0eabb7f41f626e2863b3090d528cb6d3e60180a990395017168db5a6d756",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        }
+      ],
+      "event_counts_since": {
+        "event_msg/thread_settings_applied": 4,
+        "event_msg/task_started": 4,
+        "turn_context/None": 4,
+        "response_item/function_call_output": 4,
+        "event_msg/item_completed": 12,
+        "world_state/None": 1,
+        "response_item/reasoning": 4,
+        "response_item/message": 4,
+        "token_usage_record/None": 4,
+        "event_msg/token_count": 4,
+        "event_msg/task_complete": 4
+      },
+      "invalid_json_lines": 0,
+      "last_lifecycle_metadata": {
+        "timestamp": "2026-10-02T17:59:51.159Z",
+        "event": "task_complete",
+        "turn_id": "01a0fdc5-6e5c-7082-82ff-9f4e568cc367",
+        "line": 25087
+      },
+      "note": "Lifecycle metadata alone does not establish idle, host ownership, delivery, or business success."
+    },
+    {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "source": {
+        "path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+        "snapshot_bytes": 60919075,
+        "snapshot_sha256": "16e8e2a5753e554c27ce6f4968ee9b6cae022f4cf659372894f668315e84dedf",
+        "initial_size": 60919075,
+        "final_size": 60919075,
+        "changed_during_read": false,
+        "inode": 83643923
+      },
+      "events": [
+        {
+          "line": 7800,
+          "timestamp": "2026-10-02T17:51:29.652Z",
+          "turn_id": "01a0fd98-2155-7c03-b5b8-3671eec392ad",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "7a325a61f4ee97238ca84b699ce73dd38d8fdbf891a2f4f2b6fd2390055dc0a9",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7801,
+          "timestamp": "2026-10-02T17:51:29.661Z",
+          "turn_id": "01a0fdbe-1b69-7042-b4de-b618f6e0b091",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "76357d23aa0a26ebfdc6e13f796890b0b675ffbf9eaf32099cc806978065991d",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 7802,
+          "timestamp": "2026-10-02T17:51:39.754Z",
+          "turn_id": "01a0fdbe-1b69-7042-b4de-b618f6e0b091",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "597101d2411fdbb6198899f6bdef1d65b2c824acb8fddfc1eeeb631785baf76f",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7803,
+          "timestamp": "2026-10-02T17:51:39.785Z",
+          "turn_id": "01a0fdbe-1b69-7042-b4de-b618f6e0b091",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "16a6e559724deca6d56e3871ebe0a7ba19cf66ccdf1dec8ec32d32356a451731",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-oneaxe-pay",
+          "trigger_time": "2026-10-02T17:51:29.636Z",
+          "matched_markers": [],
+          "content_sha256": "1ba30035110e16b4887364572bbf7ee72b8a8ec461ed1bfbb23f92ee40cba946"
+        },
+        {
+          "line": 7808,
+          "timestamp": "2026-10-02T17:51:50.944Z",
+          "turn_id": "01a0fdbe-1b69-7042-b4de-b618f6e0b091",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "699fef61ceea1c259da06b50be5366f1d62be30216274c23976e9bb6813853b5",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "3a6b5edc42b69bef95bd75325ff6b47262f5be215b98aed58b24ce75718c389d",
+          "content_bytes": 300
+        },
+        {
+          "line": 7811,
+          "timestamp": "2026-10-02T17:51:51.835Z",
+          "turn_id": "01a0fdbe-1b69-7042-b4de-b618f6e0b091",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "3531fce8e136e769cfbf64ab2702532f0710c3e6844e120a7136e63e7ff8402a",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        },
+        {
+          "line": 7812,
+          "timestamp": "2026-10-02T17:53:59.620Z",
+          "turn_id": "01a0fdbe-1b69-7042-b4de-b618f6e0b091",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "ee21283b53294aa31c97ad78e54df6e5c75b0855712ec5f99ee8f13f501a7809",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7813,
+          "timestamp": "2026-10-02T17:53:59.630Z",
+          "turn_id": "01a0fdc0-6537-7451-89ee-bbb1c352f4c5",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "8380d54ff246fef4f1e0676bedc8d60aaa001d5f72f5ccc824d35d02459185c9",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 7814,
+          "timestamp": "2026-10-02T17:54:09.570Z",
+          "turn_id": "01a0fdc0-6537-7451-89ee-bbb1c352f4c5",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "425ef6eadd3556783816128b3efb7dba8109318b3e260eecf46a3a0573d313f7",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7815,
+          "timestamp": "2026-10-02T17:54:09.604Z",
+          "turn_id": "01a0fdc0-6537-7451-89ee-bbb1c352f4c5",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "06332288cc9943b9f6f6bbd255b222a202e36ba2ebedb3d24df7d8e4941cb248",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-oneaxe-pay",
+          "trigger_time": "2026-10-02T17:53:59.602Z",
+          "matched_markers": [],
+          "content_sha256": "2c19077f0a17a96eae27f8f44217d850c0b0a352eb67bcaf1a4b817067b2f90c"
+        },
+        {
+          "line": 7820,
+          "timestamp": "2026-10-02T17:54:15.471Z",
+          "turn_id": "01a0fdc0-6537-7451-89ee-bbb1c352f4c5",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "2258a99fb7b328a7816c550509600e6a03162175fd210b17dd2371c78828ebd1",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "8d15b1a361bbcfe0f9e61b1794cf5e46e9b9c1b0c183e46069a9d6bc7b4fb7cb",
+          "content_bytes": 94
+        },
+        {
+          "line": 7823,
+          "timestamp": "2026-10-02T17:54:15.531Z",
+          "turn_id": "01a0fdc0-6537-7451-89ee-bbb1c352f4c5",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "b8d80c012a61c07bb5607b506a3eff6d63ea158934957551cdfe16727b29c5e6",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        },
+        {
+          "line": 7824,
+          "timestamp": "2026-10-02T17:56:29.649Z",
+          "turn_id": "01a0fdc0-6537-7451-89ee-bbb1c352f4c5",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "2edf6f144239c2dfaaf187e588b649482b55a1916b6dc4c0cead884166a05761",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7825,
+          "timestamp": "2026-10-02T17:56:29.658Z",
+          "turn_id": "01a0fdc2-af40-7031-8a24-55978ad4478f",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "0bd9c9eed7cdcdbeea56091e98bd17d03a574be91c3d2fb51cd9ed36d0c68c01",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 7826,
+          "timestamp": "2026-10-02T17:56:38.744Z",
+          "turn_id": "01a0fdc2-af40-7031-8a24-55978ad4478f",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "f3a3ae465e1623817b762e577ff14c454c230ef1b16026a1521a1811442aca26",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7827,
+          "timestamp": "2026-10-02T17:56:38.780Z",
+          "turn_id": "01a0fdc2-af40-7031-8a24-55978ad4478f",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "a73afb6ea16d285e534acc50610f6948c27764028a1bdf06644a6958fae557b4",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-oneaxe-pay",
+          "trigger_time": "2026-10-02T17:56:29.626Z",
+          "matched_markers": [
+            "oax-desktop-idle-20261003-01"
+          ],
+          "content_sha256": "c2bba42480ab6db5b27d7ea74b816ff9426445a5f9b75fba9c73cdd98978d671"
+        },
+        {
+          "line": 7832,
+          "timestamp": "2026-10-02T17:56:44.386Z",
+          "turn_id": "01a0fdc2-af40-7031-8a24-55978ad4478f",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "acc83c0bc34cc60f84ea7b5bafd8701ee3476e4c86dad394896be1933cbb1447",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "9e616b9b23c676e4bdf52a0a8c95303ea32983e9e5c3d9612ed3c864acf3cdd0",
+          "content_bytes": 79
+        },
+        {
+          "line": 7835,
+          "timestamp": "2026-10-02T17:56:44.438Z",
+          "turn_id": "01a0fdc2-af40-7031-8a24-55978ad4478f",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "18f8b93a65da9cea1990b86b650418eccf510dba4cfcc0136af05f9c2f3859a8",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        },
+        {
+          "line": 7836,
+          "timestamp": "2026-10-02T17:58:59.842Z",
+          "turn_id": "01a0fdc2-af40-7031-8a24-55978ad4478f",
+          "outer_type": "event_msg",
+          "payload_type": "thread_settings_applied",
+          "record_sha256": "912bb5f09a494701e46111458ad1e4644ecdb2349a6b066c49faec3509e8a01f",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7837,
+          "timestamp": "2026-10-02T17:58:59.852Z",
+          "turn_id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+          "outer_type": "event_msg",
+          "payload_type": "task_started",
+          "record_sha256": "4f5797da5463836779138589f99b6c44ff35ee754fdb329057b33f72d6cbe8cd",
+          "observation": "turn_lifecycle",
+          "event": "task_started"
+        },
+        {
+          "line": 7838,
+          "timestamp": "2026-10-02T17:59:09.956Z",
+          "turn_id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+          "outer_type": "turn_context",
+          "payload_type": null,
+          "record_sha256": "68df5ac7085f1e7209296fa8ffcdef14c1605292d7d78bfae36a18e9b5829280",
+          "observation": "execution_settings",
+          "model": "gpt-6-astra",
+          "reasoning_effort": "ultra",
+          "mode": "default"
+        },
+        {
+          "line": 7839,
+          "timestamp": "2026-10-02T17:59:09.990Z",
+          "turn_id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+          "outer_type": "response_item",
+          "payload_type": "function_call_output",
+          "record_sha256": "f0662330e4dd19183b8898058eaef41859adf98ab0937879fefc0c5f64600950",
+          "observation": "native_heartbeat_input",
+          "automation_id": "oax-oneaxe-pay",
+          "trigger_time": "2026-10-02T17:58:59.821Z",
+          "matched_markers": [
+            "oax-desktop-idle-20261003-01"
+          ],
+          "content_sha256": "9afcc99c8a04adb9cb8643de35e2e1936b75227d040318401ed60aa327326d62"
+        },
+        {
+          "line": 7844,
+          "timestamp": "2026-10-02T17:59:14.733Z",
+          "turn_id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+          "outer_type": "response_item",
+          "payload_type": "message",
+          "record_sha256": "56e0c9bce2a7f412171ba366cf0474ff7002b542050fd3d0604ecfc99932eb1e",
+          "observation": "final_response_metadata",
+          "matched_markers": [],
+          "content_sha256": "711743c36616beea1e628ae7471fdcb49b3cfe4578ee01076b118d0010979ac3",
+          "content_bytes": 12
+        },
+        {
+          "line": 7847,
+          "timestamp": "2026-10-02T17:59:14.798Z",
+          "turn_id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+          "outer_type": "event_msg",
+          "payload_type": "task_complete",
+          "record_sha256": "9383c61f28f0c142e5d5ff4bc8938cc0c94444b61b58bf1b104a6f5d4c5ef025",
+          "observation": "turn_lifecycle",
+          "event": "task_complete"
+        }
+      ],
+      "event_counts_since": {
+        "event_msg/thread_settings_applied": 4,
+        "event_msg/task_started": 4,
+        "turn_context/None": 4,
+        "response_item/function_call_output": 4,
+        "event_msg/item_completed": 12,
+        "response_item/reasoning": 4,
+        "response_item/message": 4,
+        "token_usage_record/None": 4,
+        "event_msg/token_count": 4,
+        "event_msg/task_complete": 4
+      },
+      "invalid_json_lines": 0,
+      "last_lifecycle_metadata": {
+        "timestamp": "2026-10-02T17:59:14.798Z",
+        "event": "task_complete",
+        "turn_id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+        "line": 7847
+      },
+      "note": "Lifecycle metadata alone does not establish idle, host ownership, delivery, or business success."
+    }
+  ],
+  "logs": [
+    {
+      "source": {
+        "path": "/home/sky/.local/state/codex/logs/2026/10/02/codex-desktop-8049d1ae-ab44-44af-a470-67a2ceacf910-1628256-t0-i1-000006-0.log",
+        "snapshot_bytes": 9522944,
+        "snapshot_sha256": "3299d868b8c123a654a5c1f60e091a3b39031a46f0d5b304074e214b26f94b34",
+        "initial_size": 9522944,
+        "final_size": 9522944,
+        "changed_during_read": false,
+        "inode": 81920380
+      },
+      "events": []
+    },
+    {
+      "source": {
+        "path": "/home/sky/.local/state/codex/logs/2026/10/02/codex-desktop-8049d1ae-ab44-44af-a470-67a2ceacf910-1628256-t1-i1-000003-0.log",
+        "snapshot_bytes": 9810384,
+        "snapshot_sha256": "e83b79339545dd705d90387ebb77b719edd506e7e37b945b664cd53eebdaf8f5",
+        "initial_size": 9810384,
+        "final_size": 9810384,
+        "changed_during_read": false,
+        "inode": 81920378
+      },
+      "events": []
+    }
+  ]
+}

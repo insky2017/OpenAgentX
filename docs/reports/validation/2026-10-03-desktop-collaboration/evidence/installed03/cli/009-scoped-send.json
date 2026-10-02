@@ -1,0 +1,29 @@
+{
+  "started_at": "2026-10-02T18:35:08.445673+00:00",
+  "finished_at": "2026-10-02T18:35:08.457085+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "send",
+    "--agent",
+    "domain-installed-a-9730f99e2b42",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/private/domain-installed-a-9730f99e2b42.json",
+    "--to",
+    "domain-installed-b-9730f99e2b42",
+    "--scope",
+    "installed.9730f99e2b42.b",
+    "--key",
+    "installed-scoped",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/raw/inputs/request.txt"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"scope\": \"installed.9730f99e2b42.b\",\n  \"processing_state\": \"pending\",\n  \"sequence\": 5,\n  \"message_id\": \"external-message-3d70d09b-115d-4da8-b67b-3c3756f9e60f\",\n  \"sender_agent_id\": \"domain-installed-a-9730f99e2b42\",\n  \"target_agent_id\": \"domain-installed-b-9730f99e2b42\",\n  \"sender_binding_id\": \"external-41f77fb2-372a-4e7e-b091-645fbd1f7b14\",\n  \"sender_generation\": 1,\n  \"kind\": \"consultation\",\n  \"content\": \"Installed test message only. No business action requested.\\n\",\n  \"idempotency_key\": \"installed-scoped\",\n  \"delivery_state\": \"pending\",\n  \"created_at\": \"2026-10-02T18:35:08.455248836Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

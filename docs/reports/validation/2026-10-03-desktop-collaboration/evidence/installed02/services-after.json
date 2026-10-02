@@ -1,0 +1,71 @@
+[
+  {
+    "unit": "openagentx.service",
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "openagentx.service",
+      "-p",
+      "MainPID",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "ExecMainStartTimestampMonotonic"
+    ],
+    "exit_code": 0,
+    "stdout": "MainPID=84879\nExecMainStartTimestampMonotonic=183697665392\nActiveState=active\nSubState=running\n",
+    "stderr": "",
+    "pid": 84879,
+    "starttime": "18369764",
+    "exe_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392"
+  },
+  {
+    "unit": "openagentx-worker@codex-domain-e2e.service",
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "openagentx-worker@codex-domain-e2e.service",
+      "-p",
+      "MainPID",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "ExecMainStartTimestampMonotonic"
+    ],
+    "exit_code": 0,
+    "stdout": "MainPID=84909\nExecMainStartTimestampMonotonic=183698193322\nActiveState=active\nSubState=running\n",
+    "stderr": "",
+    "pid": 84909,
+    "starttime": "18369818",
+    "exe_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392"
+  },
+  {
+    "unit": "openagentx-worker@agy-onboarding-e2e.service",
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "openagentx-worker@agy-onboarding-e2e.service",
+      "-p",
+      "MainPID",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "ExecMainStartTimestampMonotonic"
+    ],
+    "exit_code": 0,
+    "stdout": "MainPID=84911\nExecMainStartTimestampMonotonic=183698199111\nActiveState=active\nSubState=running\n",
+    "stderr": "",
+    "pid": 84911,
+    "starttime": "18369819",
+    "exe_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392"
+  }
+]

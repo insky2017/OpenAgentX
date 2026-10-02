@@ -1,5 +1,7 @@
 # 外部会话协作覆盖
 
+> 历史批次说明：本文件保留 `6576c55` / schema v3 当批记录，文内“原会话未初始化”“交接尚未发送”等是当时状态。后续原会话 manual 往返已 PASS，heartbeat 8 轮 0 工具调用、自动闭环 NOT_PASSED，两项自动化已暂停。当前源码 `8c9ceff` / schema v4 的正式新协议安装验收仍在进行；最新结论见[后续交付](../2026-10-03-desktop-collaboration/DELIVERY.md)、[后续覆盖](../2026-10-03-desktop-collaboration/COVERAGE.md)和[后续执行记录](../2026-10-03-desktop-collaboration/EXECUTION-LOG.md)。以下历史正文不覆盖后续状态。
+
 | 用例 | 状态 | 证据与结论 |
 |---|---|---|
 | E01 原宿主定位 | 自动投递受阻 | [host-probe01](evidence/host-probe01/README.md)：共享 daemon 两目标均 notLoaded；Desktop 队列入口没有受支持的外部消费证明 |

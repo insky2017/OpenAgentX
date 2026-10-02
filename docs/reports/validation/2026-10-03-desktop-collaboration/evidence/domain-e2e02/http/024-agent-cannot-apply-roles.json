@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-02T18:14:53.859799+00:00",
+  "method": "PUT",
+  "path": "/api/external/v1/roles",
+  "request": {
+    "organization_id": "default",
+    "expected_version": 0,
+    "rules": [
+      {
+        "scope": "fixture.a",
+        "owner_agent_id": "domain-a-143e7ec9",
+        "description": "Owns isolated a fixture questions."
+      },
+      {
+        "scope": "fixture.b",
+        "owner_agent_id": "domain-b-143e7ec9",
+        "description": "Owns isolated b fixture questions."
+      },
+      {
+        "scope": "fixture.c",
+        "owner_agent_id": "domain-c-143e7ec9",
+        "description": "Owns isolated c fixture questions."
+      },
+      {
+        "scope": "fixture.d",
+        "owner_agent_id": "domain-d-143e7ec9",
+        "description": "Owns isolated d fixture questions."
+      }
+    ]
+  },
+  "authorization": "[REDACTED]",
+  "status": 401,
+  "response": {
+    "code": "CLI_UNAUTHENTICATED",
+    "message": "CLI authentication required"
+  }
+}

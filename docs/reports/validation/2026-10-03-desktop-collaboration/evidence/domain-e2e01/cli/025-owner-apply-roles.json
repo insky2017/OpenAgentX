@@ -1,0 +1,22 @@
+{
+  "started_at": "2026-10-02T18:13:12.601918+00:00",
+  "finished_at": "2026-10-02T18:13:12.629307+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "roles",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/raw/inputs/owner-apply-roles.json",
+    "--expected-version",
+    "0",
+    "--socket",
+    "/tmp/oax-external-smoke-6782daf7ab6bf004.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/owner.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"organization_id\": \"default\",\n  \"revision\": 1,\n  \"rules\": [\n    {\n      \"scope\": \"fixture.a\",\n      \"owner_agent_id\": \"domain-a-c610c80c\",\n      \"description\": \"Owns isolated a fixture questions.\"\n    },\n    {\n      \"scope\": \"fixture.b\",\n      \"owner_agent_id\": \"domain-b-c610c80c\",\n      \"description\": \"Owns isolated b fixture questions.\"\n    },\n    {\n      \"scope\": \"fixture.c\",\n      \"owner_agent_id\": \"domain-c-c610c80c\",\n      \"description\": \"Owns isolated c fixture questions.\"\n    },\n    {\n      \"scope\": \"fixture.d\",\n      \"owner_agent_id\": \"domain-d-c610c80c\",\n      \"description\": \"Owns isolated d fixture questions.\"\n    }\n  ]\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

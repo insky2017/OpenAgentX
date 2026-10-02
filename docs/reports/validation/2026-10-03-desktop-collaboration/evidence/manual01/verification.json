@@ -1,0 +1,11 @@
+{
+  "verified_at": "2026-10-02T17:53:28.109312+00:00",
+  "source_offset_hash_checks": 15,
+  "private_artifact_hash_checks": 8,
+  "repository_and_private_SHA256SUMS": "passed",
+  "repository_full_message_content": "omitted; SHA256 and byte length retained",
+  "credential_files_opened_or_copied": false,
+  "secret_pattern_scan": "passed before writes and final inventory; manual content read contained no plaintext credentials",
+  "raw_directory_mode": "0o700",
+  "result": "passed"
+}

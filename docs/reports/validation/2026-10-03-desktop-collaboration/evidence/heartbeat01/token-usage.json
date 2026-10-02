@@ -1,0 +1,131 @@
+{
+  "records": [
+    {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "turn_id": "01a0fdbe-1b58-7350-a547-32a51d07961b",
+      "timestamp": "2026-10-02T17:52:04.741Z",
+      "source_line": 25049,
+      "record_sha256": "309881e7413b90ea3f9921af5f15dcf232ad4cd674e82d2c46c07df90737c3d6",
+      "usage": {
+        "input_tokens": 155639,
+        "cached_input_tokens": 154880,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 292,
+        "reasoning_output_tokens": 286,
+        "total_tokens": 155931
+      }
+    },
+    {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "turn_id": "01a0fdc0-da56-7ce0-8247-23aa97cb6174",
+      "timestamp": "2026-10-02T17:54:57.069Z",
+      "source_line": 25061,
+      "record_sha256": "5c1ea34727927321efb3e2b08b4bc592f5803750c563254d827d5f8f51c99b94",
+      "usage": {
+        "input_tokens": 155933,
+        "cached_input_tokens": 155520,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 116,
+        "reasoning_output_tokens": 29,
+        "total_tokens": 156049
+      }
+    },
+    {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "turn_id": "01a0fdc3-2445-77c0-9aa9-729d545bbe48",
+      "timestamp": "2026-10-02T17:57:26.410Z",
+      "source_line": 25073,
+      "record_sha256": "d8153ccc6de533c04eba0d9fa3dcc199e52aa737fdb61e1bb6248b79956b8961",
+      "usage": {
+        "input_tokens": 156051,
+        "cached_input_tokens": 155776,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 117,
+        "reasoning_output_tokens": 32,
+        "total_tokens": 156168
+      }
+    },
+    {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "turn_id": "01a0fdc5-6e5c-7082-82ff-9f4e568cc367",
+      "timestamp": "2026-10-02T17:59:51.120Z",
+      "source_line": 25085,
+      "record_sha256": "b58bdd340ff3dd31ab2950519b9fe13991b87682921a04ff29f1e67821bb5cbe",
+      "usage": {
+        "input_tokens": 156170,
+        "cached_input_tokens": 155904,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 92,
+        "reasoning_output_tokens": 6,
+        "total_tokens": 156262
+      }
+    },
+    {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "turn_id": "01a0fdbe-1b69-7042-b4de-b618f6e0b091",
+      "timestamp": "2026-10-02T17:51:51.792Z",
+      "source_line": 7809,
+      "record_sha256": "afc53aaac9a9ebc2777fd9cba95425447fa40e69a15b2fdde36f4957f4f21f20",
+      "usage": {
+        "input_tokens": 70385,
+        "cached_input_tokens": 69760,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 123,
+        "reasoning_output_tokens": 39,
+        "total_tokens": 70508
+      }
+    },
+    {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "turn_id": "01a0fdc0-6537-7451-89ee-bbb1c352f4c5",
+      "timestamp": "2026-10-02T17:54:15.479Z",
+      "source_line": 7821,
+      "record_sha256": "52ef91de5d7e9981f41054a979d60a01c76854faa634a0d776d5500d9a5f29cd",
+      "usage": {
+        "input_tokens": 70510,
+        "cached_input_tokens": 70144,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 48,
+        "reasoning_output_tokens": 19,
+        "total_tokens": 70558
+      }
+    },
+    {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "turn_id": "01a0fdc2-af40-7031-8a24-55978ad4478f",
+      "timestamp": "2026-10-02T17:56:44.395Z",
+      "source_line": 7833,
+      "record_sha256": "496285bd6ad2444a27f8f3d0abc62383500ec2c1e13c954ebf4ed14e36443bf0",
+      "usage": {
+        "input_tokens": 70560,
+        "cached_input_tokens": 70272,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 40,
+        "reasoning_output_tokens": 11,
+        "total_tokens": 70600
+      }
+    },
+    {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "turn_id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+      "timestamp": "2026-10-02T17:59:14.747Z",
+      "source_line": 7845,
+      "record_sha256": "ba0d4d455684d1007e12b1248216895a9e7e8215c0d6ebd796b886df9cf4585d",
+      "usage": {
+        "input_tokens": 70602,
+        "cached_input_tokens": 70400,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 17,
+        "reasoning_output_tokens": 8,
+        "total_tokens": 70619
+      }
+    }
+  ],
+  "totals": {
+    "input_tokens": 905850,
+    "cached_input_tokens": 902656,
+    "output_tokens": 845,
+    "total_tokens": 906695
+  },
+  "interpretation": "Recorded input includes cached input. These are actual model calls, not zero-cost scheduling. No billing or quota conversion is asserted; do not treat cached tokens as uncached paid tokens. Periodic full-context model wakeups are rejected as the standing solution."
+}

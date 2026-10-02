@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-02T18:14:54.830587+00:00",
+  "skill": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/skills/oax-collaborate/SKILL.md",
+  "sha256": "44d10c7cdc4a5d5b074904fac2582fdcb9029bce2ac1f1828f2772262872b218",
+  "result": "CLI names/flags exercised in this run",
+  "limits": "Declared scope and message states only. No semantic body enforcement, business effect, Desktop cross-repository isolation or wakeup proof."
+}

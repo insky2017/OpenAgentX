@@ -1,0 +1,121 @@
+{
+  "exported_at": "2026-10-02T18:39:28.618618+00:00",
+  "source_root": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01",
+  "omitted": "rollback, binaries, source clone, credentials, unrelated historical task contents",
+  "files": [
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/01-prestop-codex-domain-e2e.json",
+      "source_sha256": "135d3e072061189a86a2584e8790f0a20cf4453625a11d39b055892afd1f77e5",
+      "export": "01-prestop-codex-domain-e2e.json",
+      "export_sha256": "880778d984df272845b1965d6c6b9c2bf4f8bad5df4f7e9c2003c2664c1b22a4"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/02-prestop-agy-onboarding-e2e.json",
+      "source_sha256": "5f9bf73524713aff6708e8e4afe0513b09ed15b3efb460843142249e3afe82ac",
+      "export": "02-prestop-agy-onboarding-e2e.json",
+      "export_sha256": "0eae0d60d859e78f199c9c43acf88477b56180e04f08ac9cd7013de35d8548a8"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/03-build-info.json",
+      "source_sha256": "f1a3d9851cfcd44a13821ea5712856e1e8bdb78da97e8e65199d3c4489ba6acc",
+      "export": "03-build-info.json",
+      "export_sha256": "f1a3d9851cfcd44a13821ea5712856e1e8bdb78da97e8e65199d3c4489ba6acc"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/04-stop-idle-workers.json",
+      "source_sha256": "67f1db2ae03f27f9544c7dcd370ed8851488ff6b39058c6aaa9029ff88789091",
+      "export": "04-stop-idle-workers.json",
+      "export_sha256": "67f1db2ae03f27f9544c7dcd370ed8851488ff6b39058c6aaa9029ff88789091"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/05-stop-daemon.json",
+      "source_sha256": "637aba463fdf882522a5984d3ce80f5063819e8e9b3a41786ee61e938f78c5aa",
+      "export": "05-stop-daemon.json",
+      "export_sha256": "637aba463fdf882522a5984d3ce80f5063819e8e9b3a41786ee61e938f78c5aa"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/06-start-daemon.json",
+      "source_sha256": "e72a93edfa44dddfeaaf561081ae25edeaa1e14107eb1d55e1f00bc0d26aa0ef",
+      "export": "06-start-daemon.json",
+      "export_sha256": "e72a93edfa44dddfeaaf561081ae25edeaa1e14107eb1d55e1f00bc0d26aa0ef"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/07-start-workers.json",
+      "source_sha256": "653bf0e47e4211bcdda29fe2755c8b32d5f99fac62be1ad3cf7deafd58bc1905",
+      "export": "07-start-workers.json",
+      "export_sha256": "653bf0e47e4211bcdda29fe2755c8b32d5f99fac62be1ad3cf7deafd58bc1905"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/08-service-state.json",
+      "source_sha256": "5c6324d68492d693ac47d350a92aafd8a660c32735623f638bf95c74a1bef651",
+      "export": "08-service-state.json",
+      "export_sha256": "5c6324d68492d693ac47d350a92aafd8a660c32735623f638bf95c74a1bef651"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/before-agy-onboarding-e2e.json",
+      "source_sha256": "254e326e3f6ac7853d610c65c68c844f0173e0f42a58c1761df723858a09a142",
+      "export": "before-agy-onboarding-e2e.json",
+      "export_sha256": "2542715d8876b0cc4797ec61f3592109b089a97d334171e1be159e3b11de0e7a"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/before-codex-domain-e2e.json",
+      "source_sha256": "20730eecabf2fc0a4208b771a9ef4cdebe1a7d2f151896cd0dda59a56695e502",
+      "export": "before-codex-domain-e2e.json",
+      "export_sha256": "f3a9ad426623c70bfff479e85ae6b99ba4e84e59c66df88658eb279077f5f18d"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/manifest.json",
+      "source_sha256": "3f2bf1a83fc77919338ae223e0e75a8d8f121a1a336b345c717b8e639902a9cd",
+      "export": "manifest.json",
+      "export_sha256": "3f2bf1a83fc77919338ae223e0e75a8d8f121a1a336b345c717b8e639902a9cd"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/oneaxe-pay-roles.json",
+      "source_sha256": "85d35937b2b088cdb7505e83c2e9085a19dbc3f95e35b8a836ed507a140e1dd7",
+      "export": "oneaxe-pay-roles.json",
+      "export_sha256": "85d35937b2b088cdb7505e83c2e9085a19dbc3f95e35b8a836ed507a140e1dd7"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/original-host-before.json",
+      "source_sha256": "eac475d53b6e592fc4a94440972de69f5cc216fb317ee297fce30c2f6a2e69aa",
+      "export": "original-host-before.json",
+      "export_sha256": "eac475d53b6e592fc4a94440972de69f5cc216fb317ee297fce30c2f6a2e69aa"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/post-install-independent-verification.json",
+      "source_sha256": "903d4c3cf03b5e4e79b779664625deefb1b182b7b4f3f8c767f50e81df0202cb",
+      "export": "post-install-independent-verification.json",
+      "export_sha256": "903d4c3cf03b5e4e79b779664625deefb1b182b7b4f3f8c767f50e81df0202cb"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/rhythm-roles.json",
+      "source_sha256": "fe7482376e6fd6a72669b90f5472fc57c7249d8f6e6f883f1476574458710680",
+      "export": "rhythm-roles.json",
+      "export_sha256": "fe7482376e6fd6a72669b90f5472fc57c7249d8f6e6f883f1476574458710680"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/roles-apply.json",
+      "source_sha256": "4affde0297aa2c0c4eb80100d18995ed7e80fc1a0b8aa25bc0b3ca4b4a6ec236",
+      "export": "roles-apply.json",
+      "export_sha256": "4affde0297aa2c0c4eb80100d18995ed7e80fc1a0b8aa25bc0b3ca4b4a6ec236"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/roles-before.json",
+      "source_sha256": "a61c6831541ae9cba1be7951d5b9d4d6f78ec1879554bb3c2f46357528554ae2",
+      "export": "roles-before.json",
+      "export_sha256": "a61c6831541ae9cba1be7951d5b9d4d6f78ec1879554bb3c2f46357528554ae2"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/roles-installed.json",
+      "source_sha256": "cc2704c976389b1ce76f31be8eefa82fda7225635b8fb65b460a242ae08722b4",
+      "export": "roles-installed.json",
+      "export_sha256": "cc2704c976389b1ce76f31be8eefa82fda7225635b8fb65b460a242ae08722b4"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/skill-installed.json",
+      "source_sha256": "5988b1568f5d2d067b799f82bac985f3579e7ed8a0af6c31841083be8869dcdc",
+      "export": "skill-installed.json",
+      "export_sha256": "5988b1568f5d2d067b799f82bac985f3579e7ed8a0af6c31841083be8869dcdc"
+    }
+  ]
+}

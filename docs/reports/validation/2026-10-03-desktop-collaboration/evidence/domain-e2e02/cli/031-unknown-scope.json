@@ -1,0 +1,29 @@
+{
+  "started_at": "2026-10-02T18:14:53.974387+00:00",
+  "finished_at": "2026-10-02T18:14:53.986925+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "send",
+    "--agent",
+    "domain-a-143e7ec9",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-a-143e7ec9.json",
+    "--to",
+    "domain-b-143e7ec9",
+    "--key",
+    "unknown-scope",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/raw/inputs/request.txt",
+    "--scope",
+    "fixture.unknown"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 422 (UNKNOWN_SCOPE): scope has no registered owner; clarification required\n",
+  "stdin": "none"
+}

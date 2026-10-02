@@ -1,0 +1,29 @@
+{
+  "started_at": "2026-10-02T18:13:12.714393+00:00",
+  "finished_at": "2026-10-02T18:13:12.726169+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "send",
+    "--agent",
+    "domain-a-c610c80c",
+    "--socket",
+    "/tmp/oax-external-smoke-6782daf7ab6bf004.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/domain-a-c610c80c.json",
+    "--to",
+    "domain-b-c610c80c",
+    "--key",
+    "wrong-owner",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/raw/inputs/request.txt",
+    "--scope",
+    "fixture.a"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 422 (OUT_OF_SCOPE): target does not own the declared scope; scope=fixture.a owner_agent_id=domain-a-c610c80c\n",
+  "stdin": "none"
+}

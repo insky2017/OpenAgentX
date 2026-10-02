@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "go",
+    "test",
+    "./internal/persistence/sqlite",
+    "-run",
+    "^TestExternalAcceptedReplayRevalidatesChangedCatalog$",
+    "-count=1"
+  ],
+  "exit_code": 1
+}

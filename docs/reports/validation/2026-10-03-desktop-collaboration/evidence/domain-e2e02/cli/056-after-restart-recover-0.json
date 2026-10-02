@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-02T18:14:54.551253+00:00",
+  "finished_at": "2026-10-02T18:14:54.563230+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "inbox",
+    "--agent",
+    "domain-b-143e7ec9",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-b-143e7ec9.json",
+    "--recover",
+    "--after",
+    "0"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"has_more\": false,\n  \"messages\": [\n    {\n      \"processing_state\": \"needs_clarification\",\n      \"processing_note\": \"Isolated message-state fixture: needs_clarification. No real action was executed. Unknown prior effects require clarification.\\n\",\n      \"sequence\": 1,\n      \"message_id\": \"external-message-246f79b2-7c4a-4702-9a90-fa6b3ef966a7\",\n      \"sender_agent_id\": \"domain-a-143e7ec9\",\n      \"target_agent_id\": \"domain-b-143e7ec9\",\n      \"sender_binding_id\": \"external-f7a585be-379f-40bf-bb9b-4c3742a876b1\",\n      \"sender_generation\": 1,\n      \"kind\": \"consultation\",\n      \"content\": \"Inspect fixture metadata only; no payment, deployment or credential change.\\n\",\n      \"idempotency_key\": \"legacy-pending\",\n      \"delivery_state\": \"acknowledged\",\n      \"created_at\": \"2026-10-02T18:14:53.3258774Z\",\n      \"acknowledged_at\": \"2026-10-02T18:14:53.338050923Z\"\n    },\n    {\n      \"scope\": \"fixture.b\",\n      \"processing_state\": \"accepted\",\n      \"processing_note\": \"New checkpoint: independently checked fixture metadata; no business action occurred; safe to continue the fixture reply.\\n\",\n      \"sequence\": 4,\n      \"message_id\": \"external-message-77200f54-a49e-40ac-8a4a-a10ebcf83183\",\n      \"sender_agent_id\": \"domain-a-143e7ec9\",\n      \"target_agent_id\": \"domain-b-143e7ec9\",\n      \"sender_binding_id\": \"external-f7a585be-379f-40bf-bb9b-4c3742a876b1\",\n      \"sender_generation\": 1,\n      \"kind\": \"consultation\",\n      \"content\": \"Inspect fixture metadata only; no payment, deployment or credential change.\\n\",\n      \"idempotency_key\": \"scoped-current\",\n      \"delivery_state\": \"acknowledged\",\n      \"created_at\": \"2026-10-02T18:14:54.066574167Z\",\n      \"acknowledged_at\": \"2026-10-02T18:14:54.110936366Z\"\n    }\n  ],\n  \"next_after\": 4\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

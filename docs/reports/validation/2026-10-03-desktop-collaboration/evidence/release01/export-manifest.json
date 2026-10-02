@@ -1,0 +1,13 @@
+{
+  "exported_at": "2026-10-02T18:39:28.611134+00:00",
+  "source_root": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/release01",
+  "omitted": "rollback, binaries, source clone, credentials, unrelated historical task contents",
+  "files": [
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/release01/manifest.json",
+      "source_sha256": "c8e09d09bcd8b9971e7e6431415c2f4d82769ba3707d037e9730d8fd4bca84bc",
+      "export": "manifest.json",
+      "export_sha256": "c8e09d09bcd8b9971e7e6431415c2f4d82769ba3707d037e9730d8fd4bca84bc"
+    }
+  ]
+}

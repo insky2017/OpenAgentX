@@ -1,0 +1,27 @@
+{
+  "started_at": "2026-10-02T18:35:08.423053+00:00",
+  "finished_at": "2026-10-02T18:35:08.433532+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "send",
+    "--agent",
+    "domain-installed-a-9730f99e2b42",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/private/domain-installed-a-9730f99e2b42.json",
+    "--to",
+    "domain-installed-b-9730f99e2b42",
+    "--key",
+    "missing",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/raw/inputs/request.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 422 (SCOPE_REQUIRED): registered domain agents require an explicit scope; clarification required\n",
+  "stdin": "none"
+}

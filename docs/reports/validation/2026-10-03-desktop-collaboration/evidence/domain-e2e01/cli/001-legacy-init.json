@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-02T18:13:09.948119+00:00",
+  "finished_at": "2026-10-02T18:13:10.286523+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "init",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/openagentx.db"
+  ],
+  "exit_code": 0,
+  "stdout": "Initialized OpenAgentX owner \"owner\" and Organization \"default\"\n",
+  "stderr": "Owner password: \nConfirm owner password: \n",
+  "stdin": "private PTY credentials omitted"
+}

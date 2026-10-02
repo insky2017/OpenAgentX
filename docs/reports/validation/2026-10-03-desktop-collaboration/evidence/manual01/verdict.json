@@ -1,0 +1,25 @@
+{
+  "observed_at": "2026-10-02T17:52:09.510745+00:00",
+  "kind": "independent_read_only_manual_handoff_audit",
+  "result": "manual_initialization_original_threads_handoff_confirmed",
+  "request_id": "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00",
+  "reply_id": "external-message-e3cd328c-6b64-4f9e-b3c0-9d6674cd21b4",
+  "request_acknowledged_at": "2026-10-02T17:14:20.438422459Z",
+  "reply_acknowledged_at": "2026-10-02T17:25:28.417437886Z",
+  "checks": {
+    "formal_cli_both_acks": true,
+    "original_thread_send_inbox_ack_reply_calls": true,
+    "api_contents_match_original_files": true,
+    "user_initialization_in_both_threads": true,
+    "autonomous_idle_wakeup_proven": false,
+    "payment_business_acceptance_proven": false
+  },
+  "limitations": [
+    "Manual initialization followed by original-thread work is established; this evidence does not test native heartbeat scheduling, idle wakeup or busy gates.",
+    "Rhythm ACK tool output was truncated; current formal status supplies complete acknowledged_at.",
+    "Original reply receipt and old status are pending snapshots preceding Rhythm ACK; preserved unchanged.",
+    "Only OAX handoff projections and selected private output blocks retained; full business rollouts not copied.",
+    "No send, ack, reply, bind, resume, thread operation, service or business change was executed by this audit."
+  ],
+  "secret_handling": "Credential files were not opened or copied. CLI automatically loaded existing dedicated identity. Repository responses omit full content and record its hash/length; secret-pattern checks applied before every write."
+}

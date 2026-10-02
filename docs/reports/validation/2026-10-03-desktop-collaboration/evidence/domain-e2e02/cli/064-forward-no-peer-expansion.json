@@ -1,0 +1,31 @@
+{
+  "started_at": "2026-10-02T18:14:54.657900+00:00",
+  "finished_at": "2026-10-02T18:14:54.668651+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "forward",
+    "--agent",
+    "domain-b-143e7ec9",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-b-143e7ec9.json",
+    "--message",
+    "external-message-246f79b2-7c4a-4702-9a90-fa6b3ef966a7",
+    "--to",
+    "domain-d-143e7ec9",
+    "--scope",
+    "fixture.d",
+    "--key",
+    "denied-forward",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/raw/inputs/request.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 403 (FORBIDDEN): target is not an allowed peer\n",
+  "stdin": "none"
+}

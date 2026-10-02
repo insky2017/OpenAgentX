@@ -1,0 +1,32 @@
+{
+  "recorded_at": "2026-10-02T18:38:03.246121+00:00",
+  "source": "Exact stderr transcribed from exec_command result chunk efd3aa, before harness could initialize evidence writer",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/external-domain-e2e.py\", line 499, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/external-domain-e2e.py\", line 487, in main\n    test = InstalledDomain(args) if args.installed else DomainAcceptance(args)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/external-domain-e2e.py\", line 289, in __init__\n    require(args.password_file.stat().st_mode & 0o077 == 0, 'password file must be private')\n  File \"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/scripts/validation/external-session-smoke.py\", line 34, in require\n    raise RuntimeError(message)\nRuntimeError: password file must be private\n",
+  "argv": [
+    "python3",
+    "scripts/validation/external-domain-e2e.py",
+    "--installed",
+    "--binary",
+    "/home/sky/.local/bin/openagentx",
+    "--output",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed01",
+    "--commit",
+    "8c9ceff",
+    "--db",
+    "/home/sky/.openagentx/data/openagentx.db",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/pilot-bind01/private/owner-password",
+    "--unit",
+    "openagentx.service",
+    "--unit",
+    "openagentx-worker@codex-domain-e2e.service",
+    "--unit",
+    "openagentx-worker@agy-onboarding-e2e.service"
+  ]
+}

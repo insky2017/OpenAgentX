@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "go",
+    "test",
+    "-race",
+    "./..."
+  ],
+  "cwd": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree",
+  "head": "6fcc80add7c94a1d93168e47deeb69619652965f",
+  "source_diff_sha256": "0c8c57699a611e736240f5c9c0551031f515b28b2762c76bee2e3a1efa91ac97",
+  "go_version": "go version go1.22.4 linux/amd64",
+  "started_at": "2026-10-02T18:09:39.515313+00:00",
+  "exit_code": 0,
+  "finished_at": "2026-10-02T18:10:39.824436+00:00",
+  "source_unchanged": true
+}

@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-02T18:14:54.863053+00:00",
+  "status": "PASS",
+  "checks_passed": [
+    "real-v3-to-v4-migration-preserves-every-old-table-column-rowset",
+    "roles-owner-only",
+    "catalog-CAS-and-same-organization-owner",
+    "self-peer-role-visibility",
+    "scope-required-unknown-wrong-owner-denied",
+    "legacy-unscoped-held-for-clarification-not-executed",
+    "accepted-ACK-recover-and-idempotency",
+    "needs-clarification-not-completed-or-overwritten-by-delayed-retry",
+    "current-owner-rechecked-before-final-reply",
+    "restart-catalog-ACK-accepted-clarification-persistence",
+    "final-reply-completes-request-and-removes-recovery",
+    "explicit-one-hop-forward-no-fanout-loop-or-peer-expansion",
+    "no-managed-tasks-runs-workers-and-final-schema4"
+  ],
+  "error": null,
+  "boundary": "Communication API only. No model, Worker, original Desktop session, automatic wakeup, E04 or E05 proof."
+}

@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-02T18:35:08.605305+00:00",
+  "method": "GET",
+  "path": "/api/external/v1/status",
+  "request": null,
+  "authorization": "[REDACTED]",
+  "status": 401,
+  "response": {
+    "code": "UNAUTHORIZED",
+    "message": "agent credential required or expired"
+  }
+}

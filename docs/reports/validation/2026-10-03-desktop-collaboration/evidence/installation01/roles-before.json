@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "roles",
+    "--owner",
+    "--organization",
+    "default"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"organization_id\": \"default\",\n  \"revision\": 0,\n  \"rules\": []\n}\n",
+  "stderr": "",
+  "at": "2026-10-02T18:22:37.789270+00:00"
+}

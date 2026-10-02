@@ -4,11 +4,11 @@
 
 本轮以用户最新约定的结果和验收为完成目标，允许保留非阻断意见。阶段交付与完整 ADR 分开记录，不得自行删减已承诺的验收项或宣称完整 ADR 通过。
 
-## 当前实施约定（2026-10-02）
+## 当前实施约定（2026-10-03）
 
-- 2026-10-03追加授权：先验证两个原Desktop thread的原生heartbeat只读协作，再实现职责owner目录、scope/接单校验、已读未完成恢复及接入Skill。用户提供原会话已咨询/回复/ACK证据，需核实后更新旧交付状态；不等于自动唤醒通过。Pay与Rhythm分别只确认自己领域，超范围明确说明并关联转交。以[追加计划](docs/plans/2026-10-03-external-session-collaboration.md)为准；不修改业务工程、不操作资金/补发/部署、不重启共享Desktop。
+- 当前安装源码 `8c9ceff` / schema v4，见[当前交付](docs/reports/validation/2026-10-03-desktop-collaboration/DELIVERY.md)、[覆盖矩阵](docs/reports/validation/2026-10-03-desktop-collaboration/COVERAGE.md)及[执行记录](docs/reports/validation/2026-10-03-desktop-collaboration/EXECUTION-LOG.md)。原 Rhythm/Pay 会话已完成真实咨询、关联答复及双方 ACK，manual 往返 PASS；v4 职责目录、scope/接单检查、独立回执、已读未完成恢复与接入 Skill 已实现，正式安装消息协议6组验收 PASS（测试身份，不代表原Agent自动执行）。原 Agent 后续实际读取新版 Skill 与遵守新协议仍须单独举证。
 
-- 2026-10-03 [原会话协作计划](docs/plans/2026-10-03-external-session-collaboration.md)已交付消息通道，当前安装 `6576c55` / schema v3，见[本轮交付](docs/reports/validation/2026-10-03-external-session/DELIVERY.md)。Rhythm 与 Pay 已登记通信身份，保留原 Codex thread/宿主；原会话未初始化，Desktop 自动排队/唤醒受阻，E04/E05 未通过。用户已授权实施和只读交接试点；不另起 Worker 抢原 thread，不重启共享宿主。持久发信、宿主接收、Agent 已读、关联回复与独立业务验收分别举证；只读历史不能证明原宿主连接，自动唤醒未验不得宣称打通。进度见[执行记录](docs/reports/validation/2026-10-03-external-session/EXECUTION-LOG.md)。
+- 原 Desktop heartbeat 两版提示词共 8 轮、0 工具调用，自动收信及续办为 NOT_PASSED；两项自动化已暂停。禁止恢复常驻 LLM 定时轮询或以空醒冒充协作。后续方向是普通程序监听、去重/合并消息，有可执行工作才启动模型；原 Desktop 的事件入站入口仍未验，不得宣称自动协作已经打通。保留原 thread/宿主，不另起 Worker 抢占，不重启共享 Desktop；本轮没有迁移两个业务会话，也没有修改业务工程、资金、补发、凭据或业务部署。持久发信、原会话执行、ACK、关联答复、协议检查和独立业务验收分别举证。追加范围见[原会话协作计划](docs/plans/2026-10-03-external-session-collaboration.md)；`6576c55` / schema v3 的[旧交付](docs/reports/validation/2026-10-03-external-session/DELIVERY.md)保留历史，不再作为当前状态。
 
 - 历史 [Codex 实施计划](docs/plans/2026-10-02-codex-workflow-repair.md) 与 [Codex E2E](docs/plans/2026-10-02-codex-workflow-e2e.md) 已实施主链，当批安装源码为 `6b68eeb`；精确来源、真实验收和未完成项见 [Codex 交付](docs/reports/validation/2026-10-02-codex-workflow/DELIVERY.md) 与 COVERAGE。已支持原生终端、持续接单、空闲 thread 迁入和默认代理；精确仅目标工具取消及未知终态一键恢复仍待补，不能报告全矩阵通过。AGY 基线保留。
 

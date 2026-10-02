@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status",
+    "agy-onboarding-e2e",
+    "--json"
+  ],
+  "at": "2026-10-02T18:16:51.615274+00:00",
+  "exit_code": 0,
+  "stdout": "{\n  \"active_run\": null,\n  \"agent_id\": \"agy-onboarding-e2e\",\n  \"created_at\": \"2026-10-01T19:06:52.654023272Z\",\n  \"display_name\": \"AGY 入口验收\",\n  \"latest_result\": \"[OMITTED: unrelated historical task details]\",\n  \"latest_task\": \"[OMITTED: unrelated historical task details]\",\n  \"open_command\": \"openagentx agent open agy-onboarding-e2e\",\n  \"organization_id\": \"default\",\n  \"pending_task\": null,\n  \"principal_id\": \"agent-agy-onboarding-e2e\",\n  \"readiness\": {\n    \"can_start_now\": false,\n    \"next_action\": \"openagentx agent resume agy-onboarding-e2e\",\n    \"ready\": false,\n    \"reason\": \"运行环境或网络尚未就绪\"\n  },\n  \"resume_command\": \"openagentx agent resume agy-onboarding-e2e\",\n  \"status\": \"active\",\n  \"updated_at\": \"2026-10-01T19:06:52.654023272Z\",\n  \"version\": 1\n}\n",
+  "stderr": ""
+}

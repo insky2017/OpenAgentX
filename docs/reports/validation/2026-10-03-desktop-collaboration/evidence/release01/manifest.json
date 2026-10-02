@@ -1,0 +1,14 @@
+{
+  "source_commit": "8c9ceffb82f5145fc0f3f105e0de13ed945fa9fe",
+  "binary_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392",
+  "build_command": [
+    "go",
+    "build",
+    "-trimpath",
+    "-o",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/release01/openagentx",
+    "./cmd/openagentx"
+  ],
+  "workdir": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/release01/source",
+  "vcs_modified": false
+}

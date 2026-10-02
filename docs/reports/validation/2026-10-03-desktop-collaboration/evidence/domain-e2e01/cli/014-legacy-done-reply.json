@@ -1,0 +1,25 @@
+{
+  "started_at": "2026-10-02T18:13:12.098903+00:00",
+  "finished_at": "2026-10-02T18:13:12.110706+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "reply",
+    "--agent",
+    "domain-b-c610c80c",
+    "--socket",
+    "/tmp/oax-external-smoke-6782daf7ab6bf004.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/domain-b-c610c80c.json",
+    "--message",
+    "external-message-af99119b-558b-409d-8ab1-20ce28b414a6",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/raw/inputs/answer.txt"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"sequence\": 3,\n  \"message_id\": \"external-message-11dc51d9-ed90-4d63-bb42-5d8ac920c110\",\n  \"sender_agent_id\": \"domain-b-c610c80c\",\n  \"target_agent_id\": \"domain-a-c610c80c\",\n  \"sender_binding_id\": \"external-98a99452-b1e1-4cfc-beb2-db00f5aaf2b7\",\n  \"sender_generation\": 1,\n  \"kind\": \"result\",\n  \"reply_to_message_id\": \"external-message-af99119b-558b-409d-8ab1-20ce28b414a6\",\n  \"content\": \"Fixture inspection reply. Communication completed, no business success claimed.\\n\",\n  \"idempotency_key\": \"reply:external-message-af99119b-558b-409d-8ab1-20ce28b414a6\",\n  \"delivery_state\": \"pending\",\n  \"created_at\": \"2026-10-02T18:13:12.108712484Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

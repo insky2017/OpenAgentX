@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-02T18:14:54.703369+00:00",
+  "finished_at": "2026-10-02T18:14:54.714196+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "inbox",
+    "--agent",
+    "domain-b-143e7ec9",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-b-143e7ec9.json",
+    "--recover",
+    "--after",
+    "0"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"has_more\": false,\n  \"messages\": [],\n  \"next_after\": 0\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

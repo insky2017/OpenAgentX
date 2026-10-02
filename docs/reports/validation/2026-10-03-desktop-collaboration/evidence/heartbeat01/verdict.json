@@ -1,0 +1,47 @@
+{
+  "observed_at": "2026-10-02T18:03:14.009790+00:00",
+  "original_thread_wakeup": "observed",
+  "instructions_executed": "not_observed",
+  "automatic_collaboration": "NOT_PASSED",
+  "automations_final_state": "PAUSED",
+  "pause_evidence": "automation-controls.json",
+  "summary": [
+    {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "turns": 4,
+      "native_inputs": 4,
+      "tool_calls": 0,
+      "revisions": [
+        1,
+        2
+      ]
+    },
+    {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "turns": 4,
+      "native_inputs": 4,
+      "tool_calls": 0,
+      "revisions": [
+        1,
+        2
+      ]
+    }
+  ],
+  "limitations": [
+    "No model reasoning was read or exported.",
+    "No assertion that tool availability was absent.",
+    "Developer instruction wording and tool-output injection mismatch is a hypothesis only.",
+    "No restart, owner takeover, busy/input race or waiting-input acceptance was executed.",
+    "No matching selected Desktop log entries; absence of matching logs is not proof of absence of errors."
+  ],
+  "cost_assessment": {
+    "evidence": "token-usage.json",
+    "totals": {
+      "input_tokens": 905850,
+      "cached_input_tokens": 902656,
+      "output_tokens": 845,
+      "total_tokens": 906695
+    },
+    "standing_solution": "REJECTED: idle full-context LLM polling adds model usage without observed collaboration; lowering frequency is not a fundamental solution."
+  }
+}

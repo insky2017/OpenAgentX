@@ -1,0 +1,1 @@
+Isolated message-state fixture: accepted. No real action was executed. Unknown prior effects require clarification.

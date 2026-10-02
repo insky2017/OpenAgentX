@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-02T18:25:47.423836+00:00",
+  "revoked_test_agents": [],
+  "test_scopes": [
+    "installed.753c7af430ad.a",
+    "installed.753c7af430ad.b"
+  ],
+  "failures": [],
+  "identity_and_message_records": "retained for audit; credentials revoked"
+}

@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-02T18:25:47.424061+00:00",
+  "status": "FAIL",
+  "checks_passed": [
+    "installed-service-PID-starttime-and-binary-unchanged"
+  ],
+  "error": "apply-domain-installed-a-753c7af430ad: exit 1, expected 0; see CLI evidence",
+  "boundary": "Communication API only. No model, Worker, original Desktop session, automatic wakeup, E04 or E05 proof."
+}

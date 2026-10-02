@@ -1,0 +1,120 @@
+[
+  {
+    "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+    "line": 7640,
+    "byte_offset": 59276256,
+    "bytes_including_newline": 465,
+    "source_line_sha256": "36d8b1146b59f74229ec55b2cb384d7200575f8b74ff2de700c6b6643f90bec9",
+    "timestamp": "2026-10-02T17:10:11.039Z",
+    "action": "user_initialization",
+    "call_id": null,
+    "user_text": "请读取 /home/sky/.openagentx/external/oneaxe-pay/START.md，按说明接入 OAX。\n"
+  },
+  {
+    "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+    "line": 7682,
+    "byte_offset": 59444992,
+    "bytes_including_newline": 2232,
+    "source_line_sha256": "f29d54539417e35b1814963752667ede701b83c53a15505cb3f17fd65ab4195f",
+    "timestamp": "2026-10-02T17:13:27.371Z",
+    "action": "inbox_call",
+    "call_id": "call_sureebrNUrWUhjz6VwZfLrn7",
+    "tool_name": "exec",
+    "handoff_command_fragments": [
+      "root=Path('/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01');root.mkdir(parents=True,mode=0o700,exist_ok=True)",
+      "for name,args in [('external-help',['openagentx','external','--help']),('binding-status',['openagentx','external','status','--agent','oneaxe-pay']),('inbox-all',['openagentx','external','inbox','--agent','oneaxe-pay','--all'])]:"
+    ],
+    "selection_note": "Only OAX command / handoff artifact locator fragments retained; mixed unrelated tools and business body omitted."
+  },
+  {
+    "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+    "line": 7686,
+    "byte_offset": 59485258,
+    "bytes_including_newline": 12424,
+    "source_line_sha256": "afe34374786814d9b20275cd511e8545e1e1bd91e65d895880053c57c42c932d",
+    "timestamp": "2026-10-02T17:13:27.681Z",
+    "action": "inbox_result",
+    "call_id": "call_sureebrNUrWUhjz6VwZfLrn7",
+    "selected_output_block_sha256": [
+      "b2a96c4fd2db8195e9e4fc53b5852fafbe3dc45c935dcc345ab89445e693a886"
+    ],
+    "selected_output_block_count": 1,
+    "message_ids_present": [
+      "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00"
+    ],
+    "contains_exit_code_zero": true,
+    "output_was_truncated": false
+  },
+  {
+    "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+    "line": 7690,
+    "byte_offset": 59504121,
+    "bytes_including_newline": 1196,
+    "source_line_sha256": "f0b2d0e4a56a1dc823ffd3124b834e590873329f77e6a537efccdf66d3ff8251",
+    "timestamp": "2026-10-02T17:14:20.241Z",
+    "action": "ack_call",
+    "call_id": "call_Dp6iOjQsLZa3rwSj3vsVqdds",
+    "tool_name": "exec",
+    "handoff_command_fragments": [
+      "root=Path('/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01')",
+      "message='external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00'",
+      "args=['openagentx','external','ack','--agent','oneaxe-pay','--message',message]"
+    ],
+    "selection_note": "Only OAX command / handoff artifact locator fragments retained; mixed unrelated tools and business body omitted."
+  },
+  {
+    "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+    "line": 7693,
+    "byte_offset": 59521911,
+    "bytes_including_newline": 5321,
+    "source_line_sha256": "dbc1c160f53ce129beb8fb1660a2a1a7b956cf76f356f5bc7cf0295b523ae190",
+    "timestamp": "2026-10-02T17:14:20.493Z",
+    "action": "ack_result",
+    "call_id": "call_Dp6iOjQsLZa3rwSj3vsVqdds",
+    "selected_output_block_sha256": [
+      "a25c903eb5e03bac853e2e8e065326fd45c17fa31f68b0496f5aa90be41dc55e"
+    ],
+    "selected_output_block_count": 1,
+    "message_ids_present": [
+      "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00"
+    ],
+    "contains_exit_code_zero": true,
+    "output_was_truncated": false
+  },
+  {
+    "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+    "line": 7780,
+    "byte_offset": 60827870,
+    "bytes_including_newline": 1742,
+    "source_line_sha256": "cd2bad98638905ecba8712eded4f1332dc58424ecdc6cd4028bd12f985f04f3a",
+    "timestamp": "2026-10-02T17:24:10.184Z",
+    "action": "reply_call",
+    "call_id": "call_x6V5OOb78gBn71bMOgifsn6x",
+    "tool_name": "exec",
+    "handoff_command_fragments": [
+      "base = Path('/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01')",
+      "cmd = ['openagentx', 'external', 'reply', '--agent', 'oneaxe-pay', '--message', 'external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00', '--content-file', str(base / 'reply.md')]"
+    ],
+    "selection_note": "Only OAX command / handoff artifact locator fragments retained; mixed unrelated tools and business body omitted."
+  },
+  {
+    "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+    "line": 7783,
+    "byte_offset": 60835481,
+    "bytes_including_newline": 1258,
+    "source_line_sha256": "519ae282ce318e7aa38c5be6658ea9584fb662618ea6150024e843bc57671de8",
+    "timestamp": "2026-10-02T17:24:10.954Z",
+    "action": "reply_result",
+    "call_id": "call_x6V5OOb78gBn71bMOgifsn6x",
+    "selected_output_block_sha256": [
+      "da0fea44f84d08be8aaeb17456c8a4623f2fae4ad0e78b11fd46c8061f5e57fe"
+    ],
+    "selected_output_block_count": 1,
+    "message_ids_present": [
+      "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00",
+      "external-message-e3cd328c-6b64-4f9e-b3c0-9d6674cd21b4"
+    ],
+    "contains_exit_code_zero": true,
+    "output_was_truncated": false
+  }
+]

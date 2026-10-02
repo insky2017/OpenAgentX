@@ -1,0 +1,3 @@
+# 正式安装与独立核验
+
+脱敏JSON由export-manifest逐项记录来源及双向SHA。正式安装前两演示Agent无active_run/pending_task；只重启OAX三服务。安装后旧4条消息旧列哈希相同，两个原Desktop宿主PID/starttime/binary SHA保持一致。实际新版消息协议验收另见installed03，不以安装过程替代。

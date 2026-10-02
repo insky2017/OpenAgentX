@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-02T18:14:51.150541+00:00",
+  "candidate_binary": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+  "candidate_sha256": "879d3b7864c714c22b1ce4fb8548100ca038ef06957ce17b8485a8460cfb56b5",
+  "legacy_binary": "/home/sky/.local/bin/openagentx",
+  "legacy_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39",
+  "source_commit": "candidate01-dirty-diff-0c8c57699a611e736240f5c9c0551031f515b28b2762c76bee2e3a1efa91ac97",
+  "source_files": {
+    "scripts/validation/external-domain-e2e.py": "edac6f05c0c92ef96269e0b7ea8a02ff8fe7f81b691c723dc1a53f9db1dab3b9",
+    "scripts/validation/external-session-smoke.py": "16992e717e8b4c8731198d972fb5b2f59999cb4bb16bf1417c26e751ed487559",
+    "skills/oax-collaborate/SKILL.md": "44d10c7cdc4a5d5b074904fac2582fdcb9029bce2ac1f1828f2772262872b218",
+    "internal/cli/external/command.go": "0286fd60fde2009d662511746c8bfa0614acfe94489b2734de08e28f45baf625",
+    "internal/api/external/handler.go": "67f55be7923138facba09dadf9f0977007df5108abc46b0b4469e8ccaab29e31",
+    "internal/controlplane/external_session_service.go": "6fe87c5f169bfdbb722eea7959072fbbddca3bea4d38b5c647c248ba2b4ed9bf",
+    "internal/domain/external_session.go": "f792c6ddedb5b26f680fc85cd01ba877027ce24fedb56fd7491ebaf57f8b3e4a",
+    "internal/persistence/sqlite/external_roles_repository.go": "03f0a10724ad19427103a3553b024576d5602ad42f5b29659d7e112df57138df",
+    "internal/persistence/sqlite/external_session_repository.go": "dbf04a3a55bd64773e9cfc76211235c6d4352b3c41a4e41662dbded36a9eb179",
+    "internal/persistence/sqlite/migrations/004_external_roles.sql": "8103ea64320e4d77f9f3924963c077a4e165c27955dd61cb7c36e2e8739694dc"
+  },
+  "scope": "real isolated daemon CLI/API only; no semantic policy or original Desktop isolation proof",
+  "socket": "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+  "database": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/openagentx.db",
+  "agents": [
+    "domain-a-143e7ec9",
+    "domain-b-143e7ec9",
+    "domain-c-143e7ec9",
+    "domain-d-143e7ec9"
+  ]
+}

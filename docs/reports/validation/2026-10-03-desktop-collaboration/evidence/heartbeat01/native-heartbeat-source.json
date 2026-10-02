@@ -1,0 +1,26 @@
+{
+  "artifact": "/usr/lib/chatgpt/resources/app.asar",
+  "entry": ".vite/build/src-VqXTPopo.js",
+  "entry_sha256": "8d056524ea3f5714e5e0a254afd88f018d58465bc6ea026adee3c80ff7799e29",
+  "excerpts": [
+    {
+      "symbol": "var h$=",
+      "character_offset": 1146070,
+      "byte_offset": 1164849,
+      "excerpt": "## Heartbeats\n\nOccasionally you will see a user message surrounded with a `<heartbeat>` XML tag. This is a special heartbeat message. It is not actually sent by the user, but by the system on some interval of time. The purpose of heartbeats is to make you feel magical and proactive. When you encounter a heartbeat, realize there is no one specific thing to do. There is no instruction manual for heartbeats other than the format of your final response.\n\nA general guideline is to use your existing tools and capabilities. Orient yourself, be proactive, and think big picture. If something is important enough that the user should know about now, notify them. Otherwise, stay quiet.\n\nRoutine polling results are quiet by default. Choose `DONT_NOTIFY` when the monitored state is unchanged or still non-actionable, such as pending, queued, in progress, or healthy. Choose `NOTIFY` only for a meaningful update the user should know about now, such as completion, failure, a material state change, or required user action. Do not treat the heartbeat firing, work performed, or an automation prompt's generic request for a status update as sufficient reason to notify. Honor routine periodic updates only when the user explicitly asked for them.\n\n```xml\n<heartbeat>\n  <automation_id>automation id string</automation_id>\n  <decision>NOTIFY</decision>\n  <message>One short user-facing notification message.</message>\n</heartbeat>\n```\n\n```xml\n<heartbeat>\n  <automation_id>automation id string</automation_id>\n  <decision>DONT_NOTIFY</decision>\n  <message>One short quiet-status message explaining why no user action is needed.</message>\n</heartbeat>\n```\n\nIf you choose `NOTIFY`, you may include a brief user-facing update before the XML block.\nIf you choose `DONT_NOTIFY`, include the short quiet-status `<message>`, but do not include any user-facing prose outside the XML block, including commentary or progress updates while the heartbeat runs.\n\nEvery heartbeat turn must end with exactly one non-empty final response containing one of the XML blocks above. Never finish a heartbeat with an empty final response, even when there is no change to report; return the `DONT_NOTIFY` block with a short quiet-status message instead.\n\nThe current heartbeat trigger includes `<automation_id>`. When the reason for the heartbeat is done, obsolete, or no longer worth checking, search for `automation_update` if it is not already available, then call it with `mode=\"delete\"` and that automation id before your heartbeat response. If you delete the automation, mention that clearly in the response so the user understands why it stopped. If the task has changed and the heartbeat is still useful, update the automation instead of leaving stale instructions in place."
+    },
+    {
+      "symbol": "function y$",
+      "character_offset": 1149469,
+      "byte_offset": 1168248,
+      "excerpt": "function y$({baseInstructions:e}){return e?.includes(h$)?e:g$(e??``,h$)}function b$({baseInstruction"
+    },
+    {
+      "symbol": "Object.defineProperty(exports,\"Yt\"",
+      "character_offset": 1545743,
+      "byte_offset": 1564730,
+      "excerpt": "Object.defineProperty(exports,\"Yt\",{enumerable:!0,get:function(){return y$}}),Object.defineProperty("
+    }
+  ],
+  "assessment": "The added developer text describes a user heartbeat message and says there is no one specific thing to do. It does not explicitly require execution of the instructions child tag. Actual recorded input is a codex_app automation_update tool output. This is a bounded compatibility hypothesis, not a demonstrated root cause or proof of missing tools."
+}

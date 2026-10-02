@@ -1,0 +1,11 @@
+{
+  "path": "/home/sky/.codex/skills/oax-collaborate/SKILL.md",
+  "sha256": "44d10c7cdc4a5d5b074904fac2582fdcb9029bce2ac1f1828f2772262872b218",
+  "source": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/skills/oax-collaborate/SKILL.md",
+  "source_commit": "8c9ceff",
+  "runtime_start_files_updated": [
+    "rhythm",
+    "oneaxe-pay"
+  ],
+  "original_threads_have_not_yet_executed_new_skill": true
+}

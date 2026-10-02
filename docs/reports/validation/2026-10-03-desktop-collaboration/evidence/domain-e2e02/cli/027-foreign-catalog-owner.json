@@ -1,0 +1,22 @@
+{
+  "started_at": "2026-10-02T18:14:53.916428+00:00",
+  "finished_at": "2026-10-02T18:14:53.929655+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "roles",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/raw/inputs/foreign-catalog-owner.json",
+    "--expected-version",
+    "0",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 403 (FORBIDDEN): role owner must belong to the catalog organization\n",
+  "stdin": "none"
+}

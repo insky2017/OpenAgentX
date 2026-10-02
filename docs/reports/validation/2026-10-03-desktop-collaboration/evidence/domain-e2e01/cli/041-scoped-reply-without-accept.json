@@ -1,0 +1,25 @@
+{
+  "started_at": "2026-10-02T18:13:12.815195+00:00",
+  "finished_at": "2026-10-02T18:13:12.825688+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "reply",
+    "--agent",
+    "domain-b-c610c80c",
+    "--socket",
+    "/tmp/oax-external-smoke-6782daf7ab6bf004.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/domain-b-c610c80c.json",
+    "--message",
+    "external-message-142cea56-32b0-4695-8535-a7c082fa70ea",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/raw/inputs/answer.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 409 (CONFLICT): record an accepted receipt before the final scoped result\n",
+  "stdin": "none"
+}

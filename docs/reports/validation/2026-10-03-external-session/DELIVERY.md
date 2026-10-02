@@ -1,5 +1,7 @@
 # 原会话协作：本轮交付
 
+> 历史批次说明：本文件保留 `6576c55` / schema v3 当批记录，文内“原会话未初始化”“交接尚未发送”等是当时状态。后续原会话 manual 往返已 PASS，heartbeat 8 轮 0 工具调用、自动闭环 NOT_PASSED，两项自动化已暂停。当前源码 `8c9ceff` / schema v4 的正式新协议安装验收仍在进行；最新结论见[后续交付](../2026-10-03-desktop-collaboration/DELIVERY.md)、[后续覆盖](../2026-10-03-desktop-collaboration/COVERAGE.md)和[后续执行记录](../2026-10-03-desktop-collaboration/EXECUTION-LOG.md)。以下历史正文不覆盖后续状态。
+
 **已安装 OAX 持久通信通道，尚未完成两个原 Desktop 会话自动协作。** 本轮没有把两个原 thread 迁入 Worker，没有向原会话插入指令，也没有代替它们生成业务请求或答复。
 
 ## 已完成

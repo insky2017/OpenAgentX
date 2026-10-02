@@ -1,0 +1,25 @@
+{
+  "started_at": "2026-10-02T18:13:12.742046+00:00",
+  "finished_at": "2026-10-02T18:13:12.752677+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "reply",
+    "--agent",
+    "domain-b-c610c80c",
+    "--socket",
+    "/tmp/oax-external-smoke-6782daf7ab6bf004.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/domain-b-c610c80c.json",
+    "--message",
+    "external-message-ce1e6b53-0366-4337-a318-e5a9fc0d5a3d",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/raw/inputs/answer.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 422 (SCOPE_REQUIRED): registered domain agents require an explicit scope; clarification required\n",
+  "stdin": "none"
+}

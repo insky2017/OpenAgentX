@@ -1,0 +1,20 @@
+{
+  "started_at": "2026-10-02T18:35:07.803533+00:00",
+  "finished_at": "2026-10-02T18:35:07.814621+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "roles",
+    "--owner",
+    "--organization",
+    "default",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"organization_id\": \"default\",\n  \"revision\": 1,\n  \"rules\": [\n    {\n      \"scope\": \"pay.callback_protocol\",\n      \"owner_agent_id\": \"oneaxe-pay\",\n      \"description\": \"负责支付回调协议；不承接业务应用的接收器部署。\"\n    },\n    {\n      \"scope\": \"pay.credential_handoff\",\n      \"owner_agent_id\": \"oneaxe-pay\",\n      \"description\": \"负责支付凭据的受控交接；消息正文不得包含凭据明文。\"\n    },\n    {\n      \"scope\": \"pay.fund_records\",\n      \"owner_agent_id\": \"oneaxe-pay\",\n      \"description\": \"负责支付与资金记录及相应查询核对。\"\n    },\n    {\n      \"scope\": \"pay.payment_api\",\n      \"owner_agent_id\": \"oneaxe-pay\",\n      \"description\": \"负责支付接口及其调用契约。\"\n    },\n    {\n      \"scope\": \"pay.registration\",\n      \"owner_agent_id\": \"oneaxe-pay\",\n      \"description\": \"负责应用在支付系统中的登记。\"\n    },\n    {\n      \"scope\": \"rhythm.app_db_migration\",\n      \"owner_agent_id\": \"rhythm\",\n      \"description\": \"负责Rhythm应用数据库迁移；支付领域Agent不替代执行。\"\n    },\n    {\n      \"scope\": \"rhythm.entitlement_verification\",\n      \"owner_agent_id\": \"rhythm\",\n      \"description\": \"负责Rhythm用户权益核验。\"\n    },\n    {\n      \"scope\": \"rhythm.login_migration\",\n      \"owner_agent_id\": \"rhythm\",\n      \"description\": \"负责Rhythm登录体系迁移。\"\n    },\n    {\n      \"scope\": \"rhythm.receiver_deployment\",\n      \"owner_agent_id\": \"rhythm\",\n      \"description\": \"负责Rhythm支付回调接收器部署及应用侧验证。\"\n    },\n    {\n      \"scope\": \"rhythm.user_mapping\",\n      \"owner_agent_id\": \"rhythm\",\n      \"description\": \"负责Rhythm业务用户映射。\"\n    }\n  ]\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

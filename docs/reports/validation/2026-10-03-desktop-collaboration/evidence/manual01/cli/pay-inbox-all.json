@@ -1,0 +1,34 @@
+{
+  "observed_at": "2026-10-02T17:52:09.113990+00:00",
+  "command": [
+    "openagentx",
+    "external",
+    "inbox",
+    "--agent",
+    "oneaxe-pay",
+    "--all"
+  ],
+  "exit_code": 0,
+  "response": {
+    "has_more": false,
+    "messages": [
+      {
+        "sequence": 3,
+        "message_id": "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00",
+        "sender_agent_id": "rhythm",
+        "target_agent_id": "oneaxe-pay",
+        "sender_binding_id": "external-9319b8fa-c496-43e4-af5b-829cbe7ea2e3",
+        "sender_generation": 1,
+        "kind": "consultation",
+        "content_sha256": "858b8e082471a5631643e1c32cace975056488bc815506be9b4c668e3bc9cda3",
+        "content_bytes": 3944,
+        "idempotency_key": "rhythm-pay-handoff-01",
+        "delivery_state": "acknowledged",
+        "created_at": "2026-10-02T17:13:20.890136125Z",
+        "acknowledged_at": "2026-10-02T17:14:20.438422459Z"
+      }
+    ],
+    "next_after": 3
+  },
+  "stderr": ""
+}

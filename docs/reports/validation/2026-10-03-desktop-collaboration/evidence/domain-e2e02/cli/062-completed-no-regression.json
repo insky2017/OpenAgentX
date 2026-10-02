@@ -1,0 +1,27 @@
+{
+  "started_at": "2026-10-02T18:14:54.635224+00:00",
+  "finished_at": "2026-10-02T18:14:54.645715+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "receipt",
+    "--agent",
+    "domain-b-143e7ec9",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-b-143e7ec9.json",
+    "--message",
+    "external-message-77200f54-a49e-40ac-8a4a-a10ebcf83183",
+    "--state",
+    "accepted",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/raw/inputs/completed-no-regression.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 409 (CONFLICT): terminal processing state cannot change\n",
+  "stdin": "none"
+}

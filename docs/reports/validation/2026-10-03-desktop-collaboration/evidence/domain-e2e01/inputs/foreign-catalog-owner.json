@@ -1,0 +1,25 @@
+{
+  "organization_id": "different-fixture-organization",
+  "rules": [
+    {
+      "scope": "fixture.a",
+      "owner_agent_id": "domain-a-c610c80c",
+      "description": "Owns isolated a fixture questions."
+    },
+    {
+      "scope": "fixture.b",
+      "owner_agent_id": "domain-b-c610c80c",
+      "description": "Owns isolated b fixture questions."
+    },
+    {
+      "scope": "fixture.c",
+      "owner_agent_id": "domain-c-c610c80c",
+      "description": "Owns isolated c fixture questions."
+    },
+    {
+      "scope": "fixture.d",
+      "owner_agent_id": "domain-d-c610c80c",
+      "description": "Owns isolated d fixture questions."
+    }
+  ]
+}

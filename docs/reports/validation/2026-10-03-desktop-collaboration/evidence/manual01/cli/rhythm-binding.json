@@ -1,0 +1,27 @@
+{
+  "observed_at": "2026-10-02T17:52:09.042998+00:00",
+  "command": [
+    "openagentx",
+    "external",
+    "status",
+    "--agent",
+    "rhythm"
+  ],
+  "exit_code": 0,
+  "response": {
+    "binding_id": "external-9319b8fa-c496-43e4-af5b-829cbe7ea2e3",
+    "agent_id": "rhythm",
+    "principal_id": "agent-rhythm",
+    "organization_id": "default",
+    "host_id": "codex-desktop",
+    "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+    "generation": 1,
+    "state": "active",
+    "allowed_peer_agent_ids": [
+      "oneaxe-pay"
+    ],
+    "created_at": "2026-10-02T16:46:01.803981116Z",
+    "updated_at": "2026-10-02T16:46:01.803981116Z"
+  },
+  "stderr": ""
+}

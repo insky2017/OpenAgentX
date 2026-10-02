@@ -1,0 +1,14 @@
+{
+  "raw_root": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed01/raw",
+  "files": [
+    {
+      "path": "result.json",
+      "sha256": "11b2844e461b165e7ec76754bd2639d2a6940a66b8a004065901492a2cb5c5ba"
+    },
+    {
+      "path": "startup-tool-output.json",
+      "sha256": "2c95bab12df7b8f7b79d546f6778dc64e16d4a9cb5d7406c1893e09c9140ea86"
+    }
+  ],
+  "secrets": "No credentials read or copied."
+}

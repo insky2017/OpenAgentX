@@ -1,0 +1,14 @@
+[
+  {
+    "pid": 1632229,
+    "exe": "/usr/lib/chatgpt/resources/codex",
+    "starttime": "4056284",
+    "sha256": "b9315df68cb0e2827c940ffacb66f7524e820d9744060c755fbf938724ad2b76"
+  },
+  {
+    "pid": 4075769,
+    "exe": "/usr/lib/chatgpt/resources/codex",
+    "starttime": "18053432",
+    "sha256": "b9315df68cb0e2827c940ffacb66f7524e820d9744060c755fbf938724ad2b76"
+  }
+]

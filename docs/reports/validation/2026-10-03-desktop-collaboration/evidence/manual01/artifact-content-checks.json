@@ -1,0 +1,70 @@
+{
+  "artifacts": [
+    {
+      "source_path": "/home/sky/.openagentx/external/rhythm/rhythm-pay-handoff-01.md",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/rhythm/rhythm-pay-handoff-01.md",
+      "bytes": 3944,
+      "sha256": "858b8e082471a5631643e1c32cace975056488bc815506be9b4c668e3bc9cda3"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/rhythm/rhythm-pay-handoff-01-result.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/rhythm/rhythm-pay-handoff-01-result.json",
+      "bytes": 8616,
+      "sha256": "149a9e4593b30ebdeb83adbe9f1d4895cc6ba77dc858a285a1969d0ccba67880"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/rhythm/rhythm-pay-handoff-01-conclusion.md",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/rhythm/rhythm-pay-handoff-01-conclusion.md",
+      "bytes": 3006,
+      "sha256": "025e8a036ed0a59a4d0635c9478c0bb854d063d004d69aac89bb94e12aaaeef2"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/inbox-all.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/inbox-all.json",
+      "bytes": 4833,
+      "sha256": "09604b807df0f2710911375e0f289075a228575e6529586355414501407c42f5"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/ack.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/ack.json",
+      "bytes": 4833,
+      "sha256": "cd187d9bdae3a09e2373e5635378941dfc3b92f2f28ff8d5397aaca88cc436a7"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/reply.md",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/reply.md",
+      "bytes": 7889,
+      "sha256": "8f41d34873fcdde674b3970f143fff63581fdd8224592b19256da03ebb3d7485"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/reply-receipt.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/reply-receipt.json",
+      "bytes": 9012,
+      "sha256": "5b2173d9d6384cc7b0701e11d3bffd9f1b6f11e34eb364d1b91f3d20d5707df5"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/reply-status.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/reply-status.json",
+      "bytes": 8926,
+      "sha256": "a916ba2ad9953eb989d75c110f3f6569831c2966292fa0307cd6cdb442d404db"
+    }
+  ],
+  "api_body_comparisons": [
+    {
+      "message_id": "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00",
+      "source_file": "/home/sky/.openagentx/external/rhythm/rhythm-pay-handoff-01.md",
+      "api_content_sha256": "858b8e082471a5631643e1c32cace975056488bc815506be9b4c668e3bc9cda3",
+      "file_sha256": "858b8e082471a5631643e1c32cace975056488bc815506be9b4c668e3bc9cda3",
+      "bytes": 3944,
+      "byte_equal": true
+    },
+    {
+      "message_id": "external-message-e3cd328c-6b64-4f9e-b3c0-9d6674cd21b4",
+      "source_file": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/reply.md",
+      "api_content_sha256": "8f41d34873fcdde674b3970f143fff63581fdd8224592b19256da03ebb3d7485",
+      "file_sha256": "8f41d34873fcdde674b3970f143fff63581fdd8224592b19256da03ebb3d7485",
+      "bytes": 7889,
+      "byte_equal": true
+    }
+  ]
+}

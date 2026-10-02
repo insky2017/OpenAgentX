@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-10-02T18:36:51.811824+00:00",
+  "source_databases_read_only": true,
+  "old_message_count": 4,
+  "columns": [
+    "sequence",
+    "message_id",
+    "sender_agent_id",
+    "target_agent_id",
+    "sender_binding_id",
+    "sender_generation",
+    "kind",
+    "reply_to_message_id",
+    "content",
+    "idempotency_key",
+    "payload_digest",
+    "origin_task_id",
+    "delivery_state",
+    "created_at",
+    "acknowledged_at"
+  ],
+  "old_columns_sha256": "0abc7e4f746ccf9c59ad6811bd1250854e59a1a0d304743921a4c19b67f2a923",
+  "current_old_columns_sha256": "0abc7e4f746ccf9c59ad6811bd1250854e59a1a0d304743921a4c19b67f2a923",
+  "historical_messages_identical": true,
+  "desktop_hosts_after": [
+    {
+      "pid": 1632229,
+      "exe": "/usr/lib/chatgpt/resources/codex",
+      "starttime": "4056284",
+      "sha256": "b9315df68cb0e2827c940ffacb66f7524e820d9744060c755fbf938724ad2b76"
+    },
+    {
+      "pid": 4075769,
+      "exe": "/usr/lib/chatgpt/resources/codex",
+      "starttime": "18053432",
+      "sha256": "b9315df68cb0e2827c940ffacb66f7524e820d9744060c755fbf938724ad2b76"
+    }
+  ],
+  "desktop_host_identity_unchanged": true,
+  "installed_binary_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392"
+}

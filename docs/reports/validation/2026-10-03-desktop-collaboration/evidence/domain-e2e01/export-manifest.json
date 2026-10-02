@@ -1,0 +1,285 @@
+{
+  "exported_at": "2026-10-02T18:28:51.365864+00:00",
+  "source_raw_directory": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/raw",
+  "private_directory_excluded": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private",
+  "copy": "byte-identical sanitized raw only",
+  "secret_scan": "exact runtime credentials/passwords and external token pattern absent",
+  "files": [
+    {
+      "path": "cli/001-legacy-init.json",
+      "sha256": "10d08250b440e92b8e2fc6b29ff7bed424bde0559df96241c05128d84b04ee2a"
+    },
+    {
+      "path": "cli/002-legacy-apply-domain-a-c610c80c.json",
+      "sha256": "6d4282b4f8bf6e6e01046f8be28f06f413c6acf11a126321b13257a97be923f9"
+    },
+    {
+      "path": "cli/003-legacy-apply-domain-b-c610c80c.json",
+      "sha256": "dd3ee222bd36e73210be795d360d09a6bf15ac081b870d5cf684c63a366eee01"
+    },
+    {
+      "path": "cli/004-legacy-apply-domain-c-c610c80c.json",
+      "sha256": "f59e15d5abc7a30eb68db4909b85f12fa476693666170f9df8bdbb3fac4822ba"
+    },
+    {
+      "path": "cli/005-legacy-apply-domain-d-c610c80c.json",
+      "sha256": "4f219be939ff912eb79819b3cbc49c844ce8a8b8d3731c57cafcdbd04adc7beb"
+    },
+    {
+      "path": "cli/006-legacy-owner-login.json",
+      "sha256": "541fd42dca7453d9140efcc7e73bfe8e74dd093675337c64e51eadc8f26078cb"
+    },
+    {
+      "path": "cli/007-legacy-bind-domain-a-c610c80c.json",
+      "sha256": "f35350debf65190b4e7ef80672f9c63400c9686430c6489f13c85cb903189856"
+    },
+    {
+      "path": "cli/008-legacy-bind-domain-b-c610c80c.json",
+      "sha256": "2c2193ac5163a4b24b47cc98e461f3d2e034c9e425fc19ca35c96f622ed4abbd"
+    },
+    {
+      "path": "cli/009-legacy-bind-domain-c-c610c80c.json",
+      "sha256": "7d0c65eaf04c5abf06f4872ec0f9d31ff4ea32c3284dbe90bc8d9879b13d9d09"
+    },
+    {
+      "path": "cli/010-legacy-bind-domain-d-c610c80c.json",
+      "sha256": "bf4c775b7f328dd0ad59e33f88b16249b6f596b34da3b09996dbfc32cb2c0831"
+    },
+    {
+      "path": "cli/011-legacy-pending.json",
+      "sha256": "d0663ac18b86122d9361a26ed6ba1defdee5c2167429cfcf22eeafb420aaf9d1"
+    },
+    {
+      "path": "cli/012-legacy-pending-ack.json",
+      "sha256": "71b5f36d5ff609bf7d22093e66e18623fed21b0537803337c057fbbbf60b91d6"
+    },
+    {
+      "path": "cli/013-legacy-done-request.json",
+      "sha256": "a4dd66d403ac1136440a9e51232475301f0523f3fb61f0362f8f4df8396a9ac6"
+    },
+    {
+      "path": "cli/014-legacy-done-reply.json",
+      "sha256": "9f8463e08963ef613b7c508c6950552ad037b25baaca03de5a5fcd44a5948811"
+    },
+    {
+      "path": "cli/015-candidate-schema-migrate.json",
+      "sha256": "56d5d854767f1b77b1dc4573e84270df5112217ae6699a07285f79210d07dff2"
+    },
+    {
+      "path": "cli/016-migrated-binding-domain-a-c610c80c.json",
+      "sha256": "1581c3f30bc7f685aa4041a72432315f232cc32a173366dad638aa3d4dbd3a68"
+    },
+    {
+      "path": "cli/017-migrated-binding-domain-b-c610c80c.json",
+      "sha256": "4ed8e4201a0fe636d57228436803f8c97421e3d1fdfb90381e16383a0040f0b1"
+    },
+    {
+      "path": "cli/018-migrated-binding-domain-c-c610c80c.json",
+      "sha256": "ef68e568e40d85744815ad89302926355424563660bc212b7860fd95dd0de636"
+    },
+    {
+      "path": "cli/019-migrated-binding-domain-d-c610c80c.json",
+      "sha256": "f259681638406fade1b89656a6c3672b6315cc3c35136df5b1e509eb5b30438b"
+    },
+    {
+      "path": "cli/020-migrated-answered-request.json",
+      "sha256": "82ba4367717709c2a3a92f7bbe5e96e58f593adb8036a1ed5f5855e40c7d1811"
+    },
+    {
+      "path": "cli/021-migrated-result.json",
+      "sha256": "292474473a885fdd7ad2fa74be05d583cf2871e91af5165309cb5dba99ca724b"
+    },
+    {
+      "path": "cli/022-migrated-recover-0.json",
+      "sha256": "607d9038dae081f632a52b8629828cef5a815ee5c149e2ecdab0abbefb973f44"
+    },
+    {
+      "path": "cli/023-legacy-key-retry.json",
+      "sha256": "ecbc3515e98a39bd0fc7aaebb05ce54e9ad4bc97947d59699d5868204b368dfe"
+    },
+    {
+      "path": "cli/025-owner-apply-roles.json",
+      "sha256": "c491c3b9463f6fb1a29e1561d0e7b28000eaf544f4ce10c17b7bf327b7f3e0d0"
+    },
+    {
+      "path": "cli/026-stale-catalog-cas.json",
+      "sha256": "3c6df9d066f2ab8061a93860b6a9da6eca5a9488493f1043a242528348953b6e"
+    },
+    {
+      "path": "cli/027-foreign-catalog-owner.json",
+      "sha256": "e14b0424e8c9d08b72a54c76a200a0561a0850a1664975636f7ce80e7f3784d2"
+    },
+    {
+      "path": "cli/028-peer-filtered-roles.json",
+      "sha256": "88aedfdd5d08ee37982fbaec23c44fd1fad7cd9fa212b2c315fa74b3306139f2"
+    },
+    {
+      "path": "cli/029-owner-roles-via-binding.json",
+      "sha256": "6c8f4694e935680f2c03d82122d356152b51757051457cdb3fd22e26e6d63529"
+    },
+    {
+      "path": "cli/030-missing-scope.json",
+      "sha256": "08bf7c77e47ddb80fdaee60b2dd8191325112e83e837da760cc7b474d57727e9"
+    },
+    {
+      "path": "cli/031-unknown-scope.json",
+      "sha256": "6b60f9985ef345708be228cd1b18450a5f715ed5839dea951a71748bdf9d861e"
+    },
+    {
+      "path": "cli/032-wrong-owner.json",
+      "sha256": "ba5f61d59c1141c58daf34184f9202dce4662f44ed779e87fdbc4830015907ba"
+    },
+    {
+      "path": "cli/034-legacy-unscoped-accept-denied.json",
+      "sha256": "dadbb45e0a2738fc803589927133448826ea3448afbf41306b457029a6ec2ab2"
+    },
+    {
+      "path": "cli/035-legacy-unscoped-reply-denied.json",
+      "sha256": "dd0b47d84f3c9b42d0dec2da09f4171215299e4fb802eb901264acb6d9944415"
+    },
+    {
+      "path": "cli/036-legacy-needs-clarification.json",
+      "sha256": "a2db8892ac0e43d8c179fdf5f7fa7c6b13b5eba9fe96a79477139a865e0e37b3"
+    },
+    {
+      "path": "cli/037-legacy-clarification-recover-0.json",
+      "sha256": "c35c19cf635c84e17134c3f27773b200daefd983ac243d9d36335c701bf5b34a"
+    },
+    {
+      "path": "cli/038-scoped-send.json",
+      "sha256": "4b6e554d21a782ecdc0dbb23dad0b72ce4001997176af7116ba45d838e13ed99"
+    },
+    {
+      "path": "cli/039-scoped-send-retry.json",
+      "sha256": "9a09c8e51e9e6ac4a750709f07084e1b83ab4568d5463faa85c177d6d093749f"
+    },
+    {
+      "path": "cli/040-changed-payload-conflict.json",
+      "sha256": "1eceabf986a41aa811565d96744b2c6ac980db8a92f9e7267ae7cef81802b654"
+    },
+    {
+      "path": "cli/041-scoped-reply-without-accept.json",
+      "sha256": "e12f8b64e23ff5b3a5fd134fd315e7bf963d279ac5b6eb99b1a7ffc798e1c3a1"
+    },
+    {
+      "path": "cli/042-scoped-ack.json",
+      "sha256": "d5b1af213435dda6b7bc7d346537d7a0199cd7e9ba028c32ab998ab534e898fa"
+    },
+    {
+      "path": "cli/043-scoped-accept.json",
+      "sha256": "e570e7ff96a6af3149efeeedabe392e295e56009ec7379662a96ad2fb2466479"
+    },
+    {
+      "path": "cli/044-scoped-accept-retry.json",
+      "sha256": "672b1c9fd456080cf1e5b3cc2abb471cf96f728164e62ec63ca3f4d314fd5b73"
+    },
+    {
+      "path": "cli/045-accepted-recover-0.json",
+      "sha256": "d7dfa87030f218afed65f6e3fa3e4b7040d6463792d3a6cecf5a10bff0b37e57"
+    },
+    {
+      "path": "cli/046-default-inbox-after-ack.json",
+      "sha256": "5ad39693338281c6cf44ef6ddb262dffc1cbf34d0a9f2cb004b5c3db5215c9b8"
+    },
+    {
+      "path": "daemon-1-start.json",
+      "sha256": "5586649333e7df636b46d6a82d075a940ca304c26087c7ecccf996c7d5e95178"
+    },
+    {
+      "path": "daemon-1-stop.json",
+      "sha256": "cb4d5b675d38c80fcadbbe7cc98c03500cfca5ae08bbe6d33616f741d3f15bda"
+    },
+    {
+      "path": "daemon-1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "daemon-1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "daemon-2-start.json",
+      "sha256": "e410852d536e8ba84b046de43be0e82a60e788284571f2040731c5ef1883fe61"
+    },
+    {
+      "path": "daemon-2-stop.json",
+      "sha256": "b22784b5530399282e810f85c1a52887d38bd1502cdfedfe1dcb037b7b0bb24f"
+    },
+    {
+      "path": "daemon-2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "daemon-2.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "http/024-agent-cannot-apply-roles.json",
+      "sha256": "eb760351605814b60621ded715b4d58f7d4e8627c3832b5cfc2780ac2dc99bc7"
+    },
+    {
+      "path": "http/033-api-owner-guidance.json",
+      "sha256": "e320ec97ce305eac9375a3a781712527ec66a359409ddaef8e3bd13168288f3e"
+    },
+    {
+      "path": "inputs/answer.txt",
+      "sha256": "cb6653b91b7c347c90b43286e509a187928ee86da0b8ff1d3e6576e26e83ab2e"
+    },
+    {
+      "path": "inputs/changed.txt",
+      "sha256": "553c82fb1cb7438a418cd4b98699962f429cc0b778467908782cbc99119fa1b9"
+    },
+    {
+      "path": "inputs/foreign-catalog-owner.json",
+      "sha256": "3b8ff2bc80598f1baf5ac6f4677571eb8881949b2d272fba305d5cb72e7a24e6"
+    },
+    {
+      "path": "inputs/legacy-needs-clarification.txt",
+      "sha256": "0e92d117ea1a341ab9e41aadb534293513127431a817f0d035ea9d19e3d9226c"
+    },
+    {
+      "path": "inputs/legacy-unscoped-accept-denied.txt",
+      "sha256": "decde773b8712f1d431908a165abbc326f6ebbc2ca3d2d5205be057a71d1cc22"
+    },
+    {
+      "path": "inputs/owner-apply-roles.json",
+      "sha256": "f8be215bef1d56bd84292ab53aba4a0631277b2f7b6fb2f3e07204b74305c241"
+    },
+    {
+      "path": "inputs/request.txt",
+      "sha256": "96b55590a7c70d753d164da2dbf905965b2d186d6e0519df0d342060fc55d183"
+    },
+    {
+      "path": "inputs/scoped-accept-retry.txt",
+      "sha256": "decde773b8712f1d431908a165abbc326f6ebbc2ca3d2d5205be057a71d1cc22"
+    },
+    {
+      "path": "inputs/scoped-accept.txt",
+      "sha256": "decde773b8712f1d431908a165abbc326f6ebbc2ca3d2d5205be057a71d1cc22"
+    },
+    {
+      "path": "inputs/stale-catalog-cas.json",
+      "sha256": "f8be215bef1d56bd84292ab53aba4a0631277b2f7b6fb2f3e07204b74305c241"
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "52864de37723992a4bbbb1df55a02ad77510dbb5cb209643e35c07f8dd95200e"
+    },
+    {
+      "path": "migration-after-old-columns.json",
+      "sha256": "3aecd396b1292bd5dd81faccc01578b23368e0c4af19ee234e15fa3f0c982a7f"
+    },
+    {
+      "path": "migration-before.json",
+      "sha256": "93747df3da134622087ae11a9f534ac66efff3a100ef6149e966b4b6dc2800dd"
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "b496f3baf89df25c4f9fa1563513fa601c0e6e5d4e86f7db6993f94ba8f16e05"
+    },
+    {
+      "path": "result.json",
+      "sha256": "e22a0011ebc5d839aba6a3bd63adf74ccf5ed17ddf1f465faf1b4e361d71d3bb"
+    }
+  ]
+}

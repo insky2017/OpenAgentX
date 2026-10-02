@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-02T18:21:08.911254+00:00",
+  "argv": [
+    "systemctl",
+    "--user",
+    "stop",
+    "openagentx-worker@codex-domain-e2e.service",
+    "openagentx-worker@agy-onboarding-e2e.service"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": ""
+}

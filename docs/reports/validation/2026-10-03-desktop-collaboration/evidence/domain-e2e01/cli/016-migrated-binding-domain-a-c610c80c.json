@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-10-02T18:13:12.513687+00:00",
+  "finished_at": "2026-10-02T18:13:12.524210+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "status",
+    "--agent",
+    "domain-a-c610c80c",
+    "--socket",
+    "/tmp/oax-external-smoke-6782daf7ab6bf004.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e01/private/domain-a-c610c80c.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"binding_id\": \"external-51f220ee-4d9b-40b6-8284-77d52e39654e\",\n  \"agent_id\": \"domain-a-c610c80c\",\n  \"principal_id\": \"agent-domain-a-c610c80c\",\n  \"organization_id\": \"default\",\n  \"host_id\": \"isolated-domain-fixture\",\n  \"thread_id\": \"isolated-domain-a-c610c80c\",\n  \"generation\": 1,\n  \"state\": \"active\",\n  \"allowed_peer_agent_ids\": [\n    \"domain-b-c610c80c\",\n    \"domain-c-c610c80c\",\n    \"domain-d-c610c80c\"\n  ],\n  \"token_expires_at\": \"2026-11-01T18:13:11.959800915Z\",\n  \"created_at\": \"2026-10-02T18:13:11.959800915Z\",\n  \"updated_at\": \"2026-10-02T18:13:11.959800915Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

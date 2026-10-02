@@ -1,0 +1,31 @@
+{
+  "started_at": "2026-10-02T18:14:54.740793+00:00",
+  "finished_at": "2026-10-02T18:14:54.751644+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/candidate01/openagentx",
+    "external",
+    "forward",
+    "--agent",
+    "domain-c-143e7ec9",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-c-143e7ec9.json",
+    "--message",
+    "external-message-64b8fe06-02d5-49ee-afa2-64c5d084f3be",
+    "--to",
+    "domain-b-143e7ec9",
+    "--scope",
+    "fixture.b",
+    "--key",
+    "forward-loop",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/raw/inputs/request.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 409 (CONFLICT): results and forwarded requests cannot be forwarded\n",
+  "stdin": "none"
+}

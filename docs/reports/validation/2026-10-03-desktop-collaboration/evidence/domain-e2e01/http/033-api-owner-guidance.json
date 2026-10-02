@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-02T18:13:12.728627+00:00",
+  "method": "POST",
+  "path": "/api/external/v1/messages",
+  "request": {
+    "target_agent_id": "domain-b-c610c80c",
+    "kind": "consultation",
+    "scope": "fixture.a",
+    "content": "fixture",
+    "idempotency_key": "api-wrong-owner"
+  },
+  "authorization": "[REDACTED]",
+  "status": 422,
+  "response": {
+    "code": "OUT_OF_SCOPE",
+    "scope": "fixture.a",
+    "owner_agent_id": "domain-a-c610c80c",
+    "message": "target does not own the declared scope"
+  }
+}

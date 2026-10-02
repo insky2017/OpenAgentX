@@ -1,0 +1,45 @@
+{
+  "exported_at": "2026-10-02T18:28:51.419598+00:00",
+  "source_raw_directory": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed02/raw",
+  "private_directory_excluded": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed02/private",
+  "copy": "byte-identical sanitized raw only",
+  "secret_scan": "exact runtime credentials/passwords and external token pattern absent",
+  "files": [
+    {
+      "path": "before.json",
+      "sha256": "e996a837b39dfb589496c99e708530db57e0a4b6227a242dd7ce65b74a9ee96f"
+    },
+    {
+      "path": "cleanup.json",
+      "sha256": "cee6d7729c91011ae3e6b240bb8aca9c8ff1a1f259fd14460bdb5bf3ad9f3f34"
+    },
+    {
+      "path": "cli/001-business-catalog-before.json",
+      "sha256": "d2294593292a58d5580ed8342f04ff3a7ab86bfae990379e753c9000f871aebe"
+    },
+    {
+      "path": "cli/002-apply-domain-installed-a-753c7af430ad.json",
+      "sha256": "376e4ecaf1b891c7f24c36ce5b2d88b1d7aa998adc36b4f5069a7f3c6346fa2e"
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "b7ff075f8704482a631ace8efcfc052b8f224c3fa247f6dbad94cb7cb4125367"
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "e0ef2b44f855ff4112d3e0ca2d00f92f517bf0a4fd69e0b53eb2d1b1127a3472"
+    },
+    {
+      "path": "result.json",
+      "sha256": "b596ef4f53c91bc5ef05694e60af5f6de01f3b931d0c0d85569705dec9580e79"
+    },
+    {
+      "path": "services-after.json",
+      "sha256": "96c841df39e8c9cd1c449e74e30a665eb4fb14f2b4a4159e96c10db839491793"
+    },
+    {
+      "path": "services-before.json",
+      "sha256": "96c841df39e8c9cd1c449e74e30a665eb4fb14f2b4a4159e96c10db839491793"
+    }
+  ]
+}

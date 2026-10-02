@@ -1,0 +1,27 @@
+{
+  "started_at": "2026-10-02T18:14:53.280606+00:00",
+  "finished_at": "2026-10-02T18:14:53.314040+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "bind",
+    "--agent",
+    "domain-d-143e7ec9",
+    "--socket",
+    "/tmp/oax-external-smoke-7f6dcf9b6b3c11fd.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-d-143e7ec9.json",
+    "--host",
+    "isolated-domain-fixture",
+    "--thread",
+    "isolated-domain-d-143e7ec9",
+    "--peers",
+    "domain-a-143e7ec9,domain-c-143e7ec9"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"automatic_delivery\": false,\n  \"binding\": {\n    \"binding_id\": \"external-4c50890d-08df-4d36-ab25-98fe2450c2ed\",\n    \"agent_id\": \"domain-d-143e7ec9\",\n    \"principal_id\": \"agent-domain-d-143e7ec9\",\n    \"organization_id\": \"default\",\n    \"host_id\": \"isolated-domain-fixture\",\n    \"thread_id\": \"isolated-domain-d-143e7ec9\",\n    \"generation\": 1,\n    \"state\": \"active\",\n    \"allowed_peer_agent_ids\": [\n      \"domain-a-143e7ec9\",\n      \"domain-c-143e7ec9\"\n    ],\n    \"token_expires_at\": \"2026-11-01T18:14:53.290666029Z\",\n    \"created_at\": \"2026-10-02T18:14:53.290666029Z\",\n    \"updated_at\": \"2026-10-02T18:14:53.290666029Z\"\n  },\n  \"credential_file\": \"/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/domain-e2e02/private/domain-d-143e7ec9.json\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

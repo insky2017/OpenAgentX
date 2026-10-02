@@ -1,0 +1,207 @@
+{
+  "capture_started_at": "2026-10-02T17:52:09.042964+00:00",
+  "private_raw_directory": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01",
+  "source_line_hash_scope": "Exact UTF-8 JSONL source line bytes including final newline; offsets are zero-based.",
+  "rollout_sources": [
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24536,
+      "byte_offset": 166751445,
+      "bytes_including_newline": 483,
+      "source_line_sha256": "e84a1035b61a88e2d4bf54b3695d2f9f1932e6ad80715255ee3671dcf9ae04ca",
+      "timestamp": "2026-10-02T17:10:29.209Z",
+      "action": "user_initialization",
+      "call_id": null
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24588,
+      "byte_offset": 167653718,
+      "bytes_including_newline": 5127,
+      "source_line_sha256": "9748562b0e80d204554e7f3f113112f4342816854187dacf258de344c1ee2953",
+      "timestamp": "2026-10-02T17:13:20.680Z",
+      "action": "send_call",
+      "call_id": "call_0Qdb98RXwsPx8X26oqiloS7r"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24593,
+      "byte_offset": 167679979,
+      "bytes_including_newline": 5426,
+      "source_line_sha256": "50645d3fc06bf6767338e408b12add67641e1ca9990a1eeaf9f05b5bcc502914",
+      "timestamp": "2026-10-02T17:13:21.987Z",
+      "action": "send_result",
+      "call_id": "call_0Qdb98RXwsPx8X26oqiloS7r"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24788,
+      "byte_offset": 171771141,
+      "bytes_including_newline": 639,
+      "source_line_sha256": "657f2b527be68640c18127ce09267bc695e7afd3ad51f1fdccf73ef04851bb69",
+      "timestamp": "2026-10-02T17:24:44.447Z",
+      "action": "inbox_call",
+      "call_id": "call_3AUkOOlz98kTreAgGMDh0czW"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24792,
+      "byte_offset": 171800140,
+      "bytes_including_newline": 143922,
+      "source_line_sha256": "5497af31e75d433f2021ae686ce5a3f08798a086f8419a9ad46c600d7bda9e63",
+      "timestamp": "2026-10-02T17:24:44.969Z",
+      "action": "inbox_result",
+      "call_id": "call_3AUkOOlz98kTreAgGMDh0czW"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24798,
+      "byte_offset": 171949460,
+      "bytes_including_newline": 1459,
+      "source_line_sha256": "a0a532bdb41c18375ce9a4a5176dff1fa1e751bf2ffd625f1008480af28b1f40",
+      "timestamp": "2026-10-02T17:25:27.952Z",
+      "action": "ack_call",
+      "call_id": "call_jCk9jeFdUGYX458fLFLnxfEM"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24804,
+      "byte_offset": 171982065,
+      "bytes_including_newline": 7440,
+      "source_line_sha256": "f532ce1ed4be295b9b0db6d343f6fd02d7cd16d4062b8f5f674c99f0109e495c",
+      "timestamp": "2026-10-02T17:25:30.366Z",
+      "action": "ack_result",
+      "call_id": "call_jCk9jeFdUGYX458fLFLnxfEM"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl",
+      "line": 24821,
+      "byte_offset": 172407964,
+      "bytes_including_newline": 4030,
+      "source_line_sha256": "17a8963a49465bf1486fe025870fb2e5cc3f9e9d44c47f7710eec8760c37a048",
+      "timestamp": "2026-10-02T17:27:28.986Z",
+      "action": "conclusion_artifact_call",
+      "call_id": "call_1CRJg3QjomrKUKxSgLnZcSTM"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+      "line": 7640,
+      "byte_offset": 59276256,
+      "bytes_including_newline": 465,
+      "source_line_sha256": "36d8b1146b59f74229ec55b2cb384d7200575f8b74ff2de700c6b6643f90bec9",
+      "timestamp": "2026-10-02T17:10:11.039Z",
+      "action": "user_initialization",
+      "call_id": null
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+      "line": 7682,
+      "byte_offset": 59444992,
+      "bytes_including_newline": 2232,
+      "source_line_sha256": "f29d54539417e35b1814963752667ede701b83c53a15505cb3f17fd65ab4195f",
+      "timestamp": "2026-10-02T17:13:27.371Z",
+      "action": "inbox_call",
+      "call_id": "call_sureebrNUrWUhjz6VwZfLrn7"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+      "line": 7686,
+      "byte_offset": 59485258,
+      "bytes_including_newline": 12424,
+      "source_line_sha256": "afe34374786814d9b20275cd511e8545e1e1bd91e65d895880053c57c42c932d",
+      "timestamp": "2026-10-02T17:13:27.681Z",
+      "action": "inbox_result",
+      "call_id": "call_sureebrNUrWUhjz6VwZfLrn7"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+      "line": 7690,
+      "byte_offset": 59504121,
+      "bytes_including_newline": 1196,
+      "source_line_sha256": "f0b2d0e4a56a1dc823ffd3124b834e590873329f77e6a537efccdf66d3ff8251",
+      "timestamp": "2026-10-02T17:14:20.241Z",
+      "action": "ack_call",
+      "call_id": "call_Dp6iOjQsLZa3rwSj3vsVqdds"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+      "line": 7693,
+      "byte_offset": 59521911,
+      "bytes_including_newline": 5321,
+      "source_line_sha256": "dbc1c160f53ce129beb8fb1660a2a1a7b956cf76f356f5bc7cf0295b523ae190",
+      "timestamp": "2026-10-02T17:14:20.493Z",
+      "action": "ack_result",
+      "call_id": "call_Dp6iOjQsLZa3rwSj3vsVqdds"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+      "line": 7780,
+      "byte_offset": 60827870,
+      "bytes_including_newline": 1742,
+      "source_line_sha256": "cd2bad98638905ecba8712eded4f1332dc58424ecdc6cd4028bd12f985f04f3a",
+      "timestamp": "2026-10-02T17:24:10.184Z",
+      "action": "reply_call",
+      "call_id": "call_x6V5OOb78gBn71bMOgifsn6x"
+    },
+    {
+      "source_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+      "line": 7783,
+      "byte_offset": 60835481,
+      "bytes_including_newline": 1258,
+      "source_line_sha256": "519ae282ce318e7aa38c5be6658ea9584fb662618ea6150024e843bc57671de8",
+      "timestamp": "2026-10-02T17:24:10.954Z",
+      "action": "reply_result",
+      "call_id": "call_x6V5OOb78gBn71bMOgifsn6x"
+    }
+  ],
+  "artifact_sources": [
+    {
+      "source_path": "/home/sky/.openagentx/external/rhythm/rhythm-pay-handoff-01.md",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/rhythm/rhythm-pay-handoff-01.md",
+      "bytes": 3944,
+      "sha256": "858b8e082471a5631643e1c32cace975056488bc815506be9b4c668e3bc9cda3"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/rhythm/rhythm-pay-handoff-01-result.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/rhythm/rhythm-pay-handoff-01-result.json",
+      "bytes": 8616,
+      "sha256": "149a9e4593b30ebdeb83adbe9f1d4895cc6ba77dc858a285a1969d0ccba67880"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/rhythm/rhythm-pay-handoff-01-conclusion.md",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/rhythm/rhythm-pay-handoff-01-conclusion.md",
+      "bytes": 3006,
+      "sha256": "025e8a036ed0a59a4d0635c9478c0bb854d063d004d69aac89bb94e12aaaeef2"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/inbox-all.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/inbox-all.json",
+      "bytes": 4833,
+      "sha256": "09604b807df0f2710911375e0f289075a228575e6529586355414501407c42f5"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/ack.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/ack.json",
+      "bytes": 4833,
+      "sha256": "cd187d9bdae3a09e2373e5635378941dfc3b92f2f28ff8d5397aaca88cc436a7"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/reply.md",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/reply.md",
+      "bytes": 7889,
+      "sha256": "8f41d34873fcdde674b3970f143fff63581fdd8224592b19256da03ebb3d7485"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/reply-receipt.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/reply-receipt.json",
+      "bytes": 9012,
+      "sha256": "5b2173d9d6384cc7b0701e11d3bffd9f1b6f11e34eb364d1b91f3d20d5707df5"
+    },
+    {
+      "source_path": "/home/sky/.openagentx/external/oneaxe-pay/handoffs/rhythm-pay-handoff-01/reply-status.json",
+      "private_copy": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/manual01/artifacts/oneaxe-pay/reply-status.json",
+      "bytes": 8926,
+      "sha256": "a916ba2ad9953eb989d75c110f3f6569831c2966292fa0307cd6cdb442d404db"
+    }
+  ]
+}

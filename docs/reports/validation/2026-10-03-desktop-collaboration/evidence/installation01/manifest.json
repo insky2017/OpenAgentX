@@ -1,0 +1,28 @@
+{
+  "installed_at": "2026-10-02T18:21:11.486772+00:00",
+  "source_commit": "8c9ceffb82f5145fc0f3f105e0de13ed945fa9fe",
+  "schema": 4,
+  "binary_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392",
+  "old_binary_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39",
+  "rollback_directory": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installation01/rollback",
+  "services": [
+    {
+      "MainPID": "84879",
+      "Id": "openagentx.service",
+      "ActiveState": "active"
+    },
+    {
+      "MainPID": "84909",
+      "Id": "openagentx-worker@codex-domain-e2e.service",
+      "ActiveState": "active"
+    },
+    {
+      "MainPID": "84911",
+      "Id": "openagentx-worker@agy-onboarding-e2e.service",
+      "ActiveState": "active"
+    }
+  ],
+  "original_hosts_unchanged": true,
+  "historical_external_messages_old_columns_unchanged": true,
+  "historical_external_message_count": 4
+}

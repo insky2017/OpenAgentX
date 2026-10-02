@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-02T18:13:12.924202+00:00",
+  "status": "FAIL",
+  "checks_passed": [
+    "real-v3-to-v4-migration-preserves-every-old-table-column-rowset",
+    "roles-owner-only",
+    "catalog-CAS-and-same-organization-owner",
+    "self-peer-role-visibility",
+    "scope-required-unknown-wrong-owner-denied",
+    "legacy-unscoped-held-for-clarification-not-executed"
+  ],
+  "error": "default inbox should hide acknowledged requests",
+  "boundary": "Communication API only. No model, Worker, original Desktop session, automatic wakeup, E04 or E05 proof."
+}

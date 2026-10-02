@@ -1,0 +1,1 @@
+New checkpoint: independently checked fixture metadata; no business action occurred; safe to continue the fixture reply.
