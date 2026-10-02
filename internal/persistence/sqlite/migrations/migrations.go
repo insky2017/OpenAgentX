@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const CurrentVersion = 3
+const CurrentVersion = 4
 
 var (
 	ErrIncompatibleLegacySchema = errors.New("database contains a legacy schema without OpenAgentX schema metadata")
@@ -58,6 +58,9 @@ var targetSchema string
 //go:embed 003_external_sessions.sql
 var externalSessionSchema string
 
+//go:embed 004_external_roles.sql
+var externalRolesSchema string
+
 func Apply(ctx context.Context, db *sql.DB) error {
 	return apply(ctx, db, migrationOptions{})
 }
@@ -67,6 +70,7 @@ type migrationOptions struct {
 	beforeCLICommit   func() error
 	beforeV2Commit    func() error
 	beforeV3Commit    func() error
+	beforeV4Commit    func() error
 }
 
 func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -93,6 +97,8 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 			return migrateV1ToV2(ctx, db, options)
 		case 2:
 			return migrateV2ToV3(ctx, db, options)
+		case 3:
+			return migrateV3ToV4(ctx, db, options)
 		default:
 			return fmt.Errorf("%w: got %d, want 1 or %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
 		}
@@ -119,6 +125,9 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	}
 	if _, err := tx.ExecContext(ctx, externalSessionSchema); err != nil {
 		return fmt.Errorf("apply external sessions: %w", err)
+	}
+	if err := applyExternalRoles(ctx, tx, options); err != nil {
+		return err
 	}
 	if err := validateObjects(ctx, tx); err != nil {
 		return err
@@ -176,6 +185,9 @@ func migrateV1ToV2(ctx context.Context, db *sql.DB, options migrationOptions) er
 	if _, err := tx.ExecContext(ctx, externalSessionSchema); err != nil {
 		return err
 	}
+	if err := applyExternalRoles(ctx, tx, options); err != nil {
+		return err
+	}
 	if err := validateObjects(ctx, tx); err != nil {
 		return err
 	}
@@ -204,6 +216,9 @@ func migrateV2ToV3(ctx context.Context, db *sql.DB, options migrationOptions) er
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, externalSessionSchema); err != nil {
+		return err
+	}
+	if err = applyExternalRoles(ctx, tx, options); err != nil {
 		return err
 	}
 	if err = validateObjects(ctx, tx); err != nil {
@@ -544,4 +559,41 @@ func validateSchemaShape(ctx context.Context, q schemaQueryer, version int) erro
 
 func compactSQL(value string) string {
 	return strings.ToLower(strings.ReplaceAll(strings.Join(strings.Fields(strings.TrimSuffix(strings.TrimSpace(value), ";")), ""), "\"", ""))
+}
+
+func applyExternalRoles(ctx context.Context, tx *sql.Tx, options migrationOptions) error {
+	if _, err := tx.ExecContext(ctx, externalRolesSchema); err != nil {
+		return fmt.Errorf("migrate external roles v4: %w", err)
+	}
+	if options.beforeV4Commit != nil {
+		return options.beforeV4Commit()
+	}
+	return nil
+}
+func migrateV3ToV4(ctx context.Context, db *sql.DB, options migrationOptions) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var version int
+	if err = tx.QueryRowContext(ctx, "SELECT version FROM schema_meta WHERE singleton=1").Scan(&version); err != nil {
+		return err
+	}
+	if version != 3 {
+		return ErrUnsupportedSchemaVersion
+	}
+	if err = validateBaseObjects(ctx, tx); err != nil {
+		return err
+	}
+	if err = validateExternalSchema(ctx, tx, false); err != nil {
+		return err
+	}
+	if err = applyExternalRoles(ctx, tx, options); err != nil {
+		return err
+	}
+	if err = validateObjects(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit()
 }

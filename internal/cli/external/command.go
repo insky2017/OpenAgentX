@@ -35,18 +35,30 @@ const usage = `OAX 原会话通信（保留当前 Codex/Agent 宿主，不启动
   openagentx external status --agent rhythm
 
 Agent 自己发信、读信和回复：
-  openagentx external send --agent rhythm --to oneaxe-pay --key handoff-01 --content-file /path/request.md
+  openagentx external send --agent rhythm --to oneaxe-pay --scope pay.payment_api --key handoff-01 --content-file /path/request.md
   openagentx external inbox --agent oneaxe-pay
   openagentx external ack --agent oneaxe-pay --message <message_id>
+  openagentx external receipt --agent oneaxe-pay --message <message_id> --state accepted --content-file /path/receipt.md
+  openagentx external inbox --agent oneaxe-pay --recover
+  openagentx external roles --agent oneaxe-pay
+  openagentx external roles apply --file /path/roles.json --expected-version 0
+  openagentx external roles --owner --organization <organization_id>
+  openagentx external forward --agent oneaxe-pay --message <message_id> --to rhythm --scope rhythm.app_db_migration --key forward-01 --content-file /path/forward.md
   openagentx external reply --agent oneaxe-pay --message <message_id> --content-file /path/reply.md
   openagentx external status --agent rhythm --message <message_id>
 
 send 默认 consultation；--kind request 表示明确行动请求。相同 --key 和内容可安全重试；改内容须新key。
 reply 自动关联、推导接收者，默认key为 reply:<message_id>；不能回复一个结果。
 inbox 默认只显示未确认消息；--all 显示历史，--after <sequence> 分页，--watch 持续观察。
-ack 只代表读入，不代表业务完成；回复是Agent自述，不是独立验收。
+ack 只代表读入，不代表业务完成；receipt状态为accepted/needs_clarification/out_of_scope，不占最终result。
+目录内Agent新请求必须--scope，接单与最终回复再次校验owner；最终回复前须accepted。职责目录仅owner可改。
+roles返回唯一职责说明和revision；--owner --agent可从绑定推导组织。apply文件含organization_id与rules。
+--recover列出所有未终结请求，包括已ack/accepted；恢复须核对原执行证据，未知副作用写入note并needs_clarification，不自动重做。
+forward仅显式授权后使用，关联原消息并标out_of_scope；只允许转交一次，不自动扩大peer或唤醒。
+系统只校验声明scope，Agent仍须审阅正文语义；不提供Desktop跨仓文件隔离。回复是Agent自述，不是独立业务验收。
 
-当前没有 Desktop 自动唤醒连接器。绑定不证明在线或可唤醒；inbox --watch 仅观察，不会调度会话。
+external命令本身不唤醒模型。自动协作需另接可验证的事件驱动宿主入口；绑定不证明在线或可唤醒。
+inbox --watch仅观察，不会调度会话；不以周期性模型空醒代替事件驱动接收。
 轮换/换绑须 --expected-generation <当前代次>；revoke 撤销通信身份，不停止原会话。
 公共选项：--socket <绝对路径> --credentials <owner凭据文件> --session-file <专用凭据文件>
 `
@@ -54,6 +66,9 @@ ack 只代表读入，不代表业务完成；回复是Agent自述，不是独�
 type options struct {
 	agent, host, thread, peers, to, key, kind, contentFile, message, sessionFile string
 	generation, after                                                            int64
+	scope, state, file, organization                                             string
+	expectedVersion                                                              int64
+	recover                                                                      bool
 	all, watch, owner                                                            bool
 	socket, credentials                                                          localprofile.PathFlag
 }
@@ -64,8 +79,13 @@ func Execute(args []string, out, errOut io.Writer) int {
 		return 0
 	}
 	command := args[0]
+	parseArgs := args[1:]
+	if command == "roles" && len(parseArgs) > 0 && parseArgs[0] == "apply" {
+		command = "roles-apply"
+		parseArgs = parseArgs[1:]
+	}
 	switch command {
-	case "bind", "status", "send", "reply", "inbox", "ack", "revoke":
+	case "bind", "status", "send", "reply", "inbox", "ack", "revoke", "receipt", "forward", "roles", "roles-apply":
 	default:
 		fmt.Fprint(errOut, usage)
 		return 2
@@ -73,6 +93,12 @@ func Execute(args []string, out, errOut io.Writer) int {
 	var o options
 	fs := flag.NewFlagSet("external "+command, flag.ContinueOnError)
 	fs.SetOutput(errOut)
+	fs.StringVar(&o.scope, "scope", "", "声明职责scope；从external roles查询")
+	fs.StringVar(&o.state, "state", "", "accepted / needs_clarification / out_of_scope")
+	fs.StringVar(&o.file, "file", "", "owner职责目录JSON文件")
+	fs.StringVar(&o.organization, "organization", "", "owner查询的组织ID")
+	fs.Int64Var(&o.expectedVersion, "expected-version", -1, "职责目录当前revision；首次为0")
+	fs.BoolVar(&o.recover, "recover", false, "包括已ack但未最终处置的请求；不自动重新执行")
 	fs.StringVar(&o.agent, "agent", "", "自身领域Agent ID")
 	fs.StringVar(&o.host, "host", "", "原宿主标识（登记信息，不是已连接证明）")
 	fs.StringVar(&o.thread, "thread", "", "明确的原会话ID")
@@ -91,7 +117,7 @@ func Execute(args []string, out, errOut io.Writer) int {
 	fs.Var(&o.socket, "socket", localprofile.PathUsage(localprofile.SocketPath, "OAX socket"))
 	fs.Var(&o.credentials, "credentials", localprofile.PathUsage(localprofile.CredentialsPath, "owner credentials"))
 	fs.Usage = func() { fmt.Fprint(errOut, usage); fs.PrintDefaults() }
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(parseArgs); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
 		}
@@ -105,7 +131,7 @@ func Execute(args []string, out, errOut io.Writer) int {
 		fmt.Fprintln(errOut, "--owner查看绑定；查看消息请使用参与者的专用身份，不同时指定--message")
 		return 2
 	}
-	if err := domain.ValidateIdentifier("agent_id", o.agent); err != nil {
+	if err := domain.ValidateIdentifier("agent_id", o.agent); err != nil && command != "roles-apply" && !(command == "roles" && o.owner && o.organization != "") {
 		fmt.Fprintln(errOut, "请指定 --agent <领域ID>")
 		return 2
 	}
@@ -151,9 +177,16 @@ func (c *client) call(ctx context.Context, method, path, key string, in, out any
 	}
 	defer response.Body.Close()
 	if response.StatusCode/100 != 2 {
-		var failure openapi.ErrorResponse
+		var failure struct {
+			openapi.ErrorResponse
+			OwnerAgentID string `json:"owner_agent_id"`
+			Scope        string `json:"scope"`
+		}
 		if json.NewDecoder(io.LimitReader(response.Body, 8192)).Decode(&failure) != nil {
 			return fmt.Errorf("OAX HTTP %d", response.StatusCode)
+		}
+		if failure.OwnerAgentID != "" {
+			return fmt.Errorf("OAX HTTP %d (%s): %s; scope=%s owner_agent_id=%s", response.StatusCode, failure.Code, failure.Message, failure.Scope, failure.OwnerAgentID)
 		}
 		return fmt.Errorf("OAX HTTP %d (%s): %s", response.StatusCode, failure.Code, failure.Message)
 	}
@@ -197,7 +230,7 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if command == "bind" || command == "revoke" || o.owner {
+	if command == "bind" || command == "revoke" || command == "roles-apply" || o.owner {
 		ownerStore, err := credentialstore.New(ownerPath.Path, credentialstore.Options{})
 		if err != nil {
 			return err
@@ -214,8 +247,8 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 		}
 		c.token = credential.Token
 	}
-	if o.owner && command != "status" {
-		return fmt.Errorf("--owner仅用于status；发信必须使用Agent专用身份")
+	if o.owner && command != "status" && command != "roles" && command != "roles-apply" {
+		return fmt.Errorf("--owner仅用于status和roles；发信必须使用Agent专用身份")
 	}
 	switch command {
 	case "bind":
@@ -261,12 +294,19 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 			return err
 		}
 		return emit(out, result)
-	case "send", "reply":
+	case "send", "reply", "forward":
 		content, err := readContent(o.contentFile)
 		if err != nil {
 			return err
 		}
-		in := domain.SendExternalMessageInput{TargetAgentID: o.to, Kind: domain.ExternalMessageKind(o.kind), Content: string(content), IdempotencyKey: o.key}
+		in := domain.SendExternalMessageInput{Scope: o.scope, TargetAgentID: o.to, Kind: domain.ExternalMessageKind(o.kind), Content: string(content), IdempotencyKey: o.key}
+		if command == "forward" {
+			in.Kind = domain.ExternalMessageRequest
+			in.ForwardedFromMessageID = o.message
+			if o.message == "" {
+				return fmt.Errorf("forward需要--message")
+			}
+		}
 		if command == "reply" {
 			if o.to != "" {
 				return fmt.Errorf("reply接收者由原请求推导，不使用--to")
@@ -282,6 +322,58 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 		}
 		var result domain.ExternalMessage
 		if err := c.call(ctx, "POST", "messages", in.IdempotencyKey, in, &result); err != nil {
+			return err
+		}
+		return emit(out, result)
+	case "receipt":
+		content, err := readContent(o.contentFile)
+		if err != nil {
+			return err
+		}
+		in := domain.ExternalReceiptInput{State: o.state, Note: string(content)}
+		if err = in.Validate(); err != nil {
+			return err
+		}
+		if o.message == "" {
+			return fmt.Errorf("receipt需要--message")
+		}
+		var result domain.ExternalMessage
+		if err = c.call(ctx, "POST", "messages/"+url.PathEscape(o.message)+"/receipt", "", in, &result); err != nil {
+			return err
+		}
+		return emit(out, result)
+	case "roles-apply":
+		content, err := readContent(o.file)
+		if err != nil {
+			return err
+		}
+		var in domain.ApplyExternalRolesInput
+		if err = openapi.DecodeStrictJSON(bytes.NewReader(content), &in); err != nil {
+			return fmt.Errorf("invalid roles file: %w", err)
+		}
+		in.ExpectedVersion = o.expectedVersion
+		if err = in.Validate(); err != nil {
+			return err
+		}
+		var result domain.ExternalRoleCatalog
+		if err = c.call(ctx, "PUT", "roles", "", in, &result); err != nil {
+			return err
+		}
+		return emit(out, result)
+	case "roles":
+		path := "roles"
+		if o.owner {
+			if o.organization == "" {
+				var b domain.ExternalSessionBinding
+				if err = c.call(ctx, "GET", "bindings/"+url.PathEscape(o.agent), "", nil, &b); err != nil {
+					return err
+				}
+				o.organization = b.OrganizationID
+			}
+			path += "?owner=true&organization=" + url.QueryEscape(o.organization)
+		}
+		var result domain.ExternalRoleCatalog
+		if err = c.call(ctx, "GET", path, "", nil, &result); err != nil {
 			return err
 		}
 		return emit(out, result)
@@ -330,18 +422,21 @@ func inbox(ctx context.Context, c *client, o options, out io.Writer) error {
 	if o.after < 0 {
 		return fmt.Errorf("after必须非负")
 	}
+	if o.recover && o.watch {
+		return fmt.Errorf("--recover是恢复快照，不与--watch组合；逐页核对后重新查询")
+	}
 	after := o.after
 	for {
 		var result struct {
 			Messages []domain.ExternalMessage `json:"messages"`
 		}
-		if err := c.call(ctx, "GET", fmt.Sprintf("inbox?after=%d&limit=100", after), "", nil, &result); err != nil {
+		if err := c.call(ctx, "GET", fmt.Sprintf("inbox?after=%d&limit=100&recover=%t", after, o.recover), "", nil, &result); err != nil {
 			return err
 		}
 		visible := make([]domain.ExternalMessage, 0, len(result.Messages))
 		for _, m := range result.Messages {
 			after = m.Sequence
-			if o.all || m.AcknowledgedAt == nil {
+			if o.all || o.recover || m.AcknowledgedAt == nil {
 				visible = append(visible, m)
 			}
 		}

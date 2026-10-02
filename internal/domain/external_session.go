@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
@@ -66,15 +67,33 @@ const (
 )
 
 type SendExternalMessageInput struct {
-	TargetAgentID    string              `json:"target_agent_id,omitempty"`
-	Kind             ExternalMessageKind `json:"kind"`
-	ReplyToMessageID string              `json:"reply_to_message_id,omitempty"`
-	Content          string              `json:"content"`
-	IdempotencyKey   string              `json:"idempotency_key"`
-	OriginTaskID     string              `json:"origin_task_id,omitempty"`
+	Scope                  string              `json:"scope,omitempty"`
+	ForwardedFromMessageID string              `json:"forwarded_from_message_id,omitempty"`
+	TargetAgentID          string              `json:"target_agent_id,omitempty"`
+	Kind                   ExternalMessageKind `json:"kind"`
+	ReplyToMessageID       string              `json:"reply_to_message_id,omitempty"`
+	Content                string              `json:"content"`
+	IdempotencyKey         string              `json:"idempotency_key"`
+	OriginTaskID           string              `json:"origin_task_id,omitempty"`
 }
 
 func (v SendExternalMessageInput) Validate() error {
+	if v.Scope != "" {
+		if v.Scope != strings.TrimSpace(v.Scope) {
+			return ErrInvalidInput("scope cannot contain surrounding whitespace")
+		}
+		if err := ValidateIdentifier("scope", v.Scope); err != nil {
+			return err
+		}
+	}
+	if v.ForwardedFromMessageID != "" {
+		if err := ValidateOpaqueID("forwarded_from_message_id", v.ForwardedFromMessageID); err != nil {
+			return err
+		}
+		if v.Kind != ExternalMessageRequest || v.OriginTaskID != "" {
+			return ErrInvalidInput("only requests may forward a message; origin is derived from the source")
+		}
+	}
 	if err := ValidateOpaqueID("idempotency_key", v.IdempotencyKey); err != nil {
 		return err
 	}
@@ -95,7 +114,7 @@ func (v SendExternalMessageInput) Validate() error {
 			return ErrInvalidInput("only results may reference a request")
 		}
 	case ExternalMessageResult:
-		if v.TargetAgentID != "" || v.OriginTaskID != "" {
+		if v.TargetAgentID != "" || v.OriginTaskID != "" || v.Scope != "" || v.ForwardedFromMessageID != "" {
 			return ErrInvalidInput("result target and origin are derived from the request")
 		}
 		if err := ValidateOpaqueID("reply_to_message_id", v.ReplyToMessageID); err != nil {
@@ -108,19 +127,93 @@ func (v SendExternalMessageInput) Validate() error {
 }
 
 type ExternalMessage struct {
-	Sequence         int64               `json:"sequence"`
-	ID               string              `json:"message_id"`
-	SenderAgentID    string              `json:"sender_agent_id"`
-	TargetAgentID    string              `json:"target_agent_id"`
-	SenderBindingID  string              `json:"sender_binding_id"`
-	SenderGeneration int64               `json:"sender_generation"`
-	Kind             ExternalMessageKind `json:"kind"`
-	ReplyToMessageID string              `json:"reply_to_message_id,omitempty"`
-	Content          string              `json:"content"`
-	IdempotencyKey   string              `json:"idempotency_key"`
-	OriginTaskID     string              `json:"origin_task_id,omitempty"`
-	PayloadDigest    string              `json:"-"`
-	DeliveryState    string              `json:"delivery_state"`
-	CreatedAt        time.Time           `json:"created_at"`
-	AcknowledgedAt   *time.Time          `json:"acknowledged_at,omitempty"`
+	Scope                  string              `json:"scope,omitempty"`
+	ForwardedFromMessageID string              `json:"forwarded_from_message_id,omitempty"`
+	ProcessingState        string              `json:"processing_state"`
+	ProcessingNote         string              `json:"processing_note,omitempty"`
+	Sequence               int64               `json:"sequence"`
+	ID                     string              `json:"message_id"`
+	SenderAgentID          string              `json:"sender_agent_id"`
+	TargetAgentID          string              `json:"target_agent_id"`
+	SenderBindingID        string              `json:"sender_binding_id"`
+	SenderGeneration       int64               `json:"sender_generation"`
+	Kind                   ExternalMessageKind `json:"kind"`
+	ReplyToMessageID       string              `json:"reply_to_message_id,omitempty"`
+	Content                string              `json:"content"`
+	IdempotencyKey         string              `json:"idempotency_key"`
+	OriginTaskID           string              `json:"origin_task_id,omitempty"`
+	PayloadDigest          string              `json:"-"`
+	DeliveryState          string              `json:"delivery_state"`
+	CreatedAt              time.Time           `json:"created_at"`
+	AcknowledgedAt         *time.Time          `json:"acknowledged_at,omitempty"`
+}
+
+// ExternalRoleCatalog is owner-managed metadata, not a semantic body validator
+// or a sandbox for tools running in the original external host.
+type ExternalRoleRule struct {
+	Scope        string `json:"scope"`
+	OwnerAgentID string `json:"owner_agent_id"`
+	Description  string `json:"description"`
+}
+type ExternalRoleCatalog struct {
+	OrganizationID string             `json:"organization_id"`
+	Revision       int64              `json:"revision"`
+	Rules          []ExternalRoleRule `json:"rules"`
+}
+type ApplyExternalRolesInput struct {
+	OrganizationID  string             `json:"organization_id"`
+	ExpectedVersion int64              `json:"expected_version"`
+	Rules           []ExternalRoleRule `json:"rules"`
+}
+
+func (v ApplyExternalRolesInput) Validate() error {
+	if err := ValidateOpaqueID("organization_id", v.OrganizationID); err != nil {
+		return err
+	}
+	if v.ExpectedVersion < 0 || len(v.Rules) == 0 || len(v.Rules) > 200 {
+		return ErrInvalidInput("roles require 1..200 rules and nonnegative expected_version")
+	}
+	seen := map[string]bool{}
+	for _, r := range v.Rules {
+		if r.Scope != strings.TrimSpace(r.Scope) || r.OwnerAgentID != strings.TrimSpace(r.OwnerAgentID) {
+			return ErrInvalidInput("scope and owner cannot contain surrounding whitespace")
+		}
+		if err := ValidateIdentifier("scope", r.Scope); err != nil {
+			return err
+		}
+		if err := ValidateIdentifier("owner_agent_id", r.OwnerAgentID); err != nil {
+			return err
+		}
+		if seen[r.Scope] || strings.TrimSpace(r.Description) == "" || len(r.Description) > 2048 {
+			return ErrInvalidInput("role scopes must be unique and descriptions contain 1..2048 bytes")
+		}
+		seen[r.Scope] = true
+	}
+	return nil
+}
+
+type ExternalReceiptInput struct {
+	State string `json:"state"`
+	Note  string `json:"note"`
+}
+
+func (v ExternalReceiptInput) Validate() error {
+	if v.State != "accepted" && v.State != "needs_clarification" && v.State != "out_of_scope" {
+		return ErrInvalidInput("receipt state must be accepted, needs_clarification or out_of_scope")
+	}
+	if strings.TrimSpace(v.Note) == "" || len(v.Note) > 65536 {
+		return ErrInvalidInput("receipt note must contain 1..65536 bytes; record unknown effects explicitly")
+	}
+	return nil
+}
+
+type ExternalScopeError struct {
+	Code         string `json:"code"`
+	Scope        string `json:"scope"`
+	OwnerAgentID string `json:"owner_agent_id,omitempty"`
+	Message      string `json:"message"`
+}
+
+func (e *ExternalScopeError) Error() string {
+	return fmt.Sprintf("%s: %s (scope=%s owner=%s)", e.Code, e.Message, e.Scope, e.OwnerAgentID)
 }

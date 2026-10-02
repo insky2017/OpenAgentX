@@ -212,19 +212,20 @@ func (r *Repository) AuthenticateExternalSession(ctx context.Context, digest str
 	return authenticateExternalTx(ctx, tx, digest, r.now())
 }
 
-const externalMessageColumns = `sequence,message_id,sender_agent_id,target_agent_id,sender_binding_id,sender_generation,kind,reply_to_message_id,content,idempotency_key,payload_digest,origin_task_id,delivery_state,created_at,acknowledged_at`
+const externalMessageColumns = `sequence,message_id,sender_agent_id,target_agent_id,sender_binding_id,sender_generation,kind,reply_to_message_id,content,idempotency_key,payload_digest,origin_task_id,delivery_state,created_at,acknowledged_at,scope,forwarded_from_message_id,processing_state,processing_note`
 
 func scanExternalMessage(row rowScanner) (*domain.ExternalMessage, error) {
 	var m domain.ExternalMessage
-	var reply, origin, ack sql.NullString
+	var reply, origin, ack, forwarded sql.NullString
 	var created string
-	err := row.Scan(&m.Sequence, &m.ID, &m.SenderAgentID, &m.TargetAgentID, &m.SenderBindingID, &m.SenderGeneration, &m.Kind, &reply, &m.Content, &m.IdempotencyKey, &m.PayloadDigest, &origin, &m.DeliveryState, &created, &ack)
+	err := row.Scan(&m.Sequence, &m.ID, &m.SenderAgentID, &m.TargetAgentID, &m.SenderBindingID, &m.SenderGeneration, &m.Kind, &reply, &m.Content, &m.IdempotencyKey, &m.PayloadDigest, &origin, &m.DeliveryState, &created, &ack, &m.Scope, &forwarded, &m.ProcessingState, &m.ProcessingNote)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
 	}
+	m.ForwardedFromMessageID = forwarded.String
 	m.ReplyToMessageID = reply.String
 	m.OriginTaskID = origin.String
 	if m.CreatedAt, err = parseTime(created); err != nil {
@@ -255,7 +256,7 @@ func hasExternalPeer(b *domain.ExternalSessionBinding, peer string) bool {
 }
 
 func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m domain.ExternalMessage) (*domain.ExternalMessage, error) {
-	input := domain.SendExternalMessageInput{TargetAgentID: m.TargetAgentID, Kind: m.Kind, ReplyToMessageID: m.ReplyToMessageID, Content: m.Content, IdempotencyKey: m.IdempotencyKey, OriginTaskID: m.OriginTaskID}
+	input := domain.SendExternalMessageInput{Scope: m.Scope, ForwardedFromMessageID: m.ForwardedFromMessageID, TargetAgentID: m.TargetAgentID, Kind: m.Kind, ReplyToMessageID: m.ReplyToMessageID, Content: m.Content, IdempotencyKey: m.IdempotencyKey, OriginTaskID: m.OriginTaskID}
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
@@ -292,6 +293,16 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 		if original.Kind == domain.ExternalMessageResult {
 			return nil, domain.ErrInvalidInput("results cannot request another result")
 		}
+		if original.ProcessingState == "completed" || original.ProcessingState == "out_of_scope" {
+			return nil, domain.ErrConflict("request is already terminal")
+		}
+		if e = validateExternalScope(ctx, tx, b.OrganizationID, original.SenderAgentID, original.TargetAgentID, original.Scope); e != nil {
+			return nil, e
+		}
+		if original.Scope != "" && original.ProcessingState != "accepted" {
+			return nil, domain.ErrConflict("record an accepted receipt before the final scoped result")
+		}
+		m.Scope = original.Scope
 		m.TargetAgentID = original.SenderAgentID
 		m.OriginTaskID = original.OriginTaskID
 	}
@@ -312,7 +323,37 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 	if peer.State != "active" || !hasExternalPeer(peer, b.AgentID) {
 		return nil, domain.ErrForbidden("peer does not accept this sender")
 	}
-	if m.OriginTaskID != "" && m.Kind != domain.ExternalMessageResult {
+	if m.Kind != domain.ExternalMessageResult {
+		if err = validateExternalScope(ctx, tx, b.OrganizationID, b.AgentID, m.TargetAgentID, m.Scope); err != nil {
+			return nil, err
+		}
+	}
+	if m.ForwardedFromMessageID != "" {
+		original, e := scanExternalMessage(tx.QueryRowContext(ctx, `SELECT `+externalMessageColumns+` FROM external_messages WHERE message_id=?`, m.ForwardedFromMessageID))
+		if e != nil {
+			return nil, e
+		}
+		if original.TargetAgentID != b.AgentID {
+			return nil, domain.ErrForbidden("only the original recipient may forward")
+		}
+		if original.Kind == domain.ExternalMessageResult || original.ForwardedFromMessageID != "" {
+			return nil, domain.ErrConflict("results and forwarded requests cannot be forwarded")
+		}
+		if original.ProcessingState == "completed" {
+			return nil, domain.ErrConflict("completed requests cannot be forwarded")
+		}
+		if m.Scope == "" {
+			return nil, domain.ErrInvalidInput("forward requires an explicit registered scope")
+		}
+		m.OriginTaskID = original.OriginTaskID
+		if _, err = tx.ExecContext(ctx, `UPDATE external_messages SET processing_state='out_of_scope',processing_note=? WHERE message_id=?`, "Explicitly forwarded to "+m.TargetAgentID+" as "+m.ID+"; no execution is implied", original.ID); err != nil {
+			return nil, err
+		}
+		if err = r.externalJournal(ctx, tx, b.PrincipalID, b.OrganizationID, "external_message", original.ID, "external_message.forwarded", map[string]any{"forwarded_message_id": m.ID, "owner_agent_id": m.TargetAgentID, "scope": m.Scope}); err != nil {
+			return nil, err
+		}
+	}
+	if m.OriginTaskID != "" && m.Kind != domain.ExternalMessageResult && m.ForwardedFromMessageID == "" {
 		var target, org string
 		if err = tx.QueryRowContext(ctx, `SELECT target_agent_id,organization_id FROM tasks WHERE task_id=?`, m.OriginTaskID).Scan(&target, &org); errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTaskNotFound
@@ -324,11 +365,18 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 		}
 	}
 	m.DeliveryState = "pending"
+	m.ProcessingState = "pending"
+	if m.Kind == domain.ExternalMessageResult {
+		m.ProcessingState = "completed"
+		if _, err = tx.ExecContext(ctx, `UPDATE external_messages SET processing_state='completed' WHERE message_id=?`, m.ReplyToMessageID); err != nil {
+			return nil, err
+		}
+	}
 	m.CreatedAt = r.now().UTC()
-	res, err := tx.ExecContext(ctx, `INSERT INTO external_messages(message_id,sender_agent_id,target_agent_id,sender_binding_id,sender_generation,kind,reply_to_message_id,content,idempotency_key,payload_digest,origin_task_id,delivery_state,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`, m.ID, m.SenderAgentID, m.TargetAgentID, m.SenderBindingID, m.SenderGeneration, m.Kind, externalString(m.ReplyToMessageID), m.Content, m.IdempotencyKey, m.PayloadDigest, externalString(m.OriginTaskID), m.DeliveryState, formatTime(m.CreatedAt))
+	res, err := tx.ExecContext(ctx, `INSERT INTO external_messages(message_id,sender_agent_id,target_agent_id,sender_binding_id,sender_generation,kind,reply_to_message_id,content,idempotency_key,payload_digest,origin_task_id,delivery_state,created_at,scope,forwarded_from_message_id,processing_state,processing_note) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, m.ID, m.SenderAgentID, m.TargetAgentID, m.SenderBindingID, m.SenderGeneration, m.Kind, externalString(m.ReplyToMessageID), m.Content, m.IdempotencyKey, m.PayloadDigest, externalString(m.OriginTaskID), m.DeliveryState, formatTime(m.CreatedAt), m.Scope, externalString(m.ForwardedFromMessageID), m.ProcessingState, m.ProcessingNote)
 	if err != nil {
 		if isUniqueConstraint(err, "") {
-			return nil, domain.ErrConflict("request already has a result")
+			return nil, domain.ErrConflict("request already has a result or a forwarded request")
 		}
 		return nil, err
 	}
@@ -336,7 +384,7 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 	if err != nil {
 		return nil, err
 	}
-	if err = r.externalJournal(ctx, tx, b.PrincipalID, b.OrganizationID, "external_message", m.ID, "external_message.sent", map[string]any{"sender_agent_id": m.SenderAgentID, "target_agent_id": m.TargetAgentID, "kind": m.Kind, "reply_to_message_id": m.ReplyToMessageID, "sequence": m.Sequence}); err != nil {
+	if err = r.externalJournal(ctx, tx, b.PrincipalID, b.OrganizationID, "external_message", m.ID, "external_message.sent", map[string]any{"sender_agent_id": m.SenderAgentID, "target_agent_id": m.TargetAgentID, "kind": m.Kind, "reply_to_message_id": m.ReplyToMessageID, "sequence": m.Sequence, "scope": m.Scope, "forwarded_from_message_id": m.ForwardedFromMessageID}); err != nil {
 		return nil, err
 	}
 	if err = commit(tx); err != nil {
@@ -346,6 +394,12 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 }
 
 func (r *Repository) ListExternalInbox(ctx context.Context, digest string, after int64, limit int) ([]domain.ExternalMessage, error) {
+	return r.listExternalMessages(ctx, digest, after, limit, false)
+}
+func (r *Repository) ListExternalRecoverable(ctx context.Context, digest string, after int64, limit int) ([]domain.ExternalMessage, error) {
+	return r.listExternalMessages(ctx, digest, after, limit, true)
+}
+func (r *Repository) listExternalMessages(ctx context.Context, digest string, after int64, limit int, recoverable bool) ([]domain.ExternalMessage, error) {
 	if after < 0 || limit < 1 || limit > 200 {
 		return nil, domain.ErrInvalidInput("invalid inbox cursor or limit")
 	}
@@ -358,7 +412,11 @@ func (r *Repository) ListExternalInbox(ctx context.Context, digest string, after
 	if err != nil {
 		return nil, err
 	}
-	rows, err := tx.QueryContext(ctx, `SELECT `+externalMessageColumns+` FROM external_messages WHERE target_agent_id=? AND sequence>? ORDER BY sequence LIMIT ?`, b.AgentID, after, limit)
+	filter := ""
+	if recoverable {
+		filter = " AND kind<>'result' AND processing_state NOT IN ('completed','out_of_scope')"
+	}
+	rows, err := tx.QueryContext(ctx, `SELECT `+externalMessageColumns+` FROM external_messages WHERE target_agent_id=? AND sequence>?`+filter+` ORDER BY sequence LIMIT ?`, b.AgentID, after, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -419,6 +477,64 @@ func (r *Repository) AcknowledgeExternalMessage(ctx context.Context, digest, id 
 	m.DeliveryState = "acknowledged"
 	m.AcknowledgedAt = &now
 	if err = r.externalJournal(ctx, tx, b.PrincipalID, b.OrganizationID, "external_message", m.ID, "external_message.acknowledged", map[string]any{"target_agent_id": b.AgentID, "sequence": m.Sequence}); err != nil {
+		return nil, err
+	}
+	if err = commit(tx); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (r *Repository) RecordExternalReceipt(ctx context.Context, digest, id string, in domain.ExternalReceiptInput) (*domain.ExternalMessage, error) {
+	if err := in.Validate(); err != nil {
+		return nil, err
+	}
+	tx, err := r.begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	b, err := authenticateExternalTx(ctx, tx, digest, r.now())
+	if err != nil {
+		return nil, err
+	}
+	m, err := scanExternalMessage(tx.QueryRowContext(ctx, `SELECT `+externalMessageColumns+` FROM external_messages WHERE message_id=?`, id))
+	if err != nil {
+		return nil, err
+	}
+	if m.TargetAgentID != b.AgentID {
+		return nil, domain.ErrForbidden("only recipient can record a receipt")
+	}
+	if m.Kind == domain.ExternalMessageResult {
+		return nil, domain.ErrInvalidInput("results cannot receive processing receipts")
+	}
+	// Acceptance must satisfy the current catalog even on an idempotent retry.
+	if in.State == "accepted" {
+		if err = validateExternalScope(ctx, tx, b.OrganizationID, m.SenderAgentID, m.TargetAgentID, m.Scope); err != nil {
+			return nil, err
+		}
+	}
+	if m.ProcessingState == in.State && m.ProcessingNote == in.Note {
+		return m, nil
+	}
+	if m.ProcessingState == "completed" || m.ProcessingState == "out_of_scope" {
+		return nil, domain.ErrConflict("terminal processing state cannot change")
+	}
+	// A delayed retry of an older receipt must not undo a newer clarification.
+	// Reuse the durable Journal instead of introducing a parallel receipt ledger.
+	var replay int
+	if err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM event_journal WHERE aggregate_type='external_message' AND aggregate_id=? AND event_type='external_message.receipt' AND json_extract(payload_json,'$.state')=? AND json_extract(payload_json,'$.note')=?`, id, in.State, in.Note).Scan(&replay); err != nil {
+		return nil, err
+	}
+	if replay > 0 {
+		return m, nil
+	}
+	if _, err = tx.ExecContext(ctx, `UPDATE external_messages SET processing_state=?,processing_note=? WHERE message_id=?`, in.State, in.Note, id); err != nil {
+		return nil, err
+	}
+	m.ProcessingState = in.State
+	m.ProcessingNote = in.Note
+	if err = r.externalJournal(ctx, tx, b.PrincipalID, b.OrganizationID, "external_message", m.ID, "external_message.receipt", map[string]any{"state": in.State, "note": in.Note, "scope": m.Scope}); err != nil {
 		return nil, err
 	}
 	if err = commit(tx); err != nil {

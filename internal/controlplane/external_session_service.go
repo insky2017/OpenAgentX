@@ -17,6 +17,11 @@ import (
 )
 
 type ExternalSessionState interface {
+	ApplyExternalRoles(context.Context, string, domain.ApplyExternalRolesInput) (*domain.ExternalRoleCatalog, error)
+	GetExternalRolesForOwner(context.Context, string, string) (*domain.ExternalRoleCatalog, error)
+	GetExternalRoles(context.Context, string) (*domain.ExternalRoleCatalog, error)
+	RecordExternalReceipt(context.Context, string, string, domain.ExternalReceiptInput) (*domain.ExternalMessage, error)
+	ListExternalRecoverable(context.Context, string, int64, int) ([]domain.ExternalMessage, error)
 	BindExternalSession(context.Context, string, domain.ExternalSessionBinding, int64) (*domain.ExternalSessionBinding, error)
 	RevokeExternalSession(context.Context, string, string, int64) error
 	GetExternalSessionForOwner(context.Context, string, string) (*domain.ExternalSessionBinding, error)
@@ -88,7 +93,7 @@ func (s *ExternalSessionService) Send(ctx context.Context, token string, input d
 		return nil, err
 	}
 	digest := sha256.Sum256(raw)
-	m := domain.ExternalMessage{ID: "external-message-" + uuid.NewString(), TargetAgentID: input.TargetAgentID, Kind: input.Kind, ReplyToMessageID: input.ReplyToMessageID, Content: input.Content, IdempotencyKey: input.IdempotencyKey, OriginTaskID: input.OriginTaskID, PayloadDigest: hex.EncodeToString(digest[:]), DeliveryState: "pending", CreatedAt: s.now().UTC()}
+	m := domain.ExternalMessage{Scope: input.Scope, ForwardedFromMessageID: input.ForwardedFromMessageID, ID: "external-message-" + uuid.NewString(), TargetAgentID: input.TargetAgentID, Kind: input.Kind, ReplyToMessageID: input.ReplyToMessageID, Content: input.Content, IdempotencyKey: input.IdempotencyKey, OriginTaskID: input.OriginTaskID, PayloadDigest: hex.EncodeToString(digest[:]), DeliveryState: "pending", CreatedAt: s.now().UTC()}
 	result, err := s.state.SendExternalMessage(ctx, externalTokenDigest(token), m)
 	if err != nil {
 		return nil, err
@@ -126,4 +131,32 @@ func externalTokenDigest(token string) string {
 	}
 	sum := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(sum[:])
+}
+
+func (s *ExternalSessionService) ApplyRoles(ctx context.Context, owner string, in domain.ApplyExternalRolesInput) (*domain.ExternalRoleCatalog, error) {
+	return s.state.ApplyExternalRoles(ctx, owner, in)
+}
+func (s *ExternalSessionService) RolesForOwner(ctx context.Context, owner, org string) (*domain.ExternalRoleCatalog, error) {
+	if err := domain.ValidateOpaqueID("organization_id", org); err != nil {
+		return nil, err
+	}
+	return s.state.GetExternalRolesForOwner(ctx, owner, org)
+}
+func (s *ExternalSessionService) Roles(ctx context.Context, token string) (*domain.ExternalRoleCatalog, error) {
+	return s.state.GetExternalRoles(ctx, externalTokenDigest(token))
+}
+func (s *ExternalSessionService) Receipt(ctx context.Context, token, id string, in domain.ExternalReceiptInput) (*domain.ExternalMessage, error) {
+	if err := domain.ValidateOpaqueID("message_id", id); err != nil {
+		return nil, err
+	}
+	if err := in.Validate(); err != nil {
+		return nil, err
+	}
+	return s.state.RecordExternalReceipt(ctx, externalTokenDigest(token), id, in)
+}
+func (s *ExternalSessionService) Recover(ctx context.Context, token string, after int64, limit int) ([]domain.ExternalMessage, error) {
+	if after < 0 || limit < 1 || limit > 100 {
+		return nil, domain.ErrInvalidInput("invalid recovery cursor or limit")
+	}
+	return s.state.ListExternalRecoverable(ctx, externalTokenDigest(token), after, limit)
 }

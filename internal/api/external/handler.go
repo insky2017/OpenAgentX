@@ -35,6 +35,9 @@ func NewHandler(service *controlplane.ExternalSessionService, auth *cliauth.Serv
 		return nil, err
 	}
 	h := &Handler{service: service, auth: a, mux: http.NewServeMux()}
+	h.mux.HandleFunc("PUT "+Prefix+"roles", h.applyRoles)
+	h.mux.HandleFunc("GET "+Prefix+"roles", h.roles)
+	h.mux.HandleFunc("POST "+Prefix+"messages/{message}/receipt", h.receipt)
 	h.mux.HandleFunc("POST "+Prefix+"bindings", h.bind)
 	h.mux.HandleFunc("GET "+Prefix+"bindings/{agent}", h.binding)
 	h.mux.HandleFunc("POST "+Prefix+"bindings/{agent}/revoke", h.revoke)
@@ -188,7 +191,12 @@ func (h *Handler) inbox(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	messages, err := h.service.Inbox(r.Context(), bearer(r), after, limit)
+	var messages []domain.ExternalMessage
+	if r.URL.Query().Get("recover") == "true" {
+		messages, err = h.service.Recover(r.Context(), bearer(r), after, limit)
+	} else {
+		messages, err = h.service.Inbox(r.Context(), bearer(r), after, limit)
+	}
 	if err != nil {
 		fail(w, err)
 		return
@@ -205,6 +213,13 @@ func respond(w http.ResponseWriter, value any) {
 }
 
 func fail(w http.ResponseWriter, err error) {
+	var scope *domain.ExternalScopeError
+	if errors.As(err, &scope) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(scope)
+		return
+	}
 	status, code, message := http.StatusInternalServerError, "INTERNAL", "external message operation failed"
 	var d *domain.DomainError
 	switch {
@@ -228,4 +243,57 @@ func fail(w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(openapi.ErrorResponse{Code: code, Message: message})
+}
+
+func (h *Handler) applyRoles(w http.ResponseWriter, r *http.Request) {
+	p, ok := h.owner(w, r)
+	if !ok {
+		return
+	}
+	var in domain.ApplyExternalRolesInput
+	if err := openapi.DecodeStrictJSON(r.Body, &in); err != nil {
+		fail(w, domain.ErrInvalidInput("invalid roles request"))
+		return
+	}
+	c, err := h.service.ApplyRoles(r.Context(), p, in)
+	if err != nil {
+		fail(w, err)
+		return
+	}
+	respond(w, c)
+}
+func (h *Handler) roles(w http.ResponseWriter, r *http.Request) {
+	var c *domain.ExternalRoleCatalog
+	var err error
+	if r.URL.Query().Get("owner") == "true" {
+		p, ok := h.owner(w, r)
+		if !ok {
+			return
+		}
+		c, err = h.service.RolesForOwner(r.Context(), p, r.URL.Query().Get("organization"))
+	} else {
+		c, err = h.service.Roles(r.Context(), bearer(r))
+	}
+	if err != nil {
+		fail(w, err)
+		return
+	}
+	respond(w, c)
+}
+func (h *Handler) receipt(w http.ResponseWriter, r *http.Request) {
+	if _, err := h.service.Status(r.Context(), bearer(r)); err != nil {
+		fail(w, err)
+		return
+	}
+	var in domain.ExternalReceiptInput
+	if err := openapi.DecodeStrictJSON(r.Body, &in); err != nil {
+		fail(w, domain.ErrInvalidInput("invalid receipt request"))
+		return
+	}
+	m, err := h.service.Receipt(r.Context(), bearer(r), r.PathValue("message"), in)
+	if err != nil {
+		fail(w, err)
+		return
+	}
+	respond(w, m)
 }
