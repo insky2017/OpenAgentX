@@ -102,7 +102,7 @@ func TestApplyUpgradesCompleteV1TaskIntentAtomically(t *testing.T) {
 		t.Fatal("upgraded schema has no intent column")
 	}
 	v, err := Version(ctx, db)
-	if err != nil || v != 2 {
+	if err != nil || v != CurrentVersion {
 		t.Fatalf("upgraded version=%d err=%v", v, err)
 	}
 	var installation string

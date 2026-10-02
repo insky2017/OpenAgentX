@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"openagentx/internal/domain"
+	"openagentx/internal/persistence/sqlite/migrations"
 )
 
 var repositoryTestTime = time.Date(2026, 8, 30, 12, 0, 0, 0, time.UTC)
@@ -146,7 +147,7 @@ func TestOpenConfiguresTargetSQLiteAndReopensCurrentState(t *testing.T) {
 		t.Fatalf("reopened Agent/Profile = %+v / %+v, err=%v", agent, profile, err)
 	}
 	version, err := reopened.SchemaVersion(ctx)
-	if err != nil || version != 2 {
+	if err != nil || version != migrations.CurrentVersion {
 		t.Fatalf("schema version=%d err=%v", version, err)
 	}
 }

@@ -18,12 +18,14 @@ import (
 	adminapi "openagentx/internal/api/admin"
 	apiauth "openagentx/internal/api/auth"
 	consoleapi "openagentx/internal/api/console"
+	externalapi "openagentx/internal/api/external"
 	"openagentx/internal/api/panel"
 	"openagentx/internal/api/workerapi"
 	cliAuth "openagentx/internal/auth/cli"
 	webAuth "openagentx/internal/auth/web"
 	admincli "openagentx/internal/cli/admin"
 	consolecli "openagentx/internal/cli/console"
+	externalcli "openagentx/internal/cli/external"
 	fleetcli "openagentx/internal/cli/fleet"
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
@@ -31,6 +33,7 @@ import (
 	"openagentx/internal/localprofile"
 	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
+	"openagentx/internal/persistence/sqlite/migrations"
 	"openagentx/internal/transport/remotehttps"
 	"openagentx/internal/transport/unixhttp"
 )
@@ -55,6 +58,8 @@ func execute(args []string) int {
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
 	case "console":
 		return consolecli.Execute(args[1:], consolecli.DefaultDependencies())
+	case "external":
+		return externalcli.Execute(args[1:], os.Stdout, os.Stderr)
 	case "fleet":
 		return fleetcli.Execute(args[1:], fleetcli.DefaultDependencies())
 	case "serve":
@@ -70,6 +75,7 @@ func execute(args []string) int {
 		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx console [login|logout|attach]")
+		fmt.Fprintln(os.Stderr, "       openagentx external <bind|status|send|reply|inbox|ack|revoke> [flags] (existing host, messages only)")
 		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|workspace|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--worker-dir <dir>] [--credentials <path>]")
 		fmt.Fprintln(os.Stderr, "       openagentx schema verify [--db <path>]")
 		fmt.Fprintln(os.Stderr, "Local path precedence: explicit flag > resource environment > OPENAGENTX_HOME > ~/.openagentx")
@@ -248,6 +254,18 @@ func runDaemon(args []string) int {
 		return 1
 	}
 	unixMux := newUnixMux(handler, cliAuthHandler, cliConsoleHandler, cliAdminHandler, cliPanelHandler)
+	externalService, err := controlplane.NewExternalSessionService(repository, broker, time.Now)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create external session service: %v\n", err)
+		return 1
+	}
+	externalHandler, err := externalapi.NewHandler(externalService, cliAuthService)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create external session handler: %v\n", err)
+		return 1
+	}
+	// Agent communication is local UDS only; no additional public listener.
+	unixMux.Handle(externalapi.Prefix, externalHandler)
 	server, err := unixhttp.NewServer(*socketPath, unixMux, slog.Default())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create Unix server: %v\n", err)
@@ -467,7 +485,7 @@ func runSchema(args []string) int {
 		return 1
 	}
 	defer db.Close()
-	fmt.Printf("OpenAgentX schema v%d verified\n", 1)
+	fmt.Printf("OpenAgentX schema v%d verified\n", migrations.CurrentVersion)
 	return 0
 }
 

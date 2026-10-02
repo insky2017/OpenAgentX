@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"openagentx/internal/domain"
+	"openagentx/internal/persistence/sqlite/migrations"
 	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/testkit"
 )
@@ -146,7 +147,7 @@ func TestTargetSQLiteHelper(t *testing.T) {
 	if err := db.QueryRow("SELECT version FROM schema_meta WHERE singleton=1").Scan(&version); err != nil {
 		t.Fatal(err)
 	}
-	if version != 2 {
+	if version != migrations.CurrentVersion {
 		t.Fatalf("schema version = %d", version)
 	}
 }

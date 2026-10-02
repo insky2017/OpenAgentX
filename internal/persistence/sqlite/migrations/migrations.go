@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const CurrentVersion = 2
+const CurrentVersion = 3
 
 var (
 	ErrIncompatibleLegacySchema = errors.New("database contains a legacy schema without OpenAgentX schema metadata")
@@ -55,6 +55,9 @@ var requiredTaskIntentDefinitionFragments = []string{"intent text not null defau
 //go:embed 001_target_schema.sql
 var targetSchema string
 
+//go:embed 003_external_sessions.sql
+var externalSessionSchema string
+
 func Apply(ctx context.Context, db *sql.DB) error {
 	return apply(ctx, db, migrationOptions{})
 }
@@ -63,6 +66,7 @@ type migrationOptions struct {
 	newInstallationID func() (string, error)
 	beforeCLICommit   func() error
 	beforeV2Commit    func() error
+	beforeV3Commit    func() error
 }
 
 func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -87,6 +91,8 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 			return ValidateCurrent(ctx, db)
 		case 1:
 			return migrateV1ToV2(ctx, db, options)
+		case 2:
+			return migrateV2ToV3(ctx, db, options)
 		default:
 			return fmt.Errorf("%w: got %d, want 1 or %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
 		}
@@ -110,6 +116,9 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	}
 	if err := initializeInstallation(ctx, tx, options); err != nil {
 		return err
+	}
+	if _, err := tx.ExecContext(ctx, externalSessionSchema); err != nil {
+		return fmt.Errorf("apply external sessions: %w", err)
 	}
 	if err := validateObjects(ctx, tx); err != nil {
 		return err
@@ -156,12 +165,53 @@ func migrateV1ToV2(ctx context.Context, db *sql.DB, options migrationOptions) er
 			return fmt.Errorf("migrate v1 to v2: %w", err)
 		}
 	}
-	if err := validateObjects(ctx, tx); err != nil {
+	if err := validateBaseObjects(ctx, tx); err != nil {
 		return err
 	}
 	if options.beforeV2Commit != nil {
 		if err := options.beforeV2Commit(); err != nil {
 			return fmt.Errorf("v2 pre-commit: %w", err)
+		}
+	}
+	if _, err := tx.ExecContext(ctx, externalSessionSchema); err != nil {
+		return err
+	}
+	if err := validateObjects(ctx, tx); err != nil {
+		return err
+	}
+	if options.beforeV3Commit != nil {
+		if err := options.beforeV3Commit(); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func migrateV2ToV3(ctx context.Context, db *sql.DB, options migrationOptions) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var version int
+	if err = tx.QueryRowContext(ctx, "SELECT version FROM schema_meta WHERE singleton=1").Scan(&version); err != nil {
+		return err
+	}
+	if version != 2 {
+		return ErrUnsupportedSchemaVersion
+	}
+	if err = validateBaseObjects(ctx, tx); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, externalSessionSchema); err != nil {
+		return err
+	}
+	if err = validateObjects(ctx, tx); err != nil {
+		return err
+	}
+	if options.beforeV3Commit != nil {
+		if err = options.beforeV3Commit(); err != nil {
+			return err
 		}
 	}
 	return tx.Commit()
@@ -221,6 +271,13 @@ func ValidateCurrent(ctx context.Context, db *sql.DB) error {
 }
 
 func validateObjects(ctx context.Context, queryer schemaQueryer) error {
+	if err := validateBaseObjects(ctx, queryer); err != nil {
+		return err
+	}
+	return validateExternalObjects(ctx, queryer)
+}
+
+func validateBaseObjects(ctx context.Context, queryer schemaQueryer) error {
 	if err := validateSchemaShape(ctx, queryer, CurrentVersion); err != nil {
 		return err
 	}

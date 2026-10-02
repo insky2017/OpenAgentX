@@ -113,12 +113,26 @@ func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialM
 		return nil, err
 	}
 	defer tx.Rollback()
+	var externalTarget int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM external_session_bindings WHERE agent_id=? AND state='active'`, task.TargetAgentID).Scan(&externalTarget); err != nil {
+		return nil, err
+	}
+	if externalTarget != 0 {
+		return nil, domain.ErrConflict("external session uses messages, not managed tasks")
+	}
 	if binding != nil {
 		if binding.ContextID != task.ID || binding.AgentID != task.TargetAgentID {
 			return nil, domain.ErrInvalidInput("native binding must belong to new Task")
 		}
 		if err := binding.Validate(); err != nil {
 			return nil, err
+		}
+		var externalThread int
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM external_session_bindings WHERE thread_id=? AND state='active'`, binding.ProviderSessionID).Scan(&externalThread); err != nil {
+			return nil, err
+		}
+		if externalThread != 0 {
+			return nil, domain.ErrConflict("native thread belongs to an external session")
 		}
 		// A native thread cannot acquire two different long-lived identities.
 		var other int
