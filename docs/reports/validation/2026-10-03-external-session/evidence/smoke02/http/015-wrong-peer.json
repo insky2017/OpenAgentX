@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-02T16:34:32.903156+00:00",
+  "method": "POST",
+  "path": "/api/external/v1/messages",
+  "request": {
+    "target_agent_id": "external-smoke-a-28e64f5d",
+    "kind": "consultation",
+    "content": "forbidden peer",
+    "idempotency_key": "wrong-peer"
+  },
+  "authorization": "[REDACTED]",
+  "status": 403,
+  "response": {
+    "code": "FORBIDDEN",
+    "message": "target is not an allowed peer"
+  }
+}

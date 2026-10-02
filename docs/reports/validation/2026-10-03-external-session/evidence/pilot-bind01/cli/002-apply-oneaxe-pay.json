@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-10-02T16:46:01.528671+00:00",
+  "finished_at": "2026-10-02T16:46:01.793561+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "apply",
+    "--db",
+    "/home/sky/.openagentx/data/openagentx.db",
+    "--file",
+    "/home/sky/.openagentx/external/oneaxe-pay/identity.yaml"
+  ],
+  "exit_code": 0,
+  "stdout": "Created Agent \"oneaxe-pay\" in Organization \"default\"\n",
+  "stderr": "Owner password: \n",
+  "stdin": "private PTY credentials omitted"
+}

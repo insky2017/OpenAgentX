@@ -1,0 +1,89 @@
+[
+  {
+    "unit": "openagentx.service",
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "openagentx.service",
+      "-p",
+      "MainPID",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "ExecMainStartTimestampMonotonic"
+    ],
+    "exit_code": 0,
+    "stdout": "MainPID=3918536\nExecMainStartTimestampMonotonic=177735004533\nActiveState=active\nSubState=running\n",
+    "stderr": "",
+    "properties": {
+      "MainPID": "3918536",
+      "ExecMainStartTimestampMonotonic": "177735004533",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "pid": 3918536,
+    "starttime": "17773499",
+    "exe_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39"
+  },
+  {
+    "unit": "openagentx-worker@agy-onboarding-e2e.service",
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "openagentx-worker@agy-onboarding-e2e.service",
+      "-p",
+      "MainPID",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "ExecMainStartTimestampMonotonic"
+    ],
+    "exit_code": 0,
+    "stdout": "MainPID=3918568\nExecMainStartTimestampMonotonic=177735318942\nActiveState=active\nSubState=running\n",
+    "stderr": "",
+    "properties": {
+      "MainPID": "3918568",
+      "ExecMainStartTimestampMonotonic": "177735318942",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "pid": 3918568,
+    "starttime": "17773531",
+    "exe_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39"
+  },
+  {
+    "unit": "openagentx-worker@codex-domain-e2e.service",
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "openagentx-worker@codex-domain-e2e.service",
+      "-p",
+      "MainPID",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "ExecMainStartTimestampMonotonic"
+    ],
+    "exit_code": 0,
+    "stdout": "MainPID=3918566\nExecMainStartTimestampMonotonic=177735312333\nActiveState=active\nSubState=running\n",
+    "stderr": "",
+    "properties": {
+      "MainPID": "3918566",
+      "ExecMainStartTimestampMonotonic": "177735312333",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "pid": 3918566,
+    "starttime": "17773529",
+    "exe_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39"
+  }
+]

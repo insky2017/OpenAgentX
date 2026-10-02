@@ -2,9 +2,11 @@
 
 适合两个仍在 Codex Desktop/CLI 中开发、希望保留原会话的领域 Agent。与 `agent join/resume` 的 managed Worker 模式不同：外部会话模式只登记通信身份，不启动模型或 Worker，不迁移历史。
 
-**本轮边界：持久通信通道正在验收；当前 Desktop 的自动排队唤醒尚未接通。** `active` 表示通信绑定有效，不表示原宿主在线。`pending` 表示消息已入 OAX；`acknowledged` 表示收信 Agent 显式确认读入。回复是关联消息，不代表业务独立验收。
+**已安装 `6576c55` 的持久通信通道；当前 Desktop 的自动排队唤醒尚未接通。** `active` 表示通信绑定有效，不表示原宿主在线。`pending` 表示消息已入 OAX；`acknowledged` 表示收信 Agent 显式确认读入。回复是关联消息，不代表业务独立验收。
 
 ## 首次接入
+
+本机 `rhythm`、`oneaxe-pay` 已登记并完成下列绑定，不要重复执行初次 bind。原会话尚未读入初始化说明。对应一次性入口是 `/home/sky/.openagentx/external/rhythm/START.md` 和 `/home/sky/.openagentx/external/oneaxe-pay/START.md`。
 
 管理员先用 `openagentx agent apply --file <identity.yaml>` 登记身份资料（不启动 Worker），然后执行：
 

@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-10-02T16:46:01.885512+00:00",
+  "finished_at": "2026-10-02T16:46:01.896823+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "inbox",
+    "--agent",
+    "oneaxe-pay",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.openagentx/external/oneaxe-pay/credentials.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"has_more\": false,\n  \"messages\": [],\n  \"next_after\": 0\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

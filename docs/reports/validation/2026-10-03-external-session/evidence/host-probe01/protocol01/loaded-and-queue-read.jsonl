@@ -1,0 +1,12 @@
+{"send": {"id": 1, "method": "initialize", "params": {"clientInfo": {"name": "oax-readonly-probe", "version": "1"}, "capabilities": {"experimentalApi": true}}}}
+{"recv": {"id": 1, "result": {"userAgent": "codex-tui/0.160.0 (Ubuntu 24.4.0; x86_64) xterm-256color (oax-readonly-probe; 1)", "codexHome": "/home/sky/.codex", "platformFamily": "unix", "platformOs": "linux"}}}
+{"send": {"id": 2, "method": "thread/loaded/list", "params": {"limit": 100}}}
+{"recv": {"method": "configWarning", "params": {"summary": "Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.\n  user (/home/sky/.codex/config.toml): `disable_response_storage` is ignored.\n  user (/home/sky/.codex/config.toml): `mcp_servers.chrome-devtools.type` is ignored.", "details": null}, "emittedAtMs": 1790956960279}}
+{"recv": {"method": "remoteControl/status/changed", "params": {"status": "disabled", "serverName": "sky-LEGION-REN9000K-34IRZ", "installationId": "111c6643-cc61-40fa-a1a8-be881609073f", "environmentId": null}, "emittedAtMs": 1790956960279}}
+{"recv": {"id": 2, "result": {"data": ["01a0f339-e4f2-7e93-a11e-de52e9c93b6c"], "nextCursor": null}}}
+{"send": {"id": 3, "method": "thread/queue/list", "params": {"threadId": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9", "limit": 1}}}
+{"recv": {"id": 3, "result": {"data": [], "nextCursor": null}}}
+{"send": {"id": 4, "method": "thread/queue/list", "params": {"threadId": "01a0e016-d951-77d1-bc7e-d13662f4823c", "limit": 1}}}
+{"recv": {"id": 4, "result": {"data": [], "nextCursor": null}}}
+{"send": {"id": 5, "method": "thread/loaded/list", "params": {"limit": 100}}}
+{"recv": {"id": 5, "result": {"data": ["01a0f339-e4f2-7e93-a11e-de52e9c93b6c"], "nextCursor": null}}}

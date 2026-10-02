@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/proc/1632229/exe",
+    "--version"
+  ],
+  "exit": 0,
+  "stdout": "codex-cli 0.153.1\n",
+  "stderr": ""
+}

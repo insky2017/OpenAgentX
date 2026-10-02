@@ -1,0 +1,27 @@
+{
+  "started_at": "2026-10-02T16:49:57.340601+00:00",
+  "finished_at": "2026-10-02T16:49:57.355138+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "send",
+    "--agent",
+    "external-installed-a-51e44952c2",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-a-51e44952c2.json",
+    "--to",
+    "external-installed-b-51e44952c2",
+    "--key",
+    "installed-request",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/request.txt"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"sequence\": 1,\n  \"message_id\": \"external-message-6b419592-ca3f-45e8-a09a-fb4bc93c3645\",\n  \"sender_agent_id\": \"external-installed-a-51e44952c2\",\n  \"target_agent_id\": \"external-installed-b-51e44952c2\",\n  \"sender_binding_id\": \"external-b1944e8a-e4aa-44b7-a94c-1f1a88b6acf5\",\n  \"sender_generation\": 1,\n  \"kind\": \"consultation\",\n  \"content\": \"Installed communication verification: TEST REQUEST ONLY.\\n\",\n  \"idempotency_key\": \"installed-request\",\n  \"delivery_state\": \"pending\",\n  \"created_at\": \"2026-10-02T16:49:57.337428162Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

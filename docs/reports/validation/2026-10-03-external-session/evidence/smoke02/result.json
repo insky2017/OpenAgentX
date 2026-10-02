@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-02T16:34:33.582753+00:00",
+  "status": "PASS",
+  "checks_passed": [
+    "real-v2-readonly-backup-upgraded-to-v3-old-rowsets-preserved",
+    "owner-login-and-two-bindings",
+    "send-inbox-status",
+    "idempotent-send-and-conflict",
+    "read-is-not-ack",
+    "wrong-token-peer-and-ack-denied",
+    "ack-and-history",
+    "reply-correlation-and-idempotence",
+    "result-cannot-be-replied",
+    "64k-worst-json-escaping-and-oversize-api-rejection",
+    "request-kind",
+    "restart-binding-ack-inbox-idempotency-persistence",
+    "no-tasks-runs-workers",
+    "schema-verify"
+  ],
+  "error": null,
+  "boundary": "Communication API only. No model, Worker, original Desktop session, automatic wakeup, E04 or E05 proof."
+}

@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-10-02T16:25:45.069670+00:00",
+  "finished_at": "2026-10-02T16:25:45.311742+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "console",
+    "login",
+    "--socket",
+    "/tmp/oax-external-smoke-272e3fe5d2ef89f7.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/owner.json"
+  ],
+  "exit_code": 0,
+  "stdout": "CLI session established for owner; expires 2026-11-01T16:25:45Z\n",
+  "stderr": "Console username: Console password: \n",
+  "stdin": "private PTY credentials omitted"
+}

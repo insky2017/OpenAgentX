@@ -1,0 +1,24 @@
+{
+  "binding_registered": true,
+  "original_sessions_initialized": false,
+  "automatic_delivery": false,
+  "business_messages_sent": 0,
+  "agents": [
+    {
+      "agent_id": "rhythm",
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "workspace": "/home/sky/work/touzi/OneAxe/rhythm",
+      "worker_count": 0,
+      "message_count": 0,
+      "bootstrap_file": "/home/sky/.openagentx/external/rhythm/START.md"
+    },
+    {
+      "agent_id": "oneaxe-pay",
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "workspace": "/home/sky/work/touzi/OneAxe/oneaxe-pay-service",
+      "worker_count": 0,
+      "message_count": 0,
+      "bootstrap_file": "/home/sky/.openagentx/external/oneaxe-pay/START.md"
+    }
+  ]
+}

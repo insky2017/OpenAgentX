@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status",
+    "agy-onboarding-e2e",
+    "--json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"agent_id\": \"agy-onboarding-e2e\", \"active_run\": null, \"pending_task\": null, \"readiness\": {\"can_start_now\": true, \"ready\": true, \"reason\": \"可开始工作\"}}",
+  "stderr": "",
+  "at": "2026-10-02T16:41:45.591852+00:00"
+}

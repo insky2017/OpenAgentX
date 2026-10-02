@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-02T16:12:23.352264+00:00",
+  "pid": 1632229,
+  "ppid": 1628256,
+  "starttime": "4056284",
+  "exe": "/usr/lib/chatgpt/resources/codex",
+  "sha256": "b9315df68cb0e2827c940ffacb66f7524e820d9744060c755fbf938724ad2b76",
+  "stdio_fds": [
+    {
+      "fd": "0",
+      "target": "socket:[7498009]"
+    },
+    {
+      "fd": "1",
+      "target": "socket:[7498011]"
+    },
+    {
+      "fd": "2",
+      "target": "socket:[7498013]"
+    }
+  ]
+}

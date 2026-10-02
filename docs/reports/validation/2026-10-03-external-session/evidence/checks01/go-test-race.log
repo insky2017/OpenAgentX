@@ -1,0 +1,48 @@
+?   	openagentx/internal/api/external	[no test files]
+ok  	openagentx/cmd/openagentx	2.278s
+ok  	openagentx/internal/api	1.036s
+?   	openagentx/internal/cli/external	[no test files]
+ok  	openagentx/internal/api/admin	4.273s
+ok  	openagentx/internal/api/auth	4.230s
+?   	openagentx/internal/runtime/conformance	[no test files]
+?   	openagentx/internal/runtime/descriptors	[no test files]
+?   	openagentx/internal/runtime/fake	[no test files]
+?   	openagentx/internal/runtime/registry	[no test files]
+ok  	openagentx/internal/api/console	13.884s
+ok  	openagentx/internal/api/panel	56.776s
+ok  	openagentx/internal/api/workerapi	1.045s
+ok  	openagentx/internal/auth	(cached)
+ok  	openagentx/internal/auth/cli	12.543s
+ok  	openagentx/internal/auth/web	(cached)
+ok  	openagentx/internal/cli/admin	5.021s
+ok  	openagentx/internal/cli/console	37.011s
+ok  	openagentx/internal/cli/fleet	9.272s
+ok  	openagentx/internal/cli/worker	2.548s
+ok  	openagentx/internal/client/console	1.138s
+ok  	openagentx/internal/client/worker	1.048s
+ok  	openagentx/internal/consolemodel	2.394s
+ok  	openagentx/internal/controlplane	13.114s
+ok  	openagentx/internal/credentialstore	(cached)
+ok  	openagentx/internal/domain	1.034s
+ok  	openagentx/internal/fleet	(cached)
+ok  	openagentx/internal/localprofile	(cached)
+ok  	openagentx/internal/nativebridge	1.372s
+ok  	openagentx/internal/network/secretstore	1.510s
+ok  	openagentx/internal/persistence/sqlite	30.179s
+ok  	openagentx/internal/persistence/sqlite/migrations	7.869s
+ok  	openagentx/internal/runtime	1.029s
+ok  	openagentx/internal/runtime/acp	(cached)
+ok  	openagentx/internal/runtime/agy	16.939s
+ok  	openagentx/internal/runtime/codebuddy	3.167s
+ok  	openagentx/internal/runtime/codex	3.624s
+ok  	openagentx/internal/runtime/network	1.528s
+ok  	openagentx/internal/runtime/spec	1.032s
+ok  	openagentx/internal/safeoutput	(cached)
+--- FAIL: TestTargetSQLiteHelper (0.19s)
+    testkit_test.go:150: schema version = 3
+FAIL
+FAIL	openagentx/internal/testkit	0.236s
+ok  	openagentx/internal/transport/remotehttps	1.366s
+ok  	openagentx/internal/transport/unixhttp	(cached)
+ok  	openagentx/internal/worker	2.755s
+FAIL

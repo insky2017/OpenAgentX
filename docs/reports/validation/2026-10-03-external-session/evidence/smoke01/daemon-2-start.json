@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-02T16:25:45.596971+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "serve",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/openagentx.db",
+    "--socket",
+    "/tmp/oax-external-smoke-272e3fe5d2ef89f7.sock",
+    "--http-addr",
+    "127.0.0.1:0",
+    "--web-dir",
+    "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/web/dist"
+  ],
+  "pid": 3858386,
+  "starttime": "17677385",
+  "exe_sha256": "bd6877c8fcfb2d06d4156ec6060f674cc77b689a6916421b364a75b6c4f5974a"
+}

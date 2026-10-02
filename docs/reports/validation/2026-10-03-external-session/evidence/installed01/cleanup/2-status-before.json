@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-02T16:54:17.250365+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "status",
+    "--agent",
+    "external-installed-b-51e44952c2",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-b-51e44952c2.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"binding_id\": \"external-b14e40c5-9c07-4695-aa41-dd5893934013\",\n  \"agent_id\": \"external-installed-b-51e44952c2\",\n  \"principal_id\": \"agent-external-installed-b-51e44952c2\",\n  \"organization_id\": \"default\",\n  \"host_id\": \"installed-test-only\",\n  \"thread_id\": \"isolated-external-installed-b-51e44952c2\",\n  \"generation\": 1,\n  \"state\": \"active\",\n  \"allowed_peer_agent_ids\": [\n    \"external-installed-a-51e44952c2\"\n  ],\n  \"token_expires_at\": \"2026-11-01T16:49:57.307152019Z\",\n  \"created_at\": \"2026-10-02T16:49:57.307152019Z\",\n  \"updated_at\": \"2026-10-02T16:49:57.307152019Z\"\n}\n",
+  "stderr": ""
+}

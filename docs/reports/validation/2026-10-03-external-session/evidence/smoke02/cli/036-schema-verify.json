@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-02T16:34:33.508693+00:00",
+  "finished_at": "2026-10-02T16:34:33.549983+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "schema",
+    "verify",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/smoke02/private/openagentx.db"
+  ],
+  "exit_code": 0,
+  "stdout": "OpenAgentX schema v3 verified\n",
+  "stderr": "",
+  "stdin": "none"
+}

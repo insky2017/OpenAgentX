@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-02T16:54:17.274722+00:00",
+  "scope": "cleanup only, no matrix rerun; business bindings untouched; identities/messages/journal retained",
+  "results": [
+    {
+      "agent_id": "external-installed-a-51e44952c2",
+      "generation": 1,
+      "revoked": true,
+      "old_credential_http": 401
+    },
+    {
+      "agent_id": "external-installed-b-51e44952c2",
+      "generation": 1,
+      "revoked": true,
+      "old_credential_http": 401
+    }
+  ]
+}

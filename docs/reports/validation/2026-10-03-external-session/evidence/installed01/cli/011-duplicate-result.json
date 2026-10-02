@@ -1,0 +1,27 @@
+{
+  "started_at": "2026-10-02T16:49:57.416167+00:00",
+  "finished_at": "2026-10-02T16:49:57.428615+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "reply",
+    "--agent",
+    "external-installed-b-51e44952c2",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-b-51e44952c2.json",
+    "--message",
+    "external-message-6b419592-ca3f-45e8-a09a-fb4bc93c3645",
+    "--key",
+    "different-result-key",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/result.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 409 (CONFLICT): request already has a result\n",
+  "stdin": "none"
+}

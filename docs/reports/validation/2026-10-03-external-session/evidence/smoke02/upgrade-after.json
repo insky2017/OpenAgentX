@@ -1,0 +1,168 @@
+{
+  "snapshot": {
+    "schema_version": 3,
+    "tables": {
+      "agent_profiles": {
+        "rows": 7,
+        "rowset_sha256": "6f9db03da4db741124ff288c551c01e3ac6ae2a4c8ebf2c180cc0797f653cc87"
+      },
+      "agents": {
+        "rows": 7,
+        "rowset_sha256": "b0f576d9694e85f0b11716f4c3e0699f3f3ac60cf05285444dd1996062bd9e66"
+      },
+      "approval_decisions": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "approval_requests": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "artifacts": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "authority_policies": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cli_tokens": {
+        "rows": 1,
+        "rowset_sha256": "8efc12c964de7b524ffba4d25ffd02b126e4483f9fe123fe4b906755726218e3"
+      },
+      "event_journal": {
+        "rows": 278597,
+        "rowset_sha256": "2b4f465c5c8ce04ecf656c2b7a2ab5c0572fde13e4c3c4320b325ecec55a294b"
+      },
+      "execution_profiles": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "external_messages": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "external_session_bindings": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "installation_metadata": {
+        "rows": 1,
+        "rowset_sha256": "f4e803a4d390cbfb648f955c73b7e659dee583563bea1e9f4264309124af2026"
+      },
+      "mailbox_items": {
+        "rows": 93,
+        "rowset_sha256": "e223945838694877bd9542e0a1fa44ce1a3c481fbf742d2ecc27a299451c5add"
+      },
+      "messages": {
+        "rows": 83,
+        "rowset_sha256": "da366b4e1c36adb9a3c779602f392561418cbf12af41a9a9d02bf955063b6e8d"
+      },
+      "network_imports": {
+        "rows": 1,
+        "rowset_sha256": "1e7f13f253ebd81d2546f121dfb0588c6c78f828f36897efc28c4c31ae015d91"
+      },
+      "network_mode_policies": {
+        "rows": 21,
+        "rowset_sha256": "e6f6a1ce722d9915a50f1aaf8be0ea1a80caaac22bc0d89d824f4439b3f68b5f"
+      },
+      "network_mode_tests": {
+        "rows": 21,
+        "rowset_sha256": "af5a0ba545301f6667ae7379302625715961844b1b869f5f9d3261f4d50ae3db"
+      },
+      "network_profile_bindings": {
+        "rows": 3,
+        "rowset_sha256": "89c6d3ff4bba38a4f57eba636212947aefbf5b2234a3662bcd6369e0df57c685"
+      },
+      "network_profile_heads": {
+        "rows": 3,
+        "rowset_sha256": "55429ab94fd674e8a067378f5795acd7069a37ae51406b5f5765b40fb577c00d"
+      },
+      "network_profile_publications": {
+        "rows": 1,
+        "rowset_sha256": "e6d1160ca320dc941bf997929b54658eb1324a6e9e8844644c1b013ea0d9c937"
+      },
+      "network_profiles": {
+        "rows": 4,
+        "rowset_sha256": "011c6c901e077a275d9be7b8b57a4988b6c8bc133d7984cc1137244c7102912d"
+      },
+      "network_tests": {
+        "rows": 20,
+        "rowset_sha256": "2feb276b2c1b9e2be6d874f1a4f4158537c47e694dfe241b489f6d5741d16ec4"
+      },
+      "network_work_items": {
+        "rows": 56,
+        "rowset_sha256": "3ceb290b7c9aceb35594602efb872d07317ce6684508df3fad0e39eb2c2d6595"
+      },
+      "network_workflow_commands": {
+        "rows": 61,
+        "rowset_sha256": "ed4095d988541666d874dd1f7b29b64e1cf2e2eab81785b066958645a176c297"
+      },
+      "org_units": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "organizations": {
+        "rows": 1,
+        "rowset_sha256": "35572e92bf3056ec899de87238291fb69b619406835782e2adf2174a6741b40b"
+      },
+      "position_assignments": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positions": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "principals": {
+        "rows": 9,
+        "rowset_sha256": "9c721954eb2b9029c772fdd5c2c7b68dd1dd562260153d2d14bad4c31384d315"
+      },
+      "reporting_lines": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "roles": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "run_attempts": {
+        "rows": 81,
+        "rowset_sha256": "74a32f11196dbbe193f276db9e808b9d1ba89d69d780022ce13df67706d081b0"
+      },
+      "runtime_backend_registrations": {
+        "rows": 111,
+        "rowset_sha256": "81cbc0b6da432b148c2644b4808d22cf96b6dc5de9ac571b907619fd92255392"
+      },
+      "session_bindings": {
+        "rows": 49,
+        "rowset_sha256": "e67e9cf8ded11a3dacc36a28649ab5fc1c276524c661e87fba3382a4546b5d0b"
+      },
+      "tasks": {
+        "rows": 79,
+        "rowset_sha256": "8823c1a0e57aadae45dd585c3c6a371397e58a97ff3f27ca3fa8c6d855d7f28f"
+      },
+      "web_sessions": {
+        "rows": 132,
+        "rowset_sha256": "7b843c989ef13bada38648c6644398fe994c3e4d7b49623154fc01e482f7f6be"
+      },
+      "web_users": {
+        "rows": 1,
+        "rowset_sha256": "6b8ea211887b4a089b63d7357029faf9740410b7ff149bfd3046f845191b04a1"
+      },
+      "worker_commands": {
+        "rows": 6,
+        "rowset_sha256": "9f94a8bec2a0e86e1515ca9a5922bed211a20661b8c3657da8da0c38a40e0458"
+      },
+      "worker_instances": {
+        "rows": 111,
+        "rowset_sha256": "0db9b1a1355ef4c43aadc9e55d80093e51118e577d6172353f79201d2e38f7de"
+      },
+      "workspace_leases": {
+        "rows": 0,
+        "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "backup_sha256": "c6d2a55587ad1d33da947583110c4746eb18ea1ac3e78c3add1d54651ac037bf"
+}

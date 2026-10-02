@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-10-02T16:49:56.910671+00:00",
+  "finished_at": "2026-10-02T16:49:57.247976+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "apply",
+    "--db",
+    "/home/sky/.openagentx/data/openagentx.db",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-b-51e44952c2/identity.yaml",
+    "--owner-username",
+    "owner"
+  ],
+  "exit_code": 0,
+  "stdout": "Created Agent \"external-installed-b-51e44952c2\" in Organization \"default\"\n",
+  "stderr": "Owner password: \n",
+  "stdin": "private PTY credentials omitted"
+}

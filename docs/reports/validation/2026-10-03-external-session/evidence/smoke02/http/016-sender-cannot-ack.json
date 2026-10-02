@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-02T16:34:32.904552+00:00",
+  "method": "POST",
+  "path": "/api/external/v1/messages/external-message-918b0b51-3ed9-4518-9c1e-72061555dc05/ack",
+  "request": {},
+  "authorization": "[REDACTED]",
+  "status": 403,
+  "response": {
+    "code": "FORBIDDEN",
+    "message": "only recipient can acknowledge"
+  }
+}

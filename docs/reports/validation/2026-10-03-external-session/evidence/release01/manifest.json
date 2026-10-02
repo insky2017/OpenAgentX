@@ -1,0 +1,7 @@
+{
+  "commit": "6576c559ae852304b04a7bf149583a471b112597",
+  "binary_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39",
+  "built_at": "2026-10-02T16:39:08.673106+00:00",
+  "source_clean": true,
+  "note": "Go 1.22 in nested worktree stamped enclosing OneAxe repo; final release built in standalone clean local clone."
+}

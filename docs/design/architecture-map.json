@@ -1,10 +1,10 @@
 {
   "title": "OpenAgentX · 架构与关键流程",
-  "date": "2026-10-02",
-  "source_commit": "6b68eeb810c2b65d629cd8a817bad25a21483d5c",
-  "installed_commit": "6b68eeb810c2b65d629cd8a817bad25a21483d5c",
-  "binary_sha256": "f9b74b7df378ee05a38d3b49dc465c9168ff3ad7c70a49f81430e21b7f6b3366",
-  "scope": "当前 OpenAgentX 任务后台与领域 Agent 工作流。交易业务、券商或交易所的实现不在本次工程边界内。",
+  "date": "2026-10-03",
+  "source_commit": "6576c559ae852304b04a7bf149583a471b112597",
+  "installed_commit": "6576c559ae852304b04a7bf149583a471b112597",
+  "binary_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39",
+  "scope": "当前 OpenAgentX 任务后台、受管领域 Agent 及 local UDS 外部会话消息通道。交易业务、券商或交易所的实现不在本次工程边界内。",
   "refs": {
     "entry": {
       "label": "登记与服务入口",
@@ -192,12 +192,12 @@
       "line": 1
     },
     "codexcoverage": {
-      "label": "Codex 当前验收覆盖",
+      "label": "2026-10-02 历史：Codex 当前验收覆盖",
       "path": "docs/reports/validation/2026-10-02-codex-workflow/COVERAGE.md",
       "line": 1
     },
     "codexdelivery": {
-      "label": "Codex 交付与安装边界",
+      "label": "2026-10-02 历史：Codex 交付与安装边界",
       "path": "docs/reports/validation/2026-10-02-codex-workflow/DELIVERY.md",
       "line": 1
     },
@@ -232,7 +232,7 @@
       "line": 1
     },
     "codexinstalled": {
-      "label": "6b68eeb 安装来源、Web 与网络重启核验",
+      "label": "2026-10-02 历史：6b68eeb 安装来源、Web 与网络重启核验",
       "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/installed-provenance01/README.md",
       "line": 1
     },
@@ -247,18 +247,43 @@
       "line": 1
     },
     "codexinstalledapi": {
-      "label": "Codex 正式API与实际取消",
+      "label": "2026-10-02 历史：Codex 正式API与实际取消",
       "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/installed-api01/README.md",
       "line": 1
     },
     "codexinstallednative": {
-      "label": "Codex 正式原生终端与重连",
+      "label": "2026-10-02 历史：Codex 正式原生终端与重连",
       "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/installed-native01/SUMMARY.md",
       "line": 1
     },
     "codexinstalledbrowser": {
-      "label": "Codex 正式桌面/窄屏与断线",
+      "label": "2026-10-02 历史：Codex 正式桌面/窄屏与断线",
       "path": "docs/reports/validation/2026-10-02-codex-workflow/evidence/browser-installed01/README.md",
+      "line": 1
+    },
+    "externalusage": {
+      "label": "外部原会话消息通道操作指南",
+      "path": "docs/operations/external-session-entry.md",
+      "line": 1
+    },
+    "externaldelivery": {
+      "label": "6576c559 当前安装与外部消息交付边界",
+      "path": "docs/reports/validation/2026-10-03-external-session/DELIVERY.md",
+      "line": 1
+    },
+    "externalproof": {
+      "label": "真实消息 API 与不创建 Worker/Run 的证据",
+      "path": "docs/reports/validation/2026-10-03-external-session/evidence/README.md",
+      "line": 1
+    },
+    "externalapi": {
+      "label": "仅本地 UDS 的外部消息 API",
+      "path": "internal/api/external/handler.go",
+      "line": 1
+    },
+    "externalledger": {
+      "label": "外部绑定与消息持久化",
+      "path": "internal/persistence/sqlite/external_session_repository.go",
       "line": 1
     }
   },
@@ -286,7 +311,7 @@
             "codexinstalled",
             "codexcoverage"
           ],
-          "proof": "AGY 既有 I＋R 日用；6b68eeb 的8项Web静态工件与HTTP响应 I 匹配；新版本交互验收另记",
+          "proof": "历史验收：AGY 既有 I＋R 日用；6b68eeb 的8项Web静态工件与HTTP响应 I 匹配；新版本交互验收另记",
           "risk": "",
           "jump": "observe"
         },
@@ -336,12 +361,14 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "Task、Message、Mailbox、Run、SessionBinding、Worker 代次与 Journal 保存在 SQLite。复合变更由事务保持一致；内存唤醒丢失不等于工作丢失。schema v2。",
+          "detail": "SQLite schema v3 保存 Task、Message、Mailbox、Run、SessionBinding、Worker 代次和 Journal，并新增外部会话绑定与持久消息表。复合变更由事务保持一致；external_session 消息不伪造 Worker/Run。",
           "refs": [
             "ledger",
-            "installed"
+            "externalledger",
+            "externaldelivery",
+            "externalproof"
           ],
-          "proof": "AGY 既有证据：D＋I：事务测试、历史库迁移与实际安装核对",
+          "proof": "AGY/Codex 历史事务与安装证据保留；本轮真实消息 API、v2副本升级v3旧数据行集合核验",
           "risk": "",
           "jump": ""
         },
@@ -390,14 +417,15 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "AGY 与 Codex adapter 共用冻结输入、Worker 与账本。AGY 每 Run 启动 CLI；Codex 由常驻 app-server 管理 thread/turn。6b68eeb 已安装；来源、网络重启、正式任务、空闲迁入与原生交互 I 主链均已核验；完整矩阵仍有部分项。",
+          "detail": "AGY 与 Codex adapter 共用冻结输入、Worker 与账本。AGY 每 Run 启动 CLI；Codex 由常驻 app-server 管理 thread/turn。6b68eeb 的 Runtime 主链验收作为历史保留；6576c559 已安装，本轮新增消息通道不代表原会话或 Runtime 全链重验。",
           "refs": [
             "runtime",
             "codexruntime",
             "assembly",
             "codexlive",
             "codexinstalled",
-            "codexdelivery"
+            "codexdelivery",
+            "externaldelivery"
           ],
           "proof": "AGY：既有 R＋I；Codex：D＋隔离 R 主链，安装来源/环境 I",
           "risk": "",
@@ -613,7 +641,7 @@
         }
       ],
       "notes": [
-        "总览只画主要依赖。事件回传、SSE 与凭据边界在第 05 / 06 图展开。",
+        "主图仍是受管任务链；外部原会话消息通道见第03图“正在工作的CLI”旁注。消息API已验不等于原会话整链通过。",
         "绿色代表能力已实现，不表示相关的所有边界用例全部通过。点击节点可见证据范围。",
         "Quote Service 等是受管领域与业务工作区；本图不声称券商、交易所或交易执行已接通。"
       ],
@@ -1131,14 +1159,16 @@
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "外部 CLI 可读取仓库薄技能并执行 join --prepare，保存领域职责和交接。当前 turn 仍由原 CLI 完成；不得在忙碌时让新 Worker 争抢执行权。",
+          "detail": "已有 CLI 可按受管模式 join --prepare 交接，也可用 external_session 保留原宿主/thread，仅经本地 UDS 进行 bind/send/inbox/ack/reply、去重和审计。消息模式不启动 Worker、不迁移历史、不伪造 Run。rhythm/oneaxe-pay 已绑定用户原 thread，但原会话尚未初始化，业务消息为0。",
           "refs": [
-            "codexskill",
             "codexjoin",
-            "codexprepare"
+            "codexprepare",
+            "externalusage",
+            "externaldelivery",
+            "externalproof"
           ],
-          "proof": "Codex：真实 PTY prepare；活跃 turn 不自动接管",
-          "risk": "",
+          "proof": "受管 prepare 保留既有证据；本轮仅真实消息 API 已验，绑定不等于原宿主已连接",
+          "risk": "Desktop 自动 queue/wakeup 受阻；尚未证明原会话收信、已读、回复及续办整链",
           "jump": ""
         },
         {
@@ -1505,7 +1535,7 @@
       ],
       "notes": [
         "--configure-only 只抑制 Worker 启动，不代表零配置写入或 daemon 不启动。",
-        "现有命令足以登记长期身份；当前 CLI 角色读取与交接仍需显式完成。",
+        "新增 external_session：仅local UDS持久通信，不启动Worker/Run。active只是绑定有效，pending只是入库，ack只是显式已读；Desktop自动queue/wakeup尚未接通。",
         "虚线“拟议”路径尚未接通；旧 agent attach/bootstrap/launch 不是当前支持入口。"
       ],
       "rows": [
@@ -2280,7 +2310,7 @@
             "daily",
             "codexcoverage"
           ],
-          "proof": "6b68eeb Web静态工件 I；AGY旧版日用交互证据保留；新版本交互逐项验收",
+          "proof": "历史验收：6b68eeb Web静态工件 I；AGY旧版日用交互证据保留；新版本交互逐项验收",
           "risk": "",
           "jump": ""
         },
@@ -2293,12 +2323,14 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "本机 HTTP 服务 Web 与用户 API，UDS 服务本地 CLI / Worker。6b68eeb 已安装；daemon、AGY Worker、Codex Worker 的 /proc/exe SHA 均匹配发布工件，Web 静态资源匹配 release-clone。",
+          "detail": "当前安装来源为 6576c559，数据库 schema v3。本机 HTTP 服务 Web 与用户 API；external_session 的 bind/send/inbox/ack/reply 仅开放在本地 UDS。6b68eeb 的进程/Web/Runtime 验收属于历史证据。",
           "refs": [
             "main",
+            "externalapi",
+            "externaldelivery",
             "codexinstalled"
           ],
-          "proof": "I：实际进程、构建来源和8项Web文件/HTTP响应SHA一致",
+          "proof": "本轮安装与消息 API 证据见外部会话交付；旧版 Runtime/Web 验收不扩为原会话整链",
           "risk": "",
           "jump": ""
         },
@@ -2441,10 +2473,12 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "SQLite schema2保存权威状态；identity、ROLE、Worker YAML、Fleet清单在本地文件。工作目录真实产物另存，不把全部文件塞进事件账本。",
+          "detail": "SQLite schema v3 保存原有任务账本及外部会话绑定/消息，消息支持去重与 Journal。identity、ROLE、Worker YAML、Fleet 等仍在本地文件；外部消息模式不创建 Worker 或 Run，业务产物另存。",
           "refs": [
             "ledger",
-            "installed"
+            "externalledger",
+            "externaldelivery",
+            "externalproof"
           ],
           "proof": "源码已核对；真实覆盖见所列证据",
           "risk": "",
@@ -2900,7 +2934,7 @@
       "notes": [
         "join --prepare 只离线保存身份、职责和交接；当前 turn 完成后再显式 resume。",
         "thread 必须明确选择；不猜测 Desktop 会话，不把 turn/start 用作抢占活跃 turn。",
-        "6b68eeb 已安装，来源、Web静态工件及环境重启 I 已通过；API、迁入和native交互 I 已完成主链验收，安装不等于全矩阵通过。"
+        "本图保留6b68eeb的来源、网络重启、API、迁入和native交互主链历史验收。当前安装为6576c559/schema3；本轮新增外部消息通道，不据此宣称原会话整链或全矩阵通过。"
       ]
     }
   ],

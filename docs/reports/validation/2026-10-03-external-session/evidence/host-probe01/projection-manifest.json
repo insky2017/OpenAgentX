@@ -1,0 +1,98 @@
+[
+  {
+    "file": "protocol01/SUMMARY.md",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/SUMMARY.md",
+    "source_sha256": "74625ce6bc45c816e700091ed8bed44bd9467b1d14cad6f94a4656297e24dbeb",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "protocol01/version.txt",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/version.txt",
+    "source_sha256": "f6464b8cc67af75deb2589fe1dbcde152fc15ffb76a91de1cf0686b4623afb1e",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "protocol01/daemon-version.txt",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/daemon-version.txt",
+    "source_sha256": "917cab8690790163e05c398aca67bd6adac4929d1c192c99e457bae480f7ff5c",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "protocol01/direct-websocket-summary.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/direct-websocket-summary.json",
+    "source_sha256": "6a249d2fb37381e16c67e2130ecf7b7c387b9156781f6acff632701b447c8ca7",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "protocol01/loaded-and-queue-summary.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/loaded-and-queue-summary.json",
+    "source_sha256": "428a75cdbc2fe1d66f85857b926d5b7967819a315a8a1aa0fc452a88932257e5",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "protocol01/loaded-and-queue-read.jsonl",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/loaded-and-queue-read.jsonl",
+    "source_sha256": "d1f4e2b9ea3d2c9f487cba4cdfe5de99b5a2a327794e06fc92c7d26e9a30ef07",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "protocol01/proxy-help.txt",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/proxy-help.txt",
+    "source_sha256": "5059c3cd5cbcf876b0e545048ec22fa134db8cf70c1646ef7917b4b4506a37a1",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "protocol01/proxy-upgrade-response.bin",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/protocol01/proxy-upgrade-response.bin",
+    "source_sha256": "9bff6d57126bf0f72096174f165318bbe3afddc6c8e80137930acedf72f78512",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/SUMMARY.md",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/SUMMARY.md",
+    "source_sha256": "89896e23f0e7266255b47e92cfbe5f426c5cf0d0e32e7ecef2436b407d907456",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/running-version.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/running-version.json",
+    "source_sha256": "b80001565cd568f6e4e51d39ea3ce63dbe84a6edfdff42480a511aa93275b843",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/followup-final-route.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/followup-final-route.json",
+    "source_sha256": "2a16f8486778da4c5cdba8f466db59308caecf82c472a4eeeca2106275986d2f",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/send-message-submission.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/send-message-submission.json",
+    "source_sha256": "99298bb7dad49318e58ec3129f1767272350dcb9743069bdafdc9b62b185e315",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/queue-consumer.txt",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/queue-consumer.txt",
+    "source_sha256": "84e97da4c51ed21981f8e2dcf264d140a9f3e2e017507223278aab3a0ed6f13a",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/main-global-storage.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/main-global-storage.json",
+    "source_sha256": "abca10997bd4df22d71a1a1d402af8981c6214e2bdd0bc7593d0fda059f2a310",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/official-fetch-error.txt",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/official-fetch-error.txt",
+    "source_sha256": "2fbdaaa36a31ec4853f2062504fc20ecfc24512cfe648271bc840f246a542911",
+    "projection": "exact selected diagnostic; full raw wire and application bundles remain private"
+  },
+  {
+    "file": "desktop01/host-provenance-projection.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/desktop01/host-provenance.json",
+    "source_sha256": "cac80de31ad6c29918ed092257e731aab401c202968ded8d7082303141aa3f30",
+    "projection": "process identity and stdio fds only"
+  }
+]

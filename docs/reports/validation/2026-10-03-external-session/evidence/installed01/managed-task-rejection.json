@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-02T16:49:57.431587+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "meta": {
+      "idempotency_key": "installed-external-reject-90491c5301087dff"
+    },
+    "target_agent_id": "external-installed-a-51e44952c2",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Isolated API guard verification. Do not run tools or perform any business operation."
+  },
+  "authorization": "[REDACTED]",
+  "status": 400,
+  "response_body": "CONFLICT: external session uses messages, not managed tasks\n"
+}

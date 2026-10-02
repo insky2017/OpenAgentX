@@ -1,0 +1,12 @@
+[
+  {
+    "file": "go-test-race.log",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/checks02/go-test-race.log",
+    "source_sha256": "1a84250a58b50399e862f9bc16ef8386a391dbb929cb95b038735e5d752f0f8b"
+  },
+  {
+    "file": "result.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/checks02/result.json",
+    "source_sha256": "430e0be23f4d2a131ce0e841cf6394c98e037a83e61c0dd86ef1ac68fda40bdc"
+  }
+]

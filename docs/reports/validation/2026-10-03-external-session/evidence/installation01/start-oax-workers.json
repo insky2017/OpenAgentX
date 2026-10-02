@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "systemctl",
+    "--user",
+    "start",
+    "openagentx-worker@codex-domain-e2e.service",
+    "openagentx-worker@agy-onboarding-e2e.service"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "at": "2026-10-02T16:41:47.058730+00:00"
+}

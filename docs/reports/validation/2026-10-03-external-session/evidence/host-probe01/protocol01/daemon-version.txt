@@ -1,0 +1,1 @@
+{"status":"running","backend":"pid","managedCodexPath":"/home/sky/.codex/packages/standalone/current/bin/codex","managedCodexVersion":"0.160.0","socketPath":"/home/sky/.codex/app-server-control/app-server-control.sock","cliVersion":"0.160.0","appServerVersion":"0.160.0"}

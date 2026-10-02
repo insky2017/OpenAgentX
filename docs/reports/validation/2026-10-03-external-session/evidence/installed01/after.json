@@ -1,0 +1,108 @@
+{
+  "mode": "sqlite read-only, test identities only",
+  "agents": [
+    "external-installed-a-51e44952c2",
+    "external-installed-b-51e44952c2"
+  ],
+  "counts": {
+    "tasks": 0,
+    "messages": 0,
+    "mailbox_items": 0,
+    "run_attempts": 0,
+    "worker_instances": 0
+  },
+  "external_messages": [
+    {
+      "message_id": "external-message-6b419592-ca3f-45e8-a09a-fb4bc93c3645",
+      "sequence": 1,
+      "sender_agent_id": "external-installed-a-51e44952c2",
+      "target_agent_id": "external-installed-b-51e44952c2",
+      "kind": "consultation",
+      "reply_to_message_id": null,
+      "delivery_state": "acknowledged",
+      "acknowledged_at": "2026-10-02T16:49:57.383817181Z"
+    },
+    {
+      "message_id": "external-message-084bb642-5bfc-4fde-b8d8-9ef5c55830b4",
+      "sequence": 2,
+      "sender_agent_id": "external-installed-b-51e44952c2",
+      "target_agent_id": "external-installed-a-51e44952c2",
+      "kind": "result",
+      "reply_to_message_id": "external-message-6b419592-ca3f-45e8-a09a-fb4bc93c3645",
+      "delivery_state": "pending",
+      "acknowledged_at": null
+    }
+  ],
+  "journal": [
+    {
+      "sequence": 278795,
+      "event_id": "event-85020bae-ac0b-4e08-bffc-28b657eb1d6c",
+      "aggregate_type": "agent",
+      "aggregate_id": "external-installed-a-51e44952c2",
+      "event_type": "agent.created",
+      "actor_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "payload_json": "{\"display_name\":\"Installed communication verification\",\"profile_version\":1}",
+      "created_at": "2026-10-02T16:49:56.893903217Z"
+    },
+    {
+      "sequence": 278797,
+      "event_id": "event-4e575116-295d-43be-93b7-8f620e168f23",
+      "aggregate_type": "agent",
+      "aggregate_id": "external-installed-b-51e44952c2",
+      "event_type": "agent.created",
+      "actor_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "payload_json": "{\"display_name\":\"Installed communication verification\",\"profile_version\":1}",
+      "created_at": "2026-10-02T16:49:57.208615277Z"
+    },
+    {
+      "sequence": 278798,
+      "event_id": "event-df883660-df1c-4248-913c-3c72e1f0c560",
+      "aggregate_type": "external_session",
+      "aggregate_id": "external-b1944e8a-e4aa-44b7-a94c-1f1a88b6acf5",
+      "event_type": "external_session.bound",
+      "actor_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "payload_json": "{\"agent_id\":\"external-installed-a-51e44952c2\",\"generation\":1,\"host_id\":\"installed-test-only\",\"thread_id\":\"isolated-external-installed-a-51e44952c2\"}",
+      "created_at": "2026-10-02T16:49:57.276917181Z"
+    },
+    {
+      "sequence": 278799,
+      "event_id": "event-9da4c85d-89c7-4b8d-94ba-c9ea611848b4",
+      "aggregate_type": "external_session",
+      "aggregate_id": "external-b14e40c5-9c07-4695-aa41-dd5893934013",
+      "event_type": "external_session.bound",
+      "actor_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "payload_json": "{\"agent_id\":\"external-installed-b-51e44952c2\",\"generation\":1,\"host_id\":\"installed-test-only\",\"thread_id\":\"isolated-external-installed-b-51e44952c2\"}",
+      "created_at": "2026-10-02T16:49:57.3082927Z"
+    },
+    {
+      "sequence": 278800,
+      "event_id": "event-b65ee698-e9fb-4a42-ba8d-2fac258d3be9",
+      "aggregate_type": "external_message",
+      "aggregate_id": "external-message-6b419592-ca3f-45e8-a09a-fb4bc93c3645",
+      "event_type": "external_message.sent",
+      "actor_principal_id": "agent-external-installed-a-51e44952c2",
+      "payload_json": "{\"kind\":\"consultation\",\"reply_to_message_id\":\"\",\"sender_agent_id\":\"external-installed-a-51e44952c2\",\"sequence\":1,\"target_agent_id\":\"external-installed-b-51e44952c2\"}",
+      "created_at": "2026-10-02T16:49:57.337653439Z"
+    },
+    {
+      "sequence": 278801,
+      "event_id": "event-db89192c-7ba8-449d-a1ef-347eff37f556",
+      "aggregate_type": "external_message",
+      "aggregate_id": "external-message-6b419592-ca3f-45e8-a09a-fb4bc93c3645",
+      "event_type": "external_message.acknowledged",
+      "actor_principal_id": "agent-external-installed-b-51e44952c2",
+      "payload_json": "{\"sequence\":1,\"target_agent_id\":\"external-installed-b-51e44952c2\"}",
+      "created_at": "2026-10-02T16:49:57.383927347Z"
+    },
+    {
+      "sequence": 278802,
+      "event_id": "event-1c208f16-760d-4e88-ae14-03d0ccac04c5",
+      "aggregate_type": "external_message",
+      "aggregate_id": "external-message-084bb642-5bfc-4fde-b8d8-9ef5c55830b4",
+      "event_type": "external_message.sent",
+      "actor_principal_id": "agent-external-installed-b-51e44952c2",
+      "payload_json": "{\"kind\":\"result\",\"reply_to_message_id\":\"external-message-6b419592-ca3f-45e8-a09a-fb4bc93c3645\",\"sender_agent_id\":\"external-installed-b-51e44952c2\",\"sequence\":2,\"target_agent_id\":\"external-installed-a-51e44952c2\"}",
+      "created_at": "2026-10-02T16:49:57.40000737Z"
+    }
+  ]
+}

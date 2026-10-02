@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-10-02T16:25:43.903266+00:00",
+  "finished_at": "2026-10-02T16:25:43.911070+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "external",
+    "--help"
+  ],
+  "exit_code": 0,
+  "stdout": "OAX 原会话通信（保留当前 Codex/Agent 宿主，不启动 Worker）\n\n管理员首次登记身份后绑定；通信凭据自动保存，不打印：\n  openagentx external bind --agent rhythm --host codex-desktop --thread <原thread> --peers oneaxe-pay\n  openagentx external status --agent rhythm\n\nAgent 自己发信、读信和回复：\n  openagentx external send --agent rhythm --to oneaxe-pay --key handoff-01 --content-file /path/request.md\n  openagentx external inbox --agent oneaxe-pay\n  openagentx external ack --agent oneaxe-pay --message <message_id>\n  openagentx external reply --agent oneaxe-pay --message <message_id> --content-file /path/reply.md\n  openagentx external status --agent rhythm --message <message_id>\n\nsend 默认 consultation；--kind request 表示明确行动请求。相同 --key 和内容可安全重试；改内容须新key。\nreply 自动关联、推导接收者，默认key为 reply:<message_id>；不能回复一个结果。\ninbox 默认只显示未确认消息；--all 显示历史，--after <sequence> 分页，--watch 持续观察。\nack 只代表读入，不代表业务完成；回复是Agent自述，不是独立验收。\n\n当前没有 Desktop 自动唤醒连接器。绑定不证明在线或可唤醒；inbox --watch 仅观察，不会调度会话。\n轮换/换绑须 --expected-generation <当前代次>；revoke 撤销通信身份，不停止原会话。\n公共选项：--socket <绝对路径> --credentials <owner凭据文件> --session-file <专用凭据文件>\n",
+  "stderr": "",
+  "stdin": "none"
+}

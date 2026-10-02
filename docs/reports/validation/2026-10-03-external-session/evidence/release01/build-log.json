@@ -1,0 +1,41 @@
+[
+  {
+    "argv": [
+      "git",
+      "clone",
+      "--quiet",
+      "--shared",
+      "--no-checkout",
+      "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/release01/source"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "checkout",
+      "--quiet",
+      "--detach",
+      "6576c559ae852304b04a7bf149583a471b112597"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "go",
+      "build",
+      "-buildvcs=true",
+      "-o",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/release01/openagentx",
+      "./cmd/openagentx"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

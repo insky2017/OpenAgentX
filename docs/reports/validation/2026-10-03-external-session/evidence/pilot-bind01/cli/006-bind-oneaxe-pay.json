@@ -1,0 +1,27 @@
+{
+  "started_at": "2026-10-02T16:46:01.845850+00:00",
+  "finished_at": "2026-10-02T16:46:01.872495+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "bind",
+    "--agent",
+    "oneaxe-pay",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.openagentx/external/oneaxe-pay/credentials.json",
+    "--host",
+    "codex-desktop",
+    "--thread",
+    "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "--peers",
+    "rhythm"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"automatic_delivery\": false,\n  \"binding\": {\n    \"binding_id\": \"external-ba325428-275c-4e62-b2f3-4ebe2015a26f\",\n    \"agent_id\": \"oneaxe-pay\",\n    \"principal_id\": \"agent-oneaxe-pay\",\n    \"organization_id\": \"default\",\n    \"host_id\": \"codex-desktop\",\n    \"thread_id\": \"01a0e016-d951-77d1-bc7e-d13662f4823c\",\n    \"generation\": 1,\n    \"state\": \"active\",\n    \"allowed_peer_agent_ids\": [\n      \"rhythm\"\n    ],\n    \"token_expires_at\": \"2026-11-01T16:46:01.856256979Z\",\n    \"created_at\": \"2026-10-02T16:46:01.856256979Z\",\n    \"updated_at\": \"2026-10-02T16:46:01.856256979Z\"\n  },\n  \"credential_file\": \"/home/sky/.openagentx/external/oneaxe-pay/credentials.json\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

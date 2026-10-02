@@ -1,0 +1,54 @@
+[
+  {
+    "file": "stop-idle-oax-workers.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/stop-idle-oax-workers.json",
+    "source_sha256": "b15cba0956bcce93da8e9ff0282d45c23fd4464bce8e0b915554249283f8bedd"
+  },
+  {
+    "file": "start-oax-workers.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/start-oax-workers.json",
+    "source_sha256": "c8fa31674230b63dca648af13d3e892f461515fff6ed950e5a81bdf89cf89ca2"
+  },
+  {
+    "file": "service-state.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/service-state.json",
+    "source_sha256": "baea7bce5ba84d72b04504c29f4554a1d913d6c9ec2cb28ec4daba6330fb4dfa"
+  },
+  {
+    "file": "start-oax-daemon.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/start-oax-daemon.json",
+    "source_sha256": "e9d542899db1f162f1e34a8bbb92bbec2be87e9a0a28b10783c343dbd791e208"
+  },
+  {
+    "file": "stop-oax-daemon.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/stop-oax-daemon.json",
+    "source_sha256": "f5a5daebab28b7bbc6c57278a2a146f8b62932bff588319affe52d7d85c9b5fe"
+  },
+  {
+    "file": "manifest.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/manifest.json",
+    "source_sha256": "1da32b04b18874b1c863b12db20039ed4456824d06809ff0df58d38c32808c0c"
+  },
+  {
+    "file": "schema-verify.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/schema-verify.json",
+    "source_sha256": "3f91a4b4826fd0c8a23e6faaca0cc0c1de505feb1db27d02f7732177ad853548"
+  },
+  {
+    "file": "original-host-before.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/original-host-before.json",
+    "source_sha256": "7bcefbf0f6319fa5c3b5b9f750b816d8b10d6cd2ff3c6b6e390377cb58a59dec"
+  },
+  {
+    "file": "before-codex-domain-e2e.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/before-codex-domain-e2e.json",
+    "source_sha256": "fae9a05ba1cae1bbfabb6f6d7a92fc110c58286572b19a98d10e85bdec82f592",
+    "projection": "exclude unrelated prior task content; retain idle/no-pending proof"
+  },
+  {
+    "file": "before-agy-onboarding-e2e.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/before-agy-onboarding-e2e.json",
+    "source_sha256": "1b0bc6885c701cbcec4fdf9e5435ae6c0127f89dcfd45d792b071f6ba407a9f0",
+    "projection": "exclude unrelated prior task content; retain idle/no-pending proof"
+  }
+]

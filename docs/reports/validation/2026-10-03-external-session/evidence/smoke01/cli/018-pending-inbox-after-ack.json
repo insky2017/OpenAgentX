@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-10-02T16:25:45.451241+00:00",
+  "finished_at": "2026-10-02T16:25:45.461007+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "external",
+    "inbox",
+    "--agent",
+    "external-smoke-b-cc992241",
+    "--socket",
+    "/tmp/oax-external-smoke-272e3fe5d2ef89f7.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/external-smoke-b-cc992241.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"has_more\": false,\n  \"messages\": [],\n  \"next_after\": 1\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

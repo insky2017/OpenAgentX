@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-10-02T16:25:44.237719+00:00",
+  "finished_at": "2026-10-02T16:25:44.521057+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "agent",
+    "apply",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/openagentx.db",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/external-smoke-a-cc992241/identity.yaml"
+  ],
+  "exit_code": 0,
+  "stdout": "Created Agent \"external-smoke-a-cc992241\" in Organization \"default\"\n",
+  "stderr": "Owner password: \n",
+  "stdin": "private PTY credentials omitted"
+}

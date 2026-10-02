@@ -1,0 +1,11 @@
+OpenAgentX external-session messaging installed
+source_revision=6576c559ae852304b04a7bf149583a471b112597
+vcs.modified=false
+binary_sha256=432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39
+web_source_revision=6b68eeb810c2b65d629cd8a817bad25a21483d5c
+schema_meta_version=3
+backup=/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/rollback
+installed_at=2026-10-02T16:41:48.074723+00:00
+acceptance=external messaging CLI/API verified; original Desktop E04/E05 NOT connected; prior runtime evidence remains historical
+pilot=rhythm and oneaxe-pay bound; original threads not initialized; no business messages sent
+evidence=/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-external-session/DELIVERY.md

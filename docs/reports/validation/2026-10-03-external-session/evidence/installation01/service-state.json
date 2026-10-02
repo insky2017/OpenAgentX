@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "systemctl",
+    "--user",
+    "show",
+    "openagentx.service",
+    "openagentx-worker@codex-domain-e2e.service",
+    "openagentx-worker@agy-onboarding-e2e.service",
+    "-p",
+    "Id",
+    "-p",
+    "ActiveState",
+    "-p",
+    "MainPID"
+  ],
+  "exit_code": 0,
+  "stdout": "MainPID=3918536\nId=openagentx.service\nActiveState=active\n\nMainPID=3918566\nId=openagentx-worker@codex-domain-e2e.service\nActiveState=active\n\nMainPID=3918568\nId=openagentx-worker@agy-onboarding-e2e.service\nActiveState=active\n",
+  "stderr": "",
+  "at": "2026-10-02T16:41:47.134793+00:00"
+}

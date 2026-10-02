@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "systemctl",
+    "--user",
+    "start",
+    "openagentx.service"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "at": "2026-10-02T16:41:46.744063+00:00"
+}

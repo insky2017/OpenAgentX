@@ -1,0 +1,5 @@
+{
+  "file": "webview/assets/app-initial-c8dbea294abe.js",
+  "offset": 5934646,
+  "context": "async function Rqi(e,t,n,r){if(r.prompt.trim().length===0)throw Error(`Cannot send an empty follow-up message.`);let i=yG(e),a=!1,o=null;try{i.trackMessageEvent(t,pw.CODEX_REMOTE_SSH_MESSAGE_RESULT_ATTEMPTED,`steer`,{threadId:n}),a=!0;let s=Fb(e,t),c=e.get(UI,t)?.getConversation(n)??null;o=await s.sendFollowUpMessage(n,{...r,writingBlockContextPrepared:c!=null,additionalContext:NK(n,c,r.additionalContext)}),i.trackMessageEvent(t,pw.CODEX_REMOTE_SSH_MESSAGE_RESULT_SUCCEEDED,`steer`,{threadId:n,turnId:o})}catch(e){throw a&&i.trackMessageEvent(t,pw.CODEX_REMOTE_SSH_MESSAGE_RESULT_FAILED,`steer`,{threadId:n,turnId:o}),e}}"
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "term": "queued-follow-up-send-lock-acquire",
+    "offset": 1330069,
+    "context": "alStateValue(e)}),\"set-global-state\":async({key:e,value:t})=>{if($L.has(e))throw Error(`Direct writes to ${e} are not allowed`);return this.setGlobalStateValue(e,t),{success:!0}},\"queued-follow-up-send-lock-acquire\":async({conversationId:e,messageId:t,lockId:n})=>({acquired:this.queuedFollowUpSendLocks.tryAcquire({conversationId:e,messageId:t,lockId:n})}),\"queued-follow-up-send-lock-release\":async({conversationId:e,messageId:t,lockId:n,sent:r})=>{this.queuedFollowUpSendLocks.release({conversationId:e,messageId:t,lockId:n,sent:r})},\"get-configuration\":async({key:e})=>({value:this.getConfigurationValue(e)}),\"set-configuration\":async({key:e,value:t})=>{if($L.has(e))throw Error(`Direct writes to ${e} are not allowed`);return this.setConfigurationValue(e,t),{success:!0}},\"get-setting\":async({key:e})=>({value:await this.getSettingValue(e)}),\"get-settings\":async()=>({configuredValues:this.getConfiguredSettingValues(),values:await this.getSettingValues()}),\"set-setting\":async({key:e,value:t})=>(await this.setSettingValue(e,t),{success:!0}),\"settings-read\":async()=>({filePath:this.getSettingsStore().getStateFilePath(),settings:this.getToolVisibleSettings(),effectiveSettings:await this.getToolVisibleEffectiveSettings(),definitions:n.Yi}),\"settings-write\":async({settings"
+  }
+]

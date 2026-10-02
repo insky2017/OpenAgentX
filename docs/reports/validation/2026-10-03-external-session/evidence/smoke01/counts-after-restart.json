@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-02T16:25:45.945637+00:00",
+  "mode": "sqlite read-only",
+  "counts": {
+    "tasks": 0,
+    "run_attempts": 0,
+    "worker_instances": 0,
+    "external_messages": 3
+  }
+}

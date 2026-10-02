@@ -1,0 +1,23 @@
+{
+  "started_at": "2026-10-02T16:34:32.916885+00:00",
+  "finished_at": "2026-10-02T16:34:32.927518+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "external",
+    "ack",
+    "--agent",
+    "external-smoke-b-28e64f5d",
+    "--socket",
+    "/tmp/oax-external-smoke-e0c063a0f6586e98.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/smoke02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/smoke02/private/external-smoke-b-28e64f5d.json",
+    "--message",
+    "external-message-918b0b51-3ed9-4518-9c1e-72061555dc05"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"sequence\": 1,\n  \"message_id\": \"external-message-918b0b51-3ed9-4518-9c1e-72061555dc05\",\n  \"sender_agent_id\": \"external-smoke-a-28e64f5d\",\n  \"target_agent_id\": \"external-smoke-b-28e64f5d\",\n  \"sender_binding_id\": \"external-4b3981ae-39d4-4de3-8c02-f5dace58a4cd\",\n  \"sender_generation\": 1,\n  \"kind\": \"consultation\",\n  \"content\": \"OAX_EXTERNAL_SMOKE_CONSULTATION\\n\",\n  \"idempotency_key\": \"consultation-1\",\n  \"delivery_state\": \"acknowledged\",\n  \"created_at\": \"2026-10-02T16:34:32.853375812Z\",\n  \"acknowledged_at\": \"2026-10-02T16:34:32.913864695Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

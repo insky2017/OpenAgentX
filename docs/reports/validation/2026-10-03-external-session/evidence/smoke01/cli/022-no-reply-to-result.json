@@ -1,0 +1,25 @@
+{
+  "started_at": "2026-10-02T16:25:45.495499+00:00",
+  "finished_at": "2026-10-02T16:25:45.504582+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "external",
+    "reply",
+    "--agent",
+    "external-smoke-a-cc992241",
+    "--socket",
+    "/tmp/oax-external-smoke-272e3fe5d2ef89f7.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/external-smoke-a-cc992241.json",
+    "--message",
+    "external-message-e723a5c2-558d-4dfa-b27d-1bfbfbf83137",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/reply.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 400 (INVALID_INPUT): results cannot request another result\n",
+  "stdin": "none"
+}

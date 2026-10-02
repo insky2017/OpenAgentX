@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-02T16:25:43.911710+00:00",
+  "finished_at": "2026-10-02T16:25:44.236903+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "init",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/openagentx.db"
+  ],
+  "exit_code": 0,
+  "stdout": "Initialized OpenAgentX owner \"owner\" and Organization \"default\"\n",
+  "stderr": "Owner password: \nConfirm owner password: \n",
+  "stdin": "private PTY credentials omitted"
+}

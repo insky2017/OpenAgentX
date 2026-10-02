@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-10-02T16:25:45.851971+00:00",
+  "finished_at": "2026-10-02T16:25:45.864854+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "external",
+    "status",
+    "--agent",
+    "external-smoke-b-cc992241",
+    "--socket",
+    "/tmp/oax-external-smoke-272e3fe5d2ef89f7.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/external-smoke-b-cc992241.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"binding_id\": \"external-0968865c-19c9-4ff3-a837-bad95e7866f9\",\n  \"agent_id\": \"external-smoke-b-cc992241\",\n  \"principal_id\": \"agent-external-smoke-b-cc992241\",\n  \"organization_id\": \"default\",\n  \"host_id\": \"isolated-test-host\",\n  \"thread_id\": \"isolated-original-external-smoke-b-cc992241\",\n  \"generation\": 1,\n  \"state\": \"active\",\n  \"allowed_peer_agent_ids\": [\n    \"external-smoke-a-cc992241\"\n  ],\n  \"token_expires_at\": \"2026-11-01T16:25:45.34841485Z\",\n  \"created_at\": \"2026-10-02T16:25:45.34841485Z\",\n  \"updated_at\": \"2026-10-02T16:25:45.34841485Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

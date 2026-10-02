@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-10-02T16:34:33.431804+00:00",
+  "finished_at": "2026-10-02T16:34:33.442362+00:00",
+  "argv": [
+    "/tmp/openagentx-external-candidate",
+    "external",
+    "status",
+    "--agent",
+    "external-smoke-b-28e64f5d",
+    "--socket",
+    "/tmp/oax-external-smoke-e0c063a0f6586e98.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/smoke02/private/owner.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/smoke02/private/external-smoke-b-28e64f5d.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"binding_id\": \"external-51e4675f-b2da-4dc6-a6f4-e1e5962dc440\",\n  \"agent_id\": \"external-smoke-b-28e64f5d\",\n  \"principal_id\": \"agent-external-smoke-b-28e64f5d\",\n  \"organization_id\": \"default\",\n  \"host_id\": \"isolated-test-host\",\n  \"thread_id\": \"isolated-original-external-smoke-b-28e64f5d\",\n  \"generation\": 1,\n  \"state\": \"active\",\n  \"allowed_peer_agent_ids\": [\n    \"external-smoke-a-28e64f5d\"\n  ],\n  \"token_expires_at\": \"2026-11-01T16:34:32.825336102Z\",\n  \"created_at\": \"2026-10-02T16:34:32.825336102Z\",\n  \"updated_at\": \"2026-10-02T16:34:32.825336102Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

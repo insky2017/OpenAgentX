@@ -1,0 +1,137 @@
+{
+  "raw_root": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/raw",
+  "generated_at": "2026-10-02T16:49:57.771395+00:00",
+  "files": [
+    {
+      "path": "after.json",
+      "raw_sha256": "d3a733bf26ec370d0648ac2d30e8b7180e6ea01d516928ba8cbace6590ad938b",
+      "sha256": "d3a733bf26ec370d0648ac2d30e8b7180e6ea01d516928ba8cbace6590ad938b"
+    },
+    {
+      "path": "before.json",
+      "raw_sha256": "d629a0ce58ab76fe1a1b45cc9eec4723e9a317bf1275c685e43e02c368acbb45",
+      "sha256": "d629a0ce58ab76fe1a1b45cc9eec4723e9a317bf1275c685e43e02c368acbb45"
+    },
+    {
+      "path": "cli/001-apply-external-installed-a-51e44952c2.json",
+      "raw_sha256": "316cabe34468d6e080232511b4410b89333677d5e8ef176bb8ff790262533e33",
+      "sha256": "316cabe34468d6e080232511b4410b89333677d5e8ef176bb8ff790262533e33"
+    },
+    {
+      "path": "cli/002-apply-external-installed-b-51e44952c2.json",
+      "raw_sha256": "31493418ea7747895330fc5f3139fc2fc920840e95cb016ded49e413c7ce45f3",
+      "sha256": "31493418ea7747895330fc5f3139fc2fc920840e95cb016ded49e413c7ce45f3"
+    },
+    {
+      "path": "cli/003-bind-external-installed-a-51e44952c2.json",
+      "raw_sha256": "5d02f29fc2a120587350e696497867b38272d2b5747c1ee95a9d8291280d672a",
+      "sha256": "5d02f29fc2a120587350e696497867b38272d2b5747c1ee95a9d8291280d672a"
+    },
+    {
+      "path": "cli/004-bind-external-installed-b-51e44952c2.json",
+      "raw_sha256": "1411b51265f4159c9ccd0c7441acafdaae786cd9364b2493a776e8df17d5ecaa",
+      "sha256": "1411b51265f4159c9ccd0c7441acafdaae786cd9364b2493a776e8df17d5ecaa"
+    },
+    {
+      "path": "cli/005-send.json",
+      "raw_sha256": "cf9c7ce4ff5050038993b99997ad133151efe6f9b13b7f2ce4f0ae82f02b5119",
+      "sha256": "cf9c7ce4ff5050038993b99997ad133151efe6f9b13b7f2ce4f0ae82f02b5119"
+    },
+    {
+      "path": "cli/006-same-key-retry.json",
+      "raw_sha256": "6ba5509dfae5f36b067e1545c45f58644c3082446189feff9542f76dcf5320b9",
+      "sha256": "6ba5509dfae5f36b067e1545c45f58644c3082446189feff9542f76dcf5320b9"
+    },
+    {
+      "path": "cli/007-inbox.json",
+      "raw_sha256": "6f73790a88c14969159630a93c779b1f76249e3dd8394ae732303f48565828b5",
+      "sha256": "6f73790a88c14969159630a93c779b1f76249e3dd8394ae732303f48565828b5"
+    },
+    {
+      "path": "cli/008-ack.json",
+      "raw_sha256": "781f36a55132941e4c34a837bada45d07da90e936e5b7f4871ab50c50cd816b9",
+      "sha256": "781f36a55132941e4c34a837bada45d07da90e936e5b7f4871ab50c50cd816b9"
+    },
+    {
+      "path": "cli/009-reply.json",
+      "raw_sha256": "34c133c7764737e3c880eee8bc109a867a8648da06b9fad676bf5de3fdc0748b",
+      "sha256": "34c133c7764737e3c880eee8bc109a867a8648da06b9fad676bf5de3fdc0748b"
+    },
+    {
+      "path": "cli/010-result-status.json",
+      "raw_sha256": "5ee05cc7e3e3df01153c380bd1cb21e83dade069a5fc1b2e22c3c6403600da7b",
+      "sha256": "5ee05cc7e3e3df01153c380bd1cb21e83dade069a5fc1b2e22c3c6403600da7b"
+    },
+    {
+      "path": "cli/011-duplicate-result.json",
+      "raw_sha256": "581ffc5796c9d76b0c569906b8d2dab7f20b26fae7c548c9683a5cdb3861dde2",
+      "sha256": "581ffc5796c9d76b0c569906b8d2dab7f20b26fae7c548c9683a5cdb3861dde2"
+    },
+    {
+      "path": "managed-task-rejection.json",
+      "raw_sha256": "51eee8bdf6e4d31c1793e22eca9f28f96a3940f4f60476eaf05cebfaaa7af50e",
+      "sha256": "51eee8bdf6e4d31c1793e22eca9f28f96a3940f4f60476eaf05cebfaaa7af50e"
+    },
+    {
+      "path": "provenance.json",
+      "raw_sha256": "f7f86f6a961588f46bbd29ef1ba7378fa80d74dbc80127985dec4c9afd5dae53",
+      "sha256": "f7f86f6a961588f46bbd29ef1ba7378fa80d74dbc80127985dec4c9afd5dae53"
+    },
+    {
+      "path": "result.json",
+      "raw_sha256": "f5ee57e3045fb91f0128ede1f3f554538c8d7a73e85659b4533f7434a82cd674",
+      "sha256": "f5ee57e3045fb91f0128ede1f3f554538c8d7a73e85659b4533f7434a82cd674"
+    },
+    {
+      "path": "services-after.json",
+      "raw_sha256": "e02e7826344e8dffe0f4732ab91abab0ec6f09c852b1ea64f225fb72c90a4fe6",
+      "sha256": "e02e7826344e8dffe0f4732ab91abab0ec6f09c852b1ea64f225fb72c90a4fe6"
+    },
+    {
+      "path": "services-before.json",
+      "raw_sha256": "e02e7826344e8dffe0f4732ab91abab0ec6f09c852b1ea64f225fb72c90a4fe6",
+      "sha256": "e02e7826344e8dffe0f4732ab91abab0ec6f09c852b1ea64f225fb72c90a4fe6"
+    },
+    {
+      "path": "installed-build-info.json",
+      "raw_sha256": "fad0d55765c51dca0c0ebd36e3506d18781e32fb4108a0f19b583edc65c81241",
+      "sha256": "fad0d55765c51dca0c0ebd36e3506d18781e32fb4108a0f19b583edc65c81241"
+    },
+    {
+      "path": "cleanup/1-status-before.json",
+      "raw_sha256": "64b45575b25af2ad7e5aa6a1dfd5e54304f557e5655398b4257a67abbf8fb039",
+      "sha256": "64b45575b25af2ad7e5aa6a1dfd5e54304f557e5655398b4257a67abbf8fb039"
+    },
+    {
+      "path": "cleanup/1-revoke.json",
+      "raw_sha256": "a153a7dce0cbce6f05b221786fe7143ced09e348f7267844d4543d7043a02a6f",
+      "sha256": "a153a7dce0cbce6f05b221786fe7143ced09e348f7267844d4543d7043a02a6f"
+    },
+    {
+      "path": "cleanup/1-old-credential-denied.json",
+      "raw_sha256": "e0e27d4c5d6edec71f53e14c1d7d0193c3e0767c4f98a6381f465ee678bb56d1",
+      "sha256": "e0e27d4c5d6edec71f53e14c1d7d0193c3e0767c4f98a6381f465ee678bb56d1"
+    },
+    {
+      "path": "cleanup/2-status-before.json",
+      "raw_sha256": "5159f2a90ee7f738073b6b1d9fac3efcb0312ef7ea17287bf185f25eb00cce67",
+      "sha256": "5159f2a90ee7f738073b6b1d9fac3efcb0312ef7ea17287bf185f25eb00cce67"
+    },
+    {
+      "path": "cleanup/2-revoke.json",
+      "raw_sha256": "9377e62012094d34eceb4e65f754b80a7eadc3539162a92bb9fa229d05bbd31e",
+      "sha256": "9377e62012094d34eceb4e65f754b80a7eadc3539162a92bb9fa229d05bbd31e"
+    },
+    {
+      "path": "cleanup/2-old-credential-denied.json",
+      "raw_sha256": "78f971cc98222baf449bc6f470a3d9150064e87b64146ab6c9a827b5ccdbb0fe",
+      "sha256": "78f971cc98222baf449bc6f470a3d9150064e87b64146ab6c9a827b5ccdbb0fe"
+    },
+    {
+      "path": "cleanup/result.json",
+      "raw_sha256": "4e63b29431f43e910afbd4e25c5573bd0ceab934bed4fb025b2ed0556e68e2b5",
+      "sha256": "4e63b29431f43e910afbd4e25c5573bd0ceab934bed4fb025b2ed0556e68e2b5"
+    }
+  ],
+  "secrets": "credential files and authentication input excluded from raw and export"
+}

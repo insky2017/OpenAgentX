@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-02T16:25:43.851758+00:00",
+  "binary": "/tmp/openagentx-external-candidate",
+  "binary_sha256": "bd6877c8fcfb2d06d4156ec6060f674cc77b689a6916421b364a75b6c4f5974a",
+  "harness_sha256": "c1b8d34807abefea723aac93cbd81bb8091318cbab24a91c623c72c4f21b81bd",
+  "source_commit": "uncommitted-external-candidate",
+  "scope": "real isolated communication CLI/API; no original-session E04/E05 claim",
+  "socket": "/tmp/oax-external-smoke-272e3fe5d2ef89f7.sock",
+  "database": "/home/sky/.local/state/openagentx/validation/2026-10-02-external-session/smoke01/private/openagentx.db"
+}

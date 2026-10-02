@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-02T16:49:57.759888+00:00",
+  "status": "PASS",
+  "checks_passed": [
+    "installed-owner-authorized-apply-and-bind",
+    "installed-send-inbox-ack-reply-status",
+    "same-key-idempotency",
+    "duplicate-result-rejected",
+    "managed-task-rejected-with-specific-external-guard",
+    "independent-test-only-db-and-journal",
+    "installed-processes-unchanged"
+  ],
+  "error": null,
+  "boundary": "Communication API only. No model, Worker, original Desktop session, automatic wakeup, E04 or E05 proof."
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "file": "manifest.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/release01/manifest.json",
+    "source_sha256": "c6b7d9d71e71786bbe31f859d0814f3f84ff8a0ab3c42a9fe6b7b665024051ae"
+  },
+  {
+    "file": "build-info.txt",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/release01/build-info.txt",
+    "source_sha256": "9cb5c22f142defb601bc0c0a4e0155c3cd87ccb37295d0a77d0dfcaa8529f5e6"
+  },
+  {
+    "file": "build-log.json",
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/release01/build-log.json",
+    "source_sha256": "8f79b9f02bbcff87c63178f28c1b811d65f03501a6108893422f2853d9c0ed4f"
+  }
+]

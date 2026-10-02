@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "schema",
+    "verify",
+    "--db",
+    "/home/sky/.openagentx/data/openagentx.db"
+  ],
+  "exit_code": 0,
+  "stdout": "OpenAgentX schema v3 verified\n",
+  "stderr": "",
+  "at": "2026-10-02T16:41:47.105484+00:00"
+}

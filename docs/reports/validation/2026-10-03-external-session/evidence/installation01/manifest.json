@@ -1,0 +1,25 @@
+{
+  "installed_at": "2026-10-02T16:41:48.074723+00:00",
+  "source_commit": "6576c559ae852304b04a7bf149583a471b112597",
+  "binary_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39",
+  "schema": 3,
+  "services": [
+    {
+      "MainPID": "3918536",
+      "Id": "openagentx.service",
+      "ActiveState": "active"
+    },
+    {
+      "MainPID": "3918566",
+      "Id": "openagentx-worker@codex-domain-e2e.service",
+      "ActiveState": "active"
+    },
+    {
+      "MainPID": "3918568",
+      "Id": "openagentx-worker@agy-onboarding-e2e.service",
+      "ActiveState": "active"
+    }
+  ],
+  "original_host_unchanged": true,
+  "rollback_directory": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installation01/rollback"
+}

@@ -1,0 +1,29 @@
+{
+  "initialize": {
+    "id": 1,
+    "result": {
+      "userAgent": "codex-tui/0.160.0 (Ubuntu 24.4.0; x86_64) xterm-256color (oax-readonly-probe; 1)",
+      "codexHome": "/home/sky/.codex",
+      "platformFamily": "unix",
+      "platformOs": "linux"
+    }
+  },
+  "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9": {
+    "error": null,
+    "id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+    "status": {
+      "type": "notLoaded"
+    },
+    "cwd": "/home/sky/Documents/ChatGPT/steadyflow",
+    "path": "/home/sky/.codex/sessions/2026/09/18/rollout-2026-09-18T22-20-02-01a0b4e3-7b2e-7822-8ae1-9f0e812115a9.jsonl"
+  },
+  "01a0e016-d951-77d1-bc7e-d13662f4823c": {
+    "error": null,
+    "id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "status": {
+      "type": "notLoaded"
+    },
+    "cwd": "/home/sky/Documents/ChatGPT/\u7b2c\u4e8c\u589e\u957f\u66f2\u7ebf",
+    "path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl"
+  }
+}
