@@ -46,7 +46,7 @@ func TestExternalV3ToV4AtomicMigrationAndShapeValidation(t *testing.T) {
 	if err := ValidateCurrent(ctx, db); err != nil {
 		t.Fatal(err)
 	}
-	if v, err := Version(ctx, db); err != nil || v != 4 {
+	if v, err := Version(ctx, db); err != nil || v != CurrentVersion {
 		t.Fatalf("final version %d %v", v, err)
 	}
 	var state, delivery, body string

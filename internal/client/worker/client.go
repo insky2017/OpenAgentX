@@ -40,6 +40,8 @@ func (e *APIError) Is(target error) bool {
 		return target == domain.ErrFencingRejected
 	case openapi.ErrorUnsupportedCapability:
 		return target == domain.ErrUnsupportedCapability
+	case openapi.ErrorManagedCollaborationPaused:
+		return target == domain.ErrManagedCollaborationPaused
 	default:
 		return false
 	}

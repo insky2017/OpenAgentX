@@ -16,6 +16,50 @@ import (
 
 const integrationSentinelSeconds = "86400"
 
+func TestIsolatedTmuxTerminalCapabilityLabelDoesNotChangeLivePane(t *testing.T) {
+	ctx, runner := isolatedTmux(t)
+	manifest := Manifest{Version: 1, Session: SessionName, Agents: []Agent{{AgentID: "quote", WorkerConfig: "/tmp/quote.yaml", Enabled: true}}}
+	label := "OAX 状态 Console · 原生交互终端尚未适配"
+	workspace := Workspace{Runner: runner,
+		ConsoleCommand: func(string) []string { return []string{"sleep", integrationSentinelSeconds} },
+		PaneLabel:      func(string) string { return label },
+	}
+	if _, err := workspace.Reconcile(ctx, manifest); err != nil {
+		t.Fatal(err)
+	}
+	windows, err := workspace.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	window, ok := findWindowByName(windows, "quote")
+	if !ok {
+		t.Fatal("Agent pane is missing")
+	}
+	for name, want := range map[string]string{"pane-border-status": "top", "pane-border-format": label} {
+		output, err := runner.Run(ctx, "show-options", "-w", "-v", "-t", window.ID, name)
+		if err != nil || strings.TrimSpace(output) != want {
+			t.Fatalf("%s=%q err=%v", name, output, err)
+		}
+	}
+	pid, err := runner.Run(ctx, "display-message", "-p", "-t", window.ID+".0", "#{pane_pid}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	workspace.PaneLabel = func(string) string { return "Codex 受管原生终端" }
+	workspace.RespawnDead = true
+	if _, err := workspace.Reconcile(ctx, manifest); err != nil {
+		t.Fatal(err)
+	}
+	after, err := runner.Run(ctx, "display-message", "-p", "-t", window.ID+".0", "#{pane_pid}")
+	if err != nil || after != pid {
+		t.Fatalf("live process changed: %q -> %q (%v)", pid, after, err)
+	}
+	output, err := runner.Run(ctx, "show-options", "-w", "-v", "-t", window.ID, "pane-border-format")
+	if err != nil || strings.TrimSpace(output) != label {
+		t.Fatalf("live pane mislabeled: %q (%v)", output, err)
+	}
+}
+
 func isolatedTmux(t *testing.T) (context.Context, ExecRunner) {
 	t.Helper()
 	if _, err := exec.LookPath("tmux"); err != nil {

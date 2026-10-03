@@ -65,12 +65,13 @@ inbox --watch仅观察，不会调度会话；不以周期性模型空醒代替�
 
 type options struct {
 	agent, host, thread, peers, to, key, kind, contentFile, message, sessionFile string
+	mode, contextTask, backend, originTask                                       string
 	generation, after                                                            int64
 	scope, state, file, organization                                             string
 	expectedVersion                                                              int64
 	recover                                                                      bool
 	all, watch, owner                                                            bool
-	socket, credentials                                                          localprofile.PathFlag
+	socket, credentials, workerDir                                               localprofile.PathFlag
 }
 
 func Execute(args []string, out, errOut io.Writer) int {
@@ -85,7 +86,7 @@ func Execute(args []string, out, errOut io.Writer) int {
 		parseArgs = parseArgs[1:]
 	}
 	switch command {
-	case "bind", "status", "send", "reply", "inbox", "ack", "revoke", "receipt", "forward", "roles", "roles-apply":
+	case "bind", "status", "send", "reply", "inbox", "ack", "revoke", "receipt", "forward", "roles", "roles-apply", "instructions":
 	default:
 		fmt.Fprint(errOut, usage)
 		return 2
@@ -100,6 +101,11 @@ func Execute(args []string, out, errOut io.Writer) int {
 	fs.Int64Var(&o.expectedVersion, "expected-version", -1, "职责目录当前revision；首次为0")
 	fs.BoolVar(&o.recover, "recover", false, "包括已ack但未最终处置的请求；不自动重新执行")
 	fs.StringVar(&o.agent, "agent", "", "自身领域Agent ID")
+	fs.StringVar(&o.mode, "mode", "external", "通信宿主模式：external 或 managed")
+	fs.StringVar(&o.contextTask, "context-task", "", "managed模式的已有会话Task；省略时从本Agent本地Codex状态读取")
+	fs.StringVar(&o.backend, "backend", "", "managed模式的Runtime backend ID")
+	fs.StringVar(&o.originTask, "origin-task", "", "发起咨询的本Agent Task ID，用于关联后续工作")
+	fs.Var(&o.workerDir, "worker-dir", localprofile.PathUsage(localprofile.WorkerConfigDir, "Worker configs"))
 	fs.StringVar(&o.host, "host", "", "原宿主标识（登记信息，不是已连接证明）")
 	fs.StringVar(&o.thread, "thread", "", "明确的原会话ID")
 	fs.StringVar(&o.peers, "peers", "", "可互通的Agent ID，逗号分隔")
@@ -252,7 +258,12 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 	}
 	switch command {
 	case "bind":
-		in := domain.BindExternalSessionInput{AgentID: o.agent, HostID: o.host, ThreadID: o.thread, ExpectedGeneration: o.generation}
+		if o.mode == "managed" {
+			if err := resolveManagedContext(&o, resolver); err != nil {
+				return err
+			}
+		}
+		in := domain.BindExternalSessionInput{AgentID: o.agent, HostID: o.host, ThreadID: o.thread, Mode: o.mode, ManagedContextTaskID: o.contextTask, ManagedBackendID: o.backend, ExpectedGeneration: o.generation}
 		for _, peer := range strings.Split(o.peers, ",") {
 			in.AllowedPeerAgentIDs = append(in.AllowedPeerAgentIDs, strings.TrimSpace(peer))
 		}
@@ -272,7 +283,7 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 		if err != nil {
 			return fmt.Errorf("绑定或凭据保存未完成；先用 status --owner 查询当前代次后再恢复: %w", err)
 		}
-		return emit(out, map[string]any{"binding": result.Binding, "credential_file": o.sessionFile, "automatic_delivery": false})
+		return emit(out, map[string]any{"binding": result.Binding, "credential_file": o.sessionFile, "automatic_delivery": result.Binding.Mode == "managed", "next": "openagentx collaborate instructions --agent " + o.agent})
 	case "revoke":
 		if o.generation < 1 {
 			return fmt.Errorf("revoke需要 --expected-generation")
@@ -299,7 +310,7 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 		if err != nil {
 			return err
 		}
-		in := domain.SendExternalMessageInput{Scope: o.scope, TargetAgentID: o.to, Kind: domain.ExternalMessageKind(o.kind), Content: string(content), IdempotencyKey: o.key}
+		in := domain.SendExternalMessageInput{Scope: o.scope, TargetAgentID: o.to, Kind: domain.ExternalMessageKind(o.kind), Content: string(content), IdempotencyKey: o.key, OriginTaskID: o.originTask}
 		if command == "forward" {
 			in.Kind = domain.ExternalMessageRequest
 			in.ForwardedFromMessageID = o.message
@@ -388,6 +399,8 @@ func run(ctx context.Context, command string, o options, out io.Writer) error {
 		return emit(out, result)
 	case "inbox":
 		return inbox(ctx, c, o, out)
+	case "instructions":
+		return collaborationInstructions(ctx, c, o, socket.Path, out)
 	}
 	return nil
 }

@@ -534,6 +534,38 @@ func TestBeginSecurityErrorsTerminateResidentWorker(t *testing.T) {
 	}
 }
 
+func TestPausedCollaborationDoesNotStopNextOrdinaryTask(t *testing.T) {
+	runner, client, adapter := newRunnerFixture(t, false)
+	client.beginErr = domain.ErrManagedCollaborationPaused
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	go func() { result <- runner.Run(ctx) }()
+	waitSignal(t, client.heartbeatHit, "initial heartbeat")
+	client.enqueueMailbox(workItem("mailbox-review", 1))
+	waitSignal(t, client.beginHit, "isolated collaboration")
+	client.mu.Lock()
+	client.beginErr = nil
+	client.mu.Unlock()
+	client.enqueueMailbox(workItem("mailbox-next", 2))
+	handle, err := adapter.NextHandle(testContext(t))
+	if err != nil {
+		t.Fatalf("ordinary task did not run after isolated collaboration: %v", err)
+	}
+	handle.Complete(openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, Result: "next task", SideEffectsKnown: true})
+	waitSignal(t, client.finishHit, "next task finish")
+	client.mu.Lock()
+	attempts, runs := client.beginAttempts, client.runCounter
+	client.mu.Unlock()
+	if attempts != 2 || runs != 1 {
+		t.Fatalf("paused work was executed or replayed: attempts=%d runs=%d", attempts, runs)
+	}
+	cancel()
+	if err := waitWorkerExit(t, result); err != nil {
+		t.Fatalf("worker exited on paused collaboration: %v", err)
+	}
+}
+
 func TestSlowBackendHealthDoesNotBlockHeartbeatOrControl(t *testing.T) {
 	descriptor := runnerTestDescriptor([]string{"inherit"})
 	base, err := fake.NewAdapter(descriptor)

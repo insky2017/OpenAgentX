@@ -1,5 +1,5 @@
-// Package external exposes local message-only communication for agents whose
-// execution remains in an existing host. It never starts a Worker or a turn.
+// Package external exposes agent-scoped communication. External bindings keep
+// their existing host; explicitly managed bindings also admit durable work.
 package external
 
 import (

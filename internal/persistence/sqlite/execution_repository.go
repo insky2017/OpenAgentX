@@ -144,6 +144,9 @@ func (r *Repository) BeginRunAttempt(
 	if task.TargetAgentID != run.AgentID {
 		return nil, domain.ErrForbidden("RunAttempt Agent does not own target Task")
 	}
+	if err := validateManagedTaskAdmissionTx(ctx, tx, task, run, now); err != nil {
+		return nil, err
+	}
 	if !task.CanBeginAttempt() {
 		if task.Status == domain.TaskStatusCancelRequested {
 			return nil, domain.ErrTaskCancelRequested

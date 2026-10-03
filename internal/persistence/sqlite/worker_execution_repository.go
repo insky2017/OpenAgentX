@@ -237,6 +237,21 @@ func (r *Repository) BeginClaimedRunAttempt(
 		}
 		return nil, nil, domain.ErrInvalidTransition
 	}
+	if admissionErr := validateManagedTaskAdmissionTx(ctx, tx, task, run, guard.CheckedAt); admissionErr != nil {
+		if !managedAdmissionReviewable(admissionErr) {
+			return nil, nil, admissionErr
+		}
+		if err := r.pauseManagedAdmissionTx(ctx, tx, task, item, guard, admissionErr.Error()); err != nil {
+			return nil, nil, err
+		}
+		if err := r.inject(FaultBeforeCommit); err != nil {
+			return nil, nil, err
+		}
+		if err := commit(tx); err != nil {
+			return nil, nil, err
+		}
+		return nil, nil, domain.ErrManagedCollaborationPaused
+	}
 	var preflightRequest *domain.ApprovalRequest
 	if preflightScopeDigest != "" {
 		preflightRequest, err = scanApprovalRequest(tx.QueryRowContext(ctx, `SELECT `+approvalRequestColumns+`
@@ -856,6 +871,9 @@ func (r *Repository) FinishRun(
 	affected, err = result.RowsAffected()
 	if err != nil || affected != 1 {
 		return domain.ErrStaleVersion
+	}
+	if err := r.completeManagedCollaborationTx(ctx, tx, task, run); err != nil {
+		return err
 	}
 	for _, event := range []*domain.JournalEvent{runEvent, taskEvent} {
 		if err := insertJournal(ctx, tx, event); err != nil {

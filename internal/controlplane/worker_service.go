@@ -730,8 +730,24 @@ func (s *WorkerService) Finish(ctx context.Context, principalID string, token st
 	}
 	// The repository binds the Task aggregate ID from the RunAttempt and rejects
 	// mismatches; leave it empty here so the transaction supplies the authority.
-	return s.state.FinishRun(ctx, guard, runID, request.ExpectedTaskVersion,
-		request.ExpectedRunVersion, request.Result, binding, expectedBindingVersion, bindingEvent, taskEvent, runEvent)
+	if err := s.state.FinishRun(ctx, guard, runID, request.ExpectedTaskVersion,
+		request.ExpectedRunVersion, request.Result, binding, expectedBindingVersion, bindingEvent, taskEvent, runEvent); err != nil {
+		return err
+	}
+	// Completion and any collaboration follow-up are already durable. A missed
+	// notification must not turn a committed completion into an apparent error;
+	// the Worker's bounded mailbox wait will discover the same persisted Task.
+	if wake, ok := s.state.(interface {
+		ManagedCollaborationWakeTargets(context.Context, string) ([]string, error)
+	}); ok {
+		if agents, err := wake.ManagedCollaborationWakeTargets(ctx, runID); err == nil {
+			for _, agent := range agents {
+				s.broker.Publish(AgentMailboxTopic(agent))
+				s.broker.Publish("external-inbox:" + agent)
+			}
+		}
+	}
+	return nil
 }
 
 func (s *WorkerService) ClaimWorkerCommand(ctx context.Context, principalID string, token string, request api.ControlClaimRequest) (*domain.WorkerCommand, error) {

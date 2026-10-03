@@ -114,7 +114,7 @@ func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialM
 	}
 	defer tx.Rollback()
 	var externalTarget int
-	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM external_session_bindings WHERE agent_id=? AND state='active'`, task.TargetAgentID).Scan(&externalTarget); err != nil {
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM external_session_bindings WHERE mode='external' AND agent_id=? AND state='active'`, task.TargetAgentID).Scan(&externalTarget); err != nil {
 		return nil, err
 	}
 	if externalTarget != 0 {
@@ -128,7 +128,7 @@ func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialM
 			return nil, err
 		}
 		var externalThread int
-		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM external_session_bindings WHERE thread_id=? AND state='active'`, binding.ProviderSessionID).Scan(&externalThread); err != nil {
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM external_session_bindings WHERE mode='external' AND thread_id=? AND state='active'`, binding.ProviderSessionID).Scan(&externalThread); err != nil {
 			return nil, err
 		}
 		if externalThread != 0 {

@@ -12,13 +12,13 @@ import (
 	"openagentx/internal/domain"
 )
 
-const externalBindingColumns = `b.binding_id,b.agent_id,a.principal_id,a.organization_id,b.host_id,b.thread_id,b.generation,b.state,b.token_digest,b.token_expires_at,b.allowed_peer_agent_ids_json,b.created_at,b.updated_at`
+const externalBindingColumns = `b.binding_id,b.agent_id,a.principal_id,a.organization_id,b.host_id,b.thread_id,b.generation,b.state,b.token_digest,b.token_expires_at,b.allowed_peer_agent_ids_json,b.created_at,b.updated_at,b.mode,COALESCE(b.managed_context_task_id,''),b.managed_backend_id`
 const externalBindingJoin = ` FROM external_session_bindings b JOIN agents a ON a.agent_id=b.agent_id`
 
 func scanExternalBinding(row rowScanner) (*domain.ExternalSessionBinding, error) {
 	var b domain.ExternalSessionBinding
 	var expiry, created, updated, peers string
-	err := row.Scan(&b.ID, &b.AgentID, &b.PrincipalID, &b.OrganizationID, &b.HostID, &b.ThreadID, &b.Generation, &b.State, &b.TokenDigest, &expiry, &peers, &created, &updated)
+	err := row.Scan(&b.ID, &b.AgentID, &b.PrincipalID, &b.OrganizationID, &b.HostID, &b.ThreadID, &b.Generation, &b.State, &b.TokenDigest, &expiry, &peers, &created, &updated, &b.Mode, &b.ManagedContextTaskID, &b.ManagedBackendID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrNotFound
 	}
@@ -97,7 +97,10 @@ func (r *Repository) externalJournal(ctx context.Context, tx *sql.Tx, actor, org
 }
 
 func (r *Repository) BindExternalSession(ctx context.Context, owner string, b domain.ExternalSessionBinding, expected int64) (*domain.ExternalSessionBinding, error) {
-	input := domain.BindExternalSessionInput{AgentID: b.AgentID, HostID: b.HostID, ThreadID: b.ThreadID, AllowedPeerAgentIDs: b.AllowedPeerAgentIDs, ExpectedGeneration: expected}
+	if b.Mode == "" {
+		b.Mode = "external"
+	}
+	input := domain.BindExternalSessionInput{Mode: b.Mode, ManagedContextTaskID: b.ManagedContextTaskID, ManagedBackendID: b.ManagedBackendID, AgentID: b.AgentID, HostID: b.HostID, ThreadID: b.ThreadID, AllowedPeerAgentIDs: b.AllowedPeerAgentIDs, ExpectedGeneration: expected}
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
@@ -120,7 +123,7 @@ func (r *Repository) BindExternalSession(ctx context.Context, owner string, b do
 	if err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM tasks WHERE target_agent_id=? AND status NOT IN ('succeeded','failed','canceled','uncertain')`, b.AgentID).Scan(&unfinished); err != nil {
 		return nil, err
 	}
-	if unfinished != 0 {
+	if b.Mode == "external" && unfinished != 0 {
 		return nil, domain.ErrConflict("finish or cancel managed tasks before binding an external session")
 	}
 	for _, peer := range b.AllowedPeerAgentIDs {
@@ -141,14 +144,22 @@ func (r *Repository) BindExternalSession(ctx context.Context, owner string, b do
 			return nil, domain.ErrStaleVersion
 		}
 	} else {
+		if old.Mode != b.Mode {
+			return nil, domain.ErrConflict("changing collaboration mode requires an explicit migration; original binding is preserved")
+		}
 		if old.Generation != expected {
 			return nil, domain.ErrStaleVersion
 		}
 		b.ID = old.ID
 		b.CreatedAt = old.CreatedAt
 	}
+	if b.Mode == "managed" {
+		if err = resolveManagedBindingTx(ctx, tx, &b); err != nil {
+			return nil, err
+		}
+	}
 	peers, _ := json.Marshal(b.AllowedPeerAgentIDs)
-	_, err = tx.ExecContext(ctx, `INSERT INTO external_session_bindings(binding_id,agent_id,host_id,thread_id,generation,state,token_digest,token_expires_at,allowed_peer_agent_ids_json,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(agent_id) DO UPDATE SET host_id=excluded.host_id,thread_id=excluded.thread_id,generation=excluded.generation,state=excluded.state,token_digest=excluded.token_digest,token_expires_at=excluded.token_expires_at,allowed_peer_agent_ids_json=excluded.allowed_peer_agent_ids_json,updated_at=excluded.updated_at`, b.ID, b.AgentID, b.HostID, b.ThreadID, b.Generation, b.State, b.TokenDigest, formatTime(b.TokenExpiresAt), string(peers), formatTime(b.CreatedAt), formatTime(b.UpdatedAt))
+	_, err = tx.ExecContext(ctx, `INSERT INTO external_session_bindings(binding_id,agent_id,host_id,thread_id,generation,state,token_digest,token_expires_at,allowed_peer_agent_ids_json,created_at,updated_at,mode,managed_context_task_id,managed_backend_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(agent_id) DO UPDATE SET host_id=excluded.host_id,thread_id=excluded.thread_id,generation=excluded.generation,state=excluded.state,token_digest=excluded.token_digest,token_expires_at=excluded.token_expires_at,allowed_peer_agent_ids_json=excluded.allowed_peer_agent_ids_json,updated_at=excluded.updated_at,mode=excluded.mode,managed_context_task_id=excluded.managed_context_task_id,managed_backend_id=excluded.managed_backend_id`, b.ID, b.AgentID, b.HostID, b.ThreadID, b.Generation, b.State, b.TokenDigest, formatTime(b.TokenExpiresAt), string(peers), formatTime(b.CreatedAt), formatTime(b.UpdatedAt), b.Mode, externalString(b.ManagedContextTaskID), b.ManagedBackendID)
 	if err != nil {
 		if isUniqueConstraint(err, "") || strings.Contains(err.Error(), "conflicts with managed execution") {
 			return nil, domain.ErrConflict("external binding conflicts with an existing binding or managed execution")
@@ -212,13 +223,13 @@ func (r *Repository) AuthenticateExternalSession(ctx context.Context, digest str
 	return authenticateExternalTx(ctx, tx, digest, r.now())
 }
 
-const externalMessageColumns = `sequence,message_id,sender_agent_id,target_agent_id,sender_binding_id,sender_generation,kind,reply_to_message_id,content,idempotency_key,payload_digest,origin_task_id,delivery_state,created_at,acknowledged_at,scope,forwarded_from_message_id,processing_state,processing_note`
+const externalMessageColumns = `sequence,message_id,sender_agent_id,target_agent_id,sender_binding_id,sender_generation,kind,reply_to_message_id,content,idempotency_key,payload_digest,origin_task_id,delivery_state,created_at,acknowledged_at,scope,forwarded_from_message_id,processing_state,processing_note,COALESCE((SELECT task_id FROM managed_message_tasks WHERE managed_message_tasks.message_id=external_messages.message_id),''),COALESCE((SELECT state FROM managed_message_tasks WHERE managed_message_tasks.message_id=external_messages.message_id),'')`
 
 func scanExternalMessage(row rowScanner) (*domain.ExternalMessage, error) {
 	var m domain.ExternalMessage
 	var reply, origin, ack, forwarded sql.NullString
 	var created string
-	err := row.Scan(&m.Sequence, &m.ID, &m.SenderAgentID, &m.TargetAgentID, &m.SenderBindingID, &m.SenderGeneration, &m.Kind, &reply, &m.Content, &m.IdempotencyKey, &m.PayloadDigest, &origin, &m.DeliveryState, &created, &ack, &m.Scope, &forwarded, &m.ProcessingState, &m.ProcessingNote)
+	err := row.Scan(&m.Sequence, &m.ID, &m.SenderAgentID, &m.TargetAgentID, &m.SenderBindingID, &m.SenderGeneration, &m.Kind, &reply, &m.Content, &m.IdempotencyKey, &m.PayloadDigest, &origin, &m.DeliveryState, &created, &ack, &m.Scope, &forwarded, &m.ProcessingState, &m.ProcessingNote, &m.TaskID, &m.ManagedState)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrNotFound
 	}
@@ -272,6 +283,9 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 	m.SenderAgentID = b.AgentID
 	m.SenderBindingID = b.ID
 	m.SenderGeneration = b.Generation
+	if b.Mode == "managed" && m.Kind != domain.ExternalMessageResult && m.OriginTaskID == "" {
+		m.OriginTaskID = b.ManagedContextTaskID
+	}
 	prior, err := scanExternalMessage(tx.QueryRowContext(ctx, `SELECT `+externalMessageColumns+` FROM external_messages WHERE sender_agent_id=? AND idempotency_key=?`, b.AgentID, m.IdempotencyKey))
 	if err == nil {
 		if prior.PayloadDigest != m.PayloadDigest {
@@ -322,6 +336,15 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 	}
 	if peer.State != "active" || !hasExternalPeer(peer, b.AgentID) {
 		return nil, domain.ErrForbidden("peer does not accept this sender")
+	}
+	if peer.Mode == "managed" && m.Kind == domain.ExternalMessageConsultation && m.Scope == "" {
+		return nil, domain.ErrInvalidInput("managed consultation requires an explicit registered scope")
+	}
+	if peer.Mode == "managed" && m.Kind == domain.ExternalMessageRequest {
+		return nil, domain.ErrInvalidInput("managed collaboration supports read-only consultation only")
+	}
+	if b.Mode == "managed" && m.Kind == domain.ExternalMessageResult {
+		return nil, domain.ErrConflict("managed consultation results are recorded by Run settlement")
 	}
 	if m.Kind != domain.ExternalMessageResult {
 		if err = validateExternalScope(ctx, tx, b.OrganizationID, b.AgentID, m.TargetAgentID, m.Scope); err != nil {
@@ -385,6 +408,18 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 		return nil, err
 	}
 	if err = r.externalJournal(ctx, tx, b.PrincipalID, b.OrganizationID, "external_message", m.ID, "external_message.sent", map[string]any{"sender_agent_id": m.SenderAgentID, "target_agent_id": m.TargetAgentID, "kind": m.Kind, "reply_to_message_id": m.ReplyToMessageID, "sequence": m.Sequence, "scope": m.Scope, "forwarded_from_message_id": m.ForwardedFromMessageID}); err != nil {
+		return nil, err
+	}
+	if peer.Mode == "managed" {
+		// Only managed-to-managed results have trusted Run provenance. An external
+		// manual result remains in the inbox for review and does not start a model.
+		if m.Kind == domain.ExternalMessageConsultation {
+			if err = r.createManagedMessageTaskTx(ctx, tx, &m, peer, "consultation"); err != nil {
+				return nil, err
+			}
+		}
+	}
+	if err = r.inject(FaultBeforeCommit); err != nil {
 		return nil, err
 	}
 	if err = commit(tx); err != nil {
@@ -507,6 +542,9 @@ func (r *Repository) RecordExternalReceipt(ctx context.Context, digest, id strin
 	}
 	if m.Kind == domain.ExternalMessageResult {
 		return nil, domain.ErrInvalidInput("results cannot receive processing receipts")
+	}
+	if m.TaskID != "" {
+		return nil, domain.ErrConflict("managed receipt state follows the Task; use Task cancellation or review instead")
 	}
 	// Acceptance must satisfy the current catalog even on an idempotent retry.
 	if in.State == "accepted" {

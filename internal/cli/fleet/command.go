@@ -76,8 +76,10 @@ func (f *stringListFlag) Set(value string) error {
 }
 
 type preparedAgent struct {
-	entry      fleetmodel.Agent
-	workerPath string
+	entry           fleetmodel.Agent
+	workerPath      string
+	nativeSupported bool
+	nativeStatePath string
 }
 
 type fleetPaths struct {
@@ -148,7 +150,8 @@ func Execute(args []string, deps Dependencies) int {
 	flags.Var(&credentialsFlag, "credentials", localprofile.PathUsage(localprofile.CredentialsPath, "CLI credential file"))
 	flags.Var(&agents, "agent", "Agent ID to include when initializing a missing manifest (repeatable)")
 	flags.Var(&workerSources, "worker-config", "agent-id=/absolute/source.yaml to import atomically during init (repeatable)")
-	respawnDead := flags.Bool("respawn-dead", false, "Respawn only compatible managed dead pane 0 consoles")
+	respawnDead := flags.Bool("respawn-dead", false, "Respawn only compatible managed dead pane 0 terminals")
+	consoleOnly := flags.Bool("console", false, "Use the OAX status console for newly created or explicitly respawned Agent panes")
 	confirmForce := flags.Bool("confirm-force-stop", false, "Acknowledge that force-stop is destructive")
 	confirmUncertain := flags.Bool("confirm-active-run-uncertain", false, "Acknowledge active RunAttempt may become uncertain")
 	if err := flags.Parse(args[1:]); err != nil {
@@ -160,6 +163,10 @@ func Execute(args []string, deps Dependencies) int {
 	}
 	if flags.NArg() != 0 || (command != "init" && (len(agents) != 0 || len(workerSources) != 0)) {
 		usage(deps.Err)
+		return 2
+	}
+	if *consoleOnly && command != "init" && command != "workspace" && command != "up" {
+		fmt.Fprintln(deps.Err, "--console is only valid for fleet init, workspace, or up")
 		return 2
 	}
 	if command == "force-stop" && (!*confirmForce || !*confirmUncertain) {
@@ -180,7 +187,7 @@ func Execute(args []string, deps Dependencies) int {
 	defer cancel()
 	var workspace fleetmodel.Workspace
 	if command == "init" || command == "workspace" || command == "up" {
-		workspace, err = newWorkspace(paths, *respawnDead, deps)
+		workspace, err = newWorkspace(paths, *respawnDead || command == "up", deps)
 		if err != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
 			return 1
@@ -235,6 +242,22 @@ func Execute(args []string, deps Dependencies) int {
 		fmt.Fprintf(deps.Err, "Fleet preflight failed: %v\n", err)
 		return 1
 	}
+	if workspace.ConsoleCommand != nil && !*consoleOnly {
+		configureNativeTerminals(&workspace, prepared, paths, deps)
+	}
+	if workspace.ConsoleCommand != nil {
+		modes := terminalStartupModes(prepared, *consoleOnly)
+		workspace.PaneLabel = func(agentID string) string {
+			mode := modes[agentID]
+			if mode.Mode == "native" {
+				return "Codex 受管原生终端 · 后台 Worker 独立运行"
+			}
+			if mode.NativeSupported {
+				return "OAX 状态 Console · 已显式选择 --console"
+			}
+			return "OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）"
+		}
+	}
 	switch command {
 	case "init", "workspace":
 		if err := workspace.Preflight(ctx, manifest); err != nil {
@@ -246,7 +269,8 @@ func Execute(args []string, deps Dependencies) int {
 			fmt.Fprintf(deps.Err, "Fleet workspace failed: %v\n", err)
 			return 1
 		}
-		return printJSON(deps, map[string]any{"cli_username": session.Principal.Username, "workspace": report})
+		return printJSON(deps, map[string]any{"cli_username": session.Principal.Username, "workspace": report,
+			"pane_startup": terminalStartupModes(prepared, *consoleOnly)})
 	case "up":
 		if err := workspace.Preflight(ctx, manifest); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet workspace preflight failed: %v\n", err)
@@ -254,10 +278,6 @@ func Execute(args []string, deps Dependencies) int {
 		}
 		if err := verifyUserUnits(ctx, prepared, deps); err != nil {
 			fmt.Fprintf(deps.Err, "Fleet user-systemd preflight failed: %v\n", err)
-			return 1
-		}
-		if _, err := workspace.Reconcile(ctx, manifest); err != nil {
-			fmt.Fprintf(deps.Err, "Fleet workspace failed: %v\n", err)
 			return 1
 		}
 		checkLinger(ctx, deps)
@@ -271,6 +291,16 @@ func Execute(args []string, deps Dependencies) int {
 				return 1
 			}
 			fmt.Fprintf(deps.Out, "started user unit %s\n", unit)
+		}
+		readyManifest, allReady := readyNativeWorkspace(ctx, manifest, prepared, workspace, client, deps)
+		if len(readyManifest.Agents) > 0 {
+			if _, err := workspace.Reconcile(ctx, readyManifest); err != nil {
+				fmt.Fprintf(deps.Err, "Fleet workspace failed: %v\n", err)
+				return 1
+			}
+		}
+		if !allReady {
+			return 1
 		}
 		return 0
 	case "status":
@@ -690,7 +720,8 @@ func prepare(manifestPath, workerDir, socketPath string, options map[string]doma
 		if _, err := fleetmodel.ReadSecureFile(environmentPath, fleetmodel.SecureFileOptions{MaximumBytes: maxWorkerConfigBytes, RequirePrivate: true}); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fleetmodel.Manifest{}, nil, fmt.Errorf("read Worker environment file: %w", err)
 		}
-		if _, err := validateWorkerConfig(workerContent, entry.AgentID, socketPath); err != nil {
+		config, err := validateWorkerConfig(workerContent, entry.AgentID, socketPath)
+		if err != nil {
 			return fleetmodel.Manifest{}, nil, err
 		}
 		if entry.IdentityFile != "" {
@@ -698,7 +729,22 @@ func prepare(manifestPath, workerDir, socketPath string, options map[string]doma
 				return fleetmodel.Manifest{}, nil, err
 			}
 		}
-		prepared = append(prepared, preparedAgent{entry: entry, workerPath: canonical.Path})
+		item := preparedAgent{entry: entry, workerPath: canonical.Path}
+		for _, backend := range config.RuntimeBackendConfig {
+			if backend.AdapterID != "codex-app-server" {
+				continue
+			}
+			item.nativeSupported = true
+			stateDir, _ := backend.Options["state_dir"].(string)
+			if stateDir == "" {
+				stateDir = filepath.Join(filepath.Dir(canonical.Path), "codex", entry.AgentID)
+			} else if !filepath.IsAbs(stateDir) {
+				stateDir = filepath.Join(filepath.Dir(canonical.Path), stateDir)
+			}
+			item.nativeStatePath = filepath.Join(stateDir, "state.json")
+			break
+		}
+		prepared = append(prepared, item)
 	}
 	return manifest, prepared, nil
 }
@@ -857,6 +903,7 @@ func fleetStatus(ctx context.Context, manifest fleetmodel.Manifest, prepared []p
 	}
 	status["workers"] = units
 	status["fleet_agents"] = manifest.Agents
+	status["pane_startup"] = terminalStartupModes(prepared, false)
 	return printJSON(deps, status)
 }
 
@@ -896,9 +943,12 @@ func safeAuthError(err error) string {
 func usage(writer io.Writer) {
 	fmt.Fprintln(writer, "Usage: openagentx fleet <init|workspace|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--worker-dir <dir>] [--credentials <path>]")
 	fmt.Fprintln(writer, "       fleet init [--agent <agent-id> ...] [--worker-config <agent-id=/absolute/source.yaml> ...] [--respawn-dead]")
-	fmt.Fprintln(writer, "       fleet workspace [--respawn-dead]")
+	fmt.Fprintln(writer, "       fleet workspace [--respawn-dead] [--console]")
+	fmt.Fprintln(writer, "       fleet up [--console] (wait for Codex readiness, then revive compatible dead panes; preserve live panes)")
 	fmt.Fprintln(writer, "       fleet force-stop --confirm-force-stop --confirm-active-run-uncertain")
 	fmt.Fprintln(writer, "Fleet uses the stored CLI session from openagentx console login; it never reads an Owner password")
 	fmt.Fprintln(writer, "Managed tmux workspace: exact session OAX with stable pane 0; existing agentx sessions are not migrated")
+	fmt.Fprintln(writer, "New Codex panes use the managed native terminal; --console selects status Console. Existing live panes are preserved.")
+	fmt.Fprintln(writer, "AGY has no managed native terminal bridge yet; its pane remains the OAX status Console.")
 	fmt.Fprintf(writer, "Defaults: $%s/$%s/$%s/$%s/$%s > $%s > ~/.openagentx\n", localprofile.EnvFleetManifest, localprofile.EnvDatabasePath, localprofile.EnvSocketPath, localprofile.EnvWorkerConfigDir, localprofile.EnvCredentialsPath, localprofile.EnvHome)
 }

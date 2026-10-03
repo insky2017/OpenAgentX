@@ -1502,8 +1502,9 @@ func (m *tuiModel) appendFocusedTaskSummary(purpose taskSnapshotPurpose) {
 	if purpose == taskSnapshotStale {
 		label = "Task refreshed after stale CAS; review before retry"
 	}
-	m.timeline.Add(fmt.Sprintf("%s %s | version %d | status %s | stage %s",
-		label, shortID(task.TaskID), task.Version, task.Status, taskStage(task)))
+	// Put the outcome first so it remains readable in a compact Fleet pane.
+	m.timeline.Add(fmt.Sprintf("%s | status %s | %s v%d | stage %s",
+		label, task.Status, shortID(task.TaskID), task.Version, taskStage(task)))
 	for _, summary := range taskResultSummaries(task) {
 		m.timeline.Add(summary)
 	}
@@ -1926,14 +1927,15 @@ func timelineItemSummary(item consolemodel.TimelineItem, mode string) string {
 		}
 		return strings.Join(parts, " | ")
 	}
+	// Keep the state ahead of identifiers so narrow panes still show outcomes.
+	if item.TaskStatus != "" {
+		parts = append(parts, "status "+string(item.TaskStatus))
+	}
 	if item.TaskID != "" {
 		parts = append(parts, "Task "+shortID(item.TaskID))
 	}
 	if item.TaskVersion > 0 {
 		parts = append(parts, fmt.Sprintf("version %d", item.TaskVersion))
-	}
-	if item.TaskStatus != "" {
-		parts = append(parts, "status "+string(item.TaskStatus))
 	}
 	if item.MailboxItemID != "" {
 		parts = append(parts, string(item.MailboxKind)+"/"+string(item.MailboxLane)+" delivery "+string(item.MailboxState))

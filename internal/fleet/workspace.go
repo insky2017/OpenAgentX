@@ -110,8 +110,10 @@ type WorkspaceReport struct {
 }
 
 type Workspace struct {
-	Runner          CommandRunner
-	ConsoleCommand  func(agentID string) []string
+	Runner         CommandRunner
+	ConsoleCommand func(agentID string) []string
+	// PaneLabel is displayed only when creating or explicitly respawning a pane.
+	PaneLabel       func(agentID string) string
 	OverviewCommand []string
 	RespawnDead     bool
 }
@@ -374,6 +376,9 @@ func (w Workspace) respawnDeadPane(ctx context.Context, manifest Manifest, windo
 	if _, err := w.Runner.Run(ctx, args...); err != nil {
 		return fmt.Errorf("respawn dead managed Console pane for Agent %q: %w; no live pane was killed", agentID, err)
 	}
+	if err := w.setPaneLabel(ctx, window.ID, agentID); err != nil {
+		return err
+	}
 	verified, err := w.Inspect(ctx)
 	if err != nil {
 		return fmt.Errorf("verify respawned Console pane for Agent %q: %w", agentID, err)
@@ -484,6 +489,25 @@ func (w Workspace) markCreatedWindow(ctx context.Context, windowID, name string)
 	for _, command := range commands {
 		if _, err := w.Runner.Run(ctx, command...); err != nil {
 			return fmt.Errorf("configure created tmux window %q: %w", name, err)
+		}
+	}
+	if name != OverviewWindow {
+		return w.setPaneLabel(ctx, windowID, name)
+	}
+	return nil
+}
+
+func (w Workspace) setPaneLabel(ctx context.Context, windowID, agentID string) error {
+	if w.PaneLabel == nil {
+		return nil
+	}
+	label := w.PaneLabel(agentID)
+	if label == "" {
+		return nil
+	}
+	for _, option := range [][2]string{{"pane-border-status", "top"}, {"pane-border-format", label}} {
+		if _, err := w.Runner.Run(ctx, "set-option", "-w", "-t", windowID, option[0], option[1]); err != nil {
+			return fmt.Errorf("label managed terminal for Agent %q: %w", agentID, err)
 		}
 	}
 	return nil

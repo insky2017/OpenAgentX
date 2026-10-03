@@ -1,37 +1,65 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 )
 
+// ErrManagedCollaborationPaused means the claimed item was durably consumed
+// without starting a Runtime; the Worker may continue with its next item.
+var ErrManagedCollaborationPaused = errors.New("managed collaboration paused for review")
+
 type ExternalSessionBinding struct {
-	ID                  string    `json:"binding_id"`
-	AgentID             string    `json:"agent_id"`
-	PrincipalID         string    `json:"principal_id"`
-	OrganizationID      string    `json:"organization_id"`
-	HostID              string    `json:"host_id"`
-	ThreadID            string    `json:"thread_id"`
-	Generation          int64     `json:"generation"`
-	State               string    `json:"state"`
-	AllowedPeerAgentIDs []string  `json:"allowed_peer_agent_ids"`
-	TokenDigest         string    `json:"-"`
-	TokenExpiresAt      time.Time `json:"token_expires_at"`
-	CreatedAt           time.Time `json:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at"`
+	Mode                 string    `json:"mode,omitempty"`
+	ManagedContextTaskID string    `json:"managed_context_task_id,omitempty"`
+	ManagedBackendID     string    `json:"managed_backend_id,omitempty"`
+	ID                   string    `json:"binding_id"`
+	AgentID              string    `json:"agent_id"`
+	PrincipalID          string    `json:"principal_id"`
+	OrganizationID       string    `json:"organization_id"`
+	HostID               string    `json:"host_id"`
+	ThreadID             string    `json:"thread_id"`
+	Generation           int64     `json:"generation"`
+	State                string    `json:"state"`
+	AllowedPeerAgentIDs  []string  `json:"allowed_peer_agent_ids"`
+	TokenDigest          string    `json:"-"`
+	TokenExpiresAt       time.Time `json:"token_expires_at"`
+	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
 }
 
 type BindExternalSessionInput struct {
-	AgentID             string   `json:"agent_id"`
-	HostID              string   `json:"host_id"`
-	ThreadID            string   `json:"thread_id"`
-	AllowedPeerAgentIDs []string `json:"allowed_peer_agent_ids"`
-	ExpectedGeneration  int64    `json:"expected_generation"`
+	Mode                 string   `json:"mode,omitempty"`
+	ManagedContextTaskID string   `json:"managed_context_task_id,omitempty"`
+	ManagedBackendID     string   `json:"managed_backend_id,omitempty"`
+	AgentID              string   `json:"agent_id"`
+	HostID               string   `json:"host_id"`
+	ThreadID             string   `json:"thread_id"`
+	AllowedPeerAgentIDs  []string `json:"allowed_peer_agent_ids"`
+	ExpectedGeneration   int64    `json:"expected_generation"`
 }
 
 func (v BindExternalSessionInput) Validate() error {
-	for label, value := range map[string]string{"agent_id": v.AgentID, "host_id": v.HostID, "thread_id": v.ThreadID} {
+	fields := map[string]string{"agent_id": v.AgentID}
+	switch v.Mode {
+	case "", "external":
+		if v.ManagedContextTaskID != "" || v.ManagedBackendID != "" {
+			return ErrInvalidInput("external bindings cannot set managed context")
+		}
+		fields["host_id"], fields["thread_id"] = v.HostID, v.ThreadID
+	case "managed":
+		if err := ValidateOpaqueID("managed_context_task_id", v.ManagedContextTaskID); err != nil {
+			return err
+		}
+		if err := ValidateIdentifier("managed_backend_id", v.ManagedBackendID); err != nil {
+			return err
+		}
+	default:
+		return ErrInvalidInput("binding mode must be external or managed")
+	}
+	for label, value := range fields {
 		if value != strings.TrimSpace(value) {
 			return ErrInvalidInput(label + " cannot contain surrounding whitespace")
 		}
@@ -127,6 +155,8 @@ func (v SendExternalMessageInput) Validate() error {
 }
 
 type ExternalMessage struct {
+	TaskID                 string              `json:"task_id,omitempty"`
+	ManagedState           string              `json:"managed_state,omitempty"`
 	Scope                  string              `json:"scope,omitempty"`
 	ForwardedFromMessageID string              `json:"forwarded_from_message_id,omitempty"`
 	ProcessingState        string              `json:"processing_state"`

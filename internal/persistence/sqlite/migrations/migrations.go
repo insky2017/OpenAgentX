@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const CurrentVersion = 4
+const CurrentVersion = 5
 
 var (
 	ErrIncompatibleLegacySchema = errors.New("database contains a legacy schema without OpenAgentX schema metadata")
@@ -61,6 +61,9 @@ var externalSessionSchema string
 //go:embed 004_external_roles.sql
 var externalRolesSchema string
 
+//go:embed 005_managed_collaboration.sql
+var managedCollaborationSchema string
+
 func Apply(ctx context.Context, db *sql.DB) error {
 	return apply(ctx, db, migrationOptions{})
 }
@@ -71,6 +74,7 @@ type migrationOptions struct {
 	beforeV2Commit    func() error
 	beforeV3Commit    func() error
 	beforeV4Commit    func() error
+	beforeV5Commit    func() error
 }
 
 func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -99,6 +103,8 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 			return migrateV2ToV3(ctx, db, options)
 		case 3:
 			return migrateV3ToV4(ctx, db, options)
+		case 4:
+			return migrateV4ToV5(ctx, db, options)
 		default:
 			return fmt.Errorf("%w: got %d, want 1 or %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
 		}
@@ -566,9 +572,11 @@ func applyExternalRoles(ctx context.Context, tx *sql.Tx, options migrationOption
 		return fmt.Errorf("migrate external roles v4: %w", err)
 	}
 	if options.beforeV4Commit != nil {
-		return options.beforeV4Commit()
+		if err := options.beforeV4Commit(); err != nil {
+			return err
+		}
 	}
-	return nil
+	return applyManagedCollaboration(ctx, tx, options)
 }
 func migrateV3ToV4(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	tx, err := db.BeginTx(ctx, nil)
@@ -586,10 +594,47 @@ func migrateV3ToV4(ctx context.Context, db *sql.DB, options migrationOptions) er
 	if err = validateBaseObjects(ctx, tx); err != nil {
 		return err
 	}
-	if err = validateExternalSchema(ctx, tx, false); err != nil {
+	if err = validateExternalSchema(ctx, tx, 3); err != nil {
 		return err
 	}
 	if err = applyExternalRoles(ctx, tx, options); err != nil {
+		return err
+	}
+	if err = validateObjects(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func applyManagedCollaboration(ctx context.Context, tx *sql.Tx, options migrationOptions) error {
+	if _, err := tx.ExecContext(ctx, managedCollaborationSchema); err != nil {
+		return fmt.Errorf("migrate managed collaboration v5: %w", err)
+	}
+	if options.beforeV5Commit != nil {
+		return options.beforeV5Commit()
+	}
+	return nil
+}
+func migrateV4ToV5(ctx context.Context, db *sql.DB, options migrationOptions) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var version int
+	if err = tx.QueryRowContext(ctx, "SELECT version FROM schema_meta WHERE singleton=1").Scan(&version); err != nil {
+		return err
+	}
+	if version != 4 {
+		return ErrUnsupportedSchemaVersion
+	}
+	if err = validateBaseObjects(ctx, tx); err != nil {
+		return err
+	}
+	if err = validateExternalSchema(ctx, tx, 4); err != nil {
+		return err
+	}
+	if err = applyManagedCollaboration(ctx, tx, options); err != nil {
 		return err
 	}
 	if err = validateObjects(ctx, tx); err != nil {

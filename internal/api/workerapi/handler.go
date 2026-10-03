@@ -500,6 +500,8 @@ func classifyError(err error) (int, string, string) {
 		return http.StatusConflict, openapi.ErrorFencingRejected, "fencing token rejected"
 	case errors.Is(err, domain.ErrUnsupportedCapability):
 		return http.StatusUnprocessableEntity, openapi.ErrorUnsupportedCapability, "runtime capability is unavailable"
+	case errors.Is(err, domain.ErrManagedCollaborationPaused):
+		return http.StatusConflict, openapi.ErrorManagedCollaborationPaused, "collaboration task retained for review; no runtime started"
 	case errors.Is(err, domain.ErrAgentNotReady), errors.Is(err, domain.ErrWorkerBusy),
 		errors.Is(err, domain.ErrInvalidState), errors.Is(err, domain.ErrTaskCancelRequested),
 		errors.Is(err, domain.ErrInvalidTransition), errors.Is(err, domain.ErrTerminalState):

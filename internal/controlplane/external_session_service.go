@@ -68,7 +68,7 @@ func (s *ExternalSessionService) Bind(ctx context.Context, owner string, input d
 	peers := append([]string(nil), input.AllowedPeerAgentIDs...)
 	sort.Strings(peers)
 	now := s.now().UTC()
-	b := domain.ExternalSessionBinding{ID: "external-" + uuid.NewString(), AgentID: input.AgentID, HostID: input.HostID, ThreadID: input.ThreadID, Generation: input.ExpectedGeneration + 1, State: "active", AllowedPeerAgentIDs: peers, TokenDigest: externalTokenDigest(secret), TokenExpiresAt: now.Add(30 * 24 * time.Hour), CreatedAt: now, UpdatedAt: now}
+	b := domain.ExternalSessionBinding{ID: "external-" + uuid.NewString(), AgentID: input.AgentID, HostID: input.HostID, ThreadID: input.ThreadID, Mode: input.Mode, ManagedContextTaskID: input.ManagedContextTaskID, ManagedBackendID: input.ManagedBackendID, Generation: input.ExpectedGeneration + 1, State: "active", AllowedPeerAgentIDs: peers, TokenDigest: externalTokenDigest(secret), TokenExpiresAt: now.Add(30 * 24 * time.Hour), CreatedAt: now, UpdatedAt: now}
 	bound, err := s.state.BindExternalSession(ctx, owner, b, input.ExpectedGeneration)
 	if err != nil {
 		return nil, "", err
@@ -99,6 +99,9 @@ func (s *ExternalSessionService) Send(ctx context.Context, token string, input d
 		return nil, err
 	}
 	s.broker.Publish("external-inbox:" + result.TargetAgentID)
+	// Managed delivery commits its Task/Mailbox with the message. The wakeup
+	// only shortens a Worker's wait; the durable mailbox survives missed wakes.
+	s.broker.Publish(AgentMailboxTopic(result.TargetAgentID))
 	return result, nil
 }
 func (s *ExternalSessionService) Inbox(ctx context.Context, token string, after int64, limit int) ([]domain.ExternalMessage, error) {

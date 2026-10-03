@@ -153,6 +153,11 @@ func (m *ActiveRunManager) startWork(ctx context.Context, active *activeTurn, it
 	begin, err := m.client.BeginAttempt(ctx, item.ID, request)
 	if err != nil {
 		m.releaseCapacity()
+		if errors.Is(err, domain.ErrManagedCollaborationPaused) {
+			// The server atomically consumed this mailbox item and retained the
+			// task for review. Continue unrelated work without retrying this item.
+			return nil, nil
+		}
 		if errors.Is(err, domain.ErrUnsupportedCapability) {
 			timer := time.NewTimer(unsupportedBeginRetryDelay)
 			defer timer.Stop()

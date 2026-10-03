@@ -20,6 +20,7 @@ func TestBeginAttemptPreservesDomainErrorsAcrossHTTP(t *testing.T) {
 		domainErrs []error
 	}{
 		{name: "unsupported", statusCode: http.StatusUnprocessableEntity, apiCode: openapi.ErrorUnsupportedCapability, domainErrs: []error{domain.ErrUnsupportedCapability}},
+		{name: "collaboration-paused", statusCode: http.StatusConflict, apiCode: openapi.ErrorManagedCollaborationPaused, domainErrs: []error{domain.ErrManagedCollaborationPaused}},
 		{name: "unauthorized", statusCode: http.StatusUnauthorized, apiCode: openapi.ErrorUnauthorized, domainErrs: []error{domain.ErrUnauthorized}},
 		{name: "lease", statusCode: http.StatusConflict, apiCode: openapi.ErrorLeaseExpired, domainErrs: []error{domain.ErrLeaseExpired}},
 		{name: "fencing", statusCode: http.StatusConflict, apiCode: openapi.ErrorFencingRejected, domainErrs: []error{domain.ErrFencingRejected}},

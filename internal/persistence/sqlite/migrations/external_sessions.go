@@ -8,19 +8,23 @@ import (
 	"sync"
 )
 
-var externalShapeOnce [2]sync.Once
-var externalShapeErr [2]error
-var externalShape [2][]schemaObject
+var externalShapeOnce [3]sync.Once
+var externalShapeErr [3]error
+var externalShape [3][]schemaObject
 
 func validateExternalObjects(ctx context.Context, q schemaQueryer) error {
-	return validateExternalSchema(ctx, q, true)
+	return validateExternalSchema(ctx, q, 5)
 }
-func validateExternalSchema(ctx context.Context, q schemaQueryer, current bool) error {
+func validateExternalSchema(ctx context.Context, q schemaQueryer, version int) error {
 	index := 0
 	schema := targetSchema + "\n" + externalSessionSchema
-	if current {
+	if version >= 4 {
 		index = 1
 		schema += "\n" + externalRolesSchema
+	}
+	if version >= 5 {
+		index = 2
+		schema += "\n" + managedCollaborationSchema
 	}
 	externalShapeOnce[index].Do(func() {
 		db, err := sql.Open("sqlite3", ":memory:")
@@ -45,7 +49,7 @@ func validateExternalSchema(ctx context.Context, q schemaQueryer, current bool) 
 				externalShapeErr[index] = err
 				return
 			}
-			if strings.HasPrefix(o.Name, "external_") || strings.HasPrefix(o.Name, "uq_external_") || strings.HasPrefix(o.Name, "idx_external_") || strings.HasSuffix(o.Name, "_external_guard") {
+			if strings.HasPrefix(o.Name, "managed_") || strings.HasPrefix(o.Name, "external_") || strings.HasPrefix(o.Name, "uq_external_") || strings.HasPrefix(o.Name, "idx_external_") || strings.HasSuffix(o.Name, "_external_guard") {
 				externalShape[index] = append(externalShape[index], o)
 			}
 		}

@@ -99,7 +99,11 @@ Worker 完成一个 Task 后释放当前 RunAttempt，继续等待 Mailbox 中�
 
 当前 AGY 默认任务支持排队补充和进程信号取消，不提供可发起的 preflight 审批或原生交互审批入口。Console `/approve`、`/reject` 仅兼容已有审批记录；结果验收使用 `/accept`、`/result-reject`。未接通的单次 Task execution override 和 `approval_policy` 会被明确拒绝。
 
-## Fleet 与终端 Console
+## Fleet 与 Agent 终端
+
+Codex Agent 新建的 pane 0 默认打开受管原生 TUI，可以直接输入任务、查看过程和继续对话；后台 Worker 独立运行。`fleet up` 先启动 Worker、等待 Codex 后台就绪，再打开前台。`--console` 显式选择状态 Console；AGY 等尚无原生前台适配的 Runtime 仍显示 Console，并标出能力边界。现有活 pane 保持原样。
+
+只读跨领域协作使用 `openagentx collaborate`，接入方法见[托管协作指南](docs/operations/managed-collaboration.md)。实际验收范围以[本轮记录](docs/reports/validation/2026-10-03-managed-collaboration/DELIVERY.md)为准。
 
 Fleet 清单显式列出受管 Agent，不扫描目录推断启动对象：
 
@@ -132,7 +136,7 @@ systemctl --user daemon-reload
 openagentx fleet up
 ```
 
-协调器只创建缺失的具名 window 并保留额外或已移除的 window；受管目标缺少 pane `0`、名称/marker 冲突或未知程序占用目标名会在变更前失败。额外 pane `1+` 和无关 unmanaged window 会原样保留。compatible managed pane `0` 退出后会保留为 dead，只有显式执行 `openagentx fleet workspace --respawn-dead` 才能恢复；live pane、pane `1+`、unmanaged/orphaned window 绝不 respawn。协调器不删除、重排或覆盖现场，也不使用 `send-keys`、`paste-buffer` 或 `capture-pane`。tmux 不是 Worker 宿主或权威身份，关闭 Console、window、session 或 SSH 不影响 user-systemd Worker。
+协调器只创建缺失的具名 window 并保留额外或已移除的 window；受管目标缺少 pane `0`、名称/marker 冲突或未知程序占用目标名会在变更前失败。额外 pane `1+` 和无关 unmanaged window 会原样保留。compatible managed pane `0` 退出后保留为 dead，可用 `openagentx fleet workspace --respawn-dead` 或 `fleet up` 恢复；live pane、pane `1+`、unmanaged/orphaned window 不被替换。协调器不删除、重排或覆盖现场，也不使用 `send-keys`、`paste-buffer` 或 `capture-pane`。tmux 不是 Worker 宿主或权威身份，关闭前台、window、session 或 SSH 不影响 user-systemd Worker。
 
 `openagentx console` 在 TTY 中启动全屏主菜单，可登录/替换登录、退出登录、选择 Normal 或 Diagnostic Attach。主菜单可在 tmux 外运行；Attach 按逻辑 `agent_id` 跟随当前 generation，展示安全投影后的状态和实时事件，并通过正式 Control API 执行 dispatch、steer、cancel 与 approval：
 

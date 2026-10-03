@@ -60,6 +60,8 @@ func execute(args []string) int {
 		return consolecli.Execute(args[1:], consolecli.DefaultDependencies())
 	case "external":
 		return externalcli.Execute(args[1:], os.Stdout, os.Stderr)
+	case "collaborate":
+		return externalcli.ExecuteCollaboration(args[1:], os.Stdout, os.Stderr)
 	case "fleet":
 		return fleetcli.Execute(args[1:], fleetcli.DefaultDependencies())
 	case "serve":
@@ -76,6 +78,7 @@ func execute(args []string) int {
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx console [login|logout|attach]")
 		fmt.Fprintln(os.Stderr, "       openagentx external <bind|status|send|reply|inbox|ack|revoke> [flags] (existing host, messages only)")
+		fmt.Fprintln(os.Stderr, "       openagentx collaborate <enable|ask|status|instructions|inbox|roles|disable> [flags] (managed consultation and continuation)")
 		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|workspace|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--worker-dir <dir>] [--credentials <path>]")
 		fmt.Fprintln(os.Stderr, "       openagentx schema verify [--db <path>]")
 		fmt.Fprintln(os.Stderr, "Local path precedence: explicit flag > resource environment > OPENAGENTX_HOME > ~/.openagentx")
