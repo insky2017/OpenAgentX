@@ -4,6 +4,8 @@ OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持�
 
 ## 架构
 
+正式文档维护在本工程 `main` 分支的 [docs/design](docs/design/README.md)；外部阅读目录仅保留副本。
+
 当前架构以已安装 `886ba7f` / schema v5 和真实验收记录为基线：
 
 - [总体架构七视图（HTML）](docs/design/current-architecture.html) · [Markdown 与源码依据](docs/design/CURRENT_ARCHITECTURE.md)：总览、任务流、领域初始化、AGY 运行、事件观察、外部依赖及 Codex 原生终端。
