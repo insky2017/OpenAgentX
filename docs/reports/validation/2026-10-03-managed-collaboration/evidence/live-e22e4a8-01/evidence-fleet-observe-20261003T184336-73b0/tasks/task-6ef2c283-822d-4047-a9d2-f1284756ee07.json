@@ -1,0 +1,182 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-6ef2c283-822d-4047-a9d2-f1284756ee07",
+    "version": 3,
+    "target_agent_id": "managed-a-9ddfd583",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Read fleet-proof.txt in the assigned workspace using a tool. Reply with exactly its contents, without extra text or punctuation. Do not modify files.",
+    "status": "uncertain",
+    "result": "OAX_FLEET_NATIVE_2524cc3621114458\n",
+    "error": "business_effect_unverified",
+    "outcome_state": "available",
+    "created_at": "2026-10-03T10:41:32.212512456Z",
+    "updated_at": "2026-10-03T10:41:55.550182081Z"
+  },
+  "messages": [
+    {
+      "id": "message-d3e36852-15b1-40ca-b288-205a745884cf",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-6ef2c283-822d-4047-a9d2-f1284756ee07",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+      "target_agent_id": "managed-a-9ddfd583",
+      "kind": "instruction",
+      "content": "Read fleet-proof.txt in the assigned workspace using a tool. Reply with exactly its contents, without extra text or punctuation. Do not modify files.",
+      "created_at": "2026-10-03T10:41:32.212512456Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-03T11:11:32.217648263Z",
+      "instructions_sha256": "1fa21ae2df6e96153e53af3389a1dddc1005c1b852a2cfd3de42d03024bc7afa",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-a-9ddfd583.role.md",
+      "run_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "task_id": "task-6ef2c283-822d-4047-a9d2-f1284756ee07",
+      "agent_id": "managed-a-9ddfd583",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-294d0f23-a3c7-4949-9b2d-741f5b983b14",
+      "worker_generation": 2,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 2,
+      "network_binding_revision": 2,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX_FLEET_NATIVE_2524cc3621114458\n",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-03T10:41:32.217648263Z",
+      "finished_at": "2026-10-03T10:41:55.550182081Z",
+      "created_at": "2026-10-03T10:41:32.217648263Z",
+      "updated_at": "2026-10-03T10:41:55.550182081Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 872,
+      "event_id": "event-43851bb8-f040-47ce-802e-2a56ce0f0773",
+      "aggregate_type": "task",
+      "aggregate_id": "task-6ef2c283-822d-4047-a9d2-f1284756ee07",
+      "event_type": "task.created",
+      "created_at": "2026-10-03T10:41:32.212512456Z"
+    },
+    {
+      "sequence": 874,
+      "event_id": "event-task-e4e799d9-5e68-44f5-b345-904c60b4db89",
+      "aggregate_type": "task",
+      "aggregate_id": "task-6ef2c283-822d-4047-a9d2-f1284756ee07",
+      "event_type": "task.running",
+      "created_at": "2026-10-03T10:41:32.219609967Z"
+    },
+    {
+      "sequence": 875,
+      "event_id": "event-run-526c252b-8323-4e28-8c45-4eea5c238263",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-03T10:41:32.219618561Z"
+    },
+    {
+      "sequence": 877,
+      "event_id": "event-runtime-429e37da-1288-44a5-a518-d9a443b1441a",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-03T10:41:34.790976977Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 880,
+      "event_id": "event-runtime-fc1a95ab-b68e-4d6e-b018-260e43e89c38",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-03T10:41:40.891425785Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed reasoning",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 881,
+      "event_id": "event-runtime-481424c7-5479-4b22-95c2-d07b4ae67e1a",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-03T10:41:40.900720078Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "我将只读 fleet-proof.txt。\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 882,
+      "event_id": "event-runtime-b47e42c4-872d-4efc-bb98-7e6fb43757d0",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-03T10:41:43.187268854Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed commandExecution",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 885,
+      "event_id": "event-runtime-2d9cd972-a63e-4c52-b7b0-d01f98735136",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-03T10:41:55.507261157Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "OAX_FLEET_NATIVE_2524cc3621114458\n",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 887,
+      "event_id": "event-run-710ccfb5-40b7-451a-b097-c28361371365",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-8673d5cf-851a-49de-ba70-9b9fb29e132c",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-03T10:41:55.550214191Z"
+    },
+    {
+      "sequence": 888,
+      "event_id": "event-task-c2a1aa85-d2e4-49df-9dfe-8e815ce3e770",
+      "aggregate_type": "task",
+      "aggregate_id": "task-6ef2c283-822d-4047-a9d2-f1284756ee07",
+      "event_type": "task.settled",
+      "created_at": "2026-10-03T10:41:55.55021859Z"
+    }
+  ],
+  "snapshot_sequence": 908,
+  "live_after_sequence": 908,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

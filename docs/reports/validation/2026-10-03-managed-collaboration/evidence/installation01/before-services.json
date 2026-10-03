@@ -1,0 +1,26 @@
+[
+  {
+    "unit": "openagentx.service",
+    "MainPID": "84879",
+    "ActiveState": "active",
+    "SubState": "running",
+    "starttime": "18369764",
+    "exe_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392"
+  },
+  {
+    "unit": "openagentx-worker@agy-onboarding-e2e.service",
+    "MainPID": "84911",
+    "ActiveState": "active",
+    "SubState": "running",
+    "starttime": "18369819",
+    "exe_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392"
+  },
+  {
+    "unit": "openagentx-worker@codex-domain-e2e.service",
+    "MainPID": "84909",
+    "ActiveState": "active",
+    "SubState": "running",
+    "starttime": "18369818",
+    "exe_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392"
+  }
+]

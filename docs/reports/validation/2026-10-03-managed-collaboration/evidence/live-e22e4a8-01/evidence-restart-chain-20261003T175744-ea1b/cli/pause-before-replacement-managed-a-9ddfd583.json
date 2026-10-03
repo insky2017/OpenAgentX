@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-03T09:57:50.953077+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "agent",
+    "pause",
+    "managed-a-9ddfd583"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nstop queued for managed-a-9ddfd583 generation 1 (pending); intent is persistent\r\n{\r\n  \"agent_id\": \"managed-a-9ddfd583\",\r\n  \"generation\": 1,\r\n  \"worker_status\": \"draining\",\r\n  \"elapsed\": \"0s\",\r\n  \"recent_status\": \"2026-10-03T09:57:49.833745618Z\",\r\n  \"no_new_tasks\": true,\r\n  \"message\": \"draining; current RunAttempt may finish naturally; Worker will not claim new tasks\"\r\n}\r\n{\r\n  \"agent_id\": \"managed-a-9ddfd583\",\r\n  \"worker_status\": \"offline\",\r\n  \"elapsed\": \"1s\",\r\n  \"recent_status\": \"0001-01-01T00:00:00Z\",\r\n  \"no_new_tasks\": false,\r\n  \"message\": \"offline; graceful stop completed\"\r\n}\r\nAgent managed-a-9ddfd583 已暂停；恢复: openagentx agent resume managed-a-9ddfd583\r\n"
+}

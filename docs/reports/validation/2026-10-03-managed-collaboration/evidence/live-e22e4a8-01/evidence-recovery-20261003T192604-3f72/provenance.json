@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-03T11:26:05.058122+00:00",
+  "binary_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "harness_sha256": "1f389d07ea1ba68a320e812b9583dd561711f3d53f67c820806a0732534079ee",
+  "primary_harness_sha256": "8bed0a03d46b194c309eeece8052604ae6c912e4cc4d3f7576a6f8d92f0674a3",
+  "scope": "existing isolated profile; formal APIs; same Agent/config Worker restart; no production services"
+}

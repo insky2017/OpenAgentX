@@ -1,0 +1,12 @@
+[
+  {
+    "pid": 2512305,
+    "starttime": "23942874",
+    "action": "SIGTERM; harness SIGCONT only to deliver pending termination"
+  },
+  {
+    "pid": 2517460,
+    "starttime": "23949748",
+    "action": "SIGTERM; harness SIGCONT only to deliver pending termination"
+  }
+]

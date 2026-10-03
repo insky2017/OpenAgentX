@@ -1,0 +1,37 @@
+{
+  "directory": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/evidence-native-continuation-20261003T180548-58be",
+  "phase": "native-continuation",
+  "provenance": {
+    "at": "2026-10-03T10:05:49.018432+00:00",
+    "phase": "native-continuation",
+    "harness_sha256": "407fb37cffdb6e9f514051393631780a48afeed04bcdb05371734db3f055683b",
+    "binary_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9",
+    "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+    "consultation_key": "real-consultation-01"
+  },
+  "window": {
+    "status": "RUNNING",
+    "started_at": "2026-10-03T10:06:43.070988+00:00",
+    "seconds": 1800
+  },
+  "result": {
+    "status": "PASS",
+    "elapsed_seconds": 1800.1075082320021,
+    "new_tasks": 0,
+    "new_model_turns": 0,
+    "new_tool_calls": 0,
+    "scope": "OAX Task inventory and exact fixture Codex rollout event counts"
+  },
+  "verdict": {
+    "status": "PASS",
+    "phase": "native-continuation",
+    "fleet": "see separate evidence",
+    "idle_30_minutes": true,
+    "at": "2026-10-03T10:36:43.178798+00:00"
+  },
+  "evidence_sha256": {
+    "idle-window.json": "b6476e495b4ce5c869fbf42b8f8c8d5bbd915e5304768b947725e000afe677e0",
+    "idle-result.json": "103905ead1fa628465efc77aa111ffbea83280a3b8454c4087717959715132f5",
+    "verdict-native-continuation.json": "9ca94d2d55c763944911a8f0bb48730fae6b367efc8ebeab328d7c3767630397"
+  }
+}

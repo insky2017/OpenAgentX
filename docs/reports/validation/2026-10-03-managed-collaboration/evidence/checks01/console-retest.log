@@ -1,0 +1,6 @@
+--- FAIL: TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident (15.51s)
+    workflow_integration_test.go:56: Persistent isolated fixture: /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/console-retest01/oax9-125663846
+    workflow_integration_test.go:167: daemon exited before socket was ready: exit status 1: daemon stopped: listen on Unix socket: listen unix /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/console-retest01/oax9-125663846/home/.openagentx/run/openagentx.sock: bind: invalid argument
+FAIL
+FAIL	openagentx/internal/cli/console	15.523s
+FAIL

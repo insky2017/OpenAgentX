@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-03T10:01:28.211734+00:00",
+  "phase": "chain",
+  "harness_sha256": "0badc5a1af060f8f4fc1048c9446840ea92b5a06c234dc7908814a892d1cf33d",
+  "binary_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "consultation_key": "real-consultation-clean-02"
+}

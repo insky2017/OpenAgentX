@@ -1,0 +1,57 @@
+{
+  "at": "2026-10-03T10:06:55.055839+00:00",
+  "schema": 4,
+  "snapshots": {
+    "external_session_bindings": {
+      "columns": [
+        "binding_id",
+        "agent_id",
+        "host_id",
+        "thread_id",
+        "generation",
+        "state",
+        "token_digest",
+        "token_expires_at",
+        "allowed_peer_agent_ids_json",
+        "created_at",
+        "updated_at"
+      ],
+      "count": 6,
+      "sha256": "09f322513960b99c1c2c07a436ec4d8a4b3c5269570cdfccebc4479179d757a0"
+    },
+    "external_messages": {
+      "columns": [
+        "sequence",
+        "message_id",
+        "sender_agent_id",
+        "target_agent_id",
+        "sender_binding_id",
+        "sender_generation",
+        "kind",
+        "reply_to_message_id",
+        "content",
+        "idempotency_key",
+        "payload_digest",
+        "origin_task_id",
+        "delivery_state",
+        "created_at",
+        "acknowledged_at",
+        "scope",
+        "forwarded_from_message_id",
+        "processing_state",
+        "processing_note"
+      ],
+      "count": 6,
+      "sha256": "a6a0541f38769e749f519779e81862da15a6b37d342ee3918be6703396850fc9"
+    },
+    "external_role_catalogs": {
+      "columns": [
+        "organization_id",
+        "revision"
+      ],
+      "count": 1,
+      "sha256": "0c6b7c780ebe4ae25e1729390287057ba159faf157b2f4d69667c74cba3b58dd"
+    }
+  },
+  "backup_sha256": "91c9914141bd909bb4d780e78a1798912fe147a813657541b57cb17756ec9e8a"
+}

@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-03T09:46:33.099281+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx",
+    "agent",
+    "resume",
+    "managed-a-9ddfd583",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/password",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOpenAgentX is already initialized; no changes were made\r\nAgent \"managed-a-9ddfd583\" is unchanged; no events were appended\r\nAgent managed-a-9ddfd583 已纳管，工作目录 /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/workspaces/managed-a-9ddfd583，职责 /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-a-9ddfd583.role.md\r\nAgent managed-a-9ddfd583 服务在线，当前代 1 网络已应用。\r\nmanaged-a-9ddfd583 (managed-a-9ddfd583) · 可开始工作\r\n  当前：无\r\n  最近：暂无结果\r\n  打开：openagentx agent open managed-a-9ddfd583\r\n  恢复：openagentx agent resume managed-a-9ddfd583\r\n\r\n"
+}

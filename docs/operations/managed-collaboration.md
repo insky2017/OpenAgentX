@@ -61,6 +61,7 @@ openagentx collaborate inbox --agent app-domain --all
 | 现象 | 含义与处理 |
 |---|---|
 | `queued` | 已入持久待办；检查目标 Worker 是否在线、是否正执行其他任务 |
+| Worker online，但任务始终 `queued` | 再查 `agent status <id>` 的运行环境就绪状态；若提示 `agent resume`，执行 `openagentx agent resume <id> --no-open`，就绪后原待办继续，不要重发咨询 |
 | `needs_review` | 任务失败/取消/结果未知，或职责、绑定、backend发生变化；核对 Task/Run/Journal 后决定下一步，系统不自动重复原任务 |
 | scope/owner 拒绝 | 从职责目录找正确 Agent；通信 peer 白名单不等于可回答任意领域 |
 | 终端关闭 | 后台仍可处理消息；用 `agent open <id> --native` 重开 |

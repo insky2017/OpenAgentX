@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/html-status02/verification.json",
+      "path": "verification.json",
+      "source_sha256": "1e5800d6037a9d27e433a2ae8db821e9fde5c04e4f452fbcb3d6c624d134ab88",
+      "sha256": "1e5800d6037a9d27e433a2ae8db821e9fde5c04e4f452fbcb3d6c624d134ab88",
+      "sanitized_sha256": "1e5800d6037a9d27e433a2ae8db821e9fde5c04e4f452fbcb3d6c624d134ab88",
+      "source_bytes": 10972,
+      "bytes": 10972,
+      "changed": false,
+      "transformations": []
+    }
+  ]
+}

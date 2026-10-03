@@ -1,0 +1,7 @@
+{
+  "phase": "chain",
+  "at": "2026-10-03T09:50:28.901220+00:00",
+  "harness_sha256": "53a315fc9652269de7e77d2f7e55c3b04eeea8a0c60c2387d38d902b5fab11cd",
+  "resume_reason": "PTY ANSI prefix parsing only; reuse completed initial queries and existing formal managed binding; B enabled through CLI",
+  "binary_sha256": "1884bcf100e04a12729414ed38a59000703b25748d5d3599b7ba90fa98fdf4eb"
+}

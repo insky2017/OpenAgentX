@@ -1,0 +1,120 @@
+{
+  "at": "2026-10-03T10:40:57.764604+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks?limit=100",
+  "request": null,
+  "status": 200,
+  "response": {
+    "tasks": [
+      {
+        "id": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "Use a shell tool to run sleep 12 and read native-proof.txt in the assigned workspace. Reply with exactly the file content, no extra punctuation or explanation.…",
+        "created_at": "2026-10-03T10:05:56.373310954Z",
+        "updated_at": "2026-10-03T10:06:37.827054438Z"
+      },
+      {
+        "id": "task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "query",
+        "status": "canceled",
+        "summary": "Use a shell tool to run sleep 12, then reply with exactly `OAX_MANAGED_AFTER_CLOSE_OK` (no punctuation). Do not change files.",
+        "created_at": "2026-10-03T10:02:39.602166739Z",
+        "updated_at": "2026-10-03T10:02:41.722762499Z"
+      },
+      {
+        "id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "mutation",
+        "status": "uncertain",
+        "summary": "Use a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactl…",
+        "created_at": "2026-10-03T10:02:07.459423225Z",
+        "updated_at": "2026-10-03T10:02:39.328007535Z"
+      },
+      {
+        "id": "managed-task-546763f190d95ae40467b74035d134f9",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "OpenAgentX read-only collaboration. Agent: managed-a-9ddfd583. Message: managed-result-8a0d11820a1040b67d6fc77425ac3ffa.",
+        "created_at": "2026-10-03T09:59:32.267105551Z",
+        "updated_at": "2026-10-03T09:59:42.313061857Z"
+      },
+      {
+        "id": "managed-task-8a0d11820a1040b67d6fc77425ac3ffa",
+        "target_agent_id": "managed-b-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "OpenAgentX read-only collaboration. Agent: managed-b-9ddfd583. Message: external-message-f63295d0-0cbb-498d-a9ec-073492c09116.",
+        "created_at": "2026-10-03T09:59:10.375810647Z",
+        "updated_at": "2026-10-03T09:59:32.262875875Z"
+      },
+      {
+        "id": "task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "Execute this exact CLI command once using a shell tool to ask the other domain Agent. Do not read any credential contents and do not poll for the answer. After…",
+        "created_at": "2026-10-03T09:58:51.62304463Z",
+        "updated_at": "2026-10-03T09:59:17.265280109Z"
+      },
+      {
+        "id": "task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "mutation",
+        "status": "uncertain",
+        "summary": "Do not call tools. Reply exactly OAX_MANAGED_NATIVE_INPUT_OK.",
+        "created_at": "2026-10-03T09:51:17.332689446Z",
+        "updated_at": "2026-10-03T09:51:24.634823726Z"
+      },
+      {
+        "id": "managed-task-750aaa7869187a032158fe3c9742e9fe",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "OpenAgentX read-only collaboration. Agent: managed-a-9ddfd583. Message: managed-result-5fee64ad63b5ae1ae4ac02c6aafbe7bc.",
+        "created_at": "2026-10-03T09:50:52.995078422Z",
+        "updated_at": "2026-10-03T09:51:01.122714848Z"
+      },
+      {
+        "id": "managed-task-5fee64ad63b5ae1ae4ac02c6aafbe7bc",
+        "target_agent_id": "managed-b-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "OpenAgentX read-only collaboration. Agent: managed-b-9ddfd583. Message: external-message-e5509a4d-4a09-413b-b164-450839ae6d1b.",
+        "created_at": "2026-10-03T09:50:32.371181199Z",
+        "updated_at": "2026-10-03T09:50:52.990962709Z"
+      },
+      {
+        "id": "task-83d1602c-00b1-4595-adb0-db78c7028780",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "Execute this exact CLI command once using a shell tool to ask the other domain Agent. Do not read any credential contents and do not poll for the answer. After…",
+        "created_at": "2026-10-03T09:50:11.374193782Z",
+        "updated_at": "2026-10-03T09:50:37.818889452Z"
+      },
+      {
+        "id": "task-59dfba72-3f69-4ca5-bb8c-002bec38f618",
+        "target_agent_id": "managed-b-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "Do not use tools. Reply exactly INITIALIZED-managed-b-9ddfd583",
+        "created_at": "2026-10-03T09:47:12.768712757Z",
+        "updated_at": "2026-10-03T09:47:22.407923779Z"
+      },
+      {
+        "id": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+        "target_agent_id": "managed-a-9ddfd583",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "Do not use tools. Reply exactly INITIALIZED-managed-a-9ddfd583",
+        "created_at": "2026-10-03T09:46:33.102762433Z",
+        "updated_at": "2026-10-03T09:46:46.13478346Z"
+      }
+    ],
+    "has_more": false
+  }
+}

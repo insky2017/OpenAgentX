@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-03T09:45:51.881852+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "init"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOwner  \r\nConfirm owner  \r\nInitialized OpenAgentX owner \"owner\" and Organization \"default\"\r\n"
+}

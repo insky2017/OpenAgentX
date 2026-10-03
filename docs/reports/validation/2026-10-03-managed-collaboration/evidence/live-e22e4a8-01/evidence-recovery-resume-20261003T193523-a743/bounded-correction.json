@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-03T11:35:23.894731+00:00",
+  "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/evidence-recovery-20261003T192604-3f72",
+  "action": "formal agent resume after exact Worker restart",
+  "reason": "Worker online but runtime readiness false; restart fixture omitted the existing startup readiness step",
+  "no_new_task": true
+}

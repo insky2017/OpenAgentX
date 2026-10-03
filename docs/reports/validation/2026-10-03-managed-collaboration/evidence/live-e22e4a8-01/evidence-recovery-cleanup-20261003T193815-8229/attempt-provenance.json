@@ -1,0 +1,6 @@
+{
+  "at": "2026-10-03T11:38:15.292694+00:00",
+  "phase": "recovery-cleanup",
+  "scope": "exact fixture process identities only; no task dispatch; no production process signals",
+  "harness_sha256": "a670ab9df2e1f577dbc01d062e1bb768e96f186f7d58db9da3a1843afd82902e"
+}

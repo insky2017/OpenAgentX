@@ -1,0 +1,660 @@
+{
+  "at": "2026-10-03T09:46:02.846383+00:00",
+  "mode": "read-only",
+  "schema": 4,
+  "columns": {
+    "agent_profiles": [
+      "agent_id",
+      "profile_version",
+      "instructions_path",
+      "workspace_root",
+      "default_execution_profile_id",
+      "capabilities_json",
+      "created_at",
+      "updated_at"
+    ],
+    "agents": [
+      "agent_id",
+      "principal_id",
+      "organization_id",
+      "display_name",
+      "status",
+      "version",
+      "created_at",
+      "updated_at"
+    ],
+    "approval_decisions": [
+      "approval_decision_id",
+      "approval_request_id",
+      "decided_by",
+      "decision",
+      "state",
+      "idempotency_key",
+      "created_at"
+    ],
+    "approval_requests": [
+      "approval_request_id",
+      "task_id",
+      "mode",
+      "target_run_id",
+      "expected_run_version",
+      "scope_digest",
+      "state",
+      "expires_at",
+      "created_at"
+    ],
+    "artifacts": [
+      "artifact_id",
+      "task_id",
+      "run_id",
+      "kind",
+      "uri",
+      "digest",
+      "metadata_json",
+      "created_at"
+    ],
+    "authority_policies": [
+      "authority_policy_id",
+      "organization_id",
+      "subject_kind",
+      "subject_id",
+      "action",
+      "resource_scope_json",
+      "effect",
+      "version",
+      "created_at",
+      "updated_at"
+    ],
+    "cli_tokens": "[REDACTED]",
+    "event_journal": [
+      "sequence",
+      "event_id",
+      "organization_id",
+      "aggregate_type",
+      "aggregate_id",
+      "event_type",
+      "actor_principal_id",
+      "payload_json",
+      "created_at"
+    ],
+    "execution_profiles": [
+      "execution_profile_id",
+      "organization_id",
+      "name",
+      "execution_json",
+      "version",
+      "created_at",
+      "updated_at"
+    ],
+    "external_messages": [
+      "sequence",
+      "message_id",
+      "sender_agent_id",
+      "target_agent_id",
+      "sender_binding_id",
+      "sender_generation",
+      "kind",
+      "reply_to_message_id",
+      "content",
+      "idempotency_key",
+      "payload_digest",
+      "origin_task_id",
+      "delivery_state",
+      "created_at",
+      "acknowledged_at",
+      "scope",
+      "forwarded_from_message_id",
+      "processing_state",
+      "processing_note"
+    ],
+    "external_role_catalogs": [
+      "organization_id",
+      "revision"
+    ],
+    "external_role_scopes": [
+      "organization_id",
+      "scope",
+      "owner_agent_id",
+      "description"
+    ],
+    "external_session_bindings": [
+      "binding_id",
+      "agent_id",
+      "host_id",
+      "thread_id",
+      "generation",
+      "state",
+      "token_digest",
+      "token_expires_at",
+      "allowed_peer_agent_ids_json",
+      "created_at",
+      "updated_at"
+    ],
+    "installation_metadata": [
+      "singleton",
+      "installation_id",
+      "created_at"
+    ],
+    "mailbox_items": [
+      "sequence",
+      "mailbox_item_id",
+      "target_agent_id",
+      "kind",
+      "lane",
+      "task_id",
+      "message_id",
+      "approval_request_id",
+      "approval_decision_id",
+      "target_run_id",
+      "expected_run_version",
+      "state",
+      "worker_instance_id",
+      "fencing_token",
+      "lease_until",
+      "attempts",
+      "created_at",
+      "accepted_at"
+    ],
+    "messages": [
+      "message_id",
+      "task_id",
+      "version",
+      "sequence",
+      "sender_principal_id",
+      "target_agent_id",
+      "kind",
+      "content",
+      "created_at"
+    ],
+    "network_imports": [
+      "worker_instance_id",
+      "generation",
+      "backend_id",
+      "source_identity",
+      "work_id",
+      "profile_id",
+      "content_version",
+      "state",
+      "created_at",
+      "finished_at"
+    ],
+    "network_mode_policies": [
+      "agent_id",
+      "backend_id",
+      "policy_version",
+      "mode",
+      "manifest_digest",
+      "created_by",
+      "created_at"
+    ],
+    "network_mode_tests": [
+      "test_id",
+      "agent_id",
+      "backend_id",
+      "policy_version",
+      "mode",
+      "manifest_digest",
+      "worker_instance_id",
+      "generation",
+      "runtime_identity_json",
+      "binding_revision",
+      "state",
+      "diagnostic_code",
+      "duration_ms",
+      "probe_results_json",
+      "created_by",
+      "created_at",
+      "finished_at"
+    ],
+    "network_profile_bindings": [
+      "agent_id",
+      "backend_id",
+      "mode",
+      "profile_id",
+      "profile_version",
+      "policy_version",
+      "test_id",
+      "version",
+      "desired_status",
+      "applied_worker_id",
+      "applied_generation",
+      "applied_mode",
+      "applied_profile_id",
+      "applied_profile_version",
+      "applied_policy_version",
+      "applied_binding_revision",
+      "diagnostic",
+      "manifest_digest",
+      "secret_version",
+      "runtime_identity_json",
+      "updated_at"
+    ],
+    "network_profile_heads": [
+      "profile_id",
+      "current_content_version",
+      "state",
+      "state_revision",
+      "ready_test_id",
+      "published_content_version",
+      "updated_at"
+    ],
+    "network_profile_publications": [
+      "profile_id",
+      "content_version",
+      "test_id",
+      "runtime_identity_json",
+      "published_by",
+      "published_at"
+    ],
+    "network_profiles": [
+      "profile_id",
+      "version",
+      "status",
+      "mode",
+      "host",
+      "port",
+      "config_file",
+      "secret_ref",
+      "direct_ips_json",
+      "manifest_digest",
+      "created_by",
+      "created_at",
+      "updated_at"
+    ],
+    "network_tests": [
+      "test_id",
+      "profile_id",
+      "content_version",
+      "secret_version",
+      "worker_instance_id",
+      "generation",
+      "backend_id",
+      "runtime_identity_json",
+      "state",
+      "diagnostic_code",
+      "duration_ms",
+      "probe_results_json",
+      "created_by",
+      "created_at",
+      "finished_at"
+    ],
+    "network_work_items": [
+      "work_id",
+      "kind",
+      "profile_id",
+      "content_version",
+      "secret_version",
+      "agent_id",
+      "backend_id",
+      "worker_instance_id",
+      "generation",
+      "binding_revision",
+      "network_mode",
+      "policy_version",
+      "manifest_digest",
+      "runtime_identity_json",
+      "state",
+      "diagnostic_code",
+      "created_at",
+      "finished_at"
+    ],
+    "network_workflow_commands": [
+      "actor_principal_id",
+      "operation",
+      "idempotency_key",
+      "request_digest",
+      "result_json",
+      "created_at"
+    ],
+    "org_units": [
+      "org_unit_id",
+      "organization_id",
+      "parent_org_unit_id",
+      "name",
+      "created_at",
+      "updated_at"
+    ],
+    "organizations": [
+      "organization_id",
+      "name",
+      "status",
+      "created_at",
+      "updated_at"
+    ],
+    "position_assignments": [
+      "position_assignment_id",
+      "position_id",
+      "agent_id",
+      "active",
+      "starts_at",
+      "ends_at",
+      "created_at"
+    ],
+    "positions": [
+      "position_id",
+      "organization_id",
+      "org_unit_id",
+      "role_id",
+      "name",
+      "created_at",
+      "updated_at"
+    ],
+    "principals": [
+      "principal_id",
+      "kind",
+      "display_name",
+      "status",
+      "created_at",
+      "updated_at"
+    ],
+    "reporting_lines": [
+      "reporting_line_id",
+      "organization_id",
+      "manager_position_id",
+      "report_position_id",
+      "created_at"
+    ],
+    "roles": [
+      "role_id",
+      "organization_id",
+      "name",
+      "capabilities_json",
+      "created_at",
+      "updated_at"
+    ],
+    "run_attempts": [
+      "run_id",
+      "task_id",
+      "agent_id",
+      "version",
+      "status",
+      "worker_instance_id",
+      "fencing_token",
+      "lease_until",
+      "execution_spec_version",
+      "requested_execution_json",
+      "resolved_execution_json",
+      "adapter_id",
+      "backend_id",
+      "model",
+      "reasoning_mode",
+      "reasoning_value",
+      "started_at",
+      "finished_at",
+      "result_json",
+      "created_at",
+      "updated_at"
+    ],
+    "runtime_backend_registrations": [
+      "runtime_backend_registration_id",
+      "worker_instance_id",
+      "adapter_id",
+      "backend_id",
+      "descriptor_json",
+      "network_json",
+      "health",
+      "observed_at"
+    ],
+    "session_bindings": [
+      "session_binding_id",
+      "context_id",
+      "agent_id",
+      "backend_id",
+      "provider_session_id",
+      "state",
+      "version",
+      "created_at",
+      "updated_at"
+    ],
+    "tasks": [
+      "task_id",
+      "version",
+      "status",
+      "sender_principal_id",
+      "target_agent_id",
+      "dispatch_mode",
+      "intent",
+      "completion_basis",
+      "parent_task_id",
+      "organization_id",
+      "idempotency_key",
+      "content",
+      "result",
+      "error",
+      "cancel_requested_by",
+      "cancel_requested_at",
+      "created_at",
+      "updated_at"
+    ],
+    "web_sessions": [
+      "web_session_id",
+      "web_user_id",
+      "session_digest",
+      "csrf_digest",
+      "created_at",
+      "last_activity_at",
+      "idle_expires_at",
+      "absolute_expires_at",
+      "revoked_at"
+    ],
+    "web_users": [
+      "web_user_id",
+      "principal_id",
+      "username",
+      "password_hash",
+      "roles_json",
+      "status",
+      "password_changed_at",
+      "created_at",
+      "updated_at"
+    ],
+    "worker_commands": [
+      "worker_command_id",
+      "worker_instance_id",
+      "generation",
+      "kind",
+      "state",
+      "requested_by",
+      "idempotency_key",
+      "lease_until",
+      "attempts",
+      "created_at",
+      "claimed_at",
+      "applied_at",
+      "result"
+    ],
+    "worker_instances": [
+      "worker_instance_id",
+      "agent_id",
+      "generation",
+      "transport",
+      "authenticated_principal",
+      "capabilities_json",
+      "status",
+      "session_token_digest",
+      "session_token_expires_at",
+      "last_heartbeat_at",
+      "lease_until",
+      "fencing_token",
+      "started_at",
+      "updated_at"
+    ],
+    "workspace_leases": [
+      "workspace_lease_id",
+      "workspace_key",
+      "run_id",
+      "worker_instance_id",
+      "fencing_token",
+      "lease_until",
+      "created_at",
+      "updated_at"
+    ]
+  },
+  "tables": {
+    "agent_profiles": {
+      "rows": 2,
+      "rowset_sha256": "fbb104c1dc9b940eee12cabf681b9bec30ee2712ba0f3b9c27088cf8b43d5c79"
+    },
+    "agents": {
+      "rows": 2,
+      "rowset_sha256": "7f9ab94fe858554c4025c2d8b3a32db850f603d09f6f939027cb5d4f42b9ddb9"
+    },
+    "approval_decisions": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "approval_requests": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "authority_policies": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cli_tokens": "[REDACTED]",
+    "event_journal": {
+      "rows": 8,
+      "rowset_sha256": "8685ee6a3fc0d47a116c5e47eee8c60e23c519558b6d2e09b43680b5b8e93628"
+    },
+    "execution_profiles": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "external_messages": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "external_role_catalogs": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "external_role_scopes": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "external_session_bindings": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "installation_metadata": {
+      "rows": 1,
+      "rowset_sha256": "3c602bb1ff7636097b53e20b95079a672a3701c7818cbe5620dc161521bdd951"
+    },
+    "mailbox_items": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "messages": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_imports": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_mode_policies": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_mode_tests": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_profile_bindings": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_profile_heads": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_profile_publications": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_profiles": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_tests": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_work_items": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network_workflow_commands": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "org_units": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "organizations": {
+      "rows": 1,
+      "rowset_sha256": "b4fbd9788e5354370f579ff836d570617fba24aa14391d99f73936aa7e52b42a"
+    },
+    "position_assignments": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "positions": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "principals": {
+      "rows": 4,
+      "rowset_sha256": "e2a67442db8d08de3010c3dbce69a6cbe0bc320f3ae6e0270ee7fa21b7e7a98a"
+    },
+    "reporting_lines": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "roles": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run_attempts": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "runtime_backend_registrations": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "session_bindings": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tasks": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "web_sessions": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "web_users": {
+      "rows": 1,
+      "rowset_sha256": "6cacdc5f12c335fdf0be703cccd19194322bd42dec8d9a423445bb2ca8933ce8"
+    },
+    "worker_commands": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker_instances": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "workspace_leases": {
+      "rows": 0,
+      "rowset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

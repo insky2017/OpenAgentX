@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-03T11:26:05.130872+00:00",
+  "transport": "formal external UDS API",
+  "agent": "managed-b-9ddfd583",
+  "method": "POST",
+  "route": "messages",
+  "request": {
+    "target_agent_id": "managed-a-9ddfd583",
+    "scope": "fixture.managed-b-9ddfd583",
+    "kind": "consultation",
+    "content": "Read facts.txt only; this fixture verifies protocol rejection, no change is authorized.",
+    "idempotency_key": "recovery-20261003T192604-3f72-wrong-owner"
+  },
+  "status": 422,
+  "response": {
+    "code": "OUT_OF_SCOPE",
+    "scope": "fixture.managed-b-9ddfd583",
+    "owner_agent_id": "managed-b-9ddfd583",
+    "message": "target does not own the declared scope"
+  }
+}

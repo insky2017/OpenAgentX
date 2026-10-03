@@ -1,0 +1,56 @@
+{
+  "files": [
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01/after-data.json",
+      "path": "after-data.json",
+      "source_sha256": "9ee4428e47931224d54c5c01493da1bf7d1da26fb58e7eb6de1fdbfa05d554ee",
+      "sha256": "9ee4428e47931224d54c5c01493da1bf7d1da26fb58e7eb6de1fdbfa05d554ee"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01/after-services.json",
+      "path": "after-services.json",
+      "source_sha256": "12f4e0083c5a33a1e09272a3d9a93fccdab355a2e90c2ae13c804df0eba81652",
+      "sha256": "12f4e0083c5a33a1e09272a3d9a93fccdab355a2e90c2ae13c804df0eba81652"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01/before-data.json",
+      "path": "before-data.json",
+      "source_sha256": "9d7eff8cf5090310f89b971d909d70538514cec581d00db0c50f56f781bb8991",
+      "sha256": "9d7eff8cf5090310f89b971d909d70538514cec581d00db0c50f56f781bb8991"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01/before-services.json",
+      "path": "before-services.json",
+      "source_sha256": "69fea0025cceb335cf35b1e38b4c60c17889ffb61fb640977ceecfa7ff5353d7",
+      "sha256": "69fea0025cceb335cf35b1e38b4c60c17889ffb61fb640977ceecfa7ff5353d7"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01/result.json",
+      "path": "result.json",
+      "source_sha256": "7eb990ac89b8b503a4b22dd6ae7b46248ae68bfd1ae58629039664af1f64a1f7",
+      "sha256": "7eb990ac89b8b503a4b22dd6ae7b46248ae68bfd1ae58629039664af1f64a1f7"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01/business-read-status-oneaxe-pay.json",
+      "path": "business-read-status-oneaxe-pay.json",
+      "source_sha256": "7996b1df31914ec30df26ca5ff5c908f7da4260b36ea0016a17ffd6091c03c6e",
+      "sha256": "7996b1df31914ec30df26ca5ff5c908f7da4260b36ea0016a17ffd6091c03c6e",
+      "sanitized_sha256": "7996b1df31914ec30df26ca5ff5c908f7da4260b36ea0016a17ffd6091c03c6e",
+      "source_bytes": 700,
+      "bytes": 700,
+      "changed": false,
+      "transformations": []
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01/business-read-status-rhythm.json",
+      "path": "business-read-status-rhythm.json",
+      "source_sha256": "1f0ca4d7b8557876136072caeb7066b4551a32b0ef1c4372b4086190fa601566",
+      "sha256": "1f0ca4d7b8557876136072caeb7066b4551a32b0ef1c4372b4086190fa601566",
+      "sanitized_sha256": "1f0ca4d7b8557876136072caeb7066b4551a32b0ef1c4372b4086190fa601566",
+      "source_bytes": 692,
+      "bytes": 692,
+      "changed": false,
+      "transformations": []
+    }
+  ]
+}

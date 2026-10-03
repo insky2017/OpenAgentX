@@ -1,0 +1,121 @@
+{
+  "at": "2026-10-03T09:59:01.667412+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+      "version": 2,
+      "target_agent_id": "managed-a-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Execute this exact CLI command once using a shell tool to ask the other domain Agent. Do not read any credential contents and do not poll for the answer. After successful enqueue, reply exactly ASK_SENT.\n/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8 collaborate ask --agent managed-a-9ddfd583 --to managed-b-9ddfd583 --scope fixture.managed-b-9ddfd583 --key real-consultation-clean-02 --socket /tmp/oax-managed-4fbd48f15f.sock --session-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/external/managed-a-9ddfd583/credentials.json --content-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/workspaces/managed-a-9ddfd583/consultation.txt\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201\nObjective:\nDo not use tools. Reply exactly INITIALIZED-managed-a-9ddfd583\nResult:\nINITIALIZED-managed-a-9ddfd583",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T09:58:51.62304463Z",
+      "updated_at": "2026-10-03T09:58:51.629296131Z"
+    },
+    "messages": [
+      {
+        "id": "message-8af39e86-e3ef-4a40-b2a8-ea446e84f713",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "kind": "instruction",
+        "content": "Execute this exact CLI command once using a shell tool to ask the other domain Agent. Do not read any credential contents and do not poll for the answer. After successful enqueue, reply exactly ASK_SENT.\n/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8 collaborate ask --agent managed-a-9ddfd583 --to managed-b-9ddfd583 --scope fixture.managed-b-9ddfd583 --key real-consultation-clean-02 --socket /tmp/oax-managed-4fbd48f15f.sock --session-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/external/managed-a-9ddfd583/credentials.json --content-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/workspaces/managed-a-9ddfd583/consultation.txt\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201\nObjective:\nDo not use tools. Reply exactly INITIALIZED-managed-a-9ddfd583\nResult:\nINITIALIZED-managed-a-9ddfd583",
+        "created_at": "2026-10-03T09:58:51.62304463Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-03T10:28:51.629296131Z",
+        "instructions_sha256": "1fa21ae2df6e96153e53af3389a1dddc1005c1b852a2cfd3de42d03024bc7afa",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-a-9ddfd583.role.md",
+        "run_id": "run-de9168a5-1c33-471c-8a75-92071c181da5",
+        "task_id": "task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+        "agent_id": "managed-a-9ddfd583",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-294d0f23-a3c7-4949-9b2d-741f5b983b14",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-03T09:58:51.629296131Z",
+        "created_at": "2026-10-03T09:58:51.629296131Z",
+        "updated_at": "2026-10-03T09:58:59.776602382Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 275,
+        "event_id": "event-95a041fe-3ae6-4e24-86b0-0550ff7e18c7",
+        "aggregate_type": "task",
+        "aggregate_id": "task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T09:58:51.62304463Z"
+      },
+      {
+        "sequence": 277,
+        "event_id": "event-task-f90fd5a3-8ff9-4f36-a71f-c04cbb8a0e65",
+        "aggregate_type": "task",
+        "aggregate_id": "task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+        "event_type": "task.running",
+        "created_at": "2026-10-03T09:58:51.63145943Z"
+      },
+      {
+        "sequence": 278,
+        "event_id": "event-run-603f4d4d-d251-48a0-ad55-b6f4c6ce5ff1",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-de9168a5-1c33-471c-8a75-92071c181da5",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-03T09:58:51.631467921Z"
+      },
+      {
+        "sequence": 280,
+        "event_id": "event-runtime-e2db82f8-813c-4ede-916f-91827bbd9291",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-de9168a5-1c33-471c-8a75-92071c181da5",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T09:58:55.247201793Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 281,
+        "event_id": "event-runtime-f3b9b849-c40a-4400-945a-42699bb07faa",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-de9168a5-1c33-471c-8a75-92071c181da5",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T09:58:59.556738074Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我将执行指定命令一次，提交咨询请求。\n",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 283,
+    "live_after_sequence": 283,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "process": {
+    "label": "worker-replacement-managed-b-9ddfd583",
+    "pid": 2541179,
+    "starttime": "23990686"
+  },
+  "alive": false,
+  "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/evidence-recovery-20261003T192604-3f72"
+}

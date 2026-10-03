@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-03T09:50:44.621102+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx",
+    "collaborate",
+    "inbox",
+    "--agent",
+    "managed-a-9ddfd583",
+    "--all"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6n{\r\n  \"has_more\": false,\r\n  \"messages\": [],\r\n  \"next_after\": 0\r\n}\r\n"
+}

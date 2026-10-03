@@ -1,0 +1,18 @@
+{
+  "worker": {
+    "worker_instance_id": "worker-a48bf96f-24e8-4f4e-859e-4d99596c01d9",
+    "agent_id": "managed-b-9ddfd583",
+    "generation": 2,
+    "status": "online",
+    "last_heartbeat_at": "2026-10-03T11:29:09.787813408Z",
+    "lease_until": "2026-10-03T11:29:39.787813408Z",
+    "started_at": "2026-10-03T09:57:59.774369688Z",
+    "updated_at": "2026-10-03T11:29:09.787813408Z"
+  },
+  "process": {
+    "label": "worker-replacement-managed-b-9ddfd583",
+    "pid": 2541179,
+    "starttime": "23990686"
+  },
+  "config_sha256": "a8f33b0d513fa76d52ca72033152ee831bca224907941aa7e9dd28e4108db436"
+}

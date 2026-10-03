@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-03T10:06:39.804652+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "agent",
+    "open",
+    "managed-a-9ddfd583",
+    "--native"
+  ],
+  "pid": 2577427
+}

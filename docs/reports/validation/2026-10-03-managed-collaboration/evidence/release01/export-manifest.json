@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/release01/manifest.json",
+      "path": "manifest.json",
+      "source_sha256": "5188e0dc64a1bcefeed0a2bfdd8b0d004ef0392f63afa4ad5383cf33645893b4",
+      "sha256": "5188e0dc64a1bcefeed0a2bfdd8b0d004ef0392f63afa4ad5383cf33645893b4"
+    }
+  ]
+}

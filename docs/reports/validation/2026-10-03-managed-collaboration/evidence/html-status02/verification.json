@@ -1,0 +1,327 @@
+{
+  "status": "PASS",
+  "verified_at": "2026-10-03T11:39:19.704663+00:00",
+  "scope": "Static verification only; no browser, model, API or service operation",
+  "files": [
+    {
+      "path": "/home/sky/Documents/ChatGPT/OpenAgentX/OpenAgentX-事件协作与终端方案.html",
+      "sha256": "d05782e286e0bd988f360eddef3a935bb7fc730dbae8c2d938aafadd99472ec8"
+    },
+    {
+      "path": "/home/sky/Documents/ChatGPT/OpenAgentX/OpenAgentX-本轮落地与使用.md",
+      "sha256": "0dd4d3a8d20de2b0759809485dd67c0fb23bbb5ed96fc005e6076ca55d6a56e4"
+    }
+  ],
+  "html": {
+    "balanced_tags": true,
+    "id_count": 50,
+    "ids": [
+      "needs",
+      "events",
+      "desktop",
+      "terminal",
+      "architecture",
+      "pane-contract",
+      "bridge-contract",
+      "componentMap",
+      "expandMap",
+      "mapExplanation",
+      "system-component-map",
+      "component-title",
+      "component-desc",
+      "map-blue",
+      "map-green",
+      "map-purple",
+      "map-gray",
+      "event-recording",
+      "eventDemo",
+      "eventExplanation",
+      "event-subscription-map",
+      "event-title",
+      "event-desc",
+      "event-arrow",
+      "event-view-arrow",
+      "frontendClosedLabel",
+      "message-task",
+      "collaboration-map",
+      "collab-title",
+      "collab-desc",
+      "collab-solid-arrow",
+      "collab-pending-arrow",
+      "choices",
+      "gates",
+      "try",
+      "state",
+      "queued",
+      "runs",
+      "newMessage",
+      "busy",
+      "finish",
+      "idle",
+      "reset",
+      "demoLog",
+      "history",
+      "interval",
+      "agents",
+      "work",
+      "calcOutput",
+      "evidence"
+    ],
+    "duplicate_ids": [],
+    "link_count": 31,
+    "local_links": [
+      {
+        "href": "#needs",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#events",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#desktop",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#terminal",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#architecture",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#gates",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#evidence",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/DELIVERY.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/managed-collaboration.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "#pane-contract",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#bridge-contract",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#event-recording",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "#message-task",
+        "exists": true,
+        "fragment_checked": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/internal/nativebridge/bridge.go",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/internal/runtime/codex/turn.go",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/internal/runtime/codex/rpc.go",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/internal/worker/run_manager.go",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/internal/controlplane/worker_service.go",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/internal/cli/fleet/command.go",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/internal/runtime/agy/adapter.go",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-codex-workflow/evidence/installed-native01/SUMMARY.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/rhythm-pay-managed-handoff.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/DELIVERY.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/COVERAGE.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/EXECUTION-LOG.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/managed-collaboration.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/rhythm-pay-managed-handoff.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/event-driven-collaboration.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/codex-agent-entry.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-desktop-collaboration/DELIVERY.md",
+        "exists": true,
+        "fragment_checked": false
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-external-session/evidence/host-probe01/protocol01/SUMMARY.md",
+        "exists": true,
+        "fragment_checked": false
+      }
+    ],
+    "aria_references_resolved": true,
+    "literal_script_id_reference_count": 17,
+    "literal_script_id_references_resolved": true
+  },
+  "markdown": {
+    "link_count": 20,
+    "local_links": [
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/DELIVERY.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/COVERAGE.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/EXECUTION-LOG.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/managed-collaboration.md",
+        "exists": true
+      },
+      {
+        "href": "OpenAgentX-事件协作与终端方案.html#architecture",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/examples/external-session/README.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/skills/oax-collaborate/SKILL.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-desktop-collaboration/evidence/manual01/README.md",
+        "exists": true
+      },
+      {
+        "href": "OpenAgentX-架构与关键流程.html",
+        "exists": true
+      },
+      {
+        "href": "OpenAgentX-架构与关键流程.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/codex-agent-entry.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/DELIVERY.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/COVERAGE.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-managed-collaboration/EXECUTION-LOG.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-codex-workflow/DELIVERY.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-02-agy-workflow/DELIVERY.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/agy-daily-workflow.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/event-driven-collaboration.md",
+        "exists": true
+      },
+      {
+        "href": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/operations/rhythm-pay-managed-handoff.md",
+        "exists": true
+      }
+    ]
+  },
+  "git_diff_check": "PASS",
+  "visual_verification": {
+    "status": "NOT_PERFORMED",
+    "reason": "Browser URL safety policy rejected local file preview in this task; no bypass or visual recheck attempted."
+  },
+  "content_boundaries": [
+    "M04 real sleep 75 s, 37 queued/0 Run samples; sequential reply and consumption",
+    "M05 requires Worker restart plus official agent resume for Runtime readiness; same pending task continued without resend",
+    "M06 three rejections with 0 new Tasks",
+    "Original final stale PID capture FAIL retained; read-only supplementary verdict PASS with 0 new Tasks",
+    "Original Rhythm/Pay remain external; no business host migration",
+    "Fleet respawn-dead in isolated tmux does not prove fleet up systemd initial startup"
+  ]
+}

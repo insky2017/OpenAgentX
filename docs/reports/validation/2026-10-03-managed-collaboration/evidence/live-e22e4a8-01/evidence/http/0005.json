@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-03T09:46:33.109321+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+      "version": 1,
+      "target_agent_id": "managed-a-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Do not use tools. Reply exactly INITIALIZED-managed-a-9ddfd583",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T09:46:33.102762433Z",
+      "updated_at": "2026-10-03T09:46:33.102762433Z"
+    },
+    "messages": [
+      {
+        "id": "message-39301395-751f-4c6b-bf4c-bddb3a9a2d31",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "kind": "instruction",
+        "content": "Do not use tools. Reply exactly INITIALIZED-managed-a-9ddfd583",
+        "created_at": "2026-10-03T09:46:33.102762433Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 21,
+        "event_id": "event-d29f6229-538c-4d41-a390-753707b58d45",
+        "aggregate_type": "task",
+        "aggregate_id": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T09:46:33.102762433Z"
+      }
+    ],
+    "snapshot_sequence": 22,
+    "live_after_sequence": 22,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

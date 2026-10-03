@@ -1,0 +1,121 @@
+{
+  "at": "2026-10-03T10:06:11.600283+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+      "version": 2,
+      "target_agent_id": "managed-a-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Use a shell tool to run sleep 12 and read native-proof.txt in the assigned workspace. Reply with exactly the file content, no extra punctuation or explanation. Do not modify files.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-a472591c-fb6b-4d9f-9be6-061b0ed374e0\nObjective:\nUse a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactly DONE (no punctuation).\nResult:\nDONE",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T10:05:56.373310954Z",
+      "updated_at": "2026-10-03T10:05:56.386734479Z"
+    },
+    "messages": [
+      {
+        "id": "message-71e259ad-14b1-44d9-baee-47b19fa9ce14",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "kind": "instruction",
+        "content": "Use a shell tool to run sleep 12 and read native-proof.txt in the assigned workspace. Reply with exactly the file content, no extra punctuation or explanation. Do not modify files.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-a472591c-fb6b-4d9f-9be6-061b0ed374e0\nObjective:\nUse a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactly DONE (no punctuation).\nResult:\nDONE",
+        "created_at": "2026-10-03T10:05:56.373310954Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-03T10:35:56.386734479Z",
+        "instructions_sha256": "1fa21ae2df6e96153e53af3389a1dddc1005c1b852a2cfd3de42d03024bc7afa",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-a-9ddfd583.role.md",
+        "run_id": "run-b93bd199-60f6-4c24-b293-e6fecb8dc2d2",
+        "task_id": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+        "agent_id": "managed-a-9ddfd583",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-294d0f23-a3c7-4949-9b2d-741f5b983b14",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-03T10:05:56.386734479Z",
+        "created_at": "2026-10-03T10:05:56.386734479Z",
+        "updated_at": "2026-10-03T10:06:09.777593305Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 430,
+        "event_id": "event-abb912d2-5da0-4e96-b805-f6ca38ef4786",
+        "aggregate_type": "task",
+        "aggregate_id": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T10:05:56.373310954Z"
+      },
+      {
+        "sequence": 432,
+        "event_id": "event-task-f44a6f16-9186-4137-a28d-5b06c4005c54",
+        "aggregate_type": "task",
+        "aggregate_id": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+        "event_type": "task.running",
+        "created_at": "2026-10-03T10:05:56.388709285Z"
+      },
+      {
+        "sequence": 433,
+        "event_id": "event-run-6dabc5b9-9879-4fe1-8ed3-42ab049c3992",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-b93bd199-60f6-4c24-b293-e6fecb8dc2d2",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-03T10:05:56.388718369Z"
+      },
+      {
+        "sequence": 435,
+        "event_id": "event-runtime-154b3860-19de-42d6-90a8-ec9803daa16f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-b93bd199-60f6-4c24-b293-e6fecb8dc2d2",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T10:05:58.01538486Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 438,
+        "event_id": "event-runtime-15b839e0-8f12-44f6-8e6c-d6eef7b47d85",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-b93bd199-60f6-4c24-b293-e6fecb8dc2d2",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T10:06:07.46963614Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我将等待 12 秒，然后只读 native-proof.txt。\n",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 440,
+    "live_after_sequence": 440,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

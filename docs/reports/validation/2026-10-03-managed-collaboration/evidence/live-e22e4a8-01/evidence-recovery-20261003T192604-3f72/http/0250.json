@@ -1,0 +1,163 @@
+{
+  "at": "2026-10-03T11:27:51.148240+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+      "version": 2,
+      "target_agent_id": "managed-b-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Use a shell tool to run exactly sleep 75, wait for it to finish, then reply exactly BUSY-DONE-recovery-20261003T192604-3f72. Do not change files or run background commands.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-59dfba72-3f69-4ca5-bb8c-002bec38f618\nObjective:\nDo not use tools. Reply exactly INITIALIZED-managed-b-9ddfd583\nResult:\nINITIALIZED-managed-b-9ddfd583",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T11:26:05.157589398Z",
+      "updated_at": "2026-10-03T11:26:05.16188785Z"
+    },
+    "messages": [
+      {
+        "id": "message-b2e82af5-30be-4738-8ffb-907bbdfdfc98",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-b-9ddfd583",
+        "kind": "instruction",
+        "content": "Use a shell tool to run exactly sleep 75, wait for it to finish, then reply exactly BUSY-DONE-recovery-20261003T192604-3f72. Do not change files or run background commands.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-59dfba72-3f69-4ca5-bb8c-002bec38f618\nObjective:\nDo not use tools. Reply exactly INITIALIZED-managed-b-9ddfd583\nResult:\nINITIALIZED-managed-b-9ddfd583",
+        "created_at": "2026-10-03T11:26:05.157589398Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-03T11:56:05.16188785Z",
+        "instructions_sha256": "1fa21ae2df6e96153e53af3389a1dddc1005c1b852a2cfd3de42d03024bc7afa",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-b-9ddfd583.role.md",
+        "run_id": "run-3cfebe27-d5c3-434c-af00-1840f7f6d4af",
+        "task_id": "task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+        "agent_id": "managed-b-9ddfd583",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-a48bf96f-24e8-4f4e-859e-4d99596c01d9",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-03T11:26:05.16188785Z",
+        "created_at": "2026-10-03T11:26:05.16188785Z",
+        "updated_at": "2026-10-03T11:27:49.784357818Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 1420,
+        "event_id": "event-2bc89c79-1de2-4417-944d-b62c494373aa",
+        "aggregate_type": "task",
+        "aggregate_id": "task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T11:26:05.157589398Z"
+      },
+      {
+        "sequence": 1422,
+        "event_id": "event-task-47bbc787-d58a-4393-8c40-b1bf36933a1b",
+        "aggregate_type": "task",
+        "aggregate_id": "task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+        "event_type": "task.running",
+        "created_at": "2026-10-03T11:26:05.163508421Z"
+      },
+      {
+        "sequence": 1423,
+        "event_id": "event-run-4632e239-2da5-47b8-b58d-ab1057833942",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-3cfebe27-d5c3-434c-af00-1840f7f6d4af",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-03T11:26:05.163514133Z"
+      },
+      {
+        "sequence": 1425,
+        "event_id": "event-runtime-14753ea6-ad3d-4441-af6d-fb94a12e468c",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-3cfebe27-d5c3-434c-af00-1840f7f6d4af",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T11:26:07.26283346Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 1430,
+        "event_id": "event-runtime-63c394c9-3220-43f6-be71-01907ac3e9e4",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-3cfebe27-d5c3-434c-af00-1840f7f6d4af",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T11:26:24.167598366Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 1431,
+        "event_id": "event-runtime-8faf0e6f-6bbd-4484-ab4b-e218d300c654",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-3cfebe27-d5c3-434c-af00-1840f7f6d4af",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T11:26:25.15461952Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我将执行 `sleep 75`，等待命令结束。\n",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 1448,
+        "event_id": "event-runtime-83de33e5-cec9-4100-a038-b869b400c564",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-3cfebe27-d5c3-434c-af00-1840f7f6d4af",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T11:27:29.365778522Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 1453,
+        "event_id": "event-runtime-b395c400-1b53-4d34-9a0f-c58e39304ab6",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-3cfebe27-d5c3-434c-af00-1840f7f6d4af",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T11:27:43.035437378Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed commandExecution",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 1455,
+    "live_after_sequence": 1455,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

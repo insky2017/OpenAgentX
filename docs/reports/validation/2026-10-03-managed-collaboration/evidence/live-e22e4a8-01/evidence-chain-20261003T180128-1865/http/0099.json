@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-03T10:02:39.604234+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "managed-a-9ddfd583",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Use a shell tool to run sleep 12, then reply with exactly `OAX_MANAGED_AFTER_CLOSE_OK` (no punctuation). Do not change files.",
+    "parent_task_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+    "continue_context": true,
+    "runtime_session": {
+      "backend_id": "codex",
+      "source_task_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0"
+    },
+    "meta": {
+      "idempotency_key": "c1e107257cc5c283054af9cf"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 11
+  }
+}

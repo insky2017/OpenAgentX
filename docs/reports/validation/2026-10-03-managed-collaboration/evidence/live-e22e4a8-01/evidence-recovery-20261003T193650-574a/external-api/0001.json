@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-03T11:36:50.608181+00:00",
+  "transport": "formal external UDS API",
+  "agent": "managed-a-9ddfd583",
+  "method": "GET",
+  "route": "status",
+  "request": null,
+  "status": 200,
+  "response": {
+    "mode": "managed",
+    "managed_context_task_id": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+    "managed_backend_id": "codex",
+    "binding_id": "external-030bd8ac-2b7e-41d4-b6e4-08ec781c388f",
+    "agent_id": "managed-a-9ddfd583",
+    "principal_id": "agent-managed-a-9ddfd583",
+    "organization_id": "default",
+    "host_id": "managed-worker",
+    "thread_id": "01a10128-8170-7f62-91db-ebdbd9dd03e9",
+    "generation": 1,
+    "state": "active",
+    "allowed_peer_agent_ids": [
+      "managed-b-9ddfd583"
+    ],
+    "token_expires_at": "[REDACTED]",
+    "created_at": "2026-10-03T09:47:32.968437032Z",
+    "updated_at": "2026-10-03T09:47:32.968437032Z"
+  }
+}

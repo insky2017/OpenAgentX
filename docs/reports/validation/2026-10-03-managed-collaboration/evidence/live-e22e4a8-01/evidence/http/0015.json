@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-03T09:47:12.771621+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "managed-b-9ddfd583",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Do not use tools. Reply exactly INITIALIZED-managed-b-9ddfd583",
+    "meta": {
+      "idempotency_key": "196198e6710f17fcd1a6dac9"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-59dfba72-3f69-4ca5-bb8c-002bec38f618",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

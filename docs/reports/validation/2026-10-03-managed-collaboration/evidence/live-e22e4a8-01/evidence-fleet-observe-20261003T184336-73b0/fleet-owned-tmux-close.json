@@ -1,0 +1,6 @@
+{
+  "at": "2026-10-03T10:43:37.155741+00:00",
+  "server": "oax-managed-managed-a-9ddfd583",
+  "action": "kill this fixture tmux server only",
+  "daemon_workers": "left running"
+}

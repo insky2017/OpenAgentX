@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-03T09:47:27.942800+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx",
+    "collaborate",
+    "roles",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/roles.json",
+    "--expected-version",
+    "0"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6n{\r\n  \"organization_id\": \"default\",\r\n  \"revision\": 1,\r\n  \"rules\": [\r\n    {\r\n      \"scope\": \"fixture.managed-b-9ddfd583\",\r\n      \"owner_agent_id\": \"managed-b-9ddfd583\",\r\n      \"description\": \"Read only facts.txt in the assigned verification workspace and report its exact value.\"\r\n    }\r\n  ]\r\n}\r\n"
+}

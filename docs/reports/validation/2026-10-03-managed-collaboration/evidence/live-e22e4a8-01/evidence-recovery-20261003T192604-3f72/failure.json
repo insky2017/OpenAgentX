@@ -1,0 +1,7 @@
+{
+  "status": "FAIL",
+  "stage": "M05-restart",
+  "at": "2026-10-03T11:36:33.010751+00:00",
+  "error": "fixture process already exited before provenance capture",
+  "no_automatic_work_retry": true
+}

@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-03T09:45:35.701260+00:00",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx",
+  "binary_sha256": "1884bcf100e04a12729414ed38a59000703b25748d5d3599b7ba90fa98fdf4eb",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "harness_sha256": "9783554faffddbdd83605b989379b18f7050bf4b8428f3b0d75e771b705682b6",
+  "model": "gpt-6-astra",
+  "backend_default_effort": "ultra",
+  "runtime_proxy": "join generated private EnvironmentFile; ambient proxy removed",
+  "codex_version": "codex-cli 0.160.0",
+  "scope": "isolated daemon and owned Worker processes; not installed production service evidence"
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "at": "2026-10-03T10:06:56.751878+00:00",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "binary_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9",
+  "schema": 5,
+  "old_binary_sha256": "10943bd6cb83a849eeb90ab565ced0cabfef89e4218511966a0903d43034e392",
+  "restarted_units": [
+    "openagentx.service",
+    "openagentx-worker@agy-onboarding-e2e.service",
+    "openagentx-worker@codex-domain-e2e.service"
+  ],
+  "business_sessions": "external bindings unchanged; no Desktop lifecycle commands",
+  "backup_directory": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installation01",
+  "scope": "installation and data integrity only; not business collaboration acceptance"
+}

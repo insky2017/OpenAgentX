@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-03T10:05:56.385804+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "managed-a-9ddfd583",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Use a shell tool to run sleep 12 and read native-proof.txt in the assigned workspace. Reply with exactly the file content, no extra punctuation or explanation. Do not modify files.",
+    "parent_task_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+    "continue_context": true,
+    "runtime_session": {
+      "backend_id": "codex",
+      "source_task_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0"
+    },
+    "meta": {
+      "idempotency_key": "67c5bc58ec6f01fba8e23b49"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 13
+  }
+}

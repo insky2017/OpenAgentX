@@ -1,0 +1,23 @@
+{
+  "started_at": "2026-10-03T10:11:59.198484+00:00",
+  "finished_at": "2026-10-03T10:11:59.212784+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "revoke",
+    "--agent",
+    "domain-installed-b-8304eb9e5aa7",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-b-8304eb9e5aa7.json",
+    "--expected-generation",
+    "1"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"revoked\": true\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

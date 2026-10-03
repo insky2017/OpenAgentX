@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-03T10:21:11.197306+00:00",
+  "file": "/home/sky/Documents/ChatGPT/OpenAgentX/OpenAgentX-事件协作与终端方案.html",
+  "sha256": "9f49b3acb3671001a8733016210658c58e8945fe8620940467f3f6b472e6b86f",
+  "check": "static parser: unique IDs, 26 anchor/local links resolve",
+  "status": "PASS_STATIC_ONLY",
+  "browser": "NOT_RUN: in-app browser security policy rejected file URL; no bypass attempted",
+  "scope": "status text and evidence links updated; prior diagram layout and interaction retained"
+}

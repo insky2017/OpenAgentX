@@ -1,0 +1,4 @@
+{
+  "at": "2026-10-03T10:02:06.352652+00:00",
+  "input": "\u001b[200~Use a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactly DONE (no punctuation).\u001b[201~"
+}

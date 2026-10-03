@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-03T10:05:49.018432+00:00",
+  "phase": "native-continuation",
+  "harness_sha256": "407fb37cffdb6e9f514051393631780a48afeed04bcdb05371734db3f055683b",
+  "binary_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "consultation_key": "real-consultation-01"
+}

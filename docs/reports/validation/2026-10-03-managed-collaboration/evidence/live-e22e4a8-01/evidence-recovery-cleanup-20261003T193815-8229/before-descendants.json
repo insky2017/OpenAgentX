@@ -1,0 +1,110 @@
+[
+  {
+    "pid": 2541296,
+    "ppid": 2541178,
+    "starttime": "23990778",
+    "comm": "codex"
+  },
+  {
+    "pid": 2545145,
+    "ppid": 2541296,
+    "starttime": "23996177",
+    "comm": "npm exec chrome"
+  },
+  {
+    "pid": 2545146,
+    "ppid": 2541296,
+    "starttime": "23996178",
+    "comm": "node_repl"
+  },
+  {
+    "pid": 2545152,
+    "ppid": 2541296,
+    "starttime": "23996180",
+    "comm": "MainThread"
+  },
+  {
+    "pid": 2547052,
+    "ppid": 2541296,
+    "starttime": "23997842",
+    "comm": "codex-code-mode"
+  },
+  {
+    "pid": 2545257,
+    "ppid": 2545152,
+    "starttime": "23996189",
+    "comm": "node_repl"
+  },
+  {
+    "pid": 2546286,
+    "ppid": 2545145,
+    "starttime": "23996441",
+    "comm": "sh"
+  },
+  {
+    "pid": 2546287,
+    "ppid": 2546286,
+    "starttime": "23996441",
+    "comm": "chrome-devtools"
+  },
+  {
+    "pid": 2546393,
+    "ppid": 2546287,
+    "starttime": "23996542",
+    "comm": "node"
+  },
+  {
+    "pid": 2884835,
+    "ppid": 2884771,
+    "starttime": "24539259",
+    "comm": "codex"
+  },
+  {
+    "pid": 2908308,
+    "ppid": 2884835,
+    "starttime": "24577568",
+    "comm": "npm exec chrome"
+  },
+  {
+    "pid": 2908309,
+    "ppid": 2884835,
+    "starttime": "24577569",
+    "comm": "MainThread"
+  },
+  {
+    "pid": 2908310,
+    "ppid": 2884835,
+    "starttime": "24577569",
+    "comm": "node_repl"
+  },
+  {
+    "pid": 2910622,
+    "ppid": 2884835,
+    "starttime": "24579731",
+    "comm": "codex-code-mode"
+  },
+  {
+    "pid": 2908395,
+    "ppid": 2908309,
+    "starttime": "24577576",
+    "comm": "node_repl"
+  },
+  {
+    "pid": 2909492,
+    "ppid": 2908308,
+    "starttime": "24577794",
+    "comm": "sh"
+  },
+  {
+    "pid": 2909494,
+    "ppid": 2909492,
+    "starttime": "24577794",
+    "comm": "chrome-devtools"
+  },
+  {
+    "pid": 2909636,
+    "ppid": 2909494,
+    "starttime": "24577904",
+    "comm": "node"
+  }
+]

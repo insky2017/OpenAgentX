@@ -344,7 +344,8 @@ class InstalledDomain(DomainAcceptance):
         db = sqlite3.connect(self.db.as_uri() + '?mode=ro', uri=True)
         try:
             version = db.execute('SELECT version FROM schema_meta WHERE singleton=1').fetchone()[0]
-            require(version == 4, 'installed mode requires already-migrated schema4; will not migrate')
+            require(version == self.args.installed_schema,
+                    'installed mode requires the explicitly selected schema; will not migrate')
             counts = {}
             for table, column in [('tasks', 'target_agent_id'), ('messages', 'target_agent_id'),
                                   ('mailbox_items', 'target_agent_id'), ('run_attempts', 'agent_id'),
@@ -475,6 +476,8 @@ def main():
     parser.add_argument('--web', type=Path, default=Path('web/dist'))
     parser.add_argument('--commit', default='uncommitted candidate; see recorded source hashes')
     parser.add_argument('--installed', action='store_true', help='minimal already-installed API verification; never restarts services')
+    parser.add_argument('--installed-schema', type=int, choices=(4, 5), default=4,
+                        help='expected schema in installed mode; never performs a migration')
     parser.add_argument('--db', type=Path)
     parser.add_argument('--socket', type=Path)
     parser.add_argument('--credentials', type=Path)

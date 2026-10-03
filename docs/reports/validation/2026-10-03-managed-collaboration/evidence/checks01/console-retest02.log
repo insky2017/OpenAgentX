@@ -1,0 +1,69 @@
+--- FAIL: TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident (27.71s)
+    workflow_integration_test.go:56: Persistent isolated fixture: /home/sky/.local/state/oax-mc03/oax9-3233235049
+    workflow_integration_test.go:271: Console did not show "status succeeded": OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────────────────Task none | Worker worker-9fe24f96... gen 1 online | timeline 3/76 bytes
+        > /help                                                                       
+        >                                                                             
+        >                                                                             
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        [OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 17:39 03-Oct-26OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────────────────Task none | Worker worker-9fe24f96... gen 1 online | timeline 3/76 bytes
+        > /help                                                                       
+        >                                                                             
+        >                                                                             
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        [OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 17:39 03-Oct-26Agent quote-service | mode normal | connection connected | cursor 12
+        Attaching to quote-service                                                    
+        Task none | Worker worker-9fe24f96... gen 1 online | timeline 3/76 bytes
+        > /help                                                                       > /                                                                           > /di                                                                         > /disp                                                                       > /dispa                                                                      > /dispatc                                                                    Agent quote-service | mode normal | connection connected | cursor 26Task none | Worker worker-9fe24f96... gen 1 online | timeline 4/97 bytes
+        > /dispatch                                                                   > /dispatch f                                                                 > /dispatch fir                                                               > /dispatch firs                                                              > /dispatch first                                                             > /dispatch first i                                                           > /dispatch first iso                                                         > /dispatch first isola                                                       > /dispatch first isolat                                                      > /dispatch first isolated                                                    > /dispatch first isolated wo                                                 > /dispatch first isolated work                                               > /dispatch first isolated workf                                              > /dispatch first isolated workflo                                            > /dispatch first isolated workflow                                           > /dispatch first isolated workflow t                                         > /dispatch first isolated workflow tas                                       > /dispatch first isolated workflow task                                      dispatch succeeded | task task-180da92f-a... | version 1 | status queued |    
+        Task task-180da92f-a... v1 queued (queued) | Worker worker-9fe24f96... gen 1 ...> /help                                                                       Agent quote-service | mode normal | connection connected | cursor 45
+        #35 runtime.turn.output | fixture | running | phase-one-safe-output           
+        Task task-180da92f-a... v3 waiting_input (run succeeded) | Worker worker-9fe2...> /s                                                                          > /ste                                                                        > /stee                                                                       > /steer                                                                      > /steer c                                                                    > /steer con                                                                  > /steer conti                                                                > /steer contin                                                               > /steer continue                                                             > /steer continue wi                                                          > /steer continue wit                                                         > /steer continue with                                                        > /steer continue with th                                                     > /steer continue with the                                                    > /steer continue with the f                                                  > /steer continue with the fin                                                > /steer continue with the fina                                               > /steer continue with the final                                              > /steer continue with the final r                                            > /steer continue with the final rep                                          > /steer continue with the final reply                                        steer succeeded | task task-180da92f-a... | task version 4 | status           
+        Task task-180da92f-a... v4 waiting_input (run succeeded) | Worker worker-9fe2...> /help                                                                       Agent quote-service | mode normal | connection connected | cursor 64
+        #55 runtime.turn.output | fixture | running | phase-two-safe-output           
+        Task task-180da92f-a... v6 succeeded (run succeeded) | Worker worker-9fe24f96...Runtime reply: final fixture reply                                            #53 run_attempt.started | Task task-180da92f-a... | Run run-47a9ecfd-db... |  Task outcome result: final fixture reply                                      #50 task.message_created | Task task-180da92f-a... | version 6 | status       steer succeeded | task task-180da92f-a... | task version 4 | status           steer pending                                                                 #35 runtime.turn.output | fixture | running | phase-one-safe-output           Runtime reply: final fixture reply                                            Agent quote-service | mode normal | connection connected | cursor 74#33 run_attempt.started | Task task-180da92f-a... | Run run-b914deb5-e9... |  #31 mailbox.claimed | Task task-180da92f-a... | version 3 | status            #30 task.created | Task task-180da92f-a... | version 3 | status waiting_input dispatch succeeded | task task-180da92f-a... | version 1 | status queued |    dispatch pending                                                              #13 worker.heartbeat                                                          #7 worker.registered                                                          Snapshot applied at cursor 6                                                  Attaching to quote-service                                                    Agent quote-service | mode normal | connection connected | cursor 84OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────OAX 状态 Console · 原生交互终端尚未适配（AGY 等 Runtime）───────────────────────────────Agent quote-service | mode normal | connection connected | cursor 84
+        Attaching to quote-service                                                    
+        Task task-180da92f-a... v6 succeeded (run succeeded) | Worker worker-9fe24f96...> /help                                                                       
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        [OAX] 0:overview- 1:quote-service*       "sky-LEGION-REN9000K-3" 17:39 03-Oct-26Agent quote-service | mode normal | connection connected | cursor 94
+FAIL
+FAIL	openagentx/internal/cli/console	27.717s
+FAIL

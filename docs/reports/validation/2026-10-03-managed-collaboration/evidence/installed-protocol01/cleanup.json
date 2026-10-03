@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-03T10:11:59.428651+00:00",
+  "revoked_test_agents": [
+    "domain-installed-a-8304eb9e5aa7",
+    "domain-installed-b-8304eb9e5aa7"
+  ],
+  "test_scopes": [
+    "installed.8304eb9e5aa7.a",
+    "installed.8304eb9e5aa7.b"
+  ],
+  "failures": [],
+  "identity_and_message_records": "retained for audit; credentials revoked"
+}

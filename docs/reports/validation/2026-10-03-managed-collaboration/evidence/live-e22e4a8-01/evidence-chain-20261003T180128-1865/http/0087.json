@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-03T10:02:19.520817+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+      "version": 2,
+      "target_agent_id": "managed-a-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Use a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactly DONE (no punctuation).",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T10:02:07.459423225Z",
+      "updated_at": "2026-10-03T10:02:07.464756747Z"
+    },
+    "messages": [
+      {
+        "id": "message-fb88a6b9-4a30-4e21-9558-c691d2d30e9a",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "kind": "instruction",
+        "content": "Use a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactly DONE (no punctuation).",
+        "created_at": "2026-10-03T10:02:07.459423225Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-03T10:32:07.464756747Z",
+        "instructions_sha256": "1fa21ae2df6e96153e53af3389a1dddc1005c1b852a2cfd3de42d03024bc7afa",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-a-9ddfd583.role.md",
+        "run_id": "run-32cc656a-caed-4236-b6b1-d4db6cc47e4c",
+        "task_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+        "agent_id": "managed-a-9ddfd583",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-294d0f23-a3c7-4949-9b2d-741f5b983b14",
+        "worker_generation": 2,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 2,
+        "network_binding_revision": 2,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-03T10:02:07.464756747Z",
+        "created_at": "2026-10-03T10:02:07.464756747Z",
+        "updated_at": "2026-10-03T10:02:09.77759886Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 356,
+        "event_id": "event-4f741cbd-0634-49f0-8a7e-6c2aeefc0b65",
+        "aggregate_type": "task",
+        "aggregate_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T10:02:07.459423225Z"
+      },
+      {
+        "sequence": 358,
+        "event_id": "event-task-8145232f-2613-4b5c-ad61-63b2600574cd",
+        "aggregate_type": "task",
+        "aggregate_id": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+        "event_type": "task.running",
+        "created_at": "2026-10-03T10:02:07.467000702Z"
+      },
+      {
+        "sequence": 359,
+        "event_id": "event-run-5cc857c0-c936-488d-a23f-c1926ebaa885",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-32cc656a-caed-4236-b6b1-d4db6cc47e4c",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-03T10:02:07.467009082Z"
+      },
+      {
+        "sequence": 363,
+        "event_id": "event-runtime-75a9a4d0-4947-4ee4-9a3b-4ad143efa042",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-32cc656a-caed-4236-b6b1-d4db6cc47e4c",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T10:02:10.110182735Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 363,
+    "live_after_sequence": 363,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

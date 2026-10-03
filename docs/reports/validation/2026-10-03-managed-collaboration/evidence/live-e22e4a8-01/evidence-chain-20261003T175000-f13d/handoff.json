@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-03T09:51:09.152620+00:00",
+  "root": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01",
+  "socket": "/tmp/oax-managed-4fbd48f15f.sock",
+  "url": "http://127.0.0.1:38889",
+  "agents": [
+    "managed-a-9ddfd583",
+    "managed-b-9ddfd583"
+  ],
+  "bindings": {
+    "managed-a-9ddfd583": {
+      "context_task": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+      "thread_id": "01a10128-8170-7f62-91db-ebdbd9dd03e9",
+      "session_file": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/external/managed-a-9ddfd583/credentials.json"
+    },
+    "managed-b-9ddfd583": {
+      "context_task": "task-59dfba72-3f69-4ca5-bb8c-002bec38f618",
+      "thread_id": "01a10129-1c98-74c1-8fd7-9c83bfe87881",
+      "session_file": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/external/managed-b-9ddfd583/credentials.json"
+    }
+  },
+  "tasks": [
+    "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+    "task-59dfba72-3f69-4ca5-bb8c-002bec38f618",
+    "task-83d1602c-00b1-4595-adb0-db78c7028780",
+    "managed-task-5fee64ad63b5ae1ae4ac02c6aafbe7bc",
+    "managed-task-750aaa7869187a032158fe3c9742e9fe"
+  ],
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx",
+  "binary_sha256": "1884bcf100e04a12729414ed38a59000703b25748d5d3599b7ba90fa98fdf4eb",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74"
+}

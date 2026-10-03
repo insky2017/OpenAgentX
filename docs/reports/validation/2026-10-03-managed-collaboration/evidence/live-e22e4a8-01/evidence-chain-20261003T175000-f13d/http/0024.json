@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-03T09:50:11.376908+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "managed-a-9ddfd583",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Execute this exact CLI command once using a shell tool to ask the other domain Agent. Do not read any credential contents and do not poll for the answer. After successful enqueue, reply exactly ASK_SENT.\n/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx collaborate ask --agent managed-a-9ddfd583 --to managed-b-9ddfd583 --scope fixture.managed-b-9ddfd583 --key real-consultation-01 --socket /tmp/oax-managed-4fbd48f15f.sock --session-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/external/managed-a-9ddfd583/credentials.json --content-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/workspaces/managed-a-9ddfd583/consultation.txt",
+    "parent_task_id": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+    "continue_context": true,
+    "runtime_session": {
+      "backend_id": "codex",
+      "source_task_id": "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201"
+    },
+    "meta": {
+      "idempotency_key": "a91148c94511dab3a498f28d"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-83d1602c-00b1-4595-adb0-db78c7028780",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 3
+  }
+}

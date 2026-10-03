@@ -1,0 +1,23 @@
+[
+  {
+    "label": "daemon-replacement",
+    "pid": 2541088,
+    "starttime": "23990458",
+    "exe": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "exe_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9"
+  },
+  {
+    "label": "worker-replacement-managed-a-9ddfd583",
+    "pid": 2541178,
+    "starttime": "23990686",
+    "exe": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "exe_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9"
+  },
+  {
+    "label": "worker-replacement-managed-b-9ddfd583",
+    "pid": 2541179,
+    "starttime": "23990686",
+    "exe": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "exe_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9"
+  }
+]

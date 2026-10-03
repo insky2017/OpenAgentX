@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T10:11:59.428956+00:00",
+  "status": "PASS",
+  "checks_passed": [
+    "installed-random-identities-and-CAS-append-with-business-rules-preserved",
+    "installed-scope-rejections-and-idempotency",
+    "installed-ACK-accepted-recover-final-completed",
+    "installed-test-only-ledger-no-managed-work",
+    "cleanup-CAS-removes-only-test-scopes-preserves-latest-business-rules",
+    "installed-service-PID-starttime-and-binary-unchanged"
+  ],
+  "error": null,
+  "boundary": "Communication API only. No model, Worker, original Desktop session, automatic wakeup, E04 or E05 proof."
+}

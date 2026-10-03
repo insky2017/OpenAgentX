@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "file": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/workspaces/managed-b-9ddfd583/facts.txt",
+  "fact_file_sha256": "c0b5ed38b435d6bcb517dc2dfea6707358eae7d4045456bc246a4b5922b1e7e9",
+  "independent_fact": "FACT-45cf3e08883ce7629c589ae4",
+  "answer_result": "FACT-45cf3e08883ce7629c589ae4",
+  "consumption_result": "CONSUMED:FACT-45cf3e08883ce7629c589ae4"
+}

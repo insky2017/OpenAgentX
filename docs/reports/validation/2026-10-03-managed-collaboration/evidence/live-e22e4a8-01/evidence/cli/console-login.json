@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-03T09:46:10.332348+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx",
+    "console",
+    "login"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nConsole  owner\r\nConsole  \r\nCLI session established for owner; expires 2026-11-02T09:46:10Z\r\n"
+}

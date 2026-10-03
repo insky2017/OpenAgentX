@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-03T09:50:11.380867+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-83d1602c-00b1-4595-adb0-db78c7028780",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-83d1602c-00b1-4595-adb0-db78c7028780",
+      "version": 1,
+      "target_agent_id": "managed-a-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Execute this exact CLI command once using a shell tool to ask the other domain Agent. Do not read any credential contents and do not poll for the answer. After successful enqueue, reply exactly ASK_SENT.\n/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx collaborate ask --agent managed-a-9ddfd583 --to managed-b-9ddfd583 --scope fixture.managed-b-9ddfd583 --key real-consultation-01 --socket /tmp/oax-managed-4fbd48f15f.sock --session-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/external/managed-a-9ddfd583/credentials.json --content-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/workspaces/managed-a-9ddfd583/consultation.txt\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201\nObjective:\nDo not use tools. Reply exactly INITIALIZED-managed-a-9ddfd583\nResult:\nINITIALIZED-managed-a-9ddfd583",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T09:50:11.374193782Z",
+      "updated_at": "2026-10-03T09:50:11.374193782Z"
+    },
+    "messages": [
+      {
+        "id": "message-390eb03f-d5ad-491d-9f77-953c7c6d6e8f",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-83d1602c-00b1-4595-adb0-db78c7028780",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "kind": "instruction",
+        "content": "Execute this exact CLI command once using a shell tool to ask the other domain Agent. Do not read any credential contents and do not poll for the answer. After successful enqueue, reply exactly ASK_SENT.\n/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/build-e22e4a8/openagentx collaborate ask --agent managed-a-9ddfd583 --to managed-b-9ddfd583 --scope fixture.managed-b-9ddfd583 --key real-consultation-01 --socket /tmp/oax-managed-4fbd48f15f.sock --session-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/external/managed-a-9ddfd583/credentials.json --content-file /home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/workspaces/managed-a-9ddfd583/consultation.txt\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201\nObjective:\nDo not use tools. Reply exactly INITIALIZED-managed-a-9ddfd583\nResult:\nINITIALIZED-managed-a-9ddfd583",
+        "created_at": "2026-10-03T09:50:11.374193782Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 93,
+        "event_id": "event-c21231d4-830a-4db9-866c-4b518410f213",
+        "aggregate_type": "task",
+        "aggregate_id": "task-83d1602c-00b1-4595-adb0-db78c7028780",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T09:50:11.374193782Z"
+      }
+    ],
+    "snapshot_sequence": 94,
+    "live_after_sequence": 94,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

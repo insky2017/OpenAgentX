@@ -1,0 +1,7 @@
+{
+  "status": "FAIL",
+  "stage": "setup",
+  "type": "TypeError",
+  "message": "string indices must be integers, not 'str'",
+  "at": "2026-10-03T09:47:33.087899+00:00"
+}

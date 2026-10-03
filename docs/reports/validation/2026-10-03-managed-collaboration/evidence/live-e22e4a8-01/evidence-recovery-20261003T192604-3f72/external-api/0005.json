@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-03T11:26:05.140835+00:00",
+  "transport": "formal external UDS API",
+  "agent": "managed-a-9ddfd583",
+  "method": "POST",
+  "route": "messages",
+  "request": {
+    "target_agent_id": "managed-b-9ddfd583",
+    "scope": "fixture.managed-b-9ddfd583",
+    "kind": "request",
+    "content": "Read facts.txt only; this fixture verifies protocol rejection, no change is authorized.",
+    "idempotency_key": "recovery-20261003T192604-3f72-action-request"
+  },
+  "status": 400,
+  "response": {
+    "code": "INVALID_INPUT",
+    "message": "managed collaboration supports read-only consultation only"
+  }
+}

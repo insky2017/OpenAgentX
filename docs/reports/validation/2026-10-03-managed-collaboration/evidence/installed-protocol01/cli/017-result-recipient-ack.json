@@ -1,0 +1,23 @@
+{
+  "started_at": "2026-10-03T10:11:59.120573+00:00",
+  "finished_at": "2026-10-03T10:11:59.136730+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "ack",
+    "--agent",
+    "domain-installed-a-8304eb9e5aa7",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-a-8304eb9e5aa7.json",
+    "--message",
+    "external-message-90aee718-87d8-4d0d-a72e-c199ab9c03b0"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"scope\": \"installed.8304eb9e5aa7.b\",\n  \"processing_state\": \"completed\",\n  \"sequence\": 8,\n  \"message_id\": \"external-message-90aee718-87d8-4d0d-a72e-c199ab9c03b0\",\n  \"sender_agent_id\": \"domain-installed-b-8304eb9e5aa7\",\n  \"target_agent_id\": \"domain-installed-a-8304eb9e5aa7\",\n  \"sender_binding_id\": \"external-3ce855f6-8b36-4c41-88aa-e65ae2ea8157\",\n  \"sender_generation\": 1,\n  \"kind\": \"result\",\n  \"reply_to_message_id\": \"external-message-4601e639-03a5-4739-b342-a52d522b47f8\",\n  \"content\": \"Installed test reply only; no business outcome claimed.\\n\",\n  \"idempotency_key\": \"reply:external-message-4601e639-03a5-4739-b342-a52d522b47f8\",\n  \"delivery_state\": \"acknowledged\",\n  \"created_at\": \"2026-10-03T10:11:59.085703331Z\",\n  \"acknowledged_at\": \"2026-10-03T10:11:59.134063081Z\"\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

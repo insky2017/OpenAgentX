@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-03T10:39:06.089790+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "fleet",
+    "workspace",
+    "--respawn-dead"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6n{\r\n  \"cli_username\": \"owner\",\r\n  \"pane_startup\": {\r\n    \"managed-a-9ddfd583\": {\r\n      \"mode\": \"native\",\r\n      \"native_supported\": true,\r\n      \"note\": \"已配置 Codex 原生终端桥接；后台须就绪，现有活 pane 保持原样\"\r\n    },\r\n    \"managed-b-9ddfd583\": {\r\n      \"mode\": \"native\",\r\n      \"native_supported\": true,\r\n      \"note\": \"已配置 Codex 原生终端桥接；后台须就绪，现有活 pane 保持原样\"\r\n    }\r\n  },\r\n  \"workspace\": {\r\n    \"SessionCreated\": true,\r\n    \"Created\": [\r\n      \"overview\",\r\n      \"managed-a-9ddfd583\",\r\n      \"managed-b-9ddfd583\"\r\n    ],\r\n    \"Reused\": null,\r\n    \"Respawned\": null,\r\n    \"Dead\": null,\r\n    \"Unmanaged\": null,\r\n    \"Orphaned\": null\r\n  }\r\n}\r\n"
+}

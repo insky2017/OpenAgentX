@@ -1,0 +1,5 @@
+ok  	openagentx/internal/persistence/sqlite	33.681s
+ok  	openagentx/internal/worker	2.736s
+ok  	openagentx/internal/controlplane	13.078s
+ok  	openagentx/internal/cli/fleet	8.088s
+ok  	openagentx/internal/fleet	14.454s

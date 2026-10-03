@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-03T10:11:57.585067+00:00",
+  "binary": "/home/sky/.local/bin/openagentx",
+  "binary_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "harness_sha256": "e4771a8220830af68e6c3fd765b4b9e41bbcb760f2519b8dea41003225e46e9f",
+  "helper_sha256": "16992e717e8b4c8731198d972fb5b2f59999cb4bb16bf1417c26e751ed487559",
+  "scope": "installed API only; random test identities, CAS append/remove test scopes; no service lifecycle",
+  "agents": [
+    "domain-installed-a-8304eb9e5aa7",
+    "domain-installed-b-8304eb9e5aa7"
+  ],
+  "scopes": [
+    "installed.8304eb9e5aa7.a",
+    "installed.8304eb9e5aa7.b"
+  ],
+  "organization": "default",
+  "socket": "/home/sky/.openagentx/run/openagentx.sock",
+  "database": "/home/sky/.openagentx/data/openagentx.db"
+}

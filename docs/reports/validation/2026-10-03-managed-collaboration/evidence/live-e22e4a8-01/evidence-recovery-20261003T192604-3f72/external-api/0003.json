@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-03T11:26:05.119079+00:00",
+  "transport": "formal external UDS API",
+  "agent": "managed-a-9ddfd583",
+  "method": "POST",
+  "route": "messages",
+  "request": {
+    "target_agent_id": "managed-b-9ddfd583",
+    "scope": "fixture.unknown",
+    "kind": "consultation",
+    "content": "Read facts.txt only; this fixture verifies protocol rejection, no change is authorized.",
+    "idempotency_key": "recovery-20261003T192604-3f72-unknown-scope"
+  },
+  "status": 422,
+  "response": {
+    "code": "UNKNOWN_SCOPE",
+    "scope": "fixture.unknown",
+    "message": "scope has no registered owner; clarification required"
+  }
+}

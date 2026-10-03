@@ -1,0 +1,15 @@
+{
+  "path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/managed-a-9ddfd583.env",
+  "sha256": "0b59a7624931f0d027b860af0568012c371f59c9d6f24d1e77fd8bba85068954",
+  "proxy_names": [
+    "ALL_PROXY",
+    "HTTPS_PROXY",
+    "HTTP_PROXY",
+    "NO_PROXY",
+    "all_proxy",
+    "http_proxy",
+    "https_proxy",
+    "no_proxy"
+  ],
+  "source": "agent join --prepare"
+}

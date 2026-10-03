@@ -1,0 +1,5 @@
+{
+  "status": "RESUMED_EXISTING_TASK",
+  "at": "2026-10-03T11:35:46.184462+00:00",
+  "scope": "Runtime readiness only; original harness observes Task and result"
+}

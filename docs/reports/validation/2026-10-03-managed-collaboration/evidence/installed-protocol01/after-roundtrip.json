@@ -1,0 +1,38 @@
+{
+  "at": "2026-10-03T10:11:59.142006+00:00",
+  "mode": "read-only; generated test identities only",
+  "schema_version": 5,
+  "agents": [
+    "domain-installed-a-8304eb9e5aa7",
+    "domain-installed-b-8304eb9e5aa7"
+  ],
+  "counts": {
+    "tasks": 0,
+    "messages": 0,
+    "mailbox_items": 0,
+    "run_attempts": 0,
+    "worker_instances": 0
+  },
+  "external_message_rows": [
+    [
+      "external-message-4601e639-03a5-4739-b342-a52d522b47f8",
+      "domain-installed-a-8304eb9e5aa7",
+      "domain-installed-b-8304eb9e5aa7",
+      "consultation",
+      null,
+      "installed.8304eb9e5aa7.b",
+      "completed",
+      "acknowledged"
+    ],
+    [
+      "external-message-90aee718-87d8-4d0d-a72e-c199ab9c03b0",
+      "domain-installed-b-8304eb9e5aa7",
+      "domain-installed-a-8304eb9e5aa7",
+      "result",
+      "external-message-4601e639-03a5-4739-b342-a52d522b47f8",
+      "installed.8304eb9e5aa7.b",
+      "completed",
+      "acknowledged"
+    ]
+  ]
+}

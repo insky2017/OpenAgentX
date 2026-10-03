@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-03T10:11:58.033003+00:00",
+  "mode": "read-only; generated test identities only",
+  "schema_version": 5,
+  "agents": [
+    "domain-installed-a-8304eb9e5aa7",
+    "domain-installed-b-8304eb9e5aa7"
+  ],
+  "counts": {
+    "tasks": 0,
+    "messages": 0,
+    "mailbox_items": 0,
+    "run_attempts": 0,
+    "worker_instances": 0
+  },
+  "external_message_rows": []
+}

@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-03T09:51:19.346961+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+      "version": 2,
+      "target_agent_id": "managed-a-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Do not call tools. Reply exactly OAX_MANAGED_NATIVE_INPUT_OK.",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T09:51:17.332689446Z",
+      "updated_at": "2026-10-03T09:51:17.336572711Z"
+    },
+    "messages": [
+      {
+        "id": "message-21587fff-249a-47ab-9ace-89d88feb3252",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "kind": "instruction",
+        "content": "Do not call tools. Reply exactly OAX_MANAGED_NATIVE_INPUT_OK.",
+        "created_at": "2026-10-03T09:51:17.332689446Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-03T10:21:17.336572711Z",
+        "instructions_sha256": "1fa21ae2df6e96153e53af3389a1dddc1005c1b852a2cfd3de42d03024bc7afa",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-a-9ddfd583.role.md",
+        "run_id": "run-5893e2c7-3542-4db2-8054-d0c3b21c8872",
+        "task_id": "task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+        "agent_id": "managed-a-9ddfd583",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-2c82dae9-e047-400a-babc-46016f311559",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-03T09:51:17.336572711Z",
+        "created_at": "2026-10-03T09:51:17.336572711Z",
+        "updated_at": "2026-10-03T09:51:17.336572711Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 153,
+        "event_id": "event-484fefcc-a999-41f8-a655-aba2fe07e654",
+        "aggregate_type": "task",
+        "aggregate_id": "task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T09:51:17.332689446Z"
+      },
+      {
+        "sequence": 155,
+        "event_id": "event-task-442eed37-a550-491f-94e0-50616a6a9d05",
+        "aggregate_type": "task",
+        "aggregate_id": "task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+        "event_type": "task.running",
+        "created_at": "2026-10-03T09:51:17.337737395Z"
+      },
+      {
+        "sequence": 156,
+        "event_id": "event-run-ff2c8209-ae5a-4e85-8477-ffb9676762c4",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-5893e2c7-3542-4db2-8054-d0c3b21c8872",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-03T09:51:17.337742664Z"
+      },
+      {
+        "sequence": 158,
+        "event_id": "event-runtime-f8d7e4ac-c3b9-46af-ba55-26d8cba96fae",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-5893e2c7-3542-4db2-8054-d0c3b21c8872",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-03T09:51:18.951443647Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 158,
+    "live_after_sequence": 158,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

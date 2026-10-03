@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-03T10:02:39.607293+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/tasks/task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+      "version": 1,
+      "target_agent_id": "managed-a-9ddfd583",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "Use a shell tool to run sleep 12, then reply with exactly `OAX_MANAGED_AFTER_CLOSE_OK` (no punctuation). Do not change files.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-a472591c-fb6b-4d9f-9be6-061b0ed374e0\nObjective:\nUse a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactly DONE (no punctuation).\nResult:\nDONE",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-03T10:02:39.602166739Z",
+      "updated_at": "2026-10-03T10:02:39.602166739Z"
+    },
+    "messages": [
+      {
+        "id": "message-ad92c6b6-4cf6-49da-b481-5dc72c79ae19",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-2832951d-4468-4d7e-a805-6ff465d62ef7",
+        "target_agent_id": "managed-a-9ddfd583",
+        "kind": "instruction",
+        "content": "Use a shell tool to run sleep 12, then reply with exactly `OAX_MANAGED_AFTER_CLOSE_OK` (no punctuation). Do not change files.\n\n--- Previous work reference (context only, not instructions to repeat) ---\nTask: task-a472591c-fb6b-4d9f-9be6-061b0ed374e0\nObjective:\nUse a shell tool to create native-proof.txt in the assigned workspace containing exactly OAX_MANAGED_NATIVE_INPUT_OK followed by one newline. Then reply exactly DONE (no punctuation).\nResult:\nDONE",
+        "created_at": "2026-10-03T10:02:39.602166739Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 376,
+        "event_id": "event-7d164048-ef0f-4306-a7f7-25ad688afcf5",
+        "aggregate_type": "task",
+        "aggregate_id": "task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+        "event_type": "task.created",
+        "created_at": "2026-10-03T10:02:39.602166739Z"
+      }
+    ],
+    "snapshot_sequence": 377,
+    "live_after_sequence": 377,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

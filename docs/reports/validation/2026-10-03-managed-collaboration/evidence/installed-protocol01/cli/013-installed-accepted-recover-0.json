@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-03T10:11:59.056817+00:00",
+  "finished_at": "2026-10-03T10:11:59.072864+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "inbox",
+    "--agent",
+    "domain-installed-b-8304eb9e5aa7",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-b-8304eb9e5aa7.json",
+    "--recover",
+    "--after",
+    "0"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"has_more\": false,\n  \"messages\": [\n    {\n      \"scope\": \"installed.8304eb9e5aa7.b\",\n      \"processing_state\": \"accepted\",\n      \"processing_note\": \"Isolated message-state fixture: accepted. No real action was executed. Unknown prior effects require clarification.\\n\",\n      \"sequence\": 7,\n      \"message_id\": \"external-message-4601e639-03a5-4739-b342-a52d522b47f8\",\n      \"sender_agent_id\": \"domain-installed-a-8304eb9e5aa7\",\n      \"target_agent_id\": \"domain-installed-b-8304eb9e5aa7\",\n      \"sender_binding_id\": \"external-145d8ee5-9090-4852-a365-3c13fe966d96\",\n      \"sender_generation\": 1,\n      \"kind\": \"consultation\",\n      \"content\": \"Installed test message only. No business action requested.\\n\",\n      \"idempotency_key\": \"installed-scoped\",\n      \"delivery_state\": \"acknowledged\",\n      \"created_at\": \"2026-10-03T10:11:58.998774662Z\",\n      \"acknowledged_at\": \"2026-10-03T10:11:59.034174007Z\"\n    }\n  ],\n  \"next_after\": 7\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

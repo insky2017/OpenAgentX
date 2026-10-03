@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T10:01:54.097907+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "collaborate",
+    "status",
+    "--agent",
+    "managed-b-9ddfd583",
+    "--message",
+    "external-message-f63295d0-0cbb-498d-a9ec-073492c09116"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6n{\r\n  \"task_id\": \"managed-task-8a0d11820a1040b67d6fc77425ac3ffa\",\r\n  \"managed_state\": \"completed\",\r\n  \"scope\": \"fixture.managed-b-9ddfd583\",\r\n  \"processing_state\": \"completed\",\r\n  \"processing_note\": \"Managed query settled; result=managed-result-8a0d11820a1040b67d6fc77425ac3ffa\",\r\n  \"sequence\": 3,\r\n  \"message_id\": \"external-message-f63295d0-0cbb-498d-a9ec-073492c09116\",\r\n  \"sender_agent_id\": \"managed-a-9ddfd583\",\r\n  \"target_agent_id\": \"managed-b-9ddfd583\",\r\n  \"sender_binding_id\": \"external-030bd8ac-2b7e-41d4-b6e4-08ec781c388f\",\r\n  \"sender_generation\": 1,\r\n  \"kind\": \"consultation\",\r\n  \"content\": \"Read facts.txt only in your assigned workspace. Reply with its exact contents, without extra text. Do not modify any file.\\n\",\r\n  \"idempotency_key\": \"real-consultation-clean-02\",\r\n  \"origin_task_id\": \"task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201\",\r\n  \"delivery_state\": \"acknowledged\",\r\n  \"created_at\": \"2026-10-03T09:59:10.373411741Z\",\r\n  \"acknowledged_at\": \"2026-10-03T09:59:32.264914473Z\"\r\n}\r\n"
+}

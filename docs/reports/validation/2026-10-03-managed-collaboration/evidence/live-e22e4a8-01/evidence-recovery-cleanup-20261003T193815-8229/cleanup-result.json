@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "at": "2026-10-03T11:38:16.887729+00:00",
+  "operations": [
+    {
+      "process": {
+        "label": "worker-managed-b-9ddfd583-recovery-20261003T192604-3f72",
+        "pid": 2884771,
+        "starttime": "24539183"
+      },
+      "signal": "SIGTERM",
+      "alive_after": false
+    },
+    {
+      "process": {
+        "label": "worker-replacement-managed-a-9ddfd583",
+        "pid": 2541178,
+        "starttime": "23990686"
+      },
+      "signal": "SIGTERM",
+      "alive_after": false
+    },
+    {
+      "process": {
+        "label": "daemon-replacement",
+        "pid": 2541088,
+        "starttime": "23990458"
+      },
+      "signal": "SIGTERM",
+      "alive_after": false
+    }
+  ],
+  "remaining_owned_processes": [],
+  "protected_services_unchanged": true,
+  "files_preserved": true,
+  "task_dispatch": 0
+}

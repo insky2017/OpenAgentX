@@ -2,3 +2,4 @@
 docs/reports/validation/2026-10-03-external-session/evidence/host-probe01/protocol01/proxy-upgrade-response.bin binary
 docs/reports/validation/2026-10-03-external-session/evidence/host-probe01/protocol01/proxy-help.txt -whitespace
 docs/reports/validation/2026-10-03-external-session/evidence/release01/build-info.txt -whitespace
+docs/reports/validation/2026-10-03-managed-collaboration/evidence/checks01/console-retest02.log -whitespace

@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-03T11:36:32.894166+00:00",
+  "method": "GET",
+  "path": "/api/observe/v1/run-attempts/run-8829d386-116d-4dd9-adb7-6fa3c0480cde",
+  "request": null,
+  "status": 200,
+  "response": {
+    "deadline_at": "2026-10-03T12:06:24.631235112Z",
+    "instructions_sha256": "1fa21ae2df6e96153e53af3389a1dddc1005c1b852a2cfd3de42d03024bc7afa",
+    "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/live-e22e4a8-01/profile/workers/identities/managed-a-9ddfd583.role.md",
+    "run_id": "run-8829d386-116d-4dd9-adb7-6fa3c0480cde",
+    "task_id": "managed-task-fcba172edddb75741940c71f5d968131",
+    "agent_id": "managed-a-9ddfd583",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-294d0f23-a3c7-4949-9b2d-741f5b983b14",
+    "worker_generation": 2,
+    "execution_spec_version": 1,
+    "adapter_id": "codex-app-server",
+    "backend_id": "codex",
+    "model": "gpt-6-astra",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 2,
+    "network_binding_revision": 2,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "CONSUMED:FACT-b58d1f0835694f0d47ed383d",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-03T11:36:24.631235112Z",
+    "finished_at": "2026-10-03T11:36:31.388302732Z",
+    "created_at": "2026-10-03T11:36:24.631235112Z",
+    "updated_at": "2026-10-03T11:36:31.388302732Z"
+  }
+}

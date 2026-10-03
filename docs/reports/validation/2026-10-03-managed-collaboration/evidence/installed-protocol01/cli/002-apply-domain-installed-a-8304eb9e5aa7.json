@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-10-03T10:11:58.052343+00:00",
+  "finished_at": "2026-10-03T10:11:58.455131+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "apply",
+    "--db",
+    "/home/sky/.openagentx/data/openagentx.db",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-a-8304eb9e5aa7/identity.yaml",
+    "--owner-username",
+    "owner"
+  ],
+  "exit_code": 0,
+  "stdout": "Created Agent \"domain-installed-a-8304eb9e5aa7\" in Organization \"default\"\n",
+  "stderr": "Owner password: \n",
+  "stdin": "private PTY credentials omitted"
+}

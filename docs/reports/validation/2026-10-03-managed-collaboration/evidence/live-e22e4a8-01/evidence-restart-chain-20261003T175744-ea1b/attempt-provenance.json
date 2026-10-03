@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-03T09:57:44.308166+00:00",
+  "phase": "restart-chain",
+  "harness_sha256": "fbb8d8d028e37ec7f0ebe1b41eac8a76f4e3b30f610b5e43223afdfc495b358b",
+  "binary_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9",
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "consultation_key": "real-consultation-clean-02"
+}

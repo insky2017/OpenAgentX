@@ -1,0 +1,7 @@
+{
+  "status": "FAIL",
+  "stage": "native",
+  "type": "RuntimeError",
+  "message": "Task did not succeed: task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+  "at": "2026-10-03T10:02:43.828406+00:00"
+}

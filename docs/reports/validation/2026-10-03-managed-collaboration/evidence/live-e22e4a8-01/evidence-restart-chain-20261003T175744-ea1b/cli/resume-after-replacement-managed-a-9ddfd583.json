@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T09:58:20.881442+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "agent",
+    "resume",
+    "managed-a-9ddfd583",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nAgent managed-a-9ddfd583 服务在线，当前代 2 网络已应用。\r\nmanaged-a-9ddfd583 (managed-a-9ddfd583) · 可开始工作\r\n  当前：无\r\n  最近：OAX_MANAGED_NATIVE_INPUT_OK.\r\n  打开：openagentx agent open managed-a-9ddfd583\r\n  恢复：openagentx agent resume managed-a-9ddfd583\r\n\r\n"
+}

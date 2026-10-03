@@ -1,0 +1,29 @@
+{
+  "started_at": "2026-10-03T10:11:58.972011+00:00",
+  "finished_at": "2026-10-03T10:11:58.986094+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "send",
+    "--agent",
+    "domain-installed-a-8304eb9e5aa7",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-a-8304eb9e5aa7.json",
+    "--to",
+    "domain-installed-b-8304eb9e5aa7",
+    "--scope",
+    "installed.8304eb9e5aa7.a",
+    "--key",
+    "wrong",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/raw/inputs/request.txt"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "OAX HTTP 422 (OUT_OF_SCOPE): target does not own the declared scope; scope=installed.8304eb9e5aa7.a owner_agent_id=domain-installed-a-8304eb9e5aa7\n",
+  "stdin": "none"
+}

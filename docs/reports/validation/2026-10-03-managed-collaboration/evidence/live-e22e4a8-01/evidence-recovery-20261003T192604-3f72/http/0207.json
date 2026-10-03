@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-03T11:26:05.160915+00:00",
+  "method": "POST",
+  "path": "/api/control/v1/tasks",
+  "request": {
+    "target_agent_id": "managed-b-9ddfd583",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Use a shell tool to run exactly sleep 75, wait for it to finish, then reply exactly BUSY-DONE-recovery-20261003T192604-3f72. Do not change files or run background commands.",
+    "parent_task_id": "task-59dfba72-3f69-4ca5-bb8c-002bec38f618",
+    "continue_context": true,
+    "runtime_session": {
+      "backend_id": "codex",
+      "source_task_id": "task-59dfba72-3f69-4ca5-bb8c-002bec38f618"
+    },
+    "meta": {
+      "idempotency_key": "3e384b203764f44b55e8ea56"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 15
+  }
+}

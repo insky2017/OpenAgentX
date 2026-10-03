@@ -1,0 +1,5 @@
+{
+  "at": "2026-10-03T10:06:42.809699+00:00",
+  "alive": false,
+  "action": "owned PTY process group SIGHUP; no Ctrl-C / protocol interrupt"
+}

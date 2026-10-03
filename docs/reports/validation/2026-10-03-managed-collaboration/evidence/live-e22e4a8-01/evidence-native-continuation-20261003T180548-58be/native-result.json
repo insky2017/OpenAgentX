@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "native_task": "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+  "background_task": "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+  "native_task_status": "uncertain",
+  "native_run_status": "succeeded",
+  "independent_file_sha256": "9d864b7083ca3938a6d2aede5e9ee25d98ab588b287cb4608bc71a74b12979af",
+  "independent_file_bytes": "OAX_MANAGED_NATIVE_INPUT_OK\n",
+  "thread_id": "01a10128-8170-7f62-91db-ebdbd9dd03e9",
+  "closure": "PTY hangup, no protocol interrupt",
+  "scope": "prior native input/file proof reused; new read-only query survives actual terminal closure; original Ctrl-C cancellation evidence retained"
+}

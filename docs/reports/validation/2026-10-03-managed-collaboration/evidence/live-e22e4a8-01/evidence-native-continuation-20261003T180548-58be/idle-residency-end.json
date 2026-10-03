@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "at": "2026-10-03T10:38:15.222524+00:00",
+  "processes": [
+    {
+      "label": "daemon-replacement",
+      "pid": 2541088,
+      "starttime": "23990458",
+      "state": "S",
+      "exe_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9"
+    },
+    {
+      "label": "worker-replacement-managed-a-9ddfd583",
+      "pid": 2541178,
+      "starttime": "23990686",
+      "state": "S",
+      "exe_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9"
+    },
+    {
+      "label": "worker-replacement-managed-b-9ddfd583",
+      "pid": 2541179,
+      "starttime": "23990686",
+      "state": "S",
+      "exe_sha256": "14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9"
+    }
+  ],
+  "workers": [
+    {
+      "agent_id": "managed-a-9ddfd583",
+      "worker_instance_id": "worker-294d0f23-a3c7-4949-9b2d-741f5b983b14",
+      "generation": 2,
+      "status": "online",
+      "last_heartbeat_at": "2026-10-03T10:38:09.775569492Z"
+    },
+    {
+      "agent_id": "managed-b-9ddfd583",
+      "worker_instance_id": "worker-a48bf96f-24e8-4f4e-859e-4d99596c01d9",
+      "generation": 2,
+      "status": "online",
+      "last_heartbeat_at": "2026-10-03T10:38:09.790136927Z"
+    }
+  ],
+  "scope": "After completed 1800-second idle; exact process starttimes, binary SHA, Worker identity and fresh online heartbeats match mid-window evidence."
+}

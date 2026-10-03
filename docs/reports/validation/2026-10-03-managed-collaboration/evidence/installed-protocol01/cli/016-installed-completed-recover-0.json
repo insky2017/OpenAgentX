@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-03T10:11:59.104369+00:00",
+  "finished_at": "2026-10-03T10:11:59.119614+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "inbox",
+    "--agent",
+    "domain-installed-b-8304eb9e5aa7",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--session-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-b-8304eb9e5aa7.json",
+    "--recover",
+    "--after",
+    "0"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"has_more\": false,\n  \"messages\": [],\n  \"next_after\": 0\n}\n",
+  "stderr": "",
+  "stdin": "none"
+}

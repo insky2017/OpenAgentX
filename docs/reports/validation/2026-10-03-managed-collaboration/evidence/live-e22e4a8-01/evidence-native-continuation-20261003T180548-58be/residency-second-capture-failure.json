@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-03T10:38:14.634680+00:00",
+  "status": "FAIL",
+  "step": "supplemental read-only residency capture",
+  "error": "Overview retains old worker generations; select exact mid-window worker identity",
+  "effect": "No Task created; original idle PASS unaffected"
+}

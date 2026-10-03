@@ -1,0 +1,177 @@
+{
+  "at": "2026-10-03T11:36:50.918994+00:00",
+  "tasks": [
+    [
+      "managed-task-24434ba4235c94955a0058aaf845410c",
+      "succeeded"
+    ],
+    [
+      "managed-task-546763f190d95ae40467b74035d134f9",
+      "succeeded"
+    ],
+    [
+      "managed-task-5fee64ad63b5ae1ae4ac02c6aafbe7bc",
+      "succeeded"
+    ],
+    [
+      "managed-task-750aaa7869187a032158fe3c9742e9fe",
+      "succeeded"
+    ],
+    [
+      "managed-task-8a0d11820a1040b67d6fc77425ac3ffa",
+      "succeeded"
+    ],
+    [
+      "managed-task-b729d594b243f21b5f80ffeef69975cd",
+      "succeeded"
+    ],
+    [
+      "managed-task-e5c31acd958179aecad073c18f03db74",
+      "succeeded"
+    ],
+    [
+      "managed-task-fcba172edddb75741940c71f5d968131",
+      "succeeded"
+    ],
+    [
+      "task-06253e4d-3f6a-43b5-8478-00c3d49a4109",
+      "succeeded"
+    ],
+    [
+      "task-41754122-85aa-4dd2-8894-419ad1aa72b7",
+      "uncertain"
+    ],
+    [
+      "task-59dfba72-3f69-4ca5-bb8c-002bec38f618",
+      "succeeded"
+    ],
+    [
+      "task-6ef2c283-822d-4047-a9d2-f1284756ee07",
+      "uncertain"
+    ],
+    [
+      "task-7d6b7e0f-d7be-472e-8f09-a1ce6a572e25",
+      "succeeded"
+    ],
+    [
+      "task-83d1602c-00b1-4595-adb0-db78c7028780",
+      "succeeded"
+    ],
+    [
+      "task-8a0cac6b-9e8c-4cbc-99dc-7fa768b2a201",
+      "succeeded"
+    ],
+    [
+      "task-a472591c-fb6b-4d9f-9be6-061b0ed374e0",
+      "uncertain"
+    ],
+    [
+      "task-b915e174-43c3-4b12-a3f7-ac36f9bef451",
+      "succeeded"
+    ],
+    [
+      "task-cea2e509-ad0d-4e40-8faa-4ee97eb38f98",
+      "canceled"
+    ]
+  ],
+  "threads": {
+    "managed-a-9ddfd583": {
+      "thread_id": "01a10128-8170-7f62-91db-ebdbd9dd03e9",
+      "rollout": "/home/sky/.codex/sessions/2026/10/03/rollout-2026-10-03T17-46-34-01a10128-8170-7f62-91db-ebdbd9dd03e9.jsonl",
+      "sha256": "dd63b2aa651e1831bcf204ca485ab0d57bf3e6ad6016d326650028b1609fcb39",
+      "counts": {
+        "turn_context": 12,
+        "response_item": 47,
+        "model_turns_started": 12,
+        "tool_calls": 5
+      },
+      "execution": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        }
+      ]
+    },
+    "managed-b-9ddfd583": {
+      "thread_id": "01a10129-1c98-74c1-8fd7-9c83bfe87881",
+      "rollout": "/home/sky/.codex/sessions/2026/10/03/rollout-2026-10-03T17-47-13-01a10129-1c98-74c1-8fd7-9c83bfe87881.jsonl",
+      "sha256": "0dccf7a9e9a8a1e2902d975fd6a5aab1da6b2beb54c9aa092b1bb3ec384ea353",
+      "counts": {
+        "turn_context": 6,
+        "response_item": 44,
+        "model_turns_started": 6,
+        "tool_calls": 8
+      },
+      "execution": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "ultra"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "elapsed_seconds": 1800.1075082320021,
+  "new_tasks": 0,
+  "new_model_turns": 0,
+  "new_tool_calls": 0,
+  "scope": "OAX Task inventory and exact fixture Codex rollout event counts"
+}

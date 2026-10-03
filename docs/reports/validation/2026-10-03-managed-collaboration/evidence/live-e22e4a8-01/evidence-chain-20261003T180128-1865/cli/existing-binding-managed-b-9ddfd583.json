@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-03T10:01:38.703518+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/openagentx-e22e4a8",
+    "collaborate",
+    "status",
+    "--agent",
+    "managed-b-9ddfd583"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6n{\r\n  \"mode\": \"managed\",\r\n  \"managed_context_task_id\": \"task-59dfba72-3f69-4ca5-bb8c-002bec38f618\",\r\n  \"managed_backend_id\": \"codex\",\r\n  \"binding_id\": \"external-8e3b299b-7dc8-49db-a8b3-72f3b0ff8264\",\r\n  \"agent_id\": \"managed-b-9ddfd583\",\r\n  \"principal_id\": \"agent-managed-b-9ddfd583\",\r\n  \"organization_id\": \"default\",\r\n  \"host_id\": \"managed-worker\",\r\n  \"thread_id\": \"01a10129-1c98-74c1-8fd7-9c83bfe87881\",\r\n  \"generation\": 1,\r\n  \"state\": \"active\",\r\n  \"allowed_peer_agent_ids\": [\r\n    \"managed-a-9ddfd583\"\r\n  ],\r\n  \"token_expires_at\": \"2026-11-02T09:50:11.245217475Z\",\r\n  \"created_at\": \"2026-10-03T09:50:11.245217475Z\",\r\n  \"updated_at\": \"2026-10-03T09:50:11.245217475Z\"\r\n}\r\n"
+}

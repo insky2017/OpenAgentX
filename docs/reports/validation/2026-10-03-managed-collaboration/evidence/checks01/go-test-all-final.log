@@ -1,0 +1,44 @@
+?   	openagentx/internal/api/external	[no test files]
+ok  	openagentx/cmd/openagentx	0.653s
+ok  	openagentx/internal/api	(cached)
+ok  	openagentx/internal/api/admin	(cached)
+ok  	openagentx/internal/api/auth	(cached)
+ok  	openagentx/internal/api/console	(cached)
+?   	openagentx/internal/runtime/conformance	[no test files]
+?   	openagentx/internal/runtime/descriptors	[no test files]
+?   	openagentx/internal/runtime/fake	[no test files]
+?   	openagentx/internal/runtime/registry	[no test files]
+ok  	openagentx/internal/api/panel	24.711s
+ok  	openagentx/internal/api/workerapi	(cached)
+ok  	openagentx/internal/auth	(cached)
+ok  	openagentx/internal/auth/cli	(cached)
+ok  	openagentx/internal/auth/web	(cached)
+ok  	openagentx/internal/cli/admin	1.898s
+ok  	openagentx/internal/cli/console	32.753s
+ok  	openagentx/internal/cli/external	(cached)
+ok  	openagentx/internal/cli/fleet	4.709s
+ok  	openagentx/internal/cli/worker	0.849s
+ok  	openagentx/internal/client/console	(cached)
+ok  	openagentx/internal/client/worker	(cached)
+ok  	openagentx/internal/consolemodel	(cached)
+ok  	openagentx/internal/controlplane	10.559s
+ok  	openagentx/internal/credentialstore	(cached)
+ok  	openagentx/internal/domain	(cached)
+ok  	openagentx/internal/fleet	(cached)
+ok  	openagentx/internal/localprofile	(cached)
+ok  	openagentx/internal/nativebridge	(cached)
+ok  	openagentx/internal/network/secretstore	(cached)
+ok  	openagentx/internal/persistence/sqlite	24.005s
+ok  	openagentx/internal/persistence/sqlite/migrations	(cached)
+ok  	openagentx/internal/runtime	(cached)
+ok  	openagentx/internal/runtime/acp	(cached)
+ok  	openagentx/internal/runtime/agy	(cached)
+ok  	openagentx/internal/runtime/codebuddy	(cached)
+ok  	openagentx/internal/runtime/codex	(cached)
+ok  	openagentx/internal/runtime/network	(cached)
+ok  	openagentx/internal/runtime/spec	(cached)
+ok  	openagentx/internal/safeoutput	(cached)
+ok  	openagentx/internal/testkit	(cached)
+ok  	openagentx/internal/transport/remotehttps	(cached)
+ok  	openagentx/internal/transport/unixhttp	(cached)
+ok  	openagentx/internal/worker	(cached)

@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-03T10:37:49.905692+00:00",
+  "status": "FAIL",
+  "step": "supplemental read-only residency capture",
+  "error": "overview HTTP 401; urllib did not send secure login cookie on isolated HTTP fixture",
+  "effect": "No Task created; original idle PASS unaffected; explicit same cookie transport follows existing harness"
+}

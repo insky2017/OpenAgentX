@@ -1,0 +1,35 @@
+{
+  "source_commit": "e22e4a89862246c33aef822527ea3b145f150a74",
+  "files": [
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/checks01/console-retest.log",
+      "file": "console-retest.log",
+      "sha256": "013a98356ba3e88f5aec8b05a1a344b2f4234b13bea5650ef06b6f95fd67d791"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/checks01/console-retest02.log",
+      "file": "console-retest02.log",
+      "sha256": "f766bffaf00b41c0eabe9a3900d3992a41ab56d22a91517944d2ba5e4f61c592"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/checks01/console-retest03.log",
+      "file": "console-retest03.log",
+      "sha256": "80102d06feb3a2e87b1992de7385aab721914f6292f4015714fd6934fce06c5d"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/checks01/go-race.log",
+      "file": "go-race.log",
+      "sha256": "4f4bbeca780c51f6b1c11eee06cc387d7126452c8e1a39f4decc0b5f53dae810"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/checks01/go-test-all-final.log",
+      "file": "go-test-all-final.log",
+      "sha256": "66dd708b407025da623e9fc5a35b1f68fa75d99929c49a8c2802b5fc11b4a164"
+    },
+    {
+      "source": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/checks01/go-vet.log",
+      "file": "go-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
