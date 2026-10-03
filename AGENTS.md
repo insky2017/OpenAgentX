@@ -6,6 +6,8 @@
 
 ## 当前实施约定（2026-10-03）
 
+- 用户已确认事件协作 HTML 第 05 节并授权“提交相关文件，然后开始落实方案”。按[原生终端与事件协作实施、验收计划](docs/plans/2026-10-03-managed-collaboration.md)推进：Codex Fleet pane 0 原生交互入口、managed 只读咨询到任务与结果续办、独立双 Agent 真实验收及30分钟空闲零模型执行。旧 external 宿主保持；业务 Rhythm/Pay 的执行权切换须另有具体交接确认。不得以 Console、mock 或独立测试身份成功替代原生交互、真实模型和原业务迁移证据。
+
 - 当前安装源码 `8c9ceff` / schema v4，见[当前交付](docs/reports/validation/2026-10-03-desktop-collaboration/DELIVERY.md)、[覆盖矩阵](docs/reports/validation/2026-10-03-desktop-collaboration/COVERAGE.md)及[执行记录](docs/reports/validation/2026-10-03-desktop-collaboration/EXECUTION-LOG.md)。原 Rhythm/Pay 会话已完成真实咨询、关联答复及双方 ACK，manual 往返 PASS；v4 职责目录、scope/接单检查、独立回执、已读未完成恢复与接入 Skill 已实现，正式安装消息协议6组验收 PASS（测试身份，不代表原Agent自动执行）。原 Agent 后续实际读取新版 Skill 与遵守新协议仍须单独举证。
 
 - 原 Desktop heartbeat 两版提示词共 8 轮、0 工具调用，自动收信及续办为 NOT_PASSED；两项自动化已暂停。禁止恢复常驻 LLM 定时轮询或以空醒冒充协作。后续方向是普通程序监听、去重/合并消息，有可执行工作才启动模型；原 Desktop 的事件入站入口仍未验，不得宣称自动协作已经打通。保留原 thread/宿主，不另起 Worker 抢占，不重启共享 Desktop；本轮没有迁移两个业务会话，也没有修改业务工程、资金、补发、凭据或业务部署。持久发信、原会话执行、ACK、关联答复、协议检查和独立业务验收分别举证。追加范围见[原会话协作计划](docs/plans/2026-10-03-external-session-collaboration.md)；`6576c55` / schema v3 的[旧交付](docs/reports/validation/2026-10-03-external-session/DELIVERY.md)保留历史，不再作为当前状态。
