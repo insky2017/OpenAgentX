@@ -1,0 +1,32 @@
+{
+  "deadline_at": "2026-10-03T14:57:07.356624274Z",
+  "instructions_sha256": "6d030f5efc31401527970b3c299a9ab0df934be7adcfd153a57bf213d9dfa7e8",
+  "instructions_path": "/home/sky/.openagentx/external/rhythm/ROLE.md",
+  "run_id": "run-12a49b1a-7048-4e27-8388-350b4f086934",
+  "task_id": "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+  "agent_id": "rhythm",
+  "version": 2,
+  "status": "uncertain",
+  "worker_instance_id": "worker-c7914d44-0a00-45b2-a215-fca4c5b0c7b8",
+  "worker_generation": 1,
+  "execution_spec_version": 1,
+  "adapter_id": "codex-app-server",
+  "backend_id": "codex",
+  "model": "gpt-6-astra",
+  "reasoning_mode": "backend_default",
+  "network_mode": "inherit",
+  "network_policy_version": 1,
+  "network_binding_revision": 1,
+  "turn_result": {
+    "final_reply": false,
+    "runtime_status": "uncertain",
+    "error": "Runtime Backend could not establish a controlled turn",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  },
+  "turn_result_state": "available",
+  "started_at": "2026-10-03T14:27:07.356624274Z",
+  "finished_at": "2026-10-03T14:27:08.845929499Z",
+  "created_at": "2026-10-03T14:27:07.356624274Z",
+  "updated_at": "2026-10-03T14:27:08.845929499Z"
+}

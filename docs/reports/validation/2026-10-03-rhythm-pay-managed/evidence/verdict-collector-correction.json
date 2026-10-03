@@ -1,0 +1,5 @@
+{
+  "first_assertion": "runtime.session.bound must appear for every resumed turn",
+  "failure": "Not every resumed turn emits a new runtime.session.bound event; bindings are established by dispatch before that turn. No task execution failed here.",
+  "correct_check": "Read-only persisted SessionBinding for each exact task context, correct original provider thread, active state; real rollout turn IDs and terminal states independently agree."
+}

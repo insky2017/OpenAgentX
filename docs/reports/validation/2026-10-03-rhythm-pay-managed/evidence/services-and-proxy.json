@@ -1,0 +1,99 @@
+{
+  "at": "2026-10-03T14:38:40.975624+00:00",
+  "agents": {
+    "oneaxe-pay": {
+      "state": {
+        "endpoint": "unix:///tmp/oax-codex-4111237615/server.sock",
+        "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+        "turn_id": "01a10227-a25c-7612-bbe7-45cebe8364b6",
+        "task_id": "task-b7622c6b-3501-4fde-9834-0e541bdfea6a",
+        "run_id": "run-d5b94518-d59b-42d5-adff-48431811c522",
+        "state": "idle",
+        "pid": 3428672,
+        "updated_at": "2026-10-03T14:38:40.594666032Z"
+      },
+      "worker_pid": 3428571,
+      "worker_sha256": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a",
+      "runtime_exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "runtime_proxy": {
+        "HTTP_PROXY": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "HTTPS_PROXY": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "ALL_PROXY": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "NO_PROXY": {
+          "present": true,
+          "value_sha256": "ec35448f434fa4a481205b4b5d6c8430f4b7dc1e28c39f25375d9274d4cd60e9"
+        },
+        "http_proxy": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "https_proxy": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "all_proxy": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        }
+      },
+      "worker_config_sha256": "4e662e156c846149c830250d7d8e26cdb947d2b61265eaa79460fb3ba784453d",
+      "environment_file_sha256": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04"
+    },
+    "rhythm": {
+      "state": {
+        "endpoint": "unix:///tmp/oax-codex-15598851/server.sock",
+        "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+        "turn_id": "01a10233-076b-77c1-ba8e-0fc8f0362b36",
+        "task_id": "task-42fac3d0-d4de-42fb-807f-a99aee058041",
+        "run_id": "run-2c6592bf-5752-42cc-9024-1fb000b9ca7c",
+        "state": "running",
+        "pid": 3460293,
+        "updated_at": "2026-10-03T14:38:36.997948696Z"
+      },
+      "worker_pid": 3460185,
+      "worker_sha256": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a",
+      "runtime_exe": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "runtime_proxy": {
+        "HTTP_PROXY": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "HTTPS_PROXY": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "ALL_PROXY": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "NO_PROXY": {
+          "present": true,
+          "value_sha256": "ec35448f434fa4a481205b4b5d6c8430f4b7dc1e28c39f25375d9274d4cd60e9"
+        },
+        "http_proxy": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "https_proxy": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        },
+        "all_proxy": {
+          "present": true,
+          "value_sha256": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+        }
+      },
+      "worker_config_sha256": "d62459a33aaa6f6978a5d1815f7a06a2dc4de998687589df7cfb7bab515aaf75",
+      "environment_file_sha256": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04"
+    }
+  }
+}

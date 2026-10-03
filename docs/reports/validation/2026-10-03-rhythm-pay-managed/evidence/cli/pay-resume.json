@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-03T14:18:21.739443+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "resume",
+    "oneaxe-pay",
+    "--no-open",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/installation/owner-password",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "stdout": "OpenAgentX is already initialized; no changes were made\nAgent \"oneaxe-pay\" is unchanged; no events were appended\nAgent oneaxe-pay 已纳管，工作目录 /home/sky/work/touzi/OneAxe/oneaxe-pay-service，职责 /home/sky/.openagentx/external/oneaxe-pay/ROLE.md\nAgent oneaxe-pay 服务在线，当前代 1 网络已应用。\nOneAxe 支付服务 (oneaxe-pay) · 可开始工作\n  当前：无\n  最近：暂无结果\n  打开：openagentx agent open oneaxe-pay\n  恢复：openagentx agent resume oneaxe-pay\n\n",
+  "stderr": ""
+}

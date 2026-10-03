@@ -1,0 +1,25 @@
+{
+  "at": "2026-10-03T14:30:46.892Z",
+  "thread": {
+    "id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+    "kind": "codex",
+    "hostId": "local",
+    "title": "一板斧 律动 rhythm 收费应用",
+    "preview": "当前的 dashboard 用的是什么技术呢？架构上行不行呢？经常改了 js 文件，但是网页前端同步不顺利？用 typescript 好？还是用 javascrip 好呢？用 vue 好？还是 react 好？我想进行重构。请分析，并给出建议。",
+    "status": {
+      "type": "idle"
+    },
+    "cwd": "/home/sky/Documents/ChatGPT/steadyflow",
+    "createdAt": 1789741202,
+    "updatedAt": 1791032551
+  },
+  "last_turns": [
+    {
+      "id": "01a101d1-8423-7de2-b573-730378c85515",
+      "status": "completed",
+      "startedAt": 1791031870,
+      "completedAt": 1791032551
+    }
+  ],
+  "error": "OAX resume failed: original thread already has an active writer"
+}

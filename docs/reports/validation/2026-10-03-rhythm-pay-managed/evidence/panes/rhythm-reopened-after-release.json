@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-03T14:35:31.187693+00:00",
+  "before": "rhythm|0|%55|1|rhythm",
+  "argv": [
+    "tmux",
+    "respawn-pane",
+    "-t",
+    "@28.0",
+    "-c",
+    "/home/sky/work/touzi/OneAxe/rhythm",
+    "--",
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "open",
+    "rhythm",
+    "--native",
+    "--file",
+    "/home/sky/.openagentx/fleets/rhythm-pay.yaml"
+  ]
+}

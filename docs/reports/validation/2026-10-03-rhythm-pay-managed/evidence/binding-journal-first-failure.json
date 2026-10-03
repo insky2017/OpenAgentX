@@ -1,0 +1,208 @@
+{
+  "at": "2026-10-03T14:51:30.731747+00:00",
+  "db_read_only": true,
+  "bindings": [
+    {
+      "session_binding_id": "binding-d7bca869-5bb6-4810-9640-66b1f9729800",
+      "context_id": "task-b7622c6b-3501-4fde-9834-0e541bdfea6a",
+      "agent_id": "oneaxe-pay",
+      "backend_id": "codex",
+      "provider_session_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "state": "active",
+      "version": 2,
+      "created_at": "2026-10-03T14:25:14.30857478Z",
+      "updated_at": "2026-10-03T14:25:14.30857478Z"
+    },
+    {
+      "session_binding_id": "binding-2b3348a1-b7d8-4568-b01a-f9d7ea29fb2d",
+      "context_id": "task-20c0ff59-07a8-4b2b-89ae-87adb5b43289",
+      "agent_id": "rhythm",
+      "backend_id": "codex",
+      "provider_session_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "state": "active",
+      "version": 2,
+      "created_at": "2026-10-03T14:35:35.843783255Z",
+      "updated_at": "2026-10-03T14:35:35.843783255Z"
+    },
+    {
+      "session_binding_id": "binding-4a70b5bf-51cf-4c23-bd35-2da7c943149b",
+      "context_id": "task-42fac3d0-d4de-42fb-807f-a99aee058041",
+      "agent_id": "rhythm",
+      "backend_id": "codex",
+      "provider_session_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "state": "active",
+      "version": 2,
+      "created_at": "2026-10-03T14:37:36.977696707Z",
+      "updated_at": "2026-10-03T14:37:36.977696707Z"
+    },
+    {
+      "session_binding_id": "managed-session-e66ad7dce3c60b04e5a2a631cc713718",
+      "context_id": "managed-task-e66ad7dce3c60b04e5a2a631cc713718",
+      "agent_id": "oneaxe-pay",
+      "backend_id": "codex",
+      "provider_session_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "state": "active",
+      "version": 2,
+      "created_at": "2026-10-03T14:39:06.479806085Z",
+      "updated_at": "2026-10-03T14:39:06.479806085Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 294453,
+      "event_id": "event-session-binding-5844018a-b9ac-49a5-b204-f12fc8b432c5",
+      "organization_id": null,
+      "aggregate_type": "session_binding",
+      "aggregate_id": "binding-d7bca869-5bb6-4810-9640-66b1f9729800",
+      "event_type": "session_binding.saved",
+      "actor_principal_id": "daemon",
+      "created_at": "2026-10-03T14:25:24.018869421Z",
+      "payload": {
+        "backend_id": "codex",
+        "context_id": "task-b7622c6b-3501-4fde-9834-0e541bdfea6a",
+        "run_id": "run-d5b94518-d59b-42d5-adff-48431811c522"
+      }
+    },
+    {
+      "sequence": 294725,
+      "event_id": "event-session-binding-51a3dc79-a494-40a9-9c84-022be50f0149",
+      "organization_id": null,
+      "aggregate_type": "session_binding",
+      "aggregate_id": "binding-2b3348a1-b7d8-4568-b01a-f9d7ea29fb2d",
+      "event_type": "session_binding.saved",
+      "actor_principal_id": "daemon",
+      "created_at": "2026-10-03T14:35:50.720493092Z",
+      "payload": {
+        "backend_id": "codex",
+        "context_id": "task-20c0ff59-07a8-4b2b-89ae-87adb5b43289",
+        "run_id": "run-31d483f0-8db7-43cf-a3ea-7ed67fcc3d6c"
+      }
+    },
+    {
+      "sequence": 294771,
+      "event_id": "event-39b28ad8-aa1d-4f8b-a8c3-61227714924d-session",
+      "organization_id": "default",
+      "aggregate_type": "session_binding",
+      "aggregate_id": "binding-4a70b5bf-51cf-4c23-bd35-2da7c943149b",
+      "event_type": "session_binding.selected",
+      "actor_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "created_at": "2026-10-03T14:37:36.977925007Z",
+      "payload": {
+        "source": "explicit_task_request"
+      }
+    },
+    {
+      "sequence": 294818,
+      "event_id": "event-e199ed1f-7c25-4f8b-8697-006255fa4e40",
+      "organization_id": "default",
+      "aggregate_type": "external_message",
+      "aggregate_id": "external-message-c3f94db8-1f44-44c1-8238-94742f8290f7",
+      "event_type": "external_message.sent",
+      "actor_principal_id": "agent-rhythm",
+      "created_at": "2026-10-03T14:39:06.478939843Z",
+      "payload": {
+        "forwarded_from_message_id": "",
+        "kind": "consultation",
+        "reply_to_message_id": "",
+        "scope": "pay.payment_api",
+        "sender_agent_id": "rhythm",
+        "sequence": 9,
+        "target_agent_id": "oneaxe-pay"
+      }
+    },
+    {
+      "sequence": 294820,
+      "event_id": "event-2d774f2b-b6b0-4818-924b-18b3cff5acb2",
+      "organization_id": "default",
+      "aggregate_type": "external_message",
+      "aggregate_id": "external-message-c3f94db8-1f44-44c1-8238-94742f8290f7",
+      "event_type": "external_message.managed_accepted",
+      "actor_principal_id": "agent-oneaxe-pay",
+      "created_at": "2026-10-03T14:39:06.481210463Z",
+      "payload": {
+        "binding_generation": 3,
+        "role": "consultation",
+        "task_id": "managed-task-e66ad7dce3c60b04e5a2a631cc713718"
+      }
+    },
+    {
+      "sequence": 294821,
+      "event_id": "event-d19d20eb-dcdd-4f53-b6ab-2e32e4cb4c02",
+      "organization_id": "default",
+      "aggregate_type": "session_binding",
+      "aggregate_id": "managed-session-e66ad7dce3c60b04e5a2a631cc713718",
+      "event_type": "session_binding.selected",
+      "actor_principal_id": "agent-oneaxe-pay",
+      "created_at": "2026-10-03T14:39:06.481277265Z",
+      "payload": {
+        "context_id": "managed-task-e66ad7dce3c60b04e5a2a631cc713718",
+        "source": "managed_collaboration",
+        "source_task_id": "task-b7622c6b-3501-4fde-9834-0e541bdfea6a"
+      }
+    },
+    {
+      "sequence": 294836,
+      "event_id": "event-session-binding-0530173e-df17-4210-bdc5-80af13858003",
+      "organization_id": null,
+      "aggregate_type": "session_binding",
+      "aggregate_id": "binding-4a70b5bf-51cf-4c23-bd35-2da7c943149b",
+      "event_type": "session_binding.saved",
+      "actor_principal_id": "daemon",
+      "created_at": "2026-10-03T14:39:20.381717678Z",
+      "payload": {
+        "backend_id": "codex",
+        "context_id": "task-42fac3d0-d4de-42fb-807f-a99aee058041",
+        "run_id": "run-2c6592bf-5752-42cc-9024-1fb000b9ca7c"
+      }
+    },
+    {
+      "sequence": 294913,
+      "event_id": "event-session-binding-538cb8b6-74f8-48e0-9590-03e7de5f14a3",
+      "organization_id": null,
+      "aggregate_type": "session_binding",
+      "aggregate_id": "managed-session-e66ad7dce3c60b04e5a2a631cc713718",
+      "event_type": "session_binding.saved",
+      "actor_principal_id": "daemon",
+      "created_at": "2026-10-03T14:42:04.311189981Z",
+      "payload": {
+        "backend_id": "codex",
+        "context_id": "managed-task-e66ad7dce3c60b04e5a2a631cc713718",
+        "run_id": "run-7c210a04-3d18-49b2-96c5-abe081361e63"
+      }
+    },
+    {
+      "sequence": 294914,
+      "event_id": "event-0fbb5bfd-58b5-4c20-a6d2-0514c16a0ddb",
+      "organization_id": "default",
+      "aggregate_type": "external_message",
+      "aggregate_id": "external-message-c3f94db8-1f44-44c1-8238-94742f8290f7",
+      "event_type": "external_message.managed_processed",
+      "actor_principal_id": "agent-oneaxe-pay",
+      "created_at": "2026-10-03T14:42:04.312938777Z",
+      "payload": {
+        "run_id": "run-7c210a04-3d18-49b2-96c5-abe081361e63",
+        "status": "uncertain",
+        "task_id": "managed-task-e66ad7dce3c60b04e5a2a631cc713718"
+      }
+    },
+    {
+      "sequence": 294915,
+      "event_id": "event-72c507f6-ee24-4cf9-be45-ca756a2c1cb2",
+      "organization_id": "default",
+      "aggregate_type": "external_message",
+      "aggregate_id": "managed-result-e66ad7dce3c60b04e5a2a631cc713718",
+      "event_type": "external_message.sent",
+      "actor_principal_id": "agent-oneaxe-pay",
+      "created_at": "2026-10-03T14:42:04.313831773Z",
+      "payload": {
+        "kind": "result",
+        "reply_to_message_id": "external-message-c3f94db8-1f44-44c1-8238-94742f8290f7",
+        "run_id": "run-7c210a04-3d18-49b2-96c5-abe081361e63",
+        "sender_agent_id": "oneaxe-pay",
+        "status": "uncertain",
+        "target_agent_id": "rhythm",
+        "task_id": "managed-task-e66ad7dce3c60b04e5a2a631cc713718"
+      }
+    }
+  ]
+}

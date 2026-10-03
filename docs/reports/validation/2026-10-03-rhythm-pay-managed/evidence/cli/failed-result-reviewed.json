@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-03T14:57:36.110386+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "external",
+    "ack",
+    "--agent",
+    "rhythm",
+    "--message",
+    "managed-result-e66ad7dce3c60b04e5a2a631cc713718"
+  ],
+  "exit": 0,
+  "stdout": {
+    "scope": "pay.payment_api",
+    "processing_state": "completed",
+    "sequence": 10,
+    "message_id": "managed-result-e66ad7dce3c60b04e5a2a631cc713718",
+    "sender_agent_id": "oneaxe-pay",
+    "target_agent_id": "rhythm",
+    "sender_binding_id": "[REDACTED]",
+    "sender_generation": 3,
+    "kind": "result",
+    "reply_to_message_id": "external-message-c3f94db8-1f44-44c1-8238-94742f8290f7",
+    "content": "{\"completion_basis\":\"\",\"error\":\"query_result_unverified\",\"result\":\"本轮仅核对 Pay 仓库源码与接口文档，未读取业务数据库或运行时凭据，未执行任何变更；以下不代表当前部署已验证。\\n\\n1. **鉴权与创建订单**\\n\\n   `POST /v1/payments`，需要 `payments:create`。请求头包含 `Authorization=[REDACTED]\\n\\n   核心请求体：\\n   ```json\\n   {\\n     \\\"business_order_id\\\": \\\"\\u003c应用业务订单ID\\u003e\\\",\\n     \\\"customer_id\\\": \\\"\\u003c应用客户ID\\u003e\\\",\\n     \\\"product_id\\\": \\\"\\u003c已登记商品ID\\u003e\\\",\\n     \\\"amount_minor\\\": \\\"100\\\",\\n     \\\"currency\\\": \\\"CNY\\\"\\n   }\\n   ```\\n   金额为最小货币单位的正整数字符串。应用身份由 token 确定，不传 `app_id`。重试保留原幂等键和请求内容，冲突返回 409。成功返回 HTTP 200及 `order_id`、`attempt_id`、`action` 等收银字段；**创建成功不等于付款成功**。依据：[创建接口与校验](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/pay/pay.go:112)、[鉴权](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/pay/identity.go:106)、[请求与响应示例](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/docs/integration/application-handoff.md:110)。\\n\\n2. **查询订单**\\n\\n   `GET /v1/payments/{order_id}`，这里使用 Pay 返回的订单 ID，需要 `payments:read` 和上述三个鉴权头。返回 `order_id`、`payment`（`PENDING/UNKNOWN/CONFIRMED`）、`receipts`、`refunds`、`events`；每个事件含 `fact/received/processed/attempts`。付款确认、通知接收、应用处理完成分别表达；`receipts/refunds` 可能为 `null`。依据：[真实路由](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/pay/pay.go:58)、[查询字段](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/docs/integration/application-handoff.md:158)。\\n\\n3. **回调签名与应答**\\n\\n   Pay 向登记的应用 URL 发起 `POST`，约定入口为应用侧 `/internal/payment-events`。请求体是单个 `Fact`，没有 `fact/events` 外层。请求头为 `X-Event-ID`、`X-Timestamp`、`X-Signature`：\\n\\n   ```text\\n   payload_hash = lowercase_hex(SHA256(rawBody))\\n   signing_text = method + \\\"\\\\n\\\" + path + \\\"\\\\n\\\" + timestamp + \\\"\\\\n\\\" + event_id + \\\"\\\\n\\\" + payload_hash\\n   signature = lowercase_hex(HMAC_SHA256(notify_secret, UTF8(signing_text)))\\n   ```\\n   使用原始 body；`path` 不含域名和查询串；时间为 Unix 秒，允许偏差不超过 5 分钟；签名采用常量时间比较，正文 `event_id` 必须与请求头一致。付款事件需兼容缺省 `kind`。\\n\\n   可靠持久化接收记录后，返回 **HTTP 200**：\\n   ```json\\n   {\\\"event_id\\\":\\\"\\u003c原event_id\\u003e\\\",\\\"received\\\":true}\\n   ```\\n   空 200或204不算有效确认。应用实际处理完成后，再调用 `POST /v1/events/{event_id}/processed`（`events:report`，无请求体）。查询与通知须共用持久化去重规则。依据：[签名实现](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/contract/contract.go:81)、[应答判定](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/pay/tasks.go:103)、[接收契约](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/docs/integration/application-handoff.md:169)。\\n\\n4. **上线前双方需明确**\\n\\n   确定沿用还是新登记 `app_id`、商品许可、客户/业务订单标识、目标 runtime/tenant、通知 URL、双向可达性，以及实际运行构建和支付模式。登记须同时配置凭据权限、商品许可和通知目标；源码中的 `steadyflow-334` 配置不能证明 Rhythm 已获授权。服务 token 与通知 secret 分离，通过获授权的本机受限文件交接，不在消息或 Git 中传递明文。依据：[登记要求](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/docs/integration/application-handoff.md:48)、[现有应用组装](/home/sky/work/touzi/OneAxe/oneaxe-pay-service/cmd/pay/main.go:88)。\\n\\n5. **明确超出范围**\\n\\n   **用户映射、登录迁移、权益核验、应用数据库迁移和接收器部署超出 Pay 职责范围，由 Rhythm 确认。** Pay 提供接口约束及支付侧验证，不替代这些确认。\\n\\n下一步：双方先明确第4项，再安排受控购买 E2E；正式收费还须完成真实 [TRUNCATED]\",\"run_id\":\"run-7c210a04-3d18-49b2-96c5-abe081361e63\",\"status\":\"uncertain\",\"task_id\":\"managed-task-e66ad7dce3c60b04e5a2a631cc713718\"}",
+    "idempotency_key": "managed-result-key-e66ad7dce3c60b04e5a2a631cc713718",
+    "origin_task_id": "task-20c0ff59-07a8-4b2b-89ae-87adb5b43289",
+    "delivery_state": "acknowledged",
+    "created_at": "2026-10-03T14:42:04.313417781Z",
+    "acknowledged_at": "2026-10-03T14:57:36.107164984Z"
+  },
+  "stderr": ""
+}

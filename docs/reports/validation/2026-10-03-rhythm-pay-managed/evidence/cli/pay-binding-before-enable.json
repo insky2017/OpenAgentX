@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-03T14:25:56.746795+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "collaborate",
+    "status",
+    "--agent",
+    "oneaxe-pay",
+    "--owner"
+  ],
+  "exit": 0,
+  "stdout": {
+    "mode": "external",
+    "binding_id": "[REDACTED]",
+    "agent_id": "oneaxe-pay",
+    "principal_id": "agent-oneaxe-pay",
+    "organization_id": "default",
+    "host_id": "codex-desktop",
+    "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "generation": 2,
+    "state": "revoked",
+    "allowed_peer_agent_ids": [
+      "rhythm"
+    ],
+    "token_expires_at": "[REDACTED]",
+    "created_at": "2026-10-02T16:46:01.856256979Z",
+    "updated_at": "2026-10-03T14:17:58.590725305Z"
+  },
+  "stderr": ""
+}

@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-03T14:59:33.775354+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "resume",
+    "oneaxe-pay",
+    "--no-open",
+    "--file",
+    "/home/sky/.openagentx/fleets/rhythm-pay.yaml",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/installation/owner-password",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "stdout": "Agent oneaxe-pay 服务在线，当前代 2 网络已应用。\nOneAxe 支付服务 (oneaxe-pay) · 可开始工作\n  当前：无\n  最近：本轮仅核对 Pay 仓库源码与接口文档，未读取业务数据库或运行时凭据，未执行任何变更；以下不代表当前部署已验证。 1. **鉴权与创建订单** `POST /v1/payments`，需要 `payments:create`。请求头包含 `…\n  打开：openagentx agent open oneaxe-pay\n  恢复：openagentx agent resume oneaxe-pay\n\n",
+  "stderr": ""
+}

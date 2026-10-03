@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-03T14:53:52.089477+00:00",
+  "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+  "turn_id": "01a10234-6021-7bd1-99ea-1f1df765589f",
+  "source_rollout_path": "/home/sky/.codex/sessions/2026/09/27/rollout-2026-09-27T07-39-48-01a0e016-d951-77d1-bc7e-d13662f4823c.jsonl",
+  "source_line": 7887,
+  "source_timestamp": "2026-10-03T14:42:03.747Z",
+  "source_selector": {
+    "type": "response_item",
+    "role": "assistant",
+    "phase": "final_answer"
+  },
+  "source_bytes": 4391,
+  "source_sha256": "f572614bcb55d860c478dfddb5b8d8d569bf64e429ef1e07ebaf54c1b6adcb2d",
+  "fixture_path": "internal/safeoutput/testdata/pay-consultation-final.txt",
+  "fixture_bytes": 4278,
+  "fixture_sha256": "ba475c905c33ba55df4cff06f221a317f986ac97749dbd88801f545a9de8481d",
+  "redaction": "existing safeoutput.ProjectResultText rules; no raw transcript copied",
+  "old_summary_limit_bytes": 4096,
+  "new_final_result_limit_bytes": 32768,
+  "historical_failed_task": "managed-task-e66ad7dce3c60b04e5a2a631cc713718",
+  "historical_failed_run": "run-7c210a04-3d18-49b2-96c5-abe081361e63"
+}

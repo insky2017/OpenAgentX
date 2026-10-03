@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-03T15:16:26.833639+00:00",
+  "verdict": "PASS",
+  "scope": "Original domain threads, managed read-only consultation and automatic result consumption only; no payment/business integration",
+  "installed_commit": "886ba7fd255a5f6632ee550d4bdcc786274f48fa",
+  "binary_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+  "task_ids": [
+    "task-ddfddfa6-6374-450e-b544-9ff29433722d",
+    "managed-task-f936bbbbb227461e49791b9477f1f00a",
+    "managed-task-f04f1c011d75fe09ce5a60fef7f3fe10"
+  ],
+  "run_ids": [
+    "run-e636fa3b-5267-47cb-ae99-c53c1b0c797a",
+    "run-95e18155-43d1-4932-a7bc-90220f3a2e41",
+    "run-28e755d5-f004-49ea-b19f-5c866d0787d7"
+  ],
+  "completed_at": "2026-10-03T15:07:47.12149192Z",
+  "question_message_id": "external-message-cdb939c9-4402-44f4-8f2c-38b7a5f8078c",
+  "result_message_id": "managed-result-f936bbbbb227461e49791b9477f1f00a",
+  "pay_result_bytes": 7973,
+  "result_delivered_identically": true,
+  "correlated_origin_task": "task-ddfddfa6-6374-450e-b544-9ff29433722d",
+  "same_original_threads": {
+    "rhythm": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+    "oneaxe-pay": "01a0e016-d951-77d1-bc7e-d13662f4823c"
+  },
+  "query_tasks_succeeded": 3,
+  "single_run_each": true,
+  "message_count_for_retest": 2,
+  "same_agent_runs_do_not_overlap": true,
+  "repos_unchanged": {
+    "oneaxe-pay": {
+      "path": "/home/sky/work/touzi/OneAxe/oneaxe-pay-service",
+      "head": "01675906c62c04e20c24680ee34ca2f4bff0c7b7",
+      "status": ""
+    },
+    "rhythm": {
+      "path": "/home/sky/work/touzi/OneAxe/rhythm",
+      "head": "7141ec2d1928185a399637b50436929177b63ad0",
+      "status": ""
+    }
+  },
+  "first_failures_preserved": [
+    "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+    "managed-task-e66ad7dce3c60b04e5a2a631cc713718"
+  ],
+  "tool_review": "Actual new turns only: source/doc reads, instructions and one ask. No file write, DB read/write or payment/runtime API execution. No poll/watch or manual protocol reply by agents."
+}

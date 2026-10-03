@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-03T14:09:39.450009+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "join",
+    "--id",
+    "oneaxe-pay",
+    "--runtime",
+    "codex",
+    "--identity",
+    "/home/sky/.openagentx/external/oneaxe-pay/identity.yaml",
+    "--thread-id",
+    "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "--model",
+    "gpt-6-astra",
+    "--prepare"
+  ],
+  "exit": 0,
+  "stdout": "Agent oneaxe-pay 已离线准备；未绑定 live CLI、未启动服务、未派单。当前轮结束后运行 openagentx agent resume oneaxe-pay。\n",
+  "stderr": ""
+}

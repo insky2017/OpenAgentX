@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "local_links_checked": 137,
+  "html_structure": "PASS",
+  "unique_html_ids": 50,
+  "javascript_scripts_syntax_checked": 3,
+  "both_git_diff_check": "PASS",
+  "frozen_adr_unchanged": true,
+  "visual_verification": "NOT_RUN",
+  "collector_note": "First link check treated Codex file :line suffix as filename. Corrected parser; all actual files and line numbers verified. No document change needed for these links."
+}

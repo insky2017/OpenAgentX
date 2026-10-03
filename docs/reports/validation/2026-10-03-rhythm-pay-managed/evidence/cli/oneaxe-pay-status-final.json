@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-03T15:16:26.777578+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "collaborate",
+    "status",
+    "--agent",
+    "oneaxe-pay",
+    "--owner"
+  ],
+  "exit": 0,
+  "stdout": {
+    "mode": "managed",
+    "managed_context_task_id": "task-b7622c6b-3501-4fde-9834-0e541bdfea6a",
+    "managed_backend_id": "codex",
+    "binding_id": "[REDACTED]",
+    "agent_id": "oneaxe-pay",
+    "principal_id": "agent-oneaxe-pay",
+    "organization_id": "default",
+    "host_id": "managed-worker",
+    "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "generation": 3,
+    "state": "active",
+    "allowed_peer_agent_ids": [
+      "rhythm"
+    ],
+    "token_expires_at": "[REDACTED]",
+    "created_at": "2026-10-02T16:46:01.856256979Z",
+    "updated_at": "2026-10-03T14:26:14.735239405Z"
+  }
+}

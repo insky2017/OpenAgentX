@@ -1,0 +1,32 @@
+[
+  {
+    "id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "title": "OneAxe Pay 后台服务",
+    "status": {
+      "type": "notLoaded"
+    },
+    "cwd": "/home/sky/Documents/ChatGPT/第二增长曲线",
+    "turns": [
+      {
+        "id": "01a0fdc4-f9f2-79b2-8b53-80fdbfb1ccb1",
+        "status": "completed",
+        "completedAt": 1790963954
+      }
+    ]
+  },
+  {
+    "id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+    "title": "一板斧 律动 rhythm 收费应用",
+    "status": {
+      "type": "idle"
+    },
+    "cwd": "/home/sky/Documents/ChatGPT/steadyflow",
+    "turns": [
+      {
+        "id": "01a101d1-8423-7de2-b573-730378c85515",
+        "status": "completed",
+        "completedAt": 1791032551
+      }
+    ]
+  }
+]

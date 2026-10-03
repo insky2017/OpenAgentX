@@ -1,0 +1,111 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+    "version": 3,
+    "target_agent_id": "rhythm",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+    "status": "uncertain",
+    "error": "Runtime Backend could not establish a controlled turn",
+    "outcome_state": "available",
+    "created_at": "2026-10-03T14:27:07.353198531Z",
+    "updated_at": "2026-10-03T14:27:08.845929499Z"
+  },
+  "messages": [
+    {
+      "id": "message-a3b7ec88-1fae-4c6b-8c23-248d27482371",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+      "target_agent_id": "rhythm",
+      "kind": "instruction",
+      "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+      "created_at": "2026-10-03T14:27:07.353198531Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-03T14:57:07.356624274Z",
+      "instructions_sha256": "6d030f5efc31401527970b3c299a9ab0df934be7adcfd153a57bf213d9dfa7e8",
+      "instructions_path": "/home/sky/.openagentx/external/rhythm/ROLE.md",
+      "run_id": "run-12a49b1a-7048-4e27-8388-350b4f086934",
+      "task_id": "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+      "agent_id": "rhythm",
+      "version": 2,
+      "status": "uncertain",
+      "worker_instance_id": "worker-c7914d44-0a00-45b2-a215-fca4c5b0c7b8",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": false,
+        "runtime_status": "uncertain",
+        "error": "Runtime Backend could not establish a controlled turn",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-03T14:27:07.356624274Z",
+      "finished_at": "2026-10-03T14:27:08.845929499Z",
+      "created_at": "2026-10-03T14:27:07.356624274Z",
+      "updated_at": "2026-10-03T14:27:08.845929499Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 294499,
+      "event_id": "event-c08e67cb-2e9c-412e-a23d-16ab23bebacd",
+      "aggregate_type": "task",
+      "aggregate_id": "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+      "event_type": "task.created",
+      "created_at": "2026-10-03T14:27:07.353198531Z"
+    },
+    {
+      "sequence": 294501,
+      "event_id": "event-task-6d8b5e40-c794-4437-a9c9-c6e52474b1f6",
+      "aggregate_type": "task",
+      "aggregate_id": "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+      "event_type": "task.running",
+      "created_at": "2026-10-03T14:27:07.358975473Z"
+    },
+    {
+      "sequence": 294502,
+      "event_id": "event-run-0da5034c-c32c-47c8-965d-18394fca94bf",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-12a49b1a-7048-4e27-8388-350b4f086934",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-03T14:27:07.358979474Z"
+    },
+    {
+      "sequence": 294504,
+      "event_id": "event-run-1b9ff6e9-2749-428a-814a-277f3efdf4b7",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-12a49b1a-7048-4e27-8388-350b4f086934",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-03T14:27:08.845955499Z"
+    },
+    {
+      "sequence": 294505,
+      "event_id": "event-task-9b6ae8f4-3b70-42ed-b942-1329302e81d7",
+      "aggregate_type": "task",
+      "aggregate_id": "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b",
+      "event_type": "task.settled",
+      "created_at": "2026-10-03T14:27:08.845958732Z"
+    }
+  ],
+  "snapshot_sequence": 295634,
+  "live_after_sequence": 295634,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

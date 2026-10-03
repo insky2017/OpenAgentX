@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T15:00:49.181789+00:00",
+  "text": "\n  2. 查询订单\n\n     GET /v1/payments/{order_id}，这里使用 Pay 返回的订单 ID，需要 payments:read 和上述三个鉴权头。返回 order_id、payment（PENDING/UNKNOWN/CONFIRMED）、receipts、refunds、events；每个事件含 fact/received/processed/attempts。付款\n     确认、通知接收、应用处理完成分别表达；receipts/refunds 可能为 null。依据：真实路由 (internal/pay/pay.go:58)、查询字段 (docs/integration/application-handoff.md:158)。\n\n  3. 回调签名与应答\n\n     Pay 向登记的应用 URL 发起 POST，约定入口为应用侧 /internal/payment-events。请求体是单个 Fact，没有 fact/events 外层。请求头为 X-Event-ID、X-Timestamp、X-Signature：\n\n     payload_hash = lowercase_hex(SHA256(rawBody))\n     signing_text = method + \"\\n\" + path + \"\\n\" + timestamp + \"\\n\" + event_id + \"\\n\" + payload_hash\n     signature = lowercase_hex(HMAC_SHA256(notify_secret, UTF8(signing_text)))\n\n     使用原始 body；path 不含域名和查询串；时间为 Unix 秒，允许偏差不超过 5 分钟；签名采用常量时间比较，正文 event_id 必须与请求头一致。付款事件需兼容缺省 kind。\n\n     可靠持久化接收记录后，返回 HTTP 200：\n\n     {\"event_id\":\"<原event_id>\",\"received\":true}\n\n     空 200或204不算有效确认。应用实际处理完成后，再调用 POST /v1/events/{event_id}/processed（events:report，无请求体）。查询与通知须共用持久化去重规则。依据：签名实现 (internal/contract/contract.go:81)、应答判定 (internal/pay/\n     tasks.go:103)、接收契约 (docs/integration/application-handoff.md:169)。\n\n  4. 上线前双方需明确\n\n     确定沿用还是新登记 app_id、商品许可、客户/业务订单标识、目标 runtime/tenant、通知 URL、双向可达性，以及实际运行构建和支付模式。登记须同时配置凭据权限、商品许可和通知目标；源码中的 steadyflow-334 配置不能证明 Rhythm 已获授\n     权。服务 token 与通知 secret 分离，通过获授权的本机受限文件交接，不在消息或 Git 中传递明文。依据：登记要求 (docs/integration/application-handoff.md:48)、现有应用组装 (cmd/pay/main.go:88)。\n\n  5. 明确超出范围\n\n     用户映射、登录迁移、权益核验、应用数据库迁移和接收器部署超出 Pay 职责范围，由 Rhythm 确认。 Pay 提供接口约束及支付侧验证，不替代这些确认。\n\n  下一步：双方先明确第4项，再安排受控购买 E2E；正式收费还须完成真实商品/商户准入及真实交易验收，不能以 Mock 通过替代。依据：验收阶段 (docs/payment-core/requirements.md:48)。\n\n  Worked for 2m 54s • 10:42 PM\n\n■ Automatic reconnect could not restore this session. Your draft is still editable. Copy it before quitting with Ctrl+C, then reconnect with the same command.\n\n■ Server connection could not be restored\n\n• Reconnect failed — check the endpoint, then relaunch (21m 39s)\n\n\n» Ask Codex to do anything\n\n  ctrl+c quit\n",
+  "state": {
+    "endpoint": "unix:///tmp/oax-codex-3922134807/server.sock",
+    "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "turn_id": "01a10234-6021-7bd1-99ea-1f1df765589f",
+    "task_id": "managed-task-e66ad7dce3c60b04e5a2a631cc713718",
+    "run_id": "run-7c210a04-3d18-49b2-96c5-abe081361e63",
+    "state": "restored_unconfirmed",
+    "pid": 3579498,
+    "updated_at": "2026-10-03T15:00:42.477137593Z"
+  }
+}

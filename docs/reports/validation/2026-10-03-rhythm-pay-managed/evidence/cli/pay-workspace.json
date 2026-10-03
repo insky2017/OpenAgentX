@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T14:24:09.380878+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "fleet",
+    "workspace",
+    "--file",
+    "/home/sky/.openagentx/fleets/rhythm-pay.yaml",
+    "--respawn-dead"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "Fleet workspace preflight failed: unmanaged tmux window \"overview\" occupies a Fleet target name\n"
+}

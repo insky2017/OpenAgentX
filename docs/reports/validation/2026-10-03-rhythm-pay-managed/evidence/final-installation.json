@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-03T15:00:49.875788+00:00",
+  "canonical_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+  "services": {
+    "openagentx": {
+      "MainPID": "3577886",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+    },
+    "openagentx-worker@oneaxe-pay": {
+      "MainPID": "3579449",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+    },
+    "openagentx-worker@rhythm": {
+      "MainPID": "3580837",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+    },
+    "openagentx-worker@agy-onboarding-e2e": {
+      "MainPID": "3579652",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+    },
+    "openagentx-worker@codex-domain-e2e": {
+      "MainPID": "3579182",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+    }
+  }
+}

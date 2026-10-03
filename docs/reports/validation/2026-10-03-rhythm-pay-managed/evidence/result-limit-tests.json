@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-03T14:57:22.514106+00:00",
+  "argv": [
+    "go",
+    "test",
+    "./internal/safeoutput",
+    "./internal/api/console",
+    "./internal/api/panel",
+    "./internal/controlplane",
+    "./internal/persistence/sqlite",
+    "./internal/runtime/acp",
+    "./internal/runtime/agy",
+    "./internal/runtime/codex",
+    "./internal/consolemodel"
+  ],
+  "exit": 0,
+  "stdout": "ok  \topenagentx/internal/safeoutput\t0.131s\nok  \topenagentx/internal/api/console\t5.490s\nok  \topenagentx/internal/api/panel\t25.746s\nok  \topenagentx/internal/controlplane\t10.892s\nok  \topenagentx/internal/persistence/sqlite\t26.033s\nok  \topenagentx/internal/runtime/acp\t0.044s\nok  \topenagentx/internal/runtime/agy\t10.542s\nok  \topenagentx/internal/runtime/codex\t2.357s\nok  \topenagentx/internal/consolemodel\t0.344s\n",
+  "stderr": ""
+}

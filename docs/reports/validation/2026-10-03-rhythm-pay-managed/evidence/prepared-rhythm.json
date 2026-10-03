@@ -1,0 +1,26 @@
+{
+  "agent": "rhythm",
+  "worker_config": "version: 1\nagent_id: rhythm\ntransport: unix\nunix_socket: /home/sky/.openagentx/run/openagentx.sock\nendpoint: \"\"\nca_file: \"\"\nclient_cert_file: \"\"\nclient_key_file: \"\"\nserver_name: \"\"\ncapabilities: []\nheartbeat_interval: 0s\nmailbox_wait: 0s\ncontrol_wait: 0s\nshutdown_timeout: 0s\nruntime_backends:\n    - backend_id: codex\n      adapter_id: codex-app-server\n      options:\n        binary: codex\n        models:\n            - gpt-6-astra\n        state_dir: /home/sky/.openagentx/workers/codex/rhythm\n        thread_id: 01a0b4e3-7b2e-7822-8ae1-9f0e812115a9\n        timeout: 30m0s\n        working_dir: /home/sky/work/touzi/OneAxe/rhythm\n      network:\n        mode: inherit\n",
+  "environment_keys_and_presence": {
+    "HTTP_PROXY": "configured",
+    "HTTPS_PROXY": "configured",
+    "ALL_PROXY": "configured",
+    "http_proxy": "configured",
+    "https_proxy": "configured",
+    "all_proxy": "configured",
+    "CODEX_HOME": "/home/sky/.codex",
+    "NO_PROXY": "rtx4090,localhost,127.0.0.1,::1,192.168.1.9,192.168.1.10,qt.gtimg.cn,ifzq.gtimg.cn",
+    "no_proxy": "rtx4090,localhost,127.0.0.1,::1,192.168.1.9,192.168.1.10,qt.gtimg.cn,ifzq.gtimg.cn"
+  },
+  "receipt": {
+    "version": 1,
+    "state": "local_prepared",
+    "ready": false,
+    "agent_id": "rhythm",
+    "runtime": "codex",
+    "identity_file": "/home/sky/.openagentx/external/rhythm/identity.yaml",
+    "workspace": "/home/sky/work/touzi/OneAxe/rhythm",
+    "role_file": "/home/sky/.openagentx/external/rhythm/ROLE.md",
+    "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9"
+  }
+}

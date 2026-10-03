@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-03T14:23:50.062382+00:00",
+  "canonical_sha256": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a",
+  "collection_note": "Initial install collection saw MainPID=0 for demo worker after daemon restart. Installation completed. This is a read-only recovery snapshot; no reinstall or further restart.",
+  "services": {
+    "openagentx": {
+      "MainPID": "3425730",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "exe_sha256": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a"
+    },
+    "openagentx-worker@agy-onboarding-e2e": {
+      "MainPID": "3427680",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "exe_sha256": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a"
+    },
+    "openagentx-worker@codex-domain-e2e": {
+      "MainPID": "3427363",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "exe_sha256": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a"
+    },
+    "openagentx-worker@oneaxe-pay": {
+      "MainPID": "3428571",
+      "ActiveState": "active",
+      "SubState": "running",
+      "exe": "/home/sky/.local/bin/openagentx",
+      "exe_sha256": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a"
+    }
+  },
+  "api_ok": true
+}

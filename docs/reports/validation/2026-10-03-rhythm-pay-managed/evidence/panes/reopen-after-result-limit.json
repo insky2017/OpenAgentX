@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-03T15:00:49.280583+00:00",
+  "no_running_tasks": true,
+  "actions": [
+    {
+      "agent": "oneaxe-pay",
+      "guard": "oneaxe-pay|0|%54|oneaxe-pay",
+      "argv": [
+        "tmux",
+        "respawn-pane",
+        "-k",
+        "-t",
+        "@27.0",
+        "-c",
+        "/home/sky/work/touzi/OneAxe/oneaxe-pay-service",
+        "--",
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "oneaxe-pay",
+        "--native",
+        "--file",
+        "/home/sky/.openagentx/fleets/rhythm-pay.yaml"
+      ]
+    },
+    {
+      "agent": "rhythm",
+      "guard": "rhythm|0|%55|rhythm",
+      "argv": [
+        "tmux",
+        "respawn-pane",
+        "-k",
+        "-t",
+        "@28.0",
+        "-c",
+        "/home/sky/work/touzi/OneAxe/rhythm",
+        "--",
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "rhythm",
+        "--native",
+        "--file",
+        "/home/sky/.openagentx/fleets/rhythm-pay.yaml"
+      ]
+    }
+  ]
+}

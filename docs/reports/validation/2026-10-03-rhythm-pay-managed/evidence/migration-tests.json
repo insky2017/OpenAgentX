@@ -1,0 +1,5 @@
+{
+  "command": "go test ./internal/persistence/sqlite ./internal/cli/external ./internal/cli/fleet ./internal/controlplane",
+  "exit": 0,
+  "output": "ok  \topenagentx/internal/persistence/sqlite\t24.404s\nok  \topenagentx/internal/cli/external\t(cached)\nok  \topenagentx/internal/cli/fleet\t4.301s\nok  \topenagentx/internal/controlplane\t10.655s\n"
+}

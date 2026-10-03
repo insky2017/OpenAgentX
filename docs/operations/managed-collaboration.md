@@ -1,6 +1,6 @@
 # 托管领域 Agent：终端工作与自动咨询
 
-本指南描述本轮实现；已验证与未验证项见[交付记录](../reports/validation/2026-10-03-managed-collaboration/DELIVERY.md)。适用于由 OAX Worker 执行的 Codex Agent。原 Desktop 的 Rhythm / Pay 仍为 external，不能直接用下面命令抢占其原会话。
+本指南适用于由 OAX Worker 执行的 Codex Agent。当前安装 `886ba7f` / schema v5；原 Rhythm / Pay 已按用户授权保留原 thread 迁入托管，真实只读咨询、完整答复与自动续办 PASS，见[当前交付](../reports/validation/2026-10-03-rhythm-pay-managed/DELIVERY.md)、[独立核查](../reports/validation/2026-10-03-rhythm-pay-managed/evidence/independent-review.json)及[日用与切换实录](rhythm-pay-managed-handoff.md)。此前独立身份验证见[历史交付](../reports/validation/2026-10-03-managed-collaboration/DELIVERY.md)。其他 Desktop 会话仍须先确认旧宿主释放，不直接抢占。
 
 ## 使用者看到什么
 
@@ -10,7 +10,7 @@
 
 ## 一次接入
 
-1. 先用 `agent add --runtime codex ...` 新建领域 Agent；已有 CLI 则按[Codex 接入指南](codex-agent-entry.md)交接，等旧宿主结束当前轮后再 resume。Worker、workspace、ROLE 和默认代理由现有接入流程管理。
+1. 先用 `agent add --runtime codex ...` 新建领域 Agent；已有 CLI 则按[Codex 接入指南](codex-agent-entry.md)交接，确认旧宿主结束当前轮并释放 thread writer 后再 resume；idle 或停止 turn 本身不证明 writer 已释放。Worker、workspace、ROLE 和默认代理由现有接入流程管理。
 2. 打开 `openagentx agent open <id> --native`，完成一次对话，使该 Agent 有可核对的真实会话。再登记双方职责与通信许可。
 3. 在原生终端让 Agent 运行 `openagentx collaborate instructions --agent <自身ID>`，读取自身身份、职责目录和精确发问命令。让它继续原来的本域工作，无需常驻 watch。
 
@@ -52,7 +52,7 @@ openagentx collaborate inbox --agent app-domain --all
 
 `--key` 表示同一次发问；网络断开后重发相同正文和 key 会取回同一个消息与任务。新的问题用新 key。可带 `--origin-task` 关联具体来源任务，省略时关联启用协作时的会话任务。自定义 profile 使用 `instructions` 输出的 socket/session-file 路径。
 
-答复方直接在当前轮给最终答案与证据，后台替它关联发送，不能再手动 reply。同一领域 Worker 忙时持久排队；同 Agent 的协作任务使用登记时的 backend/thread，不能退回其他后台新建会话。请求方消费结果后协议结束，不自动再次回信。消息中的 `task_id` 与 `managed_state` 可核对实际处理；query 成功表示有效回复已交付，不代表发生了业务变更。
+答复方直接在当前轮给最终答案与证据，后台替它关联发送，不能再手动 reply。同一领域 Worker 忙时持久排队；同 Agent 的协作任务使用登记时的 backend/thread，不能退回其他后台新建会话。请求方消费结果后协议结束，不自动再次回信。消息中的 `task_id` 与 `managed_state` 可核对实际处理；query 成功表示有效回复已交付，不代表发生了业务变更。当前完整答复上限为 32 KiB，事件与错误摘要仍为 4 KiB；实际超限保持 `uncertain`，不伪报成功。
 
 `external inbox --watch` 可在额外终端观察消息，但不是启动协作的必需步骤，也不会调用模型。
 

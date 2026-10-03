@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-03T15:03:34.676640+00:00",
+  "checks": [
+    {
+      "agent": "oneaxe-pay",
+      "runtime_pid": 3579498,
+      "proxy_values_equal_pre_restart": true,
+      "proxy_sha256_by_variable": {
+        "HTTP_PROXY": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "HTTPS_PROXY": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "ALL_PROXY": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "NO_PROXY": "ec35448f434fa4a481205b4b5d6c8430f4b7dc1e28c39f25375d9274d4cd60e9",
+        "http_proxy": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "https_proxy": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "all_proxy": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+      },
+      "state_thread": "01a0e016-d951-77d1-bc7e-d13662f4823c"
+    },
+    {
+      "agent": "rhythm",
+      "runtime_pid": 3580900,
+      "proxy_values_equal_pre_restart": true,
+      "proxy_sha256_by_variable": {
+        "HTTP_PROXY": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "HTTPS_PROXY": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "ALL_PROXY": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "NO_PROXY": "ec35448f434fa4a481205b4b5d6c8430f4b7dc1e28c39f25375d9274d4cd60e9",
+        "http_proxy": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "https_proxy": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118",
+        "all_proxy": "813477bf51a0efb3b5926c3759f01d02cdf25cd70e6cfc7fa186d9d5e1e1d118"
+      },
+      "state_thread": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9"
+    }
+  ]
+}

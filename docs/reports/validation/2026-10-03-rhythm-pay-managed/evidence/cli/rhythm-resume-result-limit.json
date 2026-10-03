@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-03T15:00:00.112826+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "resume",
+    "rhythm",
+    "--no-open",
+    "--file",
+    "/home/sky/.openagentx/fleets/rhythm-pay.yaml",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-02-agy-workflow/installation/owner-password",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "stdout": "Agent rhythm 服务在线，当前代 2 网络已应用。\nRhythm 应用 (rhythm) · 可开始工作\n  当前：无\n  最近：已核对 `rhythm` 身份与职责，并向 `oneaxe-pay` 提交一次只读咨询，状态为已接受、已入队。 消息 ID：`external-message-c3f94db8-1f44-44c1-8238-94742f8290f7` 本轮…\n  打开：openagentx agent open rhythm\n  恢复：openagentx agent resume rhythm\n\n",
+  "stderr": ""
+}

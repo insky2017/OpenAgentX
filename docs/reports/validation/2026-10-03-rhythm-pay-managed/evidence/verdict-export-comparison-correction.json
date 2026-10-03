@@ -1,0 +1,7 @@
+{
+  "error": "Compared re-redacted saved Task text with raw CLI result text. The evidence helper applied an extra Bearer [REDACTED] step to a literal placeholder.",
+  "raw_api_bytes": 7973,
+  "raw_message_result_bytes": 7973,
+  "raw_api_equals_raw_message": true,
+  "fix": "Assert equality on live protocol values before producing redacted artifacts; no reexecution, no state mutation."
+}

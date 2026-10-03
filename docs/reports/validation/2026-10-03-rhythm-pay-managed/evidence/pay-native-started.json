@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-03T14:25:29.254065+00:00",
+  "binary_sha": "b3e925641ba47f3fc2b539b6ff1b632242fdc9a428788f3e364605ef8ce0472a",
+  "tasks": {
+    "tasks": [
+      {
+        "id": "task-b7622c6b-3501-4fde-9834-0e541bdfea6a",
+        "target_agent_id": "oneaxe-pay",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+        "created_at": "2026-10-03T14:25:11.384103347Z",
+        "updated_at": "2026-10-03T14:25:24.018452496Z"
+      }
+    ],
+    "has_more": false
+  },
+  "panes": "OAX\t0\toverview\t@2\t0\t%2\t30743\t0\tzsh\t/home/sky\nOAX\t1\tquote-service\t@3\t0\t%3\t30767\t0\tzsh\t/home/sky\nOAX\t2\tzsh\t@4\t0\t%4\t30796\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t2\tzsh\t@4\t1\t%51\t2635479\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t3\tzsh\t@5\t0\t%5\t30834\t0\tzsh\t/home/sky/.openagentx\nOAX\t3\tzsh\t@5\t1\t%6\t30868\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t4\tzsh\t@6\t0\t%7\t30919\t0\tzsh\t/home/sky/.openagentx\nOAX\t5\tpi\t@7\t0\t%8\t30956\t0\tzsh\t/home/sky\nOAX\t5\tpi\t@7\t1\t%9\t30995\t0\tzsh\t/home/sky\nOAX\t6\tagentx\t@8\t0\t%10\t31051\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t6\tagentx\t@8\t1\t%11\t31132\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t7\tapi_proxy\t@9\t0\t%12\t31224\t0\tzsh\t/home/sky/docker\nOAX\t7\tapi_proxy\t@9\t1\t%13\t31344\t0\tzsh\t/home/sky/docker\nOAX\t8\tcolab\t@10\t0\t%14\t31515\t0\tzsh\t/home/sky/work\nOAX\t8\tcolab\t@10\t1\t%15\t31664\t0\tzsh\t/home/sky/work\nOAX\t9\tvoice\t@11\t0\t%16\t31900\t0\tzsh\t/home/sky/tools/models\nOAX\t9\tvoice\t@11\t1\t%17\t32093\t0\tzsh\t/home/sky/tools/oneaxe-voice\nOAX\t10\tzsh\t@12\t0\t%18\t32361\t0\tzsh\t/home/sky/work/touzi/OneAxe/oneaxe-pay-service/docs\nOAX\t11\toneaxe-pay\t@27\t0\t%54\t3454212\t0\topenagentx\t/home/sky/work/touzi/OneAxe/oneaxe-pay-service\n",
+  "repos": {
+    "oneaxe-pay": {
+      "path": "/home/sky/work/touzi/OneAxe/oneaxe-pay-service",
+      "head": "01675906c62c04e20c24680ee34ca2f4bff0c7b7",
+      "status": ""
+    },
+    "rhythm": {
+      "path": "/home/sky/work/touzi/OneAxe/rhythm",
+      "head": "7141ec2d1928185a399637b50436929177b63ad0",
+      "status": ""
+    }
+  },
+  "task_count": 80,
+  "export_note": "Routine unrelated task/overview content omitted; original local snapshot hash recorded in provenance."
+}

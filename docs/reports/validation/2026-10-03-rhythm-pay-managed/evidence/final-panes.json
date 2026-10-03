@@ -1,0 +1,176 @@
+{
+  "at": "2026-10-03T15:09:04.526412+00:00",
+  "old_windows": 11,
+  "old_panes": 18,
+  "old_preserved": [
+    {
+      "pane_id": "%2",
+      "window_id": "@2",
+      "name": "overview",
+      "pane_pid": "30743",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%3",
+      "window_id": "@3",
+      "name": "quote-service",
+      "pane_pid": "30767",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%4",
+      "window_id": "@4",
+      "name": "zsh",
+      "pane_pid": "30796",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%51",
+      "window_id": "@4",
+      "name": "zsh",
+      "pane_pid": "2635479",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%5",
+      "window_id": "@5",
+      "name": "zsh",
+      "pane_pid": "30834",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%6",
+      "window_id": "@5",
+      "name": "zsh",
+      "pane_pid": "30868",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%7",
+      "window_id": "@6",
+      "name": "zsh",
+      "pane_pid": "30919",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%8",
+      "window_id": "@7",
+      "name": "pi",
+      "pane_pid": "30956",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%9",
+      "window_id": "@7",
+      "name": "pi",
+      "pane_pid": "30995",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%10",
+      "window_id": "@8",
+      "name": "agentx",
+      "pane_pid": "31051",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%11",
+      "window_id": "@8",
+      "name": "agentx",
+      "pane_pid": "31132",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%12",
+      "window_id": "@9",
+      "name": "api_proxy",
+      "pane_pid": "31224",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%13",
+      "window_id": "@9",
+      "name": "api_proxy",
+      "pane_pid": "31344",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%14",
+      "window_id": "@10",
+      "name": "colab",
+      "pane_pid": "31515",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%15",
+      "window_id": "@10",
+      "name": "colab",
+      "pane_pid": "31664",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%16",
+      "window_id": "@11",
+      "name": "voice",
+      "pane_pid": "31900",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%17",
+      "window_id": "@11",
+      "name": "voice",
+      "pane_pid": "32093",
+      "unchanged": true
+    },
+    {
+      "pane_id": "%18",
+      "window_id": "@12",
+      "name": "zsh",
+      "pane_pid": "32361",
+      "unchanged": true
+    }
+  ],
+  "targets": [
+    {
+      "agent": "oneaxe-pay",
+      "window_name": "oneaxe-pay",
+      "window_id": "@27",
+      "pane_id": "%54",
+      "pane_index": 0,
+      "pane_pid": "3584371",
+      "cmdline": "/home/sky/.local/bin/openagentx agent open oneaxe-pay --native --file /home/sky/.openagentx/fleets/rhythm-pay.yaml ",
+      "options": "1|oneaxe-pay|0|0",
+      "runtime_state": {
+        "endpoint": "unix:///tmp/oax-codex-3922134807/server.sock",
+        "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+        "turn_id": "01a10249-2a8b-7df3-a0a2-6a264e1e4633",
+        "task_id": "managed-task-f936bbbbb227461e49791b9477f1f00a",
+        "run_id": "run-95e18155-43d1-4932-a7bc-90220f3a2e41",
+        "state": "idle",
+        "pid": 3579498,
+        "updated_at": "2026-10-03T15:09:02.483061973Z"
+      }
+    },
+    {
+      "agent": "rhythm",
+      "window_name": "rhythm",
+      "window_id": "@28",
+      "pane_id": "%55",
+      "pane_index": 0,
+      "pane_pid": "3584397",
+      "cmdline": "/home/sky/.local/bin/openagentx agent open rhythm --native --file /home/sky/.openagentx/fleets/rhythm-pay.yaml ",
+      "options": "1|rhythm|0|0",
+      "runtime_state": {
+        "endpoint": "unix:///tmp/oax-codex-2929205272/server.sock",
+        "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+        "turn_id": "01a1024b-ba17-7592-a42e-4b1ee069458e",
+        "task_id": "managed-task-f04f1c011d75fe09ce5a60fef7f3fe10",
+        "run_id": "run-28e755d5-f004-49ea-b19f-5c866d0787d7",
+        "state": "idle",
+        "pid": 3580900,
+        "updated_at": "2026-10-03T15:08:58.793671794Z"
+      }
+    }
+  ],
+  "inventory": "OAX\t0\toverview\t@2\t0\t%2\t30743\t0\tzsh\t/home/sky\nOAX\t1\trhythm\t@28\t0\t%55\t3584397\t0\topenagentx\t/home/sky/work/touzi/OneAxe/rhythm\nOAX\t2\toneaxe-pay\t@27\t0\t%54\t3584371\t0\topenagentx\t/home/sky/work/touzi/OneAxe/oneaxe-pay-service\nOAX\t3\tquote-service\t@3\t0\t%3\t30767\t0\tzsh\t/home/sky\nOAX\t4\tzsh\t@4\t0\t%4\t30796\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t4\tzsh\t@4\t1\t%51\t2635479\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t5\tzsh\t@5\t0\t%5\t30834\t0\tzsh\t/home/sky/.openagentx\nOAX\t5\tzsh\t@5\t1\t%6\t30868\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t6\tzsh\t@6\t0\t%7\t30919\t0\tzsh\t/home/sky/.openagentx\nOAX\t7\tpi\t@7\t0\t%8\t30956\t0\tzsh\t/home/sky\nOAX\t7\tpi\t@7\t1\t%9\t30995\t0\tzsh\t/home/sky\nOAX\t8\tagentx\t@8\t0\t%10\t31051\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t8\tagentx\t@8\t1\t%11\t31132\t0\tzsh\t/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX\nOAX\t9\tapi_proxy\t@9\t0\t%12\t31224\t0\tzsh\t/home/sky/docker\nOAX\t9\tapi_proxy\t@9\t1\t%13\t31344\t0\tzsh\t/home/sky/docker\nOAX\t10\tcolab\t@10\t0\t%14\t31515\t0\tzsh\t/home/sky/work\nOAX\t10\tcolab\t@10\t1\t%15\t31664\t0\tzsh\t/home/sky/work\nOAX\t11\tvoice\t@11\t0\t%16\t31900\t0\tzsh\t/home/sky/tools/models\nOAX\t11\tvoice\t@11\t1\t%17\t32093\t0\tzsh\t/home/sky/tools/oneaxe-voice\nOAX\t12\tzsh\t@12\t0\t%18\t32361\t0\tzsh\t/home/sky/work/touzi/OneAxe/oneaxe-pay-service/docs\n"
+}

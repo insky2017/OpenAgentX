@@ -1,0 +1,1375 @@
+{
+  "at": "2026-10-03T14:42:22.943795+00:00",
+  "commit": "01675906c62c04e20c24680ee34ca2f4bff0c7b7",
+  "source_only": true,
+  "files": [
+    {
+      "path": "/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/pay/pay.go",
+      "sha256": "29f55d24a7dc66613abe635a21c6d7299bc393346a4c87971341c08e09a147c9",
+      "lines": [
+        {
+          "line": 48,
+          "text": "}"
+        },
+        {
+          "line": 49,
+          "text": "func (s *Service) Handler() http.Handler {"
+        },
+        {
+          "line": 50,
+          "text": "\tm := http.NewServeMux()"
+        },
+        {
+          "line": 51,
+          "text": "\tm.HandleFunc(\"GET /health\", func(w http.ResponseWriter, r *http.Request) {"
+        },
+        {
+          "line": 52,
+          "text": "\t\tif s.DB.Ping(r.Context()) != nil {"
+        },
+        {
+          "line": 53,
+          "text": "\t\t\tcontract.Fail(w, 503, \"database unavailable\")"
+        },
+        {
+          "line": 54,
+          "text": "\t\t\treturn"
+        },
+        {
+          "line": 55,
+          "text": "\t\t}"
+        },
+        {
+          "line": 56,
+          "text": "\t\tcontract.JSON(w, 200, map[string]string{\"mode\": s.runtimeMode()})"
+        },
+        {
+          "line": 57,
+          "text": "\t})"
+        },
+        {
+          "line": 58,
+          "text": "\tm.HandleFunc(\"POST /v1/payments\", s.authorize(\"payments:create\", s.create))"
+        },
+        {
+          "line": 59,
+          "text": "\tm.HandleFunc(\"POST /v1/payments/{id}/attempts\", s.authorize(\"payments:create\", s.nextAttempt))"
+        },
+        {
+          "line": 60,
+          "text": "\tm.HandleFunc(\"POST /v1/payments/{id}/attempts/{attempt}/close\", s.authorize(\"payments:create\", s.closeAttempt))"
+        },
+        {
+          "line": 61,
+          "text": "\tm.HandleFunc(\"GET /v1/payments/{id}\", s.authorize(\"payments:read\", s.query))"
+        },
+        {
+          "line": 62,
+          "text": "\tm.HandleFunc(\"POST /v1/events/{id}/processed\", s.authorize(\"events:report\", s.processed))"
+        },
+        {
+          "line": 63,
+          "text": "\tif s.provider == nil {"
+        },
+        {
+          "line": 64,
+          "text": "\t\tm.HandleFunc(\"POST /mock/checkout/{id}/confirm\", s.confirm)"
+        },
+        {
+          "line": 65,
+          "text": "\t\tm.HandleFunc(\"POST /mock/webhook\", s.webhook)"
+        },
+        {
+          "line": 66,
+          "text": "\t\tm.HandleFunc(\"POST /mock/refund-webhook\", s.refundWebhook)"
+        },
+        {
+          "line": 67,
+          "text": "\t} else {"
+        },
+        {
+          "line": 68,
+          "text": "\t\tm.HandleFunc(\"POST /webhooks/\"+s.provider.config.Identity.Provider, s.providerWebhook)"
+        },
+        {
+          "line": 69,
+          "text": "\t\tif s.provider.paddle != nil {"
+        },
+        {
+          "line": 70,
+          "text": "\t\t\tm.HandleFunc(\"GET /checkout/paddle\", s.paddleCheckout)"
+        },
+        {
+          "line": 71,
+          "text": "\t\t}"
+        },
+        {
+          "line": 72,
+          "text": "\t\tm.HandleFunc(\"GET /admin/provider\", s.adminHandler(s.providerStatus))"
+        },
+        {
+          "line": 73,
+          "text": "\t}"
+        },
+        {
+          "line": 74,
+          "text": "\tm.HandleFunc(\"POST /v1/payments/{id}/checkout\", s.authorize(\"checkout:create\", s.renewCheckout))"
+        },
+        {
+          "line": 75,
+          "text": "\tm.HandleFunc(\"GET /admin/orders\", s.adminHandler(s.admin))"
+        },
+        {
+          "line": 76,
+          "text": "\tm.HandleFunc(\"GET /admin/timeline\", s.adminHandler(s.timeline))"
+        },
+        {
+          "line": 77,
+          "text": "\tm.HandleFunc(\"POST /admin/funding-previews\", s.adminHandler(s.previewFunding))"
+        },
+        {
+          "line": 78,
+          "text": "\tm.HandleFunc(\"POST /admin/funding-actions\", s.adminHandler(s.controlFunding))"
+        },
+        {
+          "line": 79,
+          "text": "\tm.HandleFunc(\"GET /admin/reconciliation\", s.adminHandler(s.reconciliationReport))"
+        },
+        {
+          "line": 80,
+          "text": "\tm.HandleFunc(\"POST /admin/reconciliation-previews\", s.adminHandler(s.previewReconciliation))"
+        },
+        {
+          "line": 81,
+          "text": "\tm.HandleFunc(\"POST /admin/reconciliation-actions\", s.adminHandler(s.controlReconciliation))"
+        },
+        {
+          "line": 82,
+          "text": "\tm.HandleFunc(\"GET /admin/funding\", s.adminHandler(s.adminFunding))"
+        },
+        {
+          "line": 83,
+          "text": "\tm.HandleFunc(\"GET /admin/tasks\", s.adminHandler(s.adminTasks))"
+        },
+        {
+          "line": 84,
+          "text": "\tm.HandleFunc(\"POST /admin/task-actions\", s.adminHandler(s.controlTask))"
+        },
+        {
+          "line": 85,
+          "text": "\tm.HandleFunc(\"POST /v1/refunds\", s.authorize(\"refunds:create\", s.requestRefund))"
+        },
+        {
+          "line": 86,
+          "text": "\tm.HandleFunc(\"GET /v1/refunds/{id}\", s.authorize(\"refunds:read\", s.queryRefund))"
+        },
+        {
+          "line": 87,
+          "text": "\tm.HandleFunc(\"POST /admin/task-previews\", s.adminHandler(s.previewTask))"
+        },
+        {
+          "line": 88,
+          "text": "\tm.HandleFunc(\"GET /admin/session\", func(w http.ResponseWriter, r *http.Request) {"
+        },
+        {
+          "line": 89,
+          "text": "\t\tif s.Config.Admin != nil {"
+        },
+        {
+          "line": 90,
+          "text": "\t\t\ts.Config.Admin.Session(w, r)"
+        },
+        {
+          "line": 91,
+          "text": "\t\t} else {"
+        },
+        {
+          "line": 92,
+          "text": "\t\t\tmode := \"disabled\""
+        },
+        {
+          "line": 93,
+          "text": "\t\t\tif s.Config.AdminToken != \"\" {"
+        },
+        {
+          "line": 94,
+          "text": "\t\t\t\tmode = \"development\""
+        },
+        {
+          "line": 95,
+          "text": "\t\t\t}"
+        },
+        {
+          "line": 96,
+          "text": "\t\t\tcontract.JSON(w, 200, map[string]string{\"mode\": mode})"
+        },
+        {
+          "line": 97,
+          "text": "\t\t}"
+        },
+        {
+          "line": 98,
+          "text": "\t})"
+        },
+        {
+          "line": 99,
+          "text": "\tm.HandleFunc(\"POST /admin/login\", func(w http.ResponseWriter, r *http.Request) {"
+        },
+        {
+          "line": 100,
+          "text": "\t\tif s.Config.Admin != nil {"
+        },
+        {
+          "line": 101,
+          "text": "\t\t\ts.Config.Admin.Login(w, r)"
+        },
+        {
+          "line": 102,
+          "text": "\t\t} else {"
+        },
+        {
+          "line": 103,
+          "text": "\t\t\tcontract.Fail(w, 503, \"admin OIDC not configured\")"
+        },
+        {
+          "line": 104,
+          "text": "\t\t}"
+        },
+        {
+          "line": 105,
+          "text": "\t})"
+        },
+        {
+          "line": 106,
+          "text": "\tif s.Config.Admin != nil {"
+        },
+        {
+          "line": 107,
+          "text": "\t\tm.HandleFunc(\"GET /auth/admin/callback\", s.Config.Admin.Callback)"
+        },
+        {
+          "line": 108,
+          "text": "\t\tm.HandleFunc(\"POST /admin/logout\", s.Config.Admin.Protect(s.Config.Admin.Logout))"
+        },
+        {
+          "line": 109,
+          "text": "\t}"
+        },
+        {
+          "line": 110,
+          "text": "\treturn m"
+        },
+        {
+          "line": 111,
+          "text": "}"
+        },
+        {
+          "line": 112,
+          "text": "func (s *Service) create(w http.ResponseWriter, r *http.Request) {"
+        },
+        {
+          "line": 113,
+          "text": "\tif s.rejectRecovery(w, r) {"
+        },
+        {
+          "line": 114,
+          "text": "\t\treturn"
+        },
+        {
+          "line": 115,
+          "text": "\t}"
+        },
+        {
+          "line": 116,
+          "text": "\tapp := s.app(r)"
+        },
+        {
+          "line": 117,
+          "text": "\tif app == \"\" {"
+        },
+        {
+          "line": 118,
+          "text": "\t\tcontract.Fail(w, 401, \"service identity required\")"
+        },
+        {
+          "line": 119,
+          "text": "\t\treturn"
+        },
+        {
+          "line": 120,
+          "text": "\t}"
+        },
+        {
+          "line": 121,
+          "text": "\tvar q contract.Quote"
+        },
+        {
+          "line": 122,
+          "text": "\tif contract.Decode(w, r, &q) != nil {"
+        },
+        {
+          "line": 123,
+          "text": "\t\tcontract.Fail(w, 400, \"invalid quote\")"
+        },
+        {
+          "line": 124,
+          "text": "\t\treturn"
+        },
+        {
+          "line": 125,
+          "text": "\t}"
+        },
+        {
+          "line": 126,
+          "text": "\tif !s.Config.AllowedProducts[app][q.ProductID] {"
+        },
+        {
+          "line": 127,
+          "text": "\t\tcontract.Fail(w, 403, \"application has no approved product mapping\")"
+        },
+        {
+          "line": 128,
+          "text": "\t\treturn"
+        },
+        {
+          "line": 129,
+          "text": "\t}"
+        },
+        {
+          "line": 130,
+          "text": "\tn, err := contract.Amount(q.Amount)"
+        },
+        {
+          "line": 131,
+          "text": "\tkey := r.Header.Get(\"Idempotency-Key\")"
+        },
+        {
+          "line": 132,
+          "text": "\tif err != nil || n > 100000000 || !money.Supported(q.Currency) || len(q.BusinessOrderID) < 1 || len(q.BusinessOrderID) > 100 || len(q.CustomerID) < 1 || len(q.CustomerID) > 100 || len(key) < 1 || len(key) > 100 {"
+        },
+        {
+          "line": 133,
+          "text": "\t\tcontract.Fail(w, 400, \"quote outside permitted scope\")"
+        },
+        {
+          "line": 134,
+          "text": "\t\treturn"
+        },
+        {
+          "line": 135,
+          "text": "\t}"
+        },
+        {
+          "line": 136,
+          "text": "\tif s.provider != nil && (!s.provider.config.CreateEnabled || s.provider.config.Products[app][q.ProductID].Currency != q.Currency) {"
+        },
+        {
+          "line": 137,
+          "text": "\t\tcontract.Fail(w, 403, \"provider capability or currency unavailable\")"
+        },
+        {
+          "line": 138,
+          "text": "\t\treturn"
+        },
+        {
+          "line": 139,
+          "text": "\t}"
+        },
+        {
+          "line": 140,
+          "text": "\tb, _ := json.Marshal(q)"
+        },
+        {
+          "line": 141,
+          "text": "\thash := contract.Hash(b)"
+        },
+        {
+          "line": 142,
+          "text": "\tid := contract.ID()"
+        },
+        {
+          "line": 143,
+          "text": "\ttx, err := s.DB.Begin(r.Context())"
+        },
+        {
+          "line": 144,
+          "text": "\tif err != nil {"
+        },
+        {
+          "line": 145,
+          "text": "\t\ts.fail(w, err)"
+        }
+      ]
+    },
+    {
+      "path": "/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/contract/contract.go",
+      "sha256": "d70559d37f0bd1da0f4c7e3418c64b01325f87f1969146f38ef14f7dcb7575ed",
+      "lines": [
+        {
+          "line": 65,
+          "text": "\tJSON(w, status, map[string]string{\"error\": msg})"
+        },
+        {
+          "line": 66,
+          "text": "}"
+        },
+        {
+          "line": 67,
+          "text": "func Decode(w http.ResponseWriter, r *http.Request, v any) error {"
+        },
+        {
+          "line": 68,
+          "text": "\tif !strings.HasPrefix(r.Header.Get(\"Content-Type\"), \"application/json\") {"
+        },
+        {
+          "line": 69,
+          "text": "\t\treturn errors.New(\"application/json required\")"
+        },
+        {
+          "line": 70,
+          "text": "\t}"
+        },
+        {
+          "line": 71,
+          "text": "\td := json.NewDecoder(http.MaxBytesReader(w, r.Body, 65536))"
+        },
+        {
+          "line": 72,
+          "text": "\td.DisallowUnknownFields()"
+        },
+        {
+          "line": 73,
+          "text": "\tif err := d.Decode(v); err != nil {"
+        },
+        {
+          "line": 74,
+          "text": "\t\treturn err"
+        },
+        {
+          "line": 75,
+          "text": "\t}"
+        },
+        {
+          "line": 76,
+          "text": "\tif err := d.Decode(new(any)); err != io.EOF {"
+        },
+        {
+          "line": 77,
+          "text": "\t\treturn errors.New(\"single JSON value required\")"
+        },
+        {
+          "line": 78,
+          "text": "\t}"
+        },
+        {
+          "line": 79,
+          "text": "\treturn nil"
+        },
+        {
+          "line": 80,
+          "text": "}"
+        },
+        {
+          "line": 81,
+          "text": "func SignedHeaders(req *http.Request, body []byte, key, id string) {"
+        },
+        {
+          "line": 82,
+          "text": "\tts := strconv.FormatInt(time.Now().Unix(), 10)"
+        },
+        {
+          "line": 83,
+          "text": "\treq.Header.Set(\"Content-Type\", \"application/json\")"
+        },
+        {
+          "line": 84,
+          "text": "\treq.Header.Set(\"X-Event-ID\", id)"
+        },
+        {
+          "line": 85,
+          "text": "\treq.Header.Set(\"X-Timestamp\", ts)"
+        },
+        {
+          "line": 86,
+          "text": "\treq.Header.Set(\"X-Signature\", MAC(key, req.Method+\"\\n\"+req.URL.Path+\"\\n\"+ts+\"\\n\"+id+\"\\n\"+Hash(body)))"
+        },
+        {
+          "line": 87,
+          "text": "}"
+        },
+        {
+          "line": 88,
+          "text": "func Verify(req *http.Request, body []byte, key string) bool {"
+        },
+        {
+          "line": 89,
+          "text": "\tts := req.Header.Get(\"X-Timestamp\")"
+        },
+        {
+          "line": 90,
+          "text": "\tt, err := strconv.ParseInt(ts, 10, 64)"
+        },
+        {
+          "line": 91,
+          "text": "\tif err != nil || time.Since(time.Unix(t, 0)).Abs() > 5*time.Minute || req.Header.Get(\"X-Event-ID\") == \"\" {"
+        },
+        {
+          "line": 92,
+          "text": "\t\treturn false"
+        },
+        {
+          "line": 93,
+          "text": "\t}"
+        },
+        {
+          "line": 94,
+          "text": "\twant := MAC(key, req.Method+\"\\n\"+req.URL.Path+\"\\n\"+ts+\"\\n\"+req.Header.Get(\"X-Event-ID\")+\"\\n\"+Hash(body))"
+        },
+        {
+          "line": 95,
+          "text": "\treturn Equal(req.Header.Get(\"X-Signature\"), want)"
+        },
+        {
+          "line": 96,
+          "text": "}"
+        },
+        {
+          "line": 97,
+          "text": "func Required(name string) string {"
+        },
+        {
+          "line": 98,
+          "text": "\tv := os.Getenv(name)"
+        },
+        {
+          "line": 99,
+          "text": "\tif v == \"\" {"
+        },
+        {
+          "line": 100,
+          "text": "\t\tpanic(\"missing \" + name)"
+        },
+        {
+          "line": 101,
+          "text": "\t}"
+        },
+        {
+          "line": 102,
+          "text": "\treturn v"
+        },
+        {
+          "line": 103,
+          "text": "}"
+        },
+        {
+          "line": 104,
+          "text": "func LocalAddress(addr string) error {"
+        },
+        {
+          "line": 105,
+          "text": "\thost, _, err := net.SplitHostPort(addr)"
+        },
+        {
+          "line": 106,
+          "text": "\tif err != nil {"
+        },
+        {
+          "line": 107,
+          "text": "\t\treturn err"
+        },
+        {
+          "line": 108,
+          "text": "\t}"
+        },
+        {
+          "line": 109,
+          "text": "\tip := net.ParseIP(host)"
+        },
+        {
+          "line": 110,
+          "text": "\tif ip == nil || !ip.IsLoopback() {"
+        },
+        {
+          "line": 111,
+          "text": "\t\treturn fmt.Errorf(\"T01 only supports loopback listeners\")"
+        },
+        {
+          "line": 112,
+          "text": "\t}"
+        },
+        {
+          "line": 113,
+          "text": "\treturn nil"
+        },
+        {
+          "line": 114,
+          "text": "}"
+        },
+        {
+          "line": 115,
+          "text": "func Client() *http.Client {"
+        },
+        {
+          "line": 116,
+          "text": "\treturn &http.Client{Timeout: 3 * time.Second, CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}"
+        },
+        {
+          "line": 117,
+          "text": "}"
+        },
+        {
+          "line": 118,
+          "text": ""
+        },
+        {
+          "line": 119,
+          "text": "// Refund commands execute application decisions; they do not describe product entitlements."
+        },
+        {
+          "line": 120,
+          "text": "type RefundCommand struct {"
+        }
+      ]
+    },
+    {
+      "path": "/home/sky/work/touzi/OneAxe/oneaxe-pay-service/internal/pay/tasks.go",
+      "sha256": "252620a1b3c7627960ec8ac7bc539d4fab6545cb2034c9f14b93d8adf4625bb5",
+      "lines": [
+        {
+          "line": 90,
+          "text": "\treturn tx.Commit(ctx)"
+        },
+        {
+          "line": 91,
+          "text": "}"
+        },
+        {
+          "line": 92,
+          "text": "func (s *Service) DeliverOnce(ctx context.Context) error {"
+        },
+        {
+          "line": 93,
+          "text": "\tif paused, err := s.recoveryPaused(ctx); err != nil || paused {"
+        },
+        {
+          "line": 94,
+          "text": "\t\treturn err"
+        },
+        {
+          "line": 95,
+          "text": "\t}"
+        },
+        {
+          "line": 96,
+          "text": "\tl, err := s.claimNotification(ctx)"
+        },
+        {
+          "line": 97,
+          "text": "\tif errors.Is(err, pgx.ErrNoRows) {"
+        },
+        {
+          "line": 98,
+          "text": "\t\treturn nil"
+        },
+        {
+          "line": 99,
+          "text": "\t}"
+        },
+        {
+          "line": 100,
+          "text": "\tif err != nil {"
+        },
+        {
+          "line": 101,
+          "text": "\t\treturn err"
+        },
+        {
+          "line": 102,
+          "text": "\t}"
+        },
+        {
+          "line": 103,
+          "text": "\ttarget, ok := s.Config.Notifications[l.AppID]"
+        },
+        {
+          "line": 104,
+          "text": "\tif !ok || target.URL == \"\" || target.Secret == \"\" {"
+        },
+        {
+          "line": 105,
+          "text": "\t\treturn s.finishNotification(ctx, l, \"callback_configuration_missing\")"
+        },
+        {
+          "line": 106,
+          "text": "\t}"
+        },
+        {
+          "line": 107,
+          "text": "\treq, err := http.NewRequestWithContext(ctx, \"POST\", target.URL, bytes.NewReader(l.Body))"
+        },
+        {
+          "line": 108,
+          "text": "\tif err != nil {"
+        },
+        {
+          "line": 109,
+          "text": "\t\treturn s.finishNotification(ctx, l, \"callback_configuration_invalid\")"
+        },
+        {
+          "line": 110,
+          "text": "\t}"
+        },
+        {
+          "line": 111,
+          "text": "\tcontract.SignedHeaders(req, l.Body, target.Secret, l.ID)"
+        },
+        {
+          "line": 112,
+          "text": "\tresponse, callErr := s.Client.Do(req)"
+        },
+        {
+          "line": 113,
+          "text": "\toutcome := \"notification_network_error\""
+        },
+        {
+          "line": 114,
+          "text": "\tif callErr == nil {"
+        },
+        {
+          "line": 115,
+          "text": "\t\tvar ack contract.Ack"
+        },
+        {
+          "line": 116,
+          "text": "\t\tdecodeErr := json.NewDecoder(io.LimitReader(response.Body, 65536)).Decode(&ack)"
+        },
+        {
+          "line": 117,
+          "text": "\t\tresponse.Body.Close()"
+        },
+        {
+          "line": 118,
+          "text": "\t\toutcome = \"notification_http_\" + strconv.Itoa(response.StatusCode)"
+        },
+        {
+          "line": 119,
+          "text": "\t\tif response.StatusCode == 200 {"
+        },
+        {
+          "line": 120,
+          "text": "\t\t\toutcome = \"notification_ack_invalid\""
+        },
+        {
+          "line": 121,
+          "text": "\t\t\tif decodeErr == nil && ack.EventID == l.ID && ack.Received {"
+        },
+        {
+          "line": 122,
+          "text": "\t\t\t\toutcome = \"ack_received\""
+        },
+        {
+          "line": 123,
+          "text": "\t\t\t}"
+        },
+        {
+          "line": 124,
+          "text": "\t\t}"
+        },
+        {
+          "line": 125,
+          "text": "\t}"
+        },
+        {
+          "line": 126,
+          "text": "\treturn s.finishNotification(ctx, l, outcome)"
+        },
+        {
+          "line": 127,
+          "text": "}"
+        },
+        {
+          "line": 128,
+          "text": ""
+        },
+        {
+          "line": 129,
+          "text": "// FAILED is accepted only from the current query lease; success is always independently recorded."
+        },
+        {
+          "line": 130,
+          "text": "func (s *Service) finishRefund(ctx context.Context, l taskLease, outcome string, failed bool) error {"
+        },
+        {
+          "line": 131,
+          "text": "\ttx, err := s.DB.Begin(ctx)"
+        },
+        {
+          "line": 132,
+          "text": "\tif err != nil {"
+        },
+        {
+          "line": 133,
+          "text": "\t\treturn err"
+        },
+        {
+          "line": 134,
+          "text": "\t}"
+        },
+        {
+          "line": 135,
+          "text": "\tdefer tx.Rollback(ctx)"
+        },
+        {
+          "line": 136,
+          "text": "\ttag, err := tx.Exec(ctx, `UPDATE refund_requests SET state=CASE WHEN $6 THEN 'FAILED' ELSE state END,"
+        },
+        {
+          "line": 137,
+          "text": " task_state=CASE WHEN $6 THEN 'DONE' WHEN cycle_attempts>=$3 THEN 'NEEDS_REVIEW' ELSE 'READY' END,"
+        },
+        {
+          "line": 138,
+          "text": " lease_until=NULL,lease_token=NULL,last_error=CASE WHEN $6 THEN NULL ELSE $4 END,"
+        },
+        {
+          "line": 139,
+          "text": " next_check_at=now()+$5*interval '1 second',updated_at=now()"
+        },
+        {
+          "line": 140,
+          "text": " WHERE id=$1 AND lease_token=$2 AND state='UNKNOWN' AND task_state='READY' AND NOT EXISTS(SELECT 1 FROM refund_links WHERE refund_id=$1)`, l.ID, l.Token, maxTaskAttempts, outcome, retryDelay(l.Attempts), failed)"
+        },
+        {
+          "line": 141,
+          "text": "\tif err != nil {"
+        },
+        {
+          "line": 142,
+          "text": "\t\treturn err"
+        },
+        {
+          "line": 143,
+          "text": "\t}"
+        },
+        {
+          "line": 144,
+          "text": "\tif err = recordRun(ctx, tx, l.Token, outcome, tag.RowsAffected() == 1); err != nil {"
+        },
+        {
+          "line": 145,
+          "text": "\t\treturn err"
+        }
+      ]
+    },
+    {
+      "path": "/home/sky/work/touzi/OneAxe/oneaxe-pay-service/docs/integration/application-handoff.md",
+      "sha256": "3123a86200883e470496822387d88cca424ad034cec3304e22bb557f801608e8",
+      "lines": [
+        {
+          "line": 100,
+          "text": "| `POST /mock/checkout/{order_id}/confirm` | Bearer [REDACTED] Checkout.token | **仅 Mock 测试**，由应用服务端受控调用；不使用应用服务 token |"
+        },
+        {
+          "line": 101,
+          "text": ""
+        },
+        {
+          "line": 102,
+          "text": "OpenAPI 的尝试/关闭两条路径目前漏列 `X-Pay-Runtime`/`X-Pay-Tenant` 参数，实际 `authorize` 仍强制要求；客户端所有 `/v1/*` 统一发送即可。Mock确认是测试路由，不在 OpenAPI 的应用服务契约中。当前 provider 实现不开放主动关闭/替换尝试，不据此自动切换渠道再收费。"
+        },
+        {
+          "line": 103,
+          "text": ""
+        },
+        {
+          "line": 104,
+          "text": "## 5. 最小购买调用顺序"
+        },
+        {
+          "line": 105,
+          "text": ""
+        },
+        {
+          "line": 106,
+          "text": "### 5.1 应用先落业务订单，再创建 Pay 订单"
+        },
+        {
+          "line": 107,
+          "text": ""
+        },
+        {
+          "line": 108,
+          "text": "以下为报文示例，尖括号替换为已登记的值；不是已执行的交易记录。"
+        },
+        {
+          "line": 109,
+          "text": ""
+        },
+        {
+          "line": 110,
+          "text": "```http"
+        },
+        {
+          "line": 111,
+          "text": "POST /v1/payments"
+        },
+        {
+          "line": 112,
+          "text": "Authorization: Bearer [REDACTED]"
+        },
+        {
+          "line": 113,
+          "text": "X-Pay-Runtime: mock-local"
+        },
+        {
+          "line": 114,
+          "text": "X-Pay-Tenant: personal-local"
+        },
+        {
+          "line": 115,
+          "text": "Idempotency-Key: demo-order-0001-create"
+        },
+        {
+          "line": 116,
+          "text": "Content-Type: application/json"
+        },
+        {
+          "line": 117,
+          "text": "```"
+        },
+        {
+          "line": 118,
+          "text": ""
+        },
+        {
+          "line": 119,
+          "text": "```json"
+        },
+        {
+          "line": 120,
+          "text": "{"
+        },
+        {
+          "line": 121,
+          "text": "  \"business_order_id\": \"demo-order-0001\","
+        },
+        {
+          "line": 122,
+          "text": "  \"customer_id\": \"app-user-001\","
+        },
+        {
+          "line": 123,
+          "text": "  \"product_id\": \"<registered_product_id>\","
+        },
+        {
+          "line": 124,
+          "text": "  \"amount_minor\": \"3000\","
+        },
+        {
+          "line": 125,
+          "text": "  \"currency\": \"CNY\""
+        },
+        {
+          "line": 126,
+          "text": "}"
+        },
+        {
+          "line": 127,
+          "text": "```"
+        },
+        {
+          "line": 128,
+          "text": ""
+        },
+        {
+          "line": 129,
+          "text": "金额是最小货币单位的十进制**字符串**，不是浮点元；`\"3000\" CNY` 是30元。当前 Mock 范围：正整数、不超过100000000；CNY/USD/JPY/KWD。JSON 不额外发送渠道、商户、回调地址、app_id或权益定义；客户和商品由应用的可信服务端确定。"
+        },
+        {
+          "line": 130,
+          "text": ""
+        },
+        {
+          "line": 131,
+          "text": "HTTP200返回 `Checkout`："
+        },
+        {
+          "line": 132,
+          "text": ""
+        },
+        {
+          "line": 133,
+          "text": "```json"
+        },
+        {
+          "line": 134,
+          "text": "{"
+        },
+        {
+          "line": 135,
+          "text": "  \"expires_at\": \"2026-10-02T16:00:00Z\","
+        },
+        {
+          "line": 136,
+          "text": "  \"order_id\": \"<pay_order_id>\","
+        },
+        {
+          "line": 137,
+          "text": "  \"attempt_id\": \"<pay_attempt_id>\","
+        },
+        {
+          "line": 138,
+          "text": "  \"token\": \"<short_lived_checkout_capability>\","
+        },
+        {
+          "line": 139,
+          "text": "  \"action\": \"MOCK_CONFIRM\""
+        },
+        {
+          "line": 140,
+          "text": "}"
+        },
+        {
+          "line": 141,
+          "text": "```"
+        },
+        {
+          "line": 142,
+          "text": ""
+        },
+        {
+          "line": 143,
+          "text": "应用持久保存 `business_order_id ↔ order_id`、原请求键和收银信息。`token` 是约15分钟的收银能力，由应用后端保管，不给浏览器、不记日志；`action` 是下一步动作，**不是付款成功**。普通 Mock 返回 `MOCK_CONFIRM`；不确定时可能 `WAIT`。最新 provider 源码还可返回 `SHOW_QR`/`qr_text` 或 `REDIRECT`/`url`；`INVOKE_SDK` 仅为合同扩展枚举，当前不据此宣称有账户支持。"
+        },
+        {
+          "line": 144,
+          "text": ""
+        },
+        {
+          "line": 145,
+          "text": "### 5.2 仅测试时模拟付款"
+        },
+        {
+          "line": 146,
+          "text": ""
+        },
+        {
+          "line": 147,
+          "text": "应用后端先检查测试权限、用户及原订单归属，再请求："
+        },
+        {
+          "line": 148,
+          "text": ""
+        },
+        {
+          "line": 149,
+          "text": "```http"
+        },
+        {
+          "line": 150,
+          "text": "POST /mock/checkout/<pay_order_id>/confirm"
+        },
+        {
+          "line": 151,
+          "text": "Authorization: Bearer [REDACTED]"
+        },
+        {
+          "line": 152,
+          "text": "```"
+        },
+        {
+          "line": 153,
+          "text": ""
+        },
+        {
+          "line": 154,
+          "text": "无请求体。确认响应只能说明模拟处理结果，应用仍通过查询/签名通知获得资金事实，不能根据前端按钮或跳转开通权益。token过期时由应用服务端调用 `POST /v1/payments/{order_id}/checkout`，JSON为 `{\"customer_id\":\"app-user-001\"}`，使用原应用服务 token 和两个作用域头；续发原订单，不新建业务订单。"
+        },
+        {
+          "line": 155,
+          "text": ""
+        },
+        {
+          "line": 156,
+          "text": "### 5.3 查询与处理"
+        },
+        {
+          "line": 157,
+          "text": ""
+        },
+        {
+          "line": 158,
+          "text": "`GET /v1/payments/{order_id}` 返回 `Status`："
+        },
+        {
+          "line": 159,
+          "text": ""
+        },
+        {
+          "line": 160,
+          "text": "- `payment`：`PENDING`、`UNKNOWN` 或 `CONFIRMED`。它不是会员状态，也不会因退款变成“从未付款”。"
+        },
+        {
+          "line": 161,
+          "text": "- `receipts`：每笔实收的 `id/amount_minor/currency/eligible/refunded_minor/reserved_minor/needs_review`。"
+        },
+        {
+          "line": 162,
+          "text": "- `refunds`：退款请求及状态。"
+        },
+        {
+          "line": 163,
+          "text": "- `events`：每项包含 `fact`、`received`、`processed` 和通知尝试次数 `attempts`。"
+        },
+        {
+          "line": 164,
+          "text": ""
+        },
+        {
+          "line": 165,
+          "text": "处理可信 `events[].fact`，与通知入口共用一个业务处理器。`event_id` 用于事实去重，`operation_id` 用于业务效果去重，两者都应持久保存。`additional_payment=true` 是额外真实付款，记录并进入售后，不重复开通一次权益。同一订单的付款/退款处理应并发受控，晚到付款事件不能重新开放已退款的权益。"
+        },
+        {
+          "line": 166,
+          "text": ""
+        },
+        {
+          "line": 167,
+          "text": "应用实际处理成功并提交自身事务后，再调用 `POST /v1/events/{event_id}/processed`。查询看见付款成功、通知HTTP送达、应用处理完成是三个不同状态。`receipts/refunds` 可能为null，客户端按空集合兼容；不要用字段展示顺序推断事件时间顺序。"
+        },
+        {
+          "line": 168,
+          "text": ""
+        },
+        {
+          "line": 169,
+          "text": "## 6. 应用提供通知接收接口"
+        },
+        {
+          "line": 170,
+          "text": ""
+        },
+        {
+          "line": 171,
+          "text": "`POST /internal/payment-events` **部署在应用侧**，Pay主动请求登记的URL；不是让应用向18450的这个路径发消息。也不要与 XorPay/Paddle → Pay 的渠道回调混淆。"
+        },
+        {
+          "line": 172,
+          "text": ""
+        },
+        {
+          "line": 173,
+          "text": "请求体为一个 `Fact`，不包 `events` 或 `fact` 外层。主要字段："
+        },
+        {
+          "line": 174,
+          "text": ""
+        },
+        {
+          "line": 175,
+          "text": "| 字段 | 含义 |"
+        },
+        {
+          "line": 176,
+          "text": "| --- | --- |"
+        },
+        {
+          "line": 177,
+          "text": "| `kind` | `payment.confirmed` 或 `refund.succeeded`；兼容旧付款消息的缺省 kind，其他未知类型不盲目开通 |"
+        },
+        {
+          "line": 178,
+          "text": "| `event_id` / `operation_id` | 稳定资金事件 / 业务操作身份；查询和通知必须共用 |"
+        },
+        {
+          "line": 179,
+          "text": "| `order_id` / `business_order_id` / `customer_id` | Pay订单 / 应用原订单 / 应用原客户，需与应用已保存快照核对 |"
+        },
+        {
+          "line": 180,
+          "text": "| `receipt_id` | 原实收身份，退款时引用 |"
+        },
+        {
+          "line": 181,
+          "text": "| `amount_minor` / `currency` | 资金事实金额、币种；`additional_payment` 标明额外付款 |"
+        },
+        {
+          "line": 182,
+          "text": "| `refund_fact_id` | 退款事实身份，出现于退款事件 |"
+        },
+        {
+          "line": 183,
+          "text": "| `quote_amount_minor` | 最新合同可选原报价；Paddle最终含税实收仍在amount_minor。当前旧Mock实例不应预期有此字段 |"
+        },
+        {
+          "line": 184,
+          "text": ""
+        },
+        {
+          "line": 185,
+          "text": "验签规则来自 [contract.go](../../internal/contract/contract.go)："
+        },
+        {
+          "line": 186,
+          "text": ""
+        },
+        {
+          "line": 187,
+          "text": "```text"
+        },
+        {
+          "line": 188,
+          "text": "headers: X-Event-ID, X-Timestamp, X-Signature"
+        },
+        {
+          "line": 189,
+          "text": "X-Timestamp: Unix秒数字符串，允许与本机时间相差不超过5分钟"
+        },
+        {
+          "line": 190,
+          "text": "payload_hash = lowercase_hex(SHA256(rawBody))"
+        },
+        {
+          "line": 191,
+          "text": "signing_text = method + \"\\n\" + path + \"\\n\" + timestamp + \"\\n\" + event_id + \"\\n\" + payload_hash"
+        },
+        {
+          "line": 192,
+          "text": "signature = lowercase_hex(HMAC_SHA256(notify_secret, UTF8(signing_text)))"
+        },
+        {
+          "line": 193,
+          "text": "```"
+        },
+        {
+          "line": 194,
+          "text": ""
+        },
+        {
+          "line": 195,
+          "text": "使用原始HTTP body字节验签，不能先解析再序列化。`method`为实际`POST`，`path`是配置URL的路径部分、不含host/query；反向代理须保持签名所用路径一致。签名用常量时间比较，body的 `event_id` 必须等于头部。通知 secret 与应用服务 token 分离；重复event_id但内容变化应拒绝并保留异常。"
+        },
+        {
+          "line": 196,
+          "text": ""
+        },
+        {
+          "line": 197,
+          "text": "可靠持久化接收记录后返回**HTTP200及匹配JSON**，不能只返回空200/204："
+        },
+        {
+          "line": 198,
+          "text": ""
+        },
+        {
+          "line": 199,
+          "text": "```json"
+        },
+        {
+          "line": 200,
+          "text": "{\"event_id\":\"<same_event_id>\",\"received\":true}"
+        },
+        {
+          "line": 201,
+          "text": "```"
+        },
+        {
+          "line": 202,
+          "text": ""
+        },
+        {
+          "line": 203,
+          "text": "之后可以异步执行业务，再上报 processed；接收成功后 Pay 可停止投递，因此应用自己的异步任务必须可恢复。当前通知重试每轮最多5次，耗尽进入 `NEEDS_REVIEW`，不是无限重试；应用可主动查询补偿，并由管理流程对原事件补发。重试不生成新的业务操作标识。"
+        },
+        {
+          "line": 204,
+          "text": ""
+        },
+        {
+          "line": 205,
+          "text": "## 7. 退款与错误处理"
+        },
+        {
+          "line": 206,
+          "text": ""
+        },
+        {
+          "line": 207,
+          "text": "退款决定、消费冻结和权益撤销由应用负责；Pay仅执行与核实。使用查询结果里的**receipt_id**，不要拿order_id/attempt_id代替："
+        },
+        {
+          "line": 208,
+          "text": ""
+        },
+        {
+          "line": 209,
+          "text": "```http"
+        },
+        {
+          "line": 210,
+          "text": "POST /v1/refunds"
+        },
+        {
+          "line": 211,
+          "text": "Authorization: Bearer [REDACTED]"
+        },
+        {
+          "line": 212,
+          "text": "X-Pay-Runtime: mock-local"
+        },
+        {
+          "line": 213,
+          "text": "X-Pay-Tenant: personal-local"
+        },
+        {
+          "line": 214,
+          "text": "Idempotency-Key: demo-order-0001-refund-1"
+        },
+        {
+          "line": 215,
+          "text": "Content-Type: application/json"
+        },
+        {
+          "line": 216,
+          "text": "```"
+        },
+        {
+          "line": 217,
+          "text": ""
+        },
+        {
+          "line": 218,
+          "text": "```json"
+        },
+        {
+          "line": 219,
+          "text": "{\"receipt_id\":\"<original_receipt_id>\",\"amount_minor\":\"3000\",\"currency\":\"CNY\",\"reason\":\"本地联调退款\"}"
+        },
+        {
+          "line": 220,
+          "text": "```"
+        },
+        {
+          "line": 221,
+          "text": ""
+        },
+        {
+          "line": 222,
+          "text": "响应 `RefundRequest` 的主键字段是 **`id`，不是 `refund_id`**。保存它，再用 `GET /v1/refunds/{id}` 查询。`PENDING/UNKNOWN/REVIEW` 不等于退款完成；`SUCCEEDED` 是确认成功，`FAILED` 是明确失败。当前主动退款只允许合格实收的全额，金额/币种必须匹配，已退/占用/待审核会阻止重复退款。退款事实也会通过 `refund.succeeded` 通知应用。"
+        },
+        {
+          "line": 223,
+          "text": ""
+        },
+        {
+          "line": 224,
+          "text": "| 情况 | 应用应怎么做 |"
+        },
+        {
+          "line": 225,
+          "text": "| --- | --- |"
+        }
+      ]
+    }
+  ]
+}
