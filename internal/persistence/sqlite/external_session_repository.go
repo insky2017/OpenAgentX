@@ -144,11 +144,27 @@ func (r *Repository) BindExternalSession(ctx context.Context, owner string, b do
 			return nil, domain.ErrStaleVersion
 		}
 	} else {
-		if old.Mode != b.Mode {
-			return nil, domain.ErrConflict("changing collaboration mode requires an explicit migration; original binding is preserved")
-		}
 		if old.Generation != expected {
 			return nil, domain.ErrStaleVersion
+		}
+		if old.Mode != b.Mode {
+			// Revocation and its new generation are the explicit handoff boundary.
+			// Only the already imported original thread may move to managed mode.
+			if old.Mode != "external" || old.State != "revoked" || b.Mode != "managed" {
+				return nil, domain.ErrConflict("mode migration requires a revoked external binding; original binding is preserved")
+			}
+			if unfinished != 0 {
+				return nil, domain.ErrConflict("finish managed tasks before enabling the imported external session")
+			}
+			var pending int
+			if err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM external_messages WHERE
+ (kind<>'result' AND (sender_agent_id=? OR target_agent_id=?) AND processing_state NOT IN ('completed','out_of_scope'))
+ OR (kind='result' AND target_agent_id=? AND delivery_state<>'acknowledged')`, b.AgentID, b.AgentID, b.AgentID).Scan(&pending); err != nil {
+				return nil, err
+			}
+			if pending != 0 {
+				return nil, domain.ErrConflict("resolve pending external messages before mode migration")
+			}
 		}
 		b.ID = old.ID
 		b.CreatedAt = old.CreatedAt
@@ -156,6 +172,9 @@ func (r *Repository) BindExternalSession(ctx context.Context, owner string, b do
 	if b.Mode == "managed" {
 		if err = resolveManagedBindingTx(ctx, tx, &b); err != nil {
 			return nil, err
+		}
+		if old != nil && old.Mode != b.Mode && old.ThreadID != b.ThreadID {
+			return nil, domain.ErrConflict("managed migration must resume the original external thread")
 		}
 	}
 	peers, _ := json.Marshal(b.AllowedPeerAgentIDs)
@@ -166,7 +185,7 @@ func (r *Repository) BindExternalSession(ctx context.Context, owner string, b do
 		}
 		return nil, err
 	}
-	if err = r.externalJournal(ctx, tx, owner, b.OrganizationID, "external_session", b.ID, "external_session.bound", map[string]any{"agent_id": b.AgentID, "host_id": b.HostID, "thread_id": b.ThreadID, "generation": b.Generation}); err != nil {
+	if err = r.externalJournal(ctx, tx, owner, b.OrganizationID, "external_session", b.ID, "external_session.bound", map[string]any{"agent_id": b.AgentID, "host_id": b.HostID, "thread_id": b.ThreadID, "generation": b.Generation, "mode": b.Mode}); err != nil {
 		return nil, err
 	}
 	if err = commit(tx); err != nil {

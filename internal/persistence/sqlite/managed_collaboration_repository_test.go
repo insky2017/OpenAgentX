@@ -387,6 +387,113 @@ func TestManagedBindingCannotTakeOverExternalOrForeignContext(t *testing.T) {
 	}
 }
 
+func TestRevokedExternalMigrationPreservesIdentityThreadAndAtomicity(t *testing.T) {
+	for _, scenario := range []string{"active", "stale", "unfinished_task", "pending_request", "unread_result", "thread_mismatch", "rollback", "success"} {
+		t.Run(scenario, func(t *testing.T) {
+			ctx := context.Background()
+			r, f, s := externalFixture(t)
+			old, oldToken := externalBind(t, s, f.ownerPrincipal, f.agentID, "pay")
+			in := domain.BindExternalSessionInput{AgentID: f.agentID, Mode: "managed", ManagedContextTaskID: "imported-context", ManagedBackendID: "local", AllowedPeerAgentIDs: []string{"pay"}, ExpectedGeneration: old.Generation}
+			if scenario == "pending_request" || scenario == "unread_result" {
+				_, payToken := externalBind(t, s, f.ownerPrincipal, "pay", f.agentID)
+				m, err := s.Send(ctx, oldToken, domain.SendExternalMessageInput{TargetAgentID: "pay", Kind: domain.ExternalMessageConsultation, Content: "Read-only contract question", IdempotencyKey: "before-migration"})
+				if err != nil {
+					t.Fatal(err)
+				}
+				if scenario == "unread_result" {
+					if _, err = s.Send(ctx, payToken, domain.SendExternalMessageInput{Kind: domain.ExternalMessageResult, ReplyToMessageID: m.ID, Content: "Contract answer", IdempotencyKey: "before-migration-result"}); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			if scenario != "active" {
+				if err := s.Revoke(ctx, f.ownerPrincipal, f.agentID, old.Generation); err != nil {
+					t.Fatal(err)
+				}
+				in.ExpectedGeneration++
+				if _, err := s.Status(ctx, oldToken); !errors.Is(err, domain.ErrUnauthorized) {
+					t.Fatalf("revocation retained old token: %v", err)
+				}
+			}
+			if scenario == "stale" {
+				in.ExpectedGeneration = old.Generation
+			}
+			if scenario != "active" && scenario != "stale" {
+				task, msg, mail, event := newTaskDelivery(f, in.ManagedContextTaskID)
+				in.ManagedContextTaskID = task.ID
+				thread := old.ThreadID
+				if scenario == "thread_mismatch" {
+					thread = "different-thread"
+				}
+				binding := &domain.SessionBinding{ID: "imported-session", ContextID: task.ID, AgentID: f.agentID, BackendID: "local", ProviderSessionID: thread, State: domain.SessionBindingActive, Version: 1, CreatedAt: repositoryTestTime, UpdatedAt: repositoryTestTime}
+				if _, err := r.CreateTaskWithSession(ctx, task, msg, mail, event, binding); err != nil {
+					t.Fatal(err)
+				}
+				if scenario != "unfinished_task" {
+					if _, _, err := r.RequestTaskCancel(ctx, task.ID, 1, f.ownerPrincipal, &domain.MailboxItem{ID: "cancel-import"}, journalEvent("cancel-import-task", "task.cancel_requested", f.ownerPrincipal, f.organizationID), journalEvent("cancel-import-mail", "mailbox.cancel_created", f.ownerPrincipal, f.organizationID)); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			before, err := s.Binding(ctx, f.ownerPrincipal, f.agentID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			journalBefore := externalCount(t, r, "event_journal")
+			if scenario == "rollback" {
+				r.faultInjector = func(p FaultPoint) error {
+					if p == FaultBeforeCommit {
+						return errors.New("migration commit fault")
+					}
+					return nil
+				}
+			}
+			migrated, token, err := s.Bind(ctx, f.ownerPrincipal, in)
+			r.faultInjector = nil
+			if scenario != "success" {
+				if err == nil {
+					t.Fatal("unsafe migration accepted")
+				}
+				if scenario == "stale" && !errors.Is(err, domain.ErrStaleVersion) {
+					t.Fatalf("expected stale generation: %v", err)
+				}
+				reasons := map[string]string{"active": "revoked external binding", "unfinished_task": "finish managed tasks", "pending_request": "pending external messages", "unread_result": "pending external messages", "thread_mismatch": "original external thread", "rollback": "migration commit fault"}
+				if reason := reasons[scenario]; reason != "" && !strings.Contains(err.Error(), reason) {
+					t.Fatalf("wrong rejection, expected %q: %v", reason, err)
+				}
+				preserved, readErr := s.Binding(ctx, f.ownerPrincipal, f.agentID)
+				if readErr != nil || preserved == nil {
+					t.Fatalf("missing preserved binding: %v", readErr)
+				}
+				if preserved.ID != before.ID || preserved.Mode != before.Mode || preserved.State != before.State || preserved.Generation != before.Generation || preserved.ThreadID != before.ThreadID || preserved.TokenDigest != before.TokenDigest || externalCount(t, r, "event_journal") != journalBefore {
+					t.Fatal("failed migration changed binding or journal")
+				}
+				return
+			}
+			if err != nil || migrated.ID != old.ID || migrated.ThreadID != old.ThreadID || migrated.AgentID != old.AgentID || migrated.PrincipalID != old.PrincipalID || migrated.Generation != old.Generation+2 || migrated.Mode != "managed" || migrated.State != "active" {
+				t.Fatalf("migration lost original identity: %+v %v", migrated, err)
+			}
+			if _, err = s.Status(ctx, oldToken); !errors.Is(err, domain.ErrUnauthorized) {
+				t.Fatal("old Desktop token survived migration")
+			}
+			if _, err = s.Status(ctx, token); err != nil {
+				t.Fatal(err)
+			}
+			for _, revoke := range []bool{false, true} {
+				if revoke {
+					if err = s.Revoke(ctx, f.ownerPrincipal, f.agentID, migrated.Generation); err != nil {
+						t.Fatal(err)
+					}
+					migrated.Generation++
+				}
+				if _, _, err = s.Bind(ctx, f.ownerPrincipal, domain.BindExternalSessionInput{AgentID: f.agentID, HostID: old.HostID, ThreadID: old.ThreadID, AllowedPeerAgentIDs: []string{"pay"}, ExpectedGeneration: migrated.Generation}); err == nil {
+					t.Fatal("reverse managed to external migration accepted")
+				}
+			}
+		})
+	}
+}
+
 func TestManagedRunMustResumeTheFixedBackendAndTaskContext(t *testing.T) {
 	x := newManagedFixture(t)
 	ctx := context.Background()
