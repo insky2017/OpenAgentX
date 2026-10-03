@@ -34,7 +34,7 @@ TEMPLATE = r'''<!doctype html>
  <div class="masthead"><div class="brand"><span class="mark">OAX</span> OPENAGENTX / SYSTEM ATLAS</div><span class="edition">实现快照 · @@DATE@@ · 离线可用</span></div>
  <h1>架构与关键流程</h1>
  <p>先看全局，再进入关键链路。每个节点都附有职责、实现边界与源码／验收依据。范围是 OpenAgentX 任务后台；交易业务作为受管工作，不在此展开。</p>
- <div class="meta"><span>核对源码 <code>@@SOURCE@@</code></span><span>安装工件来源 <code>@@INSTALLED@@</code></span><span>本机 Linux · AGY / Codex 已装配并安装</span><a href="@@MARKDOWN@@">阅读 Markdown ↗</a></div>
+ <div class="meta"><span>核对源码 <code>@@SOURCE@@</code></span><span>安装工件来源 <code>@@INSTALLED@@</code></span><span>本机 Linux · schema v5 · 原 Rhythm/Pay 已托管</span><a href="@@MARKDOWN@@">阅读 Markdown ↗</a></div>
 </header>
 <nav class="tabs" role="tablist" aria-label="架构视图" id="tabs"></nav>
 <main id="panel" role="tabpanel" tabindex="-1">
@@ -46,9 +46,9 @@ TEMPLATE = r'''<!doctype html>
 </main>
 <section class="section" aria-label="边界与证据">
  <details class="disclosure" id="gaps"><summary>待补能力与建议调整点 <span class="muted">先处理日用阻力，再扩展平台能力</span></summary><div class="table-wrap"><table><thead><tr><th>能力 / 状态</th><th>当前事实</th><th>最小下一步</th><th>何时需要处理</th></tr></thead><tbody id="gap-rows"></tbody></table></div></details>
- <details class="disclosure"><summary>版本、证据与源码索引 <span class="muted">结论可追溯；历史证据不等于本版全量重测</span></summary><div class="evidence-body"><p>源码核对基线 <code>@@SOURCE@@</code>；当前已安装 Go / Web 工件来源为 <code>@@INSTALLED@@</code>。本图是文档快照，不实时查询服务状态。实际安装二进制 SHA-256：</p><p><code>@@SHA@@</code></p><div class="proof-grid"><div><b>D · 确定性</b>事务、状态规则、竞争和故障注入；不能代替模型或真实进程验证。</div><div><b>R · 真实 Runtime</b>AGY / Codex 分别以实际日志、Task / Run / Journal、文件或进程效果交叉核验。</div><div><b>I · 安装环境</b>核实已安装工件与运行来源，再通过真实 Web / PTY 完成用户流程。</div></div><p>AGY 历史验收保留；Codex 已装配并安装，进程来源、Web静态工件和网络重启持久性 I 已通过。API、迁入、native交互及其他用例按覆盖记录分别判定；精确取消和异常恢复仍有缺口。源码、R与I分开，原始失败和复验分别保存。</p><ol class="source-index" id="source-index"></ol></div></details>
+ <details class="disclosure"><summary>版本、证据与源码索引 <span class="muted">结论可追溯；历史证据不等于本版全量重测</span></summary><div class="evidence-body"><p>源码核对基线 <code>@@SOURCE@@</code>；当前安装二进制来源为 <code>@@INSTALLED@@</code>。本图是文档快照，不实时查询服务状态。实际安装二进制 SHA-256：</p><p><code>@@SHA@@</code></p><div class="proof-grid"><div><b>D · 确定性</b>事务、状态规则、竞争和故障注入；不能代替模型或真实进程验证。</div><div><b>R · 真实 Runtime</b>AGY / Codex 分别以实际日志、Task / Run / Journal、文件或进程效果交叉核验。</div><div><b>I · 安装环境</b>核实已安装工件与运行来源，再通过真实 Web / PTY 完成用户流程。</div></div><p>当前原 Rhythm/Pay 已 managed active G3、保留原 thread；三项 query Task 各一个成功 Run，7,973 字节完整答复及自动续办经独立核查。此前独立身份的原生键盘输入、PTY 重连与 30 分钟空闲证据单列，本轮没有重跑该矩阵。原 Desktop 仅查历史，heartbeat 已暂停；AGY 原生前台、精确工具取消与未知终态一键恢复仍待补。支付接入与收费业务未执行，首次失败和复验分别保留。</p><ol class="source-index" id="source-index"></ol></div></details>
 </section>
-<footer><p>维护方式：编辑 <code>docs/design/architecture-map.json</code>，运行 <code>python3 docs/design/render_architecture.py</code>，同步生成 HTML 与 Markdown。服务、协议、状态或验收结论变化时，更新对应节点及依据。</p><a href="@@MARKDOWN@@">Markdown 说明</a><span>不加载外部脚本、字体或图表服务。来源链接指向本地源码与证据文件。</span></footer>
+<footer><p>维护方式：编辑 <code>docs/design/architecture-map.json</code>，运行 <code>python3 docs/design/render_architecture.py</code>，同步生成 HTML 与 Markdown。服务、协议、状态或验收结论变化时，更新对应节点及依据。</p><a href="@@MARKDOWN@@">Markdown 说明</a><a href="@@EVENT_HTML@@">事件协作与终端方案</a><span>不加载外部脚本、字体或图表服务。来源链接指向本地源码与证据文件。</span></footer>
 </div>
 <script id="architecture-data" type="application/json">@@DATA@@</script>
 <script>
@@ -107,18 +107,18 @@ def markdown(data, destination, html_name, absolute=False):
         r = data['refs'][k]
         path = str(ROOT / r['path']) if absolute else os.path.relpath(ROOT / r['path'], destination)
         return f"[{r['label']}]({path})"
-    lines = [f"# {data['title']}\n", f"交互图：[打开 HTML 图册]({html_name})。快照日期：{data['date']}。",
+    lines = [f"# {data['title']}\n", f"交互图：[打开 HTML 图册]({html_name})；关联阅读：[事件协作与终端方案]({'OpenAgentX-事件协作与终端方案.html' if absolute else 'event-collaboration.html'})。快照日期：{data['date']}。",
         "本图描述 OpenAgentX 任务后台。交易、行情等属于受管领域及业务工作区；不声称券商、交易所或真实交易执行已经接通。\n",
         "## 要点\n",
         "- 控制面是一个 daemon；每个领域有独立 Worker service。API、领域服务不是分别部署的微服务。",
         "- SQLite 保存 Task、Run、投递与审计等权威事实；内存 Broker 只用于唤醒。Worker 通过正式 API 工作，不直接写库。",
         "- 每次 Run 冻结角色、工作目录、输入与期限。AGY 每轮启动 CLI；Codex 由常驻 app-server 管理 thread/turn。原生 TUI 的写入经桥接进入正式调度，关闭界面不会终止 Worker。",
         "- 问答成功表示完整回复已交付；执行任务的业务效果需独立核验。人工接受是独立 review，不改写原始执行事实。",
-        "- AGY 保留历史验收；Codex 已装配并安装，来源、Web静态工件及网络重启 I 已通过。任务、迁入和原生交互 I 按覆盖表分别验收；精确取消和异常恢复仍待补。\n",
+        "- 当前原 Rhythm/Pay 已 managed active G3，保留原 thread；三项 query Task 与 7,973 字节完整答复、自动续办通过独立核查。原 Desktop 仅查历史，LLM heartbeat 已暂停。\n- 此前独立身份的原生键盘输入、PTY 重连与 30 分钟空闲已验，本轮未重跑该矩阵；AGY 原生前台、精确工具取消和未知终态一键恢复仍待补。支付收费业务未实施。\n",
         "## 当前版本与阅读方法\n",
         f"核对源码：`{data['source_commit']}`；当前安装工件来源：`{data['installed_commit']}`。本图不是服务实时监控。后续文档提交不会自动改变安装来源。",
         f"\n实际安装二进制 SHA-256：`{data['binary_sha256']}`。",
-        f"\n证据入口：{link('installed')}、{link('daily')}、{link('scope')}；Codex 本轮见 {link('codexcoverage')}、{link('codexdelivery')}、{link('codexlive')}、{link('codexinstalled')}。AGY 历史证据按影响复用；Codex 安装来源/环境 I 不代表全部用户流程通过。",
+        f"\n当前证据：{link('cutover')}、{link('cutovercoverage')}、{link('cutoverlog')}、{link('cutoverreview')}。此前独立身份原生输入/重连/空闲见 {link('managedhistory')}；AGY 历史见 {link('scope')}，Codex 早期边界见 {link('codexcoverage')}。本轮 origin 由正式 Task API 发起；固定原生终端过程可见，不冒充本轮人工键盘输入重验。",
         "\n实现状态与证据强度是两条轴：**已实现**、**部分实现 / 待补**、**待实现**、**可选 / 未启用**、**外部依赖**；证据标注 **D**（确定性）、**R**（真实 Runtime）、**I**（已安装环境）。绿色不等于全部 E2E 通过。",
         "\nHTML 每次只显示一个子图；点击节点可见职责、限制和引用。虚线区分控制与拟议关系，以箭头文字和节点状态为准。\n"]
     for v in data['views']:
@@ -143,7 +143,7 @@ def markdown(data, destination, html_name, absolute=False):
         lines.append(f"- {link(k)}：`{r['path']}:{r['line']}`。")
     lines += ['\n## 下一步与维护\n',
         '1. 先读总览，再进入工作流、初始化、运行恢复、观察、依赖或 Codex 原生子图；按每个节点的 D/R/I 证据阅读。',
-        '2. Codex 已安装，继续按覆盖表收口用户流程；精确取消和异常恢复保留缺口。自有host全树兜底可能影响旧后台工具，普通resume不解除未决隔离。',
+        '2. 原身份日常使用固定 OAX:oneaxe-pay.0 与 OAX:rhythm.0，原 Desktop 仅查历史。只读协作已经验收，后续支付业务开发需另列目标；精确取消和未知终态恢复保留缺口。',
         '3. 编辑 `docs/design/architecture-map.json` 后运行 `python3 docs/design/render_architecture.py`，同时更新两份输出；需要同步阅读入口时追加 `--reading-dir /home/sky/Documents/ChatGPT/OpenAgentX`。更新节点时同步来源、证据版本与限制，避免架构文档再次落后实现。',
         '\n本图记录本轮源码及证据快照，不代表实时服务状态；原架构与失败证据由 Git 及对应批次目录保留。\n']
     return '\n'.join(lines)
@@ -158,7 +158,8 @@ def render(data, destination, html_name, md_name, absolute=False):
     embedded = json.dumps(view_data, ensure_ascii=False).replace('<', '\\u003c')
     substitutions = {'DATE': data['date'], 'SOURCE': data['source_commit'],
                      'INSTALLED': data['installed_commit'][:7], 'SHA': data['binary_sha256'],
-                     'MARKDOWN': md_name}
+                     'MARKDOWN': md_name,
+                     'EVENT_HTML': 'OpenAgentX-事件协作与终端方案.html' if absolute else 'event-collaboration.html'}
     output = TEMPLATE
     for k,value in substitutions.items():
         output = output.replace('@@'+k+'@@',html.escape(value,quote=True))

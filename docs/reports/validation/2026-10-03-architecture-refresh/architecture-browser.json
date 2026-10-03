@@ -1,0 +1,485 @@
+{
+  "verdict": "PASS",
+  "at": "2026-10-03T15:59:46.053042+00:00",
+  "scope": "真实Chrome七视图及关键交互；不是产品E2E",
+  "layout": [
+    {
+      "bad": [],
+      "hash": "#overview",
+      "nodes": 12,
+      "overflow": false
+    },
+    {
+      "bad": [],
+      "hash": "#work",
+      "nodes": 16,
+      "overflow": false
+    },
+    {
+      "bad": [],
+      "hash": "#init",
+      "nodes": 12,
+      "overflow": false
+    },
+    {
+      "bad": [],
+      "hash": "#runtime",
+      "nodes": 12,
+      "overflow": false
+    },
+    {
+      "bad": [],
+      "hash": "#observe",
+      "nodes": 12,
+      "overflow": false
+    },
+    {
+      "bad": [],
+      "hash": "#dependencies",
+      "nodes": 12,
+      "overflow": false
+    },
+    {
+      "bad": [],
+      "hash": "#native",
+      "nodes": 7,
+      "overflow": false
+    }
+  ],
+  "records": [
+    {
+      "argv": [
+        "reload"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"url\":\"http://127.0.0.1:18764/docs/design/current-architecture.html#overview\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1400",
+        "1100"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":1100,\"width\":1400},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-overview"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "(()=>{const bad=[];document.querySelectorAll('#diagram .node').forEach(g=>{const r=g.querySelector('.card').getBoundingClientRect();g.querySelectorAll('text').forEach(t=>{const b=t.getBoundingClientRect();if(b.left<r.left-2||b.right>r.right+2||b.top<r.top-2||b.bottom>r.bottom+2)bad.push({text:t.textContent,x:b.left-r.left,width:b.width,card:r.width});});});return {hash:location.hash,nodes:document.querySelectorAll('#diagram .node').length,bad,overflow:document.documentElement.scrollWidth>innerWidth};})()"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"bad\":[],\"hash\":\"#overview\",\"nodes\":12,\"overflow\":false}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-work"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "(()=>{const bad=[];document.querySelectorAll('#diagram .node').forEach(g=>{const r=g.querySelector('.card').getBoundingClientRect();g.querySelectorAll('text').forEach(t=>{const b=t.getBoundingClientRect();if(b.left<r.left-2||b.right>r.right+2||b.top<r.top-2||b.bottom>r.bottom+2)bad.push({text:t.textContent,x:b.left-r.left,width:b.width,card:r.width});});});return {hash:location.hash,nodes:document.querySelectorAll('#diagram .node').length,bad,overflow:document.documentElement.scrollWidth>innerWidth};})()"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"bad\":[],\"hash\":\"#work\",\"nodes\":16,\"overflow\":false}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "scrollintoview",
+        "#view-title"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"scrolled\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "wait",
+        "500"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"waited\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-work.png"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-work.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-init"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "(()=>{const bad=[];document.querySelectorAll('#diagram .node').forEach(g=>{const r=g.querySelector('.card').getBoundingClientRect();g.querySelectorAll('text').forEach(t=>{const b=t.getBoundingClientRect();if(b.left<r.left-2||b.right>r.right+2||b.top<r.top-2||b.bottom>r.bottom+2)bad.push({text:t.textContent,x:b.left-r.left,width:b.width,card:r.width});});});return {hash:location.hash,nodes:document.querySelectorAll('#diagram .node').length,bad,overflow:document.documentElement.scrollWidth>innerWidth};})()"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"bad\":[],\"hash\":\"#init\",\"nodes\":12,\"overflow\":false}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-runtime"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "(()=>{const bad=[];document.querySelectorAll('#diagram .node').forEach(g=>{const r=g.querySelector('.card').getBoundingClientRect();g.querySelectorAll('text').forEach(t=>{const b=t.getBoundingClientRect();if(b.left<r.left-2||b.right>r.right+2||b.top<r.top-2||b.bottom>r.bottom+2)bad.push({text:t.textContent,x:b.left-r.left,width:b.width,card:r.width});});});return {hash:location.hash,nodes:document.querySelectorAll('#diagram .node').length,bad,overflow:document.documentElement.scrollWidth>innerWidth};})()"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"bad\":[],\"hash\":\"#runtime\",\"nodes\":12,\"overflow\":false}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-observe"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "(()=>{const bad=[];document.querySelectorAll('#diagram .node').forEach(g=>{const r=g.querySelector('.card').getBoundingClientRect();g.querySelectorAll('text').forEach(t=>{const b=t.getBoundingClientRect();if(b.left<r.left-2||b.right>r.right+2||b.top<r.top-2||b.bottom>r.bottom+2)bad.push({text:t.textContent,x:b.left-r.left,width:b.width,card:r.width});});});return {hash:location.hash,nodes:document.querySelectorAll('#diagram .node').length,bad,overflow:document.documentElement.scrollWidth>innerWidth};})()"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"bad\":[],\"hash\":\"#observe\",\"nodes\":12,\"overflow\":false}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-dependencies"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "(()=>{const bad=[];document.querySelectorAll('#diagram .node').forEach(g=>{const r=g.querySelector('.card').getBoundingClientRect();g.querySelectorAll('text').forEach(t=>{const b=t.getBoundingClientRect();if(b.left<r.left-2||b.right>r.right+2||b.top<r.top-2||b.bottom>r.bottom+2)bad.push({text:t.textContent,x:b.left-r.left,width:b.width,card:r.width});});});return {hash:location.hash,nodes:document.querySelectorAll('#diagram .node').length,bad,overflow:document.documentElement.scrollWidth>innerWidth};})()"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"bad\":[],\"hash\":\"#dependencies\",\"nodes\":12,\"overflow\":false}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-native"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "(()=>{const bad=[];document.querySelectorAll('#diagram .node').forEach(g=>{const r=g.querySelector('.card').getBoundingClientRect();g.querySelectorAll('text').forEach(t=>{const b=t.getBoundingClientRect();if(b.left<r.left-2||b.right>r.right+2||b.top<r.top-2||b.bottom>r.bottom+2)bad.push({text:t.textContent,x:b.left-r.left,width:b.width,card:r.width});});});return {hash:location.hash,nodes:document.querySelectorAll('#diagram .node').length,bad,overflow:document.documentElement.scrollWidth>innerWidth};})()"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"bad\":[],\"hash\":\"#native\",\"nodes\":7,\"overflow\":false}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "scrollintoview",
+        "#view-title"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"scrolled\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "wait",
+        "500"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"waited\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-native.png"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-native.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById(\"diagram\").textContent"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"保留原生交互，写入进入正式调度原生TUI经桥接发正式任务；Worker负责turn写入。app-server分别向Worker与bridge连接发事件，界面断开不影响账本结算。 点击节点阅读实现状态和证据。原生输入 → 正式调度与权威账本原生观察 ← 常驻宿主与 Worker原生RPC正式命令事务保存领取Run连接B：turn写入连接B：执行事件→结算独立连接A连接A：允许的读取连接A：原生广播过滤 / 排序后回TUI结果 / Journal受管 Codex TUI：原生交互 · 显式 thread已实现↗受管 Codex TUI原生交互 · 显式 thread原生桥接：写入调度 · 幂等与排序已实现↗原生桥接写入调度 · 幂等与排序Control API：认证 · CAS · 当前执行权已实现↗Control API认证 · CAS · 当前执行权Task / Run / Journal：线程选择与投递同事务已实现↗Task / Run / Journal线程选择与投递同事务常驻 Worker：Runtime Adapter · 写连接已实现↗常驻 WorkerRuntime Adapter · 写连接Codex app-server：持久宿主 · thread / turn部分实现 / 待补↗Codex app-server持久宿主 · thread / turnBridge 观察连接：只读RPC · 线程通知与排序已实现↗Bridge 观察连接只读RPC · 线程通知与排序\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#gaps-toggle"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById(\"gaps-toggle\").getAttribute(\"aria-pressed\")"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"true\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#gaps-toggle"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#zoom-toggle"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById(\"scroller\").classList.contains(\"zoom\")"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#zoom-toggle"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Bridge 观察连接，已实现，查看详情"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.querySelector(\".details\").textContent"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"Bridge 观察连接已实现职责与行为bridge独立DialRPC/Subscribe至同一app-server，收到第二路原生广播，过滤所选thread，并在start响应后返回通知给TUI。该连接不能替代Worker结束回报或业务效果证据。展开 07 · Codex 原生 →证据范围源码：bridge Subscribe与Adapter Subscribe分开；历史真实原生过程/重连D = 确定性测试；R = 真实 Runtime；I = 已安装环境。标为“已实现”不代表全部边界场景均已真实验收。进一步核对原生终端写入桥接 ↗原生通知过滤与响应排序 ↗历史独立身份：原生输入、重连与30分钟空闲 ↗\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "390",
+        "844"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":844,\"width\":390},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-native"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "scrollintoview",
+        "#view-title"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"scrolled\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "wait",
+        "500"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"waited\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "({body:document.documentElement.scrollWidth,viewport:innerWidth,diagram:document.getElementById(\"scroller\").scrollWidth})"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"body\":390,\"diagram\":1050,\"viewport\":390}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-mobile.png"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-mobile.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "errors"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"errors\":[]},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1400",
+        "1100"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":1100,\"width\":1400},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-work"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-work.png",
+        "--full"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-work.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-native"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-native.png",
+        "--full"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-native.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "reload"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"url\":\"http://127.0.0.1:18764/docs/design/current-architecture.html#native\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "#tab-work"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "[...document.querySelectorAll(\"#diagram .edge-label\")].filter(e=>[\"接单\",\"执行\",\"续办\"].includes(e.textContent)).map(e=>({text:e.textContent,width:e.getBBox().width}))"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":[{\"text\":\"执行\",\"width\":21.97258186340332},{\"text\":\"接单\",\"width\":21.97258186340332},{\"text\":\"执行\",\"width\":21.97258186340332},{\"text\":\"续办\",\"width\":21.97258186340332}]},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-work.png",
+        "--full"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/architecture-work.png\"},\"error\":null}\n",
+      "stderr": ""
+    }
+  ],
+  "visual_review": "Root inspected full screenshots. Shortened three collaboration edge labels to fit node gaps and rechecked that work view; other visuals unchanged."
+}

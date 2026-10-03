@@ -1,0 +1,261 @@
+{
+  "verdict": "PASS",
+  "at": "2026-10-03T15:53:55.983215+00:00",
+  "scope": "真实Chrome显示及页面本地交互，不是新一轮业务E2E",
+  "checks": [
+    "desktop route selection",
+    "expanded map and Escape",
+    "frontend disconnect illustration",
+    "idle model-count unchanged",
+    "local queue demonstration",
+    "390px page width",
+    "no page JavaScript errors"
+  ],
+  "records": [
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1400",
+        "1100"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":1100,\"width\":1400},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e18"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "({path:document.getElementById(\"componentMap\").dataset.path,text:document.getElementById(\"mapExplanation\").textContent})"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"path\":\"auto\",\"text\":\"已实现：其他 Agent 的咨询或答复到达 → 协作入口确定目标、保存关联关系 → 登记到该 Agent 的任务待办 → 对应 Worker 空闲后领取。答复到达 managed 请求方时，自动安排它继续一轮。\"}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e20"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById(\"componentMap\").getAttribute(\"aria-modal\")"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"true\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/event-desktop.png"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/event-desktop.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "press",
+        "Escape"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"pressed\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById(\"expandMap\").getAttribute(\"aria-expanded\")"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"false\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e22"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById(\"eventExplanation\").textContent"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"模拟关闭终端：连接 A 与 Bridge 退出，屏幕不再实时显示；连接 B 仍由 Worker 持有，已接任务继续执行，事件与结束结果仍上报 OAX。重开前台可重新连接并读取历史。\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e27"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById(\"runs\").textContent"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"0\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e24"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e24"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "({runs:document.getElementById(\"runs\").textContent,queued:document.getElementById(\"queued\").textContent})"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"queued\":\"1\",\"runs\":\"1\"}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e26"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e26"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "({runs:document.getElementById(\"runs\").textContent,state:document.getElementById(\"state\").textContent})"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"runs\":\"2\",\"state\":\"空闲\"}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "390",
+        "844"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":844,\"width\":390},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "click",
+        "@e4"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "({body:document.documentElement.scrollWidth,viewport:innerWidth})"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":{\"body\":390,\"viewport\":390}},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/event-mobile.png"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/event-mobile.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "errors"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"errors\":[]},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "reload"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"url\":\"http://127.0.0.1:18764/docs/design/event-collaboration.html#terminal\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "scrollintoview",
+        "#terminal"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"scrolled\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "wait",
+        "800"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"waited\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/event-mobile.png"
+      ],
+      "exit": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/reports/validation/2026-10-03-architecture-refresh/event-mobile.png\"},\"error\":null}\n",
+      "stderr": ""
+    }
+  ]
+}

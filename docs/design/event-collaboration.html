@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>OpenAgentX · 事件协作与终端方案</title>
+<style>
+:root{--bg:#f6f5f0;--paper:#fff;--ink:#202934;--muted:#64707b;--line:#dce2df;--teal:#087f75;--light:#e9f5f0;--purple:#6552b6;--amber:#986324;--dark:#192630;--radius:20px}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:86px}body{margin:0;background:var(--bg);font-family:Inter,"Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);line-height:1.75}a{color:var(--teal);text-underline-offset:4px}button,input{font:inherit}button,a,input,summary{outline-offset:5px}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--purple)}.wrap{max-width:1180px;margin:auto;padding:0 32px}.top{border-bottom:1px solid var(--line);background:#f6f5f0f5;position:sticky;top:0;z-index:10;backdrop-filter:blur(12px)}.nav{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:68px}.brand{font-weight:800;letter-spacing:.02em;white-space:nowrap}.brand i{display:inline-block;width:11px;height:11px;background:var(--teal);border-radius:3px;margin-right:9px;transform:rotate(-12deg)}nav{display:flex;gap:22px;overflow:auto;font-size:13px;white-space:nowrap}nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--teal)}header{padding:64px 0 38px}.eyebrow{color:var(--teal);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.hero{display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center}h1{font-size:clamp(32px,4.2vw,54px);line-height:1.22;letter-spacing:-.035em;margin:18px 0 22px}h1 span{color:var(--teal)}.lead{color:var(--muted);font-size:17px;max-width:630px}.label{display:inline-block;border:1px solid var(--line);border-radius:30px;padding:4px 11px;font-size:12px;margin:3px 4px 3px 0;background:#fff}.label.pending{border-color:#dfd5b8;color:var(--amber);background:#fcf7e9}.hero-card{border-radius:24px;padding:28px;background:var(--dark);color:#e8eeed;box-shadow:0 16px 40px #20342b12}.hero-card h2{font-size:20px;margin:0 0 16px;color:#fff}.hero-card p{margin:14px 0;font-size:14px}.hero-card b{color:#8edace}.hero-card .rule{border-top:1px solid #46535c;margin-top:20px;padding-top:16px;color:#b8c8cc;font-size:13px}.notice{border-left:3px solid var(--teal);padding:14px 20px;background:var(--light);border-radius:0 12px 12px 0;font-size:14px;margin:16px 0 0}.section{padding:42px 0;border-top:1px solid var(--line)}.section-heading{display:flex;gap:15px;align-items:baseline;margin-bottom:24px}.num{color:var(--teal);font:700 13px ui-monospace,monospace}.section h2{font-size:27px;line-height:1.35;letter-spacing:-.025em;margin:0}.section-intro{color:var(--muted);max-width:900px;margin-top:-6px;margin-bottom:24px}h3{font-size:17px;line-height:1.5;margin:0 0 10px}p{margin:10px 0 14px}.grid{display:grid;gap:18px}.three{grid-template-columns:repeat(3,1fr)}.two{grid-template-columns:repeat(2,1fr)}.card{padding:24px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius)}.card p{font-size:14px;color:var(--muted);margin-bottom:0}.mini{font-size:12px;color:var(--muted)}.icon{color:var(--teal);font:700 13px ui-monospace,monospace;margin-bottom:16px}.flow{display:flex;align-items:stretch;gap:10px;overflow:auto;padding:4px 0 14px}.node{background:#fff;border:1px solid var(--line);border-radius:14px;flex:1;min-width:144px;padding:19px 15px;font-size:14px}.node b{display:block;margin-bottom:7px}.node small{color:var(--muted);font-size:12px;display:block;line-height:1.7}.node.accent{background:var(--light);border-color:#a3ccc2}.arrow{display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:22px}.strip{padding:16px 20px;background:#edeaf7;border-radius:12px;color:#57458e;font-size:14px;margin-top:8px}.list{padding-left:20px;margin:8px 0}.list li{padding:5px 0;font-size:14px}.warn{background:#fcf7e9;border:1px solid #e8ddbd;border-radius:14px;padding:20px;margin-top:20px}.warn b{color:#875d25}.facts{display:flex;gap:30px;margin:22px 0}.fact strong{display:block;font-size:30px;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--purple)}.fact span{font-size:12px;color:var(--muted)}.terminal{background:var(--dark);color:#d7e7e5;border-radius:18px;overflow:hidden;border:1px solid #31424c}.term-top{padding:12px 18px;background:#253640;font-size:12px;color:#b3c5cc;display:flex;justify-content:space-between;gap:15px}.term-body{padding:22px}.term-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.term-tab{border:1px solid #52646e;padding:7px 12px;border-radius:7px;font:13px ui-monospace,monospace}.term-tab.active{border-color:#69c6b5;color:#9de5d8}.term-row{border:1px solid #405660;padding:15px;border-radius:10px;margin-top:12px;display:grid;grid-template-columns:175px 1fr;gap:16px;font-size:13px}.term-row code{color:#9de5d8}.terminal p{color:#bacccc;font-size:13px}.arch{border:1px solid var(--line);background:#fff;border-radius:20px;padding:24px}.arch .flow{padding-bottom:4px}.arch-note{font-size:13px;color:var(--muted);margin:12px 0 0}.tag{color:var(--purple);background:#eeeaf9;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700;white-space:nowrap}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:white}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px;min-width:770px}th{font-size:12px;color:var(--muted);background:#eef1ed;padding:14px 17px}td{padding:18px 17px;border-top:1px solid var(--line);vertical-align:top}td:first-child{font-weight:700;width:20%}tr.recommended{background:#f0f8f4}.steps{display:grid;gap:12px;counter-reset:gate}.step{display:grid;grid-template-columns:44px 190px 1fr;gap:18px;padding:21px;background:#fff;border:1px solid var(--line);border-radius:16px;align-items:start}.step:before{counter-increment:gate;content:"0" counter(gate);font:700 15px ui-monospace,monospace;color:var(--teal);background:var(--light);border-radius:10px;padding:9px 6px;text-align:center}.step h3{font-size:16px;margin:5px 0}.step p{margin:0;font-size:13px;color:var(--muted)}.stop{display:block;margin-top:5px;color:#936432}.demo{background:#fff;border:1px solid var(--line);border-radius:20px;padding:25px}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 14px}button{border:1px solid var(--line);background:white;padding:9px 15px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--ink)}button:hover{background:var(--light);border-color:#a3ccc2}button.primary{background:var(--teal);color:white;border-color:var(--teal)}.statusbar{display:flex;gap:12px;flex-wrap:wrap;padding:15px;background:#f1f4ef;border-radius:12px;font-size:13px}.statusbar strong{color:var(--teal)}#demoLog{font-size:13px;min-height:52px;color:var(--muted);margin-top:14px}.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:18px 0}label{font-size:12px;color:var(--muted);display:block}input{display:block;width:100%;padding:9px 10px;margin-top:4px;border:1px solid #cbd4ce;border-radius:8px;background:#fafbf8;color:var(--ink)}.calc-result{border-top:1px solid var(--line);padding-top:14px;font-size:13px}.calc-result p{margin:4px 0}.calc-result strong{color:var(--teal);font-variant-numeric:tabular-nums}details{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:0 20px}summary{cursor:pointer;padding:16px 0;font-size:14px;font-weight:700}details p,details li{font-size:13px;color:var(--muted)}details ul{padding-left:20px;margin-top:0}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em;overflow-wrap:anywhere}footer{padding:30px 0 46px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}.footer-row{display:flex;justify-content:space-between;gap:25px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:25px}.three{grid-template-columns:1fr}.two{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column;gap:6px;padding:12px 0}nav{width:100%;padding-bottom:4px;gap:20px}.step{grid-template-columns:40px 1fr}.step p{grid-column:2}.wrap{padding:0 22px}header{padding-top:36px}.section{padding:32px 0}.term-row{grid-template-columns:1fr;gap:6px}html{scroll-padding-top:110px}.facts{flex-wrap:wrap}}@media(max-width:640px){.flow{flex-direction:column;overflow:visible;gap:6px}.node{min-width:0;flex:auto}.arrow{transform:rotate(90deg);height:24px;font-size:20px}.arch{padding:18px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}@media print{body{background:white;font-size:11pt}.top{position:static}.wrap{max-width:none;padding:0}nav,.buttons,.fields{display:none}.hero{grid-template-columns:1.4fr 1fr;gap:20px}header,.section{padding:20px 0}.card,.step,.terminal,details,.demo{break-inside:avoid}.flow{overflow:visible}.node{min-width:0}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.table-wrap{overflow:visible}table{min-width:0}.hero-card,.terminal{print-color-adjust:exact;-webkit-print-color-adjust:exact}h1{font-size:30pt}a{color:inherit}footer{padding:14px 0}.top .brand{padding:8px 0}.section h2{font-size:22pt}details:not([open]){display:none}}
+
+.command-example{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f4ef;padding:14px;border-radius:8px;font-size:13px}
+.component-map{margin-top:24px;border:1px solid #cbdad7;border-radius:20px;background:#fff;overflow:hidden}
+.map-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;background:#eef4f1;border-bottom:1px solid var(--line)}
+.map-modes{display:flex;flex-wrap:wrap;gap:7px}.map-modes button{font-size:12px;padding:7px 10px}.map-modes button[aria-pressed=true]{background:#203a45;color:#fff;border-color:#203a45}
+.map-explanation{margin:0;padding:15px 22px;min-height:80px;font-size:14px;color:#405c68;border-bottom:1px solid #e1e9e6}
+.map-scroller{overflow:auto;overscroll-behavior:contain;background:#fafcfb}.map-scroller>svg{display:block;width:100%;min-width:1040px;height:auto}
+.map-footnote{margin:0;padding:14px 22px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.component-map[data-path=manual] .route-result,.component-map[data-path=manual] .route-auto,.component-map[data-path=result] .route-manual,.component-map[data-path=result] .route-auto,.component-map[data-path=auto] .route-result{opacity:.12}
+.component-map[data-path=auto] .route-input{opacity:.12}
+.component-map.map-expanded{position:fixed;inset:10px;z-index:1000;margin:0;border:2px solid #486b70;box-shadow:0 0 0 100vmax #0b1727b0;display:flex;flex-direction:column}
+.map-expanded .map-scroller{flex:1;min-height:0}.map-expanded .map-scroller>svg{max-width:1500px;margin:auto}.map-expanded .map-explanation{min-height:0}
+@media(max-width:640px){.map-toolbar{align-items:flex-start;flex-direction:column;gap:8px}.map-explanation{font-size:13px;padding:14px}.map-footnote{padding:12px 14px}.map-expanded{inset:4px!important}.map-expanded .map-footnote{display:none}}
+@media(min-width:1050px){.map-expanded .map-scroller{display:flex;justify-content:center;align-items:flex-start}.map-expanded .map-scroller>svg{height:100%;width:auto;min-width:0;max-width:none;margin:0}}
+@media print{.map-toolbar{display:none}.map-scroller{overflow:visible}.map-scroller>svg{min-width:0;width:100%}.component-map [class^=route-]{opacity:1!important}}
+
+/* Section 05: progressive explanations and two independent event connections. */
+.section-links{display:flex;flex-wrap:wrap;gap:10px 22px;margin:18px 0 30px;overflow:visible;font-size:14px}
+.section-links a{color:var(--teal)}.mechanism-block{margin:32px 0 22px;scroll-margin-top:110px}.mechanism-block>h3{font-size:22px;line-height:1.45;margin-bottom:15px}.subnum{font:700 13px ui-monospace,monospace;letter-spacing:.06em;color:var(--teal);display:block;margin-bottom:6px}
+.compact-table{min-width:660px}.compact-table td:first-child{width:21%}.compact-table td{padding:15px 17px}.status-done{color:#087f75;font-weight:650}.status-pending{color:#986324;font-weight:650}
+.event-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:20px 0 0}.event-controls .mini{margin-right:auto}.event-controls button[aria-pressed=true]{background:#203a45;color:#fff;border-color:#203a45}
+.event-explanation{padding:15px 0;min-height:82px;color:#405c68;font-size:14px;border-bottom:1px solid var(--line)}
+.event-scroller,.collab-scroller{overflow:auto;overscroll-behavior:contain}.event-scroller svg,.collab-scroller svg{display:block;width:100%;min-width:960px;height:auto}
+#event-subscription-map text,#collaboration-map text{font-family:Inter,'Noto Sans SC','Microsoft YaHei',sans-serif;fill:var(--ink)}
+#event-subscription-map .ev-heading{font-size:22px;font-weight:700}.ev-title{font-size:20px;font-weight:700}.ev-body{font-size:17px}.ev-small{font-size:14px;fill:#64707b!important}.ev-wire{fill:none;stroke:#087f75;stroke-width:3;marker-end:url(#event-arrow)}.ev-view{stroke:#3979b6;marker-end:url(#event-view-arrow)}
+.frontend-route{transition:opacity .2s}.event-demo[data-frontend=closed] .frontend-route{opacity:.15}#frontendClosedLabel{display:none;fill:#986324!important}.event-demo[data-frontend=closed] #frontendClosedLabel{display:block}
+@media(max-width:640px){.mechanism-block>h3{font-size:20px}.event-explanation{min-height:0}.event-controls .mini{width:100%}.section-links{font-size:13px;gap:10px 18px}.section-links a{white-space:normal}.compact-table{min-width:620px}}
+@media print{.event-controls{display:none}.event-scroller,.collab-scroller{overflow:visible}.event-scroller svg,.collab-scroller svg{min-width:0}.event-demo[data-frontend=closed] .frontend-route{opacity:1}#frontendClosedLabel{display:none!important}}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap nav"><div class="brand"><i aria-hidden="true"></i>OpenAgentX <span class="mini">/ 实施与验收</span></div><nav aria-label="章节导航"><a href="#needs">需求</a><a href="#events">事件触发</a><a href="#desktop">Desktop边界</a><a href="#terminal">终端布局</a><a href="#architecture">执行架构</a><a href="#gates">逐步把关</a><a href="#evidence">证据</a></nav></div></div>
+<main class="wrap">
+<header><div class="hero"><div><div class="eyebrow">Implementation · 2026.10.03</div><h1>有工作才唤醒，<br><span>在固定终端里持续工作。</span></h1><p class="lead">托管 Codex 已能自动只读咨询、接收关联答复并续办；你可打开原生终端输入、看过程。Rhythm 与 OneAxe Pay 已保留原 thread 迁入 OAX，真实咨询、答复与自动续办全部通过。</p><div><span class="label">已安装 · 原身份协作通过</span><span class="label">保留原会话历史</span><span class="label">固定终端已核对</span></div></div><aside class="hero-card"><h2>当前可用方式</h2><p><b>普通程序负责等消息。</b><br>没有可执行工作，就不发起模型请求。</p><p><b>后台托管＋Codex 原生终端。</b><br>每个 Agent 的人工输入和协作消息统一排队；不同 Agent 可以并行。</p><p><b>前台看过程，后台继续接单。</b><br>你在固定窗口使用 Codex，后台程序负责收到任务后执行。</p><div class="rule">当前安装 886ba7f / schema v5。原 Rhythm / Pay 已由 Worker 托管；三个真实只读任务各执行一次，完整答复与终端过程均已核对。</div></aside></div><div class="notice"><strong>先把两件事分清：</strong>事件触发解决“空闲也调用模型”；统一托管解决“谁接单、何时执行、如何连续处理”。二者都需要证据，不能由一个终端窗口代替。</div></header>
+<p class="mini">配套阅读：<a href="current-architecture.html">总体架构七视图</a> · <a href="../operations/rhythm-pay-managed-handoff.md">当前使用指南</a>。本页重点说明终端、Worker 与消息之间的关系。</p>
+<div class="notice"><strong>本轮证据入口：</strong><a href="../reports/validation/2026-10-03-rhythm-pay-managed/DELIVERY.md">交付状态与证据</a> · <a href="../operations/managed-collaboration.md">实际接入步骤</a>。本轮已完成原 Rhythm / Pay 的迁入与自动只读往返；此前独立身份还验证了忙时排队、离线恢复及空闲零模型。两批证据与边界见第 09 节。</div>
+<section class="section" id="needs"><div class="section-heading"><span class="num">01</span><h2>希望最终怎么用</h2></div><div class="grid three"><article class="card"><div class="icon">RESPONSIBILITY / 职责</div><h3>原领域继续负责</h3><p>Rhythm、Pay 各自登记职责，分别推进应用与支付开发；需要配合时按 scope 咨询和回话，用户不再复制消息、来回传话。</p></article><article class="card"><div class="icon">CONTINUITY / 连续</div><h3>一轮结束，仍能接下一单</h3><p>后台程序常驻等待。有工作才启动模型；忙时排队，等待用户或审批时保留当前状态。</p></article><article class="card"><div class="icon">VISIBILITY / 可控</div><h3>固定入口，少操作</h3><p>用户进入同一个 OAX session，即可找到各 Agent 的终端、看执行过程并输入；每一步留证据、逐关确认。</p></article></div><details style="margin-top:18px"><summary>用真实场景核对：Rhythm 接入订阅支付时，我希望系统怎样工作</summary><ol class="list"><li>Rhythm 继续应用开发，需要确认支付接口时，向 Pay 发一条有明确问题与证据的咨询，用户不再转述正文。</li><li>Pay 忙时消息排队；空闲后处理自己的接口、回调协议与支付记录，超出 Pay 的用户映射、权益或应用部署问题明确交还 Rhythm。</li><li>Pay 的关联答复持久保存；Rhythm 当前轮结束后自动读入答复，再继续自己的接入工作。等待答复期间由程序保存状态，不让模型一直运行 watch 等消息。</li><li>你在 <code>OAX:rhythm.0</code> 与 <code>OAX:oneaxe-pay.0</code> 查看各自过程、输入新要求；系统协调同一 Agent 的输入顺序，不影响另一个 Agent 并行开发。</li><li>已读、接单、回复与实际业务完成分别可查。首次试点只读咨询，不因通信成功就支付、退款、改回调或部署。</li></ol><p>本轮已用这两个原业务身份完成真实只读咨询闭环；图中的 Rhythm / Pay 已对应实际托管进程。收费接入本身仍是后续业务任务。</p></details></section>
+<section class="section" id="events">
+<div class="section-heading"><span class="num">02</span><h2>事件触发：有人交来工作，才让 Codex 开始一轮</h2></div>
+<p class="section-intro">没有新工作时，普通后台程序等消息。有工作时，先记下来，再交给空闲的执行程序。等待期间不需要模型反复回答“有没有新消息”。</p>
+<div class="grid two"><article class="card"><h3>你会得到什么</h3><p>没有任务时不产生空醒模型请求；Pay 发来答复后，Rhythm 能被安排继续工作；你仍可从终端看到过程、输入新要求。原 Rhythm / Pay 的自动往返已实测；此前独立测试的 30 分钟空闲窗口新增 Task、模型轮与工具调用均为 0。</p></article><article class="card"><h3>哪些事情还要单独处理</h3><p>真正干活的一轮仍有上下文费用。消息收到、任务执行完、业务结果正确，也是不同的状态；事件触发本身不能替代业务验收。</p></article></div>
+<details open style="margin-top:18px"><summary>external inbox --watch 到底是什么？</summary><p><strong>它是一个持续打开的收件箱查看器。</strong>例如在普通终端中运行：</p><pre class="command-example">openagentx external inbox --agent rhythm --watch</pre><p>这条命令每 2 秒向本机 OAX 查询一次 Rhythm 的外部协作收件箱，有新消息就打印出来。它不调用模型，也不会替你回复、确认收件或启动 Codex 的下一轮；按 Ctrl-C 就退出。</p><p>所以，“查看到消息”和“让 Agent 处理消息”之间还差一个执行衔接。这个查看器不在第 05 节已经实现的托管任务主链中；后台 Worker 领取的是自己的任务待办。</p></details>
+</section>
+<section class="section" id="desktop"><div class="section-heading"><span class="num">03</span><h2>为什么原 Desktop 还不能承诺自动接单</h2></div><div class="grid two"><div><p>工具与 Skill 能告诉正在执行的 Agent 如何收信、回复和恢复，<strong>不能自行唤醒已经结束的模型轮</strong>。原 Desktop 可靠的事件入站、忙时排队、人工输入竞争及审批等待路径，当前没有完整实测证据。</p><p>原生 heartbeat 曾成功触发原 thread，但没有形成新的收信与协作闭环。因此不能把“界面里出现回答”当作自动执行成功。</p><div class="strip">共享 app-server 确有 <code>thread/queue/add</code>、<code>thread/queue/start</code> 协议，但历史探测中两个目标 thread 在该 daemon 显示 <code>notLoaded</code>；原 Desktop 由独立 stdio app-server 持有。缺的是当前接入方式下正确宿主的可靠入口，不是 Codex 没有队列，也不是 Desktop 永远无法自动化。</div></div><article class="card"><h3>已有试验告诉我们的事</h3><div class="facts"><div class="fact"><strong>8</strong><span>两版提示词 · 触发轮次</span></div><div class="fact"><strong>0</strong><span>工具调用</span></div></div><p><strong>905,850</strong> 输入 token，其中缓存 <strong>902,656</strong>；输出 <strong>845</strong>。缓存仍有成本，不换算未经核实的金额。</p><p><span class="label pending">自动闭环 NOT_PASSED</span><br>两项自动化已暂停；不采用常驻 LLM 定时轮询。</p></article></div></section>
+<section class="section" id="terminal">
+<div class="section-heading"><span class="num">04</span><h2>你看到什么：每个领域一个固定终端</h2></div>
+<p class="section-intro">现在可以这样使用：进入 tmux 的 <code>OAX</code> session，切到 <code>rhythm</code> 或 <code>oneaxe-pay</code> window，在 pane 0 直接与该 Agent 对话、看执行、追问和中断。前台可以是 Codex、AGY 或其他 CLI；下面先画已有原生接入基础的 Codex 路径。两个领域可以同时工作。</p>
+<div class="terminal"><div class="term-top"><span>tmux session: OAX</span><span>两业务终端已就绪</span></div><div class="term-body"><div class="term-tabs"><span class="term-tab active">rhythm</span><span class="term-tab">oneaxe-pay</span><span class="term-tab">overview · 原有 shell</span></div><div class="term-row"><code>OAX:rhythm.0</code><span><strong>Rhythm 的 Codex 界面</strong><br>你输入应用需求、看它执行、阅读 Pay 的答复。</span></div><div class="term-row"><code>OAX:oneaxe-pay.0</code><span><strong>Pay 的 Codex 界面</strong><br>你输入支付侧要求、看它处理接口与回调问题。</span></div><div class="term-row"><code>OAX:overview.0</code><span><strong>原有普通 shell（保留）</strong><br>本轮没有将它改为状态总览；它不是两业务 Agent 的执行入口。</span></div><p>后台执行程序独立运行。你退出这个终端界面后，已接下的任务仍由后台继续处理。</p></div></div>
+<div class="notice"><strong>进入方式：</strong><code>tmux attach-session -t OAX</code>，再按 <code>Ctrl-b w</code> 选择窗口名。Pay：<code>OAX:oneaxe-pay.0</code>（@27 / %54）；Rhythm：<code>OAX:rhythm.0</code>（@28 / %55）。两窗已禁止自动改名；原 Desktop 只用于查历史，后续工作从以上终端进入，避免同时恢复同一 thread。</div>
+<div class="notice"><strong>pane 0 的目标是交互工作终端。</strong>状态与管理可用独立入口；本机原有 overview 仍保留为普通 shell。Codex 路径复用官方 TUI；AGY 与其他 CLI 的原生前台尚需适配。第 05 节区分共同需求、已有能力与待补部分。</div>
+<details style="margin-top:18px"><summary>当前两窗口如何打开，其他入口还有什么边界？</summary><p>已安装版本将新建 Codex pane 0 改为原生界面；<code>fleet up</code> 等后台就绪后再打开。旧活 pane 保留，退出后可用 <code>fleet workspace --respawn-dead</code> 恢复。<code>--console</code> 显式打开状态 Console，AGY 仍使用 Console 并标明能力。此前独立 tmux 已验证 <code>fleet workspace --respawn-dead</code>。本轮因原 overview 是普通 shell，Fleet 预检拒绝；保留旧窗口，只在两个新窗口调用正式 <code>agent open --native</code>。不宣称本轮 fleet workspace / up 成功。</p><p><code>OAX</code> 是 tmux 的会话名，<code>rhythm</code> 是领域 Agent 身份及已核对的窗口名，Codex <code>thread ID</code> 则标识模型会话历史。这三个名字各有用途。</p></details>
+<details><summary>为什么自动消息不直接粘贴进 pane 0？</summary><p><code>tmux send-keys</code> 相当于替你敲键盘。比如你正在输入“先检查接口……”，程序这时把一封咨询也打进输入框，两段文字就可能混在一起。CLI 正忙时，这段输入是修改当前工作还是排到下一轮，也取决于当时的界面状态。</p><p>当前采用的处理方式是：<strong>你照常使用终端，自动消息通过后台登记成任务。</strong>这样能分别知道哪条任务来自你、哪条来自其他 Agent，以及各自是否已经接下。第 05 节的连接器负责把你的新任务也登记到同一 Agent 的待办中。</p></details>
+</section>
+<section class="section" id="architecture">
+<div class="section-heading"><span class="num">05</span><h2>从交互终端到执行记录：每一条连接都说明白</h2></div>
+<p class="section-intro">从前台体验看三个问题：Bridge 如何接入、执行事件如何留档、协作消息如何自动续办。以下 Codex 能力已安装；Rhythm／Pay 已迁入同原 thread，并在各自固定窗口显示了本次真实自动往返。</p>
+<nav class="section-links" aria-label="第05节阅读顺序"><a href="#pane-contract">A · pane 0 应该是什么</a><a href="#bridge-contract">B · Bridge 如何连接</a><a href="#event-recording">C · 事件怎样留下记录</a><a href="#message-task">D · 协作如何自动接续</a></nav>
+<div class="mechanism-block" id="pane-contract">
+<h3><span class="subnum">05-A</span>打开 pane 0，就能直接与这个 Agent 工作</h3>
+<p>你希望进入 <code>OAX:rhythm.0</code> 就能输入应用需求、看到实时执行、继续追问；进入 <code>OAX:oneaxe-pay.0</code> 则与 Pay 工作。协作任务到达后，也应在对应终端看到处理过程。<strong>关闭前台后，后台继续执行；重新打开后能够接着看、接着做。</strong></p>
+<div class="table-wrap"><table class="compact-table"><caption class="sr-only">前台入口需求与当前实现</caption><thead><tr><th>入口</th><th>当前实现</th><th>距目标还差什么</th></tr></thead><tbody>
+<tr><td>Fleet · pane 0</td><td><span class="status-done">已安装、独立 tmux 实测通过</span> Codex 新 pane 默认原生 TUI。</td><td>已验证 respawn 后原生输入及唯一输入任务；fleet up 的 systemd 首次启动未实测。旧活 pane 保留，AGY 原生前台待适配。</td></tr>
+<tr><td>Codex 原生 TUI</td><td><span class="status-done">已实测输入、断开与同 thread 重开</span><br><code>agent open &lt;id&gt; --native</code> 通过 Bridge 接入托管执行。</td><td>Run 与独立文件成功；原生输入 Task 仍可为 uncertain。managed 查询须严格成功并交付结果。</td></tr>
+<tr><td>AGY / 其他 CLI</td><td>AGY 已接后台流式执行，用 conversation ID 延续会话；尚未接通原生交互前台。</td><td><span class="status-pending">待核实接口并适配</span> 不能仅换启动命令就宣称与 Codex 等价。</td></tr>
+</tbody></table></div>
+<p class="mini">共同验收是“输入、实时过程、追问／中断、协作接续、重连”。各 CLI 可用的原生接口不同；当前不会把状态 Console 当作交互终端已经交付。</p>
+</div>
+<div class="mechanism-block" id="bridge-contract"><h3><span class="subnum">05-B</span>Native Bridge 已有：用 Codex 的远程接口接入 OAX</h3>
+<p><strong>Codex 提供远程 TUI 与 app-server 接口；OAX 自己实现 Bridge。</strong>它随 <code>openagentx agent open &lt;id&gt; --native</code> 启动，运行在前台入口进程中。它接收终端请求，把新工作登记到 OAX，同时把后台事件送回官方 Codex 界面。它本身不调用模型。</p>
+</div>
+<div class="notice"><strong>回答“是不是先给 Worker，再由 Worker 分配”：先登记到 OAX，再由对应 Worker 领取执行。</strong>目标 Agent 在登记时就已经确定，Worker 不会再把任务分给别的 Agent。实际调用模型、执行工具的仍是后台 Codex。</div>
+<div class="component-map" id="componentMap" data-path="all">
+<div class="map-toolbar"><div class="map-modes" role="group" aria-label="选择要查看的交互路径"><button type="button" data-map-path="all" aria-pressed="true">全部关系</button><button type="button" data-map-path="manual" aria-pressed="false">我输入一条任务</button><button type="button" data-map-path="auto" aria-pressed="false">其他 Agent 发来消息</button><button type="button" data-map-path="result" aria-pressed="false">结果怎么回来</button></div><button type="button" id="expandMap" aria-expanded="false">单独看全图</button></div>
+<p id="mapExplanation" class="map-explanation" aria-live="polite">左上是你使用的终端，左下是共享 OAX 服务和本地数据库，右侧是 Rhythm 的后台执行进程。实线表示终端与执行连接，紫色虚线表示托管协作；两原业务会话现已按此结构运行。</p>
+<div class="map-scroller" tabindex="0" role="region" aria-label="系统组件架构图，窄屏可左右滚动"><svg id="system-component-map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" role="img" aria-labelledby="component-title component-desc">
+<title id="component-title">同一电脑中，前台终端、共享 OAX 服务与 Rhythm 后台执行区的位置和连接</title>
+<desc id="component-desc">这是已实现机制的部署组合示意，不是原业务会话的实时运行状态。左上终端包含官方 Codex TUI 和 OAX 原生终端连接器。左下共享 OAX 服务访问本地 SQLite，其中 Task 是任务正文，Mailbox 是按 Agent 的待办索引，Run 和 Journal 是执行记录。右侧 Rhythm Worker 领取指定给 Rhythm 的任务，驱动专属 Codex app-server 读写项目文件。蓝线表示人工新任务，绿线表示过程返回和状态回报。紫色虚线表示本轮实现的协作消息到任务衔接，部署及验收状态见页首。</desc>
+<defs>
+ <marker id="map-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#3979b6"/></marker>
+ <marker id="map-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#087f75"/></marker>
+ <marker id="map-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#7960ae"/></marker>
+ <marker id="map-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#8a969a"/></marker>
+ <style>
+ text{font-family:Inter,'Noto Sans SC','Microsoft YaHei',sans-serif;fill:#202934;font-size:16px} .heading{font-size:21px;font-weight:700}.name{font-size:19px;font-weight:700}.small{font-size:14px;fill:#64707b}.code{font-family:ui-monospace,monospace;font-size:14px;fill:#64707b}.muted{fill:#64707b}.blue{fill:#3979b6}.green{fill:#087f75}.purple{fill:#7960ae}.route-manual,.route-result,.route-auto{transition:opacity .2s}.wire{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.route-manual .wire{stroke:#3979b6;marker-end:url(#map-blue)}.route-result .wire{stroke:#087f75;marker-end:url(#map-green)}.route-auto .wire{stroke:#7960ae;stroke-dasharray:7 6;marker-end:url(#map-purple)}.neutral{fill:none;stroke:#8a969a;stroke-width:2;marker-end:url(#map-gray)}.label-bg{fill:#f6f5f0}.node{fill:#fff;stroke:#cdd9d4;stroke-width:1.5}
+ </style>
+</defs>
+<rect width="1200" height="1000" rx="16" fill="#fff"/>
+<text x="30" y="35" class="heading">前台、共享后台、领域执行区：三块位置</text>
+<g aria-label="图例">
+ <path d="M32 63H66" stroke="#3979b6" stroke-width="3"/><text x="76" y="68" class="small">人工新任务</text>
+ <path d="M228 63H262" stroke="#087f75" stroke-width="3"/><text x="272" y="68" class="small">过程返回 / 状态回报</text>
+ <path d="M475 63H509" stroke="#7960ae" stroke-width="3" stroke-dasharray="7 5"/><text x="519" y="68" class="small">托管协作路径</text>
+ <text x="1170" y="68" text-anchor="end" class="small">部署关系示意 · 非运行状态</text>
+</g>
+<rect x="20" y="92" width="1160" height="785" rx="22" fill="#f6f5f0" stroke="#dce2df"/>
+<text x="42" y="122" class="small">同一台电脑</text>
+<!-- Containers encode location, not steps. -->
+<rect x="45" y="155" width="470" height="275" rx="18" fill="#eef4f7" stroke="#cedce4"/>
+<text x="68" y="190" class="heading">前台终端</text>
+<text x="68" y="213" class="code">tmux pane · OAX:rhythm.0</text>
+<rect x="70" y="240" width="190" height="135" rx="12" class="node"/>
+<text x="88" y="275" class="name">官方 Codex TUI</text>
+<text x="88" y="305">你在这里输入要求</text>
+<text x="88" y="331">查看过程与结果</text>
+<rect x="290" y="240" width="195" height="135" rx="12" class="node"/>
+<text x="307" y="275" class="name">原生终端连接器</text>
+<text x="307" y="301" class="code">OAX Native Bridge</text>
+<text x="307" y="334">转交输入、转回事件</text>
+<text x="70" y="407" class="small">连接器属于 openagentx agent open --native 前台进程</text>
+
+<rect x="45" y="520" width="470" height="340" rx="18" fill="#eef4ec" stroke="#d1dfcd"/>
+<text x="68" y="555" class="heading">共享 OAX 后台</text>
+<rect x="70" y="580" width="420" height="90" rx="12" class="node"/>
+<text x="90" y="609" class="name">任务受理与调度服务</text>
+<text x="90" y="633" class="code">openagentx.service</text>
+<text x="90" y="655" class="small">接收指定 Agent 的任务 · 管理顺序与状态</text>
+<rect x="70" y="730" width="420" height="110" rx="12" fill="#fffdf6" stroke="#d8d5c4" stroke-width="1.5"/>
+<text x="90" y="758" class="name">本地数据库</text><text x="230" y="758" class="code">SQLite</text>
+<text x="90" y="784" class="small">Task：任务正文　 Mailbox：按 Agent 的待办索引</text>
+<text x="90" y="809" class="small">Run / Journal：执行记录</text>
+<text x="90" y="830" class="small">Task、Mailbox 等都是数据库记录。</text>
+
+<rect x="660" y="155" width="495" height="705" rx="18" fill="#e9f5f0" stroke="#bcd9cd"/>
+<text x="685" y="190" class="heading">Rhythm 后台执行区</text>
+<text x="685" y="216" class="small">独立于前台终端 · 同一 Agent 按顺序执行</text>
+<rect x="690" y="245" width="430" height="120" rx="12" class="node"/>
+<text x="710" y="278" class="name">执行管理进程</text><text x="855" y="278" class="small">Worker</text>
+<text x="710" y="305" class="code">openagentx-worker@rhythm</text>
+<text x="710" y="333">内含 Codex Adapter：驱动执行、接收事件</text>
+<rect x="690" y="480" width="430" height="125" rx="12" class="node"/>
+<text x="710" y="514" class="name">专属 Codex 后台引擎</text>
+<text x="710" y="542" class="code">Codex app-server</text>
+<text x="710" y="573">调用模型、执行工具，产生过程事件</text>
+<rect x="690" y="715" width="260" height="80" rx="12" class="node"/>
+<text x="711" y="747" class="name">Rhythm 项目文件</text>
+<text x="711" y="776" class="small">工具在这里读取 / 修改文件</text>
+<text x="685" y="827" class="small">Pay 有自己的终端与 Worker，可与 Rhythm 并行。</text>
+<text x="685" y="848" class="small">两者共用左侧 OAX 服务与本地数据库。</text>
+
+<!-- Input crosses spaces between deployment zones, never node text. -->
+<g class="route-manual" aria-label="人工新任务路径"><g class="route-input">
+ <path class="wire" d="M260 288H290"/>
+ <text x="72" y="234" class="blue small">1　用户输入</text>
+ <path class="wire" d="M405 375V580"/>
+ <rect x="366" y="466" width="107" height="29" rx="8" class="label-bg"/>
+ <text x="377" y="486" class="blue small">2　登记任务</text>
+ </g><path class="wire" d="M490 609H580V306H690"/>
+ <rect x="537" y="382" width="90" height="51" rx="8" class="label-bg"/>
+ <text x="550" y="402" class="blue small">3　领取</text>
+ <text x="550" y="423" class="blue small">指定任务</text>
+ <path class="wire" d="M880 365V480"/>
+ <text x="901" y="419" class="blue">4　驱动执行</text>
+</g>
+<!-- A separate upper return corridor makes the event loop legible. -->
+<g class="route-result" aria-label="执行事件与持久状态返回路径">
+ <path class="wire" d="M1120 523H1140V137H550V264H485"/>
+ <rect x="713" y="122" width="286" height="28" rx="8" class="label-bg"/>
+ <text x="727" y="142" class="green small">5　连接 A：事件 → 连接器 → 界面</text>
+ <path class="wire" d="M290 346H260"/>
+ <path class="wire" d="M690 562H670V410H756V365"/>
+ <text x="691" y="448" class="green small">连接 B：事件 → Worker 内 Adapter</text>
+ <path class="wire" d="M690 343H628V649H490"/>
+ <rect x="594" y="661" width="79" height="28" rx="8" class="label-bg"/>
+ <text x="604" y="681" class="green small">API 上报</text>
+
+</g>
+<path class="neutral" d="M273 670V730" marker-start="url(#map-gray)"/>
+<text x="291" y="705" class="small">读写任务、待办与执行记录</text>
+<g class="route-auto" aria-label="已实现的托管协作入口">
+ <rect x="58" y="451" width="294" height="51" rx="10" fill="#f1edf9" stroke="#9c8abe" stroke-dasharray="7 5"/>
+ <text x="74" y="482" class="purple">收信后登记执行任务（已实现）</text>
+ <path class="wire" d="M330 502V580"/>
+</g>
+<path class="neutral" d="M820 605V715"/>
+<text x="838" y="662" class="small">工具读写</text>
+<!-- The model API is outside the computer and visually secondary. -->
+<path class="neutral" d="M1120 570H1165V893H1070V908"/>
+<text x="986" y="897" class="small">模型请求</text>
+<rect x="960" y="908" width="210" height="62" rx="12" fill="#fafafa" stroke="#dce2df"/>
+<text x="980" y="935" class="name">模型 API</text>
+<text x="980" y="957" class="small">电脑外部的服务</text>
+<text x="35" y="915" class="small">读图：大容器表示“在哪里运行”；箭头表示数据与控制如何流动。</text>
+<text x="35" y="943" class="small">原 Rhythm / Pay 自动往返已通过；原生输入与重连另有此前独立验收。</text>
+<text x="35" y="971" class="small">Rhythm / Pay 已迁入同原 thread；原 Desktop 后续仅查阅历史。</text>
+</svg>
+</div>
+<p class="map-footnote">图示为本机专属 Codex 引擎模式；不是实时进程视图。原 Rhythm／Pay 已迁入，并完成真实只读自动往返。不同 Agent 各自接单，同一个 Agent 的新任务依次执行。</p>
+</div>
+<p class="arch-note"><strong>图中两条绿色回程是独立连接：</strong>连接 A 供界面显示，连接 B 供 Worker 处理执行并上报记录。下方 05-C 展开它们；Worker 不依赖 Bridge 才能收到事件。</p>
+<div class="table-wrap" style="margin-top:20px"><table class="compact-table"><caption class="sr-only">Codex 接口与 OAX Bridge 的对应处理</caption><thead><tr><th>你做什么</th><th>Codex 原生接口</th><th>OAX 如何接入</th></tr></thead><tbody>
+<tr><td>打开熟悉的 Codex 界面</td><td><code>codex resume --remote &lt;地址&gt; &lt;thread-id&gt;</code></td><td>Bridge 建立本地 <code>bridge.sock</code>，让官方 TUI 连到这个地址；Bridge 再连接专属 app-server。</td></tr>
+<tr><td>输入一个新任务</td><td><code>turn/start</code></td><td>Bridge 调用 <code>POST /api/control/v1/tasks</code>，保存目标 Agent、会话和任务正文；对应 Worker 领取后执行。</td></tr>
+<tr><td>补充要求 / 中断</td><td><code>turn/steer</code> / <code>turn/interrupt</code></td><td>转为 OAX 对当前任务的补充 / 取消操作。</td></tr>
+<tr><td>查看历史与实时输出</td><td><code>thread/resume</code>、查询与事件通知</td><td>Bridge 连接同一 thread，把允许的查询和该 thread 的通知送回前台。</td></tr>
+</tbody></table></div>
+<details style="margin-top:14px"><summary>具体连的是什么？Task / Mailbox 又在哪里？</summary><p>TUI 与 Bridge、Bridge 与 app-server 都通过 WebSocket 交换结构化 RPC 消息；当前底层使用本机 Unix socket。传输的是带 <code>id / method / params / result</code> 的请求、响应与事件，不是往终端输入框注入按键。</p><p><strong>Task / Mailbox 是 OAX 的 SQLite 数据。</strong>Task 保存任务正文、目标 Agent 与状态，Mailbox 保存该 Agent 的待办与领取情况。Worker 领取的是已经指定给自己的工作，不再选择目标 Agent。</p><p>现有桥接只支持 Codex 和部分接口：输入限文字，未列入白名单的操作不透传，审批由后台处理。已验 Codex 版本为 <code>0.160.0</code>，其 app-server 标为实验性；这不等于所有 Codex 原生功能或其他 CLI 都已接通。</p></details>
+
+<div class="mechanism-block" id="event-recording">
+<h3><span class="subnum">05-C</span>同一后台，两条事件连接：一条给你看，一条留下执行记录</h3>
+<p><strong>app-server 主动推送事件；Bridge 和 Worker 分别接收。</strong>Worker 进程内部的 Codex Adapter 负责理解 Codex 协议，筛选当前 thread / turn 的事件，再调用 Worker 提供的上报函数。OAX 服务收到上报后写入数据库。</p>
+<div class="event-demo" id="eventDemo" data-frontend="open">
+<div class="event-controls" role="group" aria-label="模拟前台开关"><span class="mini">只演示连接关系，不操作真实终端</span><button type="button" data-frontend="open" aria-pressed="true">终端打开</button><button type="button" data-frontend="closed" aria-pressed="false">模拟关闭终端</button></div>
+<p id="eventExplanation" class="event-explanation" aria-live="polite">终端打开：Bridge 的连接 A 显示实时过程；Worker 的连接 B 独立接收执行事件并上报。两条连接观察同一个 Codex 会话，不会因此执行两次任务。</p>
+<div class="event-scroller" role="region" aria-label="事件订阅与记录架构图，窄屏可左右滚动" tabindex="0">
+<svg id="event-subscription-map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 775" role="img" aria-labelledby="event-title event-desc">
+<title id="event-title">Codex app-server 的两条独立事件连接，以及 Worker 将执行记录上报 OAX 的机制</title>
+<desc id="event-desc">顶部是同一专属 Codex app-server。左侧 Bridge 前台进程通过独立连接接收当前会话通知，显示到作为子进程启动的原生 TUI。右侧 Worker 进程内 Codex Adapter 通过另一连接解析事件，经 EventSink 调用 OAX 事件 API；终态另走 FinishRun。OAX 服务将执行记录保存到 SQLite Journal。关闭前台只移除左侧连接，右侧继续运行。</desc>
+<defs><marker id="event-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#087f75"/></marker><marker id="event-view-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#3979b6"/></marker></defs>
+<text x="32" y="34" class="ev-heading">谁接收事件？谁保存记录？</text>
+<text x="1085" y="34" text-anchor="end" class="ev-small">已有机制 · 按当前源码说明</text>
+<rect x="310" y="60" width="500" height="112" rx="14" fill="#192630"/>
+<text x="560" y="95" text-anchor="middle" class="ev-title" style="fill:#fff">同一个 Codex app-server</text>
+<text x="560" y="126" text-anchor="middle" class="ev-body" style="fill:#cce0db">执行任务，推送当前会话的 item / turn 事件</text>
+<text x="560" y="152" text-anchor="middle" class="ev-small" style="fill:#a6c8bf!important">两条连接读取同一轮过程，不是启动两个 Codex 执行者</text>
+<g class="frontend-route">
+
+
+<text x="80" y="210" class="ev-body" style="fill:#3979b6">连接 A · 前台独立连接</text>
+<rect x="30" y="242" width="485" height="479" rx="16" fill="#eff4f8" stroke="#cedce4"/>
+<text x="52" y="275" class="ev-title">前台终端与连接器</text>
+<rect x="60" y="297" width="425" height="119" rx="10" fill="#fff" stroke="#cedce4"/>
+<path d="M435 172V230H460V297" class="ev-wire ev-view"/>
+<text x="80" y="329" class="ev-title">Native Bridge</text>
+<text x="80" y="358" class="ev-body">接收通知，过滤到当前 thread</text>
+<text x="80" y="385" class="ev-small">经连接器送回 TUI，保持事件与轮次顺序</text>
+<path d="M272 416V516" class="ev-wire ev-view"/>
+<text x="291" y="468" class="ev-small">实时显示通道</text>
+<rect x="60" y="516" width="425" height="103" rx="10" fill="#fff" stroke="#cedce4"/>
+<text x="80" y="550" class="ev-title">官方 Codex TUI · pane 0</text>
+<text x="80" y="580" class="ev-body">显示文字、工具过程、最终答复</text>
+<text x="60" y="664" class="ev-small">前台退出：这条连接关闭。</text>
+<text x="60" y="692" class="ev-small">再次打开：重新连接，读取会话历史。</text>
+</g>
+<g class="backend-route">
+
+
+<text x="749" y="210" class="ev-body" style="fill:#087f75">连接 B · Worker 独立连接</text>
+<rect x="555" y="242" width="535" height="479" rx="16" fill="#edf6ef" stroke="#c5dbce"/>
+<text x="578" y="275" class="ev-title">后台常驻，不依赖前台窗口</text>
+<rect x="580" y="297" width="485" height="204" rx="10" fill="#fff" stroke="#bdd7c8"/>
+<path d="M685 172V230H1042V297" class="ev-wire"/>
+<text x="600" y="328" class="ev-title">Worker 进程</text>
+<rect x="600" y="345" width="445" height="135" rx="8" fill="#f0f7f2"/>
+<text x="617" y="374" class="ev-title">Codex Adapter · Worker 内部代码</text>
+<text x="617" y="405" class="ev-body">按 thread / turn 解析事件与最终结果</text>
+<text x="617" y="432" class="ev-body">过程：调用 EventSink 上报函数</text>
+<text x="617" y="459" class="ev-small">终态：Wait 返回结果，再由 Worker 结算</text>
+<path d="M822 501V606" class="ev-wire"/>
+<text x="842" y="537" class="ev-small">HTTP / Unix socket</text>
+<text x="842" y="562" class="ev-small">过程 events / 终态 finish</text>
+<rect x="580" y="606" width="485" height="95" rx="10" fill="#fffdf6" stroke="#d8d5c4"/>
+<text x="600" y="636" class="ev-title">OAX 服务 → SQLite / Journal</text>
+<text x="600" y="663" class="ev-body">校验任务归属与执行版本，再保存记录</text>
+<text x="600" y="687" class="ev-small">数据库由 OAX 服务写入，app-server 不直接写库</text>
+</g>
+<text id="frontendClosedLabel" x="272" y="457" text-anchor="middle" class="ev-title">前台已关闭 · 此路断开</text>
+<text x="34" y="755" class="ev-small">Subscribe() 是 OAX 内部的事件分发函数；图中的“连接”是 WebSocket，不是模型轮询。</text>
+</svg>
+</div>
+</div>
+<p><strong>保存的是经过处理的执行记录。</strong>当前 Adapter 把完成项转换为输出事件，并收集最终答复、用量与结束状态。屏幕上的逐字输出不逐条写入 Journal；因此“终端看到全过程”和“数据库完整保存所有原始事件”是不同能力，后者当前没有实现。</p>
+<details><summary>看一个具体例子：Codex 运行命令并回答，哪些东西被记录？</summary>
+<div class="table-wrap"><table class="compact-table"><caption class="sr-only">Codex 事件到 OAX 记录的转换</caption><thead><tr><th>app-server 发出的事件</th><th>Worker 内 Adapter 怎么处理</th><th>OAX 留下什么</th></tr></thead><tbody>
+<tr><td><code>item/started</code></td><td>追踪工具和命令执行，辅助取消与结果判断。</td><td>当前不把每个 started 事件都转存为 Journal 条目。</td></tr>
+<tr><td><code>item/completed</code></td><td>生成 <code>turn.output</code>；文字经处理，工具项无文字时使用简要说明。每轮最多 256 条公开输出事件。</td><td><code>runtime.turn.output</code>，关联当前 Run；不是原始工具日志的完整副本。</td></tr>
+<tr><td>文字增量（delta）</td><td>当前不逐条转换为持久事件。</td><td>TUI 可经连接 A 显示；Journal 不逐字留档。</td></tr>
+<tr><td><code>turn/completed</code></td><td>汇总最终答复与终态；<code>Wait</code> 返回执行结果。</td><td>Worker 另调 <code>FinishRun</code> 更新 Run / Task，写完成相关记录；业务效果仍需独立核验。</td></tr>
+</tbody></table></div></details>
+<details><summary>接口级细节：Subscribe、EventSink、上报 API 分别是什么？</summary>
+<ol class="list"><li><strong>建立连接：</strong>Worker 的 Adapter 与 Bridge 各自使用 <code>DialRPC(endpoint)</code> 建立 WebSocket 连接，通过 <code>thread/resume</code> 关联同一 thread。连接收到 app-server 的推送。</li><li><strong>程序内分发：</strong>每个 RPCClient 的 <code>readLoop</code> 读取消息；请求结果交回调用者，通知和服务端请求发给本地 <code>Subscribe()</code> 返回的 Go channel。<code>Subscribe()</code> 不是另一个叫这个名字的 Codex 网络接口。</li><li><strong>Worker 上报：</strong>Adapter 调用 <code>EventSink.Emit</code>，这是 Worker 提供的函数回调；回调调用 <code>AppendRunEvents</code>，发往 <code>POST /api/v1/run-attempts/{run-id}/events</code>。</li><li><strong>OAX 保存：</strong>服务校验 Worker 身份、执行版本与有效租约，把允许公开的事件投影为 <code>runtime.*</code> Journal 记录，通过 SQLite 事务保存。轮次结束另走 <code>POST /api/v1/run-attempts/{run-id}/finish</code>。</li></ol>
+<p>Bridge 只向 TUI 转发当前 thread 的通知；带 ID 的服务端请求（例如审批）由后台处理。两条连接承担不同职责，没有“Bridge 先收齐事件再交给 Worker”的依赖。</p></details>
+</div>
+
+<div class="mechanism-block" id="message-task">
+<h3><span class="subnum">05-D</span>协作消息到任务：收信后自动处理，再通知对方继续</h3>
+<p>消息与正式任务已接通：<strong>咨询保存与目标待办同时落库；任务结算与关联答复同时落库；请求方为 managed 时自动建立只读续办。</strong>下图紫色虚线表示已实现的协作路径。消费答复结束后不会再自动回信。</p>
+<div class="collab-scroller" tabindex="0" role="region" aria-label="Rhythm 与 Pay 双向协作示意，窄屏可左右滚动">
+<svg id="collaboration-map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 380" role="img" aria-labelledby="collab-title collab-desc">
+<title id="collab-title">Rhythm 咨询 Pay，Pay 答复后 Rhythm 自动续办的实际关系</title>
+<desc id="collab-desc">左侧 Rhythm、右侧 Pay，中间 OAX 消息与任务服务。已安装版本将咨询保存与 Pay 待办登记接通。Pay 完成后保存关联答复，为 managed Rhythm 创建继续任务。两端 Worker 可以执行已经登记的任务。</desc>
+<defs><marker id="collab-solid-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#3979b6"/></marker><marker id="collab-pending-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#7960ae"/></marker></defs>
+<rect x="22" y="46" width="248" height="273" rx="14" fill="#eef4f7" stroke="#cedce4"/>
+<text x="45" y="82" class="ev-title">Rhythm · 应用领域</text><text x="45" y="116" class="ev-body">提出支付接口咨询</text><text x="45" y="153" class="ev-small">继续处理自己的工作</text><text x="45" y="231" class="ev-body">拿到答复后续办</text><text x="45" y="272" class="ev-small">已验：终端中可见过程</text>
+<rect x="408" y="22" width="302" height="321" rx="14" fill="#f7f6f0" stroke="#deddd0"/>
+<text x="430" y="59" class="ev-title">共享 OAX 服务 / 数据库</text>
+<text x="430" y="101" class="ev-body">咨询 M17 · 目标 Pay</text><text x="430" y="139" class="ev-small">同事务登记“处理咨询”任务</text>
+<path d="M430 164H688" stroke="#dce2df"/>
+<text x="430" y="205" class="ev-body">答复 R17 · 关联 M17</text><text x="430" y="244" class="ev-small">同事务登记“读答复并继续”</text><text x="430" y="278" class="ev-small">保留消息与 Task / Run 的关联</text><text x="430" y="317" class="ev-small">后台程序衔接，不额外调用模型</text>
+<rect x="853" y="46" width="245" height="273" rx="14" fill="#edf6ef" stroke="#c5dbce"/>
+<text x="875" y="82" class="ev-title">Pay · 支付领域</text><text x="875" y="116" class="ev-body">Worker 空闲后领取</text><text x="875" y="153" class="ev-small">Codex 处理本领域咨询</text><text x="875" y="231" class="ev-body">产生支付侧答复</text><text x="875" y="272" class="ev-small">超出职责部分交还 Rhythm</text>
+<path d="M270 111H408" stroke="#3979b6" stroke-width="3" marker-end="url(#collab-solid-arrow)"/><text x="281" y="95" class="ev-small">1 · 保存咨询</text>
+<path d="M710 135H853" stroke="#7960ae" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#collab-pending-arrow)"/><text x="718" y="116" class="ev-small">2 · 登记待办</text>
+<path d="M853 229H710" stroke="#7960ae" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#collab-pending-arrow)"/><text x="718" y="212" class="ev-small">3 · 关联回复</text>
+<path d="M408 253H270" stroke="#7960ae" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#collab-pending-arrow)"/><text x="281" y="235" class="ev-small">4 · 安排续办</text>
+<text x="25" y="369" class="ev-small">托管协作结构：原 Rhythm / Pay 已迁入，真实只读自动往返已通过。</text>
+</svg></div>
+<p class="mini">现有消息 API 有目标身份与职责检查；当前 external 身份与 managed 托管身份互斥。当前已有模式接入、职责校验与消息／任务关联；失败、绑定或职责变化会进入 needs_review，不盲目重做。两原业务身份现均为 managed / active，并保留原 thread。</p>
+<p><strong>完整答复与过程摘要分开保存。</strong>当前最终答复可保留至 32 KiB，事件和错误摘要仍为 4 KiB；本次 Pay 的 7,973 字节答复已完整传到 Rhythm。真正超过答复上限时保留需核对状态，不用截短结果冒充成功。咨询只要求对方提供领域事实，后续业务修改仍按用户任务执行。</p>
+<details><summary>同一条消息重试时，为什么还要保存处理记录？</summary><p>例如 M17 已保存但发件人没收到确认，可能重发；收件程序重启也可能重新读到 M17。衔接程序要查到它已有对应任务，继续原工作。它不把这次重读当成第二项新工作。你主动发出的两次新请求仍可分别执行。</p></details>
+</div>
+<details><summary>第 05 节的源码与历史实测依据</summary><ul>
+<li><a href="../../internal/nativebridge/bridge.go">Bridge：创建 socket、启动官方 TUI、独立连接、转接任务与事件</a></li>
+<li><a href="../../internal/runtime/codex/turn.go">Codex Adapter：解析事件、完成项输出与最终结果</a>；<a href="../../internal/runtime/codex/rpc.go">RPC 连接与本地 Subscribe 分发</a></li>
+<li><a href="../../internal/worker/run_manager.go">Worker：EventSink 上报和 FinishRun</a>；<a href="../../internal/controlplane/worker_service.go">OAX 服务：事件投影与执行结算</a></li>
+<li><a href="../../internal/cli/fleet/command.go">Fleet 默认 Codex 原生终端</a>；<a href="../../internal/runtime/agy/adapter.go">AGY 当前后台执行接口</a></li>
+<li><a href="../reports/validation/2026-10-02-codex-workflow/evidence/installed-native01/SUMMARY.md">真实原生终端验收：输入、执行、退出后继续、重开历史</a>。这是历史单 Agent 证据；此前独立托管验收另含双 Agent 与 PTY 断开复验，本轮原身份迁入见第 09 节。</li>
+</ul><p>机制按当前源码核实；本轮已用原 Rhythm / Pay 验证只读自动往返，前台输入与重连另有历史独立证据。精确工具取消、未知终态恢复等既有缺口仍保留，不由本页图示宣布完成。</p></details>
+</section>
+<section class="section" id="choices"><div class="section-heading"><span class="num">06</span><h2>四条路线，取舍放在同一张表里</h2></div><div class="table-wrap"><table><caption class="sr-only">原宿主、自动续办、可见终端和证据状态对比</caption><thead><tr><th scope="col">方式</th><th scope="col">使用体验</th><th scope="col">自动协作与成本</th><th scope="col">判断</th></tr></thead><tbody><tr><td>原 Desktop 手动续办</td><td>保留原窗口与上下文；收到提醒后人工继续。</td><td>程序等消息不调用模型；仍需一次人工触发，无法保证无人值守。</td><td>真实 manual 往返已验；到件提醒仍需小规模接入。</td></tr><tr><td>固定 pane + 自动键入</td><td>可看可输入、位置固定；命令被送到终端。</td><td>自动按键可能碰到正在编辑的文字或正在执行的任务。</td><td>可做有限实验；日常协作优先使用任务接口。</td></tr><tr class="recommended"><td>后台托管 + Codex 终端<br><span class="tag">已实装可用</span></td><td>固定终端作为入口；后台 Worker 连续接单。</td><td>事件来才执行；人工和消息统一排队。真正工作轮仍有上下文成本。</td><td>原 Rhythm / Pay 已迁入并通过自动只读往返；此前独立身份已验证原生输入与重连。</td></tr><tr><td>独立短协作会话</td><td>原开发会话保留；协作使用职责、摘要与证据索引。</td><td>可压缩协作上下文，但需额外管理 owner、产物同步与写入串行。</td><td>备选，未实施；不等于继承完整原 thread 记忆，先只读。</td></tr></tbody></table></div></section>
+<section class="section" id="gates"><div class="section-heading"><span class="num">07</span><h2>原会话已迁入，真实往返通过</h2></div><p class="section-intro">按用户批准的顺序，先 Pay、再 Rhythm。两边保留原领域身份、项目目录与 thread；现在由 OAX Worker 执行，在固定 Codex 终端观察与交互。</p><div class="steps"><article class="step"><h3>安装与迁移修复<br><span class="tag">已完成</span></h3><p>修复“已撤销 external 仍不能迁入同原 thread”的限制；安装干净构建 886ba7f / schema v5。双方通信绑定均为 managed / active，旧凭据已实测失效。<span class="stop">只允许符合身份、原 thread 与未完成工作检查的正式迁移。</span></p></article><article class="step"><h3>逐个迁入原会话<br><span class="tag">已完成</span></h3><p>Pay 原 thread 初始化通过。Rhythm 首次遇 Desktop writer 占用，经正式归档／取消归档释放后通过；69 个连带子任务均恢复原状态。没有重启共享 Desktop、删锁或直接改数据库。</p></article><article class="step"><h3>核对固定窗口<br><span class="tag">已完成</span></h3><p>Pay：oneaxe-pay / @27 / %54；Rhythm：rhythm / @28 / %55，均为 OAX 的 pane 0。窗口禁止自动改名。原 11 个窗口、18 个 pane 的名称、ID、PID 保持。<span class="stop">原 overview 是普通 shell，Fleet 预检拒绝后保留；只在新窗口运行正式 agent open --native。</span></p></article><article class="step"><h3>真实咨询与自动续办<br><span class="tag">PASS</span></h3><p>Rhythm 发问 → Pay 只读源码并答复 → Rhythm 自动读答复并提出本域建议。三个 Task 均成功、各一个 Run；Pay 的 7973 字节答复与关联消息全文相同，终端过程可见。<span class="stop">首次正常长答复被 4KiB 摘要截断，已修复完整答复为 32KiB 并复验；失败记录保留。</span></p></article><article class="step"><h3>继续领域开发<br><span class="tag">现在可用</span></h3><p>进入对应窗口布置本域任务，需要对方事实时让 Agent 通过 OAX 咨询。查看 <a href="../operations/rhythm-pay-managed-handoff.md">日用与恢复说明</a>。<span class="stop">本轮只验收协作；两业务仓库保持干净，未实施支付、回调、数据库或部署变更。</span></p></article></div></section>
+<section class="section" id="try"><div class="section-heading"><span class="num">08</span><h2>在页面上试一遍</h2></div><p class="section-intro">以下仅为浏览器本地模拟：不访问 OAX、不发送消息、不调用模型、不改变任何真实会话。点击按钮不构成方案批准或实施授权；计数刷新页面即清零。</p><div class="grid two"><div class="demo"><h3>有工作才启动一轮</h3><p class="mini">“新消息”模拟新增可执行工作；忙时先入队，“完成本轮”再处理下一批。此简化演示不覆盖审批、恢复或业务副作用。</p><div class="statusbar" role="status" aria-live="polite"><span>状态 <strong id="state">空闲</strong></span><span>排队 <strong id="queued">0</strong></span><span>模拟模型轮 <strong id="runs">0</strong></span></div><div class="buttons"><button class="primary" id="newMessage" type="button">新消息</button><button id="busy" type="button">模拟人工忙碌</button><button id="finish" type="button">完成本轮</button><button id="idle" type="button">空闲等待</button><button id="reset" type="button">重置</button></div><p id="demoLog" aria-live="polite">没有工作，程序等待。模型请求不增加。</p></div><div class="demo"><h3>只算输入 token，不估价格</h3><p class="mini">对比同一小时中，定时空醒带来的额外输入与真正工作轮输入。按工作轮计数，不把每条消息都算成一轮。</p><div class="fields"><label for="history">每轮输入 token<input id="history" type="number" value="200000" min="0" max="10000000" step="1000"></label><label for="interval">空闲轮询间隔（分钟）<input id="interval" type="number" value="2" min="0.1" max="1440" step="0.1"></label><label for="agents">Agent 数量<input id="agents" type="number" value="2" min="1" max="100" step="1"></label><label for="work">每 Agent 每小时真实工作轮<input id="work" type="number" value="2" min="0" max="1000" step="1"></label></div><div class="calc-result" id="calcOutput" aria-live="polite"></div><p class="mini">简化假设：每轮输入相同、轮询均为空醒；实际忙时避让、合批、缓存及上下文会改变结果。真正工作成本并未因事件触发而消失。</p></div></div></section>
+<section class="section" id="evidence"><div class="section-heading"><span class="num">09</span><h2>证据边界与阅读来源</h2></div><details open><summary>本轮：原 Rhythm / Pay 的切换与真实自动往返</summary><ul><li>安装源码 <code>886ba7fd255a5f6632ee550d4bdcc786274f48fa</code> / schema v5；工件 SHA-256：<code>15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca</code>。daemon 与 Worker 的运行工件已核对，默认代理保持。</li><li>2026-10-03 23:01:09–23:07:47（北京时间），原 Rhythm 发问、Pay 自动答复、Rhythm 自动续办，三个 query Task 各一个成功 Run；两消息关联正确，无答复循环。</li><li>逐 Task 核对原 SessionBinding、真实工具记录、终端过程；完整 7973 字节答复与实时消息一致。两业务仓库 HEAD 与干净状态保持；独立核查 PASS。</li><li>首次 writer 冲突与 4KiB 答复截断均保留失败证据。正式生命周期释放与产品修复后复验；没有改判旧失败，也没有自动重做业务动作。</li><li>本轮 origin 通过正式 Task API 创建；本轮没有重复人工键盘发送、PTY 断开或 30 分钟空闲矩阵。以下历史独立验收各有证据，不混成原身份再次完整测试。</li></ul></details><details><summary>此前独立验收：托管只读闭环、原生终端与空闲等待</summary><ul><li>历史安装源码 <code>e22e4a89862246c33aef822527ea3b145f150a74</code> / schema v5；工件 SHA-256：<code>14f4221694eedce95a7ce81eefae52b14f58393d8d7368b3057407d10437f2d9</code>。干净构建、服务工件与旧数据保持均有记录。</li><li>独立双 Codex 自动咨询 → 真实读事实 → 关联答复 → 请求方自动消费，同 backend / thread；managed query 达到 <code>succeeded/query_result_delivered</code>。</li><li>真实 PTY 断开后后台继续、同 thread 重开；独立 tmux 中以 <code>fleet workspace --respawn-dead</code> 验证原生输入。Run 成功及独立文件匹配，不等于原生输入 Task 已消除 <code>uncertain/business_effect_unverified</code>。</li><li>2026-10-03 18:06:43–18:36:43，1800.107508 秒空闲：两个测试 Agent 的 Task 清单无变化，精确 thread 新增模型轮与工具调用均为 0。此证据不代表全机或账户账单。</li><li>忙时真实 sleep 75 秒，37 次采样均为咨询 queued / 0 Run；结束后答复与消费，Run 不重叠。三项错误请求均拒绝，0 新 Task。</li><li>离线同 key 两次仍为一条消息、一个 Task。重启 Worker 并通过正式 <code>agent resume</code> 使 Runtime 就绪后，原待办继续，双方同 thread 完成答复与消费，没有重发；仅 Worker online 不等于可接单。</li></ul></details><details><summary>历史证据与仍待完成的边界</summary><ul><li><code>8c9ceff</code> / schema v4 是历史版本：原 Rhythm / Pay manual 咨询、关联回复及 ACK 已验，由用户初始化的工作轮执行；该批次两原业务身份仍为 external；后续迁入已在本轮单独验收。</li><li>原 Desktop heartbeat 两版共 8 轮、0 工具调用，自动闭环 NOT_PASSED；两项自动化已暂停。原 Desktop 事件入站、忙时与人工输入竞争、审批等待仍未完整验证。</li><li>恢复夹具初次漏掉 resume，补齐正式步骤后原待办继续；因此不声称仅重启 Worker 就自动恢复 Runtime。原批次结尾旧 PID 采集 FAIL 保留；只读补采 verdict 为 PASS、0 新 Task。<code>fleet up</code> 的 systemd 首次启动未实测，managed→external 人工回复暂不自动续办。</li><li>AGY 原生前台、精确仅目标工具取消与未知终态一键恢复仍有缺口；普通 resume / 重启不能视作自动解除隔离。</li></ul></details><details><summary>其他办法：Desktop 界面自动化与终端守护器</summary><ul><li>Desktop 自动点击／粘贴依赖焦点、忙态、弹窗与升级后的 UI；没有持久回执与执行权验证，不作为当前主链。</li><li>固定 pane 的普通 CLI + 专门终端守护器是另一条工程路径；固定坐标本身不保证可靠。当前 Codex native bridge 已接入正式任务调度。</li></ul></details><details><summary>文件来源：当前交付、历史证据与业务交接</summary><ul><li><a href="../reports/validation/2026-10-03-managed-collaboration/DELIVERY.md">此前独立身份托管验收</a> · <a href="../reports/validation/2026-10-03-rhythm-pay-managed/evidence/independent-review.json">本轮独立核查</a></li><li><a href="../reports/validation/2026-10-03-rhythm-pay-managed/DELIVERY.md">当前交付 · DELIVERY.md</a> · <a href="../reports/validation/2026-10-03-rhythm-pay-managed/COVERAGE.md">本轮实际覆盖 · COVERAGE.md</a> · <a href="../reports/validation/2026-10-03-rhythm-pay-managed/EXECUTION-LOG.md">首次失败与复验 · EXECUTION-LOG.md</a></li><li><a href="../operations/managed-collaboration.md">托管协作使用步骤</a> · <a href="../operations/rhythm-pay-managed-handoff.md">Rhythm / Pay 切换记录与日用恢复</a></li><li><a href="../operations/event-driven-collaboration.md">事件触发机制</a> · <a href="../operations/codex-agent-entry.md">Codex 终端入口</a></li><li><a href="../reports/validation/2026-10-03-desktop-collaboration/DELIVERY.md">历史原会话 manual 协作</a> · <a href="../reports/validation/2026-10-03-external-session/evidence/host-probe01/protocol01/SUMMARY.md">历史 Desktop 宿主探测</a></li></ul><p>来源截止 2026-10-03。本页是机制与交付说明，不是实时控制台；最新逐项状态以本轮报告为准。网页演示不产生真实证据。本次使用真实 Chrome 检查图页交互与窄屏布局，见<a href="../reports/validation/2026-10-03-architecture-refresh/README.md">图页验证记录</a>；页面模拟不替代产品 E2E。</p></details></section>
+</main><footer><div class="wrap footer-row"><span>OpenAgentX · 事件协作与终端方案</span><span>现在：进入 OAX 的 oneaxe-pay 或 rhythm 窗口继续工作。</span></div></footer>
+<script>
+'use strict';
+(()=>{let running=false,pending=0,rounds=0;const el=id=>document.getElementById(id);function render(message){el('state').textContent=running?'忙碌':'空闲';el('queued').textContent=String(pending);el('runs').textContent=String(rounds);el('demoLog').textContent=message;}el('newMessage').addEventListener('click',()=>{if(running){pending++;render('当前轮正在执行。新消息已模拟入队，不启动并行模型轮。');}else{running=true;rounds++;render('发现可执行工作，启动一轮模拟执行。完成后再处理下一批。');}});el('busy').addEventListener('click',()=>{if(running){render('当前已忙碌，仍由同一个执行者处理，不启动第二轮。');return;}running=true;rounds++;render('模拟用户输入开始一个真实工作轮。协作消息此时到达应排队。');});el('finish').addEventListener('click',()=>{if(!running){render('没有运行中的工作，无需完成，也不启动模型。');return;}if(pending>0){const count=Math.min(pending,3);pending-=count;rounds++;render('前一轮完成。模拟有界合批：取出 '+count+' 条待处理工作，启动下一轮；这只是演示规则。');}else{running=false;render('本轮完成，回到程序等待。后续没有工作就不调用模型。');}});el('idle').addEventListener('click',()=>render(running?'当前仍有工作，不能强制标成空闲；请先完成本轮。':'继续空闲等待。无论等待多久，模型请求都不增加。'));el('reset').addEventListener('click',()=>{running=false;pending=0;rounds=0;render('模拟已重置。没有工作，程序等待。');});const fields=['history','interval','agents','work'];function calculate(){const vals=fields.map(id=>Number(el(id).value));if(fields.some(id=>el(id).value===''||!el(id).validity.valid)||vals.some(v=>!Number.isFinite(v))){el('calcOutput').textContent='请输入范围内的有效数值。';return;}const [history,interval,agents,work]=vals;const idle=60/interval*agents*history,real=work*agents*history;const fmt=n=>Math.round(n).toLocaleString('zh-CN');el('calcOutput').replaceChildren();[['理论可避免的空醒输入 / 小时',idle],['真正工作轮输入 / 小时（仍需承担）',real],['事件触发时的空闲输入',0]].forEach(([label,n])=>{const p=document.createElement('p');p.append(label+'：');const b=document.createElement('strong');b.textContent=fmt(n)+' token';p.append(b);el('calcOutput').append(p);});}fields.forEach(id=>el(id).addEventListener('input',calculate));calculate();})();
+</script>
+<script>
+(()=>{const panel=document.getElementById('componentMap'),exp=document.getElementById('expandMap');
+const descriptions={all:'左上是你使用的终端，左下是共享 OAX 服务和本地数据库，右侧是 Rhythm 的后台执行进程。实线表示终端与执行连接，紫色虚线表示托管协作；两原业务会话现已按此结构运行。',manual:'你在 Codex 界面按下发送 → 终端连接器登记一项目标为 Rhythm 的任务 → OAX 保存任务和待办 → Rhythm Worker 领取 → 后台 Codex 执行。Worker 不重新选择负责的 Agent。',auto:'已实现：其他 Agent 的咨询或答复到达 → 协作入口确定目标、保存关联关系 → 登记到该 Agent 的任务待办 → 对应 Worker 空闲后领取。答复到达 managed 请求方时，自动安排它继续一轮。',result:'app-server 经两条独立连接推送事件：连接 A 到 Bridge，供 TUI 显示；连接 B 到 Worker 内的 Codex Adapter，转换为执行记录再通过 OAX API 保存。下方 05-C 可模拟关闭前台，观察记录通道仍然保留。'};
+panel.querySelectorAll('[data-map-path]').forEach(button=>button.addEventListener('click',()=>{panel.dataset.path=button.dataset.mapPath;panel.querySelectorAll('[data-map-path]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));document.getElementById('mapExplanation').textContent=descriptions[button.dataset.mapPath];}));
+let overflowBefore='';function expand(on){if(on){overflowBefore=document.body.style.overflow;document.body.style.overflow='hidden';}else{document.body.style.overflow=overflowBefore;}panel.classList.toggle('map-expanded',on);if(on){panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','系统架构全图');}else{panel.removeAttribute('role');panel.removeAttribute('aria-modal');panel.removeAttribute('aria-label');}exp.textContent=on?'返回正文 · Esc':'单独看全图';exp.setAttribute('aria-expanded',String(on));}
+exp.addEventListener('click',()=>expand(!panel.classList.contains('map-expanded')));document.addEventListener('keydown',event=>{if(!panel.classList.contains('map-expanded'))return;if(event.key==='Escape'){expand(false);exp.focus();}if(event.key==='Tab'){const items=[...panel.querySelectorAll('button,[tabindex="0"]')];const first=items[0],last=items[items.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
+})();
+</script>
+<script>
+(()=>{const demo=document.getElementById('eventDemo'),output=document.getElementById('eventExplanation');demo.querySelectorAll('button[data-frontend]').forEach(button=>button.addEventListener('click',()=>{const closed=button.dataset.frontend==='closed';demo.dataset.frontend=button.dataset.frontend;demo.querySelectorAll('button[data-frontend]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));output.textContent=closed?'模拟关闭终端：连接 A 与 Bridge 退出，屏幕不再实时显示；连接 B 仍由 Worker 持有，已接任务继续执行，事件与结束结果仍上报 OAX。重开前台可重新连接并读取历史。':'终端打开：Bridge 的连接 A 显示实时过程；Worker 的连接 B 独立接收执行事件并上报。两条连接观察同一个 Codex 会话，不会因此执行两次任务。';}));})();
+</script>
+</body></html>

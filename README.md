@@ -1,14 +1,17 @@
 # OpenAgentX
 
-OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持久化组织、任务、Mailbox、RunAttempt、Worker lease 和 Event Journal；Worker 作为独立进程通过 Unix Socket 或 mTLS HTTPS 长轮询工作；Runtime Adapter 按一次 turn 启动具体 Agent CLI/ACP 会话。
+OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持久化组织、任务、Mailbox、RunAttempt、Worker lease 和 Event Journal；Worker 作为独立进程通过 Unix Socket 或 mTLS HTTPS 长轮询工作；Runtime Adapter 按 Run 驱动具体执行后端：Codex 复用专属 app-server 与 thread，AGY 等后端按各自协议执行。
 
 ## 架构
 
-最新部署与 ADR 演进见 [当前系统架构（Markdown）](docs/design/CURRENT_ARCHITECTURE.md)
-和 [离线 HTML 架构图](docs/design/current-architecture.html)。2026-10-02 快照按当前
-AGY 工作流源码与实际安装证据整理，分为总览、工作流、领域初始化、运行恢复、
-事件观察、外部依赖六个视图；区分已实现、待补、待实现及未启用能力。
-图册自身的浏览器检查见[验证记录](docs/reports/validation/2026-10-02-architecture/README.md)。
+当前架构以已安装 `886ba7f` / schema v5 和真实验收记录为基线：
+
+- [总体架构七视图（HTML）](docs/design/current-architecture.html) · [Markdown 与源码依据](docs/design/CURRENT_ARCHITECTURE.md)：总览、任务流、领域初始化、AGY 运行、事件观察、外部依赖及 Codex 原生终端。
+- [事件协作与终端方案（HTML）](docs/design/event-collaboration.html)：终端、Native Bridge、Worker、app-server 与消息任务的关系，以及两条事件连接。
+- [Rhythm / Pay 使用与恢复](docs/operations/rhythm-pay-managed-handoff.md) · [原会话切换及真实自动往返证据](docs/reports/validation/2026-10-03-rhythm-pay-managed/DELIVERY.md)。原身份已迁入；协作通过不等于收费业务完成。
+
+HTML 可下载后在浏览器离线打开，GitHub 文件页主要用于查看源码；文件之间使用仓库相对链接。
+本次图页更新与检查见[文档验证记录](docs/reports/validation/2026-10-03-architecture-refresh/README.md)。
 下面的简图仅说明基础控制面关系。
 
 逐模块测试、功能缺口、过度设计判断与 Paseo / Multica 借鉴建议见
@@ -33,7 +36,7 @@ OpenAgentX daemon
        │ Unix Socket 或 mTLS HTTPS
        ▼
 Resident Worker
-  └─ Runtime Adapter (AGY Batch / ACP / fake)
+  └─ Runtime Adapter (Codex app-server / AGY / ACP / fake)
        └─ Agent CLI 或 Runtime 进程
 ```
 

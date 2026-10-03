@@ -1,10 +1,10 @@
 {
   "title": "OpenAgentX · 架构与关键流程",
   "date": "2026-10-03",
-  "source_commit": "6576c559ae852304b04a7bf149583a471b112597",
-  "installed_commit": "6576c559ae852304b04a7bf149583a471b112597",
-  "binary_sha256": "432cbd044902351670179e7eaaf463871f59bec0d274ed8810f49eab56d7fd39",
-  "scope": "当前 OpenAgentX 任务后台、受管领域 Agent 及 local UDS 外部会话消息通道。交易业务、券商或交易所的实现不在本次工程边界内。",
+  "source_commit": "886ba7fd255a5f6632ee550d4bdcc786274f48fa",
+  "installed_commit": "886ba7fd255a5f6632ee550d4bdcc786274f48fa",
+  "binary_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+  "scope": "当前 OpenAgentX 任务后台、Codex 原生终端与 managed 领域只读协作。支付接入、收费及交易业务不在本次交付范围。",
   "refs": {
     "entry": {
       "label": "登记与服务入口",
@@ -267,12 +267,12 @@
       "line": 1
     },
     "externaldelivery": {
-      "label": "6576c559 当前安装与外部消息交付边界",
+      "label": "历史 v3：external 消息通道交付",
       "path": "docs/reports/validation/2026-10-03-external-session/DELIVERY.md",
       "line": 1
     },
     "externalproof": {
-      "label": "真实消息 API 与不创建 Worker/Run 的证据",
+      "label": "历史 v3：external API 无 Worker/Run 证据",
       "path": "docs/reports/validation/2026-10-03-external-session/evidence/README.md",
       "line": 1
     },
@@ -285,6 +285,51 @@
       "label": "外部绑定与消息持久化",
       "path": "internal/persistence/sqlite/external_session_repository.go",
       "line": 1
+    },
+    "managedrepo": {
+      "label": "托管咨询入任务与结果续办",
+      "path": "internal/persistence/sqlite/managed_collaboration_repository.go",
+      "line": 52
+    },
+    "managedschema": {
+      "label": "schema v5 托管协作关系",
+      "path": "internal/persistence/sqlite/migrations/005_managed_collaboration.sql",
+      "line": 1
+    },
+    "managedusage": {
+      "label": "托管协作日用与限制",
+      "path": "docs/operations/managed-collaboration.md",
+      "line": 1
+    },
+    "managedhistory": {
+      "label": "历史独立身份：原生输入、重连与30分钟空闲",
+      "path": "docs/reports/validation/2026-10-03-managed-collaboration/DELIVERY.md",
+      "line": 1
+    },
+    "cutover": {
+      "label": "当前原 Rhythm/Pay 迁入与只读闭环交付",
+      "path": "docs/reports/validation/2026-10-03-rhythm-pay-managed/DELIVERY.md",
+      "line": 1
+    },
+    "cutovercoverage": {
+      "label": "当前原身份覆盖矩阵与未重验项",
+      "path": "docs/reports/validation/2026-10-03-rhythm-pay-managed/COVERAGE.md",
+      "line": 1
+    },
+    "cutoverlog": {
+      "label": "writer冲突、答复截断首败及复验",
+      "path": "docs/reports/validation/2026-10-03-rhythm-pay-managed/EXECUTION-LOG.md",
+      "line": 1
+    },
+    "cutoverreview": {
+      "label": "原身份三Task与7973字节答复独立核查",
+      "path": "docs/reports/validation/2026-10-03-rhythm-pay-managed/evidence/independent-review.json",
+      "line": 1
+    },
+    "cutoverusage": {
+      "label": "固定终端与正式迁入步骤",
+      "path": "docs/operations/rhythm-pay-managed-handoff.md",
+      "line": 1
     }
   },
   "views": [
@@ -293,7 +338,7 @@
       "tag": "01 · 总览",
       "title": "一项工作如何穿过整个系统",
       "question": "谁接收指令，谁持有状态，谁真正执行？",
-      "takeaway": "一个 daemon 保存权威状态；每个领域的 Worker 独立接单；外部 CLI 执行模型与工具。",
+      "takeaway": "一个 daemon 保存权威状态；领域 Worker 接单；原生输入与 managed 咨询都进入 Task / Run，再由 Runtime 执行。",
       "nodes": [
         {
           "id": "web",
@@ -336,59 +381,63 @@
         {
           "id": "service",
           "title": "控制面领域服务",
-          "sub": "任务 · Worker · 网络",
+          "sub": "任务 · 协作 · Worker · 网络",
           "x": 610,
           "y": 100,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "处理任务、补充、取消、结果验收和网络工作流。服务模块共同运行在一个 daemon 内，不是独立部署的微服务。",
+          "detail": "同一 daemon 内处理任务、补充、取消、验收、网络与领域协作。managed consultation 经职责/peer/绑定检查原子生成 query Task；成功关联结果再生成请求方只读续办 Task。",
           "refs": [
             "commands",
-            "network",
-            "planner"
+            "managedrepo",
+            "managedusage",
+            "cutover"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
           "risk": "",
           "jump": "work"
         },
         {
           "id": "db",
           "title": "SQLite 权威账本",
-          "sub": "状态 + 投递 + 审计",
+          "sub": "schema v5 · 状态与投递",
           "x": 900,
           "y": 100,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "SQLite schema v3 保存 Task、Message、Mailbox、Run、SessionBinding、Worker 代次和 Journal，并新增外部会话绑定与持久消息表。复合变更由事务保持一致；external_session 消息不伪造 Worker/Run。",
+          "detail": "schema v5 保存 Task、Mailbox、Run、SessionBinding、代次与 Journal，以及职责目录、external 消息/回执和 managed_message_tasks。external 纯消息不伪造 Run；managed 咨询和结果消费创建真实 Task/Run。",
           "refs": [
             "ledger",
             "externalledger",
-            "externaldelivery",
-            "externalproof"
+            "managedschema",
+            "managedrepo",
+            "cutover"
           ],
-          "proof": "AGY/Codex 历史事务与安装证据保留；本轮真实消息 API、v2副本升级v3旧数据行集合核验",
+          "proof": "本轮安装schema v5；原thread绑定、三Task/Run及消息Journal交叉核对",
           "risk": "",
           "jump": ""
         },
         {
           "id": "console",
-          "title": "Console / OAX",
-          "sub": "终端查看与控制",
+          "title": "原生终端 / 桥接",
+          "sub": "Codex pane 0 · 正式写入口",
           "x": 30,
           "y": 340,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "Console 是正式 API 客户端。OAX pane 0 承载 TUI，overview 提供 Agent 导航。tmux 不承担任务路由、Runtime 身份或进程执行权。",
+          "detail": "Codex 原生 TUI 通过 native bridge 将 start/steer/interrupt 转正式 API，读取与事件观察连接 app-server。AGY 保留 Console。tmux 只承载前台，关闭前台不停止 Worker。固定入口 OAX:oneaxe-pay.0 与 OAX:rhythm.0，自动改名关闭。",
           "refs": [
-            "console",
-            "consoleproof"
+            "codexbridge",
+            "codexnative",
+            "managedhistory",
+            "cutover"
           ],
-          "proof": "AGY 既有证据：I：80×24 PTY，完整结果、接受/拒绝、继续与重开",
+          "proof": "历史独立身份：原生键盘输入、PTY关闭后后台继续/重连、忙时/离线和30分钟空闲已验；本轮未重跑该矩阵；本轮固定pane与真实过程已核对",
           "risk": "",
-          "jump": ""
+          "jump": "native"
         },
         {
           "id": "worker",
@@ -399,12 +448,14 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "每个领域使用受管 Worker。心跳和控制循环独立于一次模型运行；单 Agent 当前最多一个活动 Run。完成任务后继续等待下一项。",
+          "detail": "每个领域 Worker 独立接单，单 Agent 最多一个活动 Run。普通程序等待持久队列，有工作才启动模型；心跳和控制循环独立于模型执行。原 Desktop 的 LLM heartbeat 已暂停。",
           "refs": [
             "worker",
-            "onboarding"
+            "managedrepo",
+            "managedhistory",
+            "cutover"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "历史独立身份30分钟新增模型轮次/工具调用为0；本轮原身份自动执行已验",
           "risk": "",
           "jump": "runtime"
         },
@@ -417,36 +468,36 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "AGY 与 Codex adapter 共用冻结输入、Worker 与账本。AGY 每 Run 启动 CLI；Codex 由常驻 app-server 管理 thread/turn。6b68eeb 的 Runtime 主链验收作为历史保留；6576c559 已安装，本轮新增消息通道不代表原会话或 Runtime 全链重验。",
+          "detail": "AGY 与 Codex 共用冻结输入和权威账本。AGY 每 Run 启动 CLI；Codex Worker 经持久 app-server 管理明确 thread/turn。本轮原 Rhythm/Pay 已 managed active G3，保留原 thread；原 Desktop 仅查历史。",
           "refs": [
             "runtime",
             "codexruntime",
             "assembly",
-            "codexlive",
-            "codexinstalled",
-            "codexdelivery",
-            "externaldelivery"
+            "cutover",
+            "cutovercoverage"
           ],
-          "proof": "AGY：既有 R＋I；Codex：D＋隔离 R 主链，安装来源/环境 I",
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
           "risk": "",
           "jump": "native"
         },
         {
           "id": "cli",
-          "title": "AGY CLI / wrapper",
-          "sub": "模型调用 + 工具执行",
+          "title": "AGY / Codex 宿主",
+          "sub": "CLI / app-server · 模型与工具",
           "x": 900,
           "y": 340,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "通过正式 agy-graft 启动 AGY。每个 Run 都启动受控 CLI 进程；同 Task 内可用已保存 conversation 续接。没有接管任意外部活 CLI 的入口。",
+          "detail": "AGY 通过 agy-graft 启动 CLI；Codex 使用领域专属 app-server，Worker 是受管 turn 写入者。native bridge 另建读取/事件观察连接，不另起模型轮询。AGY 原生前台仍待补。",
           "refs": [
             "runtime",
-            "planner",
-            "daily"
+            "codexruntime",
+            "codexbridge",
+            "managedhistory",
+            "cutover"
           ],
-          "proof": "R＋I：使用真实 agy-graft 与 AGY",
+          "proof": "AGY历史R/I；Codex原身份本轮只读协作R及独立核验",
           "risk": "",
           "jump": "dependencies"
         },
@@ -459,15 +510,15 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "日常使用 agent add/open/status/pause/resume。新增 Codex join --prepare 与 open --native；离线准备不启动服务，原生写入仍进入正式调度。",
+          "detail": "日常 agent add/open/status/pause/resume；Codex join --prepare 离线保存交接，agent open --native 打开原生终端。新建 Codex Fleet pane 0 默认原生；已有活pane保留。本轮overview为既有普通shell，workspace预检拒绝，仅通过正式open新增两窗。",
           "refs": [
             "entry",
             "codexjoin",
-            "codexusage",
-            "codexprepare",
-            "codexinstalled"
+            "codexnative",
+            "managedhistory",
+            "cutoverlog"
           ],
-          "proof": "AGY：既有 I；Codex：D＋真实 PTY 准备，已安装help与服务来源 I",
+          "proof": "历史隔离Fleet原生输入已验；本轮不宣称fleet workspace/up通过",
           "risk": "",
           "jump": "init"
         },
@@ -509,20 +560,21 @@
         },
         {
           "id": "cloud",
-          "title": "Google 模型服务",
-          "sub": "经当前配置的网络访问",
+          "title": "外部模型服务",
+          "sub": "AGY / Codex 登录与网络",
           "x": 900,
           "y": 580,
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "模型推理由 AGY 依赖外部服务完成。代理与登录状态影响 Runtime 可用性；控制面并不直接代替 AGY 调用模型。图中不固定未核实的外部域名。",
+          "detail": "AGY 与 Codex 各由其 Runtime 调用外部模型服务，依赖登录、模型与代理配置。OAX控制面不直接替代Runtime调用模型；供应商内部实现不在此图范围。",
           "refs": [
             "runtime",
+            "codexruntime",
             "network",
-            "daily"
+            "cutover"
           ],
-          "proof": "真实 AGY 链接通；供应商内部实现不在本工程内",
+          "proof": "AGY历史及Codex本轮真实模型链路；不扩大为所有模型参数已验",
           "risk": "",
           "jump": ""
         }
@@ -641,9 +693,9 @@
         }
       ],
       "notes": [
-        "主图仍是受管任务链；外部原会话消息通道见第03图“正在工作的CLI”旁注。消息API已验不等于原会话整链通过。",
-        "绿色代表能力已实现，不表示相关的所有边界用例全部通过。点击节点可见证据范围。",
-        "Quote Service 等是受管领域与业务工作区；本图不声称券商、交易所或交易执行已接通。"
+        "原 Rhythm/Pay 已迁入 managed active G3、保留原thread；只读咨询→完整答复→自动续办通过，详见第02和07图。",
+        "绿色表示已实现；历史独立身份输入/重连/空闲证据，与本轮正式API发起的原身份闭环分开阅读。",
+        "query不是写入沙箱；两业务仓库未改，支付接入、收费、回调或部署均未执行。"
       ],
       "rows": [
         [
@@ -771,13 +823,13 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "Worker 上报正式 TurnResult；事务同时处理 Run、Task、会话绑定与审计。空输出、坏 JSON、缺终态不能只凭 exit 0 当成功。",
+          "detail": "Worker上报TurnResult并事务处理Run、Task、会话及Journal。完整最终答复独立保留至32KiB，事件/错误摘要仍4KiB；空输出、缺终态或真实超限不凭exit 0判成功。",
           "refs": [
             "ledger",
             "planner",
-            "scope"
+            "cutoverlog"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "本轮4KiB截断首败保留，修复后7973字节完整传播及超限回归",
           "risk": "",
           "jump": ""
         },
@@ -810,13 +862,14 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "合法成功终态及完整 FinalReply 可结算 query_result_delivered。它证明回复交付，不证明答案正确，也不提供只读沙箱。",
+          "detail": "合法成功终态及完整FinalReply可结算query_result_delivered。只证明回复交付，不证明答案正确或提供只读沙箱；managed咨询成功后由后台关联结果并安排请求方续办。",
           "refs": [
             "completion",
-            "daily",
-            "scope"
+            "managedrepo",
+            "cutover",
+            "cutoverreview"
           ],
-          "proof": "AGY 既有证据：I＋R：材料及职责标记的精确问答",
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
           "risk": "",
           "jump": ""
         },
@@ -866,12 +919,13 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "继续创建关联的新 Task，复用目标与选定结果摘要；不自动继承父任务的原生 conversation，也不重跑原任务。 终态后可直接继续，不要求先接受或拒绝结果。",
+          "detail": "用户“继续此工作”创建关联新Task并带目标/结果摘要，不重跑父任务；它与managed自动result_consumption是不同入口。managed续办固定请求方已登记backend/thread。",
           "refs": [
             "commands",
-            "daily"
+            "managedrepo",
+            "managedusage"
           ],
-          "proof": "AGY 既有证据：I＋R：原文保留后追加，B parent=A，各一 Run",
+          "proof": "历史用户继续流程；本轮managed续办Task与原thread已核对",
           "risk": "",
           "jump": ""
         },
@@ -912,6 +966,82 @@
           "proof": "源码已核对；真实覆盖见所列证据",
           "risk": "",
           "jump": "runtime"
+        },
+        {
+          "id": "ask",
+          "title": "领域 Agent 发问",
+          "sub": "consultation · scope · key",
+          "x": 30,
+          "y": 820,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "Agent按职责目录发一次collaborate ask；peer、scope/owner和绑定检查决定是否接单。当前managed仅自动接受只读consultation，行动request不在范围。",
+          "refs": [
+            "managedusage",
+            "managedrepo",
+            "cutover"
+          ],
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "consult",
+          "title": "对方持久 query Task",
+          "sub": "消息 / Mailbox / 固定thread",
+          "x": 320,
+          "y": 820,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "咨询消息与query Task/Mailbox、SessionBinding及Journal在同一事务保存，去重key避免重复任务。忙时排队，离线待办不丢，Runtime就绪后由同一Worker领取。",
+          "refs": [
+            "managedrepo",
+            "managedhistory",
+            "cutoverreview"
+          ],
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "reply",
+          "title": "成功答复关联回传",
+          "sub": "query_result_delivered",
+          "x": 610,
+          "y": 820,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "对方最终答复成功结算后，后台持久保存一条关联结果。失败、未知结果或职责/绑定/backend变化转needs_review，保留原始失败，不自动重做。",
+          "refs": [
+            "managedrepo",
+            "cutoverlog",
+            "cutoverreview"
+          ],
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
+          "risk": "",
+          "jump": ""
+        },
+        {
+          "id": "consume",
+          "title": "请求方自动续办",
+          "sub": "result_consumption · 新Task",
+          "x": 900,
+          "y": 820,
+          "w": 236,
+          "h": 108,
+          "status": "done",
+          "detail": "结果自动创建请求方query Task，固定原backend/thread，在本域职责内消费答案。消费结束不再协议回信；本轮仅一咨询一结果，无回复循环。",
+          "refs": [
+            "managedrepo",
+            "cutover",
+            "cutoverreview"
+          ],
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
+          "risk": "",
+          "jump": ""
         }
       ],
       "edges": [
@@ -1119,12 +1249,30 @@
             "y": 715,
             "anchor": "middle"
           }
+        },
+        {
+          "a": "ask",
+          "b": "consult",
+          "label": "接单",
+          "kind": "data"
+        },
+        {
+          "a": "consult",
+          "b": "reply",
+          "label": "执行",
+          "kind": "data"
+        },
+        {
+          "a": "reply",
+          "b": "consume",
+          "label": "续办",
+          "kind": "data"
         }
       ],
       "notes": [
-        "query = 回复交付；mutation = 涉及效果。query 本身不是只读权限控制。",
-        "同 Task 补充进入下一 Run；“继续此工作”新建关联 Task，无需先验收。",
-        "人工接受和系统独立验证保持不同来源；文件精确字节与进程停止由验收证据核对。"
+        "query是回复交付语义，不是OS只读沙箱。自动咨询不等于行动委派或支付收费完成。",
+        "人工继续、同Task补充与managed结果续办是三个入口；都落到既有Task/Run，managed固定原thread。",
+        "原身份本轮三Task各一个Run，7973字节完整答复；首次writer冲突与截断失败仍保留。"
       ],
       "rows": [
         [
@@ -1138,37 +1286,40 @@
         [
           550,
           "验收与继续"
+        ],
+        [
+          790,
+          "托管只读协作：复用上方 Task / Run 主链"
         ]
       ],
       "width": 1180,
-      "height": 750
+      "height": 990
     },
     {
       "id": "init",
       "tag": "03 · 领域初始化",
       "title": "从正在工作的 CLI 到长期领域",
       "question": "哪些可以今天做到，哪些仍需补入口？",
-      "takeaway": "长期保存的是领域身份、职责和工作目录。已有 CLI 对话目前通过明确交接接续。",
+      "takeaway": "保存领域身份、职责、工作目录与明确thread；原Rhythm/Pay已完成正式迁入，旧宿主必须先释放writer。",
       "nodes": [
         {
           "id": "externalcli",
-          "title": "正在工作的 CLI",
+          "title": "已有 CLI / Desktop",
           "sub": "已有上下文 / 可能无角色",
           "x": 30,
           "y": 100,
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "已有 CLI 可按受管模式 join --prepare 交接，也可用 external_session 保留原宿主/thread，仅经本地 UDS 进行 bind/send/inbox/ack/reply、去重和审计。消息模式不启动 Worker、不迁移历史、不伪造 Run。rhythm/oneaxe-pay 已绑定用户原 thread，但原会话尚未初始化，业务消息为0。",
+          "detail": "已有CLI可join --prepare；external模式保留原宿主，只提供持久消息。原Rhythm/Pay已另经用户授权迁入managed active G3，保留原thread；原Desktop仅查历史，不同时派新任务。",
           "refs": [
             "codexjoin",
-            "codexprepare",
             "externalusage",
-            "externaldelivery",
-            "externalproof"
+            "cutover",
+            "cutoverlog"
           ],
-          "proof": "受管 prepare 保留既有证据；本轮仅真实消息 API 已验，绑定不等于原宿主已连接",
-          "risk": "Desktop 自动 queue/wakeup 受阻；尚未证明原会话收信、已读、回复及续办整链",
+          "proof": "历史external人工往返与heartbeat失败保留；本轮原身份managed自动闭环已验",
+          "risk": "原Desktop事件入站仍未验；不能将Worker迁入通过算作Desktop自动协作通过",
           "jump": ""
         },
         {
@@ -1228,19 +1379,19 @@
         },
         {
           "id": "original",
-          "title": "原 CLI 继续当前工作",
+          "title": "旧宿主释放 writer",
           "sub": "不自动接收 OAX 工作",
           "x": 30,
           "y": 340,
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "原 CLI 完成当前 turn 后进入空闲交接。原 thread 必须显式选择，不能猜测 Desktop 会话或只凭 PID 接管；任意 PTY 迁移仍未支持。",
+          "detail": "停止turn或显示idle不证明thread writer已释放。本轮Rhythm首遇writer冲突；通过正式App生命周期释放并核对notLoaded后迁入，未删锁、改数据库或重启共享Desktop。",
           "refs": [
-            "codexusage",
-            "codexruntime"
+            "codexjoin",
+            "cutoverlog"
           ],
-          "proof": "AGY 既有证据：源码约束；不宣称任意活 CLI 接管",
+          "proof": "首次失败与正式释放、69个结束子任务归档状态恢复证据保留",
           "risk": "",
           "jump": ""
         },
@@ -1327,16 +1478,15 @@
           "w": 236,
           "h": 108,
           "status": "partial",
-          "detail": "Codex 可显式选择 thread/endpoint；Task 的 native session 选择与投递同事务，thread 创建后受 fencing 保护持久绑定。同一会话写入经 Worker 仲裁。AGY 外部 conversation 迁入仍待实现。",
+          "detail": "Codex显式选择thread，正式SessionBinding核对身份/原thread，受管写入由Worker仲裁。已撤销external且同身份/同原thread无冲突时才可迁入managed；active external和反向迁移仍拒绝。",
           "refs": [
-            "codexruntime",
-            "codexbridge",
-            "ledger",
-            "codexnext",
-            "codexd"
+            "codexjoin",
+            "managedrepo",
+            "cutoverlog",
+            "cutoverreview"
           ],
-          "proof": "D：会话选择与竞争；R：同 thread 后续任务",
-          "risk": "不自动发现 Desktop 活会话；不承诺任意外部 CLI 接管",
+          "proof": "本轮原Pay/Rhythm G3、原thread及职责保持；迁入回归与真实证据",
+          "risk": "AGY外部conversation迁入仍未实现；不抢占活跃宿主",
           "jump": "native"
         },
         {
@@ -1361,20 +1511,20 @@
         },
         {
           "id": "ready",
-          "title": "可以开始受管工作",
-          "sub": "agent open / 工作台",
+          "title": "固定原生终端就绪",
+          "sub": "Pay / Rhythm · managed G3",
           "x": 900,
           "y": 580,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "身份、Worker 和网络满足条件后接受工作；默认新 Task 不猜测旧原生历史，选择已有 native thread 必须显式传入并由账本约束。",
+          "detail": "本轮固定OAX:oneaxe-pay.0（@27/%54）与OAX:rhythm.0（@28/%55），窗口自动改名关闭。pane 0原生进程与原thread核对通过；原11窗口18pane保持。overview普通shell使Fleet预检拒绝，两新窗通过正式agent open --native打开。",
           "refs": [
-            "entry",
-            "codexruntime",
-            "codexlive"
+            "cutover",
+            "cutoverlog",
+            "cutoverusage"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "本轮pane/进程/原窗保留已验；不宣称fleet up或人工键盘矩阵重验",
           "risk": "",
           "jump": ""
         }
@@ -1534,9 +1684,9 @@
         }
       ],
       "notes": [
-        "--configure-only 只抑制 Worker 启动，不代表零配置写入或 daemon 不启动。",
-        "新增 external_session：仅local UDS持久通信，不启动Worker/Run。active只是绑定有效，pending只是入库，ack只是显式已读；Desktop自动queue/wakeup尚未接通。",
-        "虚线“拟议”路径尚未接通；旧 agent attach/bootstrap/launch 不是当前支持入口。"
+        "本轮两业务身份已managed active G3；职责目录revision 5。原Desktop保留查历史，日常执行从固定OAX终端进入。",
+        "join准备、writer释放、Runtime就绪、协作启用分别核对；仅Worker online不足以证明可接单。",
+        "不迁移任意活跃PTY；本轮只读验收未修改两业务仓库，也未执行支付接入。"
       ],
       "rows": [
         [
@@ -1571,12 +1721,13 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "Worker 不依靠模型输出证明存活；运行、控制与心跳分开。静默工具也需要保持 Worker/Run lease。",
+          "detail": "Worker程序心跳维持Worker/Run lease；模型运行、控制与心跳独立。无任务时程序等待，不定时启动LLM查收件箱。原Desktop两版heartbeat共8轮0工具调用失败后已暂停。",
           "refs": [
             "worker",
-            "lease"
+            "managedhistory",
+            "cutover"
           ],
-          "proof": "AGY 既有证据：R：95秒工具、7检查点、约90秒续租；原夹具FAIL仍保留",
+          "proof": "历史独立身份1800秒新增模型轮次/工具为0；本轮原身份自动咨询通过",
           "risk": "",
           "jump": ""
         },
@@ -1916,7 +2067,7 @@
         }
       ],
       "notes": [
-        "本图取消、超时、崩溃恢复和耗时数据均来自 AGY 既有证据，不套用到 Codex。",
+        "本图AGY历史控制与恢复证据保留；Codex精确工具取消、未知终态一键恢复仍待补，不因只读协作成功而转为已验。",
         "Codex 已验证空闲 Worker 重启后的来源与网络持久性；这不等于异常执行后解除隔离。",
         "Codex 的精确取消和异常恢复缺口见原生子图及覆盖矩阵。"
       ],
@@ -1942,7 +2093,7 @@
       "tag": "05 · 观察与重连",
       "title": "页面如何得到可信的当前状态",
       "question": "刷新、断网和历史任务很多时，怎样避免丢结果？",
-      "takeaway": "先读安全下界，再读快照；第一次从下界订阅，重连从已经确认的事件序号继续。",
+      "takeaway": "Web/Console 读取快照和持久Journal；原生TUI另收app-server事件。两者都不持有后台生命周期。",
       "nodes": [
         {
           "id": "client",
@@ -2009,15 +2160,15 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "第一次SSE使用live_after_sequence；后续使用已确认cursor与原生Last-Event-ID语义。旧历史数据不再强制从0回放。",
+          "detail": "此图是Web/Console的Journal观察：首次SSE从live_after_sequence订阅，重连使用已确认cursor。Codex原生TUI用bridge独立连接app-server接收线程事件，详见第07图；不是此SSE流。",
           "refs": [
-            "cursor",
             "web",
-            "daily"
+            "cursor",
+            "codexbridge"
           ],
           "proof": "AGY 既有证据：I：267881首连在线；旧from0循环失败原件保留",
           "risk": "",
-          "jump": ""
+          "jump": "native"
         },
         {
           "id": "journal",
@@ -2083,13 +2234,13 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "页面分别显示Run结果、Task事实和人工验收。结果已返回并不自动等于业务验证完成；关闭再打开不创建新Task。",
+          "detail": "页面分别显示Run、Task与人工review。当前完整答复投影最多32KiB，事件/错误摘要4KiB；本轮7973字节正式API与关联消息正文一致。回复交付不等于业务验收。",
           "refs": [
-            "daily",
             "review",
-            "consoleproof"
+            "cutover",
+            "cutoverreview"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "本轮长答复协议值独立核查；历史Web日用证据保留",
           "risk": "",
           "jump": ""
         },
@@ -2267,7 +2418,7 @@
       ],
       "notes": [
         "这里展示观察流程，不会对正在运行的产品发请求；图本身是离线架构文档。",
-        "SSE是观察通道；用户命令仍走正式写API。退出浏览器或Console不停止Worker。",
+        "Journal/SSE是持久观察通道；Codex原生广播是另一条实时观察路径。写命令仍走正式API，终端或浏览器关闭不停止Worker。",
         "就绪原因来自身份、Worker和当前代网络事实；HTTP 200不等于用户已经能开始工作。"
       ],
       "rows": [
@@ -2292,7 +2443,7 @@
       "tag": "06 · 外部依赖",
       "title": "进程、存储、网络与部署边界",
       "question": "运行依赖哪些外部东西，哪些只是可选能力？",
-      "takeaway": "常态运行依赖本机 daemon、SQLite、受管 Worker、AGY 与外部模型服务；远程和其他Runtime另行标注。",
+      "takeaway": "本机daemon、SQLite与领域Worker构成后台；AGY CLI或Codex app-server负责模型及工具。远程和其他Runtime另行标注。",
       "nodes": [
         {
           "id": "browser",
@@ -2323,14 +2474,14 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "当前安装来源为 6576c559，数据库 schema v3。本机 HTTP 服务 Web 与用户 API；external_session 的 bind/send/inbox/ack/reply 仅开放在本地 UDS。6b68eeb 的进程/Web/Runtime 验收属于历史证据。",
+          "detail": "当前已安装源码886ba7f、schema v5。HTTP服务Web/用户API；本地UDS承载Worker及external/managed协作入口。API、任务和协作服务在同一daemon内。",
           "refs": [
             "main",
             "externalapi",
-            "externaldelivery",
-            "codexinstalled"
+            "managedrepo",
+            "cutover"
           ],
-          "proof": "本轮安装与消息 API 证据见外部会话交付；旧版 Runtime/Web 验收不扩为原会话整链",
+          "proof": "本轮canonical/daemon/Worker工件SHA一致；原身份协作证据",
           "risk": "",
           "jump": ""
         },
@@ -2354,19 +2505,20 @@
         },
         {
           "id": "google",
-          "title": "Google 模型服务",
-          "sub": "外部网络与AGY认证",
+          "title": "外部模型服务",
+          "sub": "AGY / Codex 认证与模型",
           "x": 900,
           "y": 100,
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "真实AGY调用依赖模型服务可用性、AGY登录及所选模型。图不包含供应商内部架构，也不声称所有模型/effort参数已逐一验证。",
+          "detail": "由AGY或Codex Runtime调用外部模型，依赖各自认证与网络。供应商内部架构、账户总体消耗及所有模型/effort组合不在本次验证范围。",
           "refs": [
-            "daily",
-            "scope"
+            "runtime",
+            "codexruntime",
+            "cutover"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "AGY历史主链；本轮Codex原身份真实工具与答复",
           "risk": "",
           "jump": ""
         },
@@ -2410,19 +2562,21 @@
         },
         {
           "id": "agy",
-          "title": "agy-graft → AGY",
-          "sub": "结构化stdin/stdout与工具",
+          "title": "AGY / Codex Runtime",
+          "sub": "agy-graft / 专属app-server",
           "x": 610,
           "y": 340,
           "w": 236,
           "h": 108,
           "status": "external",
-          "detail": "wrapper/实际CLI是独立运行依赖；网络环境由受控配置准备。AGY执行工具、读写workspace，再回传结构化结果。",
+          "detail": "AGY依赖wrapper/CLI；Codex依赖领域专属app-server。模型和工具在Runtime执行，Worker写入连接与原生桥接读取/事件连接共用同一Codex后台，关闭TUI不停止后台。",
           "refs": [
             "runtime",
-            "live"
+            "codexruntime",
+            "codexbridge",
+            "cutover"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "当前原身份闭环及历史独立身份原生输入/重连",
           "risk": "",
           "jump": ""
         },
@@ -2440,9 +2594,9 @@
             "network",
             "codexenv",
             "codexnetwork",
-            "codexinstalled"
+            "cutover"
           ],
-          "proof": "AGY：既有证据；Codex：隔离 R 与正式 I 重启前后进程环境",
+          "proof": "历史代理链路与本轮安装后实际Worker/app-server环境保持；不扩大为所有网络组合",
           "risk": "配置覆盖不能替代实际流量证明；Codex named_profile 未开放",
           "jump": ""
         },
@@ -2467,20 +2621,20 @@
         {
           "id": "store",
           "title": "SQLite + 本地配置",
-          "sub": "任务库 / identity / Worker",
+          "sub": "schema v5 / 身份 / 职责",
           "x": 320,
           "y": 580,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "SQLite schema v3 保存原有任务账本及外部会话绑定/消息，消息支持去重与 Journal。identity、ROLE、Worker YAML、Fleet 等仍在本地文件；外部消息模式不创建 Worker 或 Run，业务产物另存。",
+          "detail": "SQLite v5保存权威账本、职责目录、external消息/回执及managed消息到Task关系。identity、ROLE、Worker YAML与Fleet为本地配置；业务产物另存，query不会形成OS写入沙箱。",
           "refs": [
             "ledger",
-            "externalledger",
-            "externaldelivery",
-            "externalproof"
+            "managedschema",
+            "managedrepo",
+            "cutover"
           ],
-          "proof": "源码已核对；真实覆盖见所列证据",
+          "proof": "本轮schema及绑定/消息/Task/Run/Journal独立核对",
           "risk": "",
           "jump": ""
         },
@@ -2670,7 +2824,7 @@
       ],
       "notes": [
         "当前未装配完整ACP生产路径；CodeBuddy代码保留，本轮未增加专项/真实验收。",
-        "组织/岗位/AuthorityPolicy模型与入口RBAC不同；完整组织业务授权和自主委派仍未贯通。",
+        "职责目录、peer/scope检查与managed只读协作已贯通；完整组织业务授权和自动行动request仍不在交付范围。",
         "额外Nginx、公网入口、远程Worker、交易服务均不是本机AGY日用链的默认已启用依赖。"
       ],
       "rows": [
@@ -2696,7 +2850,7 @@
       "description": "会话与受管写入",
       "title": "保留原生交互，写入进入正式调度",
       "question": "原生 TUI 如何共享线程而不绕过 Task / Run？",
-      "takeaway": "准备、空闲交接、明确线程、受管执行；界面可以关闭，Worker 继续接单。取消必须核验实际工具停止。",
+      "takeaway": "原生TUI经桥接发正式任务；Worker负责turn写入。app-server分别向Worker与bridge连接发事件，界面断开不影响账本结算。",
       "nodes": [
         {
           "id": "tui",
@@ -2707,17 +2861,15 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "agent open --native 打开原生 Codex 终端，连接本地桥接。thread 由受管状态或明确选择确定；关闭终端后 Worker 继续在线。",
+          "detail": "Codex新建Fleet pane 0默认原生；现有活pane保留。原Pay/Rhythm固定终端经agent open --native连接同原thread；原Desktop仅查历史。关闭TUI不停止后台。",
           "refs": [
             "codexnative",
-            "codexusage",
-            "codexnext",
-            "codexcoverage",
-            "codexinstalledapi",
-            "codexinstallednative"
+            "managedhistory",
+            "cutover",
+            "cutoverusage"
           ],
-          "proof": "源码；R：终端关闭后同 thread 正式 query 继续成功；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
-          "risk": "",
+          "proof": "历史独立身份：原生键盘输入、PTY关闭后后台继续/重连、忙时/离线和30分钟空闲已验；本轮未重跑该矩阵；本轮固定pane/原thread已核对",
+          "risk": "本轮origin经正式Task API发起，不冒充原身份人工键盘输入重验",
           "jump": ""
         },
         {
@@ -2729,16 +2881,13 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "turn/start 转正式任务，steer/interrupt 转控制入口。写请求幂等、相同 RPC ID 不可换内容；新 turn 通知等待 start 响应，按 thread 过滤广播。",
+          "detail": "native bridge在前台进程中拦截turn/start、steer、interrupt并转Control API，保证幂等/响应排序。另连同一app-server作允许的读取和线程通知观察；不绕过Worker创建turn。",
           "refs": [
             "codexbridge",
             "codexevents",
-            "codexd",
-            "codexcoverage",
-            "codexinstalledapi",
-            "codexinstallednative"
+            "managedhistory"
           ],
-          "proof": "D：重复输入、跨线程、快速终态及排序；R 边界按覆盖表；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "proof": "源码两连接核对；历史原生输入、PTY断开/重连已验",
           "risk": "",
           "jump": ""
         },
@@ -2751,16 +2900,14 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "原生终端沿用正式身份、幂等与 CAS，不直接调用 app-server 写方法绕过 OAX；server requests 仍由执行端处理。",
+          "detail": "原生写入通过认证、幂等与CAS进入正式任务/控制入口。managed只读咨询也走控制面事务创建Task；共享调度但不是向tmux注入命令。",
           "refs": [
             "commands",
             "codexbridge",
-            "codexd",
-            "codexcoverage",
-            "codexinstalledapi",
-            "codexinstallednative"
+            "managedrepo",
+            "cutover"
           ],
-          "proof": "源码＋D；隔离正式 API 主链 R；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
           "risk": "",
           "jump": ""
         },
@@ -2773,39 +2920,34 @@
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "显式 native thread 选择与 Task/Message/Mailbox 同事务；session.bound 在执行权校验后保存 Task binding，Journal 只记录安全摘要。",
+          "detail": "native thread选择与Task/Message/Mailbox同事务；managed咨询及result_consumption固定已登记backend/thread。完整回复32KiB，Journal事件摘要4KiB；真实超限保持uncertain。",
           "refs": [
             "planner",
             "ledger",
-            "codexd",
-            "codexlive",
-            "codexcoverage",
-            "codexinstalledapi",
-            "codexinstallednative"
+            "managedrepo",
+            "cutoverlog"
           ],
-          "proof": "D：事务/绑定/重放；R：正式 Task、Run、Journal 与实际文件；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS",
           "risk": "",
           "jump": ""
         },
         {
           "id": "worker",
           "title": "常驻 Worker",
-          "sub": "单活动 Run · 冻结输入",
+          "sub": "Runtime Adapter · 写连接",
           "x": 900,
           "y": 350,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "Worker持续领取任务并冻结角色、cwd、网络与期限，外部thread忙碌时不抢占。正常空闲重启已验证；running/starting/uncertain 恢复时持续隔离，不盲重放，也不由普通resume清除。",
+          "detail": "Worker及Codex Adapter持有受管turn写入连接，订阅该连接事件处理工具请求、结束回报并结算账本。普通程序接单，不轮询模型；前台退出后仍在线。",
           "refs": [
             "worker",
             "codexruntime",
-            "codexlive",
-            "codexinstalled",
-            "codexinstalledapi",
-            "codexinstallednative"
+            "managedrepo",
+            "cutover"
           ],
-          "proof": "R：同Worker三轮及产物；I：发布SHA、重启后第2代ready/网络回执",
+          "proof": "本轮：原 Rhythm/Pay 三 query Task / 三 Run 成功，7973字节完整答复与自动续办；独立核查 PASS；此前独立身份后台继续已验",
           "risk": "",
           "jump": ""
         },
@@ -2829,29 +2971,26 @@
             "codexinstalledapi",
             "codexinstallednative"
           ],
-          "proof": "R：模型、精确产物、上下文和取消兜底复验；I：实际长工具取消、延迟效果核验与下一query；完整组合按覆盖表",
+          "proof": "历史Codex R/I：实际长工具取消兜底、延迟效果核验及后续query；本轮只读协作未重验取消矩阵",
           "risk": "C08：仅目标turn的精确取消仍有缺口。C09：未知状态持续隔离，普通resume/restart不可清除；受控恢复入口待补",
           "jump": ""
         },
         {
           "id": "broadcast",
-          "title": "原生事件广播",
-          "sub": "进度 · 工具 · 完整结果",
+          "title": "Bridge 观察连接",
+          "sub": "只读RPC · 线程通知与排序",
           "x": 320,
           "y": 350,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "app-server 推送原生通知，bridge 过滤到选定 thread 并保持响应/通知顺序。界面仅观察，不持有 Worker 生命周期；真实结果仍由账本与独立效果核验。",
+          "detail": "bridge独立DialRPC/Subscribe至同一app-server，收到第二路原生广播，过滤所选thread，并在start响应后返回通知给TUI。该连接不能替代Worker结束回报或业务效果证据。",
           "refs": [
-            "codexevents",
             "codexbridge",
-            "codexnext",
-            "codexcoverage",
-            "codexinstalledapi",
-            "codexinstallednative"
+            "codexevents",
+            "managedhistory"
           ],
-          "proof": "D：线程过滤、缓冲上限与排序；R：原生关闭后继续接单；I：原生输入、同thread迁入、关闭后后台继续与重开均已验",
+          "proof": "源码：bridge Subscribe与Adapter Subscribe分开；历史真实原生过程/重连",
           "risk": "",
           "jump": ""
         }
@@ -2860,7 +2999,7 @@
         {
           "a": "tui",
           "b": "bridge",
-          "label": "原生 RPC",
+          "label": "原生RPC",
           "kind": "data"
         },
         {
@@ -2878,25 +3017,143 @@
         {
           "a": "ledger",
           "b": "worker",
-          "label": "领取 Run",
+          "label": "领取Run",
           "kind": "data"
         },
         {
           "a": "worker",
           "b": "appserver",
-          "label": "唯一写入者",
-          "kind": "data"
+          "label": "连接B：turn写入",
+          "kind": "data",
+          "points": [
+            [
+              900,
+              380
+            ],
+            [
+              873,
+              380
+            ],
+            [
+              873,
+              270
+            ],
+            [
+              728,
+              270
+            ],
+            [
+              728,
+              350
+            ]
+          ],
+          "label_pos": {
+            "x": 800,
+            "y": 257,
+            "anchor": "middle"
+          }
+        },
+        {
+          "a": "appserver",
+          "b": "worker",
+          "label": "连接B：执行事件→结算",
+          "kind": "control",
+          "points": [
+            [
+              790,
+              458
+            ],
+            [
+              790,
+              505
+            ],
+            [
+              1018,
+              505
+            ],
+            [
+              1018,
+              458
+            ]
+          ],
+          "label_pos": {
+            "x": 904,
+            "y": 493,
+            "anchor": "middle"
+          }
+        },
+        {
+          "a": "bridge",
+          "b": "broadcast",
+          "label": "独立连接A",
+          "kind": "control"
+        },
+        {
+          "a": "broadcast",
+          "b": "appserver",
+          "label": "连接A：允许的读取",
+          "kind": "control",
+          "points": [
+            [
+              556,
+              375
+            ],
+            [
+              580,
+              375
+            ],
+            [
+              580,
+              288
+            ],
+            [
+              650,
+              288
+            ],
+            [
+              650,
+              350
+            ]
+          ],
+          "label_pos": {
+            "x": 600,
+            "y": 277,
+            "anchor": "middle"
+          }
         },
         {
           "a": "appserver",
           "b": "broadcast",
-          "label": "原生通知",
-          "kind": "data"
+          "label": "连接A：原生广播",
+          "kind": "data",
+          "points": [
+            [
+              670,
+              458
+            ],
+            [
+              670,
+              543
+            ],
+            [
+              438,
+              543
+            ],
+            [
+              438,
+              458
+            ]
+          ],
+          "label_pos": {
+            "x": 554,
+            "y": 532,
+            "anchor": "middle"
+          }
         },
         {
           "a": "broadcast",
           "b": "tui",
-          "label": "经桥接返回 TUI",
+          "label": "过滤 / 排序后回TUI",
           "kind": "control",
           "points": [
             [
@@ -2917,10 +3174,39 @@
             "y": 393,
             "anchor": "middle"
           }
+        },
+        {
+          "a": "worker",
+          "b": "ledger",
+          "label": "结果 / Journal",
+          "kind": "control",
+          "points": [
+            [
+              1136,
+              405
+            ],
+            [
+              1160,
+              405
+            ],
+            [
+              1160,
+              150
+            ],
+            [
+              1136,
+              150
+            ]
+          ],
+          "label_pos": {
+            "x": 1150,
+            "y": 275,
+            "anchor": "end"
+          }
         }
       ],
       "width": 1180,
-      "height": 515,
+      "height": 610,
       "rows": [
         [
           65,
@@ -2932,9 +3218,9 @@
         ]
       ],
       "notes": [
-        "join --prepare 只离线保存身份、职责和交接；当前 turn 完成后再显式 resume。",
-        "thread 必须明确选择；不猜测 Desktop 会话，不把 turn/start 用作抢占活跃 turn。",
-        "本图保留6b68eeb的来源、网络重启、API、迁入和native交互主链历史验收。当前安装为6576c559/schema3；本轮新增外部消息通道，不据此宣称原会话整链或全矩阵通过。"
+        "图中两路事件来自同一app-server：A供bridge原生观察，B供Worker执行与结算；不是Web Journal/SSE，也不是两个模型轮询。",
+        "当前原Rhythm/Pay保留原thread，managed只读闭环已验；原Desktop事件入站未验、heartbeat暂停。",
+        "原生输入/PTY重连/30分钟空闲属于此前独立身份。AGY原生前台、精确工具取消和未知终态一键恢复仍待补。"
       ]
     }
   ],
@@ -2943,17 +3229,17 @@
       "name": "已有CLI自初始化",
       "status": "partial",
       "view": "init",
-      "current": "Codex prepare/薄技能、空闲thread迁入、新角色与原生历史 I 已核验；准备不等于live绑定",
-      "next": "继续改善当前工作Agent的自说明入口；不接管活动中的任意PID",
-      "trigger": "本轮 Codex 日用交付"
+      "current": "Codex prepare/正式空闲交接已实现；原Rhythm/Pay迁入managed G3并保留原thread，writer冲突首败及正式释放证据保留",
+      "next": "其他会话按同样正式生命周期核对，不凭idle或PID抢占",
+      "trigger": "新增领域或迁入其他原会话"
     },
     {
       "name": "原生线程与外部会话",
       "status": "partial",
       "view": "native",
-      "current": "Codex 已知thread迁入及原生界面重连 I 通过；AGY外部conversation导入未实现",
-      "next": "按明确需求补AGY外部导入，不自动猜测外部会话",
-      "trigger": "需要保留已有会话上下文"
+      "current": "当前两固定原生终端与原thread已核对；历史独立身份输入/PTY重连已验，AGY原生前台及外部conversation导入未实现",
+      "next": "按真实需求补AGY入口；不混用本轮原身份与历史独立身份验收",
+      "trigger": "需要AGY原生终端或导入既有conversation"
     },
     {
       "name": "Codex 精确取消与异常恢复",
@@ -2983,9 +3269,9 @@
       "name": "组织治理与自主委派",
       "status": "partial",
       "view": "dependencies",
-      "current": "基础模型与入口RBAC已在；完整业务授权未贯通",
-      "next": "独立定义领域授权与委派闭环后再开放",
-      "trigger": "开始真实多人/跨领域任务委派"
+      "current": "职责目录、peer/scope检查、managed只读咨询和自动续办已实现并经原身份验收；完整业务授权与自动行动request未开放",
+      "next": "具体行动先明确领域授权与独立业务验收，不从只读咨询直接扩大权限",
+      "trigger": "开始执行跨领域业务变更"
     },
     {
       "name": "其他Runtime与远程执行",
@@ -2994,6 +3280,14 @@
       "current": "Codex 已装配、已安装并有隔离R与来源/环境I；CodeBuddy保留，ACP和mTLS按既有边界",
       "next": "Codex剩余用户流程按覆盖表验收；其他Runtime与远程通道按明确需求专项验证",
       "trigger": "确有其他 Runtime 或远程机器需求"
+    },
+    {
+      "name": "Desktop事件入站",
+      "status": "partial",
+      "view": "init",
+      "current": "原Desktop heartbeat两版8轮0工具调用，自动闭环未通过且已暂停；当前成功来自授权迁入managed Worker",
+      "next": "仅在仍需Desktop自动入站时单独验证正式事件入口，禁止恢复常驻LLM定时轮询",
+      "trigger": "用户明确要求其他Desktop会话保留原宿主自动协作"
     }
   ]
 }

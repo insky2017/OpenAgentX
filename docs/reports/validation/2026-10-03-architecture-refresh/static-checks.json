@@ -1,0 +1,40 @@
+{
+  "verdict": "PASS",
+  "checked_at": "2026-10-03T16:07:45.733933+00:00",
+  "architecture_source": "886ba7fd255a5f6632ee550d4bdcc786274f48fa",
+  "installed_commit": "886ba7fd255a5f6632ee550d4bdcc786274f48fa",
+  "schema": 5,
+  "views": 7,
+  "nodes": 83,
+  "source_references": 65,
+  "local_links": 888,
+  "javascript_syntax_checks": 8,
+  "html_structure_unique_ids": "PASS",
+  "rendered_data_equals_source": "PASS",
+  "portable_repository_links": "PASS",
+  "frozen_adr_unchanged": true,
+  "tracked_diff_check": "PASS",
+  "files": [
+    {
+      "file": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/design/current-architecture.html",
+      "sha256": "1c03b3e37f804c5328b78859623c451af5b24b4a66d99a625adb7c44449bff5d",
+      "ids": 25
+    },
+    {
+      "file": "/home/sky/work/touzi/OneAxe/OpenAgentX-workflow-worktree/docs/design/event-collaboration.html",
+      "sha256": "0fd3e788656bbc329964123f8623f73b5a45414d933a3c1157c5d48f072843a4",
+      "ids": 50
+    },
+    {
+      "file": "/home/sky/Documents/ChatGPT/OpenAgentX/OpenAgentX-架构与关键流程.html",
+      "sha256": "7f7357e85762d5d81a3cf6a71e271f7457604ae4949b3a0195bb9c87057259ab",
+      "ids": 25
+    },
+    {
+      "file": "/home/sky/Documents/ChatGPT/OpenAgentX/OpenAgentX-事件协作与终端方案.html",
+      "sha256": "f01a421db7d297dbce2ec9308cc582479a0320f720a9ec4701c9a207df3a5cc9",
+      "ids": 50
+    }
+  ],
+  "validator_note": "Links to this generated output and the SHA manifest are verified after generation."
+}
