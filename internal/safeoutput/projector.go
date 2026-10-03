@@ -12,7 +12,10 @@ import (
 )
 
 const (
-	MaxTextBytes    = 4 << 10
+	MaxTextBytes = 4 << 10
+	// Final replies are persisted outcomes, not event/diagnostic summaries.
+	// Keep them bounded independently so ordinary complete answers stay complete.
+	MaxResultBytes  = 32 << 10
 	TruncatedMarker = " [TRUNCATED]"
 )
 
@@ -39,6 +42,14 @@ type OutcomeProjection struct {
 }
 
 func ProjectText(value string) TextProjection {
+	return projectText(value, MaxTextBytes)
+}
+
+func ProjectResultText(value string) TextProjection {
+	return projectText(value, MaxResultBytes)
+}
+
+func projectText(value string, maxBytes int) TextProjection {
 	alreadyTruncated := strings.HasSuffix(value, TruncatedMarker)
 	if alreadyTruncated {
 		value = strings.TrimSuffix(value, TruncatedMarker)
@@ -50,8 +61,8 @@ func ProjectText(value string) TextProjection {
 	value = secretValuePattern.ReplaceAllString(value, `${1}[REDACTED]`)
 	value = secretOptionPattern.ReplaceAllString(value, `${1}[REDACTED]`)
 	value = authSchemePattern.ReplaceAllString(value, `${1} [REDACTED]`)
-	if len(value) > MaxTextBytes {
-		limit := MaxTextBytes
+	if len(value) > maxBytes {
+		limit := maxBytes
 		for limit > 0 && !utf8.RuneStart(value[limit]) {
 			limit--
 		}
@@ -71,7 +82,7 @@ func RedactText(value string) string {
 func ProjectOutcome(terminal bool, result *string, resultError *string) OutcomeProjection {
 	projection := OutcomeProjection{State: "pending"}
 	if result != nil {
-		value := ProjectText(*result)
+		value := ProjectResultText(*result)
 		projection.Result = &value.Text
 		projection.ResultTruncated = value.Truncated
 	}
@@ -93,7 +104,7 @@ func ProjectOutcome(terminal bool, result *string, resultError *string) OutcomeP
 }
 
 func SanitizeTurnResult(result openruntime.TurnResult) openruntime.TurnResult {
-	body := ProjectText(result.Result)
+	body := ProjectResultText(result.Result)
 	diagnostic := ProjectText(result.Error)
 	result.Result = body.Text
 	result.ResultTruncated = result.ResultTruncated || body.Truncated

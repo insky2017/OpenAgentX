@@ -635,7 +635,7 @@ func validateTaskProjection(task openapi.ConsoleTaskReadModel, agentID string) e
 			task.CompletionBasis == domain.TaskCompletionMutationEffectsKnown && task.Intent != domain.TaskIntentMutation) {
 		return fmt.Errorf("invalid Console Task completion basis")
 	}
-	if strings.TrimSpace(task.Content) == "" || !safeText(task.Content) || !safeOptionalText(task.Result) || !safeOptionalText(task.Error) {
+	if strings.TrimSpace(task.Content) == "" || !safeText(task.Content) || task.Result != nil && !safeResultText(*task.Result) || !safeOptionalText(task.Error) {
 		return fmt.Errorf("invalid Console Task safe text")
 	}
 	if !validTruncation(task.Result, task.ResultTruncated) || !validTruncation(task.Error, task.ErrorTruncated) {
@@ -745,7 +745,7 @@ func validateRun(run openapi.RunAttemptReadModel, agentID string) error {
 			return fmt.Errorf("invalid Console Runtime reply projection")
 		}
 	case "empty", "available", "truncated":
-		if run.TurnResult == nil || !run.TurnResult.RuntimeStatus.Valid() || !safeText(run.TurnResult.Body) || !safeText(run.TurnResult.Error) {
+		if run.TurnResult == nil || !run.TurnResult.RuntimeStatus.Valid() || !safeResultText(run.TurnResult.Body) || !safeText(run.TurnResult.Error) {
 			return fmt.Errorf("invalid Console Runtime reply projection")
 		}
 		if !validTruncatedValue(run.TurnResult.Body, run.TurnResult.BodyTruncated) ||
@@ -776,6 +776,10 @@ func validateRun(run openapi.RunAttemptReadModel, agentID string) error {
 
 func safeText(value string) bool {
 	return utf8.ValidString(value) && len(value) <= safeoutput.MaxTextBytes+len(safeoutput.TruncatedMarker)
+}
+
+func safeResultText(value string) bool {
+	return utf8.ValidString(value) && len(value) <= safeoutput.MaxResultBytes+len(safeoutput.TruncatedMarker)
 }
 
 func safeOptionalText(value *string) bool { return value == nil || safeText(*value) }

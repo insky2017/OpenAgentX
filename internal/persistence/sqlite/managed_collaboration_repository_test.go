@@ -2,6 +2,8 @@ package sqlite
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -70,7 +72,8 @@ func (x managedFixture) begin(t *testing.T, taskID, agent string) (*domain.RunAt
 	if agent == "pay" {
 		principal = "principal-pay"
 	}
-	reg := domain.WorkerRegistration{WorkerInstanceID: "managed-worker-" + agent, AgentID: agent, Transport: domain.WorkerTransportUnix, PrincipalID: principal, Capabilities: []string{"coding"}, SessionTokenDigest: "managed-worker-digest-" + agent, TokenExpiresAt: repositoryTestTime.Add(time.Hour), LeaseUntil: repositoryTestTime.Add(time.Hour)}
+	tokenDigest := sha256.Sum256([]byte("managed-worker-token-" + agent))
+	reg := domain.WorkerRegistration{WorkerInstanceID: "managed-worker-" + agent, AgentID: agent, Transport: domain.WorkerTransportUnix, PrincipalID: principal, Capabilities: []string{"coding"}, SessionTokenDigest: hex.EncodeToString(tokenDigest[:]), TokenExpiresAt: repositoryTestTime.Add(time.Hour), LeaseUntil: repositoryTestTime.Add(time.Hour)}
 	d := messageDescriptor(openruntime.SteerQueued)
 	worker, _, err := x.r.RegisterWorker(ctx, reg, []openruntime.BackendRegistration{{BackendID: "local", Descriptor: d, Health: openruntime.BackendHealthy, Network: domain.NetworkPolicy{Mode: domain.NetworkInherit}}}, journalEvent("managed-worker-register-"+agent, "worker.registered", principal, x.f.organizationID))
 	if err != nil {

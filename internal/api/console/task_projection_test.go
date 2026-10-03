@@ -21,7 +21,7 @@ func TestConsoleTaskOutcomeAndRuntimeReplyStatesAreStructuredAndSafe(t *testing.
 	if err != nil || projected.OutcomeState != "not_recorded" {
 		t.Fatalf("missing outcome state=%q err=%v", projected.OutcomeState, err)
 	}
-	unsafe := "token=task-secret " + strings.Repeat("x", safeoutput.MaxTextBytes+1)
+	unsafe := "token=task-secret " + strings.Repeat("x", safeoutput.MaxResultBytes+1)
 	task.Result = &unsafe
 	projected, err = ProjectConsoleTask(task)
 	if err != nil || projected.OutcomeState != "truncated" || !projected.ResultTruncated || projected.Result == nil ||

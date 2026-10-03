@@ -205,9 +205,10 @@ func TestTaskReducerAppliesMailboxMessageApprovalAndRuntimeReply(t *testing.T) {
 	terminalRun := runModel("run-1", "task-main", "worker-48", 48, 2, domain.RunAttemptSucceeded)
 	terminalRun.StartedAt = run.StartedAt
 	known := true
+	completeReply := strings.Repeat("safe runtime reply ", 400)
 	terminalRun.TurnResultState = "available"
 	terminalRun.TurnResult = &openapi.TurnResultReadModel{RuntimeStatus: openruntime.TurnResultSucceeded,
-		Body: "safe runtime reply", RuntimeSideEffectsKnown: &known,
+		Body: completeReply, RuntimeSideEffectsKnown: &known,
 		SideEffectsSource: "runtime_reported", BusinessVerificationSource: "not_recorded"}
 	if _, err := reducer.Apply(openapi.JournalEventReadModel{Sequence: 35, ID: "event-run-terminal",
 		AggregateType: "run_attempt", AggregateID: terminalRun.ID, EventType: "run_attempt.succeeded", Run: &terminalRun}); err != nil {
@@ -215,8 +216,13 @@ func TestTaskReducerAppliesMailboxMessageApprovalAndRuntimeReply(t *testing.T) {
 	}
 	state = reducer.State()
 	if state.ActiveTasks[0].LatestRun == nil || state.ActiveTasks[0].LatestRun.TurnResult == nil ||
-		state.ActiveTasks[0].LatestRun.TurnResult.Body != "safe runtime reply" || state.Console.ActiveRun != nil {
+		state.ActiveTasks[0].LatestRun.TurnResult.Body != completeReply || state.Console.ActiveRun != nil {
 		t.Fatalf("Runtime reply was not retained separately: %+v", state)
+	}
+	terminalTask := taskModel("task-main", 4, domain.TaskStatusSucceeded)
+	terminalTask.Result, terminalTask.OutcomeState = &completeReply, "available"
+	if _, err := reducer.Apply(taskEventModel(36, terminalTask)); err != nil {
+		t.Fatalf("complete Task answer rejected by Console: %v", err)
 	}
 }
 

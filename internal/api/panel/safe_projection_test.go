@@ -11,7 +11,14 @@ import (
 )
 
 func TestWebTaskAndRuntimeReplyUseSharedSafeProjection(t *testing.T) {
-	unsafe := "password=web-secret " + strings.Repeat("x", safeoutput.MaxTextBytes+1)
+	complete := strings.Repeat("safe answer ", 500)
+	completeTask := taskReadModel(domain.Task{ID: "task-complete", Version: 2, TargetAgentID: "quote", Content: "inspect", Status: domain.TaskStatusSucceeded, Result: &complete})
+	completeJSON, _ := json.Marshal(openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, FinalReply: true, Result: complete})
+	completeReply, completeState := turnResultReadModel(string(completeJSON))
+	if completeTask.Result == nil || *completeTask.Result != complete || completeTask.ResultTruncated || completeReply == nil || completeReply.Body != complete || !completeReply.FinalReply || completeState != "available" {
+		t.Fatal("Web Task/Run observation truncated an ordinary complete answer")
+	}
+	unsafe := "password=web-secret " + strings.Repeat("x", safeoutput.MaxResultBytes+1)
 	task := domain.Task{ID: "task-web", Version: 2, TargetAgentID: "quote", Content: "inspect",
 		Status: domain.TaskStatusFailed, Result: &unsafe}
 	projectedTask := taskReadModel(task)

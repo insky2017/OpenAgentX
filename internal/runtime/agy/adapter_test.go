@@ -120,7 +120,7 @@ func TestParseStreamJSONBoundsEventsAndFailsClosedOnSinkOrOutputLimit(t *testing
 	oversized := `{"event":"result","result":{"status":"SUCCESS","response":"` + strings.Repeat("x", maxCapturedOutput+1) + `"}}`
 	result, err = parseStreamJSON(strings.NewReader(oversized), nil)
 	if err == nil || !strings.Contains(err.Error(), "exceeded the configured limit") || !result.ResultTruncated ||
-		len(result.Result) > safeoutput.MaxTextBytes+len(safeoutput.TruncatedMarker) {
+		len(result.Result) > safeoutput.MaxResultBytes+len(safeoutput.TruncatedMarker) {
 		t.Fatalf("oversized result len=%d truncated=%t err=%v", len(result.Result), result.ResultTruncated, err)
 	}
 }

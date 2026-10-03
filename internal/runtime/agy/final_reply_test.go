@@ -25,7 +25,7 @@ func TestFinalReplyRequiresTerminalBodyAndConsistentStream(t *testing.T) {
 		{"status after terminal", `{"event":"result","result":{"status":"failed","response":"partial"}}` + "\n" + `{"event":"step_update","step_update":{"status":"SUCCESS"}}`, false},
 		{"invalid trailing json", terminal + "\n" + "invalid", false},
 		{"conflicting error", `{"event":"result","result":{"status":"SUCCESS","response":"final","error":"failed"}}`, false},
-		{"public truncation", `{"event":"result","result":{"status":"SUCCESS","response":"` + strings.Repeat("x", safeoutput.MaxTextBytes+1) + `"}}`, false},
+		{"public truncation", `{"event":"result","result":{"status":"SUCCESS","response":"` + strings.Repeat("x", safeoutput.MaxResultBytes+1) + `"}}`, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			result, _ := parseStreamJSON(strings.NewReader(tc.input), nil)

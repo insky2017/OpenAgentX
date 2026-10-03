@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	openruntime "openagentx/internal/runtime"
 )
@@ -47,7 +48,7 @@ func TestRedactTextLimitsOutput(t *testing.T) {
 func TestTurnResultProjectionSharesRedactionAndStructuredTruncation(t *testing.T) {
 	result := SanitizeTurnResult(openruntime.TurnResult{
 		Status: openruntime.TurnResultSucceeded,
-		Result: "token=reply-secret " + strings.Repeat("x", MaxTextBytes+1),
+		Result: "token=reply-secret " + strings.Repeat("x", MaxResultBytes+1),
 		Error:  "Authorization: Bearer error-secret",
 	})
 	if !result.ResultTruncated || result.ErrorTruncated || !strings.HasSuffix(result.Result, TruncatedMarker) {
@@ -68,8 +69,24 @@ func TestTurnResultProjectionSharesRedactionAndStructuredTruncation(t *testing.T
 	}
 }
 
+func TestFinalReplyLimitIsIndependentFromEventSummaries(t *testing.T) {
+	for _, extra := range []string{"", "界"} {
+		body := strings.Repeat("x", MaxResultBytes) + extra
+		result := SanitizeTurnResult(openruntime.TurnResult{Status: openruntime.TurnResultSucceeded, FinalReply: true, Result: body})
+		if result.FinalReply != (extra == "") || result.ResultTruncated != (extra != "") || !utf8.ValidString(result.Result) || len(result.Result) > MaxResultBytes+len(TruncatedMarker) {
+			t.Fatalf("incorrect final result boundary: complete=%t truncated=%t bytes=%d", result.FinalReply, result.ResultTruncated, len(result.Result))
+		}
+		payload, _ := json.Marshal(map[string]string{"text": body})
+		projected, err := ProjectRuntimePayload(payload)
+		var event RuntimeProjection
+		if err != nil || json.Unmarshal(projected, &event) != nil || !event.TextTruncated || len(event.Text) > MaxTextBytes+len(TruncatedMarker) {
+			t.Fatal("final reply limit widened public event summaries")
+		}
+	}
+}
+
 func TestOutcomeProjectionDistinguishesPendingMissingAndTruncated(t *testing.T) {
-	secret := "token=task-secret " + strings.Repeat("x", MaxTextBytes+1)
+	secret := "token=task-secret " + strings.Repeat("x", MaxResultBytes+1)
 	if state := ProjectOutcome(false, nil, nil).State; state != "pending" {
 		t.Fatalf("pending state=%q", state)
 	}

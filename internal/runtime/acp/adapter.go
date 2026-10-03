@@ -229,7 +229,7 @@ func (h *turnHandle) collect() {
 			result.ProviderSessionID = event.ProviderSessionID
 		}
 		if event.Result != "" {
-			projected := safeoutput.ProjectText(event.Result)
+			projected := safeoutput.ProjectResultText(event.Result)
 			result.Result = projected.Text
 			result.ResultTruncated = result.ResultTruncated || projected.Truncated
 		}

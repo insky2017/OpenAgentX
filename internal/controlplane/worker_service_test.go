@@ -476,7 +476,7 @@ func TestRuntimeOutputCapAndTurnResultAreSafeBeforeAtomicFinish(t *testing.T) {
 	if err := environment.service.AppendEvents(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, request); err != nil {
 		t.Fatalf("event beyond cap must be a safe no-op: %v", err)
 	}
-	unsafeResult := "token=runtime-secret " + strings.Repeat("x", safeoutput.MaxTextBytes+100)
+	unsafeResult := "token=runtime-secret " + strings.Repeat("x", safeoutput.MaxResultBytes+100)
 	if err := environment.service.Finish(context.Background(), environment.workerID, session.SessionToken, begin.Turn.RunAttempt.ID, api.FinishRunRequest{
 		WorkerInstanceID: session.Worker.ID, Generation: session.Worker.Generation,
 		FencingToken: session.Worker.FencingToken, ExpectedTaskVersion: begin.Turn.Task.Version,
