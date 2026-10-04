@@ -1,0 +1,50 @@
+{
+  "ok": false,
+  "source": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+  "source_skill_exists": true,
+  "project": "/tmp/oax-skill-validation-o29zzfhy/missing",
+  "locations": [
+    {
+      "scope": "project",
+      "path": "/tmp/oax-skill-validation-o29zzfhy/missing/.agents/skills/openagentx-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    },
+    {
+      "scope": "user",
+      "path": "/home/sky/.agents/skills/openagentx-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    },
+    {
+      "scope": "legacy_user",
+      "path": "/home/sky/.codex/skills/openagentx-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    }
+  ],
+  "linked": false,
+  "same_name_location_count": 0,
+  "discovery": {
+    "completed": true,
+    "method": "skills/list",
+    "force_reload": true,
+    "same_name_skills": [],
+    "discovery_error_count": 0,
+    "visible": false,
+    "enabled": false
+  },
+  "conflict": false,
+  "duplicate": false,
+  "warnings": [],
+  "message": "仅验证新 app-server 的技能发现；不保证当前已运行 turn 自动注入。"
+}

@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "result": "linked",
+  "source": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+  "location": {
+    "scope": "project",
+    "path": "/tmp/oax-skill-validation-o29zzfhy/project/.agents/skills/openagentx-join",
+    "exists": true,
+    "symlink": true,
+    "skill_exists": true,
+    "target_matches_source": true,
+    "conflict": false
+  },
+  "discovery_checked": false,
+  "message": "链接已就绪；请运行 check 验证 Codex 实际发现状态。"
+}

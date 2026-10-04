@@ -35,3 +35,14 @@
 原验收目标保持原文，不将部分通过改写为完整通过。Codex 0.160.0 的 `interrupted` 事件并不保证工具退出；`thread/backgroundTerminals/list` 本次返回缺少可核验的 OS PID。当前最小实现只对自有专属 host 做 PID/starttime 全树兜底，外部或共享 host 保留 uncertain。它可能终止同 Agent 旧任务留下的后台工具，故 C08“仅目标 turn”完整目标仍未达成。
 
 异常终态会持续隔离，当前还没有用户可用的一键受控恢复入口；C09 不能标记为完整故障恢复通过。正常终态、明确取消后重建、原生界面退出后的连续接单分别按真实证据判定。后续补精确取消和受控恢复，优先复用现有账本，不新增调度平台。
+
+## 2026-10-05 追加：接入 Skill 标准化
+
+用户已派发本批实施：安装与可见性自检、四项接入资料收集、当前 thread 自动识别和标准化交接、功能验收与规范提交。
+
+- 用户结果：安装一次后可通过 `openagentx-join` 指导接入；模型根据已授权的稳定名字、目录、职责、协作对象生成一份简短 JSON，运行一个 prepare helper，即可得到可核验的准备回执及后续命令。
+- 最小实现：仓库维护单一 Skill 源；Python 标准库安装器创建工程 `.agents/skills` 或用户 `~/.agents/skills` 软链，以真实 Codex `skills/list` 验证发现和 enabled。helper 调用既有安装版 `agent join --prepare`，不修改 Go 守护进程、Worker 或调度协议。
+- thread 来源：只使用明确传入 ID 或当前工具环境的 `CODEX_THREAD_ID` / `CODEX_SESSION_ID`，校验格式与一致性；不按最新历史、目录或标题猜测。默认要求保留当前历史；缺少 ID 时明确失败，只有显式选择摘要交接才省略 thread。
+- 资料和回执保存在 OAX 私密目录，不写业务工作树；协作对象只记录意向，不自动改组织职责或通信许可。相同输入可重放，冲突不覆盖；下一步命令保留同一 profile，避免误操作默认实例。
+- 不在本批自动接管当前 `openagentx` 会话，不迁移 Rhythm/Pay，不开启新模型轮询，不将 prepare 或 skills/list 当作 managed 协作已完成。已知 Fleet 早启用、writer 生命周期与完整激活流水线保留后续范围。
+- 先做真实安装/发现和 prepare 链路，再由独立代理评审并在隔离目录验证真实 CLI/模型读取 Skill、thread 识别及准备结果。证据保存实际命令、版本、日志、私密资料的脱敏副本与摘要清单，结果见本批交付报告。

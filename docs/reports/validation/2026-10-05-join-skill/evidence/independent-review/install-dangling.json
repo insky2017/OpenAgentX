@@ -1,0 +1,16 @@
+{
+  "name": "install-dangling",
+  "argv": [
+    "python3",
+    "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/scripts/oax-skill.py",
+    "install",
+    "--scope",
+    "project",
+    "--project",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/broken"
+  ],
+  "start": "2026-10-04T18:51:13.254408+00:00",
+  "returncode": 1,
+  "stdout": "{\n  \"ok\": false,\n  \"error\": \"existing_path_conflict\",\n  \"location\": {\n    \"scope\": \"project\",\n    \"path\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/broken/.agents/skills/openagentx-join\",\n    \"exists\": true,\n    \"symlink\": true,\n    \"skill_exists\": false,\n    \"target_matches_source\": false,\n    \"conflict\": true\n  }\n}\n",
+  "stderr": ""
+}

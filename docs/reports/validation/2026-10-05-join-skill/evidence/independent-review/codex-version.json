@@ -1,0 +1,11 @@
+{
+  "name": "codex-version",
+  "argv": [
+    "codex",
+    "--version"
+  ],
+  "start": "2026-10-04T18:51:11.658439+00:00",
+  "returncode": 0,
+  "stdout": "codex-cli 0.160.0\n",
+  "stderr": ""
+}

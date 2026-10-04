@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "python3",
+    "skills/openagentx-join/scripts/prepare.py",
+    "--inspect"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"brief\": {},\n  \"collection_state\": \"incomplete\",\n  \"missing\": [\n    \"agent_id\",\n    \"workspace\",\n    \"role\",\n    \"peers\",\n    \"handoff\"\n  ],\n  \"profile\": {\n    \"credentials\": \"/home/sky/.openagentx/credentials.json\",\n    \"db\": \"/home/sky/.openagentx/data/openagentx.db\",\n    \"file\": \"/home/sky/.openagentx/fleet.yaml\",\n    \"socket\": \"/home/sky/.openagentx/run/openagentx.sock\",\n    \"worker_dir\": \"/home/sky/.openagentx/workers\"\n  },\n  \"profile_sources\": {\n    \"credentials\": \"HOME\",\n    \"db\": \"HOME\",\n    \"file\": \"HOME\",\n    \"socket\": \"HOME\",\n    \"worker_dir\": \"HOME\"\n  },\n  \"read_only\": true,\n  \"thread\": {\n    \"history\": \"current\",\n    \"sources\": [\n      \"CODEX_THREAD_ID\",\n      \"CODEX_SESSION_ID\"\n    ],\n    \"state\": \"captured\",\n    \"thread_id\": \"01a0c98a-bef8-7730-9b2b-cbc2f3594559\"\n  }\n}\n",
+  "stderr": ""
+}

@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "python_syntax": [
+    "scripts/oax-skill.py",
+    "skills/openagentx-join/scripts/prepare.py",
+    "scripts/validation/join_skill_model_e2e.py"
+  ],
+  "skill_validator": {
+    "exit_code": 0,
+    "stdout": "Skill is valid!\n"
+  },
+  "duplicate_html_ids": [],
+  "missing_local_links": [],
+  "javascript": [
+    {
+      "file": "docs/design/codex-session-join.html",
+      "exit_code": 0
+    },
+    {
+      "file": "docs/design/current-architecture.html",
+      "exit_code": 0
+    }
+  ],
+  "frozen_existing_adrs_unchanged": true,
+  "independently_reviewed_sources_unchanged": true,
+  "default_fleet_unchanged": true,
+  "real_model_workspace_recursive_file_list": [
+    "AGENTS.md",
+    "README.md"
+  ],
+  "files_sha256": {
+    "scripts/oax-skill.py": "37b6a0247069cf9d066e6cee55bb9e089d6743a7b1618ae919eb8a24f59bb273",
+    "skills/openagentx-join/scripts/prepare.py": "a37e66f37032f3528ecb57d9adadf091d413403935d115ad230f0f31b75dbaa3",
+    "skills/openagentx-join/SKILL.md": "b4573eac1380e8661f8331237c8672e0a6cc793129df0f6d81eaa69d40fc3da0",
+    "scripts/validation/join_skill_model_e2e.py": "efb3006f1938d99b91a5f039b8444f4f828ca1a4b977cd145b66d32dc580f1b5",
+    "docs/design/codex-session-join.html": "acb25a645851cc38751d772b167bdc833f7ec6e2c48b66357fe5db27246f7039",
+    "docs/design/architecture-map.json": "ba49cb9e78039ce7880ff33aecb1c657f34d43e5744042b657fd649a45428a22",
+    "docs/design/current-architecture.html": "7ac0f12b0d5d55cf85692c7ca175ba10baeced96ebace710233cc5e7bb0d0dd7",
+    "docs/design/CURRENT_ARCHITECTURE.md": "9c51f5bb4568a167e7d893ed05d97e12f8e2d13f3a27762bc733ac44ec700dda",
+    "docs/operations/codex-agent-entry.md": "aad4d064374e76aec90782d200f172b63090732577dd45388bcc7ae74817a94c"
+  },
+  "scope": "Document/syntax plus final artifact checks; actual runtime evidence is separate model02 JSONL and independent-review."
+}

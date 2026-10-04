@@ -1,0 +1,38 @@
+{
+  "raw_root": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill",
+  "redactions": [
+    {
+      "file": "model01/codex.public.jsonl",
+      "item_id": "item_4",
+      "field": "aggregated_output",
+      "reason": "unrelated local memory tool output",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "file": "model01/codex.public.jsonl",
+      "item_id": "item_4",
+      "field": "aggregated_output",
+      "reason": "unrelated local memory tool output",
+      "raw_sha256": "f584d723d6016799815da1fe797c1cb4d40b556ab350e3d7b78d3d12d7febf46",
+      "bytes": 208
+    },
+    {
+      "file": "model02/codex.public.jsonl",
+      "item_id": "item_4",
+      "field": "aggregated_output",
+      "reason": "unrelated local memory tool output",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "file": "model02/codex.public.jsonl",
+      "item_id": "item_4",
+      "field": "aggregated_output",
+      "reason": "unrelated local memory tool output",
+      "raw_sha256": "f3237bbafff0ea056f2972415b75effe4fa1a8c835023772e4d43560d8562183",
+      "bytes": 445
+    }
+  ],
+  "excluded": "Private profile env files and unrelated model memory/analysis are not published."
+}

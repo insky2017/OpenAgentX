@@ -1,0 +1,21 @@
+{
+  "agent_id": "review-env",
+  "name": "审阅接入",
+  "workspace": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/business",
+  "role": "仅审阅隔离资料，不发信、不执行支付。",
+  "peers": [
+    "peer-one"
+  ],
+  "handoff": {
+    "completed": [
+      "已核对隔离目录。"
+    ],
+    "next": [
+      "等待用户后续安排。"
+    ],
+    "uncertain": [
+      "没有验证运行态；未产生业务副作用。"
+    ]
+  },
+  "history": "summary"
+}

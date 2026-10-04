@@ -1,0 +1,5 @@
+- prepared：已完成，`state=local_prepared`；`ready=false`。本地已准备，运行态未核实。
+- thread 来源：helper 自动读取 `CODEX_THREAD_ID` 与 `CODEX_SESSION_ID`，两者一致；ID 为 `01a10843-7322-70a1-81a8-de6237f8949c`，brief 未手填。
+- 已显式传入指定 `--profile-home`；[brief.json](/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/brief.json) 权限为 `0600`。
+- 工作目录保持只读；未执行 resume/open、启动 Worker、发信或创建业务任务。
+- 下一步：等待用户正式启用；协作权限尚未配置，`pay-domain` 仅记录咨询意向。

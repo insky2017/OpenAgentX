@@ -1,0 +1,11 @@
+[
+  {
+    "argv": [
+      "eval",
+      "document.querySelector('.answer').textContent.includes('本机已安装用户级软链')"
+    ],
+    "exit_code": 1,
+    "stdout": "{\"success\":false,\"data\":null,\"error\":\"page.evaluate: TypeError: Cannot read properties of null (reading 'textContent')\\n    at eval (eval at evaluate (:290:30), <anonymous>:1:34)\\n    at eval (<anonymous>)\\n    at UtilityScript.evaluate (<anonymous>:290:30)\\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\"}\n",
+    "stderr": ""
+  }
+]

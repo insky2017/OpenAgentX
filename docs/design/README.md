@@ -7,7 +7,7 @@
 | [总体架构七视图](current-architecture.html) | 总览、任务流、领域初始化、AGY运行、事件观察、依赖及Codex原生终端 |
 | [架构说明与源码依据](CURRENT_ARCHITECTURE.md) | Markdown说明、实现状态及逐项证据 |
 | [事件协作与终端方案](event-collaboration.html) | 终端、Native Bridge、Worker、app-server与消息任务如何配合 |
-| [新的 Codex 会话怎样加入](codex-session-join.html) | Skill 现状、新建/已有 CLI/Desktop 三条路线、接通判据与最小改进建议 |
+| [新的 Codex 会话怎样加入](codex-session-join.html) | Skill 安装/自检与简化准备、新建/已有 CLI/Desktop 三条路线、接通判据与剩余步骤 |
 
 HTML下载后可在浏览器中打开；下载整个工程可保留源码和证据相对链接。GitHub文件页显示源码，不直接运行HTML。
 

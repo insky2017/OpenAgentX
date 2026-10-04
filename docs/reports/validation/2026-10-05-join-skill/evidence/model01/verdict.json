@@ -1,0 +1,6 @@
+{
+  "status": "FAILED",
+  "scope": "real-model skill preparation; no managed activation",
+  "exit_code": 0,
+  "error": "[Errno 2] No such file or directory: '/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model01/profile/workers/joins/join-skill-model-e2e.intake/cli-receipt.json'"
+}

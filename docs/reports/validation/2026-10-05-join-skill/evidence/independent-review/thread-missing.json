@@ -1,0 +1,15 @@
+{
+  "name": "thread-missing",
+  "argv": [
+    "python3",
+    "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join/scripts/prepare.py",
+    "--brief",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/brief.json",
+    "--profile-home",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/missing-profile"
+  ],
+  "start": "2026-10-04T18:51:14.606606+00:00",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "{\n  \"error\": \"history=current 缺少当前 thread ID；补充明确 thread_id 或由用户选择 history=summary，不会静默丢弃历史\",\n  \"ready\": false,\n  \"state\": \"not_prepared\"\n}\n"
+}

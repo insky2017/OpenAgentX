@@ -1,0 +1,71 @@
+{
+  "result": "PASS",
+  "isolated": {
+    "brief": {},
+    "collection_state": "incomplete",
+    "missing": [
+      "agent_id",
+      "workspace",
+      "role",
+      "peers",
+      "handoff"
+    ],
+    "profile": {
+      "credentials": "/tmp/oax-intake-check-n69fqblb/isolated/credentials.json",
+      "db": "/tmp/oax-intake-check-n69fqblb/explicit-db",
+      "file": "/tmp/oax-intake-check-n69fqblb/isolated/fleet.yaml",
+      "socket": "/tmp/oax-intake-check-n69fqblb/isolated/run/openagentx.sock",
+      "worker_dir": "/tmp/oax-intake-check-n69fqblb/isolated/workers"
+    },
+    "profile_sources": {
+      "credentials": "profile_home",
+      "db": "explicit",
+      "file": "profile_home",
+      "socket": "profile_home",
+      "worker_dir": "profile_home"
+    },
+    "read_only": true,
+    "thread": {
+      "history": "current",
+      "sources": [
+        "CODEX_THREAD_ID"
+      ],
+      "state": "captured",
+      "thread_id": "11111111-2222-4333-8444-555555555555"
+    }
+  },
+  "ambient": {
+    "brief": {},
+    "collection_state": "incomplete",
+    "missing": [
+      "agent_id",
+      "workspace",
+      "role",
+      "peers",
+      "handoff"
+    ],
+    "profile": {
+      "credentials": "/tmp/oax-intake-check-n69fqblb/ambient-home/credentials.json",
+      "db": "/tmp/oax-intake-check-n69fqblb/ambient-db",
+      "file": "/tmp/oax-intake-check-n69fqblb/ambient-home/fleet.yaml",
+      "socket": "/tmp/oax-intake-check-n69fqblb/ambient-home/run/openagentx.sock",
+      "worker_dir": "/tmp/oax-intake-check-n69fqblb/ambient-workers"
+    },
+    "profile_sources": {
+      "credentials": "OPENAGENTX_HOME",
+      "db": "OPENAGENTX_DATABASE_PATH",
+      "file": "OPENAGENTX_HOME",
+      "socket": "OPENAGENTX_HOME",
+      "worker_dir": "OPENAGENTX_WORKER_CONFIG_DIR"
+    },
+    "read_only": true,
+    "thread": {
+      "history": "current",
+      "sources": [
+        "CODEX_THREAD_ID"
+      ],
+      "state": "captured",
+      "thread_id": "11111111-2222-4333-8444-555555555555"
+    }
+  }
+}

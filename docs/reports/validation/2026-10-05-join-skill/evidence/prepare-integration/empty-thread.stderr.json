@@ -1,0 +1,5 @@
+{
+  "error": "CODEX_THREAD_ID 必须是非空 UUID",
+  "ready": false,
+  "state": "not_prepared"
+}

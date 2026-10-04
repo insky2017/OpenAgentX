@@ -1,0 +1,41 @@
+{
+  "ok": false,
+  "source": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+  "source_skill_exists": true,
+  "project": "/tmp/oax-skill-validation-o29zzfhy/project",
+  "locations": [
+    {
+      "scope": "project",
+      "path": "/tmp/oax-skill-validation-o29zzfhy/project/.agents/skills/openagentx-join",
+      "exists": true,
+      "symlink": true,
+      "skill_exists": true,
+      "target_matches_source": true,
+      "conflict": false
+    },
+    {
+      "scope": "user",
+      "path": "/home/sky/.agents/skills/openagentx-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    },
+    {
+      "scope": "legacy_user",
+      "path": "/home/sky/.codex/skills/openagentx-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    }
+  ],
+  "linked": true,
+  "same_name_location_count": 1,
+  "discovery": {
+    "completed": false,
+    "error": "codex_start_failed"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "ok": false,
+  "error": "existing_path_conflict",
+  "location": {
+    "scope": "project",
+    "path": "/tmp/oax-skill-validation-o29zzfhy/conflict/.agents/skills/openagentx-join",
+    "exists": true,
+    "symlink": false,
+    "skill_exists": false,
+    "target_matches_source": false,
+    "conflict": true
+  }
+}

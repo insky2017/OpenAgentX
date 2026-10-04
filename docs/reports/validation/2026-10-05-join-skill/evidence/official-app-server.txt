@@ -1,0 +1,241 @@
+Source: https://developers.openai.com/codex/app-server/
+Fetched: 2026-10-05
+
+
+Skills
+Invoke a skill by including
+$<skill-name>
+in the user text input. Add a
+skill
+input item (recommended) so the server injects full skill instructions instead of relying on the model to resolve the name.
+{
+"method"
+:
+"turn/start"
+,
+"id"
+:
+101
+,
+"params"
+: {
+"threadId"
+:
+"thread-1"
+,
+"input"
+: [
+{
+"type"
+:
+"text"
+,
+"text"
+:
+"$skill-creator Add a new skill for triaging flaky CI."
+},
+{
+"type"
+:
+"skill"
+,
+"name"
+:
+"skill-creator"
+,
+"path"
+:
+"/Users/me/.codex/skills/skill-creator/SKILL.md"
+}
+]
+}
+}
+If you omit the
+skill
+item, the model will still parse the
+$<skill-name>
+marker and try to locate the skill, which can add latency.
+Example:
+$skill-creator Add a new skill for triaging flaky CI and include step-by-step usage.
+Use
+skills/list
+to fetch available skills (optionally scoped by
+cwds
+, with
+forceReload
+). You can also include
+perCwdExtraUserRoots
+to scan extra absolute paths as
+user
+scope for specific
+cwd
+values. App-server ignores entries whose
+cwd
+isn’t present in
+cwds
+.
+skills/list
+may reuse a cached result per
+cwd
+; set
+forceReload: true
+to refresh from disk. When present, the server reads
+interface
+and
+dependencies
+from
+SKILL.json
+.
+{
+"method"
+:
+"skills/list"
+,
+"id"
+:
+25
+,
+"params"
+: {
+"cwds"
+: [
+"/Users/me/project"
+,
+"/Users/me/other-project"
+],
+"forceReload"
+:
+true
+,
+"perCwdExtraUserRoots"
+: [
+{
+"cwd"
+:
+"/Users/me/project"
+,
+"extraUserRoots"
+: [
+"/Users/me/shared-skills"
+]
+}
+]
+} }
+{
+"id"
+:
+25
+,
+"result"
+: {
+"data"
+: [{
+"cwd"
+:
+"/Users/me/project"
+,
+"skills"
+: [
+{
+"name"
+:
+"skill-creator"
+,
+"description"
+:
+"Create or update a Codex skill"
+,
+"enabled"
+:
+true
+,
+"interface"
+: {
+"displayName"
+:
+"Skill Creator"
+,
+"shortDescription"
+:
+"Create or update a Codex skill"
+},
+"dependencies"
+: {
+"tools"
+: [
+{
+"type"
+:
+"env_var"
+,
+"value"
+:
+"GITHUB_TOKEN"
+,
+"description"
+:
+"GitHub API token"
+},
+{
+"type"
+:
+"mcp"
+,
+"value"
+:
+"github"
+,
+"transport"
+:
+"streamable_http"
+,
+"url"
+:
+"https://example.com/mcp"
+}
+]
+}
+}
+],
+"errors"
+: []
+}]
+} }
+The server also emits
+skills/changed
+notifications when watched local skill files change. Treat this as an invalidation signal and rerun
+skills/list
+with your current params when needed.
+To enable or disable a skill by path:
+{
+"method"
+:
+"skills/config/write"
+,
+"id"
+:
+26
+,
+"params"
+: {
+"path"
+:
+"/Users/me/.codex/skills/skill-creator/SKILL.md"
+,
+"enabled"
+:
+false
+}
+}
+Apps (connectors)
+Use
+app/installed
+to read the latest committed installed app runtime snapshot.
+Each result includes the app
+id
+,
+runtimeName
+(or
+null
+), effective
+enab

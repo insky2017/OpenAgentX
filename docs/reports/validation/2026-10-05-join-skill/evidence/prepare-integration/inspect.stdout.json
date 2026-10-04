@@ -1,0 +1,32 @@
+{
+  "brief": {
+    "brief_file": "/tmp/oax-intake-check-n69fqblb/brief.json",
+    "brief_sha256": "30a2c8ebe1f3e0d7e36d1113df44998bf4bc2265b9ea5959f85af2e02853f0a7"
+  },
+  "collection_state": "complete",
+  "missing": [],
+  "profile": {
+    "credentials": "/tmp/oax-intake-check-n69fqblb/profile/credentials.json",
+    "db": "/tmp/oax-intake-check-n69fqblb/profile/data/openagentx.db",
+    "file": "/tmp/oax-intake-check-n69fqblb/profile/fleet.yaml",
+    "socket": "/tmp/oax-intake-check-n69fqblb/profile/run/openagentx.sock",
+    "worker_dir": "/tmp/oax-intake-check-n69fqblb/profile/workers"
+  },
+  "profile_sources": {
+    "credentials": "profile_home",
+    "db": "profile_home",
+    "file": "profile_home",
+    "socket": "profile_home",
+    "worker_dir": "profile_home"
+  },
+  "read_only": true,
+  "thread": {
+    "history": "current",
+    "sources": [
+      "CODEX_THREAD_ID",
+      "CODEX_SESSION_ID"
+    ],
+    "state": "captured",
+    "thread_id": "11111111-2222-4333-8444-555555555555"
+  }
+}

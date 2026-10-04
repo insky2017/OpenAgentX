@@ -1,0 +1,118 @@
+[
+  {
+    "argv": [
+      "eval",
+      "document.querySelector('.answer').textContent.includes('本机已安装用户级软链')"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "screenshot",
+      "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/skill-page-desktop.png"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/skill-page-desktop.png\"},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "find",
+      "role",
+      "tab",
+      "click",
+      "--name",
+      "已有终端 Codex 会话"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "eval",
+      "!document.getElementById('panel-cli').hidden && document.getElementById('join-prompt').textContent.includes('$openagentx-join')"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "find",
+      "role",
+      "button",
+      "click",
+      "--name",
+      "复制交接指令"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "eval",
+      "/已复制|已选中文字/.test(document.getElementById('copy-status').textContent)"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "set",
+      "viewport",
+      "390",
+      "844"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"height\":844,\"width\":390},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "eval",
+      "document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,0)"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "eval",
+      "document.documentElement.scrollWidth<=innerWidth"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "screenshot",
+      "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/skill-page-mobile.png"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/skill-page-mobile.png\"},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "errors"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"errors\":[]},\"error\":null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "close"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"success\":true,\"data\":{\"closed\":true},\"error\":null}\n",
+    "stderr": ""
+  }
+]

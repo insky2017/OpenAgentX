@@ -10,7 +10,7 @@ OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持�
 
 - [总体架构七视图（HTML）](docs/design/current-architecture.html) · [Markdown 与源码依据](docs/design/CURRENT_ARCHITECTURE.md)：总览、任务流、领域初始化、AGY 运行、事件观察、外部依赖及 Codex 原生终端。
 - [事件协作与终端方案（HTML）](docs/design/event-collaboration.html)：终端、Native Bridge、Worker、app-server 与消息任务的关系，以及两条事件连接。
-- [新的 Codex 会话怎样加入（HTML）](docs/design/codex-session-join.html)：接入 Skill 现状、三种会话入口、自动协作前置条件与改进建议。
+- [新的 Codex 会话怎样加入（HTML）](docs/design/codex-session-join.html)：已实现的 Skill 安装、自检和简化准备、三种会话入口与自动协作前置条件；命令见[接入指南](docs/operations/codex-agent-entry.md)。
 - [Rhythm / Pay 使用与恢复](docs/operations/rhythm-pay-managed-handoff.md) · [原会话切换及真实自动往返证据](docs/reports/validation/2026-10-03-rhythm-pay-managed/DELIVERY.md)。原身份已迁入；协作通过不等于收费业务完成。
 
 HTML 可下载后在浏览器离线打开，GitHub 文件页主要用于查看源码；文件之间使用仓库相对链接。

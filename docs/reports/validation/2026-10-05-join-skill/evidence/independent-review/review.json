@@ -1,0 +1,167 @@
+{
+  "reviewed_at_utc": "2026-10-04T18:53:19.310789+00:00",
+  "verdict": "PASS_WITH_EXPLICIT_SCOPE",
+  "blocking_findings": [],
+  "required_fixes": [],
+  "passed_checks": 31,
+  "checks": [
+    {
+      "check": "project linked",
+      "pass": true
+    },
+    {
+      "check": "install replay unchanged",
+      "pass": true
+    },
+    {
+      "check": "real skills/list visible enabled",
+      "pass": true
+    },
+    {
+      "check": "install conflict preserved",
+      "pass": true
+    },
+    {
+      "check": "dangling link preserved",
+      "pass": true
+    },
+    {
+      "check": "conflict check nonzero",
+      "pass": true
+    },
+    {
+      "check": "discovery failure not success",
+      "pass": true
+    },
+    {
+      "check": "inspect writes no profile",
+      "pass": true
+    },
+    {
+      "check": "real CLI current preparation",
+      "pass": true
+    },
+    {
+      "check": "correct capture",
+      "pass": true
+    },
+    {
+      "check": "receipt identity workspace runtime thread",
+      "pass": true
+    },
+    {
+      "check": "no db socket credentials",
+      "pass": true
+    },
+    {
+      "check": "business workspace unchanged",
+      "pass": true
+    },
+    {
+      "check": "fleet disabled",
+      "pass": true
+    },
+    {
+      "check": "status same prepared profile",
+      "pass": true
+    },
+    {
+      "check": "same input replay unchanged",
+      "pass": true
+    },
+    {
+      "check": "changed input preserves files",
+      "pass": true
+    },
+    {
+      "check": "thread conflict closed",
+      "pass": true
+    },
+    {
+      "check": "missing thread no write",
+      "pass": true
+    },
+    {
+      "check": "summary explicit no thread",
+      "pass": true
+    },
+    {
+      "check": "workspace output refuses writes",
+      "pass": true
+    },
+    {
+      "check": "fourth field mandatory",
+      "pass": true
+    },
+    {
+      "check": "env and explicit actual prepare",
+      "pass": true
+    },
+    {
+      "check": "precedence retained",
+      "pass": true
+    },
+    {
+      "check": "target identity independent of source env",
+      "pass": true
+    },
+    {
+      "check": "next status pins correct profile",
+      "pass": true
+    },
+    {
+      "check": "profile-home overrides inherited resource env",
+      "pass": true
+    },
+    {
+      "check": "existing identity setup via real CLI",
+      "pass": true
+    },
+    {
+      "check": "CLI conflict nonzero preserves prior identity",
+      "pass": true
+    },
+    {
+      "check": "CLI failure not ready",
+      "pass": true
+    },
+    {
+      "check": "failure diagnostics persisted",
+      "pass": true
+    }
+  ],
+  "source_unchanged_during_review": true,
+  "source_sha256": {
+    "scripts/oax-skill.py": "37b6a0247069cf9d066e6cee55bb9e089d6743a7b1618ae919eb8a24f59bb273",
+    "skills/openagentx-join/scripts/prepare.py": "a37e66f37032f3528ecb57d9adadf091d413403935d115ad230f0f31b75dbaa3",
+    "skills/openagentx-join/SKILL.md": "b4573eac1380e8661f8331237c8672e0a6cc793129df0f6d81eaa69d40fc3da0"
+  },
+  "installed_cli": "OpenAgentX build 886ba7fd255a5f6632ee550d4bdcc786274f48fa; codex-cli 0.160.0",
+  "scope": "独立源码审阅与真实已安装 CLI/Codex skills/list 的隔离离线集成验证；未修改源码。",
+  "verified": [
+    "项目相对软链安装和实际发现/启用",
+    "相同安装与相同 brief 重放不变",
+    "目录冲突与失效软链安装拒绝，不覆盖",
+    "current 模式使用一致测试 UUID 生成真实 OAX 身份和原 CLI receipt；summary 明确不传 thread",
+    "四项资料缺失拒绝、线程来源冲突或缺失拒绝、业务目录输出拒绝",
+    "原 CLI receipt、disabled Fleet、ROLE/HANDOFF 与目标身份一致，业务目录无修改，未创建 DB/socket/credentials",
+    "显式参数、资源路径环境变量、OPENAGENTX_HOME、profile-home 优先级；后续 status 固定五项路径",
+    "由真实 CLI 预建同名身份后的内容冲突失败，原文件全部保持，诊断存在且不误报 ready"
+  ],
+  "not_covered": [
+    "用户级安装分支未执行：本子任务禁止写真实用户技能目录，也未改 HOME/CODEX_HOME",
+    "模型自主补问四项资料与真实当前 thread 自动捕获由主代理单独验收；本报告一致 UUID 仅为隔离集成分支测试",
+    "未执行 resume/open、Writer 释放、真实 Worker 接管或 managed 协作，未发信"
+  ],
+  "nonblocking_suggestions": [],
+  "evidence": [
+    "observations.json",
+    "additional-observations.json",
+    "actual-thread-inspect.json",
+    "sources.json",
+    "binary.json",
+    "run_review.py",
+    "run_additional.py"
+  ],
+  "evidence_handling": "原目录保留 CLI 私密生成的环境文件；入库只选脱敏命令记录、review/观察结果、源快照、brief 和必要身份/receipt，不得批量复制 *.env。"
+}

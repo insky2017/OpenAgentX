@@ -1,0 +1,28 @@
+{
+  "brief_file": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/brief.json",
+  "brief_sha256": "2dea8188e6f3001ba5308b91b55560f67e96db490a7d8abbc5c50df58b56c38e",
+  "profile": {
+    "credentials": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/credentials.json",
+    "db": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/data/openagentx.db",
+    "file": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/fleet.yaml",
+    "socket": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/run/openagentx.sock",
+    "worker_dir": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/workers"
+  },
+  "profile_sources": {
+    "credentials": "profile_home",
+    "db": "profile_home",
+    "file": "profile_home",
+    "socket": "profile_home",
+    "worker_dir": "profile_home"
+  },
+  "thread": {
+    "history": "current",
+    "sources": [
+      "CODEX_THREAD_ID",
+      "CODEX_SESSION_ID"
+    ],
+    "state": "captured",
+    "thread_id": "01a10843-7322-70a1-81a8-de6237f8949c"
+  },
+  "version": 1
+}

@@ -1,0 +1,21 @@
+{
+  "agent_id": "join-skill-model-e2e",
+  "name": "接入验证领域",
+  "workspace": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/workspace",
+  "role": "只负责该验证工程资料整理，不负责支付、部署或其他业务领域。工作目录保持只读；本轮仅做离线 prepare，不 resume/open、不启动 Worker、不创建业务任务、不发信。与 pay-domain 仅记录将来咨询接口的意向。",
+  "peers": [
+    "pay-domain"
+  ],
+  "handoff": {
+    "completed": [
+      "已完成阅读本工程 README。"
+    ],
+    "next": [
+      "等待用户正式启用。"
+    ],
+    "uncertain": [
+      "尚未配置协作权限。"
+    ]
+  },
+  "history": "current"
+}

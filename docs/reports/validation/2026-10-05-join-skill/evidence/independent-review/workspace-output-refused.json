@@ -1,0 +1,15 @@
+{
+  "name": "workspace-output-refused",
+  "argv": [
+    "python3",
+    "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join/scripts/prepare.py",
+    "--brief",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/brief.json",
+    "--profile-home",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/business/profile"
+  ],
+  "start": "2026-10-04T18:51:15.012630+00:00",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "{\n  \"error\": \"profile 输出位于业务 workspace 内；请使用 workspace 外的 profile\",\n  \"ready\": false,\n  \"state\": \"not_prepared\"\n}\n"
+}

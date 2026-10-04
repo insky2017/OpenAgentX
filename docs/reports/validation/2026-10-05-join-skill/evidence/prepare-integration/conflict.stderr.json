@@ -1,0 +1,5 @@
+{
+  "error": "既有 intake 文件冲突或权限不安全: brief.json；保留原文件，请先核对",
+  "ready": false,
+  "state": "not_prepared"
+}

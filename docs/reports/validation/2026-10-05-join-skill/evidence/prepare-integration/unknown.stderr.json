@@ -1,0 +1,5 @@
+{
+  "error": "brief 含未知字段；请对照 --example",
+  "ready": false,
+  "state": "not_prepared"
+}

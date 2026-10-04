@@ -330,6 +330,11 @@
       "label": "固定终端与正式迁入步骤",
       "path": "docs/operations/rhythm-pay-managed-handoff.md",
       "line": 1
+    },
+    "joinskilldelivery": {
+      "label": "接入 Skill 安装与真实准备验收",
+      "path": "docs/reports/validation/2026-10-05-join-skill/DELIVERY.md",
+      "line": 1
     }
   },
   "views": [
@@ -1453,19 +1458,19 @@
         {
           "id": "selfinit",
           "title": "薄入口自初始化",
-          "sub": "join --prepare · 仓库技能",
+          "sub": "Skill → brief → prepare",
           "x": 30,
           "y": 580,
           "w": 236,
           "h": 108,
           "status": "done",
-          "detail": "Codex join 复用既有领域登记，默认只离线准备；薄技能指导职责、HANDOFF 和空闲交接。常驻监听由宿主承担，无需模型每轮 poll。",
+          "detail": "2026-10-05 增量：Skill 已支持用户/工程安装、真实发现自检和结构化 brief；自动校验当前 thread，生成 ROLE/HANDOFF 并调用现有离线 prepare。启用与协作仍由管理侧另行完成。",
           "refs": [
             "codexskill",
             "codexjoin",
-            "codexprepare"
+            "joinskilldelivery"
           ],
-          "proof": "源码＋D；R：真实 PTY prepare 及重复调用；技能未全局安装",
+          "proof": "D/I：真实 CLI、软链、skills/list 与重放；R：独立 Codex 读取 Skill 并准备，thread 与原 CLI receipt 一致；不代表已托管协作",
           "risk": "",
           "jump": "native"
         },

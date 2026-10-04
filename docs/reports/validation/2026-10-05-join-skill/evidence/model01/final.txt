@@ -1,0 +1,4 @@
+- 已阅读你提供的 Skill 内容；实际文件读取被环境错误阻断：`bwrap: No permissions to create new namespace`，helper 尚未执行。
+- `prepared`：未完成；`ready`：未核实；thread 来源：尚未由 helper 捕获。
+- 未写入 brief 或 profile，未修改 workspace，未执行 resume/open、启动 Worker、发信或创建业务任务。
+- 下一步：修复执行环境的 sandbox 后，使用指定 `--profile-home` 继续离线 prepare。

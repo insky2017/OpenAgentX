@@ -1,0 +1,178 @@
+{
+  "scope": "真实 CLI 离线集成；一致 UUID 为隔离分支测试，不证明当前模型 thread 自动捕获。未更改 HOME/CODEX_HOME；不执行 resume/open、不发信。",
+  "checks": [
+    {
+      "check": "project linked",
+      "pass": true
+    },
+    {
+      "check": "install replay unchanged",
+      "pass": true
+    },
+    {
+      "check": "real skills/list visible enabled",
+      "pass": true
+    },
+    {
+      "check": "install conflict preserved",
+      "pass": true
+    },
+    {
+      "check": "dangling link preserved",
+      "pass": true
+    },
+    {
+      "check": "conflict check nonzero",
+      "pass": true
+    },
+    {
+      "check": "discovery failure not success",
+      "pass": true
+    },
+    {
+      "check": "inspect writes no profile",
+      "pass": true
+    },
+    {
+      "check": "real CLI current preparation",
+      "pass": true
+    },
+    {
+      "check": "correct capture",
+      "pass": true
+    },
+    {
+      "check": "receipt identity workspace runtime thread",
+      "pass": true
+    },
+    {
+      "check": "no db socket credentials",
+      "pass": true
+    },
+    {
+      "check": "business workspace unchanged",
+      "pass": true
+    },
+    {
+      "check": "fleet disabled",
+      "pass": true
+    },
+    {
+      "check": "status same prepared profile",
+      "pass": true
+    },
+    {
+      "check": "same input replay unchanged",
+      "pass": true
+    },
+    {
+      "check": "changed input preserves files",
+      "pass": true
+    },
+    {
+      "check": "thread conflict closed",
+      "pass": true
+    },
+    {
+      "check": "missing thread no write",
+      "pass": true
+    },
+    {
+      "check": "summary explicit no thread",
+      "pass": true
+    },
+    {
+      "check": "workspace output refuses writes",
+      "pass": true
+    },
+    {
+      "check": "fourth field mandatory",
+      "pass": true
+    }
+  ],
+  "commands": [
+    "git-init.json",
+    "codex-version.json",
+    "oax-build.json",
+    "oax-contract.json",
+    "project-install.json",
+    "project-install-replay.json",
+    "project-check.json",
+    "install-conflict.json",
+    "install-dangling.json",
+    "check-conflict.json",
+    "check-no-binary.json",
+    "inspect-readonly.json",
+    "prepare-current.json",
+    "profile-status.json",
+    "prepare-replay.json",
+    "changed-refused.json",
+    "thread-conflict.json",
+    "thread-missing.json",
+    "prepare-summary.json",
+    "workspace-output-refused.json",
+    "missing-peers.json"
+  ],
+  "profile_hashes": {
+    "fleet.yaml": {
+      "sha256": "784a8f3586ddbb5c2f8af91e6a29156bc1e41ffd3c0421c0714eb543a8e6d546",
+      "mode": "0o600"
+    },
+    "fleet.yaml.lock": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o600"
+    },
+    "workers/review-join.env": {
+      "sha256": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04",
+      "mode": "0o600"
+    },
+    "workers/review-join.yaml": {
+      "sha256": "0220ce041230ad8395a48aace6c5724d1bd2d616957b085a80a32facb9c60410",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.handoff.md": {
+      "sha256": "a5f88e53164e32a3af8013a67a5812b05306186b8f021f1d61a8721177eb61c0",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.json": {
+      "sha256": "3a37bf7c9442d3a335c7dca014459ee0fd93e2c77a6bead1509c322695c943d8",
+      "mode": "0o600"
+    },
+    "workers/identities/review-join.yaml": {
+      "sha256": "059dd61db1dae6b12fee9ed15f6471ae51336113d6278fccb55bf3f726c1e84f",
+      "mode": "0o600"
+    },
+    "workers/identities/review-join.role.md": {
+      "sha256": "1b49a82c74407fb71627a7a760005141ddd3b9f3a06ad3a8ddbaf2e6e8df999f",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.intake/.lock": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.intake/cli-receipt.json": {
+      "sha256": "3a37bf7c9442d3a335c7dca014459ee0fd93e2c77a6bead1509c322695c943d8",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.intake/brief.json": {
+      "sha256": "af805200a16d51674767b52c9a313d8ae5ca5b28e12cc591acdeff650cda41e2",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.intake/result.json": {
+      "sha256": "c608c37aa96b44abc73c8d5f1290096fe22a4ed0916703f35273e6500dd3a042",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.intake/HANDOFF.md": {
+      "sha256": "a5f88e53164e32a3af8013a67a5812b05306186b8f021f1d61a8721177eb61c0",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.intake/source.json": {
+      "sha256": "de5af136d7798e0d45991134f6dceffa0cc5858e4a7f961f4dd175fe24ede10b",
+      "mode": "0o600"
+    },
+    "workers/joins/review-join.intake/ROLE.md": {
+      "sha256": "1b49a82c74407fb71627a7a760005141ddd3b9f3a06ad3a8ddbaf2e6e8df999f",
+      "mode": "0o600"
+    }
+  }
+}

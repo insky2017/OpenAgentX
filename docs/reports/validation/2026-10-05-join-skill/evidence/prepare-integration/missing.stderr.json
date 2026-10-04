@@ -1,0 +1,5 @@
+{
+  "error": "history=current 缺少当前 thread ID；补充明确 thread_id 或由用户选择 history=summary，不会静默丢弃历史",
+  "ready": false,
+  "state": "not_prepared"
+}

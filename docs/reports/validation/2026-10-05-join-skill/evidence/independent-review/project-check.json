@@ -1,0 +1,14 @@
+{
+  "name": "project-check",
+  "argv": [
+    "python3",
+    "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/scripts/oax-skill.py",
+    "check",
+    "--project",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/project"
+  ],
+  "start": "2026-10-04T18:51:12.716376+00:00",
+  "returncode": 0,
+  "stdout": "{\n  \"ok\": true,\n  \"source\": \"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join\",\n  \"source_skill_exists\": true,\n  \"project\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/project\",\n  \"locations\": [\n    {\n      \"scope\": \"project\",\n      \"path\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/project/.agents/skills/openagentx-join\",\n      \"exists\": true,\n      \"symlink\": true,\n      \"skill_exists\": true,\n      \"target_matches_source\": true,\n      \"conflict\": false\n    },\n    {\n      \"scope\": \"user\",\n      \"path\": \"/home/sky/.agents/skills/openagentx-join\",\n      \"exists\": true,\n      \"symlink\": true,\n      \"skill_exists\": true,\n      \"target_matches_source\": true,\n      \"conflict\": false\n    },\n    {\n      \"scope\": \"legacy_user\",\n      \"path\": \"/home/sky/.codex/skills/openagentx-join\",\n      \"exists\": false,\n      \"symlink\": false,\n      \"skill_exists\": false,\n      \"target_matches_source\": false,\n      \"conflict\": false\n    }\n  ],\n  \"linked\": true,\n  \"same_name_location_count\": 2,\n  \"discovery\": {\n    \"completed\": true,\n    \"method\": \"skills/list\",\n    \"force_reload\": true,\n    \"same_name_skills\": [\n      {\n        \"path\": \"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join/SKILL.md\",\n        \"enabled\": true,\n        \"target_matches_source\": true\n      }\n    ],\n    \"discovery_error_count\": 0,\n    \"visible\": true,\n    \"enabled\": true\n  },\n  \"conflict\": false,\n  \"duplicate\": true,\n  \"warnings\": [\n    \"发现多个同名入口；同源链接不影响此次发现，但建议保留单一安装范围。\"\n  ],\n  \"message\": \"仅验证新 app-server 的技能发现；不保证当前已运行 turn 自动注入。\"\n}\n",
+  "stderr": ""
+}

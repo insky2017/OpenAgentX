@@ -1,0 +1,7 @@
+version: 1
+session: OAX
+agents:
+    - agent_id: join-skill-model-e2e
+      identity_file: /home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/workers/identities/join-skill-model-e2e.yaml
+      worker_config: /home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/workers/join-skill-model-e2e.yaml
+      enabled: false

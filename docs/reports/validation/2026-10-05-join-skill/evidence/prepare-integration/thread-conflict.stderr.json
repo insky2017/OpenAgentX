@@ -1,0 +1,5 @@
+{
+  "error": "thread_id 来源不一致；核对 brief.thread_id、CODEX_THREAD_ID 与 CODEX_SESSION_ID",
+  "ready": false,
+  "state": "not_prepared"
+}

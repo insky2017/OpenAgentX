@@ -1,0 +1,8 @@
+{
+  "method": "agent-browser eval document.write with exact local HTML",
+  "source": "docs/design/codex-session-join.html",
+  "http_error": "net::ERR_ACCESS_DENIED; curl returned 200; stopped HTTP navigation path",
+  "exit_code": 0,
+  "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+  "stderr": ""
+}

@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "scope": "real-model skill preparation; no managed activation",
+  "exit_code": 0,
+  "thread_id": "01a10843-7322-70a1-81a8-de6237f8949c",
+  "auto_thread_matches": true,
+  "workspace_unchanged": true,
+  "no_daemon_artifacts": true,
+  "fleet_enabled": false,
+  "profile_status_verified": true,
+  "intake_dir": "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/model02/profile/workers/joins/join-skill-model-e2e.intake"
+}

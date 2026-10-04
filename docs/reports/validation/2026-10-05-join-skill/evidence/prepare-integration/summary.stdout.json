@@ -1,0 +1,78 @@
+{
+  "agent_id": "summary-check",
+  "intake_dir": "/tmp/oax-intake-check-n69fqblb/profile/workers/joins/summary-check.intake",
+  "next_commands": {
+    "open": {
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "summary-check",
+        "--worker-dir",
+        "/tmp/oax-intake-check-n69fqblb/profile/workers",
+        "--file",
+        "/tmp/oax-intake-check-n69fqblb/profile/fleet.yaml",
+        "--db",
+        "/tmp/oax-intake-check-n69fqblb/profile/data/openagentx.db",
+        "--socket",
+        "/tmp/oax-intake-check-n69fqblb/profile/run/openagentx.sock",
+        "--credentials",
+        "/tmp/oax-intake-check-n69fqblb/profile/credentials.json",
+        "--native"
+      ],
+      "shell": "/home/sky/.local/bin/openagentx agent open summary-check --worker-dir /tmp/oax-intake-check-n69fqblb/profile/workers --file /tmp/oax-intake-check-n69fqblb/profile/fleet.yaml --db /tmp/oax-intake-check-n69fqblb/profile/data/openagentx.db --socket /tmp/oax-intake-check-n69fqblb/profile/run/openagentx.sock --credentials /tmp/oax-intake-check-n69fqblb/profile/credentials.json --native"
+    },
+    "resume": {
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "resume",
+        "summary-check",
+        "--worker-dir",
+        "/tmp/oax-intake-check-n69fqblb/profile/workers",
+        "--file",
+        "/tmp/oax-intake-check-n69fqblb/profile/fleet.yaml",
+        "--db",
+        "/tmp/oax-intake-check-n69fqblb/profile/data/openagentx.db",
+        "--socket",
+        "/tmp/oax-intake-check-n69fqblb/profile/run/openagentx.sock",
+        "--credentials",
+        "/tmp/oax-intake-check-n69fqblb/profile/credentials.json"
+      ],
+      "shell": "/home/sky/.local/bin/openagentx agent resume summary-check --worker-dir /tmp/oax-intake-check-n69fqblb/profile/workers --file /tmp/oax-intake-check-n69fqblb/profile/fleet.yaml --db /tmp/oax-intake-check-n69fqblb/profile/data/openagentx.db --socket /tmp/oax-intake-check-n69fqblb/profile/run/openagentx.sock --credentials /tmp/oax-intake-check-n69fqblb/profile/credentials.json"
+    },
+    "status": {
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "status",
+        "summary-check",
+        "--worker-dir",
+        "/tmp/oax-intake-check-n69fqblb/profile/workers",
+        "--file",
+        "/tmp/oax-intake-check-n69fqblb/profile/fleet.yaml",
+        "--db",
+        "/tmp/oax-intake-check-n69fqblb/profile/data/openagentx.db",
+        "--socket",
+        "/tmp/oax-intake-check-n69fqblb/profile/run/openagentx.sock",
+        "--credentials",
+        "/tmp/oax-intake-check-n69fqblb/profile/credentials.json",
+        "--json"
+      ],
+      "shell": "/home/sky/.local/bin/openagentx agent status summary-check --worker-dir /tmp/oax-intake-check-n69fqblb/profile/workers --file /tmp/oax-intake-check-n69fqblb/profile/fleet.yaml --db /tmp/oax-intake-check-n69fqblb/profile/data/openagentx.db --socket /tmp/oax-intake-check-n69fqblb/profile/run/openagentx.sock --credentials /tmp/oax-intake-check-n69fqblb/profile/credentials.json --json"
+    }
+  },
+  "next_step": "先结束当前工作并按宿主生命周期释放 writer，再由用户或外部宿主执行 resume；随后 status/open。managed 协作另行配置。",
+  "ready": false,
+  "receipt_file": "/tmp/oax-intake-check-n69fqblb/profile/workers/joins/summary-check.json",
+  "runtime_state": "unverified",
+  "state": "local_prepared",
+  "thread": {
+    "history": "summary",
+    "sources": [
+      "brief.history"
+    ],
+    "state": "summary_only",
+    "thread_id": null
+  }
+}

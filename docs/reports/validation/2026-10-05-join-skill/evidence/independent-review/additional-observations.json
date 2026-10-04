@@ -1,0 +1,71 @@
+{
+  "checks": [
+    {
+      "check": "env and explicit actual prepare",
+      "pass": true
+    },
+    {
+      "check": "precedence retained",
+      "pass": true
+    },
+    {
+      "check": "target identity independent of source env",
+      "pass": true
+    },
+    {
+      "check": "next status pins correct profile",
+      "pass": true
+    },
+    {
+      "check": "profile-home overrides inherited resource env",
+      "pass": true
+    },
+    {
+      "check": "existing identity setup via real CLI",
+      "pass": true
+    },
+    {
+      "check": "CLI conflict nonzero preserves prior identity",
+      "pass": true
+    },
+    {
+      "check": "CLI failure not ready",
+      "pass": true
+    },
+    {
+      "check": "failure diagnostics persisted",
+      "pass": true
+    }
+  ],
+  "commands": [
+    "env-profile-prepare.json",
+    "env-profile-status-in-other-context.json",
+    "profile-home-priority-inspect.json",
+    "cli-existing-prepare.json",
+    "cli-existing-conflict.json"
+  ],
+  "existing_before": {
+    "fleet.yaml": "9b93c0e3c425076f393a74e76262d57d1a9a2efe2ff214a5cf09567b5cb48373",
+    "fleet.yaml.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "workers/review-existing.yaml": "136c815971975c243bdc9d937e42a53c2cc792d130b53ca0afb495aa1d20341a",
+    "workers/review-existing.env": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04",
+    "workers/joins/review-existing.json": "8d4a50c9b99c17a235a792c02b89a769917bade63f96571ab0a837ed8116a57e",
+    "workers/identities/review-existing.role.md": "247ce636e501c81236e931cb4a7bf588c7714b622ddff2677cf97841aef9ba04",
+    "workers/identities/review-existing.yaml": "a3b1a6167615f637c3c825bc85393f4c40811efbdc84d0faf18e0733f44cfae6"
+  },
+  "existing_after": {
+    "fleet.yaml": "9b93c0e3c425076f393a74e76262d57d1a9a2efe2ff214a5cf09567b5cb48373",
+    "fleet.yaml.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "workers/review-existing.yaml": "136c815971975c243bdc9d937e42a53c2cc792d130b53ca0afb495aa1d20341a",
+    "workers/review-existing.env": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04",
+    "workers/joins/review-existing.json": "8d4a50c9b99c17a235a792c02b89a769917bade63f96571ab0a837ed8116a57e",
+    "workers/identities/review-existing.role.md": "247ce636e501c81236e931cb4a7bf588c7714b622ddff2677cf97841aef9ba04",
+    "workers/identities/review-existing.yaml": "a3b1a6167615f637c3c825bc85393f4c40811efbdc84d0faf18e0733f44cfae6",
+    "workers/joins/review-existing.intake/failure-2724a2bf1a509dcf.json": "2724a2bf1a509dcf661af2239913e0e9016678bcffc2150817ee2b056ba87e0f",
+    "workers/joins/review-existing.intake/.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "workers/joins/review-existing.intake/brief.json": "25edfa6ec7a32a6ae291dc03a33654485fe776ae97d1aaf8ac0bb6889614ae58",
+    "workers/joins/review-existing.intake/HANDOFF.md": "3c4154a26ff6594807e83b507baf189c9e532e75eae17d1befe4803c0e682c5d",
+    "workers/joins/review-existing.intake/source.json": "86964e061df49e7e956e2fbe5391f9344f83bb5a9693eb5a66d664bb5be28b7a",
+    "workers/joins/review-existing.intake/ROLE.md": "969cad3feb6fdb9980ade58ed4b80b2dacc8a32c70b9523c15f9f38f01c34802"
+  }
+}

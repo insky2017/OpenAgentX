@@ -1,0 +1,16 @@
+{
+  "name": "inspect-readonly",
+  "argv": [
+    "python3",
+    "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join/scripts/prepare.py",
+    "--brief",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/brief.json",
+    "--profile-home",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile",
+    "--inspect"
+  ],
+  "start": "2026-10-04T18:51:13.878886+00:00",
+  "returncode": 0,
+  "stdout": "{\n  \"brief\": {\n    \"brief_file\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/brief.json\",\n    \"brief_sha256\": \"5536f292955a2422beda7b61b4ea7129ef025775f0563e651ad3ecf828c01405\"\n  },\n  \"collection_state\": \"complete\",\n  \"missing\": [],\n  \"profile\": {\n    \"credentials\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/credentials.json\",\n    \"db\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/data/openagentx.db\",\n    \"file\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/fleet.yaml\",\n    \"socket\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/run/openagentx.sock\",\n    \"worker_dir\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/workers\"\n  },\n  \"profile_sources\": {\n    \"credentials\": \"profile_home\",\n    \"db\": \"profile_home\",\n    \"file\": \"profile_home\",\n    \"socket\": \"profile_home\",\n    \"worker_dir\": \"profile_home\"\n  },\n  \"read_only\": true,\n  \"thread\": {\n    \"history\": \"current\",\n    \"sources\": [\n      \"CODEX_THREAD_ID\",\n      \"CODEX_SESSION_ID\"\n    ],\n    \"state\": \"captured\",\n    \"thread_id\": \"1a5ea370-7788-4000-a555-111111111111\"\n  }\n}\n",
+  "stderr": ""
+}

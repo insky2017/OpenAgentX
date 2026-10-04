@@ -1,0 +1,24 @@
+{
+  "name": "profile-status",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status",
+    "review-join",
+    "--worker-dir",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/workers",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/fleet.yaml",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/data/openagentx.db",
+    "--socket",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/credentials.json",
+    "--json"
+  ],
+  "start": "2026-10-04T18:51:14.262445+00:00",
+  "returncode": 0,
+  "stdout": "{\"version\":1,\"state\":\"local_prepared\",\"ready\":false,\"agent_id\":\"review-join\",\"runtime\":\"codex\",\"identity_file\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/workers/identities/review-join.yaml\",\"workspace\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/business\",\"role_file\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/workers/identities/review-join.role.md\",\"thread_id\":\"1a5ea370-7788-4000-a555-111111111111\",\"handoff_file\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-join-skill/independent-review/profile/workers/joins/review-join.handoff.md\",\"runtime_state\":\"unverified\"}\n",
+  "stderr": ""
+}
