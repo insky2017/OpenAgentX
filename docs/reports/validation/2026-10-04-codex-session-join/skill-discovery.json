@@ -1,0 +1,78 @@
+{
+  "checked_locations": [
+    {
+      "directory": "/home/sky/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/.codex/skills",
+      "exists": true,
+      "oax_skills": [
+        {
+          "path": "/home/sky/.codex/skills/oax-collaborate/SKILL.md",
+          "resolved": "/home/sky/.codex/skills/oax-collaborate/SKILL.md",
+          "sha256": "44d10c7cdc4a5d5b074904fac2582fdcb9029bce2ac1f1828f2772262872b218"
+        }
+      ]
+    },
+    {
+      "directory": "/etc/codex/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/work/touzi/OneAxe/steadyflow/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/work/touzi/OneAxe/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/work/touzi/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/work/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/Documents/ChatGPT/OpenAgentX/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/Documents/ChatGPT/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    },
+    {
+      "directory": "/home/sky/Documents/.agents/skills",
+      "exists": false,
+      "oax_skills": []
+    }
+  ],
+  "current_session_catalog_has_join": false,
+  "current_session_catalog_has_oax_collaborate": true,
+  "scope": "本机用户/管理员目录及当前阅读与正式工程祖先目录；不推断其他未检查项目。"
+}

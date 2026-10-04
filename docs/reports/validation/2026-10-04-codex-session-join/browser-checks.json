@@ -1,0 +1,659 @@
+{
+  "time": "2026-10-04T12:54:44.327802+08:00",
+  "url": "http://127.0.0.1:18765/docs/design/codex-session-join.html",
+  "browser": "Google Chrome via agent-browser; dedicated oax-join-docs session",
+  "scope": "Only documentation UI; no product API or model E2E",
+  "records": [
+    {
+      "argv": [
+        "eval",
+        "document.querySelectorAll('.panel:not([hidden])').length===1 && !document.getElementById('panel-new').hidden"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "initial route only",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "tab",
+        "click",
+        "--name",
+        "已有终端 Codex 会话"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "!document.getElementById('panel-cli').hidden && document.querySelector('[data-tab=cli]').getAttribute('aria-selected')==='true' && document.getElementById('join-prompt').textContent.includes('--prepare')"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "CLI route reveals prepare prompt",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "复制交接指令"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "/已复制|已选中文字/.test(document.getElementById('copy-status').textContent)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "copy status or honest selected-text fallback",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "tab",
+        "click",
+        "--name",
+        "已有 Desktop 会话"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "!document.getElementById('panel-desktop').hidden && document.getElementById('panel-desktop').textContent.includes('未打通可靠的事件自动唤醒')"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "Desktop route boundary",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "press",
+        "ArrowLeft"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"pressed\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.activeElement.id==='tab-cli' && !document.getElementById('panel-cli').hidden"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "keyboard tab selection",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "tab",
+        "click",
+        "--name",
+        "还没开始的新工作"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "接入准备"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById('map').dataset.mode==='join' && document.querySelectorAll('.modes button[aria-pressed=true]').length===1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "map path join",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "日常终端工作"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById('map').dataset.mode==='work' && document.querySelectorAll('.modes button[aria-pressed=true]').length===1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "map path work",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "自动领域协作"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById('map').dataset.mode==='auto' && document.querySelectorAll('.modes button[aria-pressed=true]').length===1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "map path auto",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "全部关系"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.getElementById('map').dataset.mode==='all' && document.querySelectorAll('.modes button[aria-pressed=true]').length===1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "map path all",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1280",
+        "1100"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":1100,\"width\":1280},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "link",
+        "click",
+        "--name",
+        "关系图",
+        "--exact"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/architecture.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/architecture.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.documentElement.scrollWidth<=innerWidth"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "desktop no page overflow",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "390",
+        "844"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":844,\"width\":390},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "window.scrollTo(0,0)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.documentElement.scrollWidth<=innerWidth"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "narrow screen no page overflow",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "link",
+        "click",
+        "--name",
+        "怎么加入",
+        "--exact"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "find",
+        "role",
+        "tab",
+        "click",
+        "--name",
+        "已有终端 Codex 会话"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"clicked\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "!document.getElementById('panel-cli').hidden && document.documentElement.scrollWidth<=innerWidth"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "check": "mobile route switch",
+      "passed": true,
+      "result": true
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile-route.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile-route.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "errors"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"errors\":[]},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1280",
+        "720"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":720,\"width\":1280},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "window.scrollTo(0,0)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.documentElement.style.scrollBehavior='auto'"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"auto\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1280",
+        "1250"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":1250,\"width\":1280},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "window.scrollTo(0,document.getElementById('map-section').offsetTop-88)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/architecture.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/architecture.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "390",
+        "844"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":844,\"width\":390},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "window.scrollTo(0,0)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.querySelector('[data-tab=cli]').click();window.scrollTo(0,document.getElementById('routes').offsetTop-110)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile-route.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile-route.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1280",
+        "720"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":720,\"width\":1280},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.querySelector('[data-tab=new]').click();window.scrollTo(0,0)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "open",
+        "http://127.0.0.1:18765/docs/design/codex-session-join.html"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"title\":\"OpenAgentX · 新的 Codex 会话怎样加入\",\"url\":\"http://127.0.0.1:18765/docs/design/codex-session-join.html\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.documentElement.style.scrollBehavior='auto'"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"auto\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "1280",
+        "1250"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":1250,\"width\":1280},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "window.scrollTo(0,document.getElementById('map-section').offsetTop-88)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/architecture.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/architecture.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "errors"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"errors\":[]},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "open",
+        "http://127.0.0.1:18765/docs/design/codex-session-join.html"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"title\":\"OpenAgentX · 新的 Codex 会话怎样加入\",\"url\":\"http://127.0.0.1:18765/docs/design/codex-session-join.html\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.documentElement.style.scrollBehavior='auto'"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":\"auto\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "set",
+        "viewport",
+        "390",
+        "844"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"height\":844,\"width\":390},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "window.scrollTo(0,0)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.querySelector('[data-tab=cli]').click();window.scrollTo(0,document.getElementById('routes').offsetTop-110)"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "screenshot",
+        "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile-route.png"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"path\":\"/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/docs/reports/validation/2026-10-04-codex-session-join/mobile-route.png\"},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "document.documentElement.scrollWidth<=innerWidth"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"result\":true},\"error\":null}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "close"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"success\":true,\"data\":{\"closed\":true},\"error\":null}\n",
+      "stderr": ""
+    }
+  ],
+  "screenshot_note": "首次截图在平滑锚点滚动过程中取帧，构图不完整；关闭本测试页平滑滚动后重新定位截取最终截图。未改变产品状态。"
+}

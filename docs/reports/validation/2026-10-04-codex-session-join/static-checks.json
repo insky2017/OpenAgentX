@@ -1,0 +1,39 @@
+{
+  "html_sha256": "ffc48b4d0e9eb04ec47e82a1f625d0729c0d76ff1254b061b3d1932531585723",
+  "duplicate_ids": [],
+  "missing_links": [],
+  "checked_links": [
+    "README.md",
+    "#answer",
+    "#routes",
+    "#map-section",
+    "#ready",
+    "#proposal",
+    "#sources",
+    "../../skills/openagentx-join/SKILL.md",
+    "../../skills/oax-collaborate/SKILL.md",
+    "#proposal",
+    "../operations/codex-agent-entry.md",
+    "../operations/rhythm-pay-managed-handoff.md",
+    "../operations/rhythm-pay-managed-handoff.md",
+    "event-collaboration.html#architecture",
+    "../operations/managed-collaboration.md",
+    "../../skills/openagentx-join/SKILL.md",
+    "../../skills/oax-collaborate/SKILL.md",
+    "../../internal/cli/fleet/agent_join.go",
+    "../operations/codex-agent-entry.md",
+    "../operations/managed-collaboration.md",
+    "../operations/rhythm-pay-managed-handoff.md",
+    "../reports/validation/2026-10-02-codex-workflow/evidence/codex-cli-join-20261002T074001Z/README.md",
+    "../reports/validation/2026-10-04-codex-session-join/README.md",
+    "current-architecture.html",
+    "event-collaboration.html#architecture"
+  ],
+  "javascript_syntax": {
+    "exit_code": 0,
+    "stderr": ""
+  },
+  "external_scripts": 0,
+  "product_api_calls": false,
+  "status": "PASS"
+}
