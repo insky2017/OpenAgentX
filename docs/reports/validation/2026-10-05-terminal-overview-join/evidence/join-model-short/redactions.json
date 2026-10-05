@@ -1,0 +1,6 @@
+{
+  "reasoning_events_omitted": 0,
+  "unrelated_memory_outputs_redacted": 1,
+  "private_env_db_socket_excluded": true,
+  "raw_directory": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short"
+}

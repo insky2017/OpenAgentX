@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "codex",
+    "exec",
+    "--json",
+    "-m",
+    "gpt-6-astra",
+    "-c",
+    "model_reasoning_effort=\"high\"",
+    "-c",
+    "approval_policy=\"never\"",
+    "--sandbox",
+    "danger-full-access",
+    "--cd",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/workspace",
+    "--add-dir",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short",
+    "--output-last-message",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/final.txt",
+    "-"
+  ],
+  "stdin": "prompt.txt",
+  "started": 1791166501.3878188,
+  "skill_name": "oax-join",
+  "invocation": "bare",
+  "parent_thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+  "removed_inherited_env": [
+    "CODEX_THREAD_ID",
+    "CODEX_SESSION_ID"
+  ],
+  "codex_version": "codex-cli 0.160.0"
+}

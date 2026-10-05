@@ -1,0 +1,5 @@
+- `join-skill-model-e2e`：`state=local_prepared`，本地已准备，运行态未核实。
+- `ready=false`。
+- thread 由 helper 从 `CODEX_THREAD_ID`、`CODEX_SESSION_ID` 自动捕获，两者一致：`01a109d7-d300-7102-9808-ee29e245c005`。
+- brief 权限为 `0600`，产物写入指定隔离 profile；workspace 保持只读。未执行 resume/open、启动 Worker、发信或创建业务任务。
+- 下一步：等待用户正式启用。

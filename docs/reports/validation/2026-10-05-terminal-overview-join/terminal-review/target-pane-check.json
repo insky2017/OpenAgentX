@@ -1,0 +1,8 @@
+{
+  "isolated_server": "oax-review-target-2083332",
+  "attach_process_alive": true,
+  "attach_target_pane_activity": "0:1\n1:0",
+  "switch_target_pane_activity": "0:1\n1:0",
+  "scope": "isolated tmux PTY target syntax only; no Worker, model, installation, or business service",
+  "cleanup": "isolated server killed; PTY client exited"
+}

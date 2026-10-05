@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "state": "local_prepared",
+  "ready": false,
+  "agent_id": "join-skill-model-e2e",
+  "runtime": "codex",
+  "identity_file": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers/identities/join-skill-model-e2e.yaml",
+  "workspace": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/workspace",
+  "role_file": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers/identities/join-skill-model-e2e.role.md",
+  "thread_id": "01a109d7-d300-7102-9808-ee29e245c005",
+  "handoff_file": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers/joins/join-skill-model-e2e.handoff.md"
+}

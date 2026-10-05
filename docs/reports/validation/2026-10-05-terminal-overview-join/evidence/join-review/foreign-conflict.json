@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "python3",
+    "/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/scripts/oax-skill.py",
+    "install",
+    "--scope",
+    "project",
+    "--project",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/foreign"
+  ],
+  "exit_code": 1,
+  "stdout": "{\n  \"ok\": false,\n  \"error\": \"existing_path_conflict\",\n  \"locations\": [\n    {\n      \"name\": \"oax-join\",\n      \"scope\": \"project\",\n      \"path\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/foreign/.agents/skills/oax-join\",\n      \"exists\": false,\n      \"symlink\": false,\n      \"skill_exists\": false,\n      \"target_matches_source\": false,\n      \"conflict\": false\n    },\n    {\n      \"name\": \"openagentx-join\",\n      \"scope\": \"project\",\n      \"path\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/foreign/.agents/skills/openagentx-join\",\n      \"exists\": true,\n      \"symlink\": true,\n      \"skill_exists\": true,\n      \"target_matches_source\": false,\n      \"conflict\": true\n    }\n  ]\n}\n",
+  "stderr": "",
+  "utc": "2026-10-05T02:15:10.969576+00:00"
+}

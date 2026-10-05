@@ -1,0 +1,18 @@
+{
+  "worktree": "/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree",
+  "base_commit": "eebac37ba6fb9a98d5ff005fabc20217e96180ff",
+  "source_sha256": {
+    "skills/oax-join/SKILL.md": "4af1f1a6fe79a520bd3d81e9973dc28da16fa831f63dd7e93f33c6dcf02d2c74",
+    "skills/openagentx-join/SKILL.md": "129ecac0d8a1652763495481666cb8ae8238e115576de4f4e59ae752765f1f75",
+    "skills/openagentx-join/scripts/prepare.py": "a37e66f37032f3528ecb57d9adadf091d413403935d115ad230f0f31b75dbaa3",
+    "scripts/oax-skill.py": "cde9c9f8ba889158315bcdb9bbf6c29d4e04508b885c9751077ea798c9db5bfd",
+    "scripts/validation/join_skill_model_e2e.py": "3094b7a1f25d2d1c8ca1c3cd03983b2aeb20b99dfae703c0dbc83a1d4a0158ef",
+    "docs/operations/codex-agent-entry.md": "f251c2c55f433289a2956fe5940032abea9effa4f78db701f01714552a75b68a"
+  },
+  "shared_scripts_link": "../openagentx-join/scripts",
+  "helper_unchanged_from_base": true,
+  "python_syntax": "PASS",
+  "real_model": "NOT_RUN_BY_IMPLEMENTER",
+  "user_install": "NOT_CHANGED",
+  "note": "check exit1 is the preserved user long-name link pointing to canonical main; both project skills are visible and enabled."
+}

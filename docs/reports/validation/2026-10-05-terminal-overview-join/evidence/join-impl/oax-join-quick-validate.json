@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "python3",
+    "/home/sky/.codex/skills/.system/skill-creator/scripts/quick_validate.py",
+    "/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/skills/oax-join"
+  ],
+  "exit_code": 0,
+  "stdout": "Skill is valid!\n",
+  "stderr": ""
+}

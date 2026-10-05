@@ -1,0 +1,79 @@
+{
+  "agent_id": "join-skill-model-e2e",
+  "intake_dir": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers/joins/join-skill-model-e2e.intake",
+  "next_commands": {
+    "open": {
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "join-skill-model-e2e",
+        "--worker-dir",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers",
+        "--file",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/fleet.yaml",
+        "--db",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/data/openagentx.db",
+        "--socket",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/run/openagentx.sock",
+        "--credentials",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/credentials.json",
+        "--native"
+      ],
+      "shell": "/home/sky/.local/bin/openagentx agent open join-skill-model-e2e --worker-dir /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers --file /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/fleet.yaml --db /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/data/openagentx.db --socket /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/run/openagentx.sock --credentials /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/credentials.json --native"
+    },
+    "resume": {
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "resume",
+        "join-skill-model-e2e",
+        "--worker-dir",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers",
+        "--file",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/fleet.yaml",
+        "--db",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/data/openagentx.db",
+        "--socket",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/run/openagentx.sock",
+        "--credentials",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/credentials.json"
+      ],
+      "shell": "/home/sky/.local/bin/openagentx agent resume join-skill-model-e2e --worker-dir /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers --file /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/fleet.yaml --db /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/data/openagentx.db --socket /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/run/openagentx.sock --credentials /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/credentials.json"
+    },
+    "status": {
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "status",
+        "join-skill-model-e2e",
+        "--worker-dir",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers",
+        "--file",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/fleet.yaml",
+        "--db",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/data/openagentx.db",
+        "--socket",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/run/openagentx.sock",
+        "--credentials",
+        "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/credentials.json",
+        "--json"
+      ],
+      "shell": "/home/sky/.local/bin/openagentx agent status join-skill-model-e2e --worker-dir /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers --file /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/fleet.yaml --db /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/data/openagentx.db --socket /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/run/openagentx.sock --credentials /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/credentials.json --json"
+    }
+  },
+  "next_step": "先结束当前工作并按宿主生命周期释放 writer，再由用户或外部宿主执行 resume；随后 status/open。managed 协作另行配置。",
+  "ready": false,
+  "receipt_file": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers/joins/join-skill-model-e2e.json",
+  "runtime_state": "unverified",
+  "state": "local_prepared",
+  "thread": {
+    "history": "current",
+    "sources": [
+      "CODEX_THREAD_ID",
+      "CODEX_SESSION_ID"
+    ],
+    "state": "captured",
+    "thread_id": "01a109d7-d300-7102-9808-ee29e245c005"
+  }
+}

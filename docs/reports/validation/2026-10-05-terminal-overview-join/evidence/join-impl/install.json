@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/scripts/oax-skill.py",
+    "install",
+    "--scope",
+    "project",
+    "--project",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-impl/project"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"ok\": true,\n  \"skills\": [\n    {\n      \"name\": \"oax-join\",\n      \"result\": \"linked\",\n      \"source\": \"/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/skills/oax-join\",\n      \"location\": {\n        \"name\": \"oax-join\",\n        \"scope\": \"project\",\n        \"path\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-impl/project/.agents/skills/oax-join\",\n        \"exists\": true,\n        \"symlink\": true,\n        \"skill_exists\": true,\n        \"target_matches_source\": true,\n        \"conflict\": false\n      }\n    },\n    {\n      \"name\": \"openagentx-join\",\n      \"result\": \"already_linked\",\n      \"source\": \"/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/skills/openagentx-join\",\n      \"location\": {\n        \"name\": \"openagentx-join\",\n        \"scope\": \"project\",\n        \"path\": \"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-impl/project/.agents/skills/openagentx-join\",\n        \"exists\": true,\n        \"symlink\": true,\n        \"skill_exists\": true,\n        \"target_matches_source\": true,\n        \"conflict\": false\n      }\n    }\n  ],\n  \"discovery_checked\": false,\n  \"message\": \"标准 oax-join 与兼容 openagentx-join 链接已就绪；请运行 check 验证实际发现状态。\"\n}\n",
+  "stderr": ""
+}

@@ -1,0 +1,40 @@
+{
+  "exit_code": 0,
+  "result": {
+    "ok": true,
+    "skills": [
+      {
+        "name": "oax-join",
+        "result": "linked",
+        "source": "/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/skills/oax-join",
+        "location": {
+          "name": "oax-join",
+          "scope": "project",
+          "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/workspace/.agents/skills/oax-join",
+          "exists": true,
+          "symlink": true,
+          "skill_exists": true,
+          "target_matches_source": true,
+          "conflict": false
+        }
+      },
+      {
+        "name": "openagentx-join",
+        "result": "linked",
+        "source": "/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/skills/openagentx-join",
+        "location": {
+          "name": "openagentx-join",
+          "scope": "project",
+          "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/workspace/.agents/skills/openagentx-join",
+          "exists": true,
+          "symlink": true,
+          "skill_exists": true,
+          "target_matches_source": true,
+          "conflict": false
+        }
+      }
+    ],
+    "discovery_checked": false,
+    "message": "标准 oax-join 与兼容 openagentx-join 链接已就绪；请运行 check 验证实际发现状态。"
+  }
+}

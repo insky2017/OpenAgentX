@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "status",
+    "join-alias-review",
+    "--worker-dir",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/workers",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/fleet.yaml",
+    "--db",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/data/openagentx.db",
+    "--socket",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/credentials.json",
+    "--json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"version\":1,\"state\":\"local_prepared\",\"ready\":false,\"agent_id\":\"join-alias-review\",\"runtime\":\"codex\",\"identity_file\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/workers/identities/join-alias-review.yaml\",\"workspace\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/business\",\"role_file\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/workers/identities/join-alias-review.role.md\",\"handoff_file\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/profile/workers/joins/join-alias-review.handoff.md\",\"runtime_state\":\"unverified\"}\n",
+  "stderr": "",
+  "utc": "2026-10-05T02:15:11.361073+00:00"
+}

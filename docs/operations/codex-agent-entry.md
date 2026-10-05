@@ -11,23 +11,29 @@ python3 scripts/oax-skill.py install --scope user
 python3 scripts/oax-skill.py check --project /absolute/project
 ```
 
-用户级位置为 `~/.agents/skills/openagentx-join`；仅供某个工程使用时，改用 `install --scope project --project /absolute/project`，写入该工程的 `.agents/skills/`。通常选择一种安装范围。安装器不覆盖已有不同目录或链接；重复安装同一来源保持不变。移动或删除来源仓库会使软链失效，届时自检会明确失败。
+安装器显式安装两个入口：标准短名 `~/.agents/skills/oax-join` 和兼容长名 `~/.agents/skills/openagentx-join`；仅供某个工程使用时，改用 `install --scope project --project /absolute/project`，写入该工程的 `.agents/skills/`。通常选择一种安装范围。安装器先检查两个入口，不覆盖已有不同目录或链接；重复安装同一来源保持不变。已有指向同一工程的长名链接保留，只补齐短名链接；不同来源的旧链接会报冲突，需要先核对，安装器不替换它。移动或删除来源仓库会使软链失效，届时自检会明确失败。
 
-`install` 只证明链接已建立；`check` 会启动独立、短生命周期的 Codex app-server，通过真实 `skills/list` 核对路径和 enabled，既不创建 thread/turn，也不调用模型。它不保证已经运行中的对话立即读入 Skill；在目标 Codex 用 `/skills` 或 `$` 查看并选择 `openagentx-join`，必要时按宿主提示刷新。不要为了刷新技能中断正在托管的任务。
+`install` 只证明链接已建立；`check` 会启动独立、短生命周期的 Codex app-server，通过真实 `skills/list` 分别核对两个名称、对应源码路径和 enabled，既不创建 thread/turn，也不调用模型。它不保证已经运行中的对话立即读入 Skill；在目标 Codex 用 `/skills` 或 `$` 查看并选择 `oax-join`（旧名称 `openagentx-join` 仍可使用），必要时按宿主提示刷新。不要为了刷新技能中断正在托管的任务。
 
-可以直接这样告诉目标 Agent：
+最短调用只需单独输入：
 
-> 使用 `$openagentx-join`，将当前工作准备为长期领域 Agent。稳定名字为 research，职责是本工程研究与实现，需要向 pay-domain 咨询支付接口；工作目录沿用当前目录。保留当前会话历史，整理已完成、下一步及未知副作用，只完成准备并报告回执。
+```text
+$oax-join
+```
+
+Skill 会利用当前目录与已有对话，只补问稳定身份、职责、协作对象等缺失或有歧义的资料。资料已经齐全时直接准备；显示名默认同稳定 ID，当前目录不另问。长名 `$openagentx-join` 以同一方式兼容调用。也可一次提供资料：
+
+> 使用 `$oax-join`，将当前工作准备为长期领域 Agent。稳定名字为 research，职责是本工程研究与实现，需要向 pay-domain 咨询支付接口；工作目录沿用当前目录。保留当前会话历史，整理已完成、下一步及未知副作用，只完成准备并报告回执。
 
 Skill 会根据已有上下文收集四项资料：**稳定名字、工作目录、职责、协作对象**。显示名可默认同稳定 ID；协作对象用明确的空列表表示暂不协作。模型写一份私密 JSON，再调用随 Skill 提供的 helper：
 
 ```sh
-python3 ~/.agents/skills/openagentx-join/scripts/prepare.py --inspect
-python3 ~/.agents/skills/openagentx-join/scripts/prepare.py --example
-python3 ~/.agents/skills/openagentx-join/scripts/prepare.py --brief /private/join-brief.json
+python3 ~/.agents/skills/oax-join/scripts/prepare.py --inspect
+python3 ~/.agents/skills/oax-join/scripts/prepare.py --example
+python3 ~/.agents/skills/oax-join/scripts/prepare.py --brief /private/join-brief.json
 ```
 
-helper 从 `CODEX_THREAD_ID` / `CODEX_SESSION_ID` 自动捕获当前 ID，或接受 brief 中明确提供的 ID；所有来源必须一致。未获得可信 ID 时默认失败，不扫描“最新会话”，也不静默放弃历史。用户明确选择 `history: "summary"` 时才只交接摘要。资料格式见[brief 格式与流程](../../skills/openagentx-join/SKILL.md)。
+helper 从 `CODEX_THREAD_ID` / `CODEX_SESSION_ID` 自动捕获当前 ID，或接受 brief 中明确提供的 ID；所有来源必须一致。未获得可信 ID 时默认失败，不扫描“最新会话”，也不静默放弃历史。用户明确选择 `history: "summary"` 时才只交接摘要。资料格式见[brief 格式与流程](../../skills/oax-join/SKILL.md)。
 
 它在 OAX 私密目录生成标准 ROLE、HANDOFF、资料来源及原 CLI 回执，复用已安装的 `agent join --prepare`；不写业务工作树。协作对象只是接入意向，不授予通信权限。重复相同输入复用资料；冲突不覆盖。若要隔离验证，可传 `--profile-home /absolute/isolated-profile`，生成的后续 status/resume/open 命令也保留同一 profile。
 
@@ -37,7 +43,7 @@ helper 从 `CODEX_THREAD_ID` / `CODEX_SESSION_ID` 自动捕获当前 ID，或接
 
 > 请先运行 `openagentx agent join --help`。将当前目录与我们约定的职责登记为长期领域 Agent，使用稳定名称；保存简短交接说明，并以 `--prepare` 完成自初始化。只有能够明确获得当前 Codex thread ID 时才传 `--thread-id`，不要猜测。完成本轮后告诉我登记结果以及 resume/open 命令，由我在本轮结束后启用。
 
-这条指令可直接使用，不要求安装 Skill；也可让 Agent 读取本仓库 `skills/openagentx-join/SKILL.md`。没有明确 thread ID 时，可以明确选择职责与摘要交接，但不能声称完整原生历史已迁入。已知 ID 时，旧 CLI 完成当前轮并退出、实际释放会话后，才启用该身份，避免两个写者同时操作同一会话。
+这条指令可直接使用，不要求安装 Skill；也可让 Agent 读取本仓库 `skills/oax-join/SKILL.md`。没有明确 thread ID 时，可以明确选择职责与摘要交接，但不能声称完整原生历史已迁入。已知 ID 时，旧 CLI 完成当前轮并退出、实际释放会话后，才启用该身份，避免两个写者同时操作同一会话。
 
 ## 新建与迁入
 
@@ -74,7 +80,7 @@ openagentx agent open research --native
 
 新 Codex Agent 的代理优先保留既有私密 `<worker-dir>/<id>.env`；也可显式导入 `--environment-file`。无既有文件或显式来源时，从用户 `~/.config/mihomo/config.yaml` 的 `mixed-port` 读取本机代理端口并持久保存；不猜测固定端口。`NO_PROXY/no_proxy` 包含回环地址，保存 `CODEX_HOME` 和已提供的最小 OpenAI provider 环境，不修改全局 Codex 配置。
 
-Skill 源码位于 `skills/openagentx-join/SKILL.md`，通过本页安装器显式链接到 Codex 发现目录，不会随普通 `agent join` 隐式安装。该技能用于一次准备，常驻监听由宿主承担，模型无需每轮 poll。
+标准说明位于 `skills/oax-join/SKILL.md`，`skills/openagentx-join/SKILL.md` 为薄兼容入口。唯一 helper 实现保留在 `skills/openagentx-join/scripts/prepare.py`，短名 `scripts` 通过仓库内相对软链共用，已有外部脚本调用仍兼容。两个 Skill 通过本页安装器显式链接到 Codex 发现目录，不会随普通 `agent join` 隐式安装。该技能用于一次准备，常驻监听由宿主承担，模型无需每轮 poll。
 
 ## 日常观察与边界
 

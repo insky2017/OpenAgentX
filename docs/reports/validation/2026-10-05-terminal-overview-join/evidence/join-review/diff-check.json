@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "scripts/oax-skill.py",
+    "scripts/validation/join_skill_model_e2e.py",
+    "skills/oax-join/SKILL.md",
+    "skills/openagentx-join/SKILL.md",
+    "skills/openagentx-join/scripts/prepare.py",
+    "docs/operations/codex-agent-entry.md"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "utc": "2026-10-05T02:15:11.373950+00:00"
+}

@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "scope": "real-model skill preparation; no managed activation",
+  "skill_name": "oax-join",
+  "invocation": "bare",
+  "exit_code": 0,
+  "thread_id": "01a109d7-d300-7102-9808-ee29e245c005",
+  "auto_thread_matches": true,
+  "workspace_unchanged": true,
+  "no_daemon_artifacts": true,
+  "fleet_enabled": false,
+  "profile_status_verified": true,
+  "intake_dir": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-model-short/profile/workers/joins/join-skill-model-e2e.intake"
+}

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "git",
+    "init",
+    "-q",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/join-review/project"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "utc": "2026-10-05T02:15:10.202752+00:00"
+}

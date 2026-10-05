@@ -1,0 +1,99 @@
+{
+  "verdict": "PASS_SCOPED_READY_TO_COMMIT",
+  "blocking_findings": [],
+  "required_fixes": [],
+  "checks": [
+    {
+      "check": "legacy link unchanged and short added",
+      "passed": true
+    },
+    {
+      "check": "both links unchanged on replay",
+      "passed": true
+    },
+    {
+      "check": "both exact sources visible and enabled",
+      "passed": true
+    },
+    {
+      "check": "nonzero explained solely by canonical user source",
+      "passed": true
+    },
+    {
+      "check": "foreign long link preserved without partial short install",
+      "passed": true
+    },
+    {
+      "check": "aliases resolve to one actual helper",
+      "passed": true
+    },
+    {
+      "check": "helper byte identical to reviewed base",
+      "passed": true
+    },
+    {
+      "check": "short alias prepares via real CLI",
+      "passed": true
+    },
+    {
+      "check": "long alias same result and files",
+      "passed": true
+    },
+    {
+      "check": "prepared only remains not ready",
+      "passed": true
+    },
+    {
+      "check": "no db socket or workspace writes",
+      "passed": true
+    },
+    {
+      "check": "canonical user link not changed",
+      "passed": true
+    },
+    {
+      "check": "scope diff formatting valid",
+      "passed": true
+    }
+  ],
+  "source_sha256": {
+    "scripts/oax-skill.py": "cde9c9f8ba889158315bcdb9bbf6c29d4e04508b885c9751077ea798c9db5bfd",
+    "scripts/validation/join_skill_model_e2e.py": "3094b7a1f25d2d1c8ca1c3cd03983b2aeb20b99dfae703c0dbc83a1d4a0158ef",
+    "skills/oax-join/SKILL.md": "4af1f1a6fe79a520bd3d81e9973dc28da16fa831f63dd7e93f33c6dcf02d2c74",
+    "skills/openagentx-join/SKILL.md": "129ecac0d8a1652763495481666cb8ae8238e115576de4f4e59ae752765f1f75",
+    "skills/openagentx-join/scripts/prepare.py": "a37e66f37032f3528ecb57d9adadf091d413403935d115ad230f0f31b75dbaa3",
+    "docs/operations/codex-agent-entry.md": "f251c2c55f433289a2956fe5940032abea9effa4f78db701f01714552a75b68a"
+  },
+  "scripts_symlink": "../openagentx-join/scripts",
+  "evidence": [
+    "git-init.json",
+    "migrate-same-source.json",
+    "install-replay.json",
+    "real-discovery.json",
+    "foreign-conflict.json",
+    "short-prepare.json",
+    "long-prepare-replay.json",
+    "same-profile-status.json",
+    "diff-check.json",
+    "profile-files.json",
+    "verify.py"
+  ],
+  "scope": "Independent short-name migration and compatibility integration using installed CLI and real Codex skills/list. No model invoked. No user install, resume/open, worker activation, messages, or business actions. No product files changed.",
+  "limits": [
+    "Bare-skill model comprehension and missing-information questions require main-agent model evidence.",
+    "User long-name entry still targets canonical main, so worktree check conflict is expected; final canonical install/discovery is a separate step.",
+    "Source identity/profile/thread helper unchanged; historical full matrix not rerun."
+  ],
+  "commit_recommendation": "本轮③无独立验收阻断，可提交；裸短名/长名模型行为与最终 canonical 安装仍由主代理证据判定。",
+  "user_link_before": {
+    "target": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+    "inode": 74844096,
+    "mtime_ns": 1791139789509354115
+  },
+  "user_link_after": {
+    "target": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+    "inode": 74844096,
+    "mtime_ns": 1791139789509354115
+  },
+  "reviewed_at_utc": "2026-10-05T02:15:11.374399+00:00"
+}

@@ -26,6 +26,9 @@ def main():
     parser.add_argument("--root", type=Path, required=True, help="New absolute evidence directory")
     parser.add_argument("--sandbox", choices=["workspace-write", "danger-full-access"],
                         default="workspace-write", help="Use only a mode authorized for this test host")
+    parser.add_argument("--skill-name", choices=["oax-join", "openagentx-join"], default="oax-join")
+    parser.add_argument("--invocation", choices=["bare", "full"], default="bare",
+                        help="bare sends only $skill-name; prior facts live in workspace AGENTS.md")
     args = parser.parse_args()
     root = args.root
     if not root.is_absolute() or root.exists():
@@ -40,10 +43,8 @@ def main():
         f"资料和 OAX profile 只能写在 {root} 下。\n"
         "禁止 resume/open、启动 Worker、向其他 Agent 发消息或修改默认 OAX profile。\n")
     subprocess.run(["git", "init", "-q", str(workspace)], check=True)
-    initial = workspace_files(workspace)
-    save(root / "initial-workspace.json", initial)
-    prompt = (
-        "使用 $openagentx-join 完成一次真实的离线接入准备。先读取该 Skill。\n"
+    context = (
+        "用户已确认的本次接入资料：\n"
         "稳定 Agent ID 是 join-skill-model-e2e，显示名是接入验证领域。\n"
         f"工作目录是 {workspace}。职责：只负责该验证工程资料整理，不负责支付、部署或其他业务领域。\n"
         "协作对象明确为 pay-domain，只记录将来咨询接口的意向，本轮不发信。\n"
@@ -53,6 +54,22 @@ def main():
         f"私密 brief 放在 {root / 'brief.json'}；本工作目录只读。\n"
         "只做 prepare，不能 resume/open 或创建任何业务任务。完成后报告 prepared、ready 与 thread 来源。"
     )
+    # Install both project entries from the checkout under test, never user skills.
+    installer = Path(__file__).resolve().parents[1] / "oax-skill.py"
+    installed = subprocess.run(["python3", str(installer), "install", "--scope", "project",
+                                "--project", str(workspace)], capture_output=True, text=True, timeout=30)
+    save(root / "skill-install.json", {"exit_code": installed.returncode,
+                                      "result": json.loads(installed.stdout)})
+    if installed.returncode != 0:
+        raise RuntimeError("isolated skill installation failed")
+    if args.invocation == "bare":
+        with (workspace / "AGENTS.md").open("a") as rules:
+            rules.write("\n" + context)
+        prompt = "$" + args.skill_name
+    else:
+        prompt = "使用 $" + args.skill_name + " 完成一次真实的离线接入准备。先读取该 Skill。\n" + context
+    initial = workspace_files(workspace)
+    save(root / "initial-workspace.json", initial)
     (root / "prompt.txt").write_text(prompt)
     env = os.environ.copy()
     # A newly launched CLI must supply its own tool thread IDs, never inherit the
@@ -64,10 +81,12 @@ def main():
                "--sandbox", args.sandbox, "--cd", str(workspace),
                "--add-dir", str(root), "--output-last-message", str(root / "final.txt"), "-"]
     save(root / "invocation.json", {"argv": command, "stdin": "prompt.txt",
-         "started": time.time(), "parent_thread_id": inherited_thread,
+         "started": time.time(), "skill_name": args.skill_name, "invocation": args.invocation,
+         "parent_thread_id": inherited_thread,
          "removed_inherited_env": ["CODEX_THREAD_ID", "CODEX_SESSION_ID"],
          "codex_version": subprocess.check_output(["codex", "--version"], text=True).strip()})
-    outcome = {"status": "FAILED", "scope": "real-model skill preparation; no managed activation"}
+    outcome = {"status": "FAILED", "scope": "real-model skill preparation; no managed activation",
+               "skill_name": args.skill_name, "invocation": args.invocation}
     with (root / "codex.jsonl").open("w") as stdout, (root / "codex.stderr.log").open("w") as stderr:
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout,
                                    stderr=stderr, env=env, start_new_session=True, text=True)

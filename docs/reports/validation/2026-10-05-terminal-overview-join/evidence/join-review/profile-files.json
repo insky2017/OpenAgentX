@@ -1,0 +1,17 @@
+{
+  "fleet.yaml": "271a32b06d444550da78b77af339a185a7f9b9ea8f5cac136b3de1248bc4d08a",
+  "fleet.yaml.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "workers/join-alias-review.env": "a3607604cd12d85d56d543d298f222e28dcad06b2b2ddd2baf7b8aff380b7b04",
+  "workers/join-alias-review.yaml": "e7886f45b8930ad51e96fd99f56beed370766cd2ca21024ccca4954c69029a37",
+  "workers/joins/join-alias-review.handoff.md": "7fe389c0e7099a45f65b73b7512c2c8f2f65361156e116dc9a83746d505d9b14",
+  "workers/joins/join-alias-review.json": "a935ef6a34cb404685e92165dfd4e966c16d9a0a1222e79f25e9dfcf2178938b",
+  "workers/identities/join-alias-review.role.md": "9593807f1d2dc29db7b71ea5ae7706e9ec9191b665f4102c685f95111181bcd4",
+  "workers/identities/join-alias-review.yaml": "99e65bfe8205139bbf5321b5f34a326857a314b0f53eb4ba99cded27570722ce",
+  "workers/joins/join-alias-review.intake/.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "workers/joins/join-alias-review.intake/cli-receipt.json": "a935ef6a34cb404685e92165dfd4e966c16d9a0a1222e79f25e9dfcf2178938b",
+  "workers/joins/join-alias-review.intake/brief.json": "ecde0d7921b334b7011f37fec0660186af99ddc7dd290befa71799c1aa661dee",
+  "workers/joins/join-alias-review.intake/result.json": "63b4b6a0977d0e8ee55982420b16d2c88fb0c530c0de27c321b46198cf5297ae",
+  "workers/joins/join-alias-review.intake/HANDOFF.md": "7fe389c0e7099a45f65b73b7512c2c8f2f65361156e116dc9a83746d505d9b14",
+  "workers/joins/join-alias-review.intake/source.json": "14c85dfd2088c9f8f0278963aac1430f7688ae0c49290326ee16c42739f1bf7c",
+  "workers/joins/join-alias-review.intake/ROLE.md": "9593807f1d2dc29db7b71ea5ae7706e9ec9191b665f4102c685f95111181bcd4"
+}

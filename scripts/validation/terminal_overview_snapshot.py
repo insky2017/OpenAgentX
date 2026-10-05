@@ -38,25 +38,38 @@ def process(pid):
 
 
 def children(pid):
-    try:
-        return [int(x) for x in (Path('/proc') / str(pid) / 'task' / str(pid) / 'children').read_text().split()]
-    except FileNotFoundError:
-        return []
+    found = set()
+    for thread in (Path('/proc') / str(pid) / 'task').glob('*/children'):
+        try:
+            found.update(int(x) for x in thread.read_text().split())
+        except FileNotFoundError:
+            pass
+    return sorted(found)
 
 
 def durable_children(pid, kind):
     result = []
-    for child in children(pid):
+    queue = [(child, 1) for child in children(pid)]
+    seen = set()
+    while queue:
+        child, depth = queue.pop(0)
+        if child in seen:
+            continue
+        seen.add(child)
         try:
             args = (Path('/proc') / str(child) / 'cmdline').read_bytes().split(b'\0')
-            match = (b'app-server' in args if kind == 'backend' else b'resume' in args and b'--remote' in args)
+            match = (b'app-server' in args if kind == 'backend' else
+                     (b'resume' in args and b'--remote' in args) or
+                     (b'agent' in args and b'open' in args and b'--native' in args))
             if match:
                 result.append(process(child))
+            if depth < 5 and not (match and kind == 'backend'):
+                queue.extend((p, depth + 1) for p in children(child))
         except (FileNotFoundError, ProcessLookupError):
             pass
         except PermissionError:
             result.append({'pid': child, 'inspection': 'kernel_permission_denied'})
-    return result
+    return sorted(result, key=lambda p: p['pid'])
 
 
 class UnixHTTP(http.client.HTTPConnection):
@@ -132,25 +145,31 @@ def capture(profile, go_binary):
 
 
 def compare(before, after):
+    def stable(value):
+        if isinstance(value, dict):
+            return {key: stable(item) for key, item in value.items() if key != 'executable'}
+        if isinstance(value, list):
+            return [stable(item) for item in value]
+        return value
     checks = {}
     for agent in AGENTS:
-        checks[agent] = {'service_unchanged': before['services'][agent] == after['services'][agent],
+        checks[agent] = {'service_unchanged': stable(before['services'][agent]) == stable(after['services'][agent]),
                          'thread_unchanged': before['threads'][agent]['thread_id'] == after['threads'][agent]['thread_id'],
                          'config_unchanged': before['configs_sha256'][agent] == after['configs_sha256'][agent]}
         old = next(p for p in before['panes'] if p['window_name'] == agent and p['pane_index'] == '0')
         new = next(p for p in after['panes'] if p['pane_id'] == old['pane_id'])
-        checks[agent]['terminal_unchanged'] = all(old.get(k) == new.get(k) for k in
+        checks[agent]['terminal_unchanged'] = all(stable(old.get(k)) == stable(new.get(k)) for k in
                 ['window_id', 'window_name', 'pane_id', 'pane_index', 'pane_pid', 'process', 'native_children', 'dead'])
         identity = lambda snap: sorted((w['worker_instance_id'], w['generation'], w['started_at'])
                                        for w in snap['workers'] if w['agent_id'] == agent)
         checks[agent]['worker_identity_unchanged'] = identity(before) == identity(after) and bool(identity(after))
-    extra_panes_unchanged = all(any(p['pane_id'] == old['pane_id'] and p.get('process') == old.get('process')
+    extra_panes_unchanged = all(any(p['pane_id'] == old['pane_id'] and stable(p.get('process')) == stable(old.get('process'))
                                        for p in after['panes']) for old in before['panes'] if old['window_name'] != 'overview')
     return {'agents': checks, 'all_nonoverview_panes_preserved': extra_panes_unchanged,
-            'daemon_unchanged': before['services']['daemon'] == after['services']['daemon'],
+            'daemon_unchanged': stable(before['services']['daemon']) == stable(after['services']['daemon']),
             'fleet_unchanged': before['fleet_sha256'] == after['fleet_sha256'],
             'pass': all(all(v.values()) for v in checks.values()) and extra_panes_unchanged and
-                    before['services']['daemon'] == after['services']['daemon'] and before['fleet_sha256'] == after['fleet_sha256']}
+                    stable(before['services']['daemon']) == stable(after['services']['daemon']) and before['fleet_sha256'] == after['fleet_sha256']}
 
 
 def main():

@@ -1,0 +1,38 @@
+{
+  "install": {
+    "exit_code": 0
+  },
+  "repeat": {
+    "exit_code": 0
+  },
+  "check": {
+    "exit_code": 1,
+    "verified_both_discovery": true,
+    "conflict": true,
+    "conflict_paths": [
+      "/home/sky/.agents/skills/openagentx-join"
+    ]
+  },
+  "conflict": {
+    "exit_code": 1
+  },
+  "oax-join-helper": {
+    "exit_code": 0
+  },
+  "openagentx-join-helper": {
+    "exit_code": 0
+  },
+  "oax-join-quick-validate": {
+    "exit_code": 0
+  },
+  "openagentx-join-quick-validate": {
+    "exit_code": 0
+  },
+  "legacy_link_preserved": {
+    "inode": 85990769,
+    "target": "../../../../../../../../../work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree/skills/openagentx-join"
+  },
+  "single_helper_sha256": "a37e66f37032f3528ecb57d9adadf091d413403935d115ad230f0f31b75dbaa3",
+  "real_model_invoked": false,
+  "default_profile_written": false
+}
