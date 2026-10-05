@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "type": "RuntimeError",
+  "message": "detail End did not reach a different tail view",
+  "note": "Owned fixture retained; no automatic retry or shared-resource cleanup"
+}

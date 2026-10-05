@@ -1,0 +1,38 @@
+{
+  "openagentx": {
+    "window": "@8",
+    "pane": "%11",
+    "pid": "31132",
+    "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559"
+  },
+  "rhythm": {
+    "window": "@28",
+    "pane": "%55",
+    "pid": "3584397",
+    "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9"
+  },
+  "pay-service": {
+    "window": "@27",
+    "pane": "%54",
+    "pid": "1129591",
+    "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c"
+  },
+  "quote-service": {
+    "window": "@3",
+    "pane": "%3",
+    "pid": "30767",
+    "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa"
+  },
+  "identity-service": {
+    "window": "@30",
+    "pane": "%60",
+    "pid": "3525429",
+    "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69"
+  },
+  "oneaxe-voice": {
+    "window": "@11",
+    "pane": "%17",
+    "pid": "32093",
+    "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181"
+  }
+}

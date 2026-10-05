@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-terminal-562d463",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/profile/workers/identities/terminal-e2e-f9d44e.yaml"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOwner  \r\nCreated Agent \"terminal-e2e-f9d44e\" in Organization \"default\"\r\n"
+}

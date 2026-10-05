@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-05T02:56:00.376543+00:00",
+  "path": "/api/observe/v1/tasks/task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9",
+      "version": 1,
+      "target_agent_id": "pending-e2e-f9d44e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "OVERVIEW-SCROLL-7a6bc783-START\nLINE-01: isolated read-only detail scrolling evidence.\nLINE-02: isolated read-only detail scrolling evidence.\nLINE-03: isolated read-only detail scrolling evidence.\nLINE-04: isolated read-only detail scrolling evidence.\nLINE-05: isolated read-only detail scrolling evidence.\nLINE-06: isolated read-only detail scrolling evidence.\nLINE-07: isolated read-only detail scrolling evidence.\nLINE-08: isolated read-only detail scrolling evidence.\nLINE-09: isolated read-only detail scrolling evidence.\nLINE-10: isolated read-only detail scrolling evidence.\nLINE-11: isolated read-only detail scrolling evidence.\nLINE-12: isolated read-only detail scrolling evidence.\nLINE-13: isolated read-only detail scrolling evidence.\nLINE-14: isolated read-only detail scrolling evidence.\nLINE-15: isolated read-only detail scrolling evidence.\nLINE-16: isolated read-only detail scrolling evidence.\nLINE-17: isolated read-only detail scrolling evidence.\nLINE-18: isolated read-only detail scrolling evidence.\nLINE-19: isolated read-only detail scrolling evidence.\nLINE-20: isolated read-only detail scrolling evidence.\nLINE-21: isolated read-only detail scrolling evidence.\nLINE-22: isolated read-only detail scrolling evidence.\nLINE-23: isolated read-only detail scrolling evidence.\nLINE-24: isolated read-only detail scrolling evidence.\nLINE-25: isolated read-only detail scrolling evidence.\nLINE-26: isolated read-only detail scrolling evidence.\nLINE-27: isolated read-only detail scrolling evidence.\nLINE-28: isolated read-only detail scrolling evidence.\nLINE-29: isolated read-only detail scrolling evidence.\nLINE-30: isolated read-only detail scrolling evidence.\nLINE-31: isolated read-only detail scrolling evidence.\nLINE-32: isolated read-only detail scrolling evidence.\nLINE-33: isolated read-only detail scrolling evidence.\nLINE-34: isolated read-only detail scrolling evidence.\nLINE-35: isolated read-only detail scrolling evidence.\nLINE-36: isolated read-only detail scrolling evidence.\nLINE-37: isolated read-only detail scrolling evidence.\nLINE-38: isolated read-only detail scrolling evidence.\nLINE-39: isolated read-only detail scrolling evidence.\nLINE-40: isolated read-only detail scrolling evidence.\nOVERVIEW-SCROLL-7a6bc783-END",
+      "status": "queued",
+      "outcome_state": "pending",
+      "created_at": "2026-10-05T02:53:01.22555981Z",
+      "updated_at": "2026-10-05T02:53:01.22555981Z"
+    },
+    "messages": [
+      {
+        "id": "message-cd5a3fc4-8c91-47b7-b501-8942b4cdf3ea",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-28aceaf7-50b4-4b04-8840-ce5baf0821df",
+        "target_agent_id": "pending-e2e-f9d44e",
+        "kind": "instruction",
+        "content": "OVERVIEW-SCROLL-7a6bc783-START\nLINE-01: isolated read-only detail scrolling evidence.\nLINE-02: isolated read-only detail scrolling evidence.\nLINE-03: isolated read-only detail scrolling evidence.\nLINE-04: isolated read-only detail scrolling evidence.\nLINE-05: isolated read-only detail scrolling evidence.\nLINE-06: isolated read-only detail scrolling evidence.\nLINE-07: isolated read-only detail scrolling evidence.\nLINE-08: isolated read-only detail scrolling evidence.\nLINE-09: isolated read-only detail scrolling evidence.\nLINE-10: isolated read-only detail scrolling evidence.\nLINE-11: isolated read-only detail scrolling evidence.\nLINE-12: isolated read-only detail scrolling evidence.\nLINE-13: isolated read-only detail scrolling evidence.\nLINE-14: isolated read-only detail scrolling evidence.\nLINE-15: isolated read-only detail scrolling evidence.\nLINE-16: isolated read-only detail scrolling evidence.\nLINE-17: isolated read-only detail scrolling evidence.\nLINE-18: isolated read-only detail scrolling evidence.\nLINE-19: isolated read-only detail scrolling evidence.\nLINE-20: isolated read-only detail scrolling evidence.\nLINE-21: isolated read-only detail scrolling evidence.\nLINE-22: isolated read-only detail scrolling evidence.\nLINE-23: isolated read-only detail scrolling evidence.\nLINE-24: isolated read-only detail scrolling evidence.\nLINE-25: isolated read-only detail scrolling evidence.\nLINE-26: isolated read-only detail scrolling evidence.\nLINE-27: isolated read-only detail scrolling evidence.\nLINE-28: isolated read-only detail scrolling evidence.\nLINE-29: isolated read-only detail scrolling evidence.\nLINE-30: isolated read-only detail scrolling evidence.\nLINE-31: isolated read-only detail scrolling evidence.\nLINE-32: isolated read-only detail scrolling evidence.\nLINE-33: isolated read-only detail scrolling evidence.\nLINE-34: isolated read-only detail scrolling evidence.\nLINE-35: isolated read-only detail scrolling evidence.\nLINE-36: isolated read-only detail scrolling evidence.\nLINE-37: isolated read-only detail scrolling evidence.\nLINE-38: isolated read-only detail scrolling evidence.\nLINE-39: isolated read-only detail scrolling evidence.\nLINE-40: isolated read-only detail scrolling evidence.\nOVERVIEW-SCROLL-7a6bc783-END",
+        "created_at": "2026-10-05T02:53:01.22555981Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 182,
+        "event_id": "event-160fe02f-f7cf-4dff-b664-4abbdc1efda7",
+        "aggregate_type": "task",
+        "aggregate_id": "task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9",
+        "event_type": "task.created",
+        "created_at": "2026-10-05T02:53:01.22555981Z"
+      }
+    ],
+    "snapshot_sequence": 200,
+    "live_after_sequence": 200,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

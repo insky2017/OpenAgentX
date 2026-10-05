@@ -1,0 +1,10 @@
+{
+  "local_link_checks": 164,
+  "link_errors": [],
+  "frozen_baseline_unchanged": true,
+  "syntax": "PASS",
+  "known_secret_value_scan_count": 8,
+  "secret_findings": [],
+  "production_credentials_and_private_profile_not_published": true,
+  "go_package_discovery": "PASS; overlay evidence has .go.txt suffix"
+}

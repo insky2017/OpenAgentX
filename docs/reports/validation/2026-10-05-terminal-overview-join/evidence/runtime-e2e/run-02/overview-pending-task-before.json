@@ -1,0 +1,45 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-d68d54ed-922e-498c-ac48-fd978d0e1150",
+    "version": 1,
+    "target_agent_id": "pending-e2e-f9d44e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "OVERVIEW-PENDING-READONLY: isolated queue evidence; no Worker will execute this task.",
+    "status": "queued",
+    "outcome_state": "pending",
+    "created_at": "2026-10-05T02:49:53.650067271Z",
+    "updated_at": "2026-10-05T02:49:53.650067271Z"
+  },
+  "messages": [
+    {
+      "id": "message-a38e77c0-9f64-4ca3-9165-1953f4f66b92",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-d68d54ed-922e-498c-ac48-fd978d0e1150",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-28aceaf7-50b4-4b04-8840-ce5baf0821df",
+      "target_agent_id": "pending-e2e-f9d44e",
+      "kind": "instruction",
+      "content": "OVERVIEW-PENDING-READONLY: isolated queue evidence; no Worker will execute this task.",
+      "created_at": "2026-10-05T02:49:53.650067271Z"
+    }
+  ],
+  "run_attempts": [],
+  "events": [
+    {
+      "sequence": 159,
+      "event_id": "event-1d21fc61-34af-4b25-9d2a-02c0f6280fbb",
+      "aggregate_type": "task",
+      "aggregate_id": "task-d68d54ed-922e-498c-ac48-fd978d0e1150",
+      "event_type": "task.created",
+      "created_at": "2026-10-05T02:49:53.650067271Z"
+    }
+  ],
+  "snapshot_sequence": 159,
+  "live_after_sequence": 159,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

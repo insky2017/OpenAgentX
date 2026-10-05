@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-05T02:35:25.717221+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "capture-pane",
+    "-p",
+    "-S",
+    "-",
+    "-t",
+    "@0.0"
+  ],
+  "returncode": 0,
+  "stdout": "$ /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/console-open.sh; printf '\\nCONSOLE-EXIT-%s\\n' \"$?\"\n终端真实验收 (terminal-e2e-f9d44e) · 可开始工作\n  当前：无\n  最近：OAX-TERMINAL-ROLE terminal-e2e-f9d44e WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overvie…\n  打开：openagentx agent open terminal-e2e-f9d44e\n  恢复：openagentx agent resume terminal-e2e-f9d44e\n\n\nCONSOLE-EXIT-0\n$ /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/console-open.sh; printf '\\nCONSOLE-83bdafe7-EXIT-%s\\n' \"$?\"\n终端真实验收 (terminal-e2e-f9d44e) · 可开始工作\n  当前：无\n  最近：OAX-TERMINAL-ROLE terminal-e2e-f9d44e WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overvie…\n  打开：openagentx agent open terminal-e2e-f9d44e\n  恢复：openagentx agent resume terminal-e2e-f9d44e\n\n\nCONSOLE-83bdafe7-EXIT-0\n$\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+  "stderr": ""
+}

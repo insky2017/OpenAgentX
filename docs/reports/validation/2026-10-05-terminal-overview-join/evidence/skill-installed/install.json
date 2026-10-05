@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "skills": [
+    {
+      "name": "oax-join",
+      "result": "linked",
+      "source": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/oax-join",
+      "location": {
+        "name": "oax-join",
+        "scope": "user",
+        "path": "/home/sky/.agents/skills/oax-join",
+        "exists": true,
+        "symlink": true,
+        "skill_exists": true,
+        "target_matches_source": true,
+        "conflict": false
+      }
+    },
+    {
+      "name": "openagentx-join",
+      "result": "already_linked",
+      "source": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+      "location": {
+        "name": "openagentx-join",
+        "scope": "user",
+        "path": "/home/sky/.agents/skills/openagentx-join",
+        "exists": true,
+        "symlink": true,
+        "skill_exists": true,
+        "target_matches_source": true,
+        "conflict": false
+      }
+    }
+  ],
+  "discovery_checked": false,
+  "message": "标准 oax-join 与兼容 openagentx-join 链接已就绪；请运行 check 验证实际发现状态。"
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "argv": [
+      "tmux",
+      "list-clients",
+      "-F",
+      "#{client_tty}|#{session_name}|#{window_id}|#{pane_id}"
+    ],
+    "exit_code": 0,
+    "stdout": "/dev/pts/2|bridge|@16|%58\n/dev/pts/4|OAX|@2|%2\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "capture-pane",
+      "-p",
+      "-t",
+      "%2"
+    ],
+    "exit_code": 0,
+    "stdout": "OAX 总览  ·  观察与终端导航\n在线  |  上次同步 10:59:13  |  18 个 Agent\n控制面：/home/sky/.openagentx/run/openagentx.sock\n  Agent             状态         当前工作 / 阻塞与待处理\n› agy-onboarding-e… 未就绪       运行环境或网络尚未就绪\n  codex-domain-e2e  未就绪       运行环境或网络尚未就绪\n  domain-installed… 未就绪       后台未运行\n  domain-installed… 未就绪       后台未运行\n  domain-installed… 未就绪       后台未运行\n  domain-installed… 未就绪       后台未运行\n  external-install… 未就绪       后台未运行\n  external-install… 未就绪       后台未运行\n  orchestrator      排队         请用只读 date 命令获取当前 Asia/Shang…\n  test-fake-agent   未就绪       后台未运行\n  test-fake-multit… 排队         T09 phase 1: emit exactly T09_READY, …\n  verification-run… 未就绪       后台未运行\n  oneaxe-voice      执行中       好的 执行下一步，先完成Linux 然后再完…\n  openagentx        执行中       好 继续执行吧\n  identity-service  可工作       可开始工作\n── 选中详情 · Tab 进入详情 · Agent 1/18 ──\nAGY 入口验收 (agy-onboarding-e2e)\n就绪：运行环境或网络尚未就绪\n建议操作：openagentx agent resume agy-onboarding-e2e\nWorker：online · generation 10 · 心跳 7s\n当前没有已知活动任务。待处理提示不代表所有历史任务总数。\nEnter 只跳转已验证的现有受管 pane 0，不启动或停止 Agent。\n\n\n\n\n\n\n\n\n\n提示：只读观察 · 待处理为已知任务提示，不是全局总计\n↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出\n\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "list-clients",
+      "-F",
+      "#{client_tty}|#{session_name}|#{window_id}|#{pane_id}"
+    ],
+    "exit_code": 0,
+    "stdout": "/dev/pts/2|bridge|@16|%58\n/dev/pts/4|OAX|@2|%2\n",
+    "stderr": ""
+  }
+]

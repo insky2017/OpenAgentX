@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-terminal-562d463",
+    "console",
+    "login"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nConsole  owner\r\nConsole  \r\nCLI session established for owner; expires 2026-11-04T02:27:45Z\r\n"
+}

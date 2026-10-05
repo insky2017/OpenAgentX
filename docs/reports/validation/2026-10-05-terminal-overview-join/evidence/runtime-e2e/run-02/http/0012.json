@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-05T02:30:58.134314+00:00",
+  "path": "/api/observe/v1/tasks?limit=100",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "tasks": [
+      {
+        "id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+        "target_agent_id": "terminal-e2e-f9d44e",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+        "created_at": "2026-10-05T02:28:08.614233791Z",
+        "updated_at": "2026-10-05T02:28:16.868316074Z"
+      }
+    ],
+    "has_more": false
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-05T02:57:05.530143+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "capture-pane",
+    "-p",
+    "-t",
+    "@0.0"
+  ],
+  "returncode": 0,
+  "stdout": "OAX 总览  ·  观察与终端导航\n在线  |  上次同步 10:57:02  |  2 个 Agent\n控制面：/tmp/oax-codex-c419d9055b.sock\n  Agent                状态         当前工作 / 阻塞与待处理\n› pending-e2e-f9d44e   排队         OVERVIEW-SCROLL-7a6bc783-START LINE-01: iso…\n  terminal-e2e-f9d44e  可工作       可开始工作\n── 选中详情 · 详情滚动中 · Tab 返回列表 · Agent 1/2 ──\nLINE-32: isolated read-only detail scrolling evidence.\nLINE-33: isolated read-only detail scrolling evidence.\nLINE-34: isolated read-only detail scrolling evidence.\nLINE-35: isolated read-only detail scrolling evidence.\nLINE-36: isolated read-only detail scrolling evidence.\nLINE-37: isolated read-only detail scrolling evidence.\nLINE-38: isolated read-only detail scrolling evidence.\nLINE-39: isolated read-only detail scrolling evidence.\nLINE-40: isolated read-only detail scrolling evidence.\nOVERVIEW-SCROLL-7a6bc783-END\n投递：pending\n业务效果独立核验：未记录；执行完成不等于业务验收。\nEnter 只跳转已验证的现有受管 pane 0，不启动或停止 Agent。\n提示：只读观察 · 待处理为已知任务提示，不是全局总计\n↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出\n\n",
+  "stderr": ""
+}

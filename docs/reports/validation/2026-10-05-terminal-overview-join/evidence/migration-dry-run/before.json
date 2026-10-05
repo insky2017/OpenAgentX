@@ -1,0 +1,1333 @@
+{
+  "captured_at": "2026-10-05T02:26:46.702695+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window_id": "@2",
+      "window_name": "overview",
+      "pane_id": "%2",
+      "pane_index": "0",
+      "pane_pid": "30743",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 30743,
+        "starttime": "57381",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@8",
+      "window_name": "openagentx",
+      "pane_id": "%11",
+      "pane_index": "0",
+      "pane_pid": "31132",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 31132,
+        "starttime": "57425",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 61363,
+          "starttime": "35670344",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "openagentx"
+        },
+        {
+          "pid": 63654,
+          "starttime": "35671951",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0c98a-bef8-7730-9b2b-cbc2f3594559"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@8",
+      "window_name": "openagentx",
+      "pane_id": "%59",
+      "pane_index": "1",
+      "pane_pid": "3492482",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 3492482,
+        "starttime": "34081138",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@28",
+      "window_name": "rhythm",
+      "pane_id": "%55",
+      "pane_index": "0",
+      "pane_pid": "3584397",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 3584397,
+        "starttime": "25807752",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+        "role": "native_bridge",
+        "agent_id": "rhythm"
+      },
+      "native_children": [
+        {
+          "pid": 3584466,
+          "starttime": "25807759",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@27",
+      "window_name": "pay-service",
+      "pane_id": "%54",
+      "pane_index": "0",
+      "pane_pid": "1129591",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 1129591,
+        "starttime": "37392040",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 1177832,
+          "starttime": "37458373",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "pay-service"
+        },
+        {
+          "pid": 1180441,
+          "starttime": "37460381",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0e016-d951-77d1-bc7e-d13662f4823c"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@3",
+      "window_name": "quote-service",
+      "pane_id": "%3",
+      "pane_index": "0",
+      "pane_pid": "30767",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 30767,
+        "starttime": "57386",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 18653,
+          "starttime": "35593345",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "quote-service"
+        },
+        {
+          "pid": 21538,
+          "starttime": "35596155",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a1010a-c521-78b2-98f0-eaafa642c5fa"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@30",
+      "window_name": "identity-service",
+      "pane_id": "%60",
+      "pane_index": "0",
+      "pane_pid": "3525429",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 3525429,
+        "starttime": "34121500",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 90909,
+          "starttime": "35717993",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "identity-service"
+        },
+        {
+          "pid": 93117,
+          "starttime": "35719399",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@11",
+      "window_name": "oneaxe-voice",
+      "pane_id": "%17",
+      "pane_index": "0",
+      "pane_pid": "32093",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 32093,
+        "starttime": "57454",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 301429,
+          "starttime": "36010461",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "oneaxe-voice"
+        },
+        {
+          "pid": 303535,
+          "starttime": "36011868",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0ddcc-248f-7dd0-a263-67f1d53e0181"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@31",
+      "window_name": "zsh",
+      "pane_id": "%61",
+      "pane_index": "0",
+      "pane_pid": "1127591",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 1127591,
+        "starttime": "37390881",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@9",
+      "window_name": "api_proxy",
+      "pane_id": "%12",
+      "pane_index": "0",
+      "pane_pid": "31224",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31224,
+        "starttime": "57431",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@9",
+      "window_name": "api_proxy",
+      "pane_id": "%13",
+      "pane_index": "1",
+      "pane_pid": "31344",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31344,
+        "starttime": "57435",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@10",
+      "window_name": "colab",
+      "pane_id": "%14",
+      "pane_index": "0",
+      "pane_pid": "31515",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31515,
+        "starttime": "57440",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@10",
+      "window_name": "colab",
+      "pane_id": "%15",
+      "pane_index": "1",
+      "pane_pid": "31664",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31664,
+        "starttime": "57444",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@12",
+      "window_name": "zsh",
+      "pane_id": "%18",
+      "pane_index": "0",
+      "pane_pid": "32361",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 32361,
+        "starttime": "57460",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    }
+  ],
+  "windows": {
+    "@2": {
+      "name": "overview",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    },
+    "@8": {
+      "name": "openagentx",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@oax-agent-id": {
+          "set": true,
+          "value": "openagentx"
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · openagentx · Codex 原生终端"
+        }
+      }
+    },
+    "@28": {
+      "name": "rhythm",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@oax-agent-id": {
+          "set": true,
+          "value": "rhythm"
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · rhythm · Codex 原生终端"
+        }
+      }
+    },
+    "@27": {
+      "name": "pay-service",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@oax-agent-id": {
+          "set": true,
+          "value": "pay-service"
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · pay-service · Codex 原生终端"
+        }
+      }
+    },
+    "@3": {
+      "name": "quote-service",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@oax-agent-id": {
+          "set": true,
+          "value": "quote-service"
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · quote-service · Codex 原生终端"
+        }
+      }
+    },
+    "@30": {
+      "name": "identity-service",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@oax-agent-id": {
+          "set": true,
+          "value": "identity-service"
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · identity-service · Codex 原生终端"
+        }
+      }
+    },
+    "@11": {
+      "name": "oneaxe-voice",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@oax-agent-id": {
+          "set": true,
+          "value": "oneaxe-voice"
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · oneaxe-voice · Codex 原生终端"
+        }
+      }
+    },
+    "@31": {
+      "name": "zsh",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": false,
+          "value": ""
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    },
+    "@9": {
+      "name": "api_proxy",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    },
+    "@10": {
+      "name": "colab",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    },
+    "@12": {
+      "name": "zsh",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": false,
+          "value": ""
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    }
+  },
+  "installed_binary": {
+    "path": "/home/sky/.local/bin/openagentx",
+    "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+    "build_info": "/home/sky/.local/bin/openagentx: go1.22.4\n\tpath\topenagentx/cmd/openagentx\n\tmod\topenagentx\t(devel)\t\n\tdep\tgithub.com/atotto/clipboard\tv0.1.4\th1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=\n\tdep\tgithub.com/aymanbagabas/go-osc52/v2\tv2.0.1\th1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=\n\tdep\tgithub.com/charmbracelet/bubbles\tv0.20.0\th1:jSZu6qD8cRQ6k9OMfR1WlM+ruM8fkPWkHvQWD9LIutE=\n\tdep\tgithub.com/charmbracelet/bubbletea\tv1.3.4\th1:kCg7B+jSCFPLYRA52SDZjr51kG/fMUEoPoZrkaDHyoI=\n\tdep\tgithub.com/charmbracelet/colorprofile\tv0.2.3-0.20250311203215-f60798e515dc\th1:4pZI35227imm7yK2bGPcfpFEmuY1gc2YSTShr4iJBfs=\n\tdep\tgithub.com/charmbracelet/lipgloss\tv1.1.0\th1:vYXsiLHVkK7fp74RkV7b2kq9+zDLoEU4MZoFqR/noCY=\n\tdep\tgithub.com/charmbracelet/x/ansi\tv0.8.0\th1:9GTq3xq9caJW8ZrBTe0LIe2fvfLR/bYXKTx2llXn7xE=\n\tdep\tgithub.com/charmbracelet/x/cellbuf\tv0.0.13-0.20250311204145-2c3ea96c31dd\th1:vy0GVL4jeHEwG5YOXDmi86oYw2yuYUGqz6a8sLwg0X8=\n\tdep\tgithub.com/charmbracelet/x/term\tv0.2.1\th1:AQeHeLZ1OqSXhrAWpYUtZyX1T3zVxfpZuEQMIQaGIAQ=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/gorilla/websocket\tv1.5.3\th1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=\n\tdep\tgithub.com/lucasb-eyer/go-colorful\tv1.2.0\th1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69Aj6K7nkY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.20\th1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=\n\tdep\tgithub.com/mattn/go-runewidth\tv0.0.16\th1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=\n\tdep\tgithub.com/mattn/go-sqlite3\tv1.14.49\th1:B8jBHC3xhxZgxztrgruTuLucebnULQnx4W7cF7SAE9w=\n\tdep\tgithub.com/muesli/ansi\tv0.0.0-20230316100256-276c6243b2f6\th1:ZK8zHtRHOkbHy6Mmr5D264iyp3TiX5OmNcI5cIARiQI=\n\tdep\tgithub.com/muesli/cancelreader\tv0.2.2\th1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELUXHmA=\n\tdep\tgithub.com/muesli/termenv\tv0.16.0\th1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc=\n\tdep\tgithub.com/rivo/uniseg\tv0.4.7\th1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=\n\tdep\tgithub.com/sahilm/fuzzy\tv0.1.1\th1:ceu5RHF8DGgoi+/dR5PsECjCDH1BE3Fnmpo7aVXOdRA=\n\tdep\tgithub.com/xo/terminfo\tv0.0.0-20220910002029-abceb7e1c41e\th1:JVG44RsyaB9T2KIHavMF/ppJZNG9ZpyihvCd0w101no=\n\tdep\tgolang.org/x/crypto\tv0.23.0\th1:dIJU/v2J8Mdglj/8rJ6UUOM3Zc9zLZxVZwwxMooUSAI=\n\tdep\tgolang.org/x/sync\tv0.11.0\th1:GGz8+XQP4FvTTrjZPzNKTMFtSXH80RAzG+5ghFPgK9w=\n\tdep\tgolang.org/x/sys\tv0.30.0\th1:QjkSwP/36a20jFYWkSue1YwXzLmsV5Gfq7Eiy72C1uc=\n\tdep\tgolang.org/x/term\tv0.20.0\th1:VnkxpohqXaOBYJtBmEppKUG6mXpi+4O6purfc2+sMhw=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=886ba7fd255a5f6632ee550d4bdcc786274f48fa\n\tbuild\tvcs.time=2026-10-03T14:57:59Z\n\tbuild\tvcs.modified=false"
+  },
+  "services": {
+    "daemon": {
+      "MainPID": "3577886",
+      "ExecMainStartTimestampMonotonic": "257960197386",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 3577886,
+        "starttime": "25796017",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": []
+    },
+    "openagentx": {
+      "MainPID": "58865",
+      "ExecMainStartTimestampMonotonic": "356663222212",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 58865,
+        "starttime": "35666321",
+        "comm": "openagentx",
+        "executable": "/home/sky/.local/bin/openagentx",
+        "executable_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+      },
+      "backends": [
+        {
+          "pid": 58948,
+          "starttime": "35666397",
+          "comm": "codex",
+          "executable": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+          "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "rhythm": {
+      "MainPID": "3580837",
+      "ExecMainStartTimestampMonotonic": "258006029446",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 3580837,
+        "starttime": "25800601",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 3580900,
+          "starttime": "25800676",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "pay-service": {
+      "MainPID": "1175344",
+      "ExecMainStartTimestampMonotonic": "374546450343",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 1175344,
+        "starttime": "37454643",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 1175444,
+          "starttime": "37454718",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "quote-service": {
+      "MainPID": "15339",
+      "ExecMainStartTimestampMonotonic": "355876757612",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 15339,
+        "starttime": "35587675",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 15419,
+          "starttime": "35587750",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "identity-service": {
+      "MainPID": "85950",
+      "ExecMainStartTimestampMonotonic": "357110609341",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 85950,
+        "starttime": "35711059",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 86060,
+          "starttime": "35711140",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "oneaxe-voice": {
+      "MainPID": "298177",
+      "ExecMainStartTimestampMonotonic": "360069720349",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 298177,
+        "starttime": "36006970",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 298251,
+          "starttime": "36007049",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    }
+  },
+  "threads": {
+    "openagentx": {
+      "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "task_id": "task-c0861179-7d7d-444f-8dc9-0e9b19486d43",
+      "run_id": "run-4a3ee192-b279-4c18-bd04-b47bfc2135fc",
+      "state": "running"
+    },
+    "rhythm": {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "task_id": "task-7312a872-b739-4ce0-b4ca-61a08362d499",
+      "run_id": "run-d80390a9-789e-48df-b229-2503e4e9dbfc",
+      "state": "idle"
+    },
+    "pay-service": {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+      "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+      "state": "idle"
+    },
+    "quote-service": {
+      "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "task_id": "task-cdb3bd79-1f77-496e-bdca-b91e45c5c78e",
+      "run_id": "run-4cee9941-8a1b-4bf3-9d66-919ff2d294cb",
+      "state": "idle"
+    },
+    "identity-service": {
+      "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "task_id": "task-96942a10-68f6-425c-bdb1-bcf009fae25a",
+      "run_id": "run-5c7699e8-4286-4d38-b2b2-252647f23196",
+      "state": "idle"
+    },
+    "oneaxe-voice": {
+      "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "task_id": "task-a3d42af3-2afb-4cc5-a497-6b8e2acdead5",
+      "run_id": "run-e5c46a3a-37f9-4379-a523-02d1698ae948",
+      "state": "idle"
+    }
+  },
+  "configs_sha256": {
+    "openagentx": "9f75fdde07bc56f480936d0cb17b7ca3e6646c215b15894c71df11fb592a5aa3",
+    "rhythm": "d62459a33aaa6f6978a5d1815f7a06a2dc4de998687589df7cfb7bab515aaf75",
+    "pay-service": "9acc2f9139439514e42a4be93c31a0390e81a464554273841d6534e9ee62b256",
+    "quote-service": "30accab13ff5fb893cc73192856df2d64ec793ec3a04cd58eddaff261e75a75a",
+    "identity-service": "6eceef481f3b7764930137b04bdc57b87d03f118ac9acd1fb60c04e9d5ff32cf",
+    "oneaxe-voice": "6261af245c1ff96b77a1a62dcea97adb3c225d01fef72449e7b788848461abe8"
+  },
+  "workers": [
+    {
+      "agent_id": "openagentx",
+      "worker_instance_id": "worker-569568ee-e6d1-4388-a5ab-f26469ca08d7",
+      "generation": 1,
+      "status": "online",
+      "started_at": "2026-10-04T18:23:55.95105924Z"
+    },
+    {
+      "agent_id": "identity-service",
+      "worker_instance_id": "worker-509cf5ad-1cda-491d-8202-7aaee7a7492f",
+      "generation": 1,
+      "status": "online",
+      "started_at": "2026-10-04T18:31:23.386611142Z"
+    },
+    {
+      "agent_id": "oneaxe-voice",
+      "worker_instance_id": "worker-008b7af4-295b-41d4-ae47-6255a98505e2",
+      "generation": 1,
+      "status": "online",
+      "started_at": "2026-10-04T19:20:42.469315907Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-c9d736be-57d1-4746-866d-57a22b137454",
+      "generation": 53,
+      "status": "online",
+      "started_at": "2026-10-04T18:10:49.689170695Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-21864d68-0a41-4310-b01a-ffb4e803e209",
+      "generation": 4,
+      "status": "online",
+      "started_at": "2026-10-04T23:21:59.173201323Z"
+    },
+    {
+      "agent_id": "rhythm",
+      "worker_instance_id": "worker-62fa1611-e4e3-45f1-83cc-eaaee8a2eea3",
+      "generation": 2,
+      "status": "online",
+      "started_at": "2026-10-03T14:59:38.755439153Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-65790859-dcbb-4136-b657-8e7983bc61c7",
+      "generation": 3,
+      "status": "offline",
+      "started_at": "2026-10-04T23:13:13.011610521Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-57468360-94a8-4680-8a06-f2a524d8463b",
+      "generation": 2,
+      "status": "offline",
+      "started_at": "2026-10-03T14:59:12.443542305Z"
+    },
+    {
+      "agent_id": "rhythm",
+      "worker_instance_id": "worker-c7914d44-0a00-45b2-a215-fca4c5b0c7b8",
+      "generation": 1,
+      "status": "offline",
+      "started_at": "2026-10-03T14:26:16.970519066Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-7d0528ef-f197-4f50-9dac-460863fe6d0a",
+      "generation": 1,
+      "status": "offline",
+      "started_at": "2026-10-03T14:18:00.558078967Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-e14b0b6d-5db6-443a-aa19-9edd21ed7be6",
+      "generation": 52,
+      "status": "offline",
+      "started_at": "2026-09-22T11:35:06.648340326Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+      "generation": 51,
+      "status": "offline",
+      "started_at": "2026-09-22T08:05:08.800657331Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-b51d04b2-bf20-4ded-a929-95c11fe990db",
+      "generation": 50,
+      "status": "offline",
+      "started_at": "2026-09-18T14:47:35.825834846Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cf6c22cd-7abb-4699-aa1c-204406a0d625",
+      "generation": 49,
+      "status": "offline",
+      "started_at": "2026-09-18T14:08:45.571296514Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-a33106ae-9162-4660-8f37-1ef8e8b8db53",
+      "generation": 48,
+      "status": "offline",
+      "started_at": "2026-09-13T09:10:12.414628018Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-ea2b6ad4-6044-40c2-b12c-86626a3f2dab",
+      "generation": 47,
+      "status": "offline",
+      "started_at": "2026-09-12T12:32:26.988340754Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-dfdc5c20-d395-467f-a634-e7580b243624",
+      "generation": 46,
+      "status": "offline",
+      "started_at": "2026-09-11T18:05:13.197384548Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d745bf6d-29cb-4025-84d2-5dba477b9d01",
+      "generation": 45,
+      "status": "offline",
+      "started_at": "2026-09-11T18:04:40.467130281Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-bc2755d8-3ec3-4ccb-975a-3a2453098fdd",
+      "generation": 44,
+      "status": "offline",
+      "started_at": "2026-09-11T18:04:07.471948931Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-07bd31bf-ee8e-4c18-ba6e-b59a2ba42de3",
+      "generation": 43,
+      "status": "offline",
+      "started_at": "2026-09-11T17:54:07.631850182Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-0d471821-f597-4b41-b00f-d820134652d9",
+      "generation": 42,
+      "status": "offline",
+      "started_at": "2026-09-05T19:32:40.557146293Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cc5cf872-284e-4f56-a181-7f6128da98de",
+      "generation": 41,
+      "status": "offline",
+      "started_at": "2026-09-05T19:18:05.690557797Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-1eedc2b3-c700-41bc-b35d-eb5b5285f0f6",
+      "generation": 40,
+      "status": "offline",
+      "started_at": "2026-09-05T19:13:58.5782258Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-85c8d1a0-8f96-4b91-83e3-8a56ec40fc2a",
+      "generation": 39,
+      "status": "offline",
+      "started_at": "2026-09-05T19:11:11.789417018Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-8a61d80c-0b2f-429f-88f1-9c5cda638169",
+      "generation": 38,
+      "status": "offline",
+      "started_at": "2026-09-05T19:07:40.869754466Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f3c27d46-36a7-4576-a956-6ae71eb55222",
+      "generation": 37,
+      "status": "offline",
+      "started_at": "2026-09-05T18:59:23.398026533Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-feae1f02-c563-45e1-a074-006de8f70c24",
+      "generation": 36,
+      "status": "offline",
+      "started_at": "2026-09-05T18:52:51.546745921Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-b94ccc20-bf34-458d-b0e3-0298519322c1",
+      "generation": 35,
+      "status": "offline",
+      "started_at": "2026-09-05T18:41:31.541089919Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-0bf3763b-052f-4b3e-b2f5-481ff7a30da3",
+      "generation": 34,
+      "status": "offline",
+      "started_at": "2026-09-05T18:36:17.11439838Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f924a800-888e-4309-a0e6-c54bd2c6b524",
+      "generation": 33,
+      "status": "offline",
+      "started_at": "2026-09-05T18:27:45.456096439Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d60f45e4-e54f-4f71-a6d3-3f7884703f62",
+      "generation": 32,
+      "status": "offline",
+      "started_at": "2026-09-05T18:22:14.354069705Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-b977a681-61ab-4df9-9afd-45a17befab77",
+      "generation": 31,
+      "status": "offline",
+      "started_at": "2026-09-05T18:13:19.14087955Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-1e8deef9-2758-4eef-a7d5-9e74d66b74ba",
+      "generation": 30,
+      "status": "offline",
+      "started_at": "2026-09-05T18:06:55.422249644Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-e1d53a54-93a6-4068-bea1-66d273f82a58",
+      "generation": 29,
+      "status": "offline",
+      "started_at": "2026-09-05T17:54:28.343108852Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-675bb1ac-9209-4b4e-a0eb-31fd068ba8a5",
+      "generation": 28,
+      "status": "offline",
+      "started_at": "2026-09-05T01:06:25.93521987Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-bf07dfa1-4d9e-4bd3-80ad-5d38fd4ba5e9",
+      "generation": 27,
+      "status": "offline",
+      "started_at": "2026-09-05T00:37:55.72353955Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d068d39a-c4b6-4c19-bb1f-57328fddbec9",
+      "generation": 26,
+      "status": "offline",
+      "started_at": "2026-09-05T00:37:52.751926843Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f62525c1-ba4e-4fe3-adcc-61047d46d3a3",
+      "generation": 25,
+      "status": "offline",
+      "started_at": "2026-09-04T18:42:50.576329366Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-dac3f7d7-ae9a-40ec-b0b7-0b264a8ac9cd",
+      "generation": 24,
+      "status": "offline",
+      "started_at": "2026-09-04T18:40:05.004448562Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-559005a4-7217-4921-accf-2d53edd71e60",
+      "generation": 23,
+      "status": "offline",
+      "started_at": "2026-09-04T18:39:09.382387141Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-18e4dbfd-fef8-4d3d-ad2e-3c3c8a9fce93",
+      "generation": 22,
+      "status": "offline",
+      "started_at": "2026-09-04T18:23:16.735390316Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f9e32b5b-94f5-4a35-92fc-b53eb1d0fd36",
+      "generation": 21,
+      "status": "offline",
+      "started_at": "2026-09-04T18:18:53.883923528Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-4c39d926-037d-4cb2-b6a1-4b6fd1d2dc29",
+      "generation": 20,
+      "status": "offline",
+      "started_at": "2026-09-04T17:08:23.208890377Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d79b1f6e-0fae-4762-9165-3007c16291cb",
+      "generation": 19,
+      "status": "offline",
+      "started_at": "2026-09-01T06:28:58.717469417Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cc3943db-daf6-48f9-acb8-1ee32dcfb05c",
+      "generation": 18,
+      "status": "offline",
+      "started_at": "2026-09-01T06:14:46.192591823Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-13531475-a1aa-4d36-98c1-245444a86fc7",
+      "generation": 17,
+      "status": "offline",
+      "started_at": "2026-09-01T05:51:11.723077494Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-968e8105-3bad-4db3-989d-efb9ad090d36",
+      "generation": 16,
+      "status": "offline",
+      "started_at": "2026-09-01T05:33:57.905229085Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-2702a92b-d7f5-49cd-87e4-b74d523995ee",
+      "generation": 15,
+      "status": "offline",
+      "started_at": "2026-09-01T01:49:26.692792027Z"
+    }
+  ],
+  "observe": {
+    "server_time": "2026-10-05T02:26:47.70472978Z",
+    "latest_sequence": 358464
+  },
+  "fleet_sha256": "91f3d3c3cf5acc3717bcc3291a9f47b3a8297b0903a4d5f2580e29939f644683"
+}

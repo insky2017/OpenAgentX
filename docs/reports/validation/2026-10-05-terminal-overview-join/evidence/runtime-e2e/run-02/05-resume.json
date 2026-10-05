@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-terminal-562d463",
+    "agent",
+    "resume",
+    "terminal-e2e-f9d44e",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/password",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOpenAgentX is already initialized; no changes were made\r\nAgent \"terminal-e2e-f9d44e\" is unchanged; no events were appended\r\nAgent terminal-e2e-f9d44e 已纳管，工作目录 /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/workspace，职责 /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/profile/workers/identities/terminal-e2e-f9d44e.role.md\r\nAgent terminal-e2e-f9d44e 服务在线，当前代 1 网络已应用。\r\n终端真实验收 (terminal-e2e-f9d44e) · 可开始工作\r\n  当前：无\r\n  最近：暂无结果\r\n  打开：openagentx agent open terminal-e2e-f9d44e\r\n  恢复：openagentx agent resume terminal-e2e-f9d44e\r\n\r\n"
+}

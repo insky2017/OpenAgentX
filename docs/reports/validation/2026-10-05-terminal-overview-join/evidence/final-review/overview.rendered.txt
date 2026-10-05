@@ -1,0 +1,38 @@
+OAX 总览  ·  观察与终端导航
+在线  |  上次同步 10:59:13  |  18 个 Agent
+控制面：/home/sky/.openagentx/run/openagentx.sock
+  Agent             状态         当前工作 / 阻塞与待处理
+› agy-onboarding-e… 未就绪       运行环境或网络尚未就绪
+  codex-domain-e2e  未就绪       运行环境或网络尚未就绪
+  domain-installed… 未就绪       后台未运行
+  domain-installed… 未就绪       后台未运行
+  domain-installed… 未就绪       后台未运行
+  domain-installed… 未就绪       后台未运行
+  external-install… 未就绪       后台未运行
+  external-install… 未就绪       后台未运行
+  orchestrator      排队         请用只读 date 命令获取当前 Asia/Shang…
+  test-fake-agent   未就绪       后台未运行
+  test-fake-multit… 排队         T09 phase 1: emit exactly T09_READY, …
+  verification-run… 未就绪       后台未运行
+  oneaxe-voice      执行中       好的 执行下一步，先完成Linux 然后再完…
+  openagentx        执行中       好 继续执行吧
+  identity-service  可工作       可开始工作
+── 选中详情 · Tab 进入详情 · Agent 1/18 ──
+AGY 入口验收 (agy-onboarding-e2e)
+就绪：运行环境或网络尚未就绪
+建议操作：openagentx agent resume agy-onboarding-e2e
+Worker：online · generation 10 · 心跳 7s
+当前没有已知活动任务。待处理提示不代表所有历史任务总数。
+Enter 只跳转已验证的现有受管 pane 0，不启动或停止 Agent。
+
+
+
+
+
+
+
+
+
+提示：只读观察 · 待处理为已知任务提示，不是全局总计
+↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出
+

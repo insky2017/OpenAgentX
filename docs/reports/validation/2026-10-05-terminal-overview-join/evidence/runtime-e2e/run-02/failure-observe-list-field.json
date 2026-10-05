@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "type": "KeyError",
+  "message": "'task_id'",
+  "note": "Owned fixture retained; no automatic retry or shared-resource cleanup"
+}

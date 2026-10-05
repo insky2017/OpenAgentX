@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-05T02:35:20.572164+00:00",
+  "phase": "console",
+  "harness_sha256": "3868fdd8ed416afc58786f0d0c0a33a80132e4f3f321595bd384f5d43db60122",
+  "binary_sha256": "1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1",
+  "source_commit": "562d463aa5c0de7a6481ed31fbf7b1b1966ed837",
+  "continued_owned_fixture": true
+}

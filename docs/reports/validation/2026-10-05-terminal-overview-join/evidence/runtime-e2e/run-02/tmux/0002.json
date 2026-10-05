@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-05T02:28:07.979999+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "new-window",
+    "-d",
+    "-P",
+    "-F",
+    "#{window_id}",
+    "-t",
+    "=OAX",
+    "-n",
+    "scratch",
+    "sleep",
+    "86400"
+  ],
+  "returncode": 0,
+  "stdout": "@1\n",
+  "stderr": ""
+}

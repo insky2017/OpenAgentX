@@ -1,0 +1,18 @@
+{
+  "pid": 2304458,
+  "cmdline": [
+    "/home/sky/.local/bin/openagentx",
+    "overview",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--worker-dir",
+    "/home/sky/.openagentx/workers"
+  ],
+  "matches_installed_overview_invocation": true,
+  "pid_starttime_matches_post_install": true,
+  "direct_running_exe_sha256": "UNAVAILABLE_KERNEL_PERMISSION_DENIED",
+  "disk_binary_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "observed_at_utc": "2026-10-05T03:00:26.532625+00:00"
+}

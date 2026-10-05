@@ -1,0 +1,30 @@
+{
+  "binary_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "command": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-overview-eb043ca",
+    "overview",
+    "--socket",
+    "/home/sky/.openagentx/run/openagentx.sock",
+    "--credentials",
+    "/home/sky/.openagentx/credentials.json",
+    "--worker-dir",
+    "/home/sky/.openagentx/workers"
+  ],
+  "dimensions": [
+    140,
+    40
+  ],
+  "agents_seen": {
+    "rhythm": false,
+    "pay-service": true,
+    "quote-service": false,
+    "identity-service": true,
+    "oneaxe-voice": true,
+    "openagentx": true
+  },
+  "connected": false,
+  "exit_code": 0,
+  "no_terminal_navigation": true,
+  "no_service_changes": true,
+  "pass": false
+}

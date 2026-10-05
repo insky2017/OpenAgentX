@@ -1,0 +1,22 @@
+OAX 总览  ·  观察与终端导航
+在线  |  上次同步 10:59:17  |  2 个 Agent
+控制面：/tmp/oax-codex-c419d9055b.sock
+  Agent                状态         当前工作 / 阻塞与待处理
+› pending-e2e-f9d44e   排队         OVERVIEW-SCROLL-7a6bc783-START LINE-01: iso…
+  terminal-e2e-f9d44e  可工作       可开始工作
+── 选中详情 · 详情滚动中 · Tab 返回列表 · Agent 1/2 ──
+LINE-32: isolated read-only detail scrolling evidence.
+LINE-33: isolated read-only detail scrolling evidence.
+LINE-34: isolated read-only detail scrolling evidence.
+LINE-35: isolated read-only detail scrolling evidence.
+LINE-36: isolated read-only detail scrolling evidence.
+LINE-37: isolated read-only detail scrolling evidence.
+LINE-38: isolated read-only detail scrolling evidence.
+LINE-39: isolated read-only detail scrolling evidence.
+LINE-40: isolated read-only detail scrolling evidence.
+OVERVIEW-SCROLL-7a6bc783-END
+投递：pending
+业务效果独立核验：未记录；执行完成不等于业务验收。
+Enter 只跳转已验证的现有受管 pane 0，不启动或停止 Agent。
+提示：只读观察 · 待处理为已知任务提示，不是全局总计
+↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出

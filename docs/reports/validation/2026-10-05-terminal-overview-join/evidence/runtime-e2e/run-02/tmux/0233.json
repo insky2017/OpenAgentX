@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-05T03:01:29.830152+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "show-options",
+    "-w",
+    "-t",
+    "@2"
+  ],
+  "returncode": 0,
+  "stdout": "automatic-rename off\npane-base-index 0\n",
+  "stderr": ""
+}

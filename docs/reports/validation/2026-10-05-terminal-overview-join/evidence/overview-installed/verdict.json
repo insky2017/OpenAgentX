@@ -1,0 +1,11 @@
+{
+  "result": "PASS",
+  "replaced_only": "OAX:overview.0",
+  "time_utc": "2026-10-05T02:56:03.167484+00:00",
+  "pane_id": "%2",
+  "window_id": "@2",
+  "new_pane_pid": "2304458",
+  "binary_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "six_business_agents_preserved": true,
+  "user_client_selection_preserved": true
+}

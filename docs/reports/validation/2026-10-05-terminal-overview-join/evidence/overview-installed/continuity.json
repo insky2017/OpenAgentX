@@ -1,0 +1,50 @@
+{
+  "agents": {
+    "openagentx": {
+      "service_unchanged": true,
+      "thread_unchanged": true,
+      "config_unchanged": true,
+      "terminal_unchanged": true,
+      "worker_identity_unchanged": true
+    },
+    "rhythm": {
+      "service_unchanged": true,
+      "thread_unchanged": true,
+      "config_unchanged": true,
+      "terminal_unchanged": true,
+      "worker_identity_unchanged": true
+    },
+    "pay-service": {
+      "service_unchanged": true,
+      "thread_unchanged": true,
+      "config_unchanged": true,
+      "terminal_unchanged": true,
+      "worker_identity_unchanged": true
+    },
+    "quote-service": {
+      "service_unchanged": true,
+      "thread_unchanged": true,
+      "config_unchanged": true,
+      "terminal_unchanged": true,
+      "worker_identity_unchanged": true
+    },
+    "identity-service": {
+      "service_unchanged": true,
+      "thread_unchanged": true,
+      "config_unchanged": true,
+      "terminal_unchanged": true,
+      "worker_identity_unchanged": true
+    },
+    "oneaxe-voice": {
+      "service_unchanged": true,
+      "thread_unchanged": true,
+      "config_unchanged": true,
+      "terminal_unchanged": true,
+      "worker_identity_unchanged": true
+    }
+  },
+  "all_nonoverview_panes_preserved": true,
+  "daemon_unchanged": true,
+  "fleet_unchanged": true,
+  "pass": true
+}

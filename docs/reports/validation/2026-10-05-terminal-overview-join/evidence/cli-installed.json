@@ -1,0 +1,12 @@
+{
+  "time_utc": "2026-10-05T02:54:11.070906+00:00",
+  "source_commit": "eb043ca3012b40ca5515a97c83e5422f0598f839",
+  "target": "/home/sky/.local/bin/openagentx",
+  "backup": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/installed-before-886ba7f",
+  "before_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+  "after_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "atomic_replace": true,
+  "services_restarted": false,
+  "business_panes_replaced": false,
+  "result": "PASS"
+}

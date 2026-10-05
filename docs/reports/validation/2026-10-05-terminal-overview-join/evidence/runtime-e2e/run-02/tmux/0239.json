@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-05T03:01:35.077568+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "kill-server"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

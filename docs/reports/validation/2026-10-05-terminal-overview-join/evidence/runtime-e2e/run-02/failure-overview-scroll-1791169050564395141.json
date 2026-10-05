@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "type": "TimeoutError",
+  "message": "bounded fixture wait expired",
+  "note": "Owned fixture retained; no automatic retry or shared-resource cleanup"
+}

@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "scope": "real TTY list, queued details, selection/scroll, exact native pane navigation, disconnect/recovery",
+  "overview_binary_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "daemon_binary_sha256": "1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1",
+  "native_thread_preserved": "01a109e3-d9b8-77f0-b64b-43b1ef7db7fa",
+  "pending_task": "task-d68d54ed-922e-498c-ac48-fd978d0e1150",
+  "real_client_sizes": [
+    {
+      "columns": 160,
+      "rows": 45
+    },
+    {
+      "columns": 80,
+      "rows": 24
+    }
+  ],
+  "model_tasks_before": 1,
+  "model_tasks_after": 1,
+  "no_shared_processes_touched": true
+}

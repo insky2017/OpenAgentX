@@ -1,0 +1,1208 @@
+[
+  {
+    "argv": [
+      "tmux",
+      "display-message",
+      "-p",
+      "-t",
+      "%11",
+      "-F",
+      "#{session_name}|#{window_id}|#{window_name}|#{pane_index}|#{pane_pid}"
+    ],
+    "exit_code": 0,
+    "stdout": "OAX|@8|openagentx|0|31132\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@8",
+      "automatic-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@8",
+      "automatic-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@8",
+      "allow-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@8",
+      "allow-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@8",
+      "remain-on-exit",
+      "on"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@8",
+      "remain-on-exit"
+    ],
+    "exit_code": 0,
+    "stdout": "on\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@8",
+      "@openagentx_managed",
+      "1"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@8",
+      "@openagentx_managed"
+    ],
+    "exit_code": 0,
+    "stdout": "1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@8",
+      "@openagentx_agent_id",
+      "openagentx"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@8",
+      "@openagentx_agent_id"
+    ],
+    "exit_code": 0,
+    "stdout": "openagentx\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@8",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@8",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@8",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@8",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "display-message",
+      "-p",
+      "-t",
+      "%55",
+      "-F",
+      "#{session_name}|#{window_id}|#{window_name}|#{pane_index}|#{pane_pid}"
+    ],
+    "exit_code": 0,
+    "stdout": "OAX|@28|rhythm|0|3584397\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@28",
+      "automatic-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@28",
+      "automatic-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@28",
+      "allow-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@28",
+      "allow-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@28",
+      "remain-on-exit",
+      "on"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@28",
+      "remain-on-exit"
+    ],
+    "exit_code": 0,
+    "stdout": "on\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@28",
+      "@openagentx_managed",
+      "1"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@28",
+      "@openagentx_managed"
+    ],
+    "exit_code": 0,
+    "stdout": "1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@28",
+      "@openagentx_agent_id",
+      "rhythm"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@28",
+      "@openagentx_agent_id"
+    ],
+    "exit_code": 0,
+    "stdout": "rhythm\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@28",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@28",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@28",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@28",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "display-message",
+      "-p",
+      "-t",
+      "%54",
+      "-F",
+      "#{session_name}|#{window_id}|#{window_name}|#{pane_index}|#{pane_pid}"
+    ],
+    "exit_code": 0,
+    "stdout": "OAX|@27|pay-service|0|1129591\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@27",
+      "automatic-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@27",
+      "automatic-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@27",
+      "allow-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@27",
+      "allow-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@27",
+      "remain-on-exit",
+      "on"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@27",
+      "remain-on-exit"
+    ],
+    "exit_code": 0,
+    "stdout": "on\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@27",
+      "@openagentx_managed",
+      "1"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@27",
+      "@openagentx_managed"
+    ],
+    "exit_code": 0,
+    "stdout": "1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@27",
+      "@openagentx_agent_id",
+      "pay-service"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@27",
+      "@openagentx_agent_id"
+    ],
+    "exit_code": 0,
+    "stdout": "pay-service\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@27",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@27",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@27",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@27",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "display-message",
+      "-p",
+      "-t",
+      "%3",
+      "-F",
+      "#{session_name}|#{window_id}|#{window_name}|#{pane_index}|#{pane_pid}"
+    ],
+    "exit_code": 0,
+    "stdout": "OAX|@3|quote-service|0|30767\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@3",
+      "automatic-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@3",
+      "automatic-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@3",
+      "allow-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@3",
+      "allow-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@3",
+      "remain-on-exit",
+      "on"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@3",
+      "remain-on-exit"
+    ],
+    "exit_code": 0,
+    "stdout": "on\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@3",
+      "@openagentx_managed",
+      "1"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@3",
+      "@openagentx_managed"
+    ],
+    "exit_code": 0,
+    "stdout": "1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@3",
+      "@openagentx_agent_id",
+      "quote-service"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@3",
+      "@openagentx_agent_id"
+    ],
+    "exit_code": 0,
+    "stdout": "quote-service\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@3",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@3",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@3",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@3",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "display-message",
+      "-p",
+      "-t",
+      "%60",
+      "-F",
+      "#{session_name}|#{window_id}|#{window_name}|#{pane_index}|#{pane_pid}"
+    ],
+    "exit_code": 0,
+    "stdout": "OAX|@30|identity-service|0|3525429\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@30",
+      "automatic-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@30",
+      "automatic-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@30",
+      "allow-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@30",
+      "allow-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@30",
+      "remain-on-exit",
+      "on"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@30",
+      "remain-on-exit"
+    ],
+    "exit_code": 0,
+    "stdout": "on\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@30",
+      "@openagentx_managed",
+      "1"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@30",
+      "@openagentx_managed"
+    ],
+    "exit_code": 0,
+    "stdout": "1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@30",
+      "@openagentx_agent_id",
+      "identity-service"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@30",
+      "@openagentx_agent_id"
+    ],
+    "exit_code": 0,
+    "stdout": "identity-service\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@30",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@30",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@30",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@30",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "display-message",
+      "-p",
+      "-t",
+      "%17",
+      "-F",
+      "#{session_name}|#{window_id}|#{window_name}|#{pane_index}|#{pane_pid}"
+    ],
+    "exit_code": 0,
+    "stdout": "OAX|@11|oneaxe-voice|0|32093\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@11",
+      "automatic-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@11",
+      "automatic-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@11",
+      "allow-rename",
+      "off"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@11",
+      "allow-rename"
+    ],
+    "exit_code": 0,
+    "stdout": "off\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@11",
+      "remain-on-exit",
+      "on"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@11",
+      "remain-on-exit"
+    ],
+    "exit_code": 0,
+    "stdout": "on\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@11",
+      "@openagentx_managed",
+      "1"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@11",
+      "@openagentx_managed"
+    ],
+    "exit_code": 0,
+    "stdout": "1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-w",
+      "-t",
+      "@11",
+      "@openagentx_agent_id",
+      "oneaxe-voice"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@11",
+      "@openagentx_agent_id"
+    ],
+    "exit_code": 0,
+    "stdout": "oneaxe-voice\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@11",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@11",
+      "@oax-managed"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "set-option",
+      "-wu",
+      "-t",
+      "@11",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "tmux",
+      "show-options",
+      "-wqv",
+      "-t",
+      "@11",
+      "@oax-agent-id"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

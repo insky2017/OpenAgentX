@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-05T02:49:53.652045+00:00",
+  "path": "/api/control/v1/tasks",
+  "method": "POST",
+  "request": {
+    "target_agent_id": "pending-e2e-f9d44e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "OVERVIEW-PENDING-READONLY: isolated queue evidence; no Worker will execute this task.",
+    "meta": {
+      "idempotency_key": "7da7c14f189a399e903828b6"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-d68d54ed-922e-498c-ac48-fd978d0e1150",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

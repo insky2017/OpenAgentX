@@ -1,0 +1,25 @@
+{
+  "root": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-01",
+  "socket": "/tmp/oax-codex-c3df175485.sock",
+  "url": "http://127.0.0.1:35027",
+  "agent": "terminal-e2e-dd73ca",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-terminal-562d463",
+  "binary_sha256": "1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1",
+  "server": "oax-terminal-5a5b03bad889",
+  "windows": {},
+  "tasks": [],
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 2126184,
+      "starttime": "38560102"
+    },
+    {
+      "label": "worker",
+      "pid": 2127063,
+      "starttime": "38561151"
+    }
+  ],
+  "profile": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-01/profile",
+  "at": "2026-10-05T02:26:23.566362+00:00"
+}

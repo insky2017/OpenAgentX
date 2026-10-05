@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-05T02:28:08.082085+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window": "@0",
+      "name": "overview",
+      "pane": "%0",
+      "index": "0",
+      "pid": "2136293",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    },
+    {
+      "session": "OAX",
+      "window": "@1",
+      "name": "scratch",
+      "pane": "%1",
+      "index": "0",
+      "pid": "2136300",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    },
+    {
+      "session": "OAX",
+      "window": "@1",
+      "name": "scratch",
+      "pane": "%3",
+      "index": "1",
+      "pid": "2136314",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    },
+    {
+      "session": "OAX",
+      "window": "@2",
+      "name": "other",
+      "pane": "%2",
+      "index": "0",
+      "pid": "2136303",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    }
+  ],
+  "options": {
+    "@0": "automatic-rename off\npane-base-index 0",
+    "@1": "automatic-rename off\npane-base-index 0",
+    "@2": "automatic-rename off\npane-base-index 0"
+  },
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-382017757/server.sock",
+    "thread_id": "",
+    "state": "idle",
+    "pid": 2134307,
+    "updated_at": "2026-10-05T02:28:07.111794686Z"
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 2133332,
+      "starttime": "38568383"
+    },
+    {
+      "label": "worker",
+      "pid": 2134236,
+      "starttime": "38569432"
+    }
+  ],
+  "active_window": ""
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-05T02:33:34.006391+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "list-panes",
+    "-a",
+    "-F",
+    "#{session_name}\t#{window_id}\t#{window_name}\t#{pane_id}\t#{pane_index}\t#{pane_pid}\t#{pane_dead}\t#{pane_title}"
+  ],
+  "returncode": 0,
+  "stdout": "OAX\t@0\toverview\t%0\t0\t2136293\t0\tsky-LEGION-REN9000K-34IRZ\nOAX\t@1\tterminal-e2e-f9d44e\t%1\t0\t2153606\t0\tsky\nOAX\t@1\tterminal-e2e-f9d44e\t%3\t1\t2136314\t0\tsky-LEGION-REN9000K-34IRZ\nOAX\t@2\tother\t%2\t0\t2136303\t0\tsky-LEGION-REN9000K-34IRZ\n",
+  "stderr": ""
+}

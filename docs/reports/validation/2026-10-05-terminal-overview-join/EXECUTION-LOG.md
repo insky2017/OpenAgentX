@@ -35,4 +35,22 @@
 - [实现验证](evidence/overview-impl/integration-second.log)和独立 race 集成通过，覆盖 103 Agent 分页、最大四并发、无写 API、断线/恢复、80×24 等布局约束。现场六域只读进程/profile/thread 核查通过；旧 daemon 所需 API 已静态核对。`go vet` 及 CLI Fleet 接线回归通过（11.249s）。
 - 此处集成与只读核查不代替实际 PTY/客户端跳转，完整联合验收和安装另行记录。首次 fixture token 格式失败与审查 Go PATH 失败保留。
 
-基础 Overview 真实联合验收和安装迁移继续实施。
+## 联合真实验收
+
+- 固定工件：Native/Console `562d463`，SHA `1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1`；Overview `eb043ca`，SHA `9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e`。后者未改变前者 Native/Console/Runtime 实现，真实模型证据经影响核对复用。
+- [隔离证据索引](evidence/runtime-e2e/INDEX.json)：真实 query Task `task-e87262e4-ae54-4527-b101-ded962cd9e2a`，Run `run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa`，thread `01a109e3-d9b8-77f0-b64b-43b1ef7db7fa`。真实 thread turn_context 为 `gpt-6-astra/ultra`；Run 表内 reasoning_mode=default，分别记录，不用配置推断实跑强度。
+- 初始化答复、Task/Run/Journal、终端锁、退出/重开同 thread、额外 pane 保留均通过；Console 从 overview 和无关来源窗口跳到准确目标，来源不变。Overview 在真实 160×45 和 80×24 显示排队任务、详情与选中状态，准确跳 native pane；仅隔离 daemon 有界 SIGSTOP/CONT 验传输中断/恢复。
+- 长详情补验实际看到 LINE-01…07 → LINE-32…40/END → START/LINE-01…07 三屏；两项无 Worker 排队测试 Task 最后均取消、0 Run。总计只有一项模型 Task/Run。隔离进程按 PID/启动时间核对后清理，保留所有证据。
+- 首败如实保留：run-01 CookieJar 未发送本地 Secure Cookie；run-02 取 Observe 列表误用 task_id 而实际为 id；Console 当前窗口观察参数错误；滚动补验先把列表固定摘要当作详情，再遇续验焦点状态不符。均修正夹具后沿用既有真实 Task，不重复调用模型。没有证据将这些误判为产品失败或隐去记录。
+- 本机旧 daemon 的实际读取通过。初次读取脚本误搜不存在的“已连接/已同步”，还要求18个登记 Agent 中六域全在首屏；保留初始 verdict，依据真实 PTY 的“在线/上次同步/18个Agent”做有界判定修正，见 [read-compatibility.json](evidence/overview-live-read/read-compatibility.json)。这只证明读取兼容，不冒充现场六域跳转验收。
+
+## 安装、现场迁移与独立核查
+
+- 2026-10-05 10:53（北京时间）功能提交快进合入 canonical main。用户级短名安装、长名原链接保留，真实 `skills/list` 两个同源入口 visible/enabled，见 [Skill 安装记录](evidence/skill-installed/)。
+- 10:54 原子安装经检验的 `eb043ca` CLI；旧工件备份于原始证据根 `installed-before-886ba7f`，未重启任何后台服务/业务终端。此前 linked worktree Go 自动 VCS 来源识别错误已弃用，最终使用真实 `.git` 目录独立 clone 的固定干净源码构建。
+- 六域长名 marker 写入读回后清除临时短名；全程只改 window options，原准确边框文字保留。迁移前后六域服务、backend/native进程、thread、generation、配置和额外 pane 均一致。
+- 10:56 最后核对 `@2/%2` 仍为原 PID 30743、无子进程且 foreground 为自身的空闲 zsh，再将**仅此** overview 替换为正式 CLI 总览。window/pane ID 保留，新 PID 2304458，连接在线、18 Agent。用户 client 选择未改变；见 [切换命令与快照](evidence/overview-installed/)。
+- [最终独立核查](evidence/final-review/review.json)44 项通过，含再次采集与基线比较、真实 Skill 发现、唯一窗口身份及无短名残留。部分 `/proc/exe` 不可读明确保留，未声称运行 Overview 的直接二进制哈希已取得。
+- 更新两份 HTML 和使用说明；真实 Chrome 原文渲染、DOM 交互与宽窄布局通过。工具无法 file/HTTP 导航，等价改为自有 about:blank 加载完整单文件 HTML，源 SHA、截图及限制见 [浏览器记录](evidence/browser/README.md)。
+
+本批验收结果和边界以 [DELIVERY](DELIVERY.md) 为准；最终源码/文档推送与工件安装分开记录。

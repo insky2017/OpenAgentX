@@ -1,0 +1,47 @@
+{
+  "source": "/home/sky/.codex/sessions/2026/10/05/rollout-2026-10-05T10-28-09-01a109e3-d9b8-77f0-b64b-43b1ef7db7fa.jsonl",
+  "source_sha256": "b62c6e5c174a9363521db717b6e95e6c20158cd4e69dbddc7bafc628d786822c",
+  "thread_id": "01a109e3-d9b8-77f0-b64b-43b1ef7db7fa",
+  "selected_runtime_events": [
+    {
+      "timestamp": "2026-10-05T02:28:10.066Z",
+      "ordinal": 1,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_started",
+        "turn_id": "01a109e3-daba-74c0-96da-25135a72cc90",
+        "root_turn_id": "01a109e3-daba-74c0-96da-25135a72cc90",
+        "started_at": 1791167290,
+        "model_context_window": 258400,
+        "collaboration_mode_kind": "default"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T02:28:10.592Z",
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/workspace",
+        "model": "gpt-6-astra",
+        "effort": "ultra",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "danger-full-access"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-05T02:28:16.848Z",
+      "ordinal": 16,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_complete",
+        "turn_id": "01a109e3-daba-74c0-96da-25135a72cc90",
+        "last_agent_message": "OAX-TERMINAL-ROLE terminal-e2e-f9d44e WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/workspace",
+        "started_at": 1791167290,
+        "completed_at": 1791167296,
+        "duration_ms": 6792,
+        "time_to_first_token_ms": "[REDACTED]"
+      }
+    }
+  ]
+}

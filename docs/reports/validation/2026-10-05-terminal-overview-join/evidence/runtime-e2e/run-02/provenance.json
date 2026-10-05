@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-05T02:27:19.182948+00:00",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-terminal-562d463",
+  "binary_sha256": "1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1",
+  "commit": "562d463aa5c0de7a6481ed31fbf7b1b1966ed837",
+  "harness_sha256": "6895dbb9ee5e0f0b7642560dc42f60a60df52674cbf3e5d4a9ebb916b112ddc8",
+  "codex_binary": "/home/sky/.local/bin/codex",
+  "codex_version": "codex-cli 0.160.0",
+  "model": "gpt-6-astra",
+  "configured_effort": "ultra",
+  "tmux_server": "oax-terminal-e2d45fa9550b",
+  "scope": "R isolated real CLI/Worker/tmux, no installed service or business acceptance"
+}

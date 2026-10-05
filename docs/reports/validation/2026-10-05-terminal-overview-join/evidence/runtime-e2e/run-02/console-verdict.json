@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "scope": "real agent open --console from overview and unrelated OAX source",
+  "cases": [
+    {
+      "source": "overview",
+      "target": "@1",
+      "pane_processes_preserved": true,
+      "window_options_preserved": true
+    },
+    {
+      "source": "other",
+      "target": "@1",
+      "pane_processes_preserved": true,
+      "window_options_preserved": true
+    }
+  ]
+}

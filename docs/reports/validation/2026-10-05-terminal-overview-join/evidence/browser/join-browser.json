@@ -1,0 +1,75 @@
+[
+  {
+    "command": [
+      "click",
+      "@e21"
+    ],
+    "exit_code": 0,
+    "stdout": "\u001b[32m✓\u001b[0m Done\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "eval",
+      "JSON.stringify({cliTabVisible:!document.querySelector(\"#panel-cli\").hidden,prompt:document.querySelector(\"#join-prompt\").textContent,mode:document.querySelector(\"#map\").dataset.mode,overflow:document.documentElement.scrollWidth>innerWidth})"
+    ],
+    "exit_code": 0,
+    "stdout": "\"{\\\"cliTabVisible\\\":true,\\\"prompt\\\":\\\"$oax-join\\\",\\\"mode\\\":\\\"auto\\\",\\\"overflow\\\":false}\"\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "scrollintoview",
+      "#overview"
+    ],
+    "exit_code": 0,
+    "stdout": "\u001b[32m✓\u001b[0m Done\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "screenshot",
+      "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/browser/join-overview-desktop.png"
+    ],
+    "exit_code": 0,
+    "stdout": "\u001b[32m✓\u001b[0m Screenshot saved to /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/browser/join-overview-desktop.png\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "set",
+      "viewport",
+      "390",
+      "844"
+    ],
+    "exit_code": 0,
+    "stdout": "\u001b[32m✓\u001b[0m Done\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "screenshot",
+      "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/browser/join-overview-mobile.png"
+    ],
+    "exit_code": 0,
+    "stdout": "\u001b[32m✓\u001b[0m Screenshot saved to /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/browser/join-overview-mobile.png\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "eval",
+      "JSON.stringify({width:innerWidth,bodyWidth:document.documentElement.scrollWidth,overview:document.querySelector(\"#overview\").textContent})"
+    ],
+    "exit_code": 0,
+    "stdout": "\"{\\\"width\\\":390,\\\"bodyWidth\\\":390,\\\"overview\\\":\\\"基础 Overview：CLI eb043ca 已安装，OAX:overview.0 现已可用。安装核验时，总览连接在线并列出 18 个 Agent；六域 Worker、原生终端进程与会话连续性保持，用户原选中位置未变。运行 openagentx overview 查看 Agent 列表、当前任务摘要、阻塞和已知待处理提示；用 ↑↓ 选择，Tab 进入详情滚动，Enter 跳到准确的现有受管 pane 0，q 退出。普通程序约每 5 秒通过授权 GET 刷新，不调用模型、不派单，也不随退出停止 Worker。断线保留旧数据并禁用跳转；待处理不是全局总计，Task 成功不等于业务验收。协作链全局摘要另批实现。总览操作与 profile 说明 · 本批交付状态与安装证据。当前 Pay 终端入口为 OAX:pay-service.0；历史报告中的 oneaxe-pay 保留原样。\\\"}\"\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "errors"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "type": "JSONDecodeError",
+  "message": "Expecting value: line 1 column 1 (char 0)",
+  "note": "Owned fixture retained; no automatic retry or shared-resource cleanup"
+}

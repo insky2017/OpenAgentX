@@ -1,0 +1,22 @@
+{
+  "owned_processes": [
+    {
+      "pid": 2134236,
+      "stop_sent": true,
+      "alive_after": false
+    },
+    {
+      "pid": 2133332,
+      "stop_sent": true,
+      "alive_after": false
+    }
+  ],
+  "tmux_server": "oax-terminal-e2d45fa9550b",
+  "tmux_server_stopped": true,
+  "native_terminal_lock_released": true,
+  "app_server_pid": 2134307,
+  "app_server_stopped": true,
+  "all_tasks_terminal": true,
+  "model_run_count": 1,
+  "scope": "only run-02 owned tmux server and PID/starttime matched processes; no shared service changed"
+}

@@ -1,0 +1,19 @@
+{
+  "result": "PASS_OLD_DAEMON_READ_COMPATIBILITY",
+  "evidence": "terminal.pty.log",
+  "sha256": "e79140630aaadf33df94f12287642ffe222f9a2e16b4426ec9ce07378f74d2c0",
+  "status_lines": [
+    "在线  |  上次同步 10:49:13  |  18 个 Agent",
+    "在线 · 刷新中  |  上次同步 10:49:13  |  18 个 Agent",
+    "在线  |  上次同步 10:49:18  |  18 个 Agent",
+    "在线 · 刷新中  |  上次同步 10:49:18  |  18 个 Agent",
+    "在线  |  上次同步 10:49:23  |  18 个 Agent",
+    "在线 · 刷新中  |  上次同步 10:49:23  |  18 个 Agent",
+    "在线  |  上次同步 10:49:28  |  18 个 Agent",
+    "在线 · 刷新中  |  上次同步 10:49:28  |  18 个 Agent",
+    "在线  |  上次同步 10:49:33  |  18 个 Agent"
+  ],
+  "initial_harness_verdict": "verdict.json retained unchanged: searched nonexistent 已连接/已同步 labels and incorrectly required all six names on first viewport",
+  "observed": "Actual UI shows 在线 and 上次同步; 18 Agents require list scrolling. This check proves existing credential and old daemon reads, not complete six-agent navigation.",
+  "exit_code": 0
+}

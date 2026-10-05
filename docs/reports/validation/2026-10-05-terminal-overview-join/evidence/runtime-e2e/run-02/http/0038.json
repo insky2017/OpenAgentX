@@ -1,0 +1,174 @@
+{
+  "at": "2026-10-05T03:01:29.800234+00:00",
+  "path": "/api/observe/v1/tasks/task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+      "version": 3,
+      "target_agent_id": "terminal-e2e-f9d44e",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+      "status": "succeeded",
+      "result": "OAX-TERMINAL-ROLE terminal-e2e-f9d44e WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/workspace",
+      "outcome_state": "available",
+      "created_at": "2026-10-05T02:28:08.614233791Z",
+      "updated_at": "2026-10-05T02:28:16.868316074Z"
+    },
+    "messages": [
+      {
+        "id": "message-22aab0fa-93f2-4f23-a64a-cfdbad8edd28",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-28aceaf7-50b4-4b04-8840-ce5baf0821df",
+        "target_agent_id": "terminal-e2e-f9d44e",
+        "kind": "instruction",
+        "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+        "created_at": "2026-10-05T02:28:08.614233791Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-05T02:58:08.617532134Z",
+        "instructions_sha256": "5a65d4170d0fba948d8188c253899648b19d7e30c4bc54d46ef8376bdb00c3c6",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/profile/workers/identities/terminal-e2e-f9d44e.role.md",
+        "run_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+        "task_id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+        "agent_id": "terminal-e2e-f9d44e",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-05ef5ffc-5a90-4f5f-8969-a7a18b053e4c",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-TERMINAL-ROLE terminal-e2e-f9d44e WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/workspace",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-05T02:28:08.617532134Z",
+        "finished_at": "2026-10-05T02:28:16.868316074Z",
+        "created_at": "2026-10-05T02:28:08.617532134Z",
+        "updated_at": "2026-10-05T02:28:16.868316074Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 15,
+        "event_id": "event-1c3debde-91e1-4f9d-9dc3-5b31366c2749",
+        "aggregate_type": "task",
+        "aggregate_id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+        "event_type": "task.created",
+        "created_at": "2026-10-05T02:28:08.614233791Z"
+      },
+      {
+        "sequence": 17,
+        "event_id": "event-task-f0a73421-96af-40ee-ac30-f14ac230dac7",
+        "aggregate_type": "task",
+        "aggregate_id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+        "event_type": "task.running",
+        "created_at": "2026-10-05T02:28:08.618558217Z"
+      },
+      {
+        "sequence": 18,
+        "event_id": "event-run-cd0848d7-3763-433b-9f72-a86cf0801076",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-05T02:28:08.618568842Z"
+      },
+      {
+        "sequence": 20,
+        "event_id": "event-runtime-5329c026-4c8e-4aa0-92e7-aab6be0de75d",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+        "event_type": "runtime.session.bound",
+        "created_at": "2026-10-05T02:28:10.011375978Z",
+        "output": {
+          "stage": "session",
+          "status": "bound",
+          "text": "Runtime session bound",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 21,
+        "event_id": "event-runtime-a1f1ee93-eab9-4c56-a565-32bfe06cd1e0",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T02:28:10.720287149Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 22,
+        "event_id": "event-runtime-392860be-20cf-4a2a-8b2d-fa3e1e0b20ab",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T02:28:15.025508225Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 23,
+        "event_id": "event-runtime-9fdc4094-24fe-4a15-8796-fc9408fa80d3",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T02:28:16.825234159Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "OAX-TERMINAL-ROLE terminal-e2e-f9d44e WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/workspace",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 25,
+        "event_id": "event-run-b8e672ba-3cd1-44f6-9409-299e5390dfa5",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-05T02:28:16.868382859Z"
+      },
+      {
+        "sequence": 26,
+        "event_id": "event-task-d504004c-ccb2-4cdd-9eb1-f2b5a5154782",
+        "aggregate_type": "task",
+        "aggregate_id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+        "event_type": "task.settled",
+        "created_at": "2026-10-05T02:28:16.86838561Z"
+      }
+    ],
+    "snapshot_sequence": 236,
+    "live_after_sequence": 236,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

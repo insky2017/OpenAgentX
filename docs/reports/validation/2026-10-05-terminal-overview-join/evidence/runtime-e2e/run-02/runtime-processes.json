@@ -1,0 +1,18 @@
+[
+  {
+    "label": "daemon",
+    "pid": 2133332,
+    "starttime": "38568383",
+    "state": "S",
+    "exe": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-terminal-562d463",
+    "exe_sha256": "1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1"
+  },
+  {
+    "label": "worker",
+    "pid": 2134236,
+    "starttime": "38569432",
+    "state": "S",
+    "exe": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-terminal-562d463",
+    "exe_sha256": "1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/candidate-overview-eb043ca",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/pending-identity.json"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOwner  \r\nCreated Agent \"pending-e2e-f9d44e\" in Organization \"default\"\r\n"
+}

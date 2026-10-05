@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-05T02:49:58.751900+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "capture-pane",
+    "-p",
+    "-S",
+    "-",
+    "-t",
+    "@0.0"
+  ],
+  "returncode": 0,
+  "stdout": "OAX 总览  ·  观察与终端导航\n在线  |  上次同步 10:49:58  |  2 个 Agent\n控制面：/tmp/oax-codex-c419d9055b.sock\n  Agent                    状态         当前工作 / 阻塞与待处理\n› pending-e2e-f9d44e       排队         OVERVIEW-PENDING-READONLY: isolated queue evidence; no Worker will execute this task.\n  terminal-e2e-f9d44e      可工作       可开始工作\n── 选中详情 · 详情滚动中 · Tab 返回列表 · Agent 1/2 ──\n隔离待处理验收 (pending-e2e-f9d44e)\n就绪：后台未运行\n建议操作：openagentx agent resume pending-e2e-f9d44e\nWorker：offline · generation 0 · 心跳 未知\nTask：task-d68d54ed-922e-498c-ac48-fd978d0e1150 · 排队\n任务：OVERVIEW-PENDING-READONLY: isolated queue evidence; no Worker will execute this task.\n投递：pending\n业务效果独立核验：未记录；执行完成不等于业务验收。\nEnter 只跳转已验证的现有受管 pane 0，不启动或停止 Agent。\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n提示：只读观察 · 待处理为已知任务提示，不是全局总计\n↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出\n\n",
+  "stderr": ""
+}

@@ -1,0 +1,8 @@
+{
+  "source": "docs/design/event-collaboration.html",
+  "sha256": "b2fc1ac683697687de1b3763ef5258655a40bc4bbad539dba790124f27054d6a",
+  "exit": 0,
+  "stdout": "\"OpenAgentX · 事件协作与终端方案\"\n",
+  "stderr": "",
+  "method": "same standalone HTML rendered into owned about:blank"
+}

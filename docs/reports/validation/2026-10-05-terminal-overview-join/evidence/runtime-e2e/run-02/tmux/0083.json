@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-05T02:35:25.824824+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "capture-pane",
+    "-p",
+    "-S",
+    "-",
+    "-t",
+    "@2.0"
+  ],
+  "returncode": 0,
+  "stdout": "$ /home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/console-open.sh; printf '\\nCONSOLE-decfbc9a-EXIT-%s\\n' \"$?\"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+  "stderr": ""
+}

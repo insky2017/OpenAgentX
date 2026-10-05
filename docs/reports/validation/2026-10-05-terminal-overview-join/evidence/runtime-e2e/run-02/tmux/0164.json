@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-05T02:53:01.257400+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "send-keys",
+    "-t",
+    "@0.0",
+    "-l",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/overview.sh"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

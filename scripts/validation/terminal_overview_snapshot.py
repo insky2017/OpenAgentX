@@ -7,6 +7,7 @@ import http.client
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import subprocess
 
@@ -34,6 +35,18 @@ def process(pid):
         result.update(executable=os.readlink(base / 'exe'), executable_sha256=sha(base / 'exe'))
     except PermissionError:
         result['executable_inspection'] = 'kernel_permission_denied; identity uses PID and starttime'
+    try:
+        args = (base / 'cmdline').read_bytes().split(b'\0')
+        if b'agent' in args and b'open' in args and b'--native' in args:
+            index = args.index(b'open') + 1
+            result.update(role='native_bridge', agent_id=args[index].decode())
+        elif b'resume' in args and b'--remote' in args:
+            thread_ids = [a.decode() for a in args if re.fullmatch(rb'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}', a)]
+            result.update(role='codex_tui', thread_ids=thread_ids)
+        elif b'app-server' in args:
+            result['role'] = 'codex_engine'
+    except PermissionError:
+        result['argument_inspection'] = 'kernel_permission_denied'
     return result
 
 

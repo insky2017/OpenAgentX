@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "scope": "real native initialization query, tmux binding and same-thread repair/reopen",
+  "task_id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+  "run_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+  "thread_id": "01a109e3-d9b8-77f0-b64b-43b1ef7db7fa",
+  "terminal_lock_held_after_reopen": true,
+  "extra_pane_preserved": {
+    "session": "OAX",
+    "window": "@1",
+    "name": "scratch",
+    "pane": "%3",
+    "index": "1",
+    "pid": "2136314",
+    "dead": "0",
+    "title": "sky-LEGION-REN9000K-34IRZ"
+  },
+  "not_tested": [
+    "Overview",
+    "Console navigation",
+    "installed service",
+    "business workflows"
+  ]
+}

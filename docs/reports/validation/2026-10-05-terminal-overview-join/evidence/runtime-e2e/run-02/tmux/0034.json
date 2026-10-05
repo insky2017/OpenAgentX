@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-05T02:30:53.081254+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "respawn-pane",
+    "-t",
+    "%1",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/runtime-e2e/run-02/native.sh"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

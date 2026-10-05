@@ -1,0 +1,118 @@
+{
+  "ok": true,
+  "sources": {
+    "oax-join": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/oax-join",
+    "openagentx-join": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join"
+  },
+  "source_skill_exists": true,
+  "project": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX",
+  "locations": [
+    {
+      "name": "oax-join",
+      "scope": "project",
+      "path": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/.agents/skills/oax-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    },
+    {
+      "name": "openagentx-join",
+      "scope": "project",
+      "path": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/.agents/skills/openagentx-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    },
+    {
+      "name": "oax-join",
+      "scope": "user",
+      "path": "/home/sky/.agents/skills/oax-join",
+      "exists": true,
+      "symlink": true,
+      "skill_exists": true,
+      "target_matches_source": true,
+      "conflict": false
+    },
+    {
+      "name": "openagentx-join",
+      "scope": "user",
+      "path": "/home/sky/.agents/skills/openagentx-join",
+      "exists": true,
+      "symlink": true,
+      "skill_exists": true,
+      "target_matches_source": true,
+      "conflict": false
+    },
+    {
+      "name": "oax-join",
+      "scope": "legacy_user",
+      "path": "/home/sky/.codex/skills/oax-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    },
+    {
+      "name": "openagentx-join",
+      "scope": "legacy_user",
+      "path": "/home/sky/.codex/skills/openagentx-join",
+      "exists": false,
+      "symlink": false,
+      "skill_exists": false,
+      "target_matches_source": false,
+      "conflict": false
+    }
+  ],
+  "linked": true,
+  "discovery": {
+    "completed": true,
+    "method": "skills/list",
+    "force_reload": true,
+    "same_name_skills": [
+      {
+        "name": "oax-join",
+        "path": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/oax-join/SKILL.md",
+        "enabled": true,
+        "target_matches_source": true
+      },
+      {
+        "name": "openagentx-join",
+        "path": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join/SKILL.md",
+        "enabled": true,
+        "target_matches_source": true
+      }
+    ],
+    "discovery_error_count": 0,
+    "visible": true,
+    "enabled": true
+  },
+  "skills": [
+    {
+      "name": "oax-join",
+      "source": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/oax-join/SKILL.md",
+      "visible": true,
+      "enabled": true,
+      "same_name_location_count": 1,
+      "conflict": false,
+      "duplicate": false
+    },
+    {
+      "name": "openagentx-join",
+      "source": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join/SKILL.md",
+      "visible": true,
+      "enabled": true,
+      "same_name_location_count": 1,
+      "conflict": false,
+      "duplicate": false
+    }
+  ],
+  "conflict": false,
+  "duplicate": false,
+  "warnings": [],
+  "message": "分别核对标准短名与兼容长名；仅验证新 app-server 发现，不保证当前已运行 turn 自动注入。"
+}

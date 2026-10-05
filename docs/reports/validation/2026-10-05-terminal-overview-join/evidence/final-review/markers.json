@@ -1,0 +1,230 @@
+{
+  "openagentx": {
+    "@openagentx_managed": {
+      "set": true,
+      "value": "1"
+    },
+    "@openagentx_agent_id": {
+      "set": true,
+      "value": "openagentx"
+    },
+    "@oax-managed": {
+      "set": false,
+      "value": ""
+    },
+    "@oax-agent-id": {
+      "set": false,
+      "value": ""
+    },
+    "automatic-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "allow-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "remain-on-exit": {
+      "set": true,
+      "value": "on"
+    },
+    "pane-border-status": {
+      "set": true,
+      "value": "top"
+    },
+    "pane-border-format": {
+      "set": true,
+      "value": "OAX · openagentx · Codex 原生终端"
+    }
+  },
+  "rhythm": {
+    "@openagentx_managed": {
+      "set": true,
+      "value": "1"
+    },
+    "@openagentx_agent_id": {
+      "set": true,
+      "value": "rhythm"
+    },
+    "@oax-managed": {
+      "set": false,
+      "value": ""
+    },
+    "@oax-agent-id": {
+      "set": false,
+      "value": ""
+    },
+    "automatic-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "allow-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "remain-on-exit": {
+      "set": true,
+      "value": "on"
+    },
+    "pane-border-status": {
+      "set": true,
+      "value": "top"
+    },
+    "pane-border-format": {
+      "set": true,
+      "value": "OAX · rhythm · Codex 原生终端"
+    }
+  },
+  "pay-service": {
+    "@openagentx_managed": {
+      "set": true,
+      "value": "1"
+    },
+    "@openagentx_agent_id": {
+      "set": true,
+      "value": "pay-service"
+    },
+    "@oax-managed": {
+      "set": false,
+      "value": ""
+    },
+    "@oax-agent-id": {
+      "set": false,
+      "value": ""
+    },
+    "automatic-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "allow-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "remain-on-exit": {
+      "set": true,
+      "value": "on"
+    },
+    "pane-border-status": {
+      "set": true,
+      "value": "top"
+    },
+    "pane-border-format": {
+      "set": true,
+      "value": "OAX · pay-service · Codex 原生终端"
+    }
+  },
+  "quote-service": {
+    "@openagentx_managed": {
+      "set": true,
+      "value": "1"
+    },
+    "@openagentx_agent_id": {
+      "set": true,
+      "value": "quote-service"
+    },
+    "@oax-managed": {
+      "set": false,
+      "value": ""
+    },
+    "@oax-agent-id": {
+      "set": false,
+      "value": ""
+    },
+    "automatic-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "allow-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "remain-on-exit": {
+      "set": true,
+      "value": "on"
+    },
+    "pane-border-status": {
+      "set": true,
+      "value": "top"
+    },
+    "pane-border-format": {
+      "set": true,
+      "value": "OAX · quote-service · Codex 原生终端"
+    }
+  },
+  "identity-service": {
+    "@openagentx_managed": {
+      "set": true,
+      "value": "1"
+    },
+    "@openagentx_agent_id": {
+      "set": true,
+      "value": "identity-service"
+    },
+    "@oax-managed": {
+      "set": false,
+      "value": ""
+    },
+    "@oax-agent-id": {
+      "set": false,
+      "value": ""
+    },
+    "automatic-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "allow-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "remain-on-exit": {
+      "set": true,
+      "value": "on"
+    },
+    "pane-border-status": {
+      "set": true,
+      "value": "top"
+    },
+    "pane-border-format": {
+      "set": true,
+      "value": "OAX · identity-service · Codex 原生终端"
+    }
+  },
+  "oneaxe-voice": {
+    "@openagentx_managed": {
+      "set": true,
+      "value": "1"
+    },
+    "@openagentx_agent_id": {
+      "set": true,
+      "value": "oneaxe-voice"
+    },
+    "@oax-managed": {
+      "set": false,
+      "value": ""
+    },
+    "@oax-agent-id": {
+      "set": false,
+      "value": ""
+    },
+    "automatic-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "allow-rename": {
+      "set": true,
+      "value": "off"
+    },
+    "remain-on-exit": {
+      "set": true,
+      "value": "on"
+    },
+    "pane-border-status": {
+      "set": true,
+      "value": "top"
+    },
+    "pane-border-format": {
+      "set": true,
+      "value": "OAX · oneaxe-voice · Codex 原生终端"
+    }
+  }
+}

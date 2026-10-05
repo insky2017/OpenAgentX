@@ -1,10 +1,10 @@
 {
-  "independent_integration_test.go": "0f2f9fdab33a2d495be7a57edc4df914e7de7f4dd18cd8a375c25b4382b3a48b",
   "implementer-native-source-probe-copy.log": "f17e73d68e9d5dabb8178fe5d706a29abf4a4ffc24078283436ad459ab20e9c8",
   "integration-first-harness-path-failure.log": "994a6e1c542500657130af68026e6765ce9ebcc5312a4d0d652dac60ece163a8",
   "integration.log": "946d82af0e61441e53472a30df9e4899af1a8354f3c7dfc0938b922a50a07d0c",
   "review.json": "4dcc75384d8536d1cf7e84548e535adf3c7ccbb220acda27d93a8ea53cbb2001",
   "old-daemon-contract-static.json": "b0e36451439ebc395a185fbd6574146b083bcfcb0b4070db1bfefca906a437fc",
   "overlay.json": "e99c39a2c1699a4ae2fa15bd9a329fd3399cc420f84a70badb44ad9b96caf19e",
-  "source-before.json": "549d4f90af88c0aeb4b149e85a35e35ad0fd3e0044c2c1a63e632cdd47c249ea"
+  "source-before.json": "549d4f90af88c0aeb4b149e85a35e35ad0fd3e0044c2c1a63e632cdd47c249ea",
+  "independent_integration_test.go.txt": "0f2f9fdab33a2d495be7a57edc4df914e7de7f4dd18cd8a375c25b4382b3a48b"
 }

@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "type": "RuntimeError",
+  "message": "Console did not navigate to the exact target window",
+  "note": "Owned fixture retained; no automatic retry or shared-resource cleanup"
+}

@@ -1,0 +1,15 @@
+{
+  "native_console_runtime_source_unchanged": [
+    "internal/cli/fleet/agent.go",
+    "internal/cli/fleet/agent_native.go",
+    "internal/cli/console",
+    "internal/fleet",
+    "internal/nativebridge",
+    "internal/runtime",
+    "internal/worker"
+  ],
+  "from": "562d463",
+  "to": "eb043ca",
+  "fleet_command_change": "diff --git a/internal/cli/fleet/command.go b/internal/cli/fleet/command.go\nindex c7871f7..5b9305f 100644\n--- a/internal/cli/fleet/command.go\n+++ b/internal/cli/fleet/command.go\n@@ -381,7 +381,7 @@ func newWorkspace(paths fleetPaths, respawnDead bool, deps Dependencies) (fleetm\n \t\tRunner: deps.Tmux, RespawnDead: respawnDead,\n \t\tPaneLabel:       func(string) string { return fleetmodel.ConsoleTerminalLabel },\n \t\tWarn:            func(err error) { fmt.Fprintf(deps.Err, \"终端标签告警: %v\\n\", err) },\n-\t\tOverviewCommand: []string{binary, \"agent\", \"status\", \"--watch\", \"--socket\", paths.socket, \"--credentials\", paths.credentials, \"--file\", paths.manifest, \"--worker-dir\", paths.workerDir, \"--db\", paths.database},\n+\t\tOverviewCommand: []string{binary, \"overview\", \"--socket\", paths.socket, \"--credentials\", paths.credentials, \"--worker-dir\", paths.workerDir},\n \t\tConsoleCommand: func(agentID string) []string {\n \t\t\treturn []string{binary, \"console\", \"attach\", \"--socket\", paths.socket, \"--credentials\", paths.credentials, \"--agent\", agentID}\n \t\t},\n",
+  "decision": "Reuse one real native/Console model run; final binary Overview was separately exercised in actual PTY. No repeated model needed."
+}

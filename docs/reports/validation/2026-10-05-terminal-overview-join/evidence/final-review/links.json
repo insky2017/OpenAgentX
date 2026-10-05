@@ -1,0 +1,14 @@
+{
+  "oax-join": {
+    "symlink": true,
+    "target": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/oax-join",
+    "resolved": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/oax-join",
+    "inode": 74880713
+  },
+  "openagentx-join": {
+    "symlink": true,
+    "target": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+    "resolved": "/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX/skills/openagentx-join",
+    "inode": 74844096
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-05T02:59:22.856702+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-e2d45fa9550b",
+    "capture-pane",
+    "-p",
+    "-t",
+    "@0.0"
+  ],
+  "returncode": 0,
+  "stdout": "OAX 总览  ·  观察与终端导航\n在线  |  上次同步 10:59:22  |  2 个 Agent\n控制面：/tmp/oax-codex-c419d9055b.sock\n  Agent                状态         当前工作 / 阻塞与待处理\n› pending-e2e-f9d44e   排队         OVERVIEW-SCROLL-7a6bc783-START LINE-01: iso…\n  terminal-e2e-f9d44e  可工作       可开始工作\n── 选中详情 · 详情滚动中 · Tab 返回列表 · Agent 1/2 ──\n隔离待处理验收 (pending-e2e-f9d44e)\n就绪：后台未运行\n建议操作：openagentx agent resume pending-e2e-f9d44e\nWorker：offline · generation 0 · 心跳 未知\nTask：task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9 · 排队\n任务：OVERVIEW-SCROLL-7a6bc783-START\nLINE-01: isolated read-only detail scrolling evidence.\nLINE-02: isolated read-only detail scrolling evidence.\nLINE-03: isolated read-only detail scrolling evidence.\nLINE-04: isolated read-only detail scrolling evidence.\nLINE-05: isolated read-only detail scrolling evidence.\nLINE-06: isolated read-only detail scrolling evidence.\nLINE-07: isolated read-only detail scrolling evidence.\n提示：只读观察 · 待处理为已知任务提示，不是全局总计\n↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出\n\n",
+  "stderr": ""
+}

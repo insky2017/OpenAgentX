@@ -1,0 +1,22 @@
+OAX 总览  ·  观察与终端导航
+在线  |  上次同步 10:59:22  |  2 个 Agent
+控制面：/tmp/oax-codex-c419d9055b.sock
+  Agent                状态         当前工作 / 阻塞与待处理
+› pending-e2e-f9d44e   排队         OVERVIEW-SCROLL-7a6bc783-START LINE-01: iso…
+  terminal-e2e-f9d44e  可工作       可开始工作
+── 选中详情 · 详情滚动中 · Tab 返回列表 · Agent 1/2 ──
+隔离待处理验收 (pending-e2e-f9d44e)
+就绪：后台未运行
+建议操作：openagentx agent resume pending-e2e-f9d44e
+Worker：offline · generation 0 · 心跳 未知
+Task：task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9 · 排队
+任务：OVERVIEW-SCROLL-7a6bc783-START
+LINE-01: isolated read-only detail scrolling evidence.
+LINE-02: isolated read-only detail scrolling evidence.
+LINE-03: isolated read-only detail scrolling evidence.
+LINE-04: isolated read-only detail scrolling evidence.
+LINE-05: isolated read-only detail scrolling evidence.
+LINE-06: isolated read-only detail scrolling evidence.
+LINE-07: isolated read-only detail scrolling evidence.
+提示：只读观察 · 待处理为已知任务提示，不是全局总计
+↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出

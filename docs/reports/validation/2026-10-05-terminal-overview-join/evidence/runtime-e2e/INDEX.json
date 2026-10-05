@@ -1,0 +1,53 @@
+{
+  "scope": "R isolated real Codex native plus Console and Overview TTY; not business or installed-service E2E",
+  "native_source": "562d463aa5c0de7a6481ed31fbf7b1b1966ed837",
+  "overview_source": "eb043ca3012b40ca5515a97c83e5422f0598f839",
+  "native_binary_sha256": "1affad66666a168d2961001531046bdfcf9cd43b839c5becfd51755b26de82b1",
+  "overview_binary_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "harness_sha256": "89e69f1efeff3b2cd805a1314cd241ebb2aad3de7cfb56601520fc781010dcde",
+  "read_first": [
+    "run-02/native-verdict.json",
+    "run-02/console-verdict.json",
+    "run-02/overview-verdict.json",
+    "run-02/overview-scroll-verdict.json",
+    "run-02/final-task-accounting.json",
+    "run-02/cleanup-final.json"
+  ],
+  "strong_evidence": [
+    "run-02/11-native-task.json",
+    "run-02/12-native-run.json",
+    "run-02/runtime-owned-thread.json",
+    "run-02/runtime-processes.json",
+    "run-02/tmux/",
+    "run-02/http/",
+    "run-02/attached-client.pty.redacted.log",
+    "run-02/overview-scroll-80x24-start.rendered.txt",
+    "run-02/overview-scroll-80x24-end.rendered.txt",
+    "run-02/overview-scroll-80x24-home.rendered.txt"
+  ],
+  "harness_failures_preserved": [
+    "run-01/failure.json: HTTP Cookie handling before native launch",
+    "run-02/failure-observe-list-field.json: task list id key after successful model run",
+    "run-02/failure-console-*.json: active-window observation target",
+    "run-02/failure-overview-scroll-*.json: sticky list-summary assertion then key-focus continuation",
+    "run-02/overview-scroll-first-attempt/: original changed screens proving scrolling"
+  ],
+  "not_to_copy": [
+    "password",
+    "profile/credentials.json",
+    "profile/workers/*.env",
+    "profile/data/*.db",
+    "http session cookies/CSRF",
+    "full unfiltered Codex session history",
+    "raw profile tree"
+  ],
+  "excluded_private_files_kept_locally": true,
+  "actual_model": "gpt-6-astra",
+  "actual_effort": "ultra",
+  "model_run_count": 1,
+  "queued_test_tasks": 2,
+  "queued_test_runs": 0,
+  "queued_test_tasks_canceled": true,
+  "owned_fixture_cleanup": "PASS",
+  "secret_scan": "PASS: own password and credential token contents absent; forbidden files excluded"
+}

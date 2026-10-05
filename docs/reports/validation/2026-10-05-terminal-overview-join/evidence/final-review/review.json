@@ -1,0 +1,127 @@
+{
+  "verdict": "PASS_WITH_EXPLICIT_LIMIT",
+  "checked_at_utc": "2026-10-05T02:59:17.146139+00:00",
+  "scope": "有界最终安装只读独立核查；未修改现场、未切窗、未发业务消息或模型调用。",
+  "source_commit": "eb043ca3012b40ca5515a97c83e5422f0598f839",
+  "installed_binary_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "checks": {
+    "baseline_continuity_all": true,
+    "installed_binary_exact_sha": true,
+    "installed_source_exact_clean": true,
+    "oax-join_canonical_link": true,
+    "openagentx-join_canonical_link": true,
+    "actual_codex_discovery_both_enabled": true,
+    "shared_helper_one_file": true,
+    "openagentx_unique_window": true,
+    "openagentx_canonical_only": true,
+    "openagentx_terminal_options": true,
+    "openagentx_live_pane0": true,
+    "rhythm_unique_window": true,
+    "rhythm_canonical_only": true,
+    "rhythm_terminal_options": true,
+    "rhythm_live_pane0": true,
+    "pay-service_unique_window": true,
+    "pay-service_canonical_only": true,
+    "pay-service_terminal_options": true,
+    "pay-service_live_pane0": true,
+    "quote-service_unique_window": true,
+    "quote-service_canonical_only": true,
+    "quote-service_terminal_options": true,
+    "quote-service_live_pane0": true,
+    "identity-service_unique_window": true,
+    "identity-service_canonical_only": true,
+    "identity-service_terminal_options": true,
+    "identity-service_live_pane0": true,
+    "oneaxe-voice_unique_window": true,
+    "oneaxe-voice_canonical_only": true,
+    "oneaxe-voice_terminal_options": true,
+    "oneaxe-voice_live_pane0": true,
+    "daemon_service_active": true,
+    "openagentx_service_active": true,
+    "rhythm_service_active": true,
+    "pay-service_service_active": true,
+    "quote-service_service_active": true,
+    "identity-service_service_active": true,
+    "oneaxe-voice_service_active": true,
+    "user_client_selection_unchanged": true,
+    "overview_expected_pid_alive": true,
+    "overview_rendered_online": true,
+    "review_did_not_switch_clients": true,
+    "overview_invocation_exact": true,
+    "overview_same_process_since_install": true
+  },
+  "continuity": {
+    "agents": {
+      "openagentx": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "rhythm": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "pay-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "quote-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "identity-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "oneaxe-voice": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      }
+    },
+    "all_nonoverview_panes_preserved": true,
+    "daemon_unchanged": true,
+    "fleet_unchanged": true,
+    "pass": true
+  },
+  "overview": {
+    "window": "@2",
+    "pane": "%2",
+    "pid": "2304458",
+    "live_and_online": true,
+    "runtime_binary_verified": false,
+    "runtime_source_evidence": "Exact argv, live PID/starttime unchanged from installation snapshot, and verified installed disk artifact; direct /proc/exe hash unavailable"
+  },
+  "limits": [
+    "未实际执行导航switch；仅核对当前唯一canonical身份窗口/pane0映射。",
+    "Skill check 只验证新app-server真实发现/启用；本轮未重复模型。",
+    "内核拒绝读取 Overview /proc/2304458/exe，未取得该运行进程的直接工件SHA；已独立核对其准确argv和安装后持续不变的PID/starttime，磁盘CLI哈希与清洁源码commit均一致。"
+  ],
+  "evidence": [
+    "final-independent.json",
+    "skill-check.json",
+    "links.json",
+    "markers.json",
+    "navigation-targets-readonly.json",
+    "read-only-commands.json",
+    "overview.rendered.txt",
+    "verify_final.py",
+    "overview-runtime-provenance.json"
+  ]
+}

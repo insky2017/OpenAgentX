@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "scope": "real 80x24 overflow details; Tab/End tail and Home start",
+  "task_id": "task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9",
+  "runs": 0,
+  "marker": "OVERVIEW-SCROLL-7a6bc783",
+  "task_status_after": "canceled",
+  "new_model_tasks": 0,
+  "overview_binary_sha256": "9ff957ac0a6c043b9cd8e8a41ba6270e72e1d8dafe032bfac7f1b6950748144e",
+  "harness_sha256": "89e69f1efeff3b2cd805a1314cd241ebb2aad3de7cfb56601520fc781010dcde"
+}

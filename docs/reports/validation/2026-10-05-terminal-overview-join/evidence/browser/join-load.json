@@ -1,0 +1,13 @@
+{
+  "source": "docs/design/codex-session-join.html",
+  "sha256": "d3097d8c0d3611abeddaefa6f60c5099613507b3b40b19974d9d3fb65e983cad",
+  "exit": 0,
+  "stdout": "\"{\\\"title\\\":\\\"OpenAgentX · 新的 Codex 会话怎样加入\\\",\\\"loaded\\\":\\\"$oax-join\\\",\\\"method\\\":\\\"local standalone artifact injected into owned about:blank\\\"}\"\n",
+  "stderr": "",
+  "initial_paths_unavailable": [
+    "CUA: no browser available",
+    "agent-browser legacy file URL parsed as https://file///",
+    "loopback page.goto ERR_ACCESS_DENIED"
+  ],
+  "method": "Render exact standalone HTML into owned about:blank; no external resources. Navigation to file/HTTP not verified."
+}

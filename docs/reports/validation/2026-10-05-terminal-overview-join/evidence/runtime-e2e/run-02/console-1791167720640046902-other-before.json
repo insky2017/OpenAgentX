@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-05T02:35:25.803307+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window": "@0",
+      "name": "overview",
+      "pane": "%0",
+      "index": "0",
+      "pid": "2136293",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    },
+    {
+      "session": "OAX",
+      "window": "@1",
+      "name": "terminal-e2e-f9d44e",
+      "pane": "%1",
+      "index": "0",
+      "pid": "2153606",
+      "dead": "0",
+      "title": "sky"
+    },
+    {
+      "session": "OAX",
+      "window": "@1",
+      "name": "terminal-e2e-f9d44e",
+      "pane": "%3",
+      "index": "1",
+      "pid": "2136314",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    },
+    {
+      "session": "OAX",
+      "window": "@2",
+      "name": "other",
+      "pane": "%2",
+      "index": "0",
+      "pid": "2136303",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    }
+  ],
+  "options": {
+    "@0": "@openagentx_managed 1\nautomatic-rename off\npane-base-index 0",
+    "@1": "@openagentx_agent_id terminal-e2e-f9d44e\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on",
+    "@2": "automatic-rename off\npane-base-index 0"
+  },
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-382017757/server.sock",
+    "thread_id": "01a109e3-d9b8-77f0-b64b-43b1ef7db7fa",
+    "turn_id": "01a109e3-daba-74c0-96da-25135a72cc90",
+    "task_id": "task-e87262e4-ae54-4527-b101-ded962cd9e2a",
+    "run_id": "run-db21804e-ed45-4f2a-b97f-ad0f50fab6aa",
+    "state": "idle",
+    "pid": 2134307,
+    "updated_at": "2026-10-05T02:35:17.104874288Z"
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 2133332,
+      "starttime": "38568383"
+    },
+    {
+      "label": "worker",
+      "pid": 2134236,
+      "starttime": "38569432"
+    }
+  ],
+  "active_window": "@2"
+}

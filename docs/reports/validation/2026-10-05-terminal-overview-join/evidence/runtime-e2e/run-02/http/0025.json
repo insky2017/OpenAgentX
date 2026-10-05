@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-05T02:53:01.227457+00:00",
+  "path": "/api/control/v1/tasks",
+  "method": "POST",
+  "request": {
+    "target_agent_id": "pending-e2e-f9d44e",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "OVERVIEW-SCROLL-7a6bc783-START\nLINE-01: isolated read-only detail scrolling evidence.\nLINE-02: isolated read-only detail scrolling evidence.\nLINE-03: isolated read-only detail scrolling evidence.\nLINE-04: isolated read-only detail scrolling evidence.\nLINE-05: isolated read-only detail scrolling evidence.\nLINE-06: isolated read-only detail scrolling evidence.\nLINE-07: isolated read-only detail scrolling evidence.\nLINE-08: isolated read-only detail scrolling evidence.\nLINE-09: isolated read-only detail scrolling evidence.\nLINE-10: isolated read-only detail scrolling evidence.\nLINE-11: isolated read-only detail scrolling evidence.\nLINE-12: isolated read-only detail scrolling evidence.\nLINE-13: isolated read-only detail scrolling evidence.\nLINE-14: isolated read-only detail scrolling evidence.\nLINE-15: isolated read-only detail scrolling evidence.\nLINE-16: isolated read-only detail scrolling evidence.\nLINE-17: isolated read-only detail scrolling evidence.\nLINE-18: isolated read-only detail scrolling evidence.\nLINE-19: isolated read-only detail scrolling evidence.\nLINE-20: isolated read-only detail scrolling evidence.\nLINE-21: isolated read-only detail scrolling evidence.\nLINE-22: isolated read-only detail scrolling evidence.\nLINE-23: isolated read-only detail scrolling evidence.\nLINE-24: isolated read-only detail scrolling evidence.\nLINE-25: isolated read-only detail scrolling evidence.\nLINE-26: isolated read-only detail scrolling evidence.\nLINE-27: isolated read-only detail scrolling evidence.\nLINE-28: isolated read-only detail scrolling evidence.\nLINE-29: isolated read-only detail scrolling evidence.\nLINE-30: isolated read-only detail scrolling evidence.\nLINE-31: isolated read-only detail scrolling evidence.\nLINE-32: isolated read-only detail scrolling evidence.\nLINE-33: isolated read-only detail scrolling evidence.\nLINE-34: isolated read-only detail scrolling evidence.\nLINE-35: isolated read-only detail scrolling evidence.\nLINE-36: isolated read-only detail scrolling evidence.\nLINE-37: isolated read-only detail scrolling evidence.\nLINE-38: isolated read-only detail scrolling evidence.\nLINE-39: isolated read-only detail scrolling evidence.\nLINE-40: isolated read-only detail scrolling evidence.\nOVERVIEW-SCROLL-7a6bc783-END",
+    "meta": {
+      "idempotency_key": "b2dd60ad6e40fa84fe3e2d2a"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-3594b4cd-b87d-4565-9e1c-a7bc10113fc9",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 3
+  }
+}
