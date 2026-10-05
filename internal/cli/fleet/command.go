@@ -381,7 +381,7 @@ func newWorkspace(paths fleetPaths, respawnDead bool, deps Dependencies) (fleetm
 		Runner: deps.Tmux, RespawnDead: respawnDead,
 		PaneLabel:       func(string) string { return fleetmodel.ConsoleTerminalLabel },
 		Warn:            func(err error) { fmt.Fprintf(deps.Err, "终端标签告警: %v\n", err) },
-		OverviewCommand: []string{binary, "agent", "status", "--watch", "--socket", paths.socket, "--credentials", paths.credentials, "--file", paths.manifest, "--worker-dir", paths.workerDir, "--db", paths.database},
+		OverviewCommand: []string{binary, "overview", "--socket", paths.socket, "--credentials", paths.credentials, "--worker-dir", paths.workerDir},
 		ConsoleCommand: func(agentID string) []string {
 			return []string{binary, "console", "attach", "--socket", paths.socket, "--credentials", paths.credentials, "--agent", agentID}
 		},

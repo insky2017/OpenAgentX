@@ -27,6 +27,7 @@ import (
 	consolecli "openagentx/internal/cli/console"
 	externalcli "openagentx/internal/cli/external"
 	fleetcli "openagentx/internal/cli/fleet"
+	overviewcli "openagentx/internal/cli/overview"
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
@@ -56,6 +57,8 @@ func execute(args []string) int {
 		return fleetcli.ExecuteAgent(args[1:], fleetcli.DefaultDependencies())
 	case "worker":
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
+	case "overview":
+		return overviewcli.Execute(args[1:], overviewcli.DefaultDependencies())
 	case "console":
 		return consolecli.Execute(args[1:], consolecli.DefaultDependencies())
 	case "external":
@@ -77,6 +80,7 @@ func execute(args []string) int {
 		fmt.Fprintln(os.Stderr, "       optional remote Worker HTTPS: --worker-https-addr :18101 --worker-mtls-ca <ca.pem> --worker-mtls-cert <server.pem> --worker-mtls-key <server.key> --worker-mtls-binding <principal=agent[,agent...]>")
 		fmt.Fprintln(os.Stderr, "       openagentx worker run --config <agent.yaml>")
 		fmt.Fprintln(os.Stderr, "       openagentx console [login|logout|attach]")
+		fmt.Fprintln(os.Stderr, "       openagentx overview [--socket PATH] [--credentials PATH] [--worker-dir PATH]")
 		fmt.Fprintln(os.Stderr, "       openagentx external <bind|status|send|reply|inbox|ack|revoke> [flags] (existing host, messages only)")
 		fmt.Fprintln(os.Stderr, "       openagentx collaborate <enable|ask|status|instructions|inbox|roles|disable> [flags] (managed consultation and continuation)")
 		fmt.Fprintln(os.Stderr, "       openagentx fleet <init|workspace|up|status|down|force-stop> [--file <fleet.yaml>] [--db <path>] [--socket <path>] [--worker-dir <dir>] [--credentials <path>]")

@@ -1,0 +1,11 @@
+=== RUN   TestUDSReadOnlyRefreshAndRecovery
+    integration_test.go:190: UDS read-only recovery PASS: 103 Agents, max concurrency 4, zero writes, three terminal sizes
+--- PASS: TestUDSReadOnlyRefreshAndRecovery (0.11s)
+=== RUN   TestIsolatedTmuxNavigationIdentityAndSource
+    integration_test.go:261: isolated tmux identity/source checks PASS: pane=%1 pid=2174682; extra pane=%2 preserved; no client switch attempted
+--- PASS: TestIsolatedTmuxNavigationIdentityAndSource (0.75s)
+=== RUN   TestReadOnlyNativeProfileProbe
+    integration_test.go:269: explicit native probe not requested
+--- SKIP: TestReadOnlyNativeProfileProbe (0.00s)
+PASS
+ok  	openagentx/internal/cli/overview	0.866s

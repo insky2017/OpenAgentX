@@ -1,0 +1,33 @@
+{
+  "internal/api/console/handler.go": {
+    "baseline": "886ba7f",
+    "source_sha256": "aaae0e0e30bf655b70eb3d850d7b5f82d3ea1b6cc56b5676b678a0f02781350d",
+    "relevant_lines": [
+      "\tAttachPath      = \"/api/console/v1/attach\"",
+      "\tAgentsPath      = \"/api/console/v1/agents\"",
+      "\tAgentTaskPath   = \"/api/console/v1/agents/{agentID}/tasks/{taskID}\"",
+      "\th.mux.HandleFunc(\"GET \"+AttachPath, h.attach)",
+      "\th.mux.HandleFunc(\"GET \"+AgentsPath, h.agents)",
+      "\th.mux.HandleFunc(\"GET \"+AgentTasksPath, h.tasks)",
+      "\th.mux.HandleFunc(\"GET \"+AgentTaskPath, h.task)",
+      "\t\tif _, ok := h.state.(consoleReadinessState); !ok {",
+      "\t\t\toption.ReadinessReason = \"暂时无法确认就绪状态\"",
+      "\t\t\toption.ReadinessReason = readiness.Reason",
+      "\tReadiness        *openapi.AgentReadiness              `json:\"readiness,omitempty\"`",
+      "\tSuggestedTask    *openapi.ConsoleTaskOption           `json:\"suggested_task,omitempty\"`",
+      "\tresponse := AttachResponse{Readiness: h.readiness(r.Context(), snapshot), AgentID: agentID, Mode: mode, WorkerStatus: domain.WorkerStatusOffline,",
+      "\tif snapshot.SuggestedTask != nil {",
+      "\t\tprojected, projectionErr := projectConsoleTaskOption(*snapshot.SuggestedTask)",
+      "\t\tresponse.SuggestedTask = &projected",
+      "\tif snapshot.SuggestedTask != nil {",
+      "\t\tif snapshot.SuggestedTask.TargetAgentID != agentID || snapshot.SuggestedTask.IsTerminal() {",
+      "\t\tif _, err := projectConsoleTaskOption(*snapshot.SuggestedTask); err != nil {",
+      "type consoleReadinessState interface {",
+      "func (h *Handler) readiness(ctx context.Context, snapshot domain.ConsoleSnapshot) *openapi.AgentReadiness {",
+      "\treader, ok := h.state.(consoleReadinessState)",
+      "\tif snapshot.SuggestedTask != nil {",
+      "\t\ttasks = append(tasks, *snapshot.SuggestedTask)",
+      "\tresult := openapi.ProjectAgentReadiness(snapshot.Agent.ID, snapshot.Worker, tasks, backends, time.Now())"
+    ]
+  }
+}

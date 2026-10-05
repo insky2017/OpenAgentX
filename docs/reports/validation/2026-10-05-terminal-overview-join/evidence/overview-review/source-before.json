@@ -1,0 +1,10 @@
+{
+  "internal/cli/overview/command.go": "16b11dd5ebef2b25e740b4da5da08b00b495b9e4e231b94458578c9df6b99ff3",
+  "internal/cli/overview/integration_test.go": "a4db7fb31f9b8ff041d88e7963397096e54d5a129ec65d542a8e7404d00e33bc",
+  "internal/cli/overview/navigation.go": "eec5d63a9ee9698aed6544a31151e79ce5f9cae4718c472d702ae464d4a96d1f",
+  "internal/cli/overview/reader.go": "0c787c7b8bca59d592ae80452f7d19cde26804cad79d6cb1f849b134bc6b0490",
+  "internal/cli/overview/view.go": "9dd01bd36e275b107e03c454f78ccc75ba7e50e040bccfa7a74b3ae9ab28ecd1",
+  "internal/cli/overview/model.go": "b2684c24a9a1c222b7069a82d4e0a0ae77aa2206ee14995adb71a5e6ea5da91d",
+  "cmd/openagentx/main.go": "cee3cc27c8390f341f9f3e80e1e0c8aece19904d7e36d9feeb10fd387bd5c442",
+  "internal/cli/fleet/command.go": "f623dd28399946011951934c5ccf786b17ddc7744d472f50bf75295b7ee46681"
+}

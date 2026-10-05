@@ -1,0 +1,12 @@
+=== RUN   TestUDSReadOnlyRefreshAndRecovery
+    integration_test.go:123: unsafe CLI credential store: credential metadata is incomplete
+--- FAIL: TestUDSReadOnlyRefreshAndRecovery (0.00s)
+=== RUN   TestIsolatedTmuxNavigationIdentityAndSource
+    integration_test.go:261: isolated tmux identity/source checks PASS: pane=%1 pid=2166918; extra pane=%2 preserved; no client switch attempted
+--- PASS: TestIsolatedTmuxNavigationIdentityAndSource (0.79s)
+=== RUN   TestReadOnlyNativeProfileProbe
+    integration_test.go:269: explicit native probe not requested
+--- SKIP: TestReadOnlyNativeProfileProbe (0.00s)
+FAIL
+FAIL	openagentx/internal/cli/overview	0.804s
+FAIL

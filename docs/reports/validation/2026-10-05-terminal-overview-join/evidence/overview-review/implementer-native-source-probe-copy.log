@@ -1,0 +1,22 @@
+=== RUN   TestReadOnlyNativeProfileProbe
+=== RUN   TestReadOnlyNativeProfileProbe/openagentx
+    integration_test.go:289: read-only source proof agent=openagentx parent/foreground=61363,63654
+=== RUN   TestReadOnlyNativeProfileProbe/rhythm
+    integration_test.go:289: read-only source proof agent=rhythm parent/foreground=3584397,3584466
+=== RUN   TestReadOnlyNativeProfileProbe/pay-service
+    integration_test.go:289: read-only source proof agent=pay-service parent/foreground=1177832,1180441
+=== RUN   TestReadOnlyNativeProfileProbe/quote-service
+    integration_test.go:289: read-only source proof agent=quote-service parent/foreground=18653,21538
+=== RUN   TestReadOnlyNativeProfileProbe/identity-service
+    integration_test.go:289: read-only source proof agent=identity-service parent/foreground=90909,93117
+=== RUN   TestReadOnlyNativeProfileProbe/oneaxe-voice
+    integration_test.go:289: read-only source proof agent=oneaxe-voice parent/foreground=301429,303535
+--- PASS: TestReadOnlyNativeProfileProbe (0.06s)
+    --- PASS: TestReadOnlyNativeProfileProbe/openagentx (0.01s)
+    --- PASS: TestReadOnlyNativeProfileProbe/rhythm (0.01s)
+    --- PASS: TestReadOnlyNativeProfileProbe/pay-service (0.01s)
+    --- PASS: TestReadOnlyNativeProfileProbe/quote-service (0.01s)
+    --- PASS: TestReadOnlyNativeProfileProbe/identity-service (0.01s)
+    --- PASS: TestReadOnlyNativeProfileProbe/oneaxe-voice (0.01s)
+PASS
+ok  	openagentx/internal/cli/overview	0.067s

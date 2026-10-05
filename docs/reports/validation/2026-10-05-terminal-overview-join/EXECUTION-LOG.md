@@ -27,4 +27,12 @@
 - 首次失败保留：umask 077 改变原权限 fixture；新增顶部边框导致旧 TTY 测试的历史提示裁剪，改为核验当前 mode normal header 并保留 SSE 模式断言。复验通过，未删失败记录。
 - 尚未安装、迁移现场标记或替换 overview；真实 Codex 及完整 CLI API→终端链在联合验收另行记录。
 
-基础 Overview 和安装迁移继续实施。
+## 阶段 2：基础 Overview 候选
+
+- 新增 `openagentx overview`，Fleet 新建总览默认调用此入口。复用既有 Console 授权 GET API，展示 Agent、当前已知任务、就绪/阻塞及选中详情；普通程序刷新不调用模型。
+- 详情可滚动，Enter 只跳既存且身份唯一的受管 pane 0。原生入口额外比对 Worker profile、原 thread 和真实前台 Codex；不创建或修复业务窗口。断线保留旧内容并禁导航，重连恢复。
+- [独立审查](evidence/overview-review/review.json)通过；发现 native 仅凭外层 argv 提前返回的缺口，已限制该路径只适用于 Console，native 必须核验 thread。源文件 SHA 与独立审查一致。
+- [实现验证](evidence/overview-impl/integration-second.log)和独立 race 集成通过，覆盖 103 Agent 分页、最大四并发、无写 API、断线/恢复、80×24 等布局约束。现场六域只读进程/profile/thread 核查通过；旧 daemon 所需 API 已静态核对。`go vet` 及 CLI Fleet 接线回归通过（11.249s）。
+- 此处集成与只读核查不代替实际 PTY/客户端跳转，完整联合验收和安装另行记录。首次 fixture token 格式失败与审查 Go PATH 失败保留。
+
+基础 Overview 真实联合验收和安装迁移继续实施。

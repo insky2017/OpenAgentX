@@ -1,0 +1,11 @@
+=== RUN   TestUDSReadOnlyRefreshAndRecovery
+    integration_test.go:190: UDS read-only recovery PASS: 103 Agents, max concurrency 4, zero writes, three terminal sizes
+--- PASS: TestUDSReadOnlyRefreshAndRecovery (0.34s)
+=== RUN   TestIsolatedTmuxNavigationIdentityAndSource
+    integration_test.go:261: isolated tmux identity/source checks PASS: pane=%1 pid=2187082; extra pane=%2 preserved; no client switch attempted
+--- PASS: TestIsolatedTmuxNavigationIdentityAndSource (0.77s)
+=== RUN   TestIndependentNativeOuterArgsCannotBypassThreadProof
+    integration_test.go:314: matching native argv rejected without canonical thread and foreground Codex proof; isolated real process, no native bridge/model invoked
+--- PASS: TestIndependentNativeOuterArgsCannotBypassThreadProof (0.50s)
+PASS
+ok  	openagentx/internal/cli/overview	2.649s

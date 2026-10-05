@@ -1,0 +1,74 @@
+{
+  "verdict": "PASS_SCOPED_AFTER_REQUIRED_FIX",
+  "ready_for_commit_subject_to_root_e2e": true,
+  "reviewed_at_utc": "2026-10-05T02:37:42.999496+00:00",
+  "source_sha256": {
+    "internal/cli/overview/command.go": "16b11dd5ebef2b25e740b4da5da08b00b495b9e4e231b94458578c9df6b99ff3",
+    "internal/cli/overview/integration_test.go": "a4db7fb31f9b8ff041d88e7963397096e54d5a129ec65d542a8e7404d00e33bc",
+    "internal/cli/overview/navigation.go": "eec5d63a9ee9698aed6544a31151e79ce5f9cae4718c472d702ae464d4a96d1f",
+    "internal/cli/overview/reader.go": "0c787c7b8bca59d592ae80452f7d19cde26804cad79d6cb1f849b134bc6b0490",
+    "internal/cli/overview/view.go": "9dd01bd36e275b107e03c454f78ccc75ba7e50e040bccfa7a74b3ae9ab28ecd1",
+    "internal/cli/overview/model.go": "b2684c24a9a1c222b7069a82d4e0a0ae77aa2206ee14995adb71a5e6ea5da91d",
+    "cmd/openagentx/main.go": "cee3cc27c8390f341f9f3e80e1e0c8aece19904d7e36d9feeb10fd387bd5c442",
+    "internal/cli/fleet/command.go": "f623dd28399946011951934c5ccf786b17ddc7744d472f50bf75295b7ee46681"
+  },
+  "sources_unchanged_since_independent_test": true,
+  "blocking_findings": [],
+  "resolved_findings": [
+    {
+      "finding": "native outer CLI matching socket/credentials and foreground group previously returned before thread verification",
+      "trigger": "Existing native frontend has matching explicit profile args but its persisted/original thread or Codex foreground cannot be verified",
+      "impact": "Navigation could accept outer argv without the original-thread evidence required by this batch",
+      "minimal_fix": "Restrict explicit-argv fast path to console; native always uses Worker config/socket, persisted thread, foreground Codex resume and existing Unix bridge socket",
+      "fix_evidence": "navigation.go console && guard plus TestIndependentNativeOuterArgsCannotBypassThreadProof PASS"
+    }
+  ],
+  "verified_independently": [
+    "Scope source is GET-only: installation probe, CLI session, paginated Console Agent options, attach and TaskSnapshot; no login rotation/logout/task/control/lifecycle request",
+    "Existing baseline 886ba7f contains the required Console endpoints and readiness/suggested-task fields; no new daemon protocol changes in this scope",
+    "Race-enabled real UDS contract integration: 103 Agent pagination, max concurrency 4, authenticated GET-only, disconnect preserves stale state and disables navigation, reconnect recovers",
+    "80x24,140x38,36x12 model render dimensions, detail scroll and q local exit verified by integration; these are not real PTY rendering evidence",
+    "Real isolated tmux/process identity checks reject wrong socket/profile, missing managed marker and duplicate Agent identity; exact pane0 selected for proof, pane1 and original PIDs preserved",
+    "Independent isolated foreground native-argv regression rejects lacking canonical thread/foreground Codex proof; uses Go overlay outside product files",
+    "tmux navigation resolves managed identity twice, compares immutable pane/PID record and process start/cmdline before switch-client to exact pane handle",
+    "Task API results use client ownership validation; succeeded is displayed as execution-complete with independent business-verification caveat"
+  ],
+  "reviewed_implementer_evidence": {
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/overview-impl/native-source-probe-first.log",
+    "sha256": "f17e73d68e9d5dabb8178fe5d706a29abf4a4ffc24078283436ad459ab20e9c8",
+    "result": "Six existing domain frontend source proofs PASS; not independently rerun or switched by this reviewer"
+  },
+  "commands": [
+    [
+      "/home/sky/tools/go/bin/go",
+      "test",
+      "-race",
+      "-overlay",
+      "/home/sky/.local/state/openagentx/validation/2026-10-05-terminal-overview-join/overview-review/overlay.json",
+      "./internal/cli/overview",
+      "-run",
+      "TestUDSReadOnlyRefreshAndRecovery|TestIsolatedTmuxNavigationIdentityAndSource|TestIndependentNativeOuterArgsCannotBypassThreadProof",
+      "-count=1",
+      "-v"
+    ]
+  ],
+  "independent_test_result": "PASS, 3 tests, race detector clean",
+  "not_covered": [
+    "Real PTY UI interaction and actual client switch; root owns integrated E2E acceptance",
+    "Daemon compatibility against the running service directly; this review verified old source contract and isolated UDS behavior",
+    "No service installation/restart, live tmux modifications, model calls or business messages performed"
+  ],
+  "nonblocking_notes": [
+    "Native bridge endpoints are random private /tmp sockets, so no persistent expected endpoint exists; bounded profile/thread/process-tree checks are accepted for current non-adversarial routing scope.",
+    "First review test invocation failed solely because worktree shell PATH lacked go. Original failure retained; rerun used installed absolute /home/sky/tools/go/bin/go and passed."
+  ],
+  "evidence": [
+    "integration.log",
+    "integration-first-harness-path-failure.log",
+    "independent_integration_test.go",
+    "overlay.json",
+    "source-before.json",
+    "old-daemon-contract-static.json",
+    "implementer-native-source-probe-copy.log"
+  ]
+}
