@@ -1,0 +1,25 @@
+{
+  "deleted_at": "2026-10-05T05:37:21.236270+00:00",
+  "deleted_files": [
+    {
+      "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/snapshot.db",
+      "size": 147419136,
+      "sha256": "c6905c71220a934b4e11be417604e55fdfba4f248285dc5a4f07f7159f94beb8"
+    },
+    {
+      "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/snapshot.db-wal",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/snapshot.db-shm",
+      "size": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    }
+  ],
+  "deleted_files_absent": true,
+  "go_temp_directories_remaining": [],
+  "source_production_database_untouched": true,
+  "program": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/agent_removal_perf_test.go.txt",
+  "metadata": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/bounded-results.json"
+}

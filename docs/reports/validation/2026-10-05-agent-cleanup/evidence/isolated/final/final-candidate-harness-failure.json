@@ -1,0 +1,5 @@
+{
+  "at": "2026-10-05T05:19:17.991296+00:00",
+  "error": "Initial assertion compared entire Observe envelope including global snapshot_sequence/live_after_sequence. Both legitimately advanced 373 -> 381 for new canceled cleanup Task. All Task/Run/Journal payloads identical.",
+  "recovery": "Evidence-only normalization of the two envelope cursors; no repeated CLI, Task, migration or model work."
+}

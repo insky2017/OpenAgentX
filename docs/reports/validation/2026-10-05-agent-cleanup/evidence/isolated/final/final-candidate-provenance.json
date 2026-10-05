@@ -1,0 +1,105 @@
+{
+  "at": "2026-10-05T05:18:03.631806+00:00",
+  "commit": "3b6989eb65150e9360e9c734ebf7e1f9e3d7c60c",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/final-candidate-under-test",
+  "binary_sha256": "ddfaff6bd4370639b40bb6c2760e02e9245d948a2c62d149a4b2328a7a9479a7",
+  "source_hash_comparison": {
+    "internal/cli/fleet/agent_remove_local.go": {
+      "tested": "3b879fe76892b085427145e4686d9f8bc6a365657bc2ba3c42f958851742cf76",
+      "final": "98809d0f95edb4270d0838c71bfdb97a0f669bbcc6bec8d908537d3c7e011f7e",
+      "unchanged": false
+    },
+    "internal/cli/fleet/agent_environment.go": {
+      "tested": "c4d0364d19a4e9e5633b1c189bc57e6c4321d3f38d7cb1be548ff5249dc33f12",
+      "final": "c4d0364d19a4e9e5633b1c189bc57e6c4321d3f38d7cb1be548ff5249dc33f12",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_join.go": {
+      "tested": "be97bfaeb2970e0cbd1a994c6c82f3a42ed5e0e58f973d1c3f9f74c0433bf4c1",
+      "final": "be97bfaeb2970e0cbd1a994c6c82f3a42ed5e0e58f973d1c3f9f74c0433bf4c1",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent.go": {
+      "tested": "1a9c8bdc67b7c4783ba026969ec54b7aca8b94468b2f575f1f350989eb482e65",
+      "final": "1a9c8bdc67b7c4783ba026969ec54b7aca8b94468b2f575f1f350989eb482e65",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_test.go": {
+      "tested": "8de1fa5cafbc9007e865077200c9a2061f705dbf6dcb022799ef54fbceab20d8",
+      "final": "8de1fa5cafbc9007e865077200c9a2061f705dbf6dcb022799ef54fbceab20d8",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_remove.go": {
+      "tested": "ac1d75fd49b71ba2f73e481c87bda7006fce70949419fc827d1df829b5291a3a",
+      "final": "ac1d75fd49b71ba2f73e481c87bda7006fce70949419fc827d1df829b5291a3a",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_enable.go": {
+      "tested": "5e480846860d96ff7758670ccc4b619b1a8bcb4ac9d12788ba6f03fd845c47d5",
+      "final": "5e480846860d96ff7758670ccc4b619b1a8bcb4ac9d12788ba6f03fd845c47d5",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_native.go": {
+      "tested": "98e0d7caee79c0ab23a0aab6466ebbdb84a432e7bdb847e16a86280b289ae860",
+      "final": "98e0d7caee79c0ab23a0aab6466ebbdb84a432e7bdb847e16a86280b289ae860",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_native_integration_test.go": {
+      "tested": "bc68ebad698ae0339686998ed5fc68f8e182836ffed575e33689f2854952c243",
+      "final": "bc68ebad698ae0339686998ed5fc68f8e182836ffed575e33689f2854952c243",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_enable_test.go": {
+      "tested": "cf09f38a3ccd6a8dd2b00f5488783f5f0784577dc2f83354c64b7c7d05a5e1b8",
+      "final": "cf09f38a3ccd6a8dd2b00f5488783f5f0784577dc2f83354c64b7c7d05a5e1b8",
+      "unchanged": true
+    },
+    "internal/cli/fleet/agent_remove_test.go": {
+      "tested": "fd79382d720d97eb7218df374b96bcf2f9744018d79fac8318017ec38ad51a43",
+      "final": "fd84206c262317efe22c1ca7045f2f128b780ccf88c3d561ee21a60f49bec443",
+      "unchanged": false
+    },
+    "internal/cli/fleet/agent_join_test.go": {
+      "tested": "f07dc4f61c5f9d5cdd990293a729cb27e7fa8f6c67f80c9b37bae3a98122e026",
+      "final": "f07dc4f61c5f9d5cdd990293a729cb27e7fa8f6c67f80c9b37bae3a98122e026",
+      "unchanged": true
+    },
+    "internal/domain/agent_removal.go": {
+      "tested": "355742b9480d53b17f3245adc0339d7101b82416c5df012e54194c939f6e4db5",
+      "final": "324dbc188c0807bc0635753a3a8fae90253adf53d97aa966de23a756b337386b",
+      "unchanged": false
+    },
+    "internal/persistence/sqlite/agent_removal_test.go": {
+      "tested": "734a11c959250781cf92587838d54ed47f34eabf17d8f15f1a68368315643a89",
+      "final": "cfc3df0edd25ce4cf2bd3cb2082a44ea77903d9afe449fed138531f3cc213a2d",
+      "unchanged": false
+    },
+    "internal/persistence/sqlite/agent_removal.go": {
+      "tested": "f6d5e315961f32f31c94243e34fb6da09130c52fbf4d1098165257d3b618522f",
+      "final": "171ab79468438c96b10eac3b009bf39e0fa6855a18fe6f6228aca73c4e72899b",
+      "unchanged": false
+    },
+    "internal/persistence/sqlite/migrations/agent_removal_test.go": {
+      "tested": "fc89f64d20edad00cf2ed6fca803c05623b0a59859d9ce13a550d5cb215e417c",
+      "final": "fc89f64d20edad00cf2ed6fca803c05623b0a59859d9ce13a550d5cb215e417c",
+      "unchanged": true
+    },
+    "internal/persistence/sqlite/migrations/006_agent_removal.sql": {
+      "tested": "9b60d3f77747b1b90c3d5ed35cf8c7da9693d0effc3b3a5a97234ce597d6d5ac",
+      "final": "9b60d3f77747b1b90c3d5ed35cf8c7da9693d0effc3b3a5a97234ce597d6d5ac",
+      "unchanged": true
+    },
+    "internal/persistence/sqlite/migrations/agent_removal.go": {
+      "tested": "77ab7149785ed1e4d0d59b64158a85351e878cfc82346ee18417b0b48fbdd7df",
+      "final": "77ab7149785ed1e4d0d59b64158a85351e878cfc82346ee18417b0b48fbdd7df",
+      "unchanged": true
+    },
+    "internal/persistence/sqlite/migrations/migrations.go": {
+      "tested": "e70de3123dc8eb9352706f23e4c3d6cfd54780eeed68f600b6c6f2b9731d9f7b",
+      "final": "e70de3123dc8eb9352706f23e4c3d6cfd54780eeed68f600b6c6f2b9731d9f7b",
+      "unchanged": true
+    }
+  },
+  "harness_sha256": "5fa7c7b056c68e877554ecc2667b377cea1b05cb08a58d3910b289aa5f0bb247",
+  "build_info": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/final-candidate-under-test: go1.22.4\n\tpath\topenagentx/cmd/openagentx\n\tmod\topenagentx\t(devel)\t\n\tdep\tgithub.com/atotto/clipboard\tv0.1.4\th1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=\n\tdep\tgithub.com/aymanbagabas/go-osc52/v2\tv2.0.1\th1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=\n\tdep\tgithub.com/charmbracelet/bubbles\tv0.20.0\th1:jSZu6qD8cRQ6k9OMfR1WlM+ruM8fkPWkHvQWD9LIutE=\n\tdep\tgithub.com/charmbracelet/bubbletea\tv1.3.4\th1:kCg7B+jSCFPLYRA52SDZjr51kG/fMUEoPoZrkaDHyoI=\n\tdep\tgithub.com/charmbracelet/colorprofile\tv0.2.3-0.20250311203215-f60798e515dc\th1:4pZI35227imm7yK2bGPcfpFEmuY1gc2YSTShr4iJBfs=\n\tdep\tgithub.com/charmbracelet/lipgloss\tv1.1.0\th1:vYXsiLHVkK7fp74RkV7b2kq9+zDLoEU4MZoFqR/noCY=\n\tdep\tgithub.com/charmbracelet/x/ansi\tv0.8.0\th1:9GTq3xq9caJW8ZrBTe0LIe2fvfLR/bYXKTx2llXn7xE=\n\tdep\tgithub.com/charmbracelet/x/cellbuf\tv0.0.13-0.20250311204145-2c3ea96c31dd\th1:vy0GVL4jeHEwG5YOXDmi86oYw2yuYUGqz6a8sLwg0X8=\n\tdep\tgithub.com/charmbracelet/x/term\tv0.2.1\th1:AQeHeLZ1OqSXhrAWpYUtZyX1T3zVxfpZuEQMIQaGIAQ=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/gorilla/websocket\tv1.5.3\th1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=\n\tdep\tgithub.com/lucasb-eyer/go-colorful\tv1.2.0\th1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69Aj6K7nkY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.20\th1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=\n\tdep\tgithub.com/mattn/go-runewidth\tv0.0.16\th1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=\n\tdep\tgithub.com/mattn/go-sqlite3\tv1.14.49\th1:B8jBHC3xhxZgxztrgruTuLucebnULQnx4W7cF7SAE9w=\n\tdep\tgithub.com/muesli/ansi\tv0.0.0-20230316100256-276c6243b2f6\th1:ZK8zHtRHOkbHy6Mmr5D264iyp3TiX5OmNcI5cIARiQI=\n\tdep\tgithub.com/muesli/cancelreader\tv0.2.2\th1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELUXHmA=\n\tdep\tgithub.com/muesli/termenv\tv0.16.0\th1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc=\n\tdep\tgithub.com/rivo/uniseg\tv0.4.7\th1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=\n\tdep\tgithub.com/sahilm/fuzzy\tv0.1.1\th1:ceu5RHF8DGgoi+/dR5PsECjCDH1BE3Fnmpo7aVXOdRA=\n\tdep\tgithub.com/xo/terminfo\tv0.0.0-20220910002029-abceb7e1c41e\th1:JVG44RsyaB9T2KIHavMF/ppJZNG9ZpyihvCd0w101no=\n\tdep\tgolang.org/x/crypto\tv0.23.0\th1:dIJU/v2J8Mdglj/8rJ6UUOM3Zc9zLZxVZwwxMooUSAI=\n\tdep\tgolang.org/x/sync\tv0.11.0\th1:GGz8+XQP4FvTTrjZPzNKTMFtSXH80RAzG+5ghFPgK9w=\n\tdep\tgolang.org/x/sys\tv0.30.0\th1:QjkSwP/36a20jFYWkSue1YwXzLmsV5Gfq7Eiy72C1uc=\n\tdep\tgolang.org/x/term\tv0.20.0\th1:VnkxpohqXaOBYJtBmEppKUG6mXpi+4O6purfc2+sMhw=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=3b6989eb65150e9360e9c734ebf7e1f9e3d7c60c\n\tbuild\tvcs.time=2026-10-05T05:15:24Z\n\tbuild\tvcs.modified=false\n"
+}

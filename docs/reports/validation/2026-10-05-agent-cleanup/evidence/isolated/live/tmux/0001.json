@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-05T04:27:09.159593+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-9077f094434f",
+    "new-session",
+    "-d",
+    "-x",
+    "140",
+    "-y",
+    "40",
+    "-P",
+    "-F",
+    "#{window_id}",
+    "-s",
+    "OAX",
+    "-n",
+    "cleanup-keep-9d6ee7",
+    "sleep",
+    "86400"
+  ],
+  "returncode": 0,
+  "stdout": "@0\n",
+  "stderr": ""
+}

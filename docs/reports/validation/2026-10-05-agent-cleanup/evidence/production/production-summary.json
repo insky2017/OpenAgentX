@@ -1,0 +1,240 @@
+{
+  "counts": {
+    "agent_profiles": 11,
+    "agents": 11,
+    "approval_decisions": 0,
+    "approval_requests": 0,
+    "artifacts": 0,
+    "authority_policies": 0,
+    "event_journal": 67275,
+    "external_messages": 6,
+    "external_role_scopes": 0,
+    "external_session_bindings": 6,
+    "mailbox_items": 38,
+    "managed_message_tasks": 0,
+    "messages": 36,
+    "network_imports": 0,
+    "network_mode_policies": 7,
+    "network_mode_tests": 7,
+    "network_profile_bindings": 2,
+    "network_tests": 0,
+    "network_work_items": 14,
+    "network_workflow_commands": 14,
+    "position_assignments": 0,
+    "principals": 11,
+    "run_attempts": 35,
+    "runtime_backend_registrations": 35,
+    "session_bindings": 21,
+    "tasks": 33,
+    "worker_commands": 6,
+    "worker_instances": 35,
+    "workspace_leases": 0
+  },
+  "batches": [
+    {
+      "batch": 1,
+      "agent_ids": [
+        "agy-onboarding-e2e"
+      ],
+      "database_elapsed_ms": 1149,
+      "command": "production-batch-01-command.json",
+      "output": "production-batch-01.stdout.jsonl"
+    },
+    {
+      "batch": 2,
+      "agent_ids": [
+        "codex-domain-e2e"
+      ],
+      "database_elapsed_ms": 983,
+      "command": "production-batch-02-command.json",
+      "output": "production-batch-02.stdout.jsonl"
+    },
+    {
+      "batch": 3,
+      "agent_ids": [
+        "domain-installed-a-8304eb9e5aa7",
+        "domain-installed-b-8304eb9e5aa7"
+      ],
+      "database_elapsed_ms": 336,
+      "command": "production-batch-03-command.json",
+      "output": "production-batch-03.stdout.jsonl"
+    },
+    {
+      "batch": 4,
+      "agent_ids": [
+        "domain-installed-a-9730f99e2b42",
+        "domain-installed-b-9730f99e2b42"
+      ],
+      "database_elapsed_ms": 335,
+      "command": "production-batch-04-command.json",
+      "output": "production-batch-04.stdout.jsonl"
+    },
+    {
+      "batch": 5,
+      "agent_ids": [
+        "external-installed-a-51e44952c2",
+        "external-installed-b-51e44952c2"
+      ],
+      "database_elapsed_ms": 348,
+      "command": "production-batch-05-command.json",
+      "output": "production-batch-05.stdout.jsonl"
+    },
+    {
+      "batch": 6,
+      "agent_ids": [
+        "test-fake-agent"
+      ],
+      "database_elapsed_ms": 611,
+      "command": "production-batch-06-command.json",
+      "output": "production-batch-06.stdout.jsonl"
+    },
+    {
+      "batch": 7,
+      "agent_ids": [
+        "test-fake-multiturn"
+      ],
+      "database_elapsed_ms": 272,
+      "command": "production-batch-07-command.json",
+      "output": "production-batch-07.stdout.jsonl"
+    },
+    {
+      "batch": 8,
+      "agent_ids": [
+        "verification-runner"
+      ],
+      "database_elapsed_ms": 433,
+      "command": "production-batch-08-command.json",
+      "output": "production-batch-08.stdout.jsonl"
+    }
+  ],
+  "monitor": {
+    "intervals": [
+      {
+        "file": "live-availability.jsonl",
+        "start": "2026-10-05T05:20:54.635523+00:00",
+        "end": "2026-10-05T05:34:52.863187+00:00",
+        "sample_count": 823
+      },
+      {
+        "file": "live-availability-continued.jsonl",
+        "start": "2026-10-05T05:32:59.613305+00:00",
+        "end": "2026-10-05T05:39:13.932835+00:00",
+        "sample_count": 186
+      }
+    ],
+    "samples": 1009,
+    "errors": 0,
+    "max_request_ms": 1349.96,
+    "note": "普通程序只读采样，不调用模型；后段因turn中断结束。只证明列出的采样时段，最终另做持续性快照。"
+  },
+  "cleanup_continuity": {
+    "agents": {
+      "openagentx": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "rhythm": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "pay-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "quote-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "identity-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "oneaxe-voice": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      }
+    },
+    "all_nonoverview_panes_preserved": true,
+    "daemon_unchanged": true,
+    "pass": true,
+    "retained_fleet_unchanged": true,
+    "retained_history_preserved": true,
+    "candidates_absent": true,
+    "candidate_histories_empty": true,
+    "candidate_fleet_absent": true,
+    "foreign_keys_valid": true
+  },
+  "later_continuity": {
+    "agents": {
+      "openagentx": {
+        "service_unchanged": false,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": false,
+        "worker_identity_unchanged": true
+      },
+      "rhythm": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "pay-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "quote-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "identity-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "oneaxe-voice": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      }
+    },
+    "all_nonoverview_panes_preserved": false,
+    "daemon_unchanged": true,
+    "pass": false,
+    "retained_fleet_unchanged": true,
+    "retained_history_preserved": true,
+    "candidates_absent": true,
+    "candidate_histories_empty": true,
+    "candidate_fleet_absent": true,
+    "foreign_keys_valid": true
+  }
+}

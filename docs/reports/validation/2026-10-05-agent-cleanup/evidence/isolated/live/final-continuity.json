@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-05T04:37:55.654340+00:00",
+  "processes": [
+    {
+      "pid": 2803728,
+      "starttime": "39280372",
+      "comm": "openagentx-886b",
+      "executable": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/openagentx-886ba7f",
+      "executable_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+    },
+    {
+      "pid": 2804700,
+      "starttime": "39281420",
+      "comm": "openagentx-886b",
+      "executable": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/openagentx-886ba7f",
+      "executable_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+    }
+  ],
+  "native": {
+    "pid": 2809693,
+    "starttime": "39285745",
+    "comm": "openagentx-886b",
+    "executable": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/openagentx-886ba7f",
+    "executable_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+    "role": "native_bridge",
+    "agent_id": "cleanup-keep-9d6ee7"
+  },
+  "native_children": [
+    {
+      "pid": 2811582,
+      "starttime": "39286449",
+      "comm": "codex",
+      "executable": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "role": "codex_tui",
+      "thread_ids": [
+        "01a10a50-cf58-7762-818e-a6554c01435c"
+      ]
+    }
+  ],
+  "worker_backends": [
+    {
+      "pid": 2804818,
+      "starttime": "39281498",
+      "comm": "codex",
+      "executable": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+      "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+      "role": "codex_engine"
+    }
+  ],
+  "thread": "01a10a50-cf58-7762-818e-a6554c01435c",
+  "worker": [
+    {
+      "worker_instance_id": "worker-12f05b6f-2681-4efe-aa65-2391c994e032",
+      "generation": 1,
+      "started_at": "2026-10-05T04:26:26.956218702Z"
+    }
+  ],
+  "pane": "%0|2809693|0",
+  "terminal_lock_held": true,
+  "keep_config_sha256": "d975d2eded9a4f513770ef8c00dc6b79f769c266279e4df3c9acc9297622e7a9"
+}

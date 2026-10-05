@@ -1,0 +1,74 @@
+{
+  "runtime_version": "codex-cli 0.160.0",
+  "source_commit": "3b6989eb65150e9360e9c734ebf7e1f9e3d7c60c",
+  "helper": "scripts/validation/cleanup_codex_native_history.py",
+  "helper_sha256": "1b0948d9314ae12cffe240eb5ff7250741619476daa95bd03224b5b012ff8cb3",
+  "protocol_method_from_verified_helper_source": {
+    "method": "thread/delete",
+    "params": {
+      "threadId": "01a0fb9b-4097-79d3-902f-6603a844fa15"
+    }
+  },
+  "transport": "owned temporary codex app-server --stdio",
+  "operation_receipts": {
+    "native-codex-preview.jsonl": [
+      {
+        "mode": "dry-run",
+        "plan": {
+          "objects": [
+            {
+              "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+              "agents": [
+                "codex-domain-e2e"
+              ],
+              "path": "$HOME/.codex/sessions/2026/10/02/rollout-2026-10-02T15-54-10-01a0fb9b-4097-79d3-902f-6603a844fa15.jsonl",
+              "cwd": "$HOME/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace",
+              "status": "notLoaded",
+              "descendants": []
+            }
+          ],
+          "workers": {
+            "codex-domain-e2e": {
+              "MainPID": "0",
+              "ControlGroup": "",
+              "ActiveState": "inactive"
+            }
+          }
+        }
+      }
+    ],
+    "native-codex-deletion.jsonl": [
+      {
+        "mode": "delete",
+        "plan": {
+          "objects": [
+            {
+              "thread_id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+              "agents": [
+                "codex-domain-e2e"
+              ],
+              "path": "$HOME/.codex/sessions/2026/10/02/rollout-2026-10-02T15-54-10-01a0fb9b-4097-79d3-902f-6603a844fa15.jsonl",
+              "cwd": "$HOME/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace",
+              "status": "notLoaded",
+              "descendants": []
+            }
+          ],
+          "workers": {
+            "codex-domain-e2e": {
+              "MainPID": "0",
+              "ControlGroup": "",
+              "ActiveState": "inactive"
+            }
+          }
+        }
+      },
+      {
+        "deleted": [
+          "01a0fb9b-4097-79d3-902f-6603a844fa15"
+        ],
+        "verified": true
+      }
+    ]
+  },
+  "evidence_boundary": "Receipts are helper stdout; the exact JSON-RPC request is documented from the hashed helper implementation, not presented as a captured wire transcript."
+}

@@ -1,0 +1,186 @@
+[
+  {
+    "agent_id": "agy-onboarding-e2e",
+    "path": "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace",
+    "file_count": 11,
+    "bytes": 4471,
+    "files": [
+      {
+        "relative_path": "systemd-crash.invocations.jsonl",
+        "bytes": 42
+      },
+      {
+        "relative_path": "role-freeze.invocations.jsonl",
+        "bytes": 42
+      },
+      {
+        "relative_path": "workflow-review.md",
+        "bytes": 2306
+      },
+      {
+        "relative_path": "systemd-crash.py",
+        "bytes": 548
+      },
+      {
+        "relative_path": "input.txt",
+        "bytes": 20
+      },
+      {
+        "relative_path": "systemd-crash.started.json",
+        "bytes": 129
+      },
+      {
+        "relative_path": "role-freeze.late.txt",
+        "bytes": 5
+      },
+      {
+        "relative_path": "role-freeze.py",
+        "bytes": 541
+      },
+      {
+        "relative_path": "project-notes.md",
+        "bytes": 427
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 281
+      },
+      {
+        "relative_path": "role-freeze.started.json",
+        "bytes": 130
+      }
+    ]
+  },
+  {
+    "agent_id": "codex-domain-e2e",
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace",
+    "file_count": 7,
+    "bytes": 1881,
+    "files": [
+      {
+        "relative_path": "OAX-INSTALLED-d20953aa00045552-result.txt",
+        "bytes": 31
+      },
+      {
+        "relative_path": "installed-native01.txt",
+        "bytes": 23
+      },
+      {
+        "relative_path": "HANDOFF.md",
+        "bytes": 290
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 403
+      },
+      {
+        "relative_path": "OAX-INSTALLED-d20953aa00045552-cancel/started.json",
+        "bytes": 207
+      },
+      {
+        "relative_path": "OAX-INSTALLED-d20953aa00045552-cancel/invocations.txt",
+        "bytes": 8
+      },
+      {
+        "relative_path": "OAX-INSTALLED-d20953aa00045552-cancel/long_shell.py",
+        "bytes": 919
+      }
+    ]
+  },
+  {
+    "agent_id": "domain-installed-a-8304eb9e5aa7",
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-a-8304eb9e5aa7",
+    "file_count": 2,
+    "bytes": 482,
+    "files": [
+      {
+        "relative_path": "identity.yaml",
+        "bytes": 418
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 64
+      }
+    ]
+  },
+  {
+    "agent_id": "domain-installed-b-8304eb9e5aa7",
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-b-8304eb9e5aa7",
+    "file_count": 2,
+    "bytes": 482,
+    "files": [
+      {
+        "relative_path": "identity.yaml",
+        "bytes": 418
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 64
+      }
+    ]
+  },
+  {
+    "agent_id": "domain-installed-a-9730f99e2b42",
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/private/domain-installed-a-9730f99e2b42",
+    "file_count": 2,
+    "bytes": 473,
+    "files": [
+      {
+        "relative_path": "identity.yaml",
+        "bytes": 409
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 64
+      }
+    ]
+  },
+  {
+    "agent_id": "domain-installed-b-9730f99e2b42",
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/private/domain-installed-b-9730f99e2b42",
+    "file_count": 2,
+    "bytes": 473,
+    "files": [
+      {
+        "relative_path": "identity.yaml",
+        "bytes": 409
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 64
+      }
+    ]
+  },
+  {
+    "agent_id": "external-installed-a-51e44952c2",
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-a-51e44952c2",
+    "file_count": 2,
+    "bytes": 483,
+    "files": [
+      {
+        "relative_path": "identity.yaml",
+        "bytes": 411
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 72
+      }
+    ]
+  },
+  {
+    "agent_id": "external-installed-b-51e44952c2",
+    "path": "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-b-51e44952c2",
+    "file_count": 2,
+    "bytes": 483,
+    "files": [
+      {
+        "relative_path": "identity.yaml",
+        "bytes": 411
+      },
+      {
+        "relative_path": "ROLE.md",
+        "bytes": 72
+      }
+    ]
+  }
+]

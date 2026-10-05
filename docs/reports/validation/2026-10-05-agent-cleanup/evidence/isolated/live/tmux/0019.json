@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-05T04:31:12.725737+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-9077f094434f",
+    "send-keys",
+    "-t",
+    "@0.0",
+    "Enter"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

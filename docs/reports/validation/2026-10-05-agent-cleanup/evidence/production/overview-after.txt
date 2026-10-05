@@ -1,0 +1,37 @@
+OAX 总览  ·  观察与终端导航
+在线  |  上次同步 13:38:53  |  7 个 Agent
+控制面：/home/sky/.openagentx/run/openagentx.sock
+  Agent             状态         当前工作 / 阻塞与待处理
+  orchestrator      排队         请用只读 date 命令获取当前 Asia/Shang…
+› openagentx        执行中       进展如何
+  identity-service  可工作       可开始工作
+  oneaxe-voice      可工作       可开始工作
+  pay-service       可工作       可开始工作
+  quote-service     可工作       可开始工作
+  rhythm            可工作       可开始工作
+── 选中详情 · Tab 进入详情 · Agent 2/7 ──
+OpenAgentX (openagentx)
+就绪：正在工作，新任务将排队
+Worker：online · generation 1 · 心跳 7s
+Task：task-c6acde26-194c-4214-b787-870049c09071 · 执行中
+任务：进展如何
+Run：run-6c92e4ab-b095-4ef0-a02d-fd223f664b5e · starting · 已运行
+29m39s
+投递：accepted
+业务效果独立核验：未记录；执行完成不等于业务验收。
+Enter 只跳转已验证的现有受管 pane 0，不启动或停止 Agent。
+
+
+
+
+
+
+
+
+
+
+
+
+
+提示：只读观察 · 待处理为已知任务提示，不是全局总计
+↑↓/PgUp/PgDn 滚动 · Tab 列表/详情 · Enter 跳转 · r 刷新 · q 退出

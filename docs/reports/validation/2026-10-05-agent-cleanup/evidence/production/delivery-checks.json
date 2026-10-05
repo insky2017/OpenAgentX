@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-05T07:59:55.855298+00:00",
+  "report_links_valid": true,
+  "production_source_hashes_valid": true,
+  "secret_pattern_scan_hits": 0,
+  "frozen_adrs_unchanged": true,
+  "code_changed_after_release": false,
+  "independent_verdict": "PASS_CLEANUP_WITH_LATER_RUNTIME_CHANGE_RECORDED"
+}

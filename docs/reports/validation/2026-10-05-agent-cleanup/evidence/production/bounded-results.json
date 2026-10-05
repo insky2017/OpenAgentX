@@ -1,0 +1,96 @@
+{
+  "groups": [
+    {
+      "agent_ids": [
+        "agy-onboarding-e2e"
+      ],
+      "events": 29869,
+      "plan_ms": 294,
+      "apply_ms": 1215
+    },
+    {
+      "agent_ids": [
+        "codex-domain-e2e"
+      ],
+      "events": 24906,
+      "plan_ms": 277,
+      "apply_ms": 1016
+    },
+    {
+      "agent_ids": [
+        "domain-installed-a-8304eb9e5aa7",
+        "domain-installed-b-8304eb9e5aa7"
+      ],
+      "events": 13,
+      "plan_ms": 164,
+      "apply_ms": 331
+    },
+    {
+      "agent_ids": [
+        "domain-installed-a-9730f99e2b42",
+        "domain-installed-b-9730f99e2b42"
+      ],
+      "events": 13,
+      "plan_ms": 161,
+      "apply_ms": 318
+    },
+    {
+      "agent_ids": [
+        "external-installed-a-51e44952c2",
+        "external-installed-b-51e44952c2"
+      ],
+      "events": 11,
+      "plan_ms": 176,
+      "apply_ms": 321
+    },
+    {
+      "agent_ids": [
+        "test-fake-agent"
+      ],
+      "events": 8594,
+      "plan_ms": 230,
+      "apply_ms": 578
+    },
+    {
+      "agent_ids": [
+        "test-fake-multiturn"
+      ],
+      "events": 425,
+      "plan_ms": 178,
+      "apply_ms": 262
+    },
+    {
+      "agent_ids": [
+        "verification-runner"
+      ],
+      "events": 3444,
+      "plan_ms": 207,
+      "apply_ms": 442
+    }
+  ],
+  "retained_sha256": "b639e041d6b5a9a9413687049532b742a725ce5ff438e95f6f700ee30b37f1ef",
+  "remaining_agents": 7,
+  "scope_rows": 0,
+  "receipt_rows": 8,
+  "foreign_key_violations": 0,
+  "snapshot_files": [
+    {
+      "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/snapshot.db",
+      "size": 147419136,
+      "sha256": "c6905c71220a934b4e11be417604e55fdfba4f248285dc5a4f07f7159f94beb8"
+    },
+    {
+      "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/snapshot.db-wal",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/snapshot.db-shm",
+      "size": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    }
+  ],
+  "journal_mode": "wal",
+  "product_code_changed": false,
+  "time_limit_seconds": 2
+}

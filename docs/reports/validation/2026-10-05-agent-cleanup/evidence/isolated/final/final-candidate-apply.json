@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/final-candidate-under-test",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-final-fc74d9.yaml"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOwner  \r\nCreated Agent \"cleanup-final-fc74d9\" in Organization \"default\"\r\n"
+}

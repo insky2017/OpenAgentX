@@ -1,0 +1,39 @@
+=== RUN   TestAgentRemovalPrivateSnapshotBatches
+=== RUN   TestAgentRemovalPrivateSnapshotBatches/bounded
+    agent_removal_perf_test.go:82: group=[agy-onboarding-e2e] stage=after_delivery_write elapsed_ms=909
+    agent_removal_perf_test.go:82: group=[agy-onboarding-e2e] stage=after_state_write elapsed_ms=996
+    agent_removal_perf_test.go:82: group=[agy-onboarding-e2e] stage=before_commit elapsed_ms=997
+    agent_removal_perf_test.go:87: group=[agy-onboarding-e2e] journal=29869 plan_ms=294 apply_ms=1215 err=<nil>
+    agent_removal_perf_test.go:82: group=[codex-domain-e2e] stage=after_delivery_write elapsed_ms=763
+    agent_removal_perf_test.go:82: group=[codex-domain-e2e] stage=after_state_write elapsed_ms=836
+    agent_removal_perf_test.go:82: group=[codex-domain-e2e] stage=before_commit elapsed_ms=836
+    agent_removal_perf_test.go:87: group=[codex-domain-e2e] journal=24906 plan_ms=277 apply_ms=1016 err=<nil>
+    agent_removal_perf_test.go:82: group=[domain-installed-a-8304eb9e5aa7 domain-installed-b-8304eb9e5aa7] stage=after_delivery_write elapsed_ms=167
+    agent_removal_perf_test.go:82: group=[domain-installed-a-8304eb9e5aa7 domain-installed-b-8304eb9e5aa7] stage=after_state_write elapsed_ms=315
+    agent_removal_perf_test.go:82: group=[domain-installed-a-8304eb9e5aa7 domain-installed-b-8304eb9e5aa7] stage=before_commit elapsed_ms=315
+    agent_removal_perf_test.go:87: group=[domain-installed-a-8304eb9e5aa7 domain-installed-b-8304eb9e5aa7] journal=13 plan_ms=164 apply_ms=331 err=<nil>
+    agent_removal_perf_test.go:82: group=[domain-installed-a-9730f99e2b42 domain-installed-b-9730f99e2b42] stage=after_delivery_write elapsed_ms=167
+    agent_removal_perf_test.go:82: group=[domain-installed-a-9730f99e2b42 domain-installed-b-9730f99e2b42] stage=after_state_write elapsed_ms=318
+    agent_removal_perf_test.go:82: group=[domain-installed-a-9730f99e2b42 domain-installed-b-9730f99e2b42] stage=before_commit elapsed_ms=318
+    agent_removal_perf_test.go:87: group=[domain-installed-a-9730f99e2b42 domain-installed-b-9730f99e2b42] journal=13 plan_ms=161 apply_ms=318 err=<nil>
+    agent_removal_perf_test.go:82: group=[external-installed-a-51e44952c2 external-installed-b-51e44952c2] stage=after_delivery_write elapsed_ms=172
+    agent_removal_perf_test.go:82: group=[external-installed-a-51e44952c2 external-installed-b-51e44952c2] stage=after_state_write elapsed_ms=321
+    agent_removal_perf_test.go:82: group=[external-installed-a-51e44952c2 external-installed-b-51e44952c2] stage=before_commit elapsed_ms=321
+    agent_removal_perf_test.go:87: group=[external-installed-a-51e44952c2 external-installed-b-51e44952c2] journal=11 plan_ms=176 apply_ms=321 err=<nil>
+    agent_removal_perf_test.go:82: group=[test-fake-agent] stage=after_delivery_write elapsed_ms=383
+    agent_removal_perf_test.go:82: group=[test-fake-agent] stage=after_state_write elapsed_ms=457
+    agent_removal_perf_test.go:82: group=[test-fake-agent] stage=before_commit elapsed_ms=457
+    agent_removal_perf_test.go:87: group=[test-fake-agent] journal=8594 plan_ms=230 apply_ms=578 err=<nil>
+    agent_removal_perf_test.go:82: group=[test-fake-multiturn] stage=after_delivery_write elapsed_ms=193
+    agent_removal_perf_test.go:82: group=[test-fake-multiturn] stage=after_state_write elapsed_ms=257
+    agent_removal_perf_test.go:82: group=[test-fake-multiturn] stage=before_commit elapsed_ms=257
+    agent_removal_perf_test.go:87: group=[test-fake-multiturn] journal=425 plan_ms=178 apply_ms=262 err=<nil>
+    agent_removal_perf_test.go:82: group=[verification-runner] stage=after_delivery_write elapsed_ms=277
+    agent_removal_perf_test.go:82: group=[verification-runner] stage=after_state_write elapsed_ms=345
+    agent_removal_perf_test.go:82: group=[verification-runner] stage=before_commit elapsed_ms=345
+    agent_removal_perf_test.go:87: group=[verification-runner] journal=3444 plan_ms=207 apply_ms=442 err=<nil>
+    agent_removal_perf_test.go:116: retained_integrity=PASS sha256=b639e041d6b5a9a9413687049532b742a725ce5ff438e95f6f700ee30b37f1ef remaining_agents=7 scope=0 receipts=8 foreign_keys=PASS
+--- PASS: TestAgentRemovalPrivateSnapshotBatches (11.08s)
+    --- PASS: TestAgentRemovalPrivateSnapshotBatches/bounded (11.08s)
+PASS
+ok  	openagentx/internal/persistence/sqlite	11.097s

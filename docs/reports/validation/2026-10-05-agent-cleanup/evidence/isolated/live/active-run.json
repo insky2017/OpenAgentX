@@ -1,0 +1,32 @@
+{
+  "deadline_at": "2026-10-05T04:58:07.886956077Z",
+  "instructions_sha256": "8831de049239cd4d91681c1002dbd4e2e128a25338de3223b77d38ca91aed851",
+  "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-keep-9d6ee7.role.md",
+  "run_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+  "task_id": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+  "agent_id": "cleanup-keep-9d6ee7",
+  "version": 2,
+  "status": "succeeded",
+  "worker_instance_id": "worker-12f05b6f-2681-4efe-aa65-2391c994e032",
+  "worker_generation": 1,
+  "execution_spec_version": 1,
+  "adapter_id": "codex-app-server",
+  "backend_id": "codex",
+  "model": "gpt-6-astra",
+  "reasoning_mode": "backend_default",
+  "network_mode": "inherit",
+  "network_policy_version": 1,
+  "network_binding_revision": 1,
+  "turn_result": {
+    "final_reply": true,
+    "runtime_status": "succeeded",
+    "body": "OAX-CLEANUP-LIVE-cc572f0a71d3",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  },
+  "turn_result_state": "available",
+  "started_at": "2026-10-05T04:28:07.886956077Z",
+  "finished_at": "2026-10-05T04:28:38.631218729Z",
+  "created_at": "2026-10-05T04:28:07.886956077Z",
+  "updated_at": "2026-10-05T04:28:38.631218729Z"
+}

@@ -1,0 +1,146 @@
+{
+  "at": "2026-10-05T05:27:01.162491+00:00",
+  "fixture": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02",
+  "known_identity_checks": [
+    {
+      "record": {
+        "pid": 2803728,
+        "starttime": "39280372"
+      },
+      "current": {
+        "pid": 2803728,
+        "starttime": "39280372",
+        "state": "S",
+        "ppid": 1722,
+        "comm": "openagentx-886b"
+      }
+    },
+    {
+      "record": {
+        "pid": 2804700,
+        "starttime": "39281420"
+      },
+      "current": {
+        "pid": 2804700,
+        "starttime": "39281420",
+        "state": "S",
+        "ppid": 1722,
+        "comm": "openagentx-886b"
+      }
+    },
+    {
+      "record": {
+        "pid": 2809693,
+        "starttime": "39285745"
+      },
+      "current": {
+        "pid": 2809693,
+        "starttime": "39285745",
+        "state": "S",
+        "ppid": 2809680,
+        "comm": "openagentx-886b"
+      }
+    },
+    {
+      "record": {
+        "pid": 2811582,
+        "starttime": "39286449"
+      },
+      "current": {
+        "pid": 2811582,
+        "starttime": "39286449",
+        "state": "S",
+        "ppid": 2809693,
+        "comm": "codex"
+      }
+    },
+    {
+      "record": {
+        "pid": 2804818,
+        "starttime": "39281498"
+      },
+      "current": {
+        "pid": 2804818,
+        "starttime": "39281498",
+        "state": "S",
+        "ppid": 2804700,
+        "comm": "codex"
+      }
+    }
+  ],
+  "tmux_server": "oax-terminal-9077f094434f",
+  "tmux_discovery_returncode": 0,
+  "owned_process_tree": [
+    {
+      "pid": 2803728,
+      "starttime": "39280372",
+      "state": "S",
+      "ppid": 1722,
+      "comm": "openagentx-886b"
+    },
+    {
+      "pid": 2804700,
+      "starttime": "39281420",
+      "state": "S",
+      "ppid": 1722,
+      "comm": "openagentx-886b"
+    },
+    {
+      "pid": 2809693,
+      "starttime": "39285745",
+      "state": "S",
+      "ppid": 2809680,
+      "comm": "openagentx-886b"
+    },
+    {
+      "pid": 2811582,
+      "starttime": "39286449",
+      "state": "S",
+      "ppid": 2809693,
+      "comm": "codex"
+    },
+    {
+      "pid": 2804818,
+      "starttime": "39281498",
+      "state": "S",
+      "ppid": 2804700,
+      "comm": "codex"
+    },
+    {
+      "pid": 2809680,
+      "starttime": "39285739",
+      "state": "S",
+      "ppid": 1722,
+      "comm": "tmux: server"
+    },
+    {
+      "pid": 2809936,
+      "starttime": "39285900",
+      "state": "S",
+      "ppid": 2804818,
+      "comm": "MainThread"
+    },
+    {
+      "pid": 2809940,
+      "starttime": "39285902",
+      "state": "S",
+      "ppid": 2804818,
+      "comm": "node_repl"
+    },
+    {
+      "pid": 2819487,
+      "starttime": "39293189",
+      "state": "S",
+      "ppid": 2804818,
+      "comm": "codex-code-mode"
+    },
+    {
+      "pid": 2810040,
+      "starttime": "39285909",
+      "state": "S",
+      "ppid": 2809936,
+      "comm": "node_repl"
+    }
+  ],
+  "rule": "Only exact PID/starttime pairs and this recorded dedicated tmux server may be stopped. Preserve all files."
+}

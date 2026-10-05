@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "scope": "R old real daemon/Worker/Codex/native continuity across new CLI migration and exact history purge",
+  "old_schema": 5,
+  "new_schema": 6,
+  "active_task": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+  "next_native_task": "task-09a46163-f230-4482-9c78-091bf37acb64",
+  "active_task_status": "uncertain",
+  "next_task_status": "uncertain",
+  "thread": "01a10a50-cf58-7762-818e-a6554c01435c",
+  "worker": [
+    {
+      "worker_instance_id": "worker-12f05b6f-2681-4efe-aa65-2391c994e032",
+      "generation": 1,
+      "started_at": "2026-10-05T04:26:26.956218702Z"
+    }
+  ],
+  "deleted_agent": "cleanup-delete-9d6ee7",
+  "cross_agent_boundary_refused": true,
+  "processes_native_generation_preserved": true,
+  "model_effects": [
+    "OAX-CLEANUP-LIVE-cc572f0a71d3",
+    "OAX-CLEANUP-NEXT-6e5cb6722e93"
+  ],
+  "cleanup_elapsed_seconds": 2.1867674509994686,
+  "max_wal_write_lock_seconds": 0.05282902717590332,
+  "limitations": [
+    "No production changes",
+    "No systemd unit teardown claim; fixture uses directly owned processes",
+    "Mutation Task status is preserved as reported; independent file verification does not rewrite uncertain to succeeded",
+    "Duration applies to this tested fixture size; production counts need bounded preflight"
+  ]
+}

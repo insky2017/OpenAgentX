@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-05T05:37:23.653556+00:00",
+  "finished_at": "2026-10-05T05:37:26.477583+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "remove",
+    "external-installed-a-51e44952c2",
+    "external-installed-b-51e44952c2",
+    "--purge-history",
+    "--yes"
+  ],
+  "exit_code": 0,
+  "elapsed_ms": 2824.03
+}

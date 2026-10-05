@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-05T04:28:06.652950+00:00",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/candidate-under-test",
+  "source_artifact": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/candidate-working-02",
+  "sha256": "b982da3398260d2e415166a91db50bc6055dff5e46954ec442c21e433243d81c",
+  "harness_sha256": "91de7b49e313bcc25f8556d2a12a83089e610c06c1fe54bd121a006b2e637156",
+  "source_sha256": {
+    "internal/cli/fleet/agent_remove_local.go": "3b879fe76892b085427145e4686d9f8bc6a365657bc2ba3c42f958851742cf76",
+    "internal/cli/fleet/agent_environment.go": "c4d0364d19a4e9e5633b1c189bc57e6c4321d3f38d7cb1be548ff5249dc33f12",
+    "internal/cli/fleet/agent_join.go": "be97bfaeb2970e0cbd1a994c6c82f3a42ed5e0e58f973d1c3f9f74c0433bf4c1",
+    "internal/cli/fleet/agent.go": "1a9c8bdc67b7c4783ba026969ec54b7aca8b94468b2f575f1f350989eb482e65",
+    "internal/cli/fleet/agent_test.go": "8de1fa5cafbc9007e865077200c9a2061f705dbf6dcb022799ef54fbceab20d8",
+    "internal/cli/fleet/agent_remove.go": "ac1d75fd49b71ba2f73e481c87bda7006fce70949419fc827d1df829b5291a3a",
+    "internal/cli/fleet/agent_enable.go": "5e480846860d96ff7758670ccc4b619b1a8bcb4ac9d12788ba6f03fd845c47d5",
+    "internal/cli/fleet/agent_native.go": "98e0d7caee79c0ab23a0aab6466ebbdb84a432e7bdb847e16a86280b289ae860",
+    "internal/cli/fleet/agent_native_integration_test.go": "bc68ebad698ae0339686998ed5fc68f8e182836ffed575e33689f2854952c243",
+    "internal/cli/fleet/agent_enable_test.go": "cf09f38a3ccd6a8dd2b00f5488783f5f0784577dc2f83354c64b7c7d05a5e1b8",
+    "internal/cli/fleet/agent_remove_test.go": "fd79382d720d97eb7218df374b96bcf2f9744018d79fac8318017ec38ad51a43",
+    "internal/cli/fleet/agent_join_test.go": "f07dc4f61c5f9d5cdd990293a729cb27e7fa8f6c67f80c9b37bae3a98122e026",
+    "internal/domain/agent_removal.go": "355742b9480d53b17f3245adc0339d7101b82416c5df012e54194c939f6e4db5",
+    "internal/persistence/sqlite/agent_removal_test.go": "734a11c959250781cf92587838d54ed47f34eabf17d8f15f1a68368315643a89",
+    "internal/persistence/sqlite/agent_removal.go": "f6d5e315961f32f31c94243e34fb6da09130c52fbf4d1098165257d3b618522f",
+    "internal/persistence/sqlite/migrations/agent_removal_test.go": "fc89f64d20edad00cf2ed6fca803c05623b0a59859d9ce13a550d5cb215e417c",
+    "internal/persistence/sqlite/migrations/006_agent_removal.sql": "9b60d3f77747b1b90c3d5ed35cf8c7da9693d0effc3b3a5a97234ce597d6d5ac",
+    "internal/persistence/sqlite/migrations/agent_removal.go": "77ab7149785ed1e4d0d59b64158a85351e878cfc82346ee18417b0b48fbdd7df",
+    "internal/persistence/sqlite/migrations/migrations.go": "e70de3123dc8eb9352706f23e4c3d6cfd54780eeed68f600b6c6f2b9731d9f7b"
+  },
+  "build_info": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/candidate-under-test: go1.22.4\n\tpath\topenagentx/cmd/openagentx\n\tmod\topenagentx\t(devel)\t\n\tdep\tgithub.com/atotto/clipboard\tv0.1.4\th1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=\n\tdep\tgithub.com/aymanbagabas/go-osc52/v2\tv2.0.1\th1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=\n\tdep\tgithub.com/charmbracelet/bubbles\tv0.20.0\th1:jSZu6qD8cRQ6k9OMfR1WlM+ruM8fkPWkHvQWD9LIutE=\n\tdep\tgithub.com/charmbracelet/bubbletea\tv1.3.4\th1:kCg7B+jSCFPLYRA52SDZjr51kG/fMUEoPoZrkaDHyoI=\n\tdep\tgithub.com/charmbracelet/colorprofile\tv0.2.3-0.20250311203215-f60798e515dc\th1:4pZI35227imm7yK2bGPcfpFEmuY1gc2YSTShr4iJBfs=\n\tdep\tgithub.com/charmbracelet/lipgloss\tv1.1.0\th1:vYXsiLHVkK7fp74RkV7b2kq9+zDLoEU4MZoFqR/noCY=\n\tdep\tgithub.com/charmbracelet/x/ansi\tv0.8.0\th1:9GTq3xq9caJW8ZrBTe0LIe2fvfLR/bYXKTx2llXn7xE=\n\tdep\tgithub.com/charmbracelet/x/cellbuf\tv0.0.13-0.20250311204145-2c3ea96c31dd\th1:vy0GVL4jeHEwG5YOXDmi86oYw2yuYUGqz6a8sLwg0X8=\n\tdep\tgithub.com/charmbracelet/x/term\tv0.2.1\th1:AQeHeLZ1OqSXhrAWpYUtZyX1T3zVxfpZuEQMIQaGIAQ=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/gorilla/websocket\tv1.5.3\th1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=\n\tdep\tgithub.com/lucasb-eyer/go-colorful\tv1.2.0\th1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69Aj6K7nkY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.20\th1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=\n\tdep\tgithub.com/mattn/go-runewidth\tv0.0.16\th1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=\n\tdep\tgithub.com/mattn/go-sqlite3\tv1.14.49\th1:B8jBHC3xhxZgxztrgruTuLucebnULQnx4W7cF7SAE9w=\n\tdep\tgithub.com/muesli/ansi\tv0.0.0-20230316100256-276c6243b2f6\th1:ZK8zHtRHOkbHy6Mmr5D264iyp3TiX5OmNcI5cIARiQI=\n\tdep\tgithub.com/muesli/cancelreader\tv0.2.2\th1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELUXHmA=\n\tdep\tgithub.com/muesli/termenv\tv0.16.0\th1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc=\n\tdep\tgithub.com/rivo/uniseg\tv0.4.7\th1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=\n\tdep\tgithub.com/sahilm/fuzzy\tv0.1.1\th1:ceu5RHF8DGgoi+/dR5PsECjCDH1BE3Fnmpo7aVXOdRA=\n\tdep\tgithub.com/xo/terminfo\tv0.0.0-20220910002029-abceb7e1c41e\th1:JVG44RsyaB9T2KIHavMF/ppJZNG9ZpyihvCd0w101no=\n\tdep\tgolang.org/x/crypto\tv0.23.0\th1:dIJU/v2J8Mdglj/8rJ6UUOM3Zc9zLZxVZwwxMooUSAI=\n\tdep\tgolang.org/x/sync\tv0.11.0\th1:GGz8+XQP4FvTTrjZPzNKTMFtSXH80RAzG+5ghFPgK9w=\n\tdep\tgolang.org/x/sys\tv0.30.0\th1:QjkSwP/36a20jFYWkSue1YwXzLmsV5Gfq7Eiy72C1uc=\n\tdep\tgolang.org/x/term\tv0.20.0\th1:VnkxpohqXaOBYJtBmEppKUG6mXpi+4O6purfc2+sMhw=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=c5b93b7b9ffb2265f43196e7e00638aa51df5d64\n\tbuild\tvcs.time=2026-02-08T02:48:22Z\n\tbuild\tvcs.modified=true\n"
+}

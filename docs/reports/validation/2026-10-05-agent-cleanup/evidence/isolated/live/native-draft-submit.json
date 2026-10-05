@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-05T04:33:00.353102+00:00",
+  "action": [
+    "tmux",
+    "-L",
+    "oax-terminal-9077f094434f",
+    "send-keys",
+    "-t",
+    "@0.0",
+    "Enter"
+  ],
+  "reason": "real TUI rendered the pasted instruction as an unsubmitted draft; submit existing draft once, do not resend content"
+}

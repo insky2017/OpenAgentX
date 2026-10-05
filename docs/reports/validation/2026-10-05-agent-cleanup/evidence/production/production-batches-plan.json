@@ -1,0 +1,29 @@
+[
+  [
+    "agy-onboarding-e2e"
+  ],
+  [
+    "codex-domain-e2e"
+  ],
+  [
+    "domain-installed-a-8304eb9e5aa7",
+    "domain-installed-b-8304eb9e5aa7"
+  ],
+  [
+    "domain-installed-a-9730f99e2b42",
+    "domain-installed-b-9730f99e2b42"
+  ],
+  [
+    "external-installed-a-51e44952c2",
+    "external-installed-b-51e44952c2"
+  ],
+  [
+    "test-fake-agent"
+  ],
+  [
+    "test-fake-multiturn"
+  ],
+  [
+    "verification-runner"
+  ]
+]

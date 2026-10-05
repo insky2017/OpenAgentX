@@ -1,0 +1,2217 @@
+{
+  "captured_at": "2026-10-05T05:38:16.555650+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window_id": "@2",
+      "window_name": "overview",
+      "pane_id": "%2",
+      "pane_index": "0",
+      "pane_pid": "2304458",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 2304458,
+        "starttime": "38739340",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@8",
+      "window_name": "openagentx",
+      "pane_id": "%11",
+      "pane_index": "0",
+      "pane_pid": "31132",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 31132,
+        "starttime": "57425",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 61363,
+          "starttime": "35670344",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "openagentx"
+        },
+        {
+          "pid": 63654,
+          "starttime": "35671951",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0c98a-bef8-7730-9b2b-cbc2f3594559"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@8",
+      "window_name": "openagentx",
+      "pane_id": "%59",
+      "pane_index": "1",
+      "pane_pid": "3492482",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 3492482,
+        "starttime": "34081138",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@28",
+      "window_name": "rhythm",
+      "pane_id": "%55",
+      "pane_index": "0",
+      "pane_pid": "3584397",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 3584397,
+        "starttime": "25807752",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+        "role": "native_bridge",
+        "agent_id": "rhythm"
+      },
+      "native_children": [
+        {
+          "pid": 3584466,
+          "starttime": "25807759",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@27",
+      "window_name": "pay-service",
+      "pane_id": "%54",
+      "pane_index": "0",
+      "pane_pid": "1129591",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 1129591,
+        "starttime": "37392040",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 1177832,
+          "starttime": "37458373",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "pay-service"
+        },
+        {
+          "pid": 1180441,
+          "starttime": "37460381",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0e016-d951-77d1-bc7e-d13662f4823c"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@3",
+      "window_name": "quote-service",
+      "pane_id": "%3",
+      "pane_index": "0",
+      "pane_pid": "30767",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 30767,
+        "starttime": "57386",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 18653,
+          "starttime": "35593345",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "quote-service"
+        },
+        {
+          "pid": 21538,
+          "starttime": "35596155",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a1010a-c521-78b2-98f0-eaafa642c5fa"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@30",
+      "window_name": "identity-service",
+      "pane_id": "%60",
+      "pane_index": "0",
+      "pane_pid": "3525429",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 3525429,
+        "starttime": "34121500",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 90909,
+          "starttime": "35717993",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "identity-service"
+        },
+        {
+          "pid": 93117,
+          "starttime": "35719399",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@11",
+      "window_name": "oneaxe-voice",
+      "pane_id": "%17",
+      "pane_index": "0",
+      "pane_pid": "32093",
+      "command": "openagentx",
+      "dead": "0",
+      "process": {
+        "pid": 32093,
+        "starttime": "57454",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "native_children": [
+        {
+          "pid": 301429,
+          "starttime": "36010461",
+          "comm": "openagentx",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "native_bridge",
+          "agent_id": "oneaxe-voice"
+        },
+        {
+          "pid": 303535,
+          "starttime": "36011868",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_tui",
+          "thread_ids": [
+            "01a0ddcc-248f-7dd0-a263-67f1d53e0181"
+          ]
+        }
+      ]
+    },
+    {
+      "session": "OAX",
+      "window_id": "@31",
+      "window_name": "zsh",
+      "pane_id": "%61",
+      "pane_index": "0",
+      "pane_pid": "1127591",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 1127591,
+        "starttime": "37390881",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@9",
+      "window_name": "api_proxy",
+      "pane_id": "%12",
+      "pane_index": "0",
+      "pane_pid": "31224",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31224,
+        "starttime": "57431",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@9",
+      "window_name": "api_proxy",
+      "pane_id": "%13",
+      "pane_index": "1",
+      "pane_pid": "31344",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31344,
+        "starttime": "57435",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@10",
+      "window_name": "colab",
+      "pane_id": "%14",
+      "pane_index": "0",
+      "pane_pid": "31515",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31515,
+        "starttime": "57440",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@10",
+      "window_name": "colab",
+      "pane_id": "%15",
+      "pane_index": "1",
+      "pane_pid": "31664",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 31664,
+        "starttime": "57444",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    },
+    {
+      "session": "OAX",
+      "window_id": "@12",
+      "window_name": "zsh",
+      "pane_id": "%18",
+      "pane_index": "0",
+      "pane_pid": "32361",
+      "command": "zsh",
+      "dead": "0",
+      "process": {
+        "pid": 32361,
+        "starttime": "57460",
+        "comm": "zsh",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      }
+    }
+  ],
+  "windows": {
+    "@2": {
+      "name": "overview",
+      "options": {
+        "@openagentx_managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · overview · 领域总览 / Enter 进入终端"
+        }
+      }
+    },
+    "@8": {
+      "name": "openagentx",
+      "options": {
+        "@openagentx_managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@openagentx_agent_id": {
+          "set": true,
+          "value": "openagentx"
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · openagentx · Codex 原生终端"
+        }
+      }
+    },
+    "@28": {
+      "name": "rhythm",
+      "options": {
+        "@openagentx_managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@openagentx_agent_id": {
+          "set": true,
+          "value": "rhythm"
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · rhythm · Codex 原生终端"
+        }
+      }
+    },
+    "@27": {
+      "name": "pay-service",
+      "options": {
+        "@openagentx_managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@openagentx_agent_id": {
+          "set": true,
+          "value": "pay-service"
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · pay-service · Codex 原生终端"
+        }
+      }
+    },
+    "@3": {
+      "name": "quote-service",
+      "options": {
+        "@openagentx_managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@openagentx_agent_id": {
+          "set": true,
+          "value": "quote-service"
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · quote-service · Codex 原生终端"
+        }
+      }
+    },
+    "@30": {
+      "name": "identity-service",
+      "options": {
+        "@openagentx_managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@openagentx_agent_id": {
+          "set": true,
+          "value": "identity-service"
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · identity-service · Codex 原生终端"
+        }
+      }
+    },
+    "@11": {
+      "name": "oneaxe-voice",
+      "options": {
+        "@openagentx_managed": {
+          "set": true,
+          "value": "1"
+        },
+        "@openagentx_agent_id": {
+          "set": true,
+          "value": "oneaxe-voice"
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "remain-on-exit": {
+          "set": true,
+          "value": "on"
+        },
+        "pane-border-status": {
+          "set": true,
+          "value": "top"
+        },
+        "pane-border-format": {
+          "set": true,
+          "value": "OAX · oneaxe-voice · Codex 原生终端"
+        }
+      }
+    },
+    "@31": {
+      "name": "zsh",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": false,
+          "value": ""
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    },
+    "@9": {
+      "name": "api_proxy",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    },
+    "@10": {
+      "name": "colab",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": true,
+          "value": "off"
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    },
+    "@12": {
+      "name": "zsh",
+      "options": {
+        "@openagentx_managed": {
+          "set": false,
+          "value": ""
+        },
+        "@openagentx_agent_id": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-managed": {
+          "set": false,
+          "value": ""
+        },
+        "@oax-agent-id": {
+          "set": false,
+          "value": ""
+        },
+        "automatic-rename": {
+          "set": false,
+          "value": ""
+        },
+        "allow-rename": {
+          "set": false,
+          "value": ""
+        },
+        "remain-on-exit": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-status": {
+          "set": false,
+          "value": ""
+        },
+        "pane-border-format": {
+          "set": false,
+          "value": ""
+        }
+      }
+    }
+  },
+  "installed_binary": {
+    "path": "/home/sky/.local/bin/openagentx",
+    "sha256": "ddfaff6bd4370639b40bb6c2760e02e9245d948a2c62d149a4b2328a7a9479a7",
+    "build_info": "/home/sky/.local/bin/openagentx: go1.22.4\n\tpath\topenagentx/cmd/openagentx\n\tmod\topenagentx\t(devel)\t\n\tdep\tgithub.com/atotto/clipboard\tv0.1.4\th1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=\n\tdep\tgithub.com/aymanbagabas/go-osc52/v2\tv2.0.1\th1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=\n\tdep\tgithub.com/charmbracelet/bubbles\tv0.20.0\th1:jSZu6qD8cRQ6k9OMfR1WlM+ruM8fkPWkHvQWD9LIutE=\n\tdep\tgithub.com/charmbracelet/bubbletea\tv1.3.4\th1:kCg7B+jSCFPLYRA52SDZjr51kG/fMUEoPoZrkaDHyoI=\n\tdep\tgithub.com/charmbracelet/colorprofile\tv0.2.3-0.20250311203215-f60798e515dc\th1:4pZI35227imm7yK2bGPcfpFEmuY1gc2YSTShr4iJBfs=\n\tdep\tgithub.com/charmbracelet/lipgloss\tv1.1.0\th1:vYXsiLHVkK7fp74RkV7b2kq9+zDLoEU4MZoFqR/noCY=\n\tdep\tgithub.com/charmbracelet/x/ansi\tv0.8.0\th1:9GTq3xq9caJW8ZrBTe0LIe2fvfLR/bYXKTx2llXn7xE=\n\tdep\tgithub.com/charmbracelet/x/cellbuf\tv0.0.13-0.20250311204145-2c3ea96c31dd\th1:vy0GVL4jeHEwG5YOXDmi86oYw2yuYUGqz6a8sLwg0X8=\n\tdep\tgithub.com/charmbracelet/x/term\tv0.2.1\th1:AQeHeLZ1OqSXhrAWpYUtZyX1T3zVxfpZuEQMIQaGIAQ=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/gorilla/websocket\tv1.5.3\th1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=\n\tdep\tgithub.com/lucasb-eyer/go-colorful\tv1.2.0\th1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69Aj6K7nkY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.20\th1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=\n\tdep\tgithub.com/mattn/go-runewidth\tv0.0.16\th1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=\n\tdep\tgithub.com/mattn/go-sqlite3\tv1.14.49\th1:B8jBHC3xhxZgxztrgruTuLucebnULQnx4W7cF7SAE9w=\n\tdep\tgithub.com/muesli/ansi\tv0.0.0-20230316100256-276c6243b2f6\th1:ZK8zHtRHOkbHy6Mmr5D264iyp3TiX5OmNcI5cIARiQI=\n\tdep\tgithub.com/muesli/cancelreader\tv0.2.2\th1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELUXHmA=\n\tdep\tgithub.com/muesli/termenv\tv0.16.0\th1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc=\n\tdep\tgithub.com/rivo/uniseg\tv0.4.7\th1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=\n\tdep\tgithub.com/sahilm/fuzzy\tv0.1.1\th1:ceu5RHF8DGgoi+/dR5PsECjCDH1BE3Fnmpo7aVXOdRA=\n\tdep\tgithub.com/xo/terminfo\tv0.0.0-20220910002029-abceb7e1c41e\th1:JVG44RsyaB9T2KIHavMF/ppJZNG9ZpyihvCd0w101no=\n\tdep\tgolang.org/x/crypto\tv0.23.0\th1:dIJU/v2J8Mdglj/8rJ6UUOM3Zc9zLZxVZwwxMooUSAI=\n\tdep\tgolang.org/x/sync\tv0.11.0\th1:GGz8+XQP4FvTTrjZPzNKTMFtSXH80RAzG+5ghFPgK9w=\n\tdep\tgolang.org/x/sys\tv0.30.0\th1:QjkSwP/36a20jFYWkSue1YwXzLmsV5Gfq7Eiy72C1uc=\n\tdep\tgolang.org/x/term\tv0.20.0\th1:VnkxpohqXaOBYJtBmEppKUG6mXpi+4O6purfc2+sMhw=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=3b6989eb65150e9360e9c734ebf7e1f9e3d7c60c\n\tbuild\tvcs.time=2026-10-05T05:15:24Z\n\tbuild\tvcs.modified=false"
+  },
+  "services": {
+    "daemon": {
+      "MainPID": "3577886",
+      "ExecMainStartTimestampMonotonic": "257960197386",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 3577886,
+        "starttime": "25796017",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": []
+    },
+    "openagentx": {
+      "MainPID": "58865",
+      "ExecMainStartTimestampMonotonic": "356663222212",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 58865,
+        "starttime": "35666321",
+        "comm": "openagentx",
+        "executable": "/home/sky/.local/bin/openagentx (deleted)",
+        "executable_sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca"
+      },
+      "backends": [
+        {
+          "pid": 58948,
+          "starttime": "35666397",
+          "comm": "codex",
+          "executable": "/home/sky/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/bin/codex",
+          "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "rhythm": {
+      "MainPID": "3580837",
+      "ExecMainStartTimestampMonotonic": "258006029446",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 3580837,
+        "starttime": "25800601",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 3580900,
+          "starttime": "25800676",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "pay-service": {
+      "MainPID": "1175344",
+      "ExecMainStartTimestampMonotonic": "374546450343",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 1175344,
+        "starttime": "37454643",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 1175444,
+          "starttime": "37454718",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "quote-service": {
+      "MainPID": "15339",
+      "ExecMainStartTimestampMonotonic": "355876757612",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 15339,
+        "starttime": "35587675",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 15419,
+          "starttime": "35587750",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "identity-service": {
+      "MainPID": "85950",
+      "ExecMainStartTimestampMonotonic": "357110609341",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 85950,
+        "starttime": "35711059",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 86060,
+          "starttime": "35711140",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    },
+    "oneaxe-voice": {
+      "MainPID": "298177",
+      "ExecMainStartTimestampMonotonic": "360069720349",
+      "ActiveState": "active",
+      "SubState": "running",
+      "process": {
+        "pid": 298177,
+        "starttime": "36006970",
+        "comm": "openagentx",
+        "executable_inspection": "kernel_permission_denied; identity uses PID and starttime"
+      },
+      "backends": [
+        {
+          "pid": 298251,
+          "starttime": "36007049",
+          "comm": "codex",
+          "executable_inspection": "kernel_permission_denied; identity uses PID and starttime",
+          "role": "codex_engine"
+        }
+      ]
+    }
+  },
+  "threads": {
+    "openagentx": {
+      "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "task_id": "task-c6acde26-194c-4214-b787-870049c09071",
+      "run_id": "run-6c92e4ab-b095-4ef0-a02d-fd223f664b5e",
+      "state": "running"
+    },
+    "rhythm": {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "task_id": "task-7312a872-b739-4ce0-b4ca-61a08362d499",
+      "run_id": "run-d80390a9-789e-48df-b229-2503e4e9dbfc",
+      "state": "idle"
+    },
+    "pay-service": {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+      "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+      "state": "idle"
+    },
+    "quote-service": {
+      "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "task_id": "task-cdb3bd79-1f77-496e-bdca-b91e45c5c78e",
+      "run_id": "run-4cee9941-8a1b-4bf3-9d66-919ff2d294cb",
+      "state": "idle"
+    },
+    "identity-service": {
+      "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "task_id": "task-96942a10-68f6-425c-bdb1-bcf009fae25a",
+      "run_id": "run-5c7699e8-4286-4d38-b2b2-252647f23196",
+      "state": "idle"
+    },
+    "oneaxe-voice": {
+      "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "task_id": "task-9476a711-98fc-46ac-9717-a6582b83a919",
+      "run_id": "run-33722c9d-cb71-44f7-9466-cb1323fb8bfa",
+      "state": "idle"
+    }
+  },
+  "configs_sha256": {
+    "openagentx": "9f75fdde07bc56f480936d0cb17b7ca3e6646c215b15894c71df11fb592a5aa3",
+    "rhythm": "d62459a33aaa6f6978a5d1815f7a06a2dc4de998687589df7cfb7bab515aaf75",
+    "pay-service": "9acc2f9139439514e42a4be93c31a0390e81a464554273841d6534e9ee62b256",
+    "quote-service": "30accab13ff5fb893cc73192856df2d64ec793ec3a04cd58eddaff261e75a75a",
+    "identity-service": "6eceef481f3b7764930137b04bdc57b87d03f118ac9acd1fb60c04e9d5ff32cf",
+    "oneaxe-voice": "6261af245c1ff96b77a1a62dcea97adb3c225d01fef72449e7b788848461abe8"
+  },
+  "workers": [
+    {
+      "agent_id": "openagentx",
+      "worker_instance_id": "worker-569568ee-e6d1-4388-a5ab-f26469ca08d7",
+      "generation": 1,
+      "status": "online",
+      "started_at": "2026-10-04T18:23:55.95105924Z"
+    },
+    {
+      "agent_id": "identity-service",
+      "worker_instance_id": "worker-509cf5ad-1cda-491d-8202-7aaee7a7492f",
+      "generation": 1,
+      "status": "online",
+      "started_at": "2026-10-04T18:31:23.386611142Z"
+    },
+    {
+      "agent_id": "oneaxe-voice",
+      "worker_instance_id": "worker-008b7af4-295b-41d4-ae47-6255a98505e2",
+      "generation": 1,
+      "status": "online",
+      "started_at": "2026-10-04T19:20:42.469315907Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-c9d736be-57d1-4746-866d-57a22b137454",
+      "generation": 53,
+      "status": "online",
+      "started_at": "2026-10-04T18:10:49.689170695Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-21864d68-0a41-4310-b01a-ffb4e803e209",
+      "generation": 4,
+      "status": "online",
+      "started_at": "2026-10-04T23:21:59.173201323Z"
+    },
+    {
+      "agent_id": "rhythm",
+      "worker_instance_id": "worker-62fa1611-e4e3-45f1-83cc-eaaee8a2eea3",
+      "generation": 2,
+      "status": "online",
+      "started_at": "2026-10-03T14:59:38.755439153Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-65790859-dcbb-4136-b657-8e7983bc61c7",
+      "generation": 3,
+      "status": "offline",
+      "started_at": "2026-10-04T23:13:13.011610521Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-57468360-94a8-4680-8a06-f2a524d8463b",
+      "generation": 2,
+      "status": "offline",
+      "started_at": "2026-10-03T14:59:12.443542305Z"
+    },
+    {
+      "agent_id": "rhythm",
+      "worker_instance_id": "worker-c7914d44-0a00-45b2-a215-fca4c5b0c7b8",
+      "generation": 1,
+      "status": "offline",
+      "started_at": "2026-10-03T14:26:16.970519066Z"
+    },
+    {
+      "agent_id": "pay-service",
+      "worker_instance_id": "worker-7d0528ef-f197-4f50-9dac-460863fe6d0a",
+      "generation": 1,
+      "status": "offline",
+      "started_at": "2026-10-03T14:18:00.558078967Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-e14b0b6d-5db6-443a-aa19-9edd21ed7be6",
+      "generation": 52,
+      "status": "offline",
+      "started_at": "2026-09-22T11:35:06.648340326Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+      "generation": 51,
+      "status": "offline",
+      "started_at": "2026-09-22T08:05:08.800657331Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-b51d04b2-bf20-4ded-a929-95c11fe990db",
+      "generation": 50,
+      "status": "offline",
+      "started_at": "2026-09-18T14:47:35.825834846Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cf6c22cd-7abb-4699-aa1c-204406a0d625",
+      "generation": 49,
+      "status": "offline",
+      "started_at": "2026-09-18T14:08:45.571296514Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-a33106ae-9162-4660-8f37-1ef8e8b8db53",
+      "generation": 48,
+      "status": "offline",
+      "started_at": "2026-09-13T09:10:12.414628018Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-ea2b6ad4-6044-40c2-b12c-86626a3f2dab",
+      "generation": 47,
+      "status": "offline",
+      "started_at": "2026-09-12T12:32:26.988340754Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-dfdc5c20-d395-467f-a634-e7580b243624",
+      "generation": 46,
+      "status": "offline",
+      "started_at": "2026-09-11T18:05:13.197384548Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d745bf6d-29cb-4025-84d2-5dba477b9d01",
+      "generation": 45,
+      "status": "offline",
+      "started_at": "2026-09-11T18:04:40.467130281Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-bc2755d8-3ec3-4ccb-975a-3a2453098fdd",
+      "generation": 44,
+      "status": "offline",
+      "started_at": "2026-09-11T18:04:07.471948931Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-07bd31bf-ee8e-4c18-ba6e-b59a2ba42de3",
+      "generation": 43,
+      "status": "offline",
+      "started_at": "2026-09-11T17:54:07.631850182Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-0d471821-f597-4b41-b00f-d820134652d9",
+      "generation": 42,
+      "status": "offline",
+      "started_at": "2026-09-05T19:32:40.557146293Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cc5cf872-284e-4f56-a181-7f6128da98de",
+      "generation": 41,
+      "status": "offline",
+      "started_at": "2026-09-05T19:18:05.690557797Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-1eedc2b3-c700-41bc-b35d-eb5b5285f0f6",
+      "generation": 40,
+      "status": "offline",
+      "started_at": "2026-09-05T19:13:58.5782258Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-85c8d1a0-8f96-4b91-83e3-8a56ec40fc2a",
+      "generation": 39,
+      "status": "offline",
+      "started_at": "2026-09-05T19:11:11.789417018Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-8a61d80c-0b2f-429f-88f1-9c5cda638169",
+      "generation": 38,
+      "status": "offline",
+      "started_at": "2026-09-05T19:07:40.869754466Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f3c27d46-36a7-4576-a956-6ae71eb55222",
+      "generation": 37,
+      "status": "offline",
+      "started_at": "2026-09-05T18:59:23.398026533Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-feae1f02-c563-45e1-a074-006de8f70c24",
+      "generation": 36,
+      "status": "offline",
+      "started_at": "2026-09-05T18:52:51.546745921Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-b94ccc20-bf34-458d-b0e3-0298519322c1",
+      "generation": 35,
+      "status": "offline",
+      "started_at": "2026-09-05T18:41:31.541089919Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-0bf3763b-052f-4b3e-b2f5-481ff7a30da3",
+      "generation": 34,
+      "status": "offline",
+      "started_at": "2026-09-05T18:36:17.11439838Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f924a800-888e-4309-a0e6-c54bd2c6b524",
+      "generation": 33,
+      "status": "offline",
+      "started_at": "2026-09-05T18:27:45.456096439Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d60f45e4-e54f-4f71-a6d3-3f7884703f62",
+      "generation": 32,
+      "status": "offline",
+      "started_at": "2026-09-05T18:22:14.354069705Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-b977a681-61ab-4df9-9afd-45a17befab77",
+      "generation": 31,
+      "status": "offline",
+      "started_at": "2026-09-05T18:13:19.14087955Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-1e8deef9-2758-4eef-a7d5-9e74d66b74ba",
+      "generation": 30,
+      "status": "offline",
+      "started_at": "2026-09-05T18:06:55.422249644Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-e1d53a54-93a6-4068-bea1-66d273f82a58",
+      "generation": 29,
+      "status": "offline",
+      "started_at": "2026-09-05T17:54:28.343108852Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-675bb1ac-9209-4b4e-a0eb-31fd068ba8a5",
+      "generation": 28,
+      "status": "offline",
+      "started_at": "2026-09-05T01:06:25.93521987Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-bf07dfa1-4d9e-4bd3-80ad-5d38fd4ba5e9",
+      "generation": 27,
+      "status": "offline",
+      "started_at": "2026-09-05T00:37:55.72353955Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d068d39a-c4b6-4c19-bb1f-57328fddbec9",
+      "generation": 26,
+      "status": "offline",
+      "started_at": "2026-09-05T00:37:52.751926843Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f62525c1-ba4e-4fe3-adcc-61047d46d3a3",
+      "generation": 25,
+      "status": "offline",
+      "started_at": "2026-09-04T18:42:50.576329366Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-dac3f7d7-ae9a-40ec-b0b7-0b264a8ac9cd",
+      "generation": 24,
+      "status": "offline",
+      "started_at": "2026-09-04T18:40:05.004448562Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-559005a4-7217-4921-accf-2d53edd71e60",
+      "generation": 23,
+      "status": "offline",
+      "started_at": "2026-09-04T18:39:09.382387141Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-18e4dbfd-fef8-4d3d-ad2e-3c3c8a9fce93",
+      "generation": 22,
+      "status": "offline",
+      "started_at": "2026-09-04T18:23:16.735390316Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-f9e32b5b-94f5-4a35-92fc-b53eb1d0fd36",
+      "generation": 21,
+      "status": "offline",
+      "started_at": "2026-09-04T18:18:53.883923528Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-4c39d926-037d-4cb2-b6a1-4b6fd1d2dc29",
+      "generation": 20,
+      "status": "offline",
+      "started_at": "2026-09-04T17:08:23.208890377Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d79b1f6e-0fae-4762-9165-3007c16291cb",
+      "generation": 19,
+      "status": "offline",
+      "started_at": "2026-09-01T06:28:58.717469417Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-cc3943db-daf6-48f9-acb8-1ee32dcfb05c",
+      "generation": 18,
+      "status": "offline",
+      "started_at": "2026-09-01T06:14:46.192591823Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-13531475-a1aa-4d36-98c1-245444a86fc7",
+      "generation": 17,
+      "status": "offline",
+      "started_at": "2026-09-01T05:51:11.723077494Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-968e8105-3bad-4db3-989d-efb9ad090d36",
+      "generation": 16,
+      "status": "offline",
+      "started_at": "2026-09-01T05:33:57.905229085Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-2702a92b-d7f5-49cd-87e4-b74d523995ee",
+      "generation": 15,
+      "status": "offline",
+      "started_at": "2026-09-01T01:49:26.692792027Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-fc1ec8d4-fcda-4628-8ded-cbd0770e5ae1",
+      "generation": 14,
+      "status": "offline",
+      "started_at": "2026-08-31T22:04:21.909277213Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-4db332f5-91f0-4cde-a3a5-7a7ddff6d5f3",
+      "generation": 13,
+      "status": "offline",
+      "started_at": "2026-08-31T21:55:00.461488078Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-9a63c2fa-5752-49dc-bb61-308fcb81acd8",
+      "generation": 12,
+      "status": "offline",
+      "started_at": "2026-08-31T18:08:36.673289097Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-8adda275-6cc1-4fa1-8fcd-31ae767fa7f0",
+      "generation": 11,
+      "status": "offline",
+      "started_at": "2026-08-31T16:35:44.525321406Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-fbf574d4-7f67-4506-bdd9-8f4503ba7307",
+      "generation": 10,
+      "status": "offline",
+      "started_at": "2026-08-31T03:23:20.046478728Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-c8c03350-4b43-4690-b283-ab48c435cfad",
+      "generation": 9,
+      "status": "offline",
+      "started_at": "2026-08-31T03:05:05.633028717Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-c9bce90f-bc8f-4494-b56c-59657cde5b49",
+      "generation": 8,
+      "status": "offline",
+      "started_at": "2026-08-31T02:56:58.376950086Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-9cff7b1c-8ff2-4400-8b7d-cc639c022758",
+      "generation": 7,
+      "status": "offline",
+      "started_at": "2026-08-31T02:51:51.608611662Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-d118d336-1958-4741-b8e8-d7ba248b0079",
+      "generation": 6,
+      "status": "offline",
+      "started_at": "2026-08-31T02:42:45.318334118Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-2a77306e-e718-4845-9ca5-71643fc2ed70",
+      "generation": 5,
+      "status": "offline",
+      "started_at": "2026-08-31T02:35:50.711320778Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-27bb86df-b403-4d4a-81f8-332391b422eb",
+      "generation": 4,
+      "status": "offline",
+      "started_at": "2026-08-31T02:23:38.894384128Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-010aaff7-0bcb-44d7-bb56-848ee2423b0f",
+      "generation": 3,
+      "status": "offline",
+      "started_at": "2026-08-31T01:52:06.922880187Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-4d3b168d-b7d4-409c-9e6d-0e04f7857d79",
+      "generation": 2,
+      "status": "offline",
+      "started_at": "2026-08-30T17:10:22.24980888Z"
+    },
+    {
+      "agent_id": "quote-service",
+      "worker_instance_id": "worker-135afe0b-d7ef-4006-9abd-fa2283c347cc",
+      "generation": 1,
+      "status": "offline",
+      "started_at": "2026-08-30T17:01:15.810487259Z"
+    }
+  ],
+  "observe": {
+    "server_time": "2026-10-05T05:38:17.612171085Z",
+    "latest_sequence": 368415
+  },
+  "fleet_sha256": "a5ae9d743f2d2725bc477da99621fbb6e1ede503d641e6343460441de2af7c56",
+  "schema_version": 6,
+  "foreign_key_violations": [],
+  "agent_ids": [
+    "identity-service",
+    "oneaxe-voice",
+    "openagentx",
+    "orchestrator",
+    "pay-service",
+    "quote-service",
+    "rhythm"
+  ],
+  "agent_history": {
+    "openagentx": {
+      "tasks": [
+        "task-048311e7-2003-44c6-862c-fcc3586e45c6",
+        "task-41b8be71-4ae9-4787-b9ae-76d601f45bb1",
+        "task-442350cb-defa-40b4-9bfd-51f2c9c2aaca",
+        "task-541739fd-c845-48a2-8a73-6cb9aef7669b",
+        "task-563aca58-adb4-4f3f-95d7-8cff1a376719",
+        "task-723637cf-dff2-4b7a-a9d0-9e729a70639b",
+        "task-8e7ae241-956a-4bde-bd85-95e087925616",
+        "task-c0861179-7d7d-444f-8dc9-0e9b19486d43",
+        "task-c6acde26-194c-4214-b787-870049c09071",
+        "task-d74e1f0d-d010-4a31-a7ea-85b56fc16c0c",
+        "task-e07cbc74-49d4-4598-a876-cd526068c527",
+        "task-ef3c448c-6d86-4503-bcaf-f32240429f69",
+        "task-f5f7d5c3-c94f-482e-9d55-e2b5ef017e47"
+      ],
+      "runs": [
+        "run-1897db41-4b2d-41ca-8ffe-8505da012588",
+        "run-18dc2b96-1853-44ba-bf6c-12f15205678c",
+        "run-2bc4d4d6-acb8-4c23-8788-23c9bc27b544",
+        "run-4a3ee192-b279-4c18-bd04-b47bfc2135fc",
+        "run-6c92e4ab-b095-4ef0-a02d-fd223f664b5e",
+        "run-a49cebf9-3362-4873-8d04-719cd16fc545",
+        "run-b831a211-22de-4907-9056-c4c6e7c7289a",
+        "run-bc82d4a5-4db6-4fa2-b15c-7bf755e66dc6",
+        "run-c404e23f-1943-4785-bee1-ca8f19ee1f3e",
+        "run-c7fff5cc-82e0-4e0d-a4ad-9759450109ea",
+        "run-dd0056cb-d1e6-4bd6-8901-02028b21d6eb",
+        "run-e821cf1b-f327-4e88-9b1f-f61f99ede259",
+        "run-efcb7d0a-5a05-46b0-9041-36dbb359ef2d"
+      ],
+      "bindings": [
+        "binding-01c15980-a99b-4f89-b534-329baa3fda96",
+        "binding-18463ec9-f203-4546-b401-65ad536c4d57",
+        "binding-1fe127dd-fa11-415c-b291-4e5ef2cc88d4",
+        "binding-26fe2890-b512-4a99-a65d-9a996275c03a",
+        "binding-2de14189-4924-4d93-9a6d-3029c4d3d014",
+        "binding-56b3315d-4829-4b6f-95d6-731c73f91026",
+        "binding-57e5263b-6ad7-437e-a5f8-53c2b171c262",
+        "binding-6e11ab0a-7031-43f4-afe2-f08a042ce44c",
+        "binding-9787ff41-f6e9-4933-b0a1-8f5db81f9aee",
+        "binding-b3059f81-21e8-40e8-a233-f6114620c166",
+        "binding-c3ba8be7-006c-4642-b9d8-e21923e7696a",
+        "binding-ea61e064-13b3-4550-896d-c7d5d093cdf8",
+        "binding-fb5481f4-fabd-4fb4-81d8-e52db46bd265"
+      ],
+      "external_bindings": [],
+      "mailbox": [
+        "mailbox-038c9b4d-b69c-4de7-a395-e5c62c066569",
+        "mailbox-302472ef-dd47-41e1-8cdf-fa82be1de4ec",
+        "mailbox-4d9a17b9-6eed-47f5-858b-4a9f5060f42c",
+        "mailbox-7a4e63f1-71e9-4333-9972-8f0c6265f6ba",
+        "mailbox-7bf04cb7-3886-4628-a6d7-149cfc153051",
+        "mailbox-7c01cbd0-3adf-49e7-b198-3ed5a1865bf4",
+        "mailbox-8d9951d8-7a9f-4f0b-982c-96f008266d5c",
+        "mailbox-93d00d33-f873-4519-a202-2d6c919ad0ad",
+        "mailbox-9e388474-a2e4-44d0-accb-d6c822a02db6",
+        "mailbox-a62aec43-e1d6-4c56-b720-79792ef808e3",
+        "mailbox-be4a234d-f2e5-46d0-9739-04b8a2cbf916",
+        "mailbox-c353bc0e-9ca0-43b4-85da-f3cd197c447f",
+        "mailbox-d4aaa8b2-2374-4f80-9d96-16afe90d69ae",
+        "mailbox-fcc17923-a8b5-49db-ae42-9540e1cddfbf"
+      ],
+      "workers": [
+        "worker-569568ee-e6d1-4388-a5ab-f26469ca08d7"
+      ],
+      "external_messages": [],
+      "task_states": {
+        "canceled": 4,
+        "running": 1,
+        "succeeded": 3,
+        "uncertain": 5
+      }
+    },
+    "rhythm": {
+      "tasks": [
+        "managed-task-f04f1c011d75fe09ce5a60fef7f3fe10",
+        "task-20c0ff59-07a8-4b2b-89ae-87adb5b43289",
+        "task-42fac3d0-d4de-42fb-807f-a99aee058041",
+        "task-7312a872-b739-4ce0-b4ca-61a08362d499",
+        "task-ddfddfa6-6374-450e-b544-9ff29433722d",
+        "task-e67be4fa-b1d6-45f4-80a7-55da636a7f3b"
+      ],
+      "runs": [
+        "run-12a49b1a-7048-4e27-8388-350b4f086934",
+        "run-28e755d5-f004-49ea-b19f-5c866d0787d7",
+        "run-2c6592bf-5752-42cc-9024-1fb000b9ca7c",
+        "run-31d483f0-8db7-43cf-a3ea-7ed67fcc3d6c",
+        "run-d80390a9-789e-48df-b229-2503e4e9dbfc",
+        "run-e636fa3b-5267-47cb-ae99-c53c1b0c797a"
+      ],
+      "bindings": [
+        "binding-2b3348a1-b7d8-4568-b01a-f9d7ea29fb2d",
+        "binding-4a70b5bf-51cf-4c23-bd35-2da7c943149b",
+        "binding-4d4e0853-ecff-440c-b059-58f50ab66462",
+        "binding-c0a473d7-3ae9-420e-8346-59b28580a1a1",
+        "managed-session-f04f1c011d75fe09ce5a60fef7f3fe10"
+      ],
+      "external_bindings": [
+        "external-9319b8fa-c496-43e4-af5b-829cbe7ea2e3"
+      ],
+      "mailbox": [
+        "mailbox-57040dca-ed84-446b-9233-434b880383f4",
+        "mailbox-9fbb1c19-9863-45fd-9bf0-8a92accb3f71",
+        "mailbox-b165780c-2fbb-49e2-a635-d4121152ee5c",
+        "mailbox-eaa78cdb-37db-429b-ad1a-0e9f40f5681c",
+        "mailbox-f9b92e4a-9c9e-4a5f-a886-9eb02b52e787",
+        "managed-mailbox-f04f1c011d75fe09ce5a60fef7f3fe10"
+      ],
+      "workers": [
+        "worker-62fa1611-e4e3-45f1-83cc-eaaee8a2eea3",
+        "worker-c7914d44-0a00-45b2-a215-fca4c5b0c7b8"
+      ],
+      "external_messages": [
+        "external-message-c3f94db8-1f44-44c1-8238-94742f8290f7",
+        "external-message-cdb939c9-4402-44f4-8f2c-38b7a5f8078c",
+        "external-message-e3cd328c-6b64-4f9e-b3c0-9d6674cd21b4",
+        "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00",
+        "managed-result-e66ad7dce3c60b04e5a2a631cc713718",
+        "managed-result-f936bbbbb227461e49791b9477f1f00a"
+      ],
+      "task_states": {
+        "succeeded": 5,
+        "uncertain": 1
+      }
+    },
+    "pay-service": {
+      "tasks": [
+        "managed-task-e66ad7dce3c60b04e5a2a631cc713718",
+        "managed-task-f936bbbbb227461e49791b9477f1f00a",
+        "task-4785c2fe-6d89-4d18-97a3-4b8732d63728",
+        "task-b7622c6b-3501-4fde-9834-0e541bdfea6a",
+        "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7"
+      ],
+      "runs": [
+        "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+        "run-0ee0b194-7c50-4f6e-bee7-8927728cc4bb",
+        "run-7c210a04-3d18-49b2-96c5-abe081361e63",
+        "run-95e18155-43d1-4932-a7bc-90220f3a2e41",
+        "run-d5b94518-d59b-42d5-adff-48431811c522"
+      ],
+      "bindings": [
+        "binding-bae95ac5-9859-43c9-b700-9fb59a9e6d02",
+        "binding-d2368189-815b-4d64-a3d2-0f6657936914",
+        "binding-d7bca869-5bb6-4810-9640-66b1f9729800",
+        "managed-session-e66ad7dce3c60b04e5a2a631cc713718",
+        "managed-session-f936bbbbb227461e49791b9477f1f00a"
+      ],
+      "external_bindings": [
+        "external-ba325428-275c-4e62-b2f3-4ebe2015a26f"
+      ],
+      "mailbox": [
+        "mailbox-0d035b2d-aee9-4344-bf19-d9f216cb5ac3",
+        "mailbox-980b730a-e597-4ee6-af6c-c457a9487f81",
+        "mailbox-ff7d2d44-a78d-4e4a-b104-e9ee2b051b30",
+        "managed-mailbox-e66ad7dce3c60b04e5a2a631cc713718",
+        "managed-mailbox-f936bbbbb227461e49791b9477f1f00a"
+      ],
+      "workers": [
+        "worker-21864d68-0a41-4310-b01a-ffb4e803e209",
+        "worker-57468360-94a8-4680-8a06-f2a524d8463b",
+        "worker-65790859-dcbb-4136-b657-8e7983bc61c7",
+        "worker-7d0528ef-f197-4f50-9dac-460863fe6d0a"
+      ],
+      "external_messages": [
+        "external-message-c3f94db8-1f44-44c1-8238-94742f8290f7",
+        "external-message-cdb939c9-4402-44f4-8f2c-38b7a5f8078c",
+        "external-message-e3cd328c-6b64-4f9e-b3c0-9d6674cd21b4",
+        "external-message-f12bfb90-4a96-4d28-b211-b26c7d52ae00",
+        "managed-result-e66ad7dce3c60b04e5a2a631cc713718",
+        "managed-result-f936bbbbb227461e49791b9477f1f00a"
+      ],
+      "task_states": {
+        "succeeded": 4,
+        "uncertain": 1
+      }
+    },
+    "quote-service": {
+      "tasks": [
+        "task-01ec8ae3-0895-4984-9e59-11ebf593e75a",
+        "task-11759158-003f-4492-bdfe-af1633da8076",
+        "task-147909b6-081f-4780-856f-f1fa1bf2fcf9",
+        "task-1a3f757c-0717-4f91-8e2a-7549622203cd",
+        "task-1a992a2f-5ba0-4c51-8b1d-0b315e66f0d4",
+        "task-2a742111-a399-4670-8040-79d4fe05b322",
+        "task-2b82c127-3446-4625-9dc4-c1c8319abb37",
+        "task-2bec4bc9-6a69-415e-92f7-1b5b12fbac49",
+        "task-2d4f18dc-e7d0-460a-838a-e29f168374ae",
+        "task-2e767fc1-185c-4fff-9f14-8cb4f5f48e5c",
+        "task-31981d1f-c42a-449f-a4c6-73d4d3e566b2",
+        "task-38df2b14-87c7-4199-9048-50fc8c23187c",
+        "task-39e79f4e-d4c3-40ef-9aa4-db72e6057383",
+        "task-3a10e0ab-76b0-4c4b-8c68-5e28c7b84cc9",
+        "task-3abf6b7c-9b41-4238-b5b2-044f6627d70e",
+        "task-43704170-fff1-48f8-a52a-1b1696bdbaa3",
+        "task-45fcf197-a29d-4fa5-b669-83cb19b26105",
+        "task-45ff30d2-f24b-4834-9424-7dab3880b516",
+        "task-4a4e1492-9204-4173-ad2b-9dddc7c5ee57",
+        "task-589111d6-a4ca-4fa1-92c9-3595a14281aa",
+        "task-5a06145c-9de5-461d-89ad-9fd7ccd83e6f",
+        "task-5b114f4e-9ecb-4326-8a46-0d89287efe98",
+        "task-5c5467dd-6c17-4b37-8031-cda7dfbefffc",
+        "task-5e492668-458c-4dcd-a8c7-d3a6aa7648eb",
+        "task-61faf7d9-3c43-40ed-ba3f-c2b77a912548",
+        "task-68b5e4e2-24f9-4f60-812e-3407e7cec49c",
+        "task-6fa3bb47-5cd9-4693-9079-f527e395b9ff",
+        "task-86aec3e6-a87a-4ab6-aac4-c59174d97ae3",
+        "task-874ebc71-6fd2-4ada-a618-cf1d867ea7a0",
+        "task-88304feb-7c5d-478d-9d10-cf6254e2702b",
+        "task-88bb8078-a28a-4a3d-a335-d9d84e86ac42",
+        "task-89ff5a4b-0a8c-4d0b-ba3b-9b635a0a0b94",
+        "task-8b094824-4ae0-491b-baca-3399788299f8",
+        "task-931d44ff-11d0-4b26-84d3-e878ea82f593",
+        "task-962b9a2d-e36e-4ab8-9d97-4e41e394ea07",
+        "task-9b2ad618-59dd-49c5-8f54-b61bababccee",
+        "task-a9e0a495-64c8-411e-bb65-9f6909d0c15f",
+        "task-adb0f396-ffee-41f5-9664-3c44e9b7669e",
+        "task-b4d7022a-7926-4ee5-b536-7d1b82a0098a",
+        "task-bd2ffba7-477e-434e-be44-1489c9ebd452",
+        "task-be99b242-d659-4fd2-a9e0-62e743fb7843",
+        "task-cdb3bd79-1f77-496e-bdca-b91e45c5c78e",
+        "task-cf603293-3b6d-4d4d-b52d-258ef637f30c",
+        "task-d27444c9-72da-43d2-bd3b-2c4984caf4b5",
+        "task-e1d3f7a2-0273-44e0-9350-cc88c0a91d41",
+        "task-ef10ae0e-81be-4eb6-b9c8-b3e80962d99d",
+        "task-f0f303f4-0330-412b-9bf6-c9cfdd4bb4a3"
+      ],
+      "runs": [
+        "run-040d489c-0664-4ba3-9c2d-0112a42db4b3",
+        "run-05734f10-cc53-4bf6-929e-84ea59fb5260",
+        "run-07dec8d2-9f6f-4220-a9d1-1828d36a814b",
+        "run-113caee5-02f4-48f2-a5c9-2ba18b93ddd5",
+        "run-2a1e5252-ed23-4a51-a230-5671f28f8617",
+        "run-3d5bac66-934c-488b-b454-f7b24efaa756",
+        "run-41a6a473-1ba4-447a-b044-ce28df24fdb5",
+        "run-45a8d0b6-085b-456c-99ec-8dc1bbd2e998",
+        "run-4cee9941-8a1b-4bf3-9d66-919ff2d294cb",
+        "run-4dc0f528-8684-4097-bc15-0ebbad417f2b",
+        "run-5208ff83-0da4-42e3-9ee5-f8fdfd8e2e8d",
+        "run-606aede9-a8e9-4e4c-b6d3-a6eab8a8ab74",
+        "run-6132936e-100b-4716-9224-9ce3994403d4",
+        "run-61b7ec14-b8db-4d8c-b091-9b26cf5d5505",
+        "run-6476af55-318d-4522-9f82-ff2275c01d0d",
+        "run-6ebb9191-6d00-4b43-8a5e-c112a7e8c1aa",
+        "run-7037f032-bf64-4f2b-b231-d9d08024a4d8",
+        "run-71e75ec3-d2ed-4cba-b8a0-4a6cd08c70bc",
+        "run-779b5a40-34c2-4097-a43c-9b6432a69f2e",
+        "run-7eb5a6c9-1af9-4238-a4e5-f4064a7c4b3f",
+        "run-7fd5f5d5-2d18-4b22-8ac0-5dc96969636b",
+        "run-84244feb-fe85-48ca-aaea-3985f8a04f1c",
+        "run-8936830a-8be5-448a-9810-f9665def8b0e",
+        "run-8b6c0cd7-a15c-44a2-86ba-65cff0a2e004",
+        "run-8c1fcfd4-f0fb-40d4-9b11-49f889d58ae7",
+        "run-8db3dcc0-f367-4e04-b6b0-ea498d1cb2d7",
+        "run-96a8fe19-5344-4105-bb77-41d5f8dd12fb",
+        "run-99433eb9-b7fb-45ea-b7f7-75260c451fc1",
+        "run-ad90698c-ae46-4559-acff-18945f7d0648",
+        "run-adf21374-12df-499a-b8ae-dd4d55e05b95",
+        "run-b2ba86d3-668d-407c-8416-f9d6833bf900",
+        "run-b3aa3207-8c12-4e77-ab24-91238fee977a",
+        "run-b6d238ad-ab8c-4336-b48a-df6076fe74c1",
+        "run-be0f9ca9-814b-4e06-b691-5525171fd51a",
+        "run-c3c13fd4-421c-4143-83dd-cb458620d27c",
+        "run-c6bfd4bf-4de5-49d0-9318-f810013c49ec",
+        "run-cc31b7b8-7cc4-4c7a-ac1a-4ae1019d998a",
+        "run-cce16a40-c574-46ba-a016-4e5f0e279050",
+        "run-cf1ebad6-937d-4051-8355-ad0c99783ccb",
+        "run-d064705f-0e18-4c01-93c4-0be47414700a",
+        "run-dcb09adc-5a36-4662-b1a6-2350bdbb35c6",
+        "run-de4173d9-5196-47aa-a95d-bf33d1fccb70",
+        "run-e5bd44d6-619c-42d8-a8c6-113635dfe156",
+        "run-ebbc0521-4fc3-4b00-8af3-262e8122e543",
+        "run-eccf61a3-ae26-4485-9f31-36cb7ae6a78b",
+        "run-ef89ca5a-99ac-45ee-a37a-09de087d6819",
+        "run-f0845f6d-9a84-4891-8e17-8d8f184248cb",
+        "run-fe163298-e2a2-4d30-b13c-5dd1d9d4fd67"
+      ],
+      "bindings": [
+        "binding-17822972-7358-4f38-912f-6f803a22a3c4",
+        "binding-26a45c82-d260-48d5-8b40-00e876886ada",
+        "binding-2b9ebde2-3920-48ca-a83c-57e7400fe748",
+        "binding-2bc41e4d-e36d-4bd3-8442-15c7ec2e93b7",
+        "binding-32b57afd-e38f-4e58-aa70-e4862f6f1742",
+        "binding-34188b3e-9587-4638-ad5a-86699cbb3427",
+        "binding-393f89a6-8b80-4411-a1a8-0d4dfeb0b8ab",
+        "binding-3ec80c23-4780-4abf-847b-47b0e7c8865b",
+        "binding-3f0c1dab-5592-47df-9661-28f3164387ea",
+        "binding-42e3ea0f-77f2-4069-8911-76dd898b7c22",
+        "binding-473ca6ba-0b1c-4c29-a292-9dd4ae9cc92c",
+        "binding-52d79cd2-aef8-48af-ba7b-db2fb3888c55",
+        "binding-5b4760e0-62dd-49e1-a4dd-6b1524ff8258",
+        "binding-5eabf6ca-e76d-455f-8ee7-8bfbace69351",
+        "binding-60dea805-5e39-4740-98f0-0b991d8b3ad7",
+        "binding-6937f2cd-8d36-461e-b8ae-f63598b7e18d",
+        "binding-7d2d9a86-ed79-4ef3-a0e2-3eea0077d6c1",
+        "binding-7d99c976-b012-46e9-9c79-35249fce4d29",
+        "binding-8013e2ee-698d-40d3-a043-1af92508df5c",
+        "binding-82b3cdf6-300a-44dd-b0a3-2292192593e4",
+        "binding-82f59457-5e56-4abe-8933-932e52297e10",
+        "binding-87626bd8-b4cf-411b-9b72-9f2cbcaaaec3",
+        "binding-87a2ef20-8272-49e1-8418-9f6a3c01f113",
+        "binding-883ccccb-72bc-40e9-a46b-cd89a10f8c4d",
+        "binding-8ccb35e4-70f7-4db2-a150-148236ae0da1",
+        "binding-cddc9056-9296-4f9b-bab9-99c7c9bc9c70",
+        "binding-cdfb8b2a-84e0-46c0-b4bd-69431569d265",
+        "binding-da615b99-ffbc-455d-b712-bb130debec44",
+        "binding-eec51709-1937-48cf-a56b-b998a3e418d7",
+        "binding-f08cf480-5bf6-4bac-adb6-8358fd083dfc"
+      ],
+      "external_bindings": [],
+      "mailbox": [
+        "mailbox-014ff0e6-6272-49d8-9789-1d8af295a91f",
+        "mailbox-02aa830d-923d-4cb3-a289-8ea15ba0e712",
+        "mailbox-0aaf5ea3-3da2-4d62-8cb5-e3a038da5e77",
+        "mailbox-0bbe1745-f89b-4578-b807-5c265b36c69a",
+        "mailbox-0ece38f0-dea9-4430-a91d-8a936a5e1b45",
+        "mailbox-0f95588c-a0c1-4a47-a0bf-0a8cfe65e21b",
+        "mailbox-125184bc-9fa2-490f-bb3a-c6bf79b5405a",
+        "mailbox-179389c4-1ef5-4ad5-85e8-9fa2358f6b24",
+        "mailbox-217ec7a6-af4b-4927-b5f8-5f09da49ac54",
+        "mailbox-23a2a8d1-950d-4e22-9575-c16b547a488d",
+        "mailbox-27dc2106-8ccd-4d0d-92d6-ed8bab2f9241",
+        "mailbox-2c3f2c3b-1e24-4426-8e69-baf1b24ce258",
+        "mailbox-2e020f6f-0bb9-4fca-a1b5-2e5f160e59f0",
+        "mailbox-2f4a26f4-571e-4fd5-b998-e02392827e47",
+        "mailbox-31bbff9b-755d-4ca8-be20-7f0b305320fb",
+        "mailbox-32e1821c-e421-426e-a460-89aab1606bae",
+        "mailbox-37db7a0c-e02c-46e1-89e5-0eced20ad44f",
+        "mailbox-39fd97c9-d7e9-47d5-a3a2-cd86203c003b",
+        "mailbox-3cb10b3c-2b4b-46dd-a7b0-95965d2ebb86",
+        "mailbox-47a4aad3-3352-4273-b7f3-63a4efd00597",
+        "mailbox-49cb883d-9c0d-4d62-8e44-5df1ca95e84d",
+        "mailbox-5a851242-735f-4437-9f63-43cfcfeba6d6",
+        "mailbox-5cd5b8a6-ec6e-418a-8b4a-02928ecac3d9",
+        "mailbox-60e92cea-ea8d-4762-baae-3f7727b24c1d",
+        "mailbox-6f5a759f-30ef-4876-bdb3-58fc586b322b",
+        "mailbox-7861d149-cd3a-428a-8e0a-5da268002606",
+        "mailbox-7aed6fd7-71b9-4b7f-b5a4-99432154a18e",
+        "mailbox-7d0204f9-66ff-4f82-8fb5-d04381000ad1",
+        "mailbox-81e44c47-d017-4a0f-9bfc-3d81cf74d7f9",
+        "mailbox-8b7cd523-08d1-4ba3-ab54-59e1bb6f2335",
+        "mailbox-96968282-fa94-49bf-a76f-4955b5c4cb3c",
+        "mailbox-9c1fca23-0f35-4c6b-9905-07669d9afd57",
+        "mailbox-a8af72ae-667c-4531-aff4-eace8d6b25fe",
+        "mailbox-aad2c5f8-b6b4-4699-835b-9e5b49bd9662",
+        "mailbox-ab8f6e34-b228-4e65-89b7-51939b6aaab8",
+        "mailbox-ae143d8f-4189-426e-ba70-f993d5a75773",
+        "mailbox-bdfeed1d-136e-4e0d-a281-723436b40d10",
+        "mailbox-c47eb9be-7d18-4554-b91f-4f51895cfb28",
+        "mailbox-c50c38b7-cf70-4091-98e5-38399bee13a7",
+        "mailbox-c7bae82e-8edb-43e6-8d7e-73d54b68a8f1",
+        "mailbox-ccc40afa-8fc3-4962-9906-e36134096089",
+        "mailbox-cff078a4-4315-4de0-a94e-943857f271e1",
+        "mailbox-d36c0e6c-2029-4187-b28d-4f0d83e21580",
+        "mailbox-d54ad691-3118-42a9-b2fd-93d34db44767",
+        "mailbox-d66a7e27-793d-4db1-ab13-8f050d0b1e67",
+        "mailbox-d992ccbb-3847-4818-b95e-900c91d74bb6",
+        "mailbox-dbe3b59f-c9cc-4c7b-97f1-6b7b2dc201c5",
+        "mailbox-de3fa761-6838-4438-ae5e-25466bd9b5c5",
+        "mailbox-df97167a-e679-41ff-bb69-0b545e1abff1",
+        "mailbox-e1680bad-244f-4a77-ab59-39d5538cd1a0",
+        "mailbox-ec22bf43-99fe-42a4-8577-6633427e6d32",
+        "mailbox-ef14237a-d3a8-40e3-a35a-217f5caedb3d",
+        "mailbox-f3a427a3-dacc-4d98-8bfc-35e0afacf849",
+        "mailbox-f5753a8e-8324-515b-99df-8a0dde5dcc40",
+        "mailbox-fd3fea80-839f-44ce-aeb8-fc6304b17638",
+        "mailbox-fea41e91-3a32-48e2-871f-fba16acfebe4"
+      ],
+      "workers": [
+        "worker-010aaff7-0bcb-44d7-bb56-848ee2423b0f",
+        "worker-07bd31bf-ee8e-4c18-ba6e-b59a2ba42de3",
+        "worker-0bf3763b-052f-4b3e-b2f5-481ff7a30da3",
+        "worker-0d471821-f597-4b41-b00f-d820134652d9",
+        "worker-13531475-a1aa-4d36-98c1-245444a86fc7",
+        "worker-135afe0b-d7ef-4006-9abd-fa2283c347cc",
+        "worker-18e4dbfd-fef8-4d3d-ad2e-3c3c8a9fce93",
+        "worker-1e8deef9-2758-4eef-a7d5-9e74d66b74ba",
+        "worker-1eedc2b3-c700-41bc-b35d-eb5b5285f0f6",
+        "worker-2702a92b-d7f5-49cd-87e4-b74d523995ee",
+        "worker-27bb86df-b403-4d4a-81f8-332391b422eb",
+        "worker-2a77306e-e718-4845-9ca5-71643fc2ed70",
+        "worker-4c39d926-037d-4cb2-b6a1-4b6fd1d2dc29",
+        "worker-4d3b168d-b7d4-409c-9e6d-0e04f7857d79",
+        "worker-4db332f5-91f0-4cde-a3a5-7a7ddff6d5f3",
+        "worker-559005a4-7217-4921-accf-2d53edd71e60",
+        "worker-675bb1ac-9209-4b4e-a0eb-31fd068ba8a5",
+        "worker-85c8d1a0-8f96-4b91-83e3-8a56ec40fc2a",
+        "worker-8a61d80c-0b2f-429f-88f1-9c5cda638169",
+        "worker-8adda275-6cc1-4fa1-8fcd-31ae767fa7f0",
+        "worker-968e8105-3bad-4db3-989d-efb9ad090d36",
+        "worker-9a63c2fa-5752-49dc-bb61-308fcb81acd8",
+        "worker-9cff7b1c-8ff2-4400-8b7d-cc639c022758",
+        "worker-a33106ae-9162-4660-8f37-1ef8e8b8db53",
+        "worker-b51d04b2-bf20-4ded-a929-95c11fe990db",
+        "worker-b94ccc20-bf34-458d-b0e3-0298519322c1",
+        "worker-b977a681-61ab-4df9-9afd-45a17befab77",
+        "worker-bc2755d8-3ec3-4ccb-975a-3a2453098fdd",
+        "worker-bf07dfa1-4d9e-4bd3-80ad-5d38fd4ba5e9",
+        "worker-c8c03350-4b43-4690-b283-ab48c435cfad",
+        "worker-c9bce90f-bc8f-4494-b56c-59657cde5b49",
+        "worker-c9d736be-57d1-4746-866d-57a22b137454",
+        "worker-cc3943db-daf6-48f9-acb8-1ee32dcfb05c",
+        "worker-cc5cf872-284e-4f56-a181-7f6128da98de",
+        "worker-cf6c22cd-7abb-4699-aa1c-204406a0d625",
+        "worker-cf83eb66-4b84-4453-84b9-20fc1024d3eb",
+        "worker-d068d39a-c4b6-4c19-bb1f-57328fddbec9",
+        "worker-d118d336-1958-4741-b8e8-d7ba248b0079",
+        "worker-d60f45e4-e54f-4f71-a6d3-3f7884703f62",
+        "worker-d745bf6d-29cb-4025-84d2-5dba477b9d01",
+        "worker-d79b1f6e-0fae-4762-9165-3007c16291cb",
+        "worker-dac3f7d7-ae9a-40ec-b0b7-0b264a8ac9cd",
+        "worker-dfdc5c20-d395-467f-a634-e7580b243624",
+        "worker-e14b0b6d-5db6-443a-aa19-9edd21ed7be6",
+        "worker-e1d53a54-93a6-4068-bea1-66d273f82a58",
+        "worker-ea2b6ad4-6044-40c2-b12c-86626a3f2dab",
+        "worker-f3c27d46-36a7-4576-a956-6ae71eb55222",
+        "worker-f62525c1-ba4e-4fe3-adcc-61047d46d3a3",
+        "worker-f924a800-888e-4309-a0e6-c54bd2c6b524",
+        "worker-f9e32b5b-94f5-4a35-92fc-b53eb1d0fd36",
+        "worker-fbf574d4-7f67-4506-bdd9-8f4503ba7307",
+        "worker-fc1ec8d4-fcda-4628-8ded-cbd0770e5ae1",
+        "worker-feae1f02-c563-45e1-a074-006de8f70c24"
+      ],
+      "external_messages": [],
+      "task_states": {
+        "canceled": 8,
+        "failed": 2,
+        "succeeded": 19,
+        "uncertain": 18
+      }
+    },
+    "identity-service": {
+      "tasks": [
+        "task-6ea240dd-6d74-4ce1-ac38-7844ed731b93",
+        "task-96942a10-68f6-425c-bdb1-bcf009fae25a",
+        "task-d4ca1fd4-0aaf-4b71-8266-203a6b4a9fbe"
+      ],
+      "runs": [
+        "run-5c7699e8-4286-4d38-b2b2-252647f23196",
+        "run-7d1a129a-93e3-4f4e-af99-e6ed685364a2",
+        "run-f1d7954a-3ef6-4d2b-bc22-00ad3e7e800f"
+      ],
+      "bindings": [
+        "binding-77351c21-fb3d-4a12-b525-3914512f037c",
+        "binding-c95c251b-0720-46ce-8ba5-881c25b99c5b"
+      ],
+      "external_bindings": [],
+      "mailbox": [
+        "mailbox-4daa8c96-2dff-4eb3-9c8f-0540c9eeeed9",
+        "mailbox-9d0e0672-c5aa-4fd0-9e70-361b1ec0e670",
+        "mailbox-e3be0650-49b8-45e1-a752-4777d7e321c6"
+      ],
+      "workers": [
+        "worker-509cf5ad-1cda-491d-8202-7aaee7a7492f"
+      ],
+      "external_messages": [],
+      "task_states": {
+        "succeeded": 2,
+        "uncertain": 1
+      }
+    },
+    "oneaxe-voice": {
+      "tasks": [
+        "task-01457fcd-7dc9-4aec-b23c-63d22bd6d559",
+        "task-08624d35-0240-46ef-89f0-9787aac92bde",
+        "task-2e07c2d0-29fb-4ab3-a1ae-e4c1db244422",
+        "task-9476a711-98fc-46ac-9717-a6582b83a919",
+        "task-a1ec5a9c-decb-47c4-b24a-e84d897f02bf",
+        "task-a3d42af3-2afb-4cc5-a497-6b8e2acdead5",
+        "task-ba40a57b-2f52-4a9d-9241-13cd7093f0fd",
+        "task-ec446b96-0ef6-4f22-a19a-419d147afdd2",
+        "task-fd81aabb-5667-4fd2-ac89-da34d4b0b273"
+      ],
+      "runs": [
+        "run-2df878a2-d1da-448b-b972-0ba1b13a5c9e",
+        "run-319a7d0f-b5f6-496a-af53-91d960334e6e",
+        "run-33722c9d-cb71-44f7-9466-cb1323fb8bfa",
+        "run-5f960cd0-70b6-403d-acd6-987a032eb56d",
+        "run-90ed4040-e1b4-43a8-b34a-32af6b31437e",
+        "run-a935d5b9-f12d-404a-b116-f2d761d7eca7",
+        "run-cfedae20-8620-46be-8d8a-c2ad27b03b96",
+        "run-e5c46a3a-37f9-4379-a523-02d1698ae948",
+        "run-e7619b9d-5099-412e-aa11-2d4135aef9a9"
+      ],
+      "bindings": [
+        "binding-02234ea8-e18e-45cd-9d94-7589bcf7fca9",
+        "binding-0d23b94d-7fa0-4526-abee-cbcdb0fa76e9",
+        "binding-15bd9aba-7dc4-447e-8109-796719e2aa92",
+        "binding-3a3e0c1b-a1a3-441a-acd9-e1627cf920c8",
+        "binding-4c868f8c-21a5-4390-a238-837f577fd254",
+        "binding-4cfecb34-1679-4503-8165-ea7e897e508d",
+        "binding-664e2119-29a7-491d-866d-c8dc5613d67e",
+        "binding-79a1f7cd-0370-45df-80fe-7f0127be6c96",
+        "binding-8b869d17-9809-4f5e-a875-b4f2cdabafa9"
+      ],
+      "external_bindings": [],
+      "mailbox": [
+        "mailbox-0a4c0f1b-ea15-4a75-81ce-78de6d55d8f2",
+        "mailbox-2398a406-e010-4d83-8e31-d979470ab1a5",
+        "mailbox-4170d668-a09c-45d2-88bd-3819b609cf6f",
+        "mailbox-449e757e-cdb7-59a8-93c6-f1cdc520e57e",
+        "mailbox-4e6d373b-24e3-402d-844e-f70acc8a840d",
+        "mailbox-5d5d37bc-3966-4b8e-adff-c48abd405cfd",
+        "mailbox-62d58826-8dca-565e-83cc-aa5814de4518",
+        "mailbox-6adafff0-0655-4061-adf6-552135b705f4",
+        "mailbox-950ce593-3cf8-49a3-8e60-72b3fc787749",
+        "mailbox-b4108bfd-284d-5a3a-b01d-47a57ca05d5c",
+        "mailbox-cc00cde2-c719-4f20-9257-a09248ad97fc",
+        "mailbox-ea787926-2ab0-46a6-bc36-3d91d2d94021"
+      ],
+      "workers": [
+        "worker-008b7af4-295b-41d4-ae47-6255a98505e2"
+      ],
+      "external_messages": [],
+      "task_states": {
+        "canceled": 2,
+        "succeeded": 3,
+        "uncertain": 4
+      }
+    },
+    "orchestrator": {
+      "tasks": [
+        "task-17beccd5-0c86-4a26-b699-85294132a0e7"
+      ],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [
+        "mailbox-c03f6f71-7a75-4aac-943c-5bda58701d85"
+      ],
+      "workers": [
+        "worker-05c1d213-4e09-4008-9b0f-5cab6a316758",
+        "worker-08631cbb-f337-475e-94ce-6eed6f180868",
+        "worker-0a73dc49-b5f0-4e56-9d57-cef3cbec69a5",
+        "worker-0fd55bb3-93d9-4d21-83b6-21963e5053de",
+        "worker-12f1d3b7-4864-4e15-b61c-7ea3b7ee341c",
+        "worker-16a0ff5d-08c2-4f34-8695-7dd87b7431ea",
+        "worker-16bd521c-0cf6-43a7-a755-b3c78d0785af",
+        "worker-19489a7c-1e07-42c2-a4ee-fbba66e076b5",
+        "worker-1bf593ee-f17a-4f99-8559-11ce0c423781",
+        "worker-1c040b22-8ab5-46b5-a77c-770e3bb8d85f",
+        "worker-25924278-d773-47b9-a296-f24e02e4ecfd",
+        "worker-3d2377a2-a164-4411-96b9-ef4a432a453b",
+        "worker-4407d191-5da1-4a17-ac59-5cea7f90ead7",
+        "worker-595f470d-5205-4fdd-b348-94792e965109",
+        "worker-5d052fde-6c6f-4331-a4d6-56ec2211a4cb",
+        "worker-63887664-5ee4-4d30-aae0-24bf52d22f6d",
+        "worker-749bc7cb-68c4-4781-acee-1a540b30be1d",
+        "worker-7a2853cb-04e9-4cdc-bb17-0fe0d578234d",
+        "worker-84cac20a-8d8c-44d7-a1f9-87a8df6504e1",
+        "worker-8cd1d9ff-02ca-4c6f-93b6-c7dfd8a4ac84",
+        "worker-9166d7e9-d699-49da-85bf-15f0f4190139",
+        "worker-94baba3b-cb9b-4a50-8ff8-034b5576271a",
+        "worker-97ff96e3-378f-4e81-861e-9034d160f262",
+        "worker-9c8a47d3-e7ae-445b-9650-7dee0158ccfd",
+        "worker-a17b926b-2bb0-4a28-a254-01c0b9bed9b0",
+        "worker-a699f949-bef1-42e5-997d-f41537c29ec0",
+        "worker-adf2ec52-839e-4849-b360-18d970fd072e",
+        "worker-b918b9e4-a12a-45ac-9dc6-fdb61e527b8a",
+        "worker-bf0f9675-9a16-4faf-913b-d30d3388b7fa",
+        "worker-cb4caaba-cbe1-4f49-9035-38d076dff404",
+        "worker-e2119921-e748-485b-969a-6c678d08518a",
+        "worker-e3fc7b2e-4cea-4911-a0c4-0c4baec31bf5",
+        "worker-e4f3b3ac-74b8-40f8-a189-2ad2bc5ef630",
+        "worker-fb1ac594-822f-478a-aad4-071b95a2f93e"
+      ],
+      "external_messages": [],
+      "task_states": {
+        "queued": 1
+      }
+    },
+    "agy-onboarding-e2e": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "codex-domain-e2e": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "domain-installed-a-8304eb9e5aa7": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "domain-installed-b-8304eb9e5aa7": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "domain-installed-a-9730f99e2b42": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "domain-installed-b-9730f99e2b42": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "external-installed-a-51e44952c2": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "external-installed-b-51e44952c2": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "test-fake-agent": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "test-fake-multiturn": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    },
+    "verification-runner": {
+      "tasks": [],
+      "runs": [],
+      "bindings": [],
+      "external_bindings": [],
+      "mailbox": [],
+      "workers": [],
+      "external_messages": [],
+      "task_states": {}
+    }
+  },
+  "fleet_entries": {
+    "quote-service": {
+      "agent_id": "quote-service",
+      "worker_config": "/home/sky/.openagentx/workers/quote-service.yaml",
+      "enabled": true
+    },
+    "pay-service": {
+      "agent_id": "pay-service",
+      "identity_file": "/home/sky/.openagentx/workers/identities/pay-service.yaml",
+      "worker_config": "/home/sky/.openagentx/workers/pay-service.yaml",
+      "enabled": true
+    },
+    "rhythm": {
+      "agent_id": "rhythm",
+      "identity_file": "/home/sky/.openagentx/external/rhythm/identity.yaml",
+      "worker_config": "/home/sky/.openagentx/workers/rhythm.yaml",
+      "enabled": true
+    },
+    "openagentx": {
+      "agent_id": "openagentx",
+      "identity_file": "/home/sky/.openagentx/workers/identities/openagentx.yaml",
+      "worker_config": "/home/sky/.openagentx/workers/openagentx.yaml",
+      "enabled": true
+    },
+    "identity-service": {
+      "agent_id": "identity-service",
+      "identity_file": "/home/sky/.openagentx/workers/identities/identity-service.yaml",
+      "worker_config": "/home/sky/.openagentx/workers/identity-service.yaml",
+      "enabled": true
+    },
+    "oneaxe-voice": {
+      "agent_id": "oneaxe-voice",
+      "identity_file": "/home/sky/.openagentx/workers/identities/oneaxe-voice.yaml",
+      "worker_config": "/home/sky/.openagentx/workers/oneaxe-voice.yaml",
+      "enabled": true
+    }
+  },
+  "cleanup_verification": {
+    "agents": {
+      "openagentx": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "rhythm": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "pay-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "quote-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "identity-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "oneaxe-voice": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      }
+    },
+    "all_nonoverview_panes_preserved": true,
+    "daemon_unchanged": true,
+    "pass": true,
+    "retained_fleet_unchanged": true,
+    "retained_history_preserved": true,
+    "candidates_absent": true,
+    "candidate_histories_empty": true,
+    "candidate_fleet_absent": true,
+    "foreign_keys_valid": true
+  }
+}

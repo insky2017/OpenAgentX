@@ -1,0 +1,117 @@
+{
+  "private_root": "$HOME/.local/state/openagentx/validation/2026-10-05-agent-cleanup",
+  "private_sources": [
+    {
+      "path": "native-codex-deletion.jsonl",
+      "bytes": 563,
+      "sha256": "efc8a2843d8847e5c2a16e5dfcbd58c067e1782622aee3cdd09267616904b0d4"
+    },
+    {
+      "path": "native-codex-preview.jsonl",
+      "bytes": 492,
+      "sha256": "8d549658d429f10af65c7477a889293114f78f304a5248a8c80f1320febae1cd"
+    },
+    {
+      "path": "private/native-history/after-154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.json",
+      "bytes": 1726,
+      "sha256": "e7789fff5aa3de1c1faddceb3602cdf67794c119e7d6c2c7b664672a72e3701c"
+    },
+    {
+      "path": "private/native-history/after-489142fd-988d-4754-b310-141fceef4700.json",
+      "bytes": 1999,
+      "sha256": "6aa742d092b4e0570dc00cb409613591534a856d881d6e926de2c55b1e49421f"
+    },
+    {
+      "path": "private/native-history/after-63659f75-f7f9-46a2-857a-f74d9f5eb4e8.json",
+      "bytes": 1362,
+      "sha256": "28d342c1e08f963058377b8d9bc18fc047e22631898c87d37424230725ca2f5f"
+    },
+    {
+      "path": "private/native-history/after-737da8cb-adeb-46f6-b6c1-7ebe9169ee12.json",
+      "bytes": 1022,
+      "sha256": "086e3b59be20f1810fd2712858f76670c6e37927133a9042d94bbc0157ca8949"
+    },
+    {
+      "path": "private/native-history/after-8b31d994-6951-4962-9eb7-3328fef57dda.json",
+      "bytes": 2181,
+      "sha256": "0281f326999061aaec7407891b93d54cdba7c69c1ed6c86408a1a997d225fe74"
+    },
+    {
+      "path": "private/native-history/after-9ec4a622-010a-4186-9776-4458bd7535dc.json",
+      "bytes": 2090,
+      "sha256": "1813a6cb22d9af2f0cfadcf464c12a179cf93398b6c14b0c73b5159fa3c3e435"
+    },
+    {
+      "path": "private/native-history/after-9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.json",
+      "bytes": 1544,
+      "sha256": "ec80e603c272874f1c08eb9de25fbb93de8e2bb4a36b99495391abb40d6ae803"
+    },
+    {
+      "path": "private/native-history/after-a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.json",
+      "bytes": 1908,
+      "sha256": "3d02cb7897d73d6c9cbebc156cf143c8bbc549e1d7ba11e429408cdc03ff5630"
+    },
+    {
+      "path": "private/native-history/after-c11bcc8f-375d-4b07-b078-6d10892b7b5a.json",
+      "bytes": 1635,
+      "sha256": "9a067c61393a3e3c11090c74e3b8203ac4d63124ee556c7431503288b19c8db9"
+    },
+    {
+      "path": "private/native-history/after-cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.json",
+      "bytes": 1453,
+      "sha256": "22139e51871cb2a1fbfd15c84de332f83e5e43464777a47751425a9f2aa64c43"
+    },
+    {
+      "path": "private/native-history/after-e51ca819-7df6-466a-a60f-97142a847f7b.json",
+      "bytes": 1817,
+      "sha256": "884916d7b42bec1bd4567a5fcf676b4d79745db3e8d396689bb842a05e21cd17"
+    },
+    {
+      "path": "private/native-history/agy-final-verification.json",
+      "bytes": 4620,
+      "sha256": "596b6528027cc6c3357962ba79953ca8315352e63fb4d38d68891fe59d0c0c36"
+    },
+    {
+      "path": "private/native-history/execution-before-agy-ids.json",
+      "bytes": 34690,
+      "sha256": "c55a8200de657ca73ab4722df4e4eda34602c9ea8e8df51d8c466ff94a9882fc"
+    },
+    {
+      "path": "private/native-history/pty-execution-complete.json",
+      "bytes": 85061,
+      "sha256": "99ff7e959cf997cd00bb308cd54de194c8516723c0ca639099351d3d62eda6a7"
+    },
+    {
+      "path": "private/native-history/readonly-metadata-before.json",
+      "bytes": 24118,
+      "sha256": "6ebcb629a0362292b29ef96fa8b0cd05329f2ec6a53e00496ad085c1b2861e22"
+    }
+  ],
+  "public_exports": [
+    {
+      "path": "agy-independent-final.json",
+      "bytes": 4576,
+      "sha256": "46253e31cbbc6c01eb3a9b21aa23f333f96cc905e72b7e1a7deac17d96499fb6"
+    },
+    {
+      "path": "agy-target-actions-and-checks.json",
+      "bytes": 31613,
+      "sha256": "d9ecc5bbbeacfe6f4ee718a9ce88fb382ada95fd5bf215ae5de68238883cb63d"
+    },
+    {
+      "path": "codex-independent-after.json",
+      "bytes": 566,
+      "sha256": "72554fc23fecd568bc73cc525d38af03e3faf2db5d448a9f3db5ca09471c8f33"
+    },
+    {
+      "path": "codex-operation.json",
+      "bytes": 2460,
+      "sha256": "79b86d4ca5c4767e02e8f48e4148afecb811575907aaf0c46a024d57894a2b7a"
+    },
+    {
+      "path": "ownership-before.json",
+      "bytes": 9889,
+      "sha256": "3826c43366ea5bbb70aef9a6b6f2d884424d5f22e2a5da396dddd05cd73180f4"
+    }
+  ]
+}

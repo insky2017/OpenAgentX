@@ -1,0 +1,167 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+    "version": 3,
+    "target_agent_id": "cleanup-keep-9d6ee7",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+    "status": "succeeded",
+    "result": "OAX-TERMINAL-ROLE cleanup-keep-9d6ee7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+    "outcome_state": "available",
+    "created_at": "2026-10-05T04:27:09.226776533Z",
+    "updated_at": "2026-10-05T04:27:16.124340468Z"
+  },
+  "messages": [
+    {
+      "id": "message-814c9ecf-f049-414a-ad7f-d6c2b57428e9",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-bf55f983-3d4d-4c1f-a2ad-08b619c9754a",
+      "target_agent_id": "cleanup-keep-9d6ee7",
+      "kind": "instruction",
+      "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+      "created_at": "2026-10-05T04:27:09.226776533Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-05T04:57:09.2297715Z",
+      "instructions_sha256": "8831de049239cd4d91681c1002dbd4e2e128a25338de3223b77d38ca91aed851",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-keep-9d6ee7.role.md",
+      "run_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+      "task_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+      "agent_id": "cleanup-keep-9d6ee7",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-12f05b6f-2681-4efe-aa65-2391c994e032",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX-TERMINAL-ROLE cleanup-keep-9d6ee7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-05T04:27:09.2297715Z",
+      "finished_at": "2026-10-05T04:27:16.124340468Z",
+      "created_at": "2026-10-05T04:27:09.2297715Z",
+      "updated_at": "2026-10-05T04:27:16.124340468Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 21,
+      "event_id": "event-b5367584-e5de-4d44-a377-dd265a5ed29c",
+      "aggregate_type": "task",
+      "aggregate_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+      "event_type": "task.created",
+      "created_at": "2026-10-05T04:27:09.226776533Z"
+    },
+    {
+      "sequence": 23,
+      "event_id": "event-task-28af49a3-ea31-4c7f-84a5-ce296cdf504e",
+      "aggregate_type": "task",
+      "aggregate_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+      "event_type": "task.running",
+      "created_at": "2026-10-05T04:27:09.231874729Z"
+    },
+    {
+      "sequence": 24,
+      "event_id": "event-run-63ee50a7-9b3e-4133-bc98-9f5868b79ce3",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-05T04:27:09.231878654Z"
+    },
+    {
+      "sequence": 26,
+      "event_id": "event-runtime-92eba69d-ea45-4c28-a6fe-82c927cf9a16",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+      "event_type": "runtime.session.bound",
+      "created_at": "2026-10-05T04:27:10.78573668Z",
+      "output": {
+        "stage": "session",
+        "status": "bound",
+        "text": "Runtime session bound",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 27,
+      "event_id": "event-runtime-41c6cc55-92b9-47db-a6e0-eb87d46a5e83",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-05T04:27:11.59316081Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 28,
+      "event_id": "event-runtime-7a9e83c3-dcef-4bd1-9ce4-1932341e84d2",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-05T04:27:15.535112049Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed reasoning",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 29,
+      "event_id": "event-runtime-080aa9bc-1cad-4d20-83f2-8d2618fb114e",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-05T04:27:15.948851546Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "OAX-TERMINAL-ROLE cleanup-keep-9d6ee7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 31,
+      "event_id": "event-run-570c793e-c4ff-45a3-b3f7-df3c284c9bb7",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-05T04:27:16.124409397Z"
+    },
+    {
+      "sequence": 32,
+      "event_id": "event-task-3d0a87a5-1827-4399-a068-bbcdfe2a8f4e",
+      "aggregate_type": "task",
+      "aggregate_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+      "event_type": "task.settled",
+      "created_at": "2026-10-05T04:27:16.124412698Z"
+    }
+  ],
+  "snapshot_sequence": 33,
+  "live_after_sequence": 33,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

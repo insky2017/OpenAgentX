@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "at": "2026-10-05T05:19:19.760156+00:00",
+  "commit": "3b6989eb65150e9360e9c734ebf7e1f9e3d7c60c",
+  "binary_sha256": "ddfaff6bd4370639b40bb6c2760e02e9245d948a2c62d149a4b2328a7a9479a7",
+  "deleted_agent": "cleanup-final-fc74d9",
+  "canceled_task": "task-f092be12-fdf1-44a2-b5ea-cc1b990159e0",
+  "plan_apply_repeat_receipt": true,
+  "shared_reference_refused": true,
+  "preserved_processes_native_thread_generation": true,
+  "preserved_tasks_runs_journal_identical": true,
+  "observe_global_cursors_excluded": [
+    "snapshot_sequence",
+    "live_after_sequence"
+  ],
+  "new_model_runs": 0,
+  "inherited_live_evidence": "verdict.json",
+  "recovery": "Evidence-only correction of global snapshot cursor comparison; no repeated removal",
+  "limitations": [
+    "Already-v6 final CLI supplement; no second live migration/model run",
+    "No systemd teardown coverage: exact fixture discovery only; all systemctl mutations forbidden",
+    "Small fixture: one canceled target Task, zero target Runs; retained model Agent evidence inherited"
+  ]
+}

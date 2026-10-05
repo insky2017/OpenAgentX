@@ -1,0 +1,26 @@
+{
+  "method": "Read-only packaging check of retained files; no task/tool/model rerun",
+  "files": [
+    {
+      "file": "before-proof.txt",
+      "bytes": 30,
+      "sha256": "5f064bb361f27e03a5d27ea58b86012c3ae6c6cf2166601ea32b121318f253d6",
+      "expected_sha256": "5f064bb361f27e03a5d27ea58b86012c3ae6c6cf2166601ea32b121318f253d6",
+      "exact_bytes": true
+    },
+    {
+      "file": "after-proof.txt",
+      "bytes": 30,
+      "sha256": "5f064bb361f27e03a5d27ea58b86012c3ae6c6cf2166601ea32b121318f253d6",
+      "expected_sha256": "5f064bb361f27e03a5d27ea58b86012c3ae6c6cf2166601ea32b121318f253d6",
+      "exact_bytes": true
+    },
+    {
+      "file": "next-proof.txt",
+      "bytes": 30,
+      "sha256": "db785916aeb6febfdb49f486b3ba225e86a51a03064b84aaa707ca03a4f99d63",
+      "expected_sha256": "db785916aeb6febfdb49f486b3ba225e86a51a03064b84aaa707ca03a4f99d63",
+      "exact_bytes": true
+    }
+  ]
+}

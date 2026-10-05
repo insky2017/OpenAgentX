@@ -1,0 +1,126 @@
+{
+  "backup_seconds": 0.36144424200756475,
+  "bytes": 147419136,
+  "schema": 6,
+  "journal_count": 368154,
+  "principal_delete_plan": [
+    [
+      3,
+      0,
+      0,
+      "SEARCH principals USING INTEGER PRIMARY KEY (rowid=?)"
+    ],
+    [
+      32,
+      0,
+      0,
+      "SEARCH agent_removal_receipts USING COVERING INDEX sqlite_autoindex_agent_removal_receipts_1 (actor_principal_id=?)"
+    ],
+    [
+      39,
+      0,
+      0,
+      "SCAN cli_tokens"
+    ],
+    [
+      46,
+      0,
+      0,
+      "SEARCH worker_commands USING COVERING INDEX sqlite_autoindex_worker_commands_2 (requested_by=?)"
+    ],
+    [
+      53,
+      0,
+      0,
+      "SCAN network_mode_tests"
+    ],
+    [
+      60,
+      0,
+      0,
+      "SCAN network_mode_policies"
+    ],
+    [
+      67,
+      0,
+      0,
+      "SCAN network_profile_publications"
+    ],
+    [
+      74,
+      0,
+      0,
+      "SEARCH network_workflow_commands USING COVERING INDEX sqlite_autoindex_network_workflow_commands_1 (actor_principal_id=?)"
+    ],
+    [
+      81,
+      0,
+      0,
+      "SCAN network_tests"
+    ],
+    [
+      88,
+      0,
+      0,
+      "SCAN network_profiles"
+    ],
+    [
+      95,
+      0,
+      0,
+      "SEARCH web_users USING COVERING INDEX sqlite_autoindex_web_users_2 (principal_id=?)"
+    ],
+    [
+      101,
+      0,
+      0,
+      "SCAN event_journal"
+    ],
+    [
+      108,
+      0,
+      0,
+      "SEARCH approval_decisions USING COVERING INDEX sqlite_autoindex_approval_decisions_2 (decided_by=?)"
+    ],
+    [
+      115,
+      0,
+      0,
+      "SCAN messages"
+    ],
+    [
+      122,
+      0,
+      0,
+      "SCAN tasks"
+    ],
+    [
+      129,
+      0,
+      0,
+      "SEARCH tasks USING COVERING INDEX sqlite_autoindex_tasks_2 (sender_principal_id=?)"
+    ],
+    [
+      136,
+      0,
+      0,
+      "SEARCH agents USING COVERING INDEX sqlite_autoindex_agents_2 (principal_id=?)"
+    ]
+  ],
+  "journal_indexes": [
+    [
+      0,
+      "idx_event_journal_aggregate",
+      0,
+      "c",
+      0
+    ],
+    [
+      1,
+      "sqlite_autoindex_event_journal_1",
+      1,
+      "u",
+      0
+    ]
+  ]
+}

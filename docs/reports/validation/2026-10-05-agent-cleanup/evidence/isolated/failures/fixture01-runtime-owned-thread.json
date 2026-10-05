@@ -1,0 +1,87 @@
+{
+  "source": "/home/sky/.codex/sessions/2026/10/05/rollout-2026-10-05T12-16-33-01a10a47-172f-7c91-86cd-bcfe6d45928e.jsonl",
+  "source_sha256": "6af75ec76d876edb867c9855e572b244a4dd7a6a1e681be2c011709f99ac2a78",
+  "thread_id": "01a10a47-172f-7c91-86cd-bcfe6d45928e",
+  "selected_runtime_events": [
+    {
+      "timestamp": "2026-10-05T04:16:33.876Z",
+      "ordinal": 1,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_started",
+        "turn_id": "01a10a47-1837-7772-a89a-c8e7f8a2b66f",
+        "root_turn_id": "01a10a47-1837-7772-a89a-c8e7f8a2b66f",
+        "started_at": 1791173793,
+        "model_context_window": 258400,
+        "collaboration_mode_kind": "default"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:16:34.436Z",
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture/workspace",
+        "model": "gpt-6-astra",
+        "effort": "ultra",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "danger-full-access"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:16:40.173Z",
+      "ordinal": 16,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_complete",
+        "turn_id": "01a10a47-1837-7772-a89a-c8e7f8a2b66f",
+        "last_agent_message": "OAX-TERMINAL-ROLE cleanup-keep-a134bf WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture/workspace",
+        "started_at": 1791173793,
+        "completed_at": 1791173800,
+        "duration_ms": 6307,
+        "time_to_first_token_ms": "[REDACTED]"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:22:10.475Z",
+      "ordinal": 18,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_started",
+        "turn_id": "01a10a4c-3b19-7320-b848-8eb142c427ac",
+        "root_turn_id": "01a10a4c-3b19-7320-b848-8eb142c427ac",
+        "started_at": 1791174130,
+        "model_context_window": 258400,
+        "collaboration_mode_kind": "default"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:22:10.582Z",
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture/workspace",
+        "model": "gpt-6-astra",
+        "effort": "ultra",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "danger-full-access"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:22:18.077Z",
+      "ordinal": 28,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_complete",
+        "turn_id": "01a10a4c-3b19-7320-b848-8eb142c427ac",
+        "last_agent_message": "本轮角色约束禁止运行工具或修改文件，因此未执行该命令，也未生成验证文件。",
+        "started_at": 1791174130,
+        "completed_at": 1791174138,
+        "duration_ms": 7602,
+        "time_to_first_token_ms": "[REDACTED]"
+      }
+    }
+  ]
+}

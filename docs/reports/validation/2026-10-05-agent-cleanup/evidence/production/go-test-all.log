@@ -1,0 +1,49 @@
+?   	openagentx/internal/api/external	[no test files]
+ok  	openagentx/cmd/openagentx	0.838s
+ok  	openagentx/internal/api	0.005s
+ok  	openagentx/internal/api/admin	1.751s
+ok  	openagentx/internal/api/auth	1.785s
+?   	openagentx/internal/runtime/conformance	[no test files]
+?   	openagentx/internal/runtime/descriptors	[no test files]
+?   	openagentx/internal/runtime/fake	[no test files]
+?   	openagentx/internal/runtime/registry	[no test files]
+ok  	openagentx/internal/api/console	6.296s
+ok  	openagentx/internal/api/panel	27.799s
+ok  	openagentx/internal/api/workerapi	0.017s
+ok  	openagentx/internal/auth	0.754s
+ok  	openagentx/internal/auth/cli	5.959s
+ok  	openagentx/internal/auth/web	1.893s
+ok  	openagentx/internal/cli/admin	2.368s
+ok  	openagentx/internal/cli/console	33.662s
+ok  	openagentx/internal/cli/external	0.019s
+--- FAIL: TestAgentRemovalResumesLocalCleanupAfterDatabaseCommit (1.13s)
+    agent_remove_test.go:264: purge did not commit: agent not found
+FAIL
+FAIL	openagentx/internal/cli/fleet	14.694s
+ok  	openagentx/internal/cli/overview	1.323s
+ok  	openagentx/internal/cli/worker	1.127s
+ok  	openagentx/internal/client/console	0.055s
+ok  	openagentx/internal/client/worker	0.023s
+ok  	openagentx/internal/consolemodel	0.473s
+ok  	openagentx/internal/controlplane	11.899s
+ok  	openagentx/internal/credentialstore	0.481s
+ok  	openagentx/internal/domain	0.009s
+ok  	openagentx/internal/fleet	20.981s
+ok  	openagentx/internal/localprofile	0.010s
+ok  	openagentx/internal/nativebridge	0.336s
+ok  	openagentx/internal/network/secretstore	0.590s
+ok  	openagentx/internal/persistence/sqlite	33.858s
+ok  	openagentx/internal/persistence/sqlite/migrations	14.954s
+ok  	openagentx/internal/runtime	0.006s
+ok  	openagentx/internal/runtime/acp	0.045s
+ok  	openagentx/internal/runtime/agy	9.881s
+ok  	openagentx/internal/runtime/codebuddy	2.144s
+ok  	openagentx/internal/runtime/codex	2.533s
+ok  	openagentx/internal/runtime/network	0.478s
+ok  	openagentx/internal/runtime/spec	0.008s
+ok  	openagentx/internal/safeoutput	0.141s
+ok  	openagentx/internal/testkit	0.225s
+ok  	openagentx/internal/transport/remotehttps	0.290s
+ok  	openagentx/internal/transport/unixhttp	0.036s
+ok  	openagentx/internal/worker	1.648s
+FAIL

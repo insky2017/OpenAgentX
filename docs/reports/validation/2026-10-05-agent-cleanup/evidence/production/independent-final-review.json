@@ -1,0 +1,1037 @@
+{
+  "checked_at": "2026-10-05T07:57:43.862917+00:00",
+  "reviewer": "cleanup_cli independent final reviewer",
+  "method": "Read existing evidence, SQLite mode=ro + query_only, systemctl show, tmux read-only inspection, /proc metadata, exact path existence and SHA-256. Only this JSON is written.",
+  "scope": "Production cleanup terminal state and time-bounded continuity; no Runtime/model tasks, DB mutation, service actions, source edits or test reruns.",
+  "candidate_agent_ids": [
+    "agy-onboarding-e2e",
+    "codex-domain-e2e",
+    "domain-installed-a-8304eb9e5aa7",
+    "domain-installed-a-9730f99e2b42",
+    "domain-installed-b-8304eb9e5aa7",
+    "domain-installed-b-9730f99e2b42",
+    "external-installed-a-51e44952c2",
+    "external-installed-b-51e44952c2",
+    "test-fake-agent",
+    "test-fake-multiturn",
+    "verification-runner"
+  ],
+  "retained_agent_ids": [
+    "identity-service",
+    "oneaxe-voice",
+    "openagentx",
+    "orchestrator",
+    "pay-service",
+    "quote-service",
+    "rhythm"
+  ],
+  "checks": {
+    "exactly_seven_retained_identities": true,
+    "schema_v6": true,
+    "scope_and_guard_empty": true,
+    "eight_receipts": true,
+    "foreign_keys_valid": true,
+    "candidate_records_absent": true,
+    "receipts_match_exact_candidates": true,
+    "receipt_counts_match_batch_evidence": true,
+    "two_shared_organization_snapshots_preserved": true,
+    "retained_precleanup_history_preserved": true,
+    "daemon_process_unchanged": true,
+    "all_six_worker_processes_and_identities_unchanged": true,
+    "all_six_threads_and_configs_unchanged": true,
+    "other_five_domains_runtime_native_unchanged": true,
+    "candidate_fleet_absent": true,
+    "retained_fleet_entries_unchanged": true,
+    "candidate_services_inactive_and_not_enabled": true,
+    "recorded_deleted_files_and_eight_workspaces_absent": true,
+    "eight_batches_completed_under_two_second_db_deadline": true,
+    "recorded_cleanup_availability_samples_all_successful": true,
+    "live_overview_exact_seven_retained": true,
+    "installed_sha_matches_release": true,
+    "prior_independent_native_history_evidence_pass": true
+  },
+  "limitations": [
+    "openagentx backend/native changed after the cleanup-after snapshot; current full-process continuity is false. Worker PID/instance/generation/thread remain unchanged. Cause unconfirmed.",
+    "Availability sampling ends at 2026-10-05T05:39:13.932835+00:00; no claim of continuous observation after that time.",
+    "The two mixed organization historical snapshots and empty unheld AGY presence lock files are intentionally retained.",
+    "Native deletion correctness uses the separately recorded independent native-history checks; this review did not repeat native protocols."
+  ],
+  "database": {
+    "path": "/home/sky/.openagentx/data/openagentx.db",
+    "schema_version": 6,
+    "agent_ids": [
+      "identity-service",
+      "oneaxe-voice",
+      "openagentx",
+      "orchestrator",
+      "pay-service",
+      "quote-service",
+      "rhythm"
+    ],
+    "maintenance_counts": {
+      "agent_removal_guard": 0,
+      "agent_removal_scope": 0,
+      "agent_removal_receipts": 8
+    },
+    "foreign_key_violations": [],
+    "candidate_remaining_counts": {
+      "agents": 0,
+      "agent_profiles": 0,
+      "worker_instances": 0,
+      "tasks": 0,
+      "run_attempts": 0,
+      "session_bindings": 0,
+      "external_session_bindings": 0,
+      "mailbox_items": 0,
+      "network_profile_bindings": 0,
+      "network_mode_policies": 0,
+      "network_mode_tests": 0,
+      "network_work_items": 0,
+      "external_role_scopes": 0,
+      "external_messages": 0
+    },
+    "candidate_journal_remaining_by_precleanup_entity": {
+      "agent": 0,
+      "task": 0,
+      "run_attempt": 0,
+      "runtime": 0,
+      "session_binding": 0,
+      "external_session": 0,
+      "mailbox_item": 0,
+      "worker_instance": 0,
+      "external_message": 0
+    },
+    "receipt_batches": [
+      {
+        "agent_ids": [
+          "agy-onboarding-e2e"
+        ],
+        "created_at": "2026-10-05T05:37:14.730000588Z",
+        "digest": "38e663347f5f7b6500f1669806f4fb19dcb573a202164523923d940e6de05ece"
+      },
+      {
+        "agent_ids": [
+          "codex-domain-e2e"
+        ],
+        "created_at": "2026-10-05T05:37:17.701801282Z",
+        "digest": "44bffe0b6e295c7d3b960fa48ac02c106b693c10e29a5dd7b0001ae2087699e3"
+      },
+      {
+        "agent_ids": [
+          "domain-installed-a-8304eb9e5aa7",
+          "domain-installed-b-8304eb9e5aa7"
+        ],
+        "created_at": "2026-10-05T05:37:20.78080689Z",
+        "digest": "4a40b6434a462da89153e2ec976724523df67c2c22bb80cd60b651db264b7aa8"
+      },
+      {
+        "agent_ids": [
+          "domain-installed-a-9730f99e2b42",
+          "domain-installed-b-9730f99e2b42"
+        ],
+        "created_at": "2026-10-05T05:37:23.603915821Z",
+        "digest": "4bbe9caa6470d17b07efd2564642693e5be0c6aea0f036c3b1d0cec1796eb82a"
+      },
+      {
+        "agent_ids": [
+          "external-installed-a-51e44952c2",
+          "external-installed-b-51e44952c2"
+        ],
+        "created_at": "2026-10-05T05:37:26.43472437Z",
+        "digest": "3d81810b3c9b451259005fbc7bfc0c1d0e4a696b2faf60ae63e82c6c58ef398b"
+      },
+      {
+        "agent_ids": [
+          "test-fake-agent"
+        ],
+        "created_at": "2026-10-05T05:37:28.758504219Z",
+        "digest": "cde54837a1823e79682e0e42ed94b70ddddc39af0cfb6b8f3cd99c988b0739a2"
+      },
+      {
+        "agent_ids": [
+          "test-fake-multiturn"
+        ],
+        "created_at": "2026-10-05T05:37:30.890742554Z",
+        "digest": "927c62c06e6b45536aaa8c66c731c39c096246f06162fa778151012992a2064e"
+      },
+      {
+        "agent_ids": [
+          "verification-runner"
+        ],
+        "created_at": "2026-10-05T05:37:33.0169683Z",
+        "digest": "41c89278363daa6a3512b14bb98d30cee49b30c92d290f223f4012517d31aa09"
+      }
+    ],
+    "deleted_counts_from_receipts": {
+      "agent_profiles": 11,
+      "agents": 11,
+      "approval_decisions": 0,
+      "approval_requests": 0,
+      "artifacts": 0,
+      "authority_policies": 0,
+      "event_journal": 67275,
+      "external_messages": 6,
+      "external_role_scopes": 0,
+      "external_session_bindings": 6,
+      "mailbox_items": 38,
+      "managed_message_tasks": 0,
+      "messages": 36,
+      "network_imports": 0,
+      "network_mode_policies": 7,
+      "network_mode_tests": 7,
+      "network_profile_bindings": 2,
+      "network_tests": 0,
+      "network_work_items": 14,
+      "network_workflow_commands": 14,
+      "position_assignments": 0,
+      "principals": 11,
+      "run_attempts": 35,
+      "runtime_backend_registrations": 35,
+      "session_bindings": 21,
+      "tasks": 33,
+      "worker_commands": 6,
+      "worker_instances": 35,
+      "workspace_leases": 0
+    },
+    "preserved_mixed_organization_snapshots": [
+      {
+        "sequence": 280084,
+        "event_id": "event-c5fded36-9ee2-4acc-8804-e0f41e44804d",
+        "aggregate_id": "default",
+        "created_at": "2026-10-02T18:35:08.420172132Z",
+        "payload_sha256": "c451a8001b0e508d784f665f57fe4571687959cdf88d463d8408336eb3bc7986"
+      },
+      {
+        "sequence": 291345,
+        "event_id": "event-cef6526f-2980-4ca8-81ca-a83a7a4a0c41",
+        "aggregate_id": "default",
+        "created_at": "2026-10-03T10:11:58.950723108Z",
+        "payload_sha256": "1f086c3795c4c9bf58a88014fbbf06c3c52975901d0a47599a4e1daea0ff3ee0"
+      }
+    ],
+    "retained_history_missing": []
+  },
+  "live_runtime": {
+    "checked_at": "2026-10-05T07:57:43.862917+00:00",
+    "services": {
+      "daemon": {
+        "MainPID": "3577886",
+        "ExecMainStartTimestampMonotonic": "257960197386",
+        "ActiveState": "active",
+        "SubState": "running",
+        "process": {
+          "pid": 3577886,
+          "starttime": "25796017",
+          "comm": "openagentx"
+        },
+        "backends": []
+      },
+      "openagentx": {
+        "MainPID": "58865",
+        "ExecMainStartTimestampMonotonic": "356663222212",
+        "ActiveState": "active",
+        "SubState": "running",
+        "process": {
+          "pid": 58865,
+          "starttime": "35666321",
+          "comm": "openagentx"
+        },
+        "backends": [
+          {
+            "pid": 3218736,
+            "starttime": "39718424",
+            "comm": "codex",
+            "role": "codex_engine"
+          }
+        ]
+      },
+      "rhythm": {
+        "MainPID": "3580837",
+        "ExecMainStartTimestampMonotonic": "258006029446",
+        "ActiveState": "active",
+        "SubState": "running",
+        "process": {
+          "pid": 3580837,
+          "starttime": "25800601",
+          "comm": "openagentx"
+        },
+        "backends": [
+          {
+            "pid": 3580900,
+            "starttime": "25800676",
+            "comm": "codex",
+            "role": "codex_engine"
+          }
+        ]
+      },
+      "pay-service": {
+        "MainPID": "1175344",
+        "ExecMainStartTimestampMonotonic": "374546450343",
+        "ActiveState": "active",
+        "SubState": "running",
+        "process": {
+          "pid": 1175344,
+          "starttime": "37454643",
+          "comm": "openagentx"
+        },
+        "backends": [
+          {
+            "pid": 1175444,
+            "starttime": "37454718",
+            "comm": "codex",
+            "role": "codex_engine"
+          }
+        ]
+      },
+      "quote-service": {
+        "MainPID": "15339",
+        "ExecMainStartTimestampMonotonic": "355876757612",
+        "ActiveState": "active",
+        "SubState": "running",
+        "process": {
+          "pid": 15339,
+          "starttime": "35587675",
+          "comm": "openagentx"
+        },
+        "backends": [
+          {
+            "pid": 15419,
+            "starttime": "35587750",
+            "comm": "codex",
+            "role": "codex_engine"
+          }
+        ]
+      },
+      "identity-service": {
+        "MainPID": "85950",
+        "ExecMainStartTimestampMonotonic": "357110609341",
+        "ActiveState": "active",
+        "SubState": "running",
+        "process": {
+          "pid": 85950,
+          "starttime": "35711059",
+          "comm": "openagentx"
+        },
+        "backends": [
+          {
+            "pid": 86060,
+            "starttime": "35711140",
+            "comm": "codex",
+            "role": "codex_engine"
+          }
+        ]
+      },
+      "oneaxe-voice": {
+        "MainPID": "298177",
+        "ExecMainStartTimestampMonotonic": "360069720349",
+        "ActiveState": "active",
+        "SubState": "running",
+        "process": {
+          "pid": 298177,
+          "starttime": "36006970",
+          "comm": "openagentx"
+        },
+        "backends": [
+          {
+            "pid": 298251,
+            "starttime": "36007049",
+            "comm": "codex",
+            "role": "codex_engine"
+          }
+        ]
+      }
+    },
+    "workers": {
+      "openagentx": {
+        "worker_instance_id": "worker-569568ee-e6d1-4388-a5ab-f26469ca08d7",
+        "generation": 1,
+        "status": "online",
+        "started_at": "2026-10-04T18:23:55.95105924Z"
+      },
+      "rhythm": {
+        "worker_instance_id": "worker-62fa1611-e4e3-45f1-83cc-eaaee8a2eea3",
+        "generation": 2,
+        "status": "online",
+        "started_at": "2026-10-03T14:59:38.755439153Z"
+      },
+      "pay-service": {
+        "worker_instance_id": "worker-21864d68-0a41-4310-b01a-ffb4e803e209",
+        "generation": 4,
+        "status": "online",
+        "started_at": "2026-10-04T23:21:59.173201323Z"
+      },
+      "quote-service": {
+        "worker_instance_id": "worker-c9d736be-57d1-4746-866d-57a22b137454",
+        "generation": 53,
+        "status": "online",
+        "started_at": "2026-10-04T18:10:49.689170695Z"
+      },
+      "identity-service": {
+        "worker_instance_id": "worker-509cf5ad-1cda-491d-8202-7aaee7a7492f",
+        "generation": 1,
+        "status": "online",
+        "started_at": "2026-10-04T18:31:23.386611142Z"
+      },
+      "oneaxe-voice": {
+        "worker_instance_id": "worker-008b7af4-295b-41d4-ae47-6255a98505e2",
+        "generation": 1,
+        "status": "online",
+        "started_at": "2026-10-04T19:20:42.469315907Z"
+      }
+    },
+    "agent_comparison_to_before_install": {
+      "openagentx": {
+        "worker_process_unchanged": true,
+        "worker_service_started_at_unchanged": true,
+        "worker_active": true,
+        "worker_identity_unchanged": true,
+        "worker_status": "online",
+        "thread_unchanged": true,
+        "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+        "config_unchanged": true,
+        "backend_processes_unchanged": false,
+        "native_processes_unchanged": false,
+        "pane0_identity_unchanged": true
+      },
+      "rhythm": {
+        "worker_process_unchanged": true,
+        "worker_service_started_at_unchanged": true,
+        "worker_active": true,
+        "worker_identity_unchanged": true,
+        "worker_status": "online",
+        "thread_unchanged": true,
+        "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+        "config_unchanged": true,
+        "backend_processes_unchanged": true,
+        "native_processes_unchanged": true,
+        "pane0_identity_unchanged": true
+      },
+      "pay-service": {
+        "worker_process_unchanged": true,
+        "worker_service_started_at_unchanged": true,
+        "worker_active": true,
+        "worker_identity_unchanged": true,
+        "worker_status": "online",
+        "thread_unchanged": true,
+        "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+        "config_unchanged": true,
+        "backend_processes_unchanged": true,
+        "native_processes_unchanged": true,
+        "pane0_identity_unchanged": true
+      },
+      "quote-service": {
+        "worker_process_unchanged": true,
+        "worker_service_started_at_unchanged": true,
+        "worker_active": true,
+        "worker_identity_unchanged": true,
+        "worker_status": "online",
+        "thread_unchanged": true,
+        "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+        "config_unchanged": true,
+        "backend_processes_unchanged": true,
+        "native_processes_unchanged": true,
+        "pane0_identity_unchanged": true
+      },
+      "identity-service": {
+        "worker_process_unchanged": true,
+        "worker_service_started_at_unchanged": true,
+        "worker_active": true,
+        "worker_identity_unchanged": true,
+        "worker_status": "online",
+        "thread_unchanged": true,
+        "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+        "config_unchanged": true,
+        "backend_processes_unchanged": true,
+        "native_processes_unchanged": true,
+        "pane0_identity_unchanged": true
+      },
+      "oneaxe-voice": {
+        "worker_process_unchanged": true,
+        "worker_service_started_at_unchanged": true,
+        "worker_active": true,
+        "worker_identity_unchanged": true,
+        "worker_status": "online",
+        "thread_unchanged": true,
+        "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+        "config_unchanged": true,
+        "backend_processes_unchanged": true,
+        "native_processes_unchanged": true,
+        "pane0_identity_unchanged": true
+      }
+    },
+    "panes": [
+      {
+        "window_id": "@2",
+        "window_name": "overview",
+        "pane_id": "%2",
+        "pane_index": "0",
+        "pane_pid": "2304458",
+        "dead": "0"
+      },
+      {
+        "window_id": "@8",
+        "window_name": "openagentx",
+        "pane_id": "%11",
+        "pane_index": "0",
+        "pane_pid": "31132",
+        "dead": "0",
+        "native_children": [
+          {
+            "pid": 3667798,
+            "starttime": "40485339",
+            "comm": "openagentx",
+            "role": "native_bridge",
+            "agent_id": "openagentx"
+          },
+          {
+            "pid": 3668048,
+            "starttime": "40485450",
+            "comm": "codex",
+            "role": "codex_tui",
+            "thread_ids": [
+              "01a0c98a-bef8-7730-9b2b-cbc2f3594559"
+            ]
+          }
+        ]
+      },
+      {
+        "window_id": "@28",
+        "window_name": "rhythm",
+        "pane_id": "%55",
+        "pane_index": "0",
+        "pane_pid": "3584397",
+        "dead": "0",
+        "native_children": [
+          {
+            "pid": 3584466,
+            "starttime": "25807759",
+            "comm": "codex",
+            "role": "codex_tui",
+            "thread_ids": [
+              "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9"
+            ]
+          }
+        ]
+      },
+      {
+        "window_id": "@27",
+        "window_name": "pay-service",
+        "pane_id": "%54",
+        "pane_index": "0",
+        "pane_pid": "1129591",
+        "dead": "0",
+        "native_children": [
+          {
+            "pid": 1177832,
+            "starttime": "37458373",
+            "comm": "openagentx",
+            "role": "native_bridge",
+            "agent_id": "pay-service"
+          },
+          {
+            "pid": 1180441,
+            "starttime": "37460381",
+            "comm": "codex",
+            "role": "codex_tui",
+            "thread_ids": [
+              "01a0e016-d951-77d1-bc7e-d13662f4823c"
+            ]
+          }
+        ]
+      },
+      {
+        "window_id": "@3",
+        "window_name": "quote-service",
+        "pane_id": "%3",
+        "pane_index": "0",
+        "pane_pid": "30767",
+        "dead": "0",
+        "native_children": [
+          {
+            "pid": 18653,
+            "starttime": "35593345",
+            "comm": "openagentx",
+            "role": "native_bridge",
+            "agent_id": "quote-service"
+          },
+          {
+            "pid": 21538,
+            "starttime": "35596155",
+            "comm": "codex",
+            "role": "codex_tui",
+            "thread_ids": [
+              "01a1010a-c521-78b2-98f0-eaafa642c5fa"
+            ]
+          }
+        ]
+      },
+      {
+        "window_id": "@30",
+        "window_name": "identity-service",
+        "pane_id": "%60",
+        "pane_index": "0",
+        "pane_pid": "3525429",
+        "dead": "0",
+        "native_children": [
+          {
+            "pid": 90909,
+            "starttime": "35717993",
+            "comm": "openagentx",
+            "role": "native_bridge",
+            "agent_id": "identity-service"
+          },
+          {
+            "pid": 93117,
+            "starttime": "35719399",
+            "comm": "codex",
+            "role": "codex_tui",
+            "thread_ids": [
+              "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69"
+            ]
+          }
+        ]
+      },
+      {
+        "window_id": "@11",
+        "window_name": "oneaxe-voice",
+        "pane_id": "%17",
+        "pane_index": "0",
+        "pane_pid": "32093",
+        "dead": "0",
+        "native_children": [
+          {
+            "pid": 301429,
+            "starttime": "36010461",
+            "comm": "openagentx",
+            "role": "native_bridge",
+            "agent_id": "oneaxe-voice"
+          },
+          {
+            "pid": 303535,
+            "starttime": "36011868",
+            "comm": "codex",
+            "role": "codex_tui",
+            "thread_ids": [
+              "01a0ddcc-248f-7dd0-a263-67f1d53e0181"
+            ]
+          }
+        ]
+      },
+      {
+        "window_id": "@31",
+        "window_name": "zsh",
+        "pane_id": "%61",
+        "pane_index": "0",
+        "pane_pid": "1127591",
+        "dead": "0"
+      },
+      {
+        "window_id": "@9",
+        "window_name": "api_proxy",
+        "pane_id": "%12",
+        "pane_index": "0",
+        "pane_pid": "31224",
+        "dead": "0"
+      },
+      {
+        "window_id": "@9",
+        "window_name": "api_proxy",
+        "pane_id": "%13",
+        "pane_index": "1",
+        "pane_pid": "31344",
+        "dead": "0"
+      },
+      {
+        "window_id": "@10",
+        "window_name": "colab",
+        "pane_id": "%14",
+        "pane_index": "0",
+        "pane_pid": "31515",
+        "dead": "0"
+      },
+      {
+        "window_id": "@10",
+        "window_name": "colab",
+        "pane_id": "%15",
+        "pane_index": "1",
+        "pane_pid": "31664",
+        "dead": "0"
+      },
+      {
+        "window_id": "@12",
+        "window_name": "zsh",
+        "pane_id": "%18",
+        "pane_index": "0",
+        "pane_pid": "32361",
+        "dead": "0"
+      }
+    ]
+  },
+  "current_full_process_continuity_pass": false,
+  "post_cleanup_difference": {
+    "recorded_final_snapshot_at": "2026-10-05T07:49:18.813949+00:00",
+    "recorded_final_continuity_pass": false,
+    "changed_agent": "openagentx",
+    "new_process_start_estimates": [
+      {
+        "role": "codex_engine",
+        "pid": 3218736,
+        "starttime_ticks": "39718424",
+        "estimated_started_at_utc": "2026-10-05T05:39:15.240000+00:00",
+        "after_cleanup_snapshot": true
+      },
+      {
+        "role": "native_bridge",
+        "pid": 3667798,
+        "starttime_ticks": "40485339",
+        "estimated_started_at_utc": "2026-10-05T07:47:04.390000+00:00",
+        "after_cleanup_snapshot": true
+      },
+      {
+        "role": "codex_tui",
+        "pid": 3668048,
+        "starttime_ticks": "40485450",
+        "estimated_started_at_utc": "2026-10-05T07:47:05.500000+00:00",
+        "after_cleanup_snapshot": true
+      }
+    ],
+    "missing_precleanup_panes": [
+      "%59"
+    ],
+    "journal_query": {
+      "unit": "openagentx-worker@openagentx.service",
+      "since_utc": "2026-10-05T05:38:00Z",
+      "until_utc": "2026-10-05T07:50:00Z",
+      "exit_code": 0,
+      "entry_count": 0
+    },
+    "cause": "unconfirmed; no causal attribution",
+    "time_precision": "UTC estimates use /proc/stat btime (whole seconds) + starttime/CLK_TCK; approximately one-second precision"
+  },
+  "fleet_agent_ids": [
+    "identity-service",
+    "oneaxe-voice",
+    "openagentx",
+    "pay-service",
+    "quote-service",
+    "rhythm"
+  ],
+  "candidate_services": {
+    "agy-onboarding-e2e": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "codex-domain-e2e": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "domain-installed-a-8304eb9e5aa7": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "domain-installed-a-9730f99e2b42": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "domain-installed-b-8304eb9e5aa7": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "domain-installed-b-9730f99e2b42": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "external-installed-a-51e44952c2": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "external-installed-b-51e44952c2": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "test-fake-agent": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "test-fake-multiturn": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    },
+    "verification-runner": {
+      "MainPID": "0",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "UnitFileState": "disabled",
+      "inspection_exit_code": 0
+    }
+  },
+  "deleted_path_verification": {
+    "exact_paths_checked": [
+      "/home/sky/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace",
+      "/home/sky/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/private/domain-installed-a-9730f99e2b42",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-desktop-collaboration/installed03/private/domain-installed-b-9730f99e2b42",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-a-51e44952c2",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-external-session/installed01/private/external-installed-b-51e44952c2",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-a-8304eb9e5aa7",
+      "/home/sky/.local/state/openagentx/validation/2026-10-03-managed-collaboration/installed-protocol01/private/domain-installed-b-8304eb9e5aa7",
+      "/home/sky/.openagentx/workers/agy-onboarding-e2e.env",
+      "/home/sky/.openagentx/workers/agy-onboarding-e2e.yaml",
+      "/home/sky/.openagentx/workers/codex-domain-e2e.env",
+      "/home/sky/.openagentx/workers/codex-domain-e2e.yaml",
+      "/home/sky/.openagentx/workers/codex/codex-domain-e2e",
+      "/home/sky/.openagentx/workers/identities/agy-onboarding-e2e.yaml",
+      "/home/sky/.openagentx/workers/identities/codex-domain-e2e.role.md",
+      "/home/sky/.openagentx/workers/identities/codex-domain-e2e.yaml",
+      "/home/sky/.openagentx/workers/joins/codex-domain-e2e.handoff.md",
+      "/home/sky/.openagentx/workers/joins/codex-domain-e2e.json",
+      "/home/sky/.openagentx/workers/joins/codex-domain-e2e.json.registered"
+    ],
+    "still_present": [],
+    "owned_workspace_count": 8
+  },
+  "verified_batches": [
+    {
+      "batch": 1,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:11.761020+00:00",
+      "finished_at": "2026-10-05T05:37:14.934577+00:00",
+      "purge_elapsed_ms": 1149,
+      "completed": true
+    },
+    {
+      "batch": 2,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:15.011211+00:00",
+      "finished_at": "2026-10-05T05:37:17.934798+00:00",
+      "purge_elapsed_ms": 983,
+      "completed": true
+    },
+    {
+      "batch": 3,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:18.015232+00:00",
+      "finished_at": "2026-10-05T05:37:20.839394+00:00",
+      "purge_elapsed_ms": 336,
+      "completed": true
+    },
+    {
+      "batch": 4,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:20.859296+00:00",
+      "finished_at": "2026-10-05T05:37:23.633195+00:00",
+      "purge_elapsed_ms": 335,
+      "completed": true
+    },
+    {
+      "batch": 5,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:23.653556+00:00",
+      "finished_at": "2026-10-05T05:37:26.477583+00:00",
+      "purge_elapsed_ms": 348,
+      "completed": true
+    },
+    {
+      "batch": 6,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:26.495916+00:00",
+      "finished_at": "2026-10-05T05:37:28.918408+00:00",
+      "purge_elapsed_ms": 611,
+      "completed": true
+    },
+    {
+      "batch": 7,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:28.980390+00:00",
+      "finished_at": "2026-10-05T05:37:30.951413+00:00",
+      "purge_elapsed_ms": 272,
+      "completed": true
+    },
+    {
+      "batch": 8,
+      "command_exit_code": 0,
+      "started_at": "2026-10-05T05:37:30.970229+00:00",
+      "finished_at": "2026-10-05T05:37:33.141247+00:00",
+      "purge_elapsed_ms": 433,
+      "completed": true
+    }
+  ],
+  "availability_evidence": [
+    {
+      "file": "live-availability.jsonl",
+      "first_at": "2026-10-05T05:20:54.635523+00:00",
+      "last_at": "2026-10-05T05:34:52.863187+00:00",
+      "samples": 823,
+      "errors": 0,
+      "max_elapsed_ms": 1349.96
+    },
+    {
+      "file": "live-availability-continued.jsonl",
+      "first_at": "2026-10-05T05:32:59.613305+00:00",
+      "last_at": "2026-10-05T05:39:13.932835+00:00",
+      "samples": 186,
+      "errors": 0,
+      "max_elapsed_ms": 847.85
+    }
+  ],
+  "overview": {
+    "live_agent_count_seven_marker": true,
+    "live_visible_agent_ids": [
+      "identity-service",
+      "oneaxe-voice",
+      "openagentx",
+      "orchestrator",
+      "pay-service",
+      "quote-service",
+      "rhythm"
+    ]
+  },
+  "installed_artifact": {
+    "source_commit": "3b6989eb65150e9360e9c734ebf7e1f9e3d7c60c",
+    "sha256": "ddfaff6bd4370639b40bb6c2760e02e9245d948a2c62d149a4b2328a7a9479a7"
+  },
+  "native_history_prior_independent_evidence": {
+    "agy_checked_at": "2026-10-05T05:28:45.173253+00:00",
+    "agy_removed_count": 11,
+    "agy_other_history_preserved": true,
+    "agy_empty_unheld_presence_lock_files_retained": 11,
+    "codex_checked_at": "2026-10-05T05:34:12.004142+00:00",
+    "codex_thread_rows": 0,
+    "codex_rollout_exists": false,
+    "codex_paginated_history_rows": {
+      "thread_turns": 0,
+      "thread_items": 0,
+      "thread_history_projection_state": 0,
+      "thread_realtime_items": 0
+    },
+    "scope": "Reused existing native-history independent evidence; no native lifecycle operation repeated"
+  },
+  "cleanup_interval": {
+    "before_snapshot_at": "2026-10-05T05:20:36.430865+00:00",
+    "after_snapshot_at": "2026-10-05T05:38:16.555650+00:00",
+    "source_checks": {
+      "agents": {
+        "openagentx": {
+          "service_unchanged": true,
+          "thread_unchanged": true,
+          "config_unchanged": true,
+          "terminal_unchanged": true,
+          "worker_identity_unchanged": true
+        },
+        "rhythm": {
+          "service_unchanged": true,
+          "thread_unchanged": true,
+          "config_unchanged": true,
+          "terminal_unchanged": true,
+          "worker_identity_unchanged": true
+        },
+        "pay-service": {
+          "service_unchanged": true,
+          "thread_unchanged": true,
+          "config_unchanged": true,
+          "terminal_unchanged": true,
+          "worker_identity_unchanged": true
+        },
+        "quote-service": {
+          "service_unchanged": true,
+          "thread_unchanged": true,
+          "config_unchanged": true,
+          "terminal_unchanged": true,
+          "worker_identity_unchanged": true
+        },
+        "identity-service": {
+          "service_unchanged": true,
+          "thread_unchanged": true,
+          "config_unchanged": true,
+          "terminal_unchanged": true,
+          "worker_identity_unchanged": true
+        },
+        "oneaxe-voice": {
+          "service_unchanged": true,
+          "thread_unchanged": true,
+          "config_unchanged": true,
+          "terminal_unchanged": true,
+          "worker_identity_unchanged": true
+        }
+      },
+      "all_nonoverview_panes_preserved": true,
+      "daemon_unchanged": true,
+      "pass": true,
+      "retained_fleet_unchanged": true,
+      "retained_history_preserved": true,
+      "candidates_absent": true,
+      "candidate_histories_empty": true,
+      "candidate_fleet_absent": true,
+      "foreign_keys_valid": true
+    },
+    "pass": true,
+    "boundary": "The recorded cleanup interval passed. It does not imply unchanged Runtime/native processes through the later 07:49 snapshot or this review."
+  },
+  "evidence_sha256": {
+    "after-cleanup.json": "758ba077f43de17f8b8aa6df4ab37209e762ac981de24ac07fdab54a1c887ace",
+    "before-install.json": "cdd90f3292f0ae5ad5e9858c87678b4ddb5a00219431e9b6d21a27199a403ce3",
+    "final-continuity.json": "eb2373fb670d9a11bd70f44b2e5322f3d52616f4a282d306c78c2eed183439b4",
+    "first-attempt-rollback-verification.json": "8d397074eb1cf202c205a3fc4bd4820307724e8c2e78469c90f1470b48e84c18",
+    "installation.json": "2059b37c779963d7c5e34755d329a2ca4cc4f57436d576d1b9226576820521ea",
+    "live-availability-continued.jsonl": "0bd29eb23cd11f1232e7cdeb12ec5e6ef93e30607bd81318d4de1c9ad503731b",
+    "live-availability.jsonl": "12ab0f19061044f0852c077e39448e5eb3c0e1b0822be3fb531c7afe19043e90",
+    "overview-after.txt": "0e489fd9fe270e2c63ae241b67fb44c3113d393d9dbc59aa959e255a3ccf6dee",
+    "owned-workspaces-deletion.json": "506b345f167ce5ae0320b4964a34665b1b8e995051954ed2f9575ffc80557fa5",
+    "production-batch-01-command.json": "02869f32bd03d9d1347a22172185a56d0dd96fea3275a6dd255b44f0bb9a3a32",
+    "production-batch-01.stdout.jsonl": "706ee0a5254c126979a14e351671687f5b7455e8c7b002b62247c6b67e5f5f3c",
+    "production-batch-02-command.json": "ddc0ad9eba15fe2837d407fa88f0295ba89e8ab85eee3c65e3f9f77052bb9cfe",
+    "production-batch-02.stdout.jsonl": "4c40fd37e050b98c3a9916ff7f91ca9e75315899067e70a65b8e59f751ea080c",
+    "production-batch-03-command.json": "2647c117dfaf0ec739b4e2f88f6ce21453a4f1656ecfcf08329118ed5a2ca922",
+    "production-batch-03.stdout.jsonl": "84767043ab49f893cc150f2c3a51bacede5d8c12f12ea6613a79ebecabca89d0",
+    "production-batch-04-command.json": "9efa5a34cff10eeac7b1f8bd87403334f4ae42e9e5d5be07dcc685c54ef3c0a3",
+    "production-batch-04.stdout.jsonl": "2142c5173b793fd37d0f0c18541527be50e7b07a55c697d292951a5e7d893eba",
+    "production-batch-05-command.json": "d70b3713f148687be3c131cb0617be743ed9d5a5ce9dacd2a39e2c148cd02dce",
+    "production-batch-05.stdout.jsonl": "d452662b5fa62d264f265b9c22f1f7f89b8035fee336b7387c50128fffb336ec",
+    "production-batch-06-command.json": "d1411f977781ea4731a3df981742b3d69deb2d8477f69445e9ba2e7bf00bdbe7",
+    "production-batch-06.stdout.jsonl": "85b34c8f67723ddc13aa7beb70035a63d442820755b3778d5439e5c484c82c38",
+    "production-batch-07-command.json": "11d0d919f977c37085ca21b13b32bd190a9f2db26740cac6f3d61e73a27a850e",
+    "production-batch-07.stdout.jsonl": "082d6add168d0f598c5ded41304c50a56cb3057f29a1f49162bc21f8c9abbaa8",
+    "production-batch-08-command.json": "a2ba703f32905d72a5d514c6c2826e45c1ebc28053089a87a22065ef8bbd47eb",
+    "production-batch-08.stdout.jsonl": "45c72d2c99b00f0aad4ca89e2e12d8ec09976c0f58bbdc30e6f7c2f199ea6ee9",
+    "production-summary.json": "193d4defbcff15a178c8959c4fb41b331b5e83778b534e5561c09a3f0ede82b0",
+    "../native-history/agy-independent-final.json": "46253e31cbbc6c01eb3a9b21aa23f333f96cc905e72b7e1a7deac17d96499fb6",
+    "../native-history/codex-independent-after.json": "72554fc23fecd568bc73cc525d38af03e3faf2db5d448a9f3db5ca09471c8f33",
+    "../native-history/agy-target-actions-and-checks.json": "d9ecc5bbbeacfe6f4ee718a9ce88fb382ada95fd5bf215ae5de68238883cb63d",
+    "../native-history/codex-operation.json": "79b86d4ca5c4767e02e8f48e4148afecb811575907aaf0c46a024d57894a2b7a"
+  },
+  "cleanup_terminal_state_pass": true,
+  "verdict": "PASS_CLEANUP_WITH_LATER_RUNTIME_CHANGE_RECORDED",
+  "evidence_hash_notes": {
+    "overview-after.txt": "Hash above refers to the original raw tmux capture as reviewed. Git export removes trailing blank lines only; source-manifest.json records both source and export hashes."
+  }
+}

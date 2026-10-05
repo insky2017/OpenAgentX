@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-05T05:27:01.108630+00:00",
+  "fixture": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture",
+  "known_identity_checks": [
+    {
+      "record": {
+        "pid": 2730779,
+        "starttime": "39216669"
+      },
+      "current": null
+    },
+    {
+      "record": {
+        "pid": 2731700,
+        "starttime": "39217719"
+      },
+      "current": null
+    },
+    {
+      "record": {
+        "pid": 2735957,
+        "starttime": "39222045"
+      },
+      "current": null
+    },
+    {
+      "record": {
+        "pid": 2738041,
+        "starttime": "39222849"
+      },
+      "current": null
+    },
+    {
+      "record": {
+        "pid": 2731854,
+        "starttime": "39217795"
+      },
+      "current": null
+    }
+  ],
+  "tmux_server": "oax-terminal-4bfe1060235d",
+  "tmux_discovery_returncode": 1,
+  "owned_process_tree": [],
+  "rule": "Only exact PID/starttime pairs and this recorded dedicated tmux server may be stopped. Preserve all files."
+}

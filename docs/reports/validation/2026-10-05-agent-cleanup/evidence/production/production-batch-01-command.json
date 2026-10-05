@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-05T05:37:11.761020+00:00",
+  "finished_at": "2026-10-05T05:37:14.934577+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "remove",
+    "agy-onboarding-e2e",
+    "--purge-history",
+    "--yes"
+  ],
+  "exit_code": 0,
+  "elapsed_ms": 3173.56
+}

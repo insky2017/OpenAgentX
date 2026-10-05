@@ -1,0 +1,66 @@
+{
+  "baseline": "bc93cee",
+  "all_unchanged": true,
+  "files": [
+    {
+      "path": "docs/decisions/ADR-001-resident-agent-worker-runtime-observability.md",
+      "baseline_sha256": "587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403",
+      "current_sha256": "587e9b8f27ddeb68aae8e5a507fefc10973739c8dd2c3def86e2c0bbc51db403",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-002-agent-cli-proxy-environment.md",
+      "baseline_sha256": "e1e4cb8b2368be2ea17f66fb1ce33c0185c8d4be9484bc63a245494b0d547f1d",
+      "current_sha256": "e1e4cb8b2368be2ea17f66fb1ce33c0185c8d4be9484bc63a245494b0d547f1d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-003-command-center-task-observation-and-content.md",
+      "baseline_sha256": "a538850fdf884a4d7a00ab92646c6a6c9e5374eb91ef35a0c7ffabf7e80ec99c",
+      "current_sha256": "a538850fdf884a4d7a00ab92646c6a6c9e5374eb91ef35a0c7ffabf7e80ec99c",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-004-streamlined-command-center-network-ux.md",
+      "baseline_sha256": "317e0d0017e2e5685d4112b010b1c5a0370bf6316495cc905014715446589ce3",
+      "current_sha256": "317e0d0017e2e5685d4112b010b1c5a0370bf6316495cc905014715446589ce3",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-005-interactive-worker-console-and-developer-experience.md",
+      "baseline_sha256": "70164f591997051c26947b08ca2de1c7946b7dfa3389763ecb5ab79998187b7a",
+      "current_sha256": "70164f591997051c26947b08ca2de1c7946b7dfa3389763ecb5ab79998187b7a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-006-task-intent-and-verifiable-terminal-semantics.md",
+      "baseline_sha256": "b5b10ba96bd6db7e9092dbeb259d5be30e988fd4523f2775b31812ed7832c688",
+      "current_sha256": "b5b10ba96bd6db7e9092dbeb259d5be30e988fd4523f2775b31812ed7832c688",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-007-worker-network-binding-generation-continuity.md",
+      "baseline_sha256": "98ed16da6ccecc9958e335f7a446ea04aafebf30923fc1e5568a12ff09d0f37a",
+      "current_sha256": "98ed16da6ccecc9958e335f7a446ea04aafebf30923fc1e5568a12ff09d0f37a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-008-oax-workspace-console-tui-and-cli-session.md",
+      "baseline_sha256": "572e9edc47e8f1961f7db89ada9723ebbe2fcba6ee7fecd37891f76c53f7406d",
+      "current_sha256": "572e9edc47e8f1961f7db89ada9723ebbe2fcba6ee7fecd37891f76c53f7406d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/ADR-009-pane-zero-task-console-observability.md",
+      "baseline_sha256": "afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69",
+      "current_sha256": "afb7473b6eb353dd06551bb3126fbe3300005e4a1d782b863a9cb1d0f2a32c69",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/README.md",
+      "baseline_sha256": "84af96f2631bf64429fa9a04542485a8a9ae9c6cb7ad790f5382d04d9fa768cf",
+      "current_sha256": "84af96f2631bf64429fa9a04542485a8a9ae9c6cb7ad790f5382d04d9fa768cf",
+      "unchanged": true
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-f092be12-fdf1-44a2-b5ea-cc1b990159e0",
+    "version": 2,
+    "target_agent_id": "cleanup-final-fc74d9",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "FINAL-CANDIDATE-CLEANUP: never execute; canceled history only.",
+    "status": "canceled",
+    "outcome_state": "not_recorded",
+    "created_at": "2026-10-05T05:18:16.176531777Z",
+    "updated_at": "2026-10-05T05:18:16.239186169Z"
+  },
+  "messages": [
+    {
+      "id": "message-af1bcfe5-cad0-4bac-92da-c8a563106fb4",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-f092be12-fdf1-44a2-b5ea-cc1b990159e0",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-bf55f983-3d4d-4c1f-a2ad-08b619c9754a",
+      "target_agent_id": "cleanup-final-fc74d9",
+      "kind": "instruction",
+      "content": "FINAL-CANDIDATE-CLEANUP: never execute; canceled history only.",
+      "created_at": "2026-10-05T05:18:16.176531777Z"
+    }
+  ],
+  "run_attempts": [],
+  "events": [
+    {
+      "sequence": 377,
+      "event_id": "event-a8aead61-9afe-4f8a-8244-da1701bc0034",
+      "aggregate_type": "task",
+      "aggregate_id": "task-f092be12-fdf1-44a2-b5ea-cc1b990159e0",
+      "event_type": "task.created",
+      "created_at": "2026-10-05T05:18:16.176531777Z"
+    },
+    {
+      "sequence": 378,
+      "event_id": "event-7da5247c-40ef-47a0-ab65-97da992fb8c5",
+      "aggregate_type": "task",
+      "aggregate_id": "task-f092be12-fdf1-44a2-b5ea-cc1b990159e0",
+      "event_type": "task.cancel_requested",
+      "created_at": "2026-10-05T05:18:16.239179309Z"
+    },
+    {
+      "sequence": 380,
+      "event_id": "event-cancel-62fb38e5-a66c-4a81-a4f4-86e687f23db0",
+      "aggregate_type": "task",
+      "aggregate_id": "task-f092be12-fdf1-44a2-b5ea-cc1b990159e0",
+      "event_type": "task.canceled",
+      "created_at": "2026-10-05T05:18:16.239186169Z"
+    }
+  ],
+  "snapshot_sequence": 380,
+  "live_after_sequence": 380,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

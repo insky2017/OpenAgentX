@@ -1,0 +1,18 @@
+{
+  "method": "strace successful fcntl locks on this fixture DB-shm byte 120",
+  "holds": [
+    {
+      "acquired_at_epoch": 1791174511.657646,
+      "released_at_epoch": 1791174511.701151,
+      "seconds": 0.043504953384399414
+    },
+    {
+      "acquired_at_epoch": 1791174511.750005,
+      "released_at_epoch": 1791174511.802834,
+      "seconds": 0.05282902717590332
+    }
+  ],
+  "max_seconds": 0.05282902717590332,
+  "budget_seconds": 2,
+  "pass": true
+}

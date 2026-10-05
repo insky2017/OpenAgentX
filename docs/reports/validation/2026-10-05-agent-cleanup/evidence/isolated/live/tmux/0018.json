@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-05T04:31:12.718660+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-9077f094434f",
+    "send-keys",
+    "-t",
+    "@0.0",
+    "-l",
+    "Write next-proof.txt in the assigned workspace containing exactly OAX-CLEANUP-NEXT-6e5cb6722e93 followed by one newline. Then reply exactly OAX-CLEANUP-NEXT-6e5cb6722e93. Do nothing else."
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

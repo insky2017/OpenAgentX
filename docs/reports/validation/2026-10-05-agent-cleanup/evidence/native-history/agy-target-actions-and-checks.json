@@ -1,0 +1,815 @@
+{
+  "runtime_version": "1.2.16",
+  "entry": "agy /resume picker",
+  "pty_session_id": 30110,
+  "raw_record_source": "private/native-history/pty-execution-complete.json",
+  "redaction": "Only target UUID filters, native delete confirmation markers and per-target verification are exported. Conversation titles, unrelated picker rows and account identity are omitted.",
+  "objects": [
+    {
+      "conversation_id": "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+      "selection": {
+        "kind": "pre_execution_observation_metadata_and_recorded_recheck",
+        "source": "ownership probe private/native-history/readonly-metadata-before.json",
+        "observation": {
+          "pty_session_id": 30110,
+          "argv": [
+            "agy"
+          ],
+          "cwd": "$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace",
+          "actions": [
+            "/resume",
+            "type full conversation UUID",
+            "append x",
+            "backspace"
+          ],
+          "full_id": "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "full_id_match_count": 1,
+          "full_id_plus_x_match_count": 0,
+          "footer": "f4 Delete",
+          "f4_sent": false,
+          "conversation_resumed": false,
+          "model_task_sent": false
+        },
+        "recorded_recheck": [
+          {
+            "at": "2026-10-05T05:22:49.476Z",
+            "action": "append_x_to_existing_full_uuid_filter",
+            "keys": "x",
+            "output_excerpt": "No matching conversations."
+          },
+          {
+            "at": "2026-10-05T05:23:07.587Z",
+            "action": "restore_first_exact_uuid_filter",
+            "keys": "BACKSPACE",
+            "output_excerpt": "> <target-conversation>"
+          }
+        ],
+        "raw_complete_uuid_entry_present_in_execution_transcript": false
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:23:34.827Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:23:55.142Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:23:55.341893+00:00",
+        "conversation_id": "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/737da8cb-adeb-46f6-b6c1-7ebe9169ee12.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/737da8cb-adeb-46f6-b6c1-7ebe9169ee12.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036764,
+            "mtime_ns": 1790881650333149771,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/737da8cb-adeb-46f6-b6c1-7ebe9169ee12.lock"
+        ],
+        "all_reviewed_paths_absent": false
+      }
+    },
+    {
+      "conversation_id": "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:25:06.925Z",
+        "keys": "bracketed paste 63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+        "output_excerpt": "Search: 63659f75-f7f9-46a2-857a-f74d9f5eb4e8\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:26:35.922Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:26:37.028Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:26:37.253451+00:00",
+        "conversation_id": "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/63659f75-f7f9-46a2-857a-f74d9f5eb4e8.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/63659f75-f7f9-46a2-857a-f74d9f5eb4e8.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036765,
+            "mtime_ns": 1790881692091760166,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/63659f75-f7f9-46a2-857a-f74d9f5eb4e8.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12"
+        ],
+        "cumulative_removed_db_names": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:26:39.521Z",
+        "keys": "bracketed paste cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+        "output_excerpt": "Search: cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:26:40.637Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:26:41.744Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:26:41.949795+00:00",
+        "conversation_id": "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036779,
+            "mtime_ns": 1790881907651189562,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669"
+        ],
+        "cumulative_removed_db_names": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:26:44.200Z",
+        "keys": "bracketed paste 9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+        "output_excerpt": "Search: 9f5dd97c-62aa-4393-acdf-dcf0182fb2c7\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:26:45.307Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:26:46.413Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:26:46.628036+00:00",
+        "conversation_id": "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036591,
+            "mtime_ns": 1790882178245968151,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669"
+        ],
+        "cumulative_removed_db_names": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:26:48.884Z",
+        "keys": "bracketed paste c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+        "output_excerpt": "Search: c11bcc8f-375d-4b07-b078-6d10892b7b5a\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:26:49.991Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:26:51.097Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:26:51.286823+00:00",
+        "conversation_id": "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/c11bcc8f-375d-4b07-b078-6d10892b7b5a.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/c11bcc8f-375d-4b07-b078-6d10892b7b5a.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036781,
+            "mtime_ns": 1790882380420457431,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/c11bcc8f-375d-4b07-b078-6d10892b7b5a.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669"
+        ],
+        "cumulative_removed_db_names": [
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:26:53.538Z",
+        "keys": "bracketed paste 154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+        "output_excerpt": "Search: 154a09ec-3ca1-4ae8-b8fc-e468f5b876a8\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:26:54.646Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:26:55.754Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:26:55.972578+00:00",
+        "conversation_id": "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036782,
+            "mtime_ns": 1790882408074342616,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669"
+        ],
+        "cumulative_removed_db_names": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.db",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "e51ca819-7df6-466a-a60f-97142a847f7b",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:26:58.225Z",
+        "keys": "bracketed paste e51ca819-7df6-466a-a60f-97142a847f7b",
+        "output_excerpt": "Search: e51ca819-7df6-466a-a60f-97142a847f7b\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:26:59.331Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:27:00.439Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:27:00.653894+00:00",
+        "conversation_id": "e51ca819-7df6-466a-a60f-97142a847f7b",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/e51ca819-7df6-466a-a60f-97142a847f7b.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/e51ca819-7df6-466a-a60f-97142a847f7b",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/e51ca819-7df6-466a-a60f-97142a847f7b.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/e51ca819-7df6-466a-a60f-97142a847f7b.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036443,
+            "mtime_ns": 1790883723399917390,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/e51ca819-7df6-466a-a60f-97142a847f7b.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+          "e51ca819-7df6-466a-a60f-97142a847f7b"
+        ],
+        "cumulative_removed_db_names": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.db",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db",
+          "e51ca819-7df6-466a-a60f-97142a847f7b.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:27:02.911Z",
+        "keys": "bracketed paste a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+        "output_excerpt": "Search: a10dbd1e-ca03-4137-bb3d-ec55b8358ed5\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:27:04.018Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:27:05.126Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:27:05.329914+00:00",
+        "conversation_id": "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036803,
+            "mtime_ns": 1790883869102343258,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+          "e51ca819-7df6-466a-a60f-97142a847f7b"
+        ],
+        "cumulative_removed_db_names": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.db",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.db",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db",
+          "e51ca819-7df6-466a-a60f-97142a847f7b.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "489142fd-988d-4754-b310-141fceef4700",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:27:07.581Z",
+        "keys": "bracketed paste 489142fd-988d-4754-b310-141fceef4700",
+        "output_excerpt": "Search: 489142fd-988d-4754-b310-141fceef4700\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:27:08.687Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:27:09.796Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:27:10.007466+00:00",
+        "conversation_id": "489142fd-988d-4754-b310-141fceef4700",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/489142fd-988d-4754-b310-141fceef4700.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/489142fd-988d-4754-b310-141fceef4700",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/489142fd-988d-4754-b310-141fceef4700.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/489142fd-988d-4754-b310-141fceef4700.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036804,
+            "mtime_ns": 1790884085888191913,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/489142fd-988d-4754-b310-141fceef4700.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+          "489142fd-988d-4754-b310-141fceef4700",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+          "e51ca819-7df6-466a-a60f-97142a847f7b"
+        ],
+        "cumulative_removed_db_names": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.db",
+          "489142fd-988d-4754-b310-141fceef4700.db",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.db",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db",
+          "e51ca819-7df6-466a-a60f-97142a847f7b.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "9ec4a622-010a-4186-9776-4458bd7535dc",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:27:12.268Z",
+        "keys": "bracketed paste 9ec4a622-010a-4186-9776-4458bd7535dc",
+        "output_excerpt": "Search: 9ec4a622-010a-4186-9776-4458bd7535dc\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:27:13.377Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:27:14.485Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:27:14.699785+00:00",
+        "conversation_id": "9ec4a622-010a-4186-9776-4458bd7535dc",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/9ec4a622-010a-4186-9776-4458bd7535dc.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/9ec4a622-010a-4186-9776-4458bd7535dc",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/9ec4a622-010a-4186-9776-4458bd7535dc.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/9ec4a622-010a-4186-9776-4458bd7535dc.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036438,
+            "mtime_ns": 1790899331791822199,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/9ec4a622-010a-4186-9776-4458bd7535dc.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+          "489142fd-988d-4754-b310-141fceef4700",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "9ec4a622-010a-4186-9776-4458bd7535dc",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+          "e51ca819-7df6-466a-a60f-97142a847f7b"
+        ],
+        "cumulative_removed_db_names": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.db",
+          "489142fd-988d-4754-b310-141fceef4700.db",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "9ec4a622-010a-4186-9776-4458bd7535dc.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.db",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db",
+          "e51ca819-7df6-466a-a60f-97142a847f7b.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    },
+    {
+      "conversation_id": "8b31d994-6951-4962-9eb7-3328fef57dda",
+      "selection": {
+        "kind": "recorded_complete_uuid_filter",
+        "at": "2026-10-05T05:27:16.985Z",
+        "keys": "bracketed paste 8b31d994-6951-4962-9eb7-3328fef57dda",
+        "output_excerpt": "Search: 8b31d994-6951-4962-9eb7-3328fef57dda\n> <target-conversation>",
+        "selected_row_count": 1
+      },
+      "delete_request": {
+        "at": "2026-10-05T05:27:18.092Z",
+        "key": "F4 (ESC O S)",
+        "output_excerpt": "<target-conversation> [Delete? (y/n)]"
+      },
+      "native_confirmation": {
+        "at": "2026-10-05T05:27:19.199Z",
+        "key": "y",
+        "output_excerpt": "No matching conversations."
+      },
+      "independent_after": {
+        "checked_at": "2026-10-05T05:27:19.415637+00:00",
+        "conversation_id": "8b31d994-6951-4962-9eb7-3328fef57dda",
+        "summary_row_count": 0,
+        "paths": [
+          {
+            "path": "$HOME/.gemini/antigravity-cli/conversations/8b31d994-6951-4962-9eb7-3328fef57dda.db",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/brain/8b31d994-6951-4962-9eb7-3328fef57dda",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/annotations/8b31d994-6951-4962-9eb7-3328fef57dda.pbtxt",
+            "exists": false
+          },
+          {
+            "path": "$HOME/.gemini/antigravity-cli/presence/8b31d994-6951-4962-9eb7-3328fef57dda.lock",
+            "exists": true,
+            "size": 0,
+            "inode": 76036818,
+            "mtime_ns": 1790930324521490083,
+            "is_dir": false
+          }
+        ],
+        "held_locks": [],
+        "core_conversation_removed": true,
+        "residual_paths": [
+          "$HOME/.gemini/antigravity-cli/presence/8b31d994-6951-4962-9eb7-3328fef57dda.lock"
+        ],
+        "all_reviewed_paths_absent": false,
+        "cumulative_removed_summary_ids": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+          "489142fd-988d-4754-b310-141fceef4700",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+          "8b31d994-6951-4962-9eb7-3328fef57dda",
+          "9ec4a622-010a-4186-9776-4458bd7535dc",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+          "e51ca819-7df6-466a-a60f-97142a847f7b"
+        ],
+        "cumulative_removed_db_names": [
+          "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.db",
+          "489142fd-988d-4754-b310-141fceef4700.db",
+          "63659f75-f7f9-46a2-857a-f74d9f5eb4e8.db",
+          "737da8cb-adeb-46f6-b6c1-7ebe9169ee12.db",
+          "8b31d994-6951-4962-9eb7-3328fef57dda.db",
+          "9ec4a622-010a-4186-9776-4458bd7535dc.db",
+          "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.db",
+          "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.db",
+          "c11bcc8f-375d-4b07-b078-6d10892b7b5a.db",
+          "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.db",
+          "e51ca819-7df6-466a-a60f-97142a847f7b.db"
+        ],
+        "unexpected_removed_summary_ids": [],
+        "unexpected_removed_db_names": []
+      }
+    }
+  ],
+  "owned_pty_exit_code": 0
+}

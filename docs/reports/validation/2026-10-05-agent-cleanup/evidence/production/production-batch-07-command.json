@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-05T05:37:28.980390+00:00",
+  "finished_at": "2026-10-05T05:37:30.951413+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "remove",
+    "test-fake-multiturn",
+    "--purge-history",
+    "--yes"
+  ],
+  "exit_code": 0,
+  "elapsed_ms": 1971.03
+}

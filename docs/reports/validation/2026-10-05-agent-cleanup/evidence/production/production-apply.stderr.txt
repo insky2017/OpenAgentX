@@ -1,0 +1,12 @@
+agy-onboarding-e2e already offline
+codex-domain-e2e already offline
+domain-installed-a-8304eb9e5aa7 already offline
+domain-installed-a-9730f99e2b42 already offline
+domain-installed-b-8304eb9e5aa7 already offline
+domain-installed-b-9730f99e2b42 already offline
+external-installed-a-51e44952c2 already offline
+external-installed-b-51e44952c2 already offline
+test-fake-agent already offline
+test-fake-multiturn already offline
+verification-runner already offline
+Agent remove 未完成: database purge failed after 2015 ms: remove principals: context deadline exceeded；已报告的步骤不会自动回滚，修复阻断后可对相同 ID 重试。

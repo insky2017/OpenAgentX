@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-05T04:34:00.645536+00:00",
+  "marker": "OAX-CLEANUP-NEXT-6e5cb6722e93",
+  "text": "Write next-proof.txt in the assigned workspace containing exactly OAX-CLEANUP-NEXT-6e5cb6722e93 followed by one newline. Then reply exactly OAX-CLEANUP-NEXT-6e5cb6722e93. Do nothing else.",
+  "recovered_from": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/evidence/tmux/0018.json",
+  "rule": "instruction already typed and existing draft submitted; never resend content"
+}

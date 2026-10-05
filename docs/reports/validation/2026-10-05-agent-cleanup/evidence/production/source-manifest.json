@@ -1,0 +1,315 @@
+[
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/release-build.json",
+    "export": "release-build.json",
+    "source_sha256": "b022904bc65b448467cef507e5d4064ce60e3e4b2733bd799d9856a90cc371d7",
+    "export_sha256": "b022904bc65b448467cef507e5d4064ce60e3e4b2733bd799d9856a90cc371d7"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/installation.json",
+    "export": "installation.json",
+    "source_sha256": "2059b37c779963d7c5e34755d329a2ca4cc4f57436d576d1b9226576820521ea",
+    "export_sha256": "2059b37c779963d7c5e34755d329a2ca4cc4f57436d576d1b9226576820521ea"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/before-install.json",
+    "export": "before-install.json",
+    "source_sha256": "cdd90f3292f0ae5ad5e9858c87678b4ddb5a00219431e9b6d21a27199a403ce3",
+    "export_sha256": "cdd90f3292f0ae5ad5e9858c87678b4ddb5a00219431e9b6d21a27199a403ce3"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-preview-final.stdout.jsonl",
+    "export": "production-preview-final.stdout.jsonl",
+    "source_sha256": "cc1d274bd17263ea35b129d896edba4eae51ccd30a4abc1c33bbf949f1ec1c72",
+    "export_sha256": "cc1d274bd17263ea35b129d896edba4eae51ccd30a4abc1c33bbf949f1ec1c72"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-apply.stdout.jsonl",
+    "export": "production-apply.stdout.jsonl",
+    "source_sha256": "7e9c10554d41135a0c4bd7700009b11c5990b0b362c93201654d1a11f3a73e0e",
+    "export_sha256": "7e9c10554d41135a0c4bd7700009b11c5990b0b362c93201654d1a11f3a73e0e"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-apply.stderr.txt",
+    "export": "production-apply.stderr.txt",
+    "source_sha256": "c9585539dab469170822f8809124f529c1dcdb9267fac3e659f9bbe203424185",
+    "export_sha256": "c9585539dab469170822f8809124f529c1dcdb9267fac3e659f9bbe203424185"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-apply-command.json",
+    "export": "production-apply-command.json",
+    "source_sha256": "2d003e9de2d7e3580cc8afa2a1f0ff2034e513b89877e3939a8900256c754a62",
+    "export_sha256": "2d003e9de2d7e3580cc8afa2a1f0ff2034e513b89877e3939a8900256c754a62"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/after-first-attempt.json",
+    "export": "after-first-attempt.json",
+    "source_sha256": "7d30cb35ee09e42e329d2bdaafa1aafb43cb449013dffdb7b77d2b4bb0fdbb24",
+    "export_sha256": "7d30cb35ee09e42e329d2bdaafa1aafb43cb449013dffdb7b77d2b4bb0fdbb24"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/first-attempt-rollback-verification.json",
+    "export": "first-attempt-rollback-verification.json",
+    "source_sha256": "8d397074eb1cf202c205a3fc4bd4820307724e8c2e78469c90f1470b48e84c18",
+    "export_sha256": "8d397074eb1cf202c205a3fc4bd4820307724e8c2e78469c90f1470b48e84c18"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/owned-workspaces-plan.json",
+    "export": "owned-workspaces-plan.json",
+    "source_sha256": "d65dabd104bec3b4bab9d45a71c360f5c592e3fb0a1c5ae76228c735ef764df0",
+    "export_sha256": "d65dabd104bec3b4bab9d45a71c360f5c592e3fb0a1c5ae76228c735ef764df0"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/go-test-final.log",
+    "export": "go-test-final.log",
+    "source_sha256": "95070b84b75534dc5087dda58422af6e2e4bc2974c3e55c8c1b885229a1e1f0d",
+    "export_sha256": "95070b84b75534dc5087dda58422af6e2e4bc2974c3e55c8c1b885229a1e1f0d"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/go-test-all.log",
+    "export": "go-test-all.log",
+    "source_sha256": "782dc444f9d1e6995a5f8aea4ef843ac206f0c23157b207f8d0ab552407d6674",
+    "export_sha256": "782dc444f9d1e6995a5f8aea4ef843ac206f0c23157b207f8d0ab552407d6674"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/after-cleanup.json",
+    "export": "after-cleanup.json",
+    "source_sha256": "758ba077f43de17f8b8aa6df4ab37209e762ac981de24ac07fdab54a1c887ace",
+    "export_sha256": "758ba077f43de17f8b8aa6df4ab37209e762ac981de24ac07fdab54a1c887ace"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/final-continuity.json",
+    "export": "final-continuity.json",
+    "source_sha256": "eb2373fb670d9a11bd70f44b2e5322f3d52616f4a282d306c78c2eed183439b4",
+    "export_sha256": "eb2373fb670d9a11bd70f44b2e5322f3d52616f4a282d306c78c2eed183439b4"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/owned-workspaces-deletion.json",
+    "export": "owned-workspaces-deletion.json",
+    "source_sha256": "506b345f167ce5ae0320b4964a34665b1b8e995051954ed2f9575ffc80557fa5",
+    "export_sha256": "506b345f167ce5ae0320b4964a34665b1b8e995051954ed2f9575ffc80557fa5"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batches-plan.json",
+    "export": "production-batches-plan.json",
+    "source_sha256": "3bf3428430c1e857af68f52c2441f7a3812484447c88fd28c3ba60ec6030cfc3",
+    "export_sha256": "3bf3428430c1e857af68f52c2441f7a3812484447c88fd28c3ba60ec6030cfc3"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/overview-after.txt",
+    "export": "overview-after.txt",
+    "source_sha256": "0e489fd9fe270e2c63ae241b67fb44c3113d393d9dbc59aa959e255a3ccf6dee",
+    "export_sha256": "970ce1b701fe707cb501beffc6941a142f2a6b36326ff1fdf682767417505cf8",
+    "transform": "Trim trailing blank lines for Git; raw tmux capture preserved at source."
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/overview-capture-command.json",
+    "export": "overview-capture-command.json",
+    "source_sha256": "756ae06ae886d6134dbf0d374eae9fcf10d0b6904c372caf283e2ffd613e82bd",
+    "export_sha256": "756ae06ae886d6134dbf0d374eae9fcf10d0b6904c372caf283e2ffd613e82bd"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-availability.jsonl",
+    "export": "live-availability.jsonl",
+    "source_sha256": "12ab0f19061044f0852c077e39448e5eb3c0e1b0822be3fb531c7afe19043e90",
+    "export_sha256": "12ab0f19061044f0852c077e39448e5eb3c0e1b0822be3fb531c7afe19043e90"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-availability-continued.jsonl",
+    "export": "live-availability-continued.jsonl",
+    "source_sha256": "0bd29eb23cd11f1232e7cdeb12ec5e6ef93e30607bd81318d4de1c9ad503731b",
+    "export_sha256": "0bd29eb23cd11f1232e7cdeb12ec5e6ef93e30607bd81318d4de1c9ad503731b"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-01.stdout.jsonl",
+    "export": "production-batch-01.stdout.jsonl",
+    "source_sha256": "706ee0a5254c126979a14e351671687f5b7455e8c7b002b62247c6b67e5f5f3c",
+    "export_sha256": "706ee0a5254c126979a14e351671687f5b7455e8c7b002b62247c6b67e5f5f3c"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-01.stderr.txt",
+    "export": "production-batch-01.stderr.txt",
+    "source_sha256": "3c10b2538cd3e5599d9d78ef1b24997c64e72786cc5948ce59efc5d549378282",
+    "export_sha256": "3c10b2538cd3e5599d9d78ef1b24997c64e72786cc5948ce59efc5d549378282"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-01-command.json",
+    "export": "production-batch-01-command.json",
+    "source_sha256": "02869f32bd03d9d1347a22172185a56d0dd96fea3275a6dd255b44f0bb9a3a32",
+    "export_sha256": "02869f32bd03d9d1347a22172185a56d0dd96fea3275a6dd255b44f0bb9a3a32"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-02.stdout.jsonl",
+    "export": "production-batch-02.stdout.jsonl",
+    "source_sha256": "4c40fd37e050b98c3a9916ff7f91ca9e75315899067e70a65b8e59f751ea080c",
+    "export_sha256": "4c40fd37e050b98c3a9916ff7f91ca9e75315899067e70a65b8e59f751ea080c"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-02.stderr.txt",
+    "export": "production-batch-02.stderr.txt",
+    "source_sha256": "ee83569faa6d227f44f3cf6c0252c05730cd08b745da7be02ed6268b35487a42",
+    "export_sha256": "ee83569faa6d227f44f3cf6c0252c05730cd08b745da7be02ed6268b35487a42"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-02-command.json",
+    "export": "production-batch-02-command.json",
+    "source_sha256": "ddc0ad9eba15fe2837d407fa88f0295ba89e8ab85eee3c65e3f9f77052bb9cfe",
+    "export_sha256": "ddc0ad9eba15fe2837d407fa88f0295ba89e8ab85eee3c65e3f9f77052bb9cfe"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-03.stdout.jsonl",
+    "export": "production-batch-03.stdout.jsonl",
+    "source_sha256": "84767043ab49f893cc150f2c3a51bacede5d8c12f12ea6613a79ebecabca89d0",
+    "export_sha256": "84767043ab49f893cc150f2c3a51bacede5d8c12f12ea6613a79ebecabca89d0"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-03.stderr.txt",
+    "export": "production-batch-03.stderr.txt",
+    "source_sha256": "38493b17719b981e58aad3696fa7a10dca4350c60b937c79c367b3d0c242684f",
+    "export_sha256": "38493b17719b981e58aad3696fa7a10dca4350c60b937c79c367b3d0c242684f"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-03-command.json",
+    "export": "production-batch-03-command.json",
+    "source_sha256": "2647c117dfaf0ec739b4e2f88f6ce21453a4f1656ecfcf08329118ed5a2ca922",
+    "export_sha256": "2647c117dfaf0ec739b4e2f88f6ce21453a4f1656ecfcf08329118ed5a2ca922"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-04.stdout.jsonl",
+    "export": "production-batch-04.stdout.jsonl",
+    "source_sha256": "2142c5173b793fd37d0f0c18541527be50e7b07a55c697d292951a5e7d893eba",
+    "export_sha256": "2142c5173b793fd37d0f0c18541527be50e7b07a55c697d292951a5e7d893eba"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-04.stderr.txt",
+    "export": "production-batch-04.stderr.txt",
+    "source_sha256": "cce4eee3fc0a8c604adf8cb68c13c1df8437e18c594f0fa5e307122a2f96e8e7",
+    "export_sha256": "cce4eee3fc0a8c604adf8cb68c13c1df8437e18c594f0fa5e307122a2f96e8e7"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-04-command.json",
+    "export": "production-batch-04-command.json",
+    "source_sha256": "9efa5a34cff10eeac7b1f8bd87403334f4ae42e9e5d5be07dcc685c54ef3c0a3",
+    "export_sha256": "9efa5a34cff10eeac7b1f8bd87403334f4ae42e9e5d5be07dcc685c54ef3c0a3"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-05.stdout.jsonl",
+    "export": "production-batch-05.stdout.jsonl",
+    "source_sha256": "d452662b5fa62d264f265b9c22f1f7f89b8035fee336b7387c50128fffb336ec",
+    "export_sha256": "d452662b5fa62d264f265b9c22f1f7f89b8035fee336b7387c50128fffb336ec"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-05.stderr.txt",
+    "export": "production-batch-05.stderr.txt",
+    "source_sha256": "cc822b0913b4176d4a1c540dfb8428cb5e307bad88aa5eae971bfacbe0966da4",
+    "export_sha256": "cc822b0913b4176d4a1c540dfb8428cb5e307bad88aa5eae971bfacbe0966da4"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-05-command.json",
+    "export": "production-batch-05-command.json",
+    "source_sha256": "d70b3713f148687be3c131cb0617be743ed9d5a5ce9dacd2a39e2c148cd02dce",
+    "export_sha256": "d70b3713f148687be3c131cb0617be743ed9d5a5ce9dacd2a39e2c148cd02dce"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-06.stdout.jsonl",
+    "export": "production-batch-06.stdout.jsonl",
+    "source_sha256": "85b34c8f67723ddc13aa7beb70035a63d442820755b3778d5439e5c484c82c38",
+    "export_sha256": "85b34c8f67723ddc13aa7beb70035a63d442820755b3778d5439e5c484c82c38"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-06.stderr.txt",
+    "export": "production-batch-06.stderr.txt",
+    "source_sha256": "ed82654557c4fe14bbc86fe0ddb8fdaad66d6451883381a5d0c0d820024f87e5",
+    "export_sha256": "ed82654557c4fe14bbc86fe0ddb8fdaad66d6451883381a5d0c0d820024f87e5"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-06-command.json",
+    "export": "production-batch-06-command.json",
+    "source_sha256": "d1411f977781ea4731a3df981742b3d69deb2d8477f69445e9ba2e7bf00bdbe7",
+    "export_sha256": "d1411f977781ea4731a3df981742b3d69deb2d8477f69445e9ba2e7bf00bdbe7"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-07.stdout.jsonl",
+    "export": "production-batch-07.stdout.jsonl",
+    "source_sha256": "082d6add168d0f598c5ded41304c50a56cb3057f29a1f49162bc21f8c9abbaa8",
+    "export_sha256": "082d6add168d0f598c5ded41304c50a56cb3057f29a1f49162bc21f8c9abbaa8"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-07.stderr.txt",
+    "export": "production-batch-07.stderr.txt",
+    "source_sha256": "8d2de6f535ce6db12d8d814ed666275e0a9296fc2811c33c677ca3c661785eb1",
+    "export_sha256": "8d2de6f535ce6db12d8d814ed666275e0a9296fc2811c33c677ca3c661785eb1"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-07-command.json",
+    "export": "production-batch-07-command.json",
+    "source_sha256": "11d0d919f977c37085ca21b13b32bd190a9f2db26740cac6f3d61e73a27a850e",
+    "export_sha256": "11d0d919f977c37085ca21b13b32bd190a9f2db26740cac6f3d61e73a27a850e"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-08.stdout.jsonl",
+    "export": "production-batch-08.stdout.jsonl",
+    "source_sha256": "45c72d2c99b00f0aad4ca89e2e12d8ec09976c0f58bbdc30e6f7c2f199ea6ee9",
+    "export_sha256": "45c72d2c99b00f0aad4ca89e2e12d8ec09976c0f58bbdc30e6f7c2f199ea6ee9"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-08.stderr.txt",
+    "export": "production-batch-08.stderr.txt",
+    "source_sha256": "51d848453340bb8f715e64cebe2266870f6e0480cc3a79d3e354b1a7f6f95db6",
+    "export_sha256": "51d848453340bb8f715e64cebe2266870f6e0480cc3a79d3e354b1a7f6f95db6"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-batch-08-command.json",
+    "export": "production-batch-08-command.json",
+    "source_sha256": "a2ba703f32905d72a5d514c6c2826e45c1ebc28053089a87a22065ef8bbd47eb",
+    "export_sha256": "a2ba703f32905d72a5d514c6c2826e45c1ebc28053089a87a22065ef8bbd47eb"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/bounded-results.json",
+    "export": "bounded-results.json",
+    "source_sha256": "cfe2c99401e37ce3e92121cdff34f5930afe329a59bd4145d39a95fbb87d85aa",
+    "export_sha256": "cfe2c99401e37ce3e92121cdff34f5930afe329a59bd4145d39a95fbb87d85aa"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/batches-integrity.log",
+    "export": "batches-integrity.log",
+    "source_sha256": "cfe2bbe52a2d3120ae6b609a0bfd3d77e88a28eabbe4657c244abf7e9b045acf",
+    "export_sha256": "cfe2bbe52a2d3120ae6b609a0bfd3d77e88a28eabbe4657c244abf7e9b045acf"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/principal-baseline.json",
+    "export": "principal-baseline.json",
+    "source_sha256": "d9a9920b86f7f07ece10e01e99489b238c862c17caf51d3fd361a4615e3e6ea8",
+    "export_sha256": "d9a9920b86f7f07ece10e01e99489b238c862c17caf51d3fd361a4615e3e6ea8"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/baseline-metadata.json",
+    "export": "baseline-metadata.json",
+    "source_sha256": "3e77c82ef9c02dd50d2f72f3bafd36f1116dbb255206e6c336c929fdb6a53085",
+    "export_sha256": "3e77c82ef9c02dd50d2f72f3bafd36f1116dbb255206e6c336c929fdb6a53085"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/private-copy-deletion-receipt.json",
+    "export": "private-copy-deletion-receipt.json",
+    "source_sha256": "91961f3a118a55bdd10e0b7eabf73dae9aeba04e0e2bdf2fab24e3e854bb7205",
+    "export_sha256": "91961f3a118a55bdd10e0b7eabf73dae9aeba04e0e2bdf2fab24e3e854bb7205"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance/agent_removal_perf_test.go.txt",
+    "export": "agent_removal_perf_test.go.txt",
+    "source_sha256": "5de26406ffff176c54fc951f05230006db52a1280c3140203b38af086a02b4d8",
+    "export_sha256": "5de26406ffff176c54fc951f05230006db52a1280c3140203b38af086a02b4d8"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/production-summary.json",
+    "export": "production-summary.json",
+    "source_sha256": "193d4defbcff15a178c8959c4fb41b331b5e83778b534e5561c09a3f0ede82b0",
+    "export_sha256": "193d4defbcff15a178c8959c4fb41b331b5e83778b534e5561c09a3f0ede82b0"
+  },
+  {
+    "source": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/post-cleanup-runtime-difference.json",
+    "export": "post-cleanup-runtime-difference.json",
+    "source_sha256": "dba86290f33c3312fa6feaff6569e25a6bbc4f49f39735e2419e8e40b38d56c8",
+    "export_sha256": "dba86290f33c3312fa6feaff6569e25a6bbc4f49f39735e2419e8e40b38d56c8"
+  }
+]

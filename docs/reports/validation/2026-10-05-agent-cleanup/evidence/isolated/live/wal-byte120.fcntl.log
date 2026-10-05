@@ -1,0 +1,4 @@
+2821891 1791174511.657646 fcntl(9</home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/data/openagentx.db-shm>, F_SETLK, {l_type=F_WRLCK, l_whence=SEEK_SET, l_start=120, l_len=1}) = 0
+2821802 1791174511.701151 fcntl(9</home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/data/openagentx.db-shm>, F_SETLK, {l_type=F_UNLCK, l_whence=SEEK_SET, l_start=120, l_len=1}) = 0
+2821946 1791174511.750005 fcntl(9</home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/data/openagentx.db-shm>, F_SETLK, {l_type=F_WRLCK, l_whence=SEEK_SET, l_start=120, l_len=1}) = 0
+2821946 1791174511.802834 fcntl(9</home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/data/openagentx.db-shm>, F_SETLK, {l_type=F_UNLCK, l_whence=SEEK_SET, l_start=120, l_len=1}) = 0

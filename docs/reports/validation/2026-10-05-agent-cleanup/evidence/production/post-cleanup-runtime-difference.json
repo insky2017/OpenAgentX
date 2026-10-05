@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-10-05T07:52:14.635035+00:00",
+  "cleanup_after_snapshot": "2026-10-05T05:38:16.555650+00:00",
+  "process_start_times": [
+    {
+      "pid": 3218736,
+      "role": "codex_engine",
+      "started_at_utc": "2026-10-05T05:39:15.240000+00:00"
+    },
+    {
+      "pid": 3667798,
+      "role": "native_bridge",
+      "started_at_utc": "2026-10-05T07:47:04.390000+00:00"
+    },
+    {
+      "pid": 3668048,
+      "role": "codex_tui",
+      "started_at_utc": "2026-10-05T07:47:05.500000+00:00"
+    }
+  ],
+  "journal_metadata": [],
+  "raw_journal_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "cause": "not established; no restart was performed by this cleanup sequence"
+}

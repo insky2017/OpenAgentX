@@ -1,0 +1,162 @@
+package sqlite
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"sort"
+	"testing"
+	"time"
+)
+
+// Temporary bounded diagnostic: reads only a designated private online backup,
+// and all mutations happen to fresh disposable copies under testing.T.TempDir.
+func TestAgentRemovalPrivateSnapshotBatches(t *testing.T) {
+	const root = "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/private/performance"
+	if os.Getenv("OAX_REMOVAL_PRIVATE_PERF") != "1" {
+		t.Skip("explicit private backup diagnostic only")
+	}
+	idsRaw, err := os.ReadFile(filepath.Join(root, "ids.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var ids []string
+	if err = json.Unmarshal(idsRaw, &ids); err != nil {
+		t.Fatal(err)
+	}
+	variants := []struct {
+		name   string
+		groups [][]string
+	}{
+
+		{"bounded", [][]string{{"agy-onboarding-e2e"}, {"codex-domain-e2e"}, {"domain-installed-a-8304eb9e5aa7", "domain-installed-b-8304eb9e5aa7"}, {"domain-installed-a-9730f99e2b42", "domain-installed-b-9730f99e2b42"}, {"external-installed-a-51e44952c2", "external-installed-b-51e44952c2"}, {"test-fake-agent"}, {"test-fake-multiturn"}, {"verification-runner"}}},
+	}
+	for _, variant := range variants {
+		t.Run(variant.name, func(t *testing.T) {
+			source, err := os.Open(filepath.Join(root, "snapshot.db"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			target := filepath.Join(t.TempDir(), "private-copy.db")
+			out, err := os.OpenFile(target, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = io.Copy(out, source)
+			out.Close()
+			source.Close()
+			if err != nil {
+				t.Fatal(err)
+			}
+			ctx := context.Background()
+			r, err := OpenMaintenance(ctx, target, false, Options{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer r.Close()
+			var actor string
+			if err = r.db.QueryRow(`SELECT principal_id FROM web_users WHERE status='active' AND EXISTS(SELECT 1 FROM json_each(roles_json) WHERE value='owner') LIMIT 1`).Scan(&actor); err != nil {
+				t.Fatal(err)
+			}
+			before := removalRetainedDigest(t, r, ids)
+			for _, group := range variant.groups {
+				start := time.Now()
+				p, err := r.PlanAgentRemoval(ctx, actor, group)
+				if err != nil {
+					t.Fatal(err)
+				}
+				planMS := time.Since(start).Milliseconds()
+				if len(p.Blockers) > 0 || len(p.WorkersToStop) > 0 {
+					t.Logf("group=%v plan_ms=%d blockers=%v workers=%d", group, planMS, p.Blockers, len(p.WorkersToStop))
+					if variant.name != "all" {
+						t.Fail()
+					}
+					continue
+				}
+				start = time.Now()
+				profiled := newRepository(r.db, Options{FaultInjector: func(point FaultPoint) error {
+					t.Logf("group=%v stage=%s elapsed_ms=%d", group, point, time.Since(start).Milliseconds())
+					return nil
+				}})
+				_, err = profiled.ApplyAgentRemoval(ctx, actor, group, p.Digest)
+				elapsed := time.Since(start)
+				t.Logf("group=%v journal=%d plan_ms=%d apply_ms=%d err=%v", group, p.Counts["event_journal"], planMS, elapsed.Milliseconds(), err)
+				if err != nil && variant.name != "all" {
+					t.Fail()
+				}
+			}
+			after := removalRetainedDigest(t, r, ids)
+			if before != after {
+				t.Fatal("retained rows changed")
+			}
+			var agentCount, scopeCount, receiptCount int
+			if err = r.db.QueryRow("SELECT count(*) FROM agents").Scan(&agentCount); err != nil {
+				t.Fatal(err)
+			}
+			if err = r.db.QueryRow("SELECT count(*) FROM agent_removal_scope").Scan(&scopeCount); err != nil {
+				t.Fatal(err)
+			}
+			if err = r.db.QueryRow("SELECT count(*) FROM agent_removal_receipts").Scan(&receiptCount); err != nil {
+				t.Fatal(err)
+			}
+			var violation any
+			rows, err := r.db.Query("PRAGMA foreign_key_check")
+			if err != nil {
+				t.Fatal(err)
+			}
+			violation = rows.Next()
+			rows.Close()
+			if agentCount != 7 || scopeCount != 0 || receiptCount != 8 || violation != false {
+				t.Fatalf("integrity counts agents=%d scope=%d receipts=%d fk=%v", agentCount, scopeCount, receiptCount, violation)
+			}
+			t.Logf("retained_integrity=PASS sha256=%s remaining_agents=%d scope=%d receipts=%d foreign_keys=PASS", after, agentCount, scopeCount, receiptCount)
+		})
+	}
+}
+
+func removalRetainedDigest(t *testing.T, r *Repository, ids []string) string {
+	t.Helper()
+	predicates := removalPredicates(ids)
+	tables := make([]string, 0, len(predicates))
+	for name := range predicates {
+		tables = append(tables, name)
+	}
+	sort.Strings(tables)
+	h := sha256.New()
+	encoder := json.NewEncoder(h)
+	for _, table := range tables {
+		if err := encoder.Encode(table); err != nil {
+			t.Fatal(err)
+		}
+		rows, err := r.db.Query("SELECT rowid,* FROM " + table + " WHERE NOT (" + predicates[table] + ") ORDER BY rowid")
+		if err != nil {
+			t.Fatal(err)
+		}
+		columns, err := rows.Columns()
+		if err != nil {
+			t.Fatal(err)
+		}
+		values := make([]any, len(columns))
+		dest := make([]any, len(columns))
+		for i := range values {
+			dest[i] = &values[i]
+		}
+		for rows.Next() {
+			if err = rows.Scan(dest...); err != nil {
+				t.Fatal(err)
+			}
+			if err = encoder.Encode(values); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err = rows.Err(); err != nil {
+			t.Fatal(err)
+		}
+		rows.Close()
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
+}

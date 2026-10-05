@@ -1,0 +1,125 @@
+{
+  "checked_at": "2026-10-05T05:28:45.173253+00:00",
+  "approved_count": 11,
+  "native_deleted_count": 11,
+  "other_summary_ids_removed": [],
+  "other_conversation_db_files_removed": [],
+  "other_summary_ids_preserved": true,
+  "other_conversation_db_files_preserved": true,
+  "all_test_history_removed": true,
+  "empty_presence_lock_files_retained": 11,
+  "held_test_locks": [],
+  "owned_pty_exit_code": 0,
+  "objects": [
+    {
+      "id": "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/154a09ec-3ca1-4ae8-b8fc-e468f5b876a8.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "489142fd-988d-4754-b310-141fceef4700",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/489142fd-988d-4754-b310-141fceef4700.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/63659f75-f7f9-46a2-857a-f74d9f5eb4e8.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/737da8cb-adeb-46f6-b6c1-7ebe9169ee12.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "8b31d994-6951-4962-9eb7-3328fef57dda",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/8b31d994-6951-4962-9eb7-3328fef57dda.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "9ec4a622-010a-4186-9776-4458bd7535dc",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/9ec4a622-010a-4186-9776-4458bd7535dc.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/9f5dd97c-62aa-4393-acdf-dcf0182fb2c7.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/a10dbd1e-ca03-4137-bb3d-ec55b8358ed5.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/c11bcc8f-375d-4b07-b078-6d10892b7b5a.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    },
+    {
+      "id": "e51ca819-7df6-466a-a60f-97142a847f7b",
+      "summary_rows": 0,
+      "conversation_db_absent": true,
+      "brain_absent": true,
+      "annotations_absent": true,
+      "presence_lock_retained": "$HOME/.gemini/antigravity-cli/presence/e51ca819-7df6-466a-a60f-97142a847f7b.lock",
+      "presence_lock_bytes": 0,
+      "presence_inode_unchanged": true
+    }
+  ]
+}

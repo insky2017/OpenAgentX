@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-05T05:37:18.015232+00:00",
+  "finished_at": "2026-10-05T05:37:20.839394+00:00",
+  "argv": [
+    "/home/sky/.local/bin/openagentx",
+    "agent",
+    "remove",
+    "domain-installed-a-8304eb9e5aa7",
+    "domain-installed-b-8304eb9e5aa7",
+    "--purge-history",
+    "--yes"
+  ],
+  "exit_code": 0,
+  "elapsed_ms": 2824.17
+}

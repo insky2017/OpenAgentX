@@ -1,0 +1,388 @@
+{
+  "captured_at": "2026-10-05T04:26:14.516197+00:00",
+  "versions": {
+    "codex": "codex-cli 0.160.0",
+    "agy": "1.2.16"
+  },
+  "source": "private/native-history/readonly-metadata-before.json",
+  "exclusive_bindings": [
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "489142fd-988d-4754-b310-141fceef4700"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "63659f75-f7f9-46a2-857a-f74d9f5eb4e8"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "737da8cb-adeb-46f6-b6c1-7ebe9169ee12"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "8b31d994-6951-4962-9eb7-3328fef57dda"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "9ec4a622-010a-4186-9776-4458bd7535dc"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "c11bcc8f-375d-4b07-b078-6d10892b7b5a"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669"
+    ],
+    [
+      "agy-onboarding-e2e",
+      "agy",
+      "e51ca819-7df6-466a-a60f-97142a847f7b"
+    ],
+    [
+      "codex-domain-e2e",
+      "codex",
+      "01a0fb9b-4097-79d3-902f-6603a844fa15"
+    ]
+  ],
+  "other_agent_bindings": [],
+  "codex_metadata": [
+    [
+      "01a0fb9b-4097-79d3-902f-6603a844fa15",
+      "$HOME/.codex/sessions/2026/10/02/rollout-2026-10-02T15-54-10-01a0fb9b-4097-79d3-902f-6603a844fa15.jsonl",
+      "$HOME/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace",
+      0,
+      "paginated"
+    ]
+  ],
+  "codex_spawn_edges": [],
+  "codex_readonly_protocol_probe": {
+    "pid": 2803499,
+    "argv": [
+      "codex",
+      "app-server",
+      "--stdio"
+    ],
+    "initialize": {
+      "userAgent": "oax_cleanup_readonly_probe/0.160.0 (Ubuntu 24.4.0; x86_64) dumb (oax_cleanup_readonly_probe; 1)",
+      "codexHome": "$HOME/.codex",
+      "platformFamily": "unix",
+      "platformOs": "linux"
+    },
+    "loaded": {
+      "data": [],
+      "nextCursor": null
+    },
+    "thread": {
+      "id": "01a0fb9b-4097-79d3-902f-6603a844fa15",
+      "path": "$HOME/.codex/sessions/2026/10/02/rollout-2026-10-02T15-54-10-01a0fb9b-4097-79d3-902f-6603a844fa15.jsonl",
+      "cwd": "$HOME/.local/state/openagentx/validation/2026-10-02-codex-workflow/installed01/workspace",
+      "status": {
+        "type": "notLoaded"
+      },
+      "ephemeral": false
+    },
+    "descendants": {
+      "False": {
+        "ids": [],
+        "nextCursor": null
+      },
+      "True": {
+        "ids": [],
+        "nextCursor": null
+      }
+    },
+    "mutation_methods_called": [],
+    "own_child_exit_code": 0
+  },
+  "agy_conversations": [
+    {
+      "id": "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "154a09ec-3ca1-4ae8-b8fc-e468f5b876a8",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "489142fd-988d-4754-b310-141fceef4700",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "489142fd-988d-4754-b310-141fceef4700",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "63659f75-f7f9-46a2-857a-f74d9f5eb4e8",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "737da8cb-adeb-46f6-b6c1-7ebe9169ee12",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "8b31d994-6951-4962-9eb7-3328fef57dda",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "8b31d994-6951-4962-9eb7-3328fef57dda",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "9ec4a622-010a-4186-9776-4458bd7535dc",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "9ec4a622-010a-4186-9776-4458bd7535dc",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "9f5dd97c-62aa-4393-acdf-dcf0182fb2c7",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "a10dbd1e-ca03-4137-bb3d-ec55b8358ed5",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "c11bcc8f-375d-4b07-b078-6d10892b7b5a",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "cc064bc9-b5ef-4e7e-a93d-ac45aa6fa669",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    },
+    {
+      "id": "e51ca819-7df6-466a-a60f-97142a847f7b",
+      "summary_metadata_columns": [
+        "conversation_id",
+        "workspace_uris",
+        "status",
+        "source",
+        "parent_conversation_id",
+        "not_fully_idle",
+        "killed",
+        "app_data_dir"
+      ],
+      "summary_metadata": [
+        "e51ca819-7df6-466a-a60f-97142a847f7b",
+        "[\"file://$HOME/.local/state/openagentx/evidence/installed-17d5cd2-onboarding01/workspace\"]",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "antigravity-cli"
+      ]
+    }
+  ],
+  "agy_descendants": [],
+  "test_held_locks": [],
+  "protected_agent_guard": {
+    "identity-service": "Protected Agents cannot be cleaned: identity-service",
+    "oneaxe-pay": "Protected Agents cannot be cleaned: oneaxe-pay",
+    "oneaxe-voice": "Protected Agents cannot be cleaned: oneaxe-voice",
+    "openagentx": "Protected Agents cannot be cleaned: openagentx",
+    "orchestrator": "Protected Agents cannot be cleaned: orchestrator",
+    "pay-service": "Protected Agents cannot be cleaned: pay-service",
+    "quote-service": "Protected Agents cannot be cleaned: quote-service",
+    "rhythm": "Protected Agents cannot be cleaned: rhythm"
+  },
+  "existing_service_identity_unchanged_during_readonly_probe": true
+}

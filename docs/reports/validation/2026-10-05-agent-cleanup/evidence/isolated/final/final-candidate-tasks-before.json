@@ -1,0 +1,594 @@
+{
+  "task-09a46163-f230-4482-9c78-091bf37acb64": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-09a46163-f230-4482-9c78-091bf37acb64",
+      "version": 3,
+      "target_agent_id": "cleanup-keep-9d6ee7",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Write next-proof.txt in the assigned workspace containing exactly OAX-CLEANUP-NEXT-6e5cb6722e93 followed by one newline. Then reply exactly OAX-CLEANUP-NEXT-6e5cb6722e93. Do nothing else.",
+      "status": "uncertain",
+      "result": "OAX-CLEANUP-NEXT-6e5cb6722e93",
+      "error": "business_effect_unverified",
+      "outcome_state": "available",
+      "created_at": "2026-10-05T04:33:00.35612977Z",
+      "updated_at": "2026-10-05T04:33:12.950410022Z"
+    },
+    "messages": [
+      {
+        "id": "message-5637605e-64d6-4fda-ac4a-6c243993f4c7",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-09a46163-f230-4482-9c78-091bf37acb64",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-bf55f983-3d4d-4c1f-a2ad-08b619c9754a",
+        "target_agent_id": "cleanup-keep-9d6ee7",
+        "kind": "instruction",
+        "content": "Write next-proof.txt in the assigned workspace containing exactly OAX-CLEANUP-NEXT-6e5cb6722e93 followed by one newline. Then reply exactly OAX-CLEANUP-NEXT-6e5cb6722e93. Do nothing else.",
+        "created_at": "2026-10-05T04:33:00.35612977Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-05T05:03:00.359901382Z",
+        "instructions_sha256": "8831de049239cd4d91681c1002dbd4e2e128a25338de3223b77d38ca91aed851",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-keep-9d6ee7.role.md",
+        "run_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "task_id": "task-09a46163-f230-4482-9c78-091bf37acb64",
+        "agent_id": "cleanup-keep-9d6ee7",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-12f05b6f-2681-4efe-aa65-2391c994e032",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-CLEANUP-NEXT-6e5cb6722e93",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-05T04:33:00.359901382Z",
+        "finished_at": "2026-10-05T04:33:12.950410022Z",
+        "created_at": "2026-10-05T04:33:00.359901382Z",
+        "updated_at": "2026-10-05T04:33:12.950410022Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 91,
+        "event_id": "event-5db39a8b-5f01-4501-99e9-f0be3e8badc8",
+        "aggregate_type": "task",
+        "aggregate_id": "task-09a46163-f230-4482-9c78-091bf37acb64",
+        "event_type": "task.created",
+        "created_at": "2026-10-05T04:33:00.35612977Z"
+      },
+      {
+        "sequence": 93,
+        "event_id": "event-task-aa605130-1839-49bc-a776-5368b2bde537",
+        "aggregate_type": "task",
+        "aggregate_id": "task-09a46163-f230-4482-9c78-091bf37acb64",
+        "event_type": "task.running",
+        "created_at": "2026-10-05T04:33:00.360906485Z"
+      },
+      {
+        "sequence": 94,
+        "event_id": "event-run-e17879d8-1105-4f04-9b5d-c663fd945582",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-05T04:33:00.360910782Z"
+      },
+      {
+        "sequence": 96,
+        "event_id": "event-runtime-2d08aeab-7095-45a0-866d-a3d9b8760349",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:33:02.144353823Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 98,
+        "event_id": "event-runtime-18752de4-9b0f-4370-bb29-1af460354b2d",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:33:07.820193679Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 99,
+        "event_id": "event-runtime-e06c0257-5f89-4563-8a41-65107b21810e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:33:07.859537305Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我会写入指定内容，并保留一个末尾换行。",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 100,
+        "event_id": "event-runtime-53ffc561-06e6-4e10-967c-0e8313278d39",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:33:08.506793719Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed commandExecution",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 101,
+        "event_id": "event-runtime-bd45d4c6-244e-4923-848c-d11a3a29accc",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:33:12.911546183Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "OAX-CLEANUP-NEXT-6e5cb6722e93",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 103,
+        "event_id": "event-run-27c9a8a9-5bb7-4f15-8af4-84afc661c5d8",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-835cc9dc-518f-410b-a2ee-a15394c952ff",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-05T04:33:12.950440556Z"
+      },
+      {
+        "sequence": 104,
+        "event_id": "event-task-61018982-8f45-4197-8ac6-39dfc6cade3e",
+        "aggregate_type": "task",
+        "aggregate_id": "task-09a46163-f230-4482-9c78-091bf37acb64",
+        "event_type": "task.settled",
+        "created_at": "2026-10-05T04:33:12.950445969Z"
+      }
+    ],
+    "snapshot_sequence": 373,
+    "live_after_sequence": 373,
+    "has_older_events": false,
+    "has_more_live_events": false
+  },
+  "task-dd82d239-1d98-444b-9808-49af51a0827c": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+      "version": 3,
+      "target_agent_id": "cleanup-keep-9d6ee7",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "Execute exactly one local Python command in your assigned workspace using the script below. It writes proof before and after the external migration harness releases it. Do not access other directories or run other commands. Wait for this command to finish, then reply exactly OAX-CLEANUP-LIVE-cc572f0a71d3.\npython3 -c 'from pathlib import Path\nimport time\np=Path('\"'\"'.'\"'\"')\np.joinpath('\"'\"'before-proof.txt'\"'\"').write_text('\"'\"'OAX-CLEANUP-LIVE-cc572f0a71d3\\n'\"'\"')\np.joinpath('\"'\"'migration-ready.txt'\"'\"').write_text('\"'\"'ready\\n'\"'\"')\nend=time.monotonic()+180\nwhile not p.joinpath('\"'\"'migration-release.txt'\"'\"').exists():\n if time.monotonic()>end: raise TimeoutError('\"'\"'migration release not received'\"'\"')\n time.sleep(1)\np.joinpath('\"'\"'after-proof.txt'\"'\"').write_text('\"'\"'OAX-CLEANUP-LIVE-cc572f0a71d3\\n'\"'\"')\n'",
+      "status": "uncertain",
+      "result": "OAX-CLEANUP-LIVE-cc572f0a71d3",
+      "error": "business_effect_unverified",
+      "outcome_state": "available",
+      "created_at": "2026-10-05T04:28:07.883298962Z",
+      "updated_at": "2026-10-05T04:28:38.631218729Z"
+    },
+    "messages": [
+      {
+        "id": "message-766cd492-7c85-4bb0-a654-751d4afd3fe4",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-bf55f983-3d4d-4c1f-a2ad-08b619c9754a",
+        "target_agent_id": "cleanup-keep-9d6ee7",
+        "kind": "instruction",
+        "content": "Execute exactly one local Python command in your assigned workspace using the script below. It writes proof before and after the external migration harness releases it. Do not access other directories or run other commands. Wait for this command to finish, then reply exactly OAX-CLEANUP-LIVE-cc572f0a71d3.\npython3 -c 'from pathlib import Path\nimport time\np=Path('\"'\"'.'\"'\"')\np.joinpath('\"'\"'before-proof.txt'\"'\"').write_text('\"'\"'OAX-CLEANUP-LIVE-cc572f0a71d3\\n'\"'\"')\np.joinpath('\"'\"'migration-ready.txt'\"'\"').write_text('\"'\"'ready\\n'\"'\"')\nend=time.monotonic()+180\nwhile not p.joinpath('\"'\"'migration-release.txt'\"'\"').exists():\n if time.monotonic()>end: raise TimeoutError('\"'\"'migration release not received'\"'\"')\n time.sleep(1)\np.joinpath('\"'\"'after-proof.txt'\"'\"').write_text('\"'\"'OAX-CLEANUP-LIVE-cc572f0a71d3\\n'\"'\"')\n'",
+        "created_at": "2026-10-05T04:28:07.883298962Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-05T04:58:07.886956077Z",
+        "instructions_sha256": "8831de049239cd4d91681c1002dbd4e2e128a25338de3223b77d38ca91aed851",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-keep-9d6ee7.role.md",
+        "run_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "task_id": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+        "agent_id": "cleanup-keep-9d6ee7",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-12f05b6f-2681-4efe-aa65-2391c994e032",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-CLEANUP-LIVE-cc572f0a71d3",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-05T04:28:07.886956077Z",
+        "finished_at": "2026-10-05T04:28:38.631218729Z",
+        "created_at": "2026-10-05T04:28:07.886956077Z",
+        "updated_at": "2026-10-05T04:28:38.631218729Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 48,
+        "event_id": "event-cedea8af-aa96-4621-98dc-971d3481a898",
+        "aggregate_type": "task",
+        "aggregate_id": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+        "event_type": "task.created",
+        "created_at": "2026-10-05T04:28:07.883298962Z"
+      },
+      {
+        "sequence": 50,
+        "event_id": "event-task-5b1760b3-68c7-4bee-a9af-5188dfc249ab",
+        "aggregate_type": "task",
+        "aggregate_id": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+        "event_type": "task.running",
+        "created_at": "2026-10-05T04:28:07.888285474Z"
+      },
+      {
+        "sequence": 51,
+        "event_id": "event-run-276587fd-7f00-4961-ae6d-0c7d11532127",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-05T04:28:07.888290381Z"
+      },
+      {
+        "sequence": 53,
+        "event_id": "event-runtime-fa0b3208-5bfd-4f39-92b4-7007c12e777d",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:28:09.266437302Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 54,
+        "event_id": "event-runtime-288838d5-8142-49f9-bdd6-c7dc5dcde545",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:28:13.85287907Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我会在指定工作目录中执行这一次 Python 命令，并等待它结束。",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 57,
+        "event_id": "event-runtime-251fe00d-7e24-488c-9c3d-1d96b6c1f87a",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:28:30.106005996Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 58,
+        "event_id": "event-runtime-d699cc93-7350-4a8c-aa7c-d8a40e0742ae",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:28:32.769542535Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed commandExecution",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 60,
+        "event_id": "event-runtime-a6154c3f-483f-402c-8df1-6c41e4358a62",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:28:38.595790939Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "OAX-CLEANUP-LIVE-cc572f0a71d3",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 62,
+        "event_id": "event-run-6f2e3dc0-3d02-43c2-adea-27df8291eb07",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-ab12dd37-5fb0-49c5-867f-e6674aa345fb",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-05T04:28:38.631243422Z"
+      },
+      {
+        "sequence": 63,
+        "event_id": "event-task-175a2322-fcf8-4a74-a347-157dd8f69500",
+        "aggregate_type": "task",
+        "aggregate_id": "task-dd82d239-1d98-444b-9808-49af51a0827c",
+        "event_type": "task.settled",
+        "created_at": "2026-10-05T04:28:38.631247098Z"
+      }
+    ],
+    "snapshot_sequence": 373,
+    "live_after_sequence": 373,
+    "has_older_events": false,
+    "has_more_live_events": false
+  },
+  "task-c939afe3-003b-40b7-a8cb-b6e4cbbc1a29": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-c939afe3-003b-40b7-a8cb-b6e4cbbc1a29",
+      "version": 2,
+      "target_agent_id": "cleanup-shared-9d6ee7",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "CLEANUP-SHARED-BOUNDARY: preserve this cross-Agent parent relation.",
+      "status": "canceled",
+      "outcome_state": "not_recorded",
+      "created_at": "2026-10-05T04:27:19.297320121Z",
+      "updated_at": "2026-10-05T04:27:19.342959338Z"
+    },
+    "messages": [
+      {
+        "id": "message-9eb1023a-4b93-4a60-87d2-4238db3b9e64",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-c939afe3-003b-40b7-a8cb-b6e4cbbc1a29",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-bf55f983-3d4d-4c1f-a2ad-08b619c9754a",
+        "target_agent_id": "cleanup-shared-9d6ee7",
+        "kind": "instruction",
+        "content": "CLEANUP-SHARED-BOUNDARY: preserve this cross-Agent parent relation.",
+        "created_at": "2026-10-05T04:27:19.297320121Z"
+      }
+    ],
+    "run_attempts": [],
+    "events": [
+      {
+        "sequence": 38,
+        "event_id": "event-c3cbad91-ffa6-424f-bac5-99cbde8a60de",
+        "aggregate_type": "task",
+        "aggregate_id": "task-c939afe3-003b-40b7-a8cb-b6e4cbbc1a29",
+        "event_type": "task.created",
+        "created_at": "2026-10-05T04:27:19.297320121Z"
+      },
+      {
+        "sequence": 39,
+        "event_id": "event-8bab445c-77ce-4960-bdd2-50bf65e2f65c",
+        "aggregate_type": "task",
+        "aggregate_id": "task-c939afe3-003b-40b7-a8cb-b6e4cbbc1a29",
+        "event_type": "task.cancel_requested",
+        "created_at": "2026-10-05T04:27:19.342953385Z"
+      },
+      {
+        "sequence": 41,
+        "event_id": "event-cancel-4f7cd169-1f9c-4f7e-8a99-4389d405cd46",
+        "aggregate_type": "task",
+        "aggregate_id": "task-c939afe3-003b-40b7-a8cb-b6e4cbbc1a29",
+        "event_type": "task.canceled",
+        "created_at": "2026-10-05T04:27:19.342959338Z"
+      }
+    ],
+    "snapshot_sequence": 373,
+    "live_after_sequence": 373,
+    "has_older_events": false,
+    "has_more_live_events": false
+  },
+  "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+      "version": 3,
+      "target_agent_id": "cleanup-keep-9d6ee7",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+      "status": "succeeded",
+      "result": "OAX-TERMINAL-ROLE cleanup-keep-9d6ee7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+      "outcome_state": "available",
+      "created_at": "2026-10-05T04:27:09.226776533Z",
+      "updated_at": "2026-10-05T04:27:16.124340468Z"
+    },
+    "messages": [
+      {
+        "id": "message-814c9ecf-f049-414a-ad7f-d6c2b57428e9",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-bf55f983-3d4d-4c1f-a2ad-08b619c9754a",
+        "target_agent_id": "cleanup-keep-9d6ee7",
+        "kind": "instruction",
+        "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+        "created_at": "2026-10-05T04:27:09.226776533Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "deadline_at": "2026-10-05T04:57:09.2297715Z",
+        "instructions_sha256": "8831de049239cd4d91681c1002dbd4e2e128a25338de3223b77d38ca91aed851",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-keep-9d6ee7.role.md",
+        "run_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+        "task_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+        "agent_id": "cleanup-keep-9d6ee7",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-12f05b6f-2681-4efe-aa65-2391c994e032",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-TERMINAL-ROLE cleanup-keep-9d6ee7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-05T04:27:09.2297715Z",
+        "finished_at": "2026-10-05T04:27:16.124340468Z",
+        "created_at": "2026-10-05T04:27:09.2297715Z",
+        "updated_at": "2026-10-05T04:27:16.124340468Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 21,
+        "event_id": "event-b5367584-e5de-4d44-a377-dd265a5ed29c",
+        "aggregate_type": "task",
+        "aggregate_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+        "event_type": "task.created",
+        "created_at": "2026-10-05T04:27:09.226776533Z"
+      },
+      {
+        "sequence": 23,
+        "event_id": "event-task-28af49a3-ea31-4c7f-84a5-ce296cdf504e",
+        "aggregate_type": "task",
+        "aggregate_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+        "event_type": "task.running",
+        "created_at": "2026-10-05T04:27:09.231874729Z"
+      },
+      {
+        "sequence": 24,
+        "event_id": "event-run-63ee50a7-9b3e-4133-bc98-9f5868b79ce3",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-05T04:27:09.231878654Z"
+      },
+      {
+        "sequence": 26,
+        "event_id": "event-runtime-92eba69d-ea45-4c28-a6fe-82c927cf9a16",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+        "event_type": "runtime.session.bound",
+        "created_at": "2026-10-05T04:27:10.78573668Z",
+        "output": {
+          "stage": "session",
+          "status": "bound",
+          "text": "Runtime session bound",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 27,
+        "event_id": "event-runtime-41c6cc55-92b9-47db-a6e0-eb87d46a5e83",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:27:11.59316081Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 28,
+        "event_id": "event-runtime-7a9e83c3-dcef-4bd1-9ce4-1932341e84d2",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:27:15.535112049Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 29,
+        "event_id": "event-runtime-080aa9bc-1cad-4d20-83f2-8d2618fb114e",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-05T04:27:15.948851546Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "OAX-TERMINAL-ROLE cleanup-keep-9d6ee7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 31,
+        "event_id": "event-run-570c793e-c4ff-45a3-b3f7-df3c284c9bb7",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-2e9d3f38-90ca-4703-b881-0b3694c0b077",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-05T04:27:16.124409397Z"
+      },
+      {
+        "sequence": 32,
+        "event_id": "event-task-3d0a87a5-1827-4399-a068-bbcdfe2a8f4e",
+        "aggregate_type": "task",
+        "aggregate_id": "task-aa507ddd-b2db-4f7f-b7f8-03bc52a86ed8",
+        "event_type": "task.settled",
+        "created_at": "2026-10-05T04:27:16.124412698Z"
+      }
+    ],
+    "snapshot_sequence": 373,
+    "live_after_sequence": 373,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "at": "2026-10-05T05:27:24.346588+00:00",
+  "status": "PASS",
+  "process_results": [
+    {
+      "pid": 2803728,
+      "starttime": "39280372",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2804700,
+      "starttime": "39281420",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2809693,
+      "starttime": "39285745",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2811582,
+      "starttime": "39286449",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2804818,
+      "starttime": "39281498",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2809680,
+      "starttime": "39285739",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2809936,
+      "starttime": "39285900",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2809940,
+      "starttime": "39285902",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2819487,
+      "starttime": "39293189",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    },
+    {
+      "pid": 2810040,
+      "starttime": "39285909",
+      "same_identity_remains": false,
+      "state": null,
+      "running": false
+    }
+  ],
+  "remaining_live_owned_pids": [],
+  "dedicated_tmux_server_absent": true,
+  "database_preserved": true,
+  "database_bytes": 811008,
+  "all_evidence_preserved": true,
+  "production_touched": false
+}

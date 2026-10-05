@@ -1,0 +1,66 @@
+{
+  "at": "2026-10-05T05:32:07.610059+00:00",
+  "schema_version": 6,
+  "maintenance_tables": {
+    "agent_removal_guard": 0,
+    "agent_removal_scope": 0,
+    "agent_removal_receipts": 0
+  },
+  "foreign_key_violations": [],
+  "candidate_history_rollback_preserved": true,
+  "verification": {
+    "agents": {
+      "openagentx": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "rhythm": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "pay-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "quote-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "identity-service": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      },
+      "oneaxe-voice": {
+        "service_unchanged": true,
+        "thread_unchanged": true,
+        "config_unchanged": true,
+        "terminal_unchanged": true,
+        "worker_identity_unchanged": true
+      }
+    },
+    "all_nonoverview_panes_preserved": true,
+    "daemon_unchanged": true,
+    "pass": false,
+    "retained_fleet_unchanged": true,
+    "retained_history_preserved": true,
+    "candidates_absent": false,
+    "candidate_histories_empty": false,
+    "candidate_fleet_absent": false,
+    "foreign_keys_valid": true
+  }
+}

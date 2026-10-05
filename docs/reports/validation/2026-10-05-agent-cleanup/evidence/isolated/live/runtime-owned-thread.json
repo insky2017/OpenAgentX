@@ -1,0 +1,127 @@
+{
+  "source": "/home/sky/.codex/sessions/2026/10/05/rollout-2026-10-05T12-27-10-01a10a50-cf58-7762-818e-a6554c01435c.jsonl",
+  "source_sha256": "3f528dee8a47e72ba86973109d83986636eb6d5f62c285beaab995263df799fb",
+  "thread_id": "01a10a50-cf58-7762-818e-a6554c01435c",
+  "selected_runtime_events": [
+    {
+      "timestamp": "2026-10-05T04:27:10.829Z",
+      "ordinal": 1,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_started",
+        "turn_id": "01a10a50-d058-71a1-a1fd-99f5785a3d8c",
+        "root_turn_id": "01a10a50-d058-71a1-a1fd-99f5785a3d8c",
+        "started_at": 1791174430,
+        "model_context_window": 258400,
+        "collaboration_mode_kind": "default"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:27:11.452Z",
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+        "model": "gpt-6-astra",
+        "effort": "ultra",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "danger-full-access"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:27:16.105Z",
+      "ordinal": 16,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_complete",
+        "turn_id": "01a10a50-d058-71a1-a1fd-99f5785a3d8c",
+        "last_agent_message": "OAX-TERMINAL-ROLE cleanup-keep-9d6ee7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+        "started_at": 1791174430,
+        "completed_at": 1791174436,
+        "duration_ms": 5286,
+        "time_to_first_token_ms": "[REDACTED]"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:28:09.024Z",
+      "ordinal": 18,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_started",
+        "turn_id": "01a10a51-b3ae-7791-9d34-c7de0e941e82",
+        "root_turn_id": "01a10a51-b3ae-7791-9d34-c7de0e941e82",
+        "started_at": 1791174489,
+        "model_context_window": 258400,
+        "collaboration_mode_kind": "default"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:28:09.135Z",
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+        "model": "gpt-6-astra",
+        "effort": "ultra",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "danger-full-access"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:28:38.611Z",
+      "ordinal": 39,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_complete",
+        "turn_id": "01a10a51-b3ae-7791-9d34-c7de0e941e82",
+        "last_agent_message": "OAX-CLEANUP-LIVE-cc572f0a71d3",
+        "started_at": 1791174489,
+        "completed_at": 1791174518,
+        "duration_ms": 29587,
+        "time_to_first_token_ms": "[REDACTED]"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:33:01.981Z",
+      "ordinal": 41,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_started",
+        "turn_id": "01a10a56-2c0b-79c2-883f-8b9338f0cfd9",
+        "root_turn_id": "01a10a56-2c0b-79c2-883f-8b9338f0cfd9",
+        "started_at": 1791174781,
+        "model_context_window": 258400,
+        "collaboration_mode_kind": "default"
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:33:02.003Z",
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace",
+        "model": "gpt-6-astra",
+        "effort": "ultra",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "danger-full-access"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-05T04:33:12.930Z",
+      "ordinal": 58,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_complete",
+        "turn_id": "01a10a56-2c0b-79c2-883f-8b9338f0cfd9",
+        "last_agent_message": "OAX-CLEANUP-NEXT-6e5cb6722e93",
+        "started_at": 1791174781,
+        "completed_at": 1791174792,
+        "duration_ms": 10949,
+        "time_to_first_token_ms": "[REDACTED]"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-05T04:28:07.132945+00:00",
+  "command": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/candidate-under-test",
+    "agent",
+    "remove",
+    "cleanup-shared-9d6ee7",
+    "--purge-history",
+    "--dry-run",
+    "--wait",
+    "30s"
+  ],
+  "returncode": 0,
+  "elapsed_seconds": 0.3991519100381993,
+  "stdout": "{\"dry_run\":true,\"database\":{\"agent_ids\":[\"cleanup-shared-9d6ee7\"],\"installation_id\":\"[REDACTED]\",\"schema_version\":5,\"counts\":{\"agent_profiles\":1,\"agents\":1,\"approval_decisions\":0,\"approval_requests\":0,\"artifacts\":0,\"authority_policies\":0,\"event_journal\":6,\"external_messages\":0,\"external_role_scopes\":0,\"external_session_bindings\":0,\"mailbox_items\":1,\"managed_message_tasks\":0,\"messages\":1,\"network_imports\":0,\"network_mode_policies\":0,\"network_mode_tests\":0,\"network_profile_bindings\":0,\"network_tests\":0,\"network_work_items\":0,\"network_workflow_commands\":0,\"position_assignments\":0,\"principals\":1,\"run_attempts\":0,\"runtime_backend_registrations\":0,\"session_bindings\":0,\"tasks\":1,\"worker_commands\":0,\"worker_instances\":0,\"workspace_leases\":0},\"replayed\":false,\"workers_to_stop\":null,\"blockers\":[\"shared outgoing reference: tasks -\\u003e tasks\"],\"digest\":\"35e29ea7d0f385c59702596285cfd61d4378d5ed84a71ea3d82446e8d0726961\"},\"local\":{\"files\":[{\"path\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/cleanup-shared-9d6ee7.env\",\"kind\":\"environment\",\"entries\":1},{\"path\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-shared-9d6ee7.role.md\",\"kind\":\"role\",\"entries\":1},{\"path\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/joins/cleanup-shared-9d6ee7.json\",\"kind\":\"join_receipt\",\"entries\":1},{\"path\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/identities/cleanup-shared-9d6ee7.yaml\",\"kind\":\"identity\",\"entries\":1},{\"path\":\"/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/profile/workers/cleanup-shared-9d6ee7.yaml\",\"kind\":\"worker_config\",\"entries\":1}],\"services\":[{\"unit\":\"openagentx-worker@cleanup-shared-9d6ee7.service\",\"loaded\":false}],\"preserved\":[\"/home/sky/.config/systemd/user/openagentx-worker@.service (unowned inactive template; no service action)\",\"/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace-cleanup-shared-9d6ee7\"],\"preserved_reasons\":{\"/home/sky/.config/systemd/user/openagentx-worker@.service (unowned inactive template; no service action)\":\"systemd unit definition retained; only a verified selected instance may be disabled\",\"/home/sky/.local/state/openagentx/validation/2026-10-05-agent-cleanup/live-independent/fixture02/workspace-cleanup-shared-9d6ee7\":\"workspace or external artifact; working directories and paths without canonical exclusive ownership are preserved\"},\"blockers\":[]}}\n",
+  "stderr": ""
+}
