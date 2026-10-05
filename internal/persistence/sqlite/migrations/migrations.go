@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const CurrentVersion = 5
+const CurrentVersion = 6
 
 var (
 	ErrIncompatibleLegacySchema = errors.New("database contains a legacy schema without OpenAgentX schema metadata")
@@ -75,6 +75,7 @@ type migrationOptions struct {
 	beforeV3Commit    func() error
 	beforeV4Commit    func() error
 	beforeV5Commit    func() error
+	beforeV6Commit    func() error
 }
 
 func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -105,6 +106,8 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 			return migrateV3ToV4(ctx, db, options)
 		case 4:
 			return migrateV4ToV5(ctx, db, options)
+		case 5:
+			return migrateV5ToV6(ctx, db, options)
 		default:
 			return fmt.Errorf("%w: got %d, want 1 or %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
 		}
@@ -295,11 +298,18 @@ func validateObjects(ctx context.Context, queryer schemaQueryer) error {
 	if err := validateBaseObjects(ctx, queryer); err != nil {
 		return err
 	}
-	return validateExternalObjects(ctx, queryer)
+	if err := validateExternalObjects(ctx, queryer); err != nil {
+		return err
+	}
+	return validateAgentRemoval(ctx, queryer)
 }
 
 func validateBaseObjects(ctx context.Context, queryer schemaQueryer) error {
-	if err := validateSchemaShape(ctx, queryer, CurrentVersion); err != nil {
+	var version int
+	if err := queryer.QueryRowContext(ctx, "SELECT version FROM schema_meta WHERE singleton=1").Scan(&version); err != nil {
+		return err
+	}
+	if err := validateSchemaShape(ctx, queryer, version); err != nil {
 		return err
 	}
 	if err := validateObjectsWithoutTaskIntent(ctx, queryer); err != nil {
@@ -538,7 +548,13 @@ func validateSchemaShape(ctx context.Context, q schemaQueryer, version int) erro
 		if err := q.QueryRowContext(ctx, "SELECT sql FROM sqlite_master WHERE type=? AND name=?", object.Kind, object.Name).Scan(&definition); err != nil {
 			return fmt.Errorf("%w: missing %s %s", ErrIncompleteSchema, object.Kind, object.Name)
 		}
-		if compactSQL(definition) != compactSQL(object.SQL) {
+		expectedSQL := object.SQL
+		if version >= 6 {
+			if replacement, ok := removalTriggerDefinitions()[object.Name]; ok {
+				expectedSQL = replacement
+			}
+		}
+		if compactSQL(definition) != compactSQL(expectedSQL) {
 			return fmt.Errorf("%w: invalid %s %s", ErrIncompleteSchema, object.Kind, object.Name)
 		}
 	}
@@ -611,9 +627,11 @@ func applyManagedCollaboration(ctx context.Context, tx *sql.Tx, options migratio
 		return fmt.Errorf("migrate managed collaboration v5: %w", err)
 	}
 	if options.beforeV5Commit != nil {
-		return options.beforeV5Commit()
+		if err := options.beforeV5Commit(); err != nil {
+			return err
+		}
 	}
-	return nil
+	return applyAgentRemoval(ctx, tx, options)
 }
 func migrateV4ToV5(ctx context.Context, db *sql.DB, options migrationOptions) error {
 	tx, err := db.BeginTx(ctx, nil)
