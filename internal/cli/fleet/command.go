@@ -101,7 +101,7 @@ func DefaultDependencies() Dependencies {
 			return nativebridge.Open(ctx, nativebridge.Options{AgentID: r.AgentID, WorkerConfig: r.WorkerConfig, Socket: r.Socket, Credentials: r.Credentials, In: r.In, Out: r.Out, Err: r.Err})
 		},
 		IsInteractive: func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
-		Tmux:          fleetmodel.ExecRunner{}, Now: time.Now, UserHomeDir: os.UserHomeDir,
+		Tmux:          fleetmodel.ExecRunner{CurrentTarget: os.Getenv("TMUX_PANE")}, Now: time.Now, UserHomeDir: os.UserHomeDir,
 		RunSystemctl: func(ctx context.Context, args ...string) (string, error) { return run(ctx, "systemctl", args...) },
 		RunLoginctl:  func(ctx context.Context, args ...string) (string, error) { return run(ctx, "loginctl", args...) },
 		NewConsole:   func(socketPath string) (consoleClient, error) { return consoleclient.NewUnixClient(socketPath) },
@@ -250,7 +250,7 @@ func Execute(args []string, deps Dependencies) int {
 		workspace.PaneLabel = func(agentID string) string {
 			mode := modes[agentID]
 			if mode.Mode == "native" {
-				return "Codex 受管原生终端 · 后台 Worker 独立运行"
+				return fleetmodel.NativeTerminalLabel
 			}
 			if mode.NativeSupported {
 				return "OAX 状态 Console · 已显式选择 --console"
@@ -379,6 +379,8 @@ func newWorkspace(paths fleetPaths, respawnDead bool, deps Dependencies) (fleetm
 	}
 	return fleetmodel.Workspace{
 		Runner: deps.Tmux, RespawnDead: respawnDead,
+		PaneLabel:       func(string) string { return fleetmodel.ConsoleTerminalLabel },
+		Warn:            func(err error) { fmt.Fprintf(deps.Err, "终端标签告警: %v\n", err) },
 		OverviewCommand: []string{binary, "agent", "status", "--watch", "--socket", paths.socket, "--credentials", paths.credentials, "--file", paths.manifest, "--worker-dir", paths.workerDir, "--db", paths.database},
 		ConsoleCommand: func(agentID string) []string {
 			return []string{binary, "console", "attach", "--socket", paths.socket, "--credentials", paths.credentials, "--agent", agentID}

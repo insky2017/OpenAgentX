@@ -168,11 +168,19 @@ type applicationTmuxRunner struct {
 	managed bool
 	agentID string
 	calls   []string
+	options map[string]string
 }
 
 func (r *applicationTmuxRunner) Run(_ context.Context, args ...string) (string, error) {
 	call := strings.Join(args, " ")
 	r.calls = append(r.calls, call)
+	if len(args) == 6 && args[0] == "set-option" && (args[4] == "automatic-rename" || args[4] == "allow-rename" || args[4] == "remain-on-exit" || strings.HasPrefix(args[4], "pane-border-")) {
+		if r.options == nil {
+			r.options = make(map[string]string)
+		}
+		r.options[args[4]] = args[5]
+		return "", nil
+	}
 	switch call {
 	case "display-message -p -F #{window_id}":
 		return "@1\n", nil
@@ -193,10 +201,14 @@ func (r *applicationTmuxRunner) Run(_ context.Context, args ...string) (string, 
 	case "display-message -p -t @1.0 -F #{pane_dead}":
 		return "0\n", nil
 	case "show-options -w -t @1":
-		if r.managed {
-			return fleetmodel.ManagedOption + " 1\n" + fleetmodel.AgentIDOption + " " + r.agentID + "\n", nil
+		options := ""
+		for name, value := range r.options {
+			options += name + " " + value + "\n"
 		}
-		return "", nil
+		if r.managed {
+			return options + fleetmodel.ManagedOption + " 1\n" + fleetmodel.AgentIDOption + " " + r.agentID + "\n", nil
+		}
+		return options, nil
 	case "set-option -w -t @1 " + fleetmodel.ManagedOption + " 1":
 		r.managed = true
 		return "", nil

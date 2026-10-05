@@ -1,0 +1,139 @@
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/duplicate_window
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/marker_mismatch
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_session
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_pane
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/missing_pane_zero
+=== RUN   TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/overview
+--- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/duplicate_window (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/marker_mismatch (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_session (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/wrong_pane (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/missing_pane_zero (0.00s)
+    --- PASS: TestAttachPreflightRequiresExactOAXPaneZeroAndCompatibleTopology/overview (0.00s)
+=== RUN   TestAttachPreflightOutsideTmuxFailsClosed
+--- PASS: TestAttachPreflightOutsideTmuxFailsClosed (0.00s)
+=== RUN   TestAttachPreflightPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero
+--- PASS: TestAttachPreflightPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero (0.00s)
+=== RUN   TestAttachPreflightRejectsAmbiguousCurrentUnmanagedName
+--- PASS: TestAttachPreflightRejectsAmbiguousCurrentUnmanagedName (0.00s)
+=== RUN   TestBindCurrentBindsUnmanagedWindowAndPreservesAdditionalPanes
+--- PASS: TestBindCurrentBindsUnmanagedWindowAndPreservesAdditionalPanes (0.00s)
+=== RUN   TestBindCurrentReusesSameAgentWithoutMutation
+--- PASS: TestBindCurrentReusesSameAgentWithoutMutation (0.00s)
+=== RUN   TestBindCurrentOtherAgentRequiresConfirmationWithoutMutation
+--- PASS: TestBindCurrentOtherAgentRequiresConfirmationWithoutMutation (0.00s)
+=== RUN   TestBindCurrentRejectsTargetConflictsBeforeMutation
+=== RUN   TestBindCurrentRejectsTargetConflictsBeforeMutation/compatible_occupied
+=== RUN   TestBindCurrentRejectsTargetConflictsBeforeMutation/unmanaged_occupied
+--- PASS: TestBindCurrentRejectsTargetConflictsBeforeMutation (0.00s)
+    --- PASS: TestBindCurrentRejectsTargetConflictsBeforeMutation/compatible_occupied (0.00s)
+    --- PASS: TestBindCurrentRejectsTargetConflictsBeforeMutation/unmanaged_occupied (0.00s)
+=== RUN   TestBindCurrentDetectsCurrentWindowTOCTOU
+--- PASS: TestBindCurrentDetectsCurrentWindowTOCTOU (0.00s)
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/agent_marker
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/rename
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/verify
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/managed_marker
+--- PASS: TestBindCurrentCompensatesEveryMutationFailure (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/agent_marker (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/rename (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/verify (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/managed_marker (0.00s)
+=== RUN   TestBindCurrentReportsPartialFailureWhenCompensationFails
+--- PASS: TestBindCurrentReportsPartialFailureWhenCompensationFails (0.00s)
+=== RUN   TestBindCurrentRestoresExistingNameAndOptionPresence
+--- PASS: TestBindCurrentRestoresExistingNameAndOptionPresence (0.00s)
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback/failure=
+    terminal_integration_test.go:71: isolated server=openagentx-adr008-task05-2042628-1791166448629952307 pane processes preserved="%1:0:2042898\n%2:1:2042912\n" failure="" result={Status:bound AgentID:quote OriginalName:sleep CurrentName:quote Mutated:true} err=<nil>
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback/failure=automatic-rename
+    terminal_integration_test.go:71: isolated server=openagentx-adr008-task05-2042628-1791166450047505502 pane processes preserved="%1:0:2043793\n%2:1:2043807\n" failure="automatic-rename" result={Status: AgentID: OriginalName: CurrentName: Mutated:false} err=tmux binding failed and original state was restored: set automatic-rename: injected terminal option failure: automatic-rename
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback/failure=allow-rename
+    terminal_integration_test.go:71: isolated server=openagentx-adr008-task05-2042628-1791166450919981825 pane processes preserved="%1:0:2044304\n%2:1:2044331\n" failure="allow-rename" result={Status: AgentID: OriginalName: CurrentName: Mutated:false} err=tmux binding failed and original state was restored: set allow-rename: injected terminal option failure: allow-rename
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback/failure=remain-on-exit
+    terminal_integration_test.go:71: isolated server=openagentx-adr008-task05-2042628-1791166451807258583 pane processes preserved="%1:0:2044827\n%2:1:2044850\n" failure="remain-on-exit" result={Status: AgentID: OriginalName: CurrentName: Mutated:false} err=tmux binding failed and original state was restored: set remain-on-exit: injected terminal option failure: remain-on-exit
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback/failure=@openagentx_managed
+    terminal_integration_test.go:71: isolated server=openagentx-adr008-task05-2042628-1791166452726877093 pane processes preserved="%1:0:2045338\n%2:1:2045362\n" failure="@openagentx_managed" result={Status: AgentID: OriginalName: CurrentName: Mutated:false} err=tmux binding failed and original state was restored: set @openagentx_managed: injected terminal option failure: @openagentx_managed
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback/failure=@openagentx_agent_id
+    terminal_integration_test.go:71: isolated server=openagentx-adr008-task05-2042628-1791166453650404114 pane processes preserved="%1:0:2045846\n%2:1:2045863\n" failure="@openagentx_agent_id" result={Status: AgentID: OriginalName: CurrentName: Mutated:false} err=tmux binding failed and original state was restored: set @openagentx_agent_id: injected terminal option failure: @openagentx_agent_id
+=== RUN   TestIsolatedTmuxTerminalRepairAndRollback/failure=pane-border-format
+    terminal_integration_test.go:71: isolated server=openagentx-adr008-task05-2042628-1791166454573864774 pane processes preserved="%1:0:2046291\n%2:1:2046346\n" failure="pane-border-format" result={Status:bound AgentID:quote OriginalName:sleep CurrentName:quote Mutated:true} err=<nil>
+--- PASS: TestIsolatedTmuxTerminalRepairAndRollback (7.32s)
+    --- PASS: TestIsolatedTmuxTerminalRepairAndRollback/failure= (1.42s)
+    --- PASS: TestIsolatedTmuxTerminalRepairAndRollback/failure=automatic-rename (0.87s)
+    --- PASS: TestIsolatedTmuxTerminalRepairAndRollback/failure=allow-rename (0.89s)
+    --- PASS: TestIsolatedTmuxTerminalRepairAndRollback/failure=remain-on-exit (0.92s)
+    --- PASS: TestIsolatedTmuxTerminalRepairAndRollback/failure=@openagentx_managed (0.92s)
+    --- PASS: TestIsolatedTmuxTerminalRepairAndRollback/failure=@openagentx_agent_id (0.92s)
+    --- PASS: TestIsolatedTmuxTerminalRepairAndRollback/failure=pane-border-format (1.38s)
+=== RUN   TestIsolatedTmuxTerminalCapabilityLabelDoesNotChangeLivePane
+--- PASS: TestIsolatedTmuxTerminalCapabilityLabelDoesNotChangeLivePane (1.04s)
+=== RUN   TestIsolatedTmuxReconcilePreservesPaneZeroOneTwoAndIgnoresOldAgentx
+--- PASS: TestIsolatedTmuxReconcilePreservesPaneZeroOneTwoAndIgnoresOldAgentx (0.82s)
+=== RUN   TestIsolatedTmuxCreatesOAXWithoutMigratingExistingAgentx
+--- PASS: TestIsolatedTmuxCreatesOAXWithoutMigratingExistingAgentx (0.74s)
+=== RUN   TestIsolatedTmuxPrependsManagedWindowsWithoutTakingOverExistingOAX
+--- PASS: TestIsolatedTmuxPrependsManagedWindowsWithoutTakingOverExistingOAX (1.04s)
+=== RUN   TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified
+--- PASS: TestIsolatedTmuxStartsConsoleOnlyAfterPaneAndMarkersAreVerified (0.77s)
+=== RUN   TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxiliaryPanes
+--- PASS: TestIsolatedTmuxExplicitlyRecoversCompatibleDeadPaneZeroAndPreservesAuxiliaryPanes (1.26s)
+=== RUN   TestIsolatedTmuxConsoleSessionExitDoesNotTerminateIndependentWorker
+--- PASS: TestIsolatedTmuxConsoleSessionExitDoesNotTerminateIndependentWorker (0.71s)
+=== RUN   TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero
+--- PASS: TestIsolatedTmuxPreservesIrrelevantUnmanagedDuplicateNamesWithoutPaneZero (1.07s)
+=== RUN   TestIsolatedTmuxBindCurrentPreservesPanesAndRequiresConfirmation
+--- PASS: TestIsolatedTmuxBindCurrentPreservesPanesAndRequiresConfirmation (1.79s)
+=== RUN   TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero
+=== RUN   TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/wrong_pane
+=== RUN   TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/missing_pane_zero
+--- PASS: TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero (1.15s)
+    --- PASS: TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/wrong_pane (0.62s)
+    --- PASS: TestIsolatedTmuxAttachRejectsWrongPaneAndMissingPaneZero/missing_pane_zero (0.53s)
+=== RUN   TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation
+=== RUN   TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_name
+=== RUN   TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_marker
+--- PASS: TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation (1.28s)
+    --- PASS: TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_name (0.61s)
+    --- PASS: TestIsolatedTmuxRejectsDuplicateNameAndMarkerBeforeReconcileMutation/duplicate_marker (0.67s)
+PASS
+ok  	openagentx/internal/fleet	19.010s
+=== RUN   TestNativeOpenRequiresBridgeAndPreservesManagedReferences
+--- PASS: TestNativeOpenRequiresBridgeAndPreservesManagedReferences (0.00s)
+=== RUN   TestIsolatedTmuxNativeOpenIdentity
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/exact-pane
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166449511348272 scenario=exact-pane exact pane=%0 bridge called=true processes="%0:0:2043498\n%1:1:2043521\n%2:0:2043535" result=<nil>
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/same-identity
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166450451598142 scenario=same-identity exact pane=%0 bridge called=true processes="%0:0:2044015\n%1:1:2044047\n%2:0:2044058" result=<nil>
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/overview
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166451403869112 scenario=overview exact pane=%0 bridge called=false processes="%0:0:2044576\n%1:1:2044588\n%2:0:2044592" result=current tmux location is OAX:overview.0; switch to an Agent window before Attach
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/pane-one
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166452075820226 scenario=pane-one exact pane=%1 bridge called=false processes="%0:0:2044964\n%1:1:2044973\n%2:0:2044981" result=current tmux location is OAX:scratch.1; switch to OAX:scratch.0
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/other-identity
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166452727820800 scenario=other-identity exact pane=%0 bridge called=false processes="%0:0:2045318\n%1:1:2045324\n%2:0:2045332" result=current window is bound to Agent "risk"; rebinding to "quote" requires explicit confirmation in the Task 06 Console UI
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/duplicate-name
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166453523110512 scenario=duplicate-name exact pane=%0 bridge called=false processes="%0:0:2045768\n%1:1:2045778\n%2:0:2045795" result=unmanaged or incompatible tmux window "quote" occupies the target name; no binding was performed
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/duplicate-marker
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166454339592808 scenario=duplicate-marker exact pane=%0 bridge called=false processes="%0:0:2046184\n%1:1:2046197\n%2:0:2046209" result=Agent marker "quote" is duplicated by tmux windows "quote" and "unrelated"
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/non-oax
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166455063931999 scenario=non-oax exact pane=%0 bridge called=true processes="%0:0:2046601\n%1:1:2046628\n%2:0:2046644" result=<nil>
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/missing-pane
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166455618334536 scenario=missing-pane exact pane= bridge called=false processes="%0:0:2047123\n%1:1:2047131\n%2:0:2047135" result=cannot identify exact current tmux pane: TMUX_PANE is missing or invalid
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/missing-target
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-2043048-1791166456163561542 scenario=missing-target exact pane=%99999999 bridge called=false processes="%0:0:2047380\n%1:1:2047392\n%2:0:2047400" result=tmux returned an invalid current session name
+--- PASS: TestIsolatedTmuxNativeOpenIdentity (7.27s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/exact-pane (0.94s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/same-identity (0.95s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/overview (0.67s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/pane-one (0.65s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/other-identity (0.80s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/duplicate-name (0.82s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/duplicate-marker (0.72s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/non-oax (0.55s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/missing-pane (0.55s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/missing-target (0.62s)
+PASS
+ok  	openagentx/internal/cli/fleet	7.281s

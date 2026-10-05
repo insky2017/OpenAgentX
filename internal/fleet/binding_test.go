@@ -189,13 +189,10 @@ func TestBindCurrentCompensatesEveryMutationFailure(t *testing.T) {
 				t.Fatal(err)
 			}
 			failed := false
-			displayCalls := 0
 			runner.fail = func(call string, _ int) bool {
-				if strings.HasPrefix(call, "display-message -p -F") {
-					displayCalls++
-					if name == "verify" && displayCalls < 2 {
-						return false
-					}
+				// Fail the verification read after mutation, not the second preflight.
+				if name == "verify" && !strings.Contains(strings.Join(runner.calls, "\n"), "rename-window -t @1 quote") {
+					return false
 				}
 				if !failed && strings.HasPrefix(call, failingCall) {
 					failed = true

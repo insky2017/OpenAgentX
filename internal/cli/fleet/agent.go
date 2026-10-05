@@ -222,7 +222,7 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 		if os.Getenv("TMUX") != "" {
 			action = "switch-client"
 		}
-		cmd := exec.CommandContext(ctx, "tmux", action, "-t", fleetmodel.SessionName+":"+o.id)
+		cmd := exec.CommandContext(ctx, "tmux", action, "-t", fleetmodel.SessionName+":"+o.id+".0")
 		cmd.Stdin = deps.In
 		cmd.Stdout = deps.Out
 		cmd.Stderr = deps.Err

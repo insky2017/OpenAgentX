@@ -1,0 +1,57 @@
+{
+  "recorded_at": "2026-10-05T02:18:22.953406+00:00",
+  "worktree": "/home/sky/work/touzi/OneAxe/OpenAgentX-terminal-overview-worktree",
+  "base_commit": "33ab0cc264790bb07a6e1ab29318463cc9db5715",
+  "go": "go version go1.22.4 linux/amd64",
+  "tmux": "tmux 3.4",
+  "commands": [
+    {
+      "log": "first-tests.log",
+      "command": "go test ./internal/fleet ./internal/cli/fleet ./internal/cli/console -count=1 -timeout=180s",
+      "result": "FAIL: inherited umask 077 changes permission fixtures; TTY mode history clipped by new border"
+    },
+    {
+      "log": "identity-tests.log",
+      "command": "umask 022; go test ./internal/fleet ./internal/cli/fleet -run TestIsolatedTmux|TestBindCurrent|TestAttachPreflight|TestNativeOpen -count=1 -timeout=120s -v",
+      "result": "PASS"
+    },
+    {
+      "log": "final-package-tests.log",
+      "command": "umask 022; go test ./internal/fleet ./internal/cli/fleet ./internal/cli/console -count=1 -timeout=180s -v",
+      "result": "PASS"
+    },
+    {
+      "log": "verification-rollback-tests.log",
+      "command": "umask 022; go test ./internal/fleet -run ^TestBindCurrentCompensatesEveryMutationFailure$ -count=1 -v",
+      "result": "PASS"
+    },
+    {
+      "log": "final-cli-compile-test.log",
+      "command": "umask 022; go test ./internal/cli/fleet -run ^TestNativeOpenRequiresBridgeAndPreservesManagedReferences$ -count=1 -v",
+      "result": "PASS after console .0 target change"
+    },
+    {
+      "log": "console-pane-zero.json",
+      "command": "isolated tmux + script attached TTY; switch-client -t OAX:quote.0",
+      "result": "PASS exact pane 0 and unchanged pane PIDs"
+    }
+  ],
+  "boundary": "Real isolated tmux and Console TTY; native bridge dispatch uses a seam and does not start a model or Worker. No default tmux server, service, install, migration, or git commit changed.",
+  "source_sha256": {
+    "internal/fleet/binding.go": "2e90651f7350a918b17cdff50e274c1bc1fba547016cb889df188f8ba935f9f9",
+    "internal/fleet/workspace.go": "178d47d12462a9c66bf8a0306a88e475810e4104f008485ec1cd36b10ee00c3c",
+    "internal/fleet/terminal.go": "a551b87a09fd2a60dbf84c537128ee86678170c20dc67571effffc69cf82b996",
+    "internal/fleet/binding_test.go": "34d8c8040a818a3333beedc981dcdb4f529b7dc6b10111751c669e380012ea06",
+    "internal/fleet/workspace_test.go": "c48c146630ec26d31e51e32087593d773f46cbe9cc6aa5d1a99a5085aed1d228",
+    "internal/fleet/terminal_integration_test.go": "893f42e64e626dd315f608964f8e36a2baf77c7e2dd5990a0951975753dcee0a",
+    "internal/cli/fleet/agent.go": "20f7d751e45affa82e7df58f1ee64e6ffa9f57456f7eb990994c809dfb0227c1",
+    "internal/cli/fleet/agent_native.go": "98e0d7caee79c0ab23a0aab6466ebbdb84a432e7bdb847e16a86280b289ae860",
+    "internal/cli/fleet/command.go": "9af6f69d626ddfb974e60d4055093e82ae19e99df9c8fa3f22887d8aba63da49",
+    "internal/cli/fleet/agent_join_test.go": "f07dc4f61c5f9d5cdd990293a729cb27e7fa8f6c67f80c9b37bae3a98122e026",
+    "internal/cli/fleet/command_test.go": "a68f040c98d4c6d81a8eb4975e486ffce717a50b49537d26334997866477d79d",
+    "internal/cli/fleet/agent_native_integration_test.go": "bc68ebad698ae0339686998ed5fc68f8e182836ffed575e33689f2854952c243",
+    "internal/cli/console/application.go": "70e5ef15b456a0fba67d3e6d6e35099c3e255211a3ac7f162a39ec4f4d8daab3",
+    "internal/cli/console/application_test.go": "63196ce919f062a5f1cd20f0f36df9e891da4ce3caf37d7103c6c48d698fd96b",
+    "internal/cli/console/smoke_test.go": "588225942b0990bb6f7b9b9417960ac25b83c489b85d44f709be2079d9926f58"
+  }
+}

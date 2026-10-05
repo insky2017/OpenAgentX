@@ -18,4 +18,13 @@
 - 原始日志私密保留；入库日志删除无关记忆查询输出，详见 redactions.json；未复制 profile 的环境文件。
 - 本阶段尚未安装新用户技能或二进制，没有接管任何业务 Agent。
 
-终端固化、基础 Overview 和安装迁移尚在实施。
+## 阶段 1a：终端身份固化
+
+- Native 在精确 TMUX_PANE 下复用 PreflightAttach/BindCurrent；仅 OAX pane 0 纳管。Console 对 Reconcile 目标操作，再定位 `.0`，不改调用窗口。canonical marker、窗口名与 rename 锁统一；同身份补齐差异选项，保留额外 pane。
+- 共享绑定逻辑保存/恢复显式选项及 unset 状态。定位不明、身份冲突及身份配置失败拒绝原地打开；仅边框标签失败告警。新建/dead pane 的既有生命周期与活 pane repair 分离。
+- [实现测试记录](evidence/terminal-impl/implementation-evidence.json)及 [最终三包回归](evidence/terminal-impl/final-package-tests.log)通过；覆盖真实隔离 tmux、Console TTY、准确目标与进程保留。native 回调 seam 仅证明启动关口，不能冒充真实模型验收。
+- [独立预审](../2026-10-05-terminal-overview-join/terminal-review/REVIEW.md)无阻断；独立真实附着 PTY 验证 attach/switch 都定位 pane 0，源码 SHA-256 已与最终实现核对一致。
+- 首次失败保留：umask 077 改变原权限 fixture；新增顶部边框导致旧 TTY 测试的历史提示裁剪，改为核验当前 mode normal header 并保留 SSE 模式断言。复验通过，未删失败记录。
+- 尚未安装、迁移现场标记或替换 overview；真实 Codex 及完整 CLI API→终端链在联合验收另行记录。
+
+基础 Overview 和安装迁移继续实施。

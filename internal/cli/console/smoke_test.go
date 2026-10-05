@@ -379,9 +379,12 @@ func TestIsolatedTTYSmokeUsesAltScreenBindsAndPreservesExtraPanes(t *testing.T) 
 		stopAttach()
 		t.Fatalf("Console input did not return after closing Diagnostic overlay: %q", terminal.String())
 	}
+	normalOffset := len(terminal.String())
 	writeCommand("/normal")
 	waitMode(consoleapi.ModeNormal)
-	if !waitForRenderedTerminalText(&terminal, "Console mode switched to normal", 10*time.Second) {
+	// The border uses one row; a small pane may clip the timeline notice.
+	// Require a new authoritative mode header after the command instead.
+	if !waitForRenderedTerminalTextAfter(&terminal, normalOffset, "mode normal | connection connected", 10*time.Second) {
 		stopAttach()
 		t.Fatalf("Console did not render restored Normal mode: %q", terminal.String())
 	}

@@ -28,6 +28,7 @@ type fleetTestWindow struct {
 	managed bool
 	agentID string
 	dead    bool
+	options map[string]string
 }
 
 type testTmux struct {
@@ -77,6 +78,9 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 	case "show-options":
 		window := t.windows[fleetArgAfter(args, "-t")]
 		var output strings.Builder
+		for name, value := range window.options {
+			fmt.Fprintf(&output, "%s %s\n", name, value)
+		}
 		if window.managed {
 			fmt.Fprintln(&output, "@openagentx_managed 1")
 		}
@@ -95,8 +99,17 @@ func (t *testTmux) Run(_ context.Context, args ...string) (string, error) {
 		return id + "\n", nil
 	case "set-option":
 		window := t.windows[fleetArgAfter(args, "-t")]
+		if window.options == nil {
+			window.options = make(map[string]string)
+		}
 		for index, arg := range args {
 			switch arg {
+			case "automatic-rename", "allow-rename", "remain-on-exit":
+				if fleetHasArg(args, "-u") {
+					delete(window.options, arg)
+				} else {
+					window.options[arg] = args[index+1]
+				}
 			case "@openagentx_managed":
 				window.managed = !fleetHasArg(args, "-u") && index+1 < len(args) && args[index+1] == "1"
 			case "@openagentx_agent_id":

@@ -1,0 +1,8 @@
+{
+  "isolated_server": "oax-console-target-2089416",
+  "observed": "quote:0",
+  "pane_processes_before": "%0:2089555\n%1:2089559\n%2:2089573",
+  "pane_processes_after": "%0:2089555\n%1:2089559\n%2:2089573",
+  "result": "PASS",
+  "boundary": "Real tmux switch-client .0 target syntax with isolated attached TTY; not a full agent --console API flow."
+}

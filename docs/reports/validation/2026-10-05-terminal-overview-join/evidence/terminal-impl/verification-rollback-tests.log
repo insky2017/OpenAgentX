@@ -1,0 +1,12 @@
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/managed_marker
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/agent_marker
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/rename
+=== RUN   TestBindCurrentCompensatesEveryMutationFailure/verify
+--- PASS: TestBindCurrentCompensatesEveryMutationFailure (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/managed_marker (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/agent_marker (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/rename (0.00s)
+    --- PASS: TestBindCurrentCompensatesEveryMutationFailure/verify (0.00s)
+PASS
+ok  	openagentx/internal/fleet	0.005s

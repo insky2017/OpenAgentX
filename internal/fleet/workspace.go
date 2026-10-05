@@ -43,7 +43,10 @@ func (r ExecRunner) Run(ctx context.Context, args ...string) (string, error) {
 	if r.SocketName != "" {
 		commandArgs = append([]string{"-L", r.SocketName}, commandArgs...)
 	}
-	if r.CurrentTarget != "" && len(args) > 0 && args[0] == "display-message" && !hasFlag(args, "-t") {
+	if len(args) > 0 && args[0] == "display-message" && !hasFlag(args, "-t") {
+		if r.CurrentTarget == "" {
+			return "", fmt.Errorf("exact current tmux pane is required; TMUX_PANE is missing")
+		}
 		commandArgs = append(commandArgs, "-t", r.CurrentTarget)
 	}
 	command := exec.CommandContext(ctx, "tmux", commandArgs...)
@@ -74,13 +77,14 @@ type OptionValue struct {
 type Window struct {
 	// ID is an internal tmux handle used only to keep mutations on the window
 	// that passed preflight. It is never an Agent identity or API value.
-	ID           string
-	Name         string
-	PaneIndices  []int
-	PaneZeroDead bool
-	PaneZeroSeen bool
-	Managed      OptionValue
-	AgentID      OptionValue
+	ID              string
+	Name            string
+	PaneIndices     []int
+	PaneZeroDead    bool
+	PaneZeroSeen    bool
+	Managed         OptionValue
+	AgentID         OptionValue
+	terminalOptions map[string]OptionValue
 }
 
 func (w Window) HasPane(index int) bool {
@@ -111,9 +115,12 @@ type WorkspaceReport struct {
 
 type Workspace struct {
 	Runner         CommandRunner
+	CurrentTarget  string
 	ConsoleCommand func(agentID string) []string
-	// PaneLabel is displayed only when creating or explicitly respawning a pane.
+	// PaneLabel describes the terminal being started or directly attached.
+	// Reconcile never applies a requested startup label to a reused live pane.
 	PaneLabel       func(agentID string) string
+	Warn            func(error)
 	OverviewCommand []string
 	RespawnDead     bool
 }
@@ -159,6 +166,7 @@ func (w Workspace) Inspect(ctx context.Context) ([]Window, error) {
 		if optionErr != nil {
 			return nil, fmt.Errorf("read options for tmux window %q: %w", window.Name, optionErr)
 		}
+		window.terminalOptions = parseTerminalOptions(optionOutput)
 		window.Managed, window.AgentID, err = parseWindowOptions(optionOutput)
 		if err != nil {
 			return nil, fmt.Errorf("read options for tmux window %q: %w", window.Name, err)
@@ -226,6 +234,11 @@ func (w Workspace) InspectCurrent(ctx context.Context) (CurrentPane, []Window, e
 	return current, windows, nil
 }
 
+// CurrentSession inspects the runner's exact current pane before optional adoption.
+func (w Workspace) CurrentSession(ctx context.Context) (string, error) {
+	return w.readCurrentField(ctx, sessionNameFormat, "current session name")
+}
+
 func (w Workspace) inspectCurrentHandle(ctx context.Context) (CurrentPane, error) {
 	windowBefore, err := w.readCurrentField(ctx, windowIDFormat, "current window handle")
 	if err != nil {
@@ -258,7 +271,11 @@ func (w Workspace) inspectCurrentHandle(ctx context.Context) (CurrentPane, error
 }
 
 func (w Workspace) readCurrentField(ctx context.Context, format, label string) (string, error) {
-	output, err := w.Runner.Run(ctx, "display-message", "-p", "-F", format)
+	args := []string{"display-message", "-p", "-F", format}
+	if w.CurrentTarget != "" {
+		args = append(args, "-t", w.CurrentTarget)
+	}
+	output, err := w.Runner.Run(ctx, args...)
 	if err != nil {
 		return "", fmt.Errorf("inspect current tmux location: %w", err)
 	}
@@ -330,6 +347,11 @@ func (w Workspace) Reconcile(ctx context.Context, manifest Manifest) (WorkspaceR
 				report.Respawned = append(report.Respawned, name)
 				continue
 			}
+			if name != OverviewWindow {
+				if _, err := w.stabilizeBinding(ctx, window, name, func() error { return w.verifyWindowBinding(ctx, window.ID, name) }); err != nil {
+					return report, err
+				}
+			}
 			report.Reused = append(report.Reused, name)
 			continue
 		}
@@ -369,6 +391,9 @@ func (w Workspace) respawnDeadPane(ctx context.Context, manifest Manifest, windo
 	if !ok || window.Name != agentID || !window.PaneZeroSeen || !window.PaneZeroDead ||
 		window.Managed != (OptionValue{Set: true, Value: "1"}) || window.AgentID != (OptionValue{Set: true, Value: agentID}) {
 		return fmt.Errorf("managed Console pane for Agent %q changed before respawn; no process was replaced", agentID)
+	}
+	if _, err := w.stabilizeBinding(ctx, window, agentID, func() error { return w.verifyWindowBinding(ctx, window.ID, agentID) }); err != nil {
+		return err
 	}
 	command := w.ConsoleCommand(agentID)
 	args := []string{"respawn-pane", "-t", window.ID + ".0", "--"}
@@ -479,6 +504,8 @@ func (w Workspace) markCreatedWindow(ctx context.Context, windowID, name string)
 	commands := [][]string{
 		{"set-option", "-w", "-t", windowID, "pane-base-index", "0"},
 		{"set-option", "-w", "-t", windowID, "remain-on-exit", "on"},
+		{"set-option", "-w", "-t", windowID, "automatic-rename", "off"},
+		{"set-option", "-w", "-t", windowID, "allow-rename", "off"},
 		{"set-option", "-w", "-t", windowID, ManagedOption, "1"},
 	}
 	if name == OverviewWindow {
@@ -507,7 +534,10 @@ func (w Workspace) setPaneLabel(ctx context.Context, windowID, agentID string) e
 	}
 	for _, option := range [][2]string{{"pane-border-status", "top"}, {"pane-border-format", label}} {
 		if _, err := w.Runner.Run(ctx, "set-option", "-w", "-t", windowID, option[0], option[1]); err != nil {
-			return fmt.Errorf("label managed terminal for Agent %q: %w", agentID, err)
+			if w.Warn != nil {
+				w.Warn(fmt.Errorf("label managed terminal for Agent %q: %w", agentID, err))
+			}
+			return nil
 		}
 	}
 	return nil

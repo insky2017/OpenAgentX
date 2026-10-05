@@ -1,0 +1,4 @@
+=== RUN   TestNativeOpenRequiresBridgeAndPreservesManagedReferences
+--- PASS: TestNativeOpenRequiresBridgeAndPreservesManagedReferences (0.00s)
+PASS
+ok  	openagentx/internal/cli/fleet	0.009s

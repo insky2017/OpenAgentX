@@ -149,6 +149,8 @@ func TestCodexEnvironmentUsesPersistentProxyAndPreservesExisting(t *testing.T) {
 }
 
 func TestNativeOpenRequiresBridgeAndPreservesManagedReferences(t *testing.T) {
+	t.Setenv("TMUX", "")
+	t.Setenv("TMUX_PANE", "")
 	f := newFleetFixture(t)
 	deps := withDefaults(Dependencies{IsInteractive: func() bool { return true }})
 	deps.OpenNative = nil // Test the absent bridge fail-closed seam.

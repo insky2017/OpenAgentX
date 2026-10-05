@@ -17,6 +17,7 @@ type fakeWindow struct {
 	dead    bool
 	managed OptionValue
 	agent   OptionValue
+	options map[string]string
 }
 
 type fakeRunner struct {
@@ -99,6 +100,9 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 			return "", errors.New("window missing")
 		}
 		var output strings.Builder
+		for name, value := range window.options {
+			fmt.Fprintf(&output, "%s %s\n", name, value)
+		}
 		if window.managed.Set {
 			fmt.Fprintf(&output, "%s %s\n", ManagedOption, window.managed.Value)
 		}
@@ -127,6 +131,26 @@ func (r *fakeRunner) Run(_ context.Context, args ...string) (string, error) {
 			return "", errors.New("window missing")
 		}
 		unset := containsArg(args, "-u")
+		if window.options == nil {
+			window.options = make(map[string]string)
+		}
+		optionAt := 0
+		for i, arg := range args {
+			if arg == "-t" {
+				optionAt = i + 2
+				break
+			}
+		}
+		if optionAt < len(args) {
+			name := args[optionAt]
+			if name != ManagedOption && name != AgentIDOption {
+				if unset {
+					delete(window.options, name)
+				} else {
+					window.options[name] = args[optionAt+1]
+				}
+			}
+		}
 		for index, arg := range args {
 			if arg != ManagedOption && arg != AgentIDOption {
 				continue
@@ -221,7 +245,7 @@ func containsInt(values []int, expected int) bool {
 }
 
 func managedWindow(id, name string, panes ...int) *fakeWindow {
-	window := &fakeWindow{id: id, name: name, panes: append([]int(nil), panes...), managed: OptionValue{Set: true, Value: "1"}}
+	window := &fakeWindow{id: id, name: name, panes: append([]int(nil), panes...), managed: OptionValue{Set: true, Value: "1"}, options: map[string]string{"automatic-rename": "off", "allow-rename": "off", "remain-on-exit": "on"}}
 	if name != OverviewWindow {
 		window.agent = OptionValue{Set: true, Value: name}
 	}

@@ -63,7 +63,10 @@ type consoleApplication struct {
 
 func newConsoleApplication(ctx context.Context, socket string, store CredentialStore, deps Dependencies) *consoleApplication {
 	return &consoleApplication{ctx: ctx, deps: deps, socket: socket, store: store,
-		workspace: fleetmodel.Workspace{Runner: deps.Tmux}, prepared: make(map[uint64]preparedAttach),
+		workspace: fleetmodel.Workspace{Runner: deps.Tmux,
+			PaneLabel: func(string) string { return fleetmodel.ConsoleTerminalLabel },
+			Warn:      func(err error) { fmt.Fprintf(deps.Err, "终端标签告警: %v\n", err) },
+		}, prepared: make(map[uint64]preparedAttach),
 		follows: make(map[uint64]context.CancelFunc)}
 }
 
