@@ -59,8 +59,11 @@ type control interface {
 	TaskSnapshot(context.Context, string, string) (api.ConsoleTaskSnapshot, error)
 	Steer(context.Context, string, api.CreateMessageRequest) (api.CreateMessageResponse, error)
 	Cancel(context.Context, string, api.CancelTaskRequest) (api.CancelTaskResponse, error)
+	GetAgentModelSettings(context.Context, string, string) (domain.AgentModelSettings, error)
+	SetAgentModelSettings(context.Context, string, domain.AgentModelSettingsUpdate) (domain.AgentModelSettings, error)
 }
 type bridge struct {
+	settingsMu                                                        sync.Mutex
 	control                                                           control
 	agentID, organizationID, backendID, threadID, statePath, endpoint string
 }
@@ -256,6 +259,14 @@ func (b *bridge) serve(w http.ResponseWriter, r *http.Request) {
 				if len(event.ID) > 0 || !notificationForThread(event, b.threadID) {
 					continue
 				}
+				if event.Method == "thread/settings/updated" {
+					projected, err := b.projectSettings(ctx, event.Method, event.Params)
+					if err != nil {
+						failConnection()
+						return
+					}
+					event.Params = projected
+				}
 				if err := order.notification(event); err != nil {
 					failConnection()
 					return
@@ -360,6 +371,8 @@ func (b *bridge) requestWithDispatch(ctx context.Context, upstream *codex.RPCCli
 		idempotencyKey = fmt.Sprintf("native-%x", sha256.Sum256(encoded))
 	}
 	switch method {
+	case "thread/settings/update", "config/batchWrite":
+		return b.updateSettings(ctx, method, params)
 	case "turn/start":
 		content, err := textInput(p.Input)
 		if err != nil {
@@ -427,8 +440,8 @@ func (b *bridge) requestWithDispatch(ctx context.Context, upstream *codex.RPCCli
 		}
 		return rawResult(map[string]any{"turnId": state.TurnID})
 	case "thread/resume":
-		// Ignore TUI config overrides: the registered role/cwd/model and frozen Run
-		// spec remain authoritative. Resuming here only attaches an observer.
+		// Ignore TUI overrides: role/cwd and OAX Agent preferences remain
+		// authoritative. Resuming here only attaches an observer.
 		params, _ = json.Marshal(map[string]any{"threadId": b.threadID})
 	default:
 		if !readMethod(method) {
@@ -439,7 +452,7 @@ func (b *bridge) requestWithDispatch(ctx context.Context, upstream *codex.RPCCli
 	if err := upstream.Call(ctx, method, params, &result); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return b.projectSettings(ctx, method, result)
 }
 func textInput(input []struct{ Type, Text string }) (string, error) {
 	var parts []string

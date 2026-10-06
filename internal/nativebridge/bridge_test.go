@@ -3,6 +3,7 @@ package nativebridge
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,6 +22,8 @@ import (
 
 // Isolated protocol peers below are D evidence; no real Codex execution claim.
 type bridgeControlFixture struct {
+	settings   domain.AgentModelSettings
+	updates    []domain.AgentModelSettingsUpdate
 	mu         sync.Mutex
 	dispatches []api.CreateTaskRequest
 	steers     []api.CreateMessageRequest
@@ -63,9 +66,44 @@ func (c *bridgeControlFixture) Cancel(_ context.Context, _ string, r api.CancelT
 	return api.CancelTaskResponse{}, nil
 }
 
+func (c *bridgeControlFixture) GetAgentModelSettings(_ context.Context, agent, backend string) (domain.AgentModelSettings, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	s := c.settings
+	s.AgentID, s.BackendID = agent, backend
+	return s, nil
+}
+func (c *bridgeControlFixture) SetAgentModelSettings(_ context.Context, agent string, r domain.AgentModelSettingsUpdate) (domain.AgentModelSettings, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if r.ExpectedVersion != c.settings.Version {
+		return domain.AgentModelSettings{}, errors.New("CAS conflict")
+	}
+	valid := false
+	for _, m := range c.settings.Models {
+		valid = valid || m == r.Model
+	}
+	if !valid {
+		return domain.AgentModelSettings{}, errors.New("unsupported model")
+	}
+	if r.Effort != "" {
+		valid = false
+		for _, e := range c.settings.ModelEfforts[r.Model] {
+			valid = valid || e == r.Effort
+		}
+		if !valid {
+			return domain.AgentModelSettings{}, errors.New("unsupported effort")
+		}
+	}
+	c.updates = append(c.updates, r)
+	c.settings.Model, c.settings.Effort = r.Model, r.Effort
+	c.settings.Version++
+	return c.settings, nil
+}
+
 func bridgeFixture(t *testing.T) (*bridge, *bridgeControlFixture) {
 	t.Helper()
-	c := &bridgeControlFixture{}
+	c := &bridgeControlFixture{settings: domain.AgentModelSettings{Model: "model-default", Models: []string{"model-default", "model-other"}, ModelEfforts: map[string][]string{"model-default": {"high"}, "model-other": {"high", "max"}}}}
 	b := &bridge{control: c, agentID: "agent-test", organizationID: "org-test", backendID: "codex-local",
 		threadID: "thread-owned", statePath: filepath.Join(t.TempDir(), "state.json")}
 	bridgeState(t, b, "task-owned", "turn-owned")

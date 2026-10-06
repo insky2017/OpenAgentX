@@ -76,6 +76,8 @@ func newHandler(state ObserveState, authorizer requestauth.RequestAuthorizer) (*
 	h := &Handler{state: state, auth: authorizer, limiter: newLimiter(), mux: http.NewServeMux()}
 	h.mux.HandleFunc("GET "+AttachPath, h.attach)
 	h.mux.HandleFunc("GET "+AgentsPath, h.agents)
+	h.mux.HandleFunc("GET "+AgentModelSettingsPath, h.modelSettings)
+	h.mux.HandleFunc("PUT "+AgentModelSettingsPath, h.modelSettings)
 	h.mux.HandleFunc("GET "+AgentTasksPath, h.tasks)
 	h.mux.HandleFunc("GET "+AgentTaskPath, h.task)
 	return h, nil

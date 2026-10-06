@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"syscall"
@@ -22,6 +23,7 @@ import (
 const AdapterID = "codex-app-server"
 
 type Config struct {
+	DiscoverModels  bool
 	Binary          string
 	WorkingDir      string
 	Models          []string
@@ -48,6 +50,8 @@ type SessionState struct {
 }
 
 type Adapter struct {
+	modelEfforts    map[string][]string
+	catalogLoaded   bool
 	mu              sync.Mutex
 	config          Config
 	client          *RPCClient
@@ -140,16 +144,35 @@ func NewAdapter(config Config) (*Adapter, error) {
 	return a, nil
 }
 
-func (a *Adapter) Descriptor(context.Context) (openruntime.AdapterDescriptor, error) {
+func (a *Adapter) Descriptor(ctx context.Context) (openruntime.AdapterDescriptor, error) {
+	a.mu.Lock()
+	discover := a.config.DiscoverModels && !a.catalogLoaded
+	a.mu.Unlock()
+	if discover {
+		probeCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+		defer cancel()
+		a.mu.Lock()
+		err := a.ensureLocked(probeCtx)
+		client := a.client
+		a.mu.Unlock()
+		if err != nil {
+			return openruntime.AdapterDescriptor{}, err
+		}
+		if err := a.loadModelCatalog(probeCtx, client); err != nil {
+			return openruntime.AdapterDescriptor{}, err
+		}
+	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	return openruntime.AdapterDescriptor{AdapterID: AdapterID, BackendType: "codex", Version: "1", LaunchProtocol: "app-server", Models: append([]string(nil), a.config.Models...),
+	return openruntime.AdapterDescriptor{AdapterID: AdapterID, BackendType: "codex", Version: "1", LaunchProtocol: "app-server", Models: append([]string(nil), a.config.Models...), ModelReasoningEfforts: cloneModelEfforts(a.modelEfforts),
 		ReasoningModes: []domain.ReasoningMode{domain.ReasoningBackendDefault, domain.ReasoningEffort}, SessionModes: []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume},
 		Steer: openruntime.SteerNative, Approval: openruntime.ApprovalNative, Cancel: openruntime.CancelNative, Permissions: []string{"never", "on-request"}, Sandboxes: []string{"read-only", "workspace-write", "danger-full-access"},
 		NetworkModes: []string{"inherit", "direct"}, Streams: true, MaxConcurrency: 1, DefaultTimeout: a.config.Timeout, BackendOptionsJSON: json.RawMessage(`{"type":"object","additionalProperties":false}`), RuntimeIdentity: a.config.RuntimeIdentity}, nil
 }
 
 func (a *Adapter) Validate(_ context.Context, s domain.ExecutionSpec) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	if err := s.ValidateShape(); err != nil {
 		return err
 	}
@@ -166,7 +189,10 @@ func (a *Adapter) Validate(_ context.Context, s domain.ExecutionSpec) error {
 	if s.Reasoning.Mode != domain.ReasoningBackendDefault && s.Reasoning.Mode != domain.ReasoningEffort {
 		return domain.ErrUnsupportedCapability
 	}
-	if s.Reasoning.Mode == domain.ReasoningEffort {
+	if s.Reasoning.Mode == domain.ReasoningEffort && a.catalogLoaded && !slices.Contains(a.modelEfforts[s.Model], s.Reasoning.Value) {
+		return domain.ErrUnsupportedCapability
+	}
+	if s.Reasoning.Mode == domain.ReasoningEffort && !a.catalogLoaded {
 		switch s.Reasoning.Value {
 		case "none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra":
 		default:
@@ -219,6 +245,11 @@ func (a *Adapter) Health(ctx context.Context) error {
 	a.mu.Unlock()
 	if err != nil {
 		return err
+	}
+	if cfg.DiscoverModels {
+		if err := a.loadModelCatalog(ctx, client); err != nil {
+			return err
+		}
 	}
 	if checkJoined {
 		var response threadResponse

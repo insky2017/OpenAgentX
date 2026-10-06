@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -867,6 +868,10 @@ type SessionBindingReader interface {
 	GetSessionBinding(context.Context, string, string, string) (*domain.SessionBinding, error)
 }
 
+type agentModelPreferenceReader interface {
+	ReadAgentModelPreference(context.Context, string) (*domain.AgentModelSettings, error)
+}
+
 type M1TurnPlanner struct {
 	Bindings SessionBindingReader
 }
@@ -887,7 +892,7 @@ func (p M1TurnPlanner) Plan(ctx context.Context, task domain.Task, _ []domain.Me
 				return TurnPlan{}, err
 			}
 			if err == nil && binding.State == domain.SessionBindingActive {
-				return m1PlanForBackend(task, backend, binding)
+				return p.planForBackend(ctx, task, backend, binding)
 			}
 		}
 	}
@@ -895,9 +900,41 @@ func (p M1TurnPlanner) Plan(ctx context.Context, task domain.Task, _ []domain.Me
 		if !m1BackendUsable(backend) || !containsSession(backend.Descriptor.SessionModes, domain.SessionModeNew) {
 			continue
 		}
-		return m1PlanForBackend(task, backend, nil)
+		return p.planForBackend(ctx, task, backend, nil)
 	}
 	return TurnPlan{}, domain.ErrUnsupportedCapability
+}
+
+func (p M1TurnPlanner) planForBackend(ctx context.Context, task domain.Task, backend openruntime.BackendRegistration, binding *domain.SessionBinding) (TurnPlan, error) {
+	plan, err := m1PlanForBackend(task, backend, binding)
+	if err != nil {
+		return plan, err
+	}
+	reader, ok := p.Bindings.(agentModelPreferenceReader)
+	if !ok {
+		return plan, nil
+	}
+	saved, err := reader.ReadAgentModelPreference(ctx, task.TargetAgentID)
+	if err != nil {
+		return TurnPlan{}, err
+	}
+	if saved == nil {
+		return plan, nil
+	}
+	if saved.BackendID != backend.BackendID || backend.Descriptor.AdapterID != "codex-app-server" || !slices.Contains(backend.Descriptor.Models, saved.Model) {
+		return TurnPlan{}, domain.ErrInvalidInput("saved Agent model is unavailable on the selected backend; choose a supported model")
+	}
+	if saved.Effort != "" && !slices.Contains(backend.Descriptor.ModelReasoningEfforts[saved.Model], saved.Effort) {
+		return TurnPlan{}, domain.ErrInvalidInput("saved Agent reasoning effort is unavailable; choose a supported effort")
+	}
+	plan.Execution.Spec.Model = saved.Model
+	plan.Execution.Spec.Reasoning = domain.ReasoningSpec{Mode: domain.ReasoningBackendDefault}
+	if saved.Effort != "" {
+		plan.Execution.Spec.Reasoning = domain.ReasoningSpec{Mode: domain.ReasoningEffort, Value: saved.Effort}
+	}
+	plan.Execution.Sources["model"] = fmt.Sprintf("agent_model_settings:%d", saved.Version)
+	plan.Execution.Sources["reasoning"] = fmt.Sprintf("agent_model_settings:%d", saved.Version)
+	return plan, nil
 }
 
 func m1BackendUsable(backend openruntime.BackendRegistration) bool {

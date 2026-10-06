@@ -82,6 +82,16 @@ openagentx agent open research --native
 
 标准说明位于 `skills/oax-join/SKILL.md`，`skills/openagentx-join/SKILL.md` 为薄兼容入口。唯一 helper 实现保留在 `skills/openagentx-join/scripts/prepare.py`，短名 `scripts` 通过仓库内相对软链共用，已有外部脚本调用仍兼容。两个 Skill 通过本页安装器显式链接到 Codex 发现目录，不会随普通 `agent join` 隐式安装。该技能用于一次准备，常驻监听由宿主承担，模型无需每轮 poll。
 
+## 在受管终端切换模型
+
+在当前 Agent 的 Codex 终端输入 `/model`，选择模型和推理强度即可。选择保存在 OAX 当前 Agent 的执行配置中；重新打开终端、重启后台后仍保留。其他 Agent 和全局 Codex 配置不变。
+
+新设置用于之后开始规划的 Run，包括队列中尚未执行的任务；已经开始的 Run 保留原模型。模型菜单显示的是下一轮的偏好，正在执行任务实际使用的模型以工作台 Run 记录为准。`requested_execution_json`、`resolved_execution_json` 与实际 Runtime 记录应一致，来源标为 `agent_model_settings:<版本>`。
+
+支持 Codex 0.160.1 的默认交互模式，兼容其模型菜单附带的 `collaborationMode.settings` 模型字段。模型和推理强度按后台启动时的真实 Codex 目录校验，不支持的组合直接报错；目录变化后可重启相应 Worker 刷新。此入口仅保存模型与推理强度，修改工作目录、角色、审批策略或全局配置仍使用对应 OAX 管理入口。
+
+出现旧版“受管终端暂不支持 config/batchWrite”时，说明原生入口或后台还在运行旧工件；单独替换磁盘上的 CLI 不会升级已运行的进程。本次实施与正式安装状态见[修复交付](../reports/validation/2026-10-07-native-model-settings/DELIVERY.md)。
+
 ## 日常观察与边界
 
 - `openagentx agent status <id>` 查看是否可开始、当前任务及最近结果。`openagentx agent open <id> --native` 打开原生 Codex；`--console` 打开 OAX 状态终端。两种界面都不承担后台监听职责。

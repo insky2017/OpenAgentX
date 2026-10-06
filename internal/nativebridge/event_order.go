@@ -21,7 +21,7 @@ type nativeReceipt struct {
 }
 
 func nativeWrite(method string) bool {
-	return method == "turn/start" || method == "turn/steer" || method == "turn/interrupt"
+	return method == "turn/start" || method == "turn/steer" || method == "turn/interrupt" || method == "thread/settings/update" || method == "config/batchWrite"
 }
 
 func notificationIdentity(event codex.RPCMessage) (thread, turn string) {

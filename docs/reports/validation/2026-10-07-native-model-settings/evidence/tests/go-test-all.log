@@ -1,0 +1,73 @@
+?   	openagentx/internal/api/external	[no test files]
+ok  	openagentx/cmd/openagentx	0.737s
+ok  	openagentx/internal/api	0.006s
+ok  	openagentx/internal/api/admin	1.622s
+ok  	openagentx/internal/api/auth	1.597s
+ok  	openagentx/internal/api/console	(cached)
+?   	openagentx/internal/runtime/conformance	[no test files]
+?   	openagentx/internal/runtime/descriptors	[no test files]
+?   	openagentx/internal/runtime/fake	[no test files]
+?   	openagentx/internal/runtime/registry	[no test files]
+ok  	openagentx/internal/api/panel	31.291s
+ok  	openagentx/internal/api/workerapi	0.008s
+ok  	openagentx/internal/auth	0.655s
+ok  	openagentx/internal/auth/cli	5.656s
+ok  	openagentx/internal/auth/web	1.609s
+ok  	openagentx/internal/cli/admin	2.103s
+--- FAIL: TestIsolatedDefaultProfileWorkflowShowsTaskProgressAndKeepsWorkerResident (30.57s)
+    workflow_integration_test.go:295: review detail did not refresh
+FAIL
+FAIL	openagentx/internal/cli/console	34.449s
+ok  	openagentx/internal/cli/external	0.012s
+--- FAIL: TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile (0.00s)
+    command_test.go:780: code=0 stderr=
+FAIL
+FAIL	openagentx/internal/cli/fleet	15.447s
+ok  	openagentx/internal/cli/overview	1.014s
+ok  	openagentx/internal/cli/worker	0.902s
+ok  	openagentx/internal/client/console	(cached)
+ok  	openagentx/internal/client/worker	0.011s
+ok  	openagentx/internal/consolemodel	0.302s
+ok  	openagentx/internal/controlplane	11.701s
+--- FAIL: TestStoreRejectsSymlinkBroadPermissionsAndWrongOwner (0.00s)
+    store_test.go:70: broad credential mode accepted: CLI credential not found
+--- FAIL: TestStoreRejectsBroadOrSymlinkDirectoryAndNonRegularCredential (0.02s)
+    store_test.go:106: broad credential directory accepted: <nil>
+FAIL
+FAIL	openagentx/internal/credentialstore	0.436s
+ok  	openagentx/internal/domain	0.007s
+--- FAIL: TestWriteExactFileAtomicRejectsSymlinkAndBroadPermissions (0.00s)
+    atomicfile_test.go:72: broad permissions accepted
+--- FAIL: TestReadSecureFileUsesOpenedRegularFileAndRejectsUnsafeInputs (0.00s)
+    atomicfile_test.go:98: broad private file accepted
+FAIL
+FAIL	openagentx/internal/fleet	21.849s
+ok  	openagentx/internal/localprofile	0.008s
+ok  	openagentx/internal/nativebridge	0.321s
+--- FAIL: TestFileStoreRejectsLinksAndBadPermissions (0.03s)
+    file_store_test.go:64: 0755 root accepted
+FAIL
+FAIL	openagentx/internal/network/secretstore	0.576s
+--- FAIL: TestAgentModelSettingsPersistencePlanningAndRollback (0.22s)
+    agent_model_settings_test.go:23: register Message worker: INVALID_INPUT: runtime identity does not match Adapter descriptor
+FAIL
+FAIL	openagentx/internal/persistence/sqlite	35.488s
+ok  	openagentx/internal/persistence/sqlite/migrations	14.710s
+ok  	openagentx/internal/runtime	0.005s
+ok  	openagentx/internal/runtime/acp	0.041s
+ok  	openagentx/internal/runtime/agy	9.450s
+ok  	openagentx/internal/runtime/codebuddy	2.137s
+ok  	openagentx/internal/runtime/codex	2.578s
+--- FAIL: TestEnvironmentRejectsInsecureProfileFile (0.00s)
+    environment_test.go:104: expected mode 0600 validation failure
+2026/10/07 05:30:14 WARN Runtime executable changed; continuing with current executable adapter_id=agy-batch expected_sha256=3027e3b18a68be8fd49cc24c3f04e460484e09866afe57d5a3d4d57427d2963c actual_sha256=653496c6b50d2c75b9a8d7dc186923f96eec7edef4906d21673c8a6ee91d4741
+2026/10/07 05:30:14 WARN Runtime executable changed; continuing with current executable adapter_id=codex-app-server expected_sha256=306c6ca7407560340797866e077e053627ad409277d1b9da58106fce4cf717cb actual_sha256=5eeea47bc34afff0d2c9d7b032c207e981ee335770720d57ce000240fb506f55
+FAIL
+FAIL	openagentx/internal/runtime/network	0.515s
+ok  	openagentx/internal/runtime/spec	0.005s
+ok  	openagentx/internal/safeoutput	0.131s
+ok  	openagentx/internal/testkit	0.220s
+ok  	openagentx/internal/transport/remotehttps	0.288s
+ok  	openagentx/internal/transport/unixhttp	0.033s
+ok  	openagentx/internal/worker	1.675s
+FAIL

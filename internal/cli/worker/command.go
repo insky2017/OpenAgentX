@@ -527,7 +527,7 @@ func codebuddyMaxTurnsOption(options map[string]any) (int, error) {
 }
 
 func codexConfigFromOptions(options map[string]any, configDir string) (codex.Config, error) {
-	cfg := codex.Config{Binary: "codex", Models: []string{"gpt-6-astra"}}
+	cfg := codex.Config{Binary: "codex", Models: []string{"gpt-6-astra"}, DiscoverModels: true}
 	common := map[string]any{}
 	for key, value := range options {
 		switch key {

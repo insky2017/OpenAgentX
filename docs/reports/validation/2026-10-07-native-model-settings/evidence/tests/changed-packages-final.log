@@ -1,0 +1,8 @@
+ok  	openagentx/internal/runtime/codex	2.092s
+ok  	openagentx/internal/runtime	0.004s
+ok  	openagentx/internal/persistence/sqlite	31.502s
+ok  	openagentx/internal/controlplane	10.366s
+ok  	openagentx/internal/nativebridge	0.317s
+ok  	openagentx/internal/api/console	4.704s
+ok  	openagentx/internal/client/console	(cached)
+ok  	openagentx/internal/cli/worker	0.892s

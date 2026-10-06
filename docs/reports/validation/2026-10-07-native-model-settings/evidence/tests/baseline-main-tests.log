@@ -1,0 +1,22 @@
+ok  	openagentx/internal/cli/console	30.070s
+--- FAIL: TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile (0.00s)
+    command_test.go:780: code=0 stderr=
+FAIL
+FAIL	openagentx/internal/cli/fleet	0.018s
+--- FAIL: TestStoreRejectsSymlinkBroadPermissionsAndWrongOwner (0.00s)
+    store_test.go:70: broad credential mode accepted: CLI credential not found
+FAIL
+FAIL	openagentx/internal/credentialstore	0.007s
+--- FAIL: TestWriteExactFileAtomicRejectsSymlinkAndBroadPermissions (0.00s)
+    atomicfile_test.go:72: broad permissions accepted
+FAIL
+FAIL	openagentx/internal/fleet	0.012s
+--- FAIL: TestFileStoreRejectsLinksAndBadPermissions (0.01s)
+    file_store_test.go:64: 0755 root accepted
+FAIL
+FAIL	openagentx/internal/network/secretstore	0.021s
+--- FAIL: TestEnvironmentRejectsInsecureProfileFile (0.00s)
+    environment_test.go:104: expected mode 0600 validation failure
+FAIL
+FAIL	openagentx/internal/runtime/network	0.010s
+FAIL

@@ -57,24 +57,25 @@ func (m CancelMode) Valid() bool {
 }
 
 type AdapterDescriptor struct {
-	DefaultTimeout     time.Duration          `json:"default_timeout,omitempty"`
-	AdapterID          string                 `json:"adapter_id"`
-	BackendType        string                 `json:"backend_type"`
-	Version            string                 `json:"version"`
-	LaunchProtocol     string                 `json:"launch_protocol"`
-	Models             []string               `json:"models"`
-	ReasoningModes     []domain.ReasoningMode `json:"reasoning_modes"`
-	SessionModes       []domain.SessionMode   `json:"session_modes"`
-	Steer              SteerMode              `json:"steer"`
-	Approval           ApprovalMode           `json:"approval"`
-	Cancel             CancelMode             `json:"cancel"`
-	Permissions        []string               `json:"permissions"`
-	Sandboxes          []string               `json:"sandboxes"`
-	NetworkModes       []string               `json:"network_modes"`
-	Streams            bool                   `json:"streams"`
-	BackendOptionsJSON json.RawMessage        `json:"backend_options_schema"`
-	MaxConcurrency     int                    `json:"max_concurrency"`
-	RuntimeIdentity    domain.RuntimeIdentity `json:"runtime_identity,omitempty"`
+	ModelReasoningEfforts map[string][]string    `json:"model_reasoning_efforts,omitempty"`
+	DefaultTimeout        time.Duration          `json:"default_timeout,omitempty"`
+	AdapterID             string                 `json:"adapter_id"`
+	BackendType           string                 `json:"backend_type"`
+	Version               string                 `json:"version"`
+	LaunchProtocol        string                 `json:"launch_protocol"`
+	Models                []string               `json:"models"`
+	ReasoningModes        []domain.ReasoningMode `json:"reasoning_modes"`
+	SessionModes          []domain.SessionMode   `json:"session_modes"`
+	Steer                 SteerMode              `json:"steer"`
+	Approval              ApprovalMode           `json:"approval"`
+	Cancel                CancelMode             `json:"cancel"`
+	Permissions           []string               `json:"permissions"`
+	Sandboxes             []string               `json:"sandboxes"`
+	NetworkModes          []string               `json:"network_modes"`
+	Streams               bool                   `json:"streams"`
+	BackendOptionsJSON    json.RawMessage        `json:"backend_options_schema"`
+	MaxConcurrency        int                    `json:"max_concurrency"`
+	RuntimeIdentity       domain.RuntimeIdentity `json:"runtime_identity,omitempty"`
 }
 
 type BackendHealth string
@@ -140,6 +141,21 @@ func (d AdapterDescriptor) Validate() error {
 			return domain.ErrInvalidInput("adapter models must be unique")
 		}
 		seenModels[model] = struct{}{}
+	}
+	for model, efforts := range d.ModelReasoningEfforts {
+		if _, ok := seenModels[model]; !ok {
+			return domain.ErrInvalidInput("reasoning catalog references an unknown model")
+		}
+		seen := map[string]bool{}
+		for _, effort := range efforts {
+			if err := domain.ValidateIdentifier("reasoning effort", effort); err != nil {
+				return err
+			}
+			if seen[effort] {
+				return domain.ErrInvalidInput("model reasoning efforts must be unique")
+			}
+			seen[effort] = true
+		}
 	}
 	for _, mode := range d.ReasoningModes {
 		if !mode.Valid() {

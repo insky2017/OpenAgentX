@@ -142,6 +142,7 @@ func removalPredicates(ids []string) map[string]string {
 	message := "SELECT message_id FROM external_messages WHERE sender_agent_id IN " + agents + " AND target_agent_id IN " + agents
 	p := map[string]string{
 		"agents": a, "principals": "principal_id IN (" + principal + ")", "position_assignments": a, "agent_profiles": a,
+		"execution_profiles": "execution_profile_id IN (SELECT default_execution_profile_id FROM agent_profiles WHERE " + a + " AND default_execution_profile_id='agent-model:'||agent_id) AND NOT EXISTS(SELECT 1 FROM agent_profiles other WHERE other.default_execution_profile_id=execution_profiles.execution_profile_id AND other.agent_id NOT IN " + agents + ")",
 		"authority_policies": "subject_kind='principal' AND subject_id IN (" + principal + ")",
 		"worker_instances":   a, "runtime_backend_registrations": "worker_instance_id IN (" + worker + ")", "worker_commands": "worker_instance_id IN (" + worker + ")",
 		"tasks": "target_agent_id IN " + agents, "messages": "task_id IN (" + task + ")", "run_attempts": "run_id IN (" + run + ")",
@@ -546,7 +547,7 @@ func (r *Repository) ApplyAgentRemoval(ctx context.Context, actor string, ids []
 	if err = r.inject(FaultAfterDelivery); err != nil {
 		return nil, err
 	}
-	order := []string{"managed_message_tasks", "external_messages", "external_session_bindings", "mailbox_items", "artifacts", "approval_decisions", "approval_requests", "workspace_leases", "run_attempts", "messages", "session_bindings", "tasks", "network_workflow_commands", "network_imports", "network_work_items", "network_mode_tests", "network_tests", "network_profile_bindings", "network_mode_policies", "worker_commands", "runtime_backend_registrations", "worker_instances", "external_role_scopes", "authority_policies", "position_assignments", "agent_profiles", "agents", "principals"}
+	order := []string{"managed_message_tasks", "external_messages", "external_session_bindings", "mailbox_items", "artifacts", "approval_decisions", "approval_requests", "workspace_leases", "run_attempts", "messages", "session_bindings", "tasks", "network_workflow_commands", "network_imports", "network_work_items", "network_mode_tests", "network_tests", "network_profile_bindings", "network_mode_policies", "worker_commands", "runtime_backend_registrations", "worker_instances", "external_role_scopes", "authority_policies", "position_assignments", "agent_profiles", "execution_profiles", "agents", "principals"}
 	for _, table := range order {
 		rowIDs := selected.rows[table]
 		for len(rowIDs) > 0 {
