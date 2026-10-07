@@ -1,0 +1,7 @@
+{
+  "id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "cwd": "/home/sky/docs",
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "rollout_path": "/home/sky/.codex/sessions/2026/10/07/rollout-2026-10-07T18-29-06-01a115e8-e528-75f3-9e30-612d617cfb84.jsonl"
+}

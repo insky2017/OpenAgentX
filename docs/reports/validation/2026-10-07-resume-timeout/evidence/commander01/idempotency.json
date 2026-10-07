@@ -1,0 +1,14 @@
+[
+  {
+    "case": "duplicate-same-event",
+    "exit_code": 0,
+    "stdout": "{\n  \"at\": \"2026-10-07T10:34:41.088318+00:00\",\n  \"event\": \"api-read-20261007\",\n  \"prompt_sha256\": \"3a3b8bad33318e52afd8f87207524c38d66090f21d2057673c1fd4945722b2a4\",\n  \"workspace\": \"/home/sky/docs\",\n  \"model\": \"gpt-6-astra\",\n  \"effort\": \"high\",\n  \"sandbox\": \"danger-full-access\",\n  \"task_scope\": \"read-only\",\n  \"thread_before\": \"01a115e8-e528-75f3-9e30-612d617cfb84\",\n  \"operator_pid\": 4082844,\n  \"finished_at\": \"2026-10-07T10:36:01.906318+00:00\",\n  \"exit_code\": 0,\n  \"thread_id\": \"01a115e8-e528-75f3-9e30-612d617cfb84\",\n  \"final_exists\": true,\n  \"turn_completed\": true,\n  \"status\": \"completed\"\n}\n\n",
+    "stderr": ""
+  },
+  {
+    "case": "conflicting-event-key",
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Event key was already used with different content; refusing replay.\n"
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "Commander writer is already active; this event was not submitted.\n",
+  "expected": "writer already active"
+}

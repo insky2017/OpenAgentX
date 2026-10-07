@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-07T10:29:06.800033+00:00",
+  "event": "bootstrap-20261007",
+  "prompt_sha256": "eb15a0c5e8631688a80b2ee38f51238fb518dea399f06bb7f8775650ed8bebed",
+  "workspace": "/home/sky/docs",
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "sandbox": "read-only",
+  "thread_before": null,
+  "operator_pid": 4026248,
+  "finished_at": "2026-10-07T10:31:28.910798+00:00",
+  "exit_code": 0,
+  "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "final_exists": true,
+  "status": "completed",
+  "handoff_verdict": "FAILED: bwrap prevented actual file reads; raw result preserved"
+}

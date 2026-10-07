@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-07T10:32:13.867474+00:00",
+  "event": "handoff-read-20261007",
+  "prompt_sha256": "0bde0fab9f8b7a37d85df28e91092cb6599f21db6a8dbc5004ed46c7061a41b1",
+  "workspace": "/home/sky/docs",
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "sandbox": "danger-full-access",
+  "task_scope": "read-only-until-explicit-handoff",
+  "thread_before": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "operator_pid": 4058909,
+  "finished_at": "2026-10-07T10:34:04.292276+00:00",
+  "exit_code": 0,
+  "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "final_exists": true,
+  "turn_completed": true,
+  "status": "completed",
+  "handoff_verdict": "PASS: real read-only command effects and final answer verified"
+}
