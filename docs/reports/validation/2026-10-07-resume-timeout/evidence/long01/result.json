@@ -1,0 +1,7 @@
+{
+  "status": "FAILED",
+  "at": "2026-10-07T10:49:45.869257+00:00",
+  "source_commit": "15f787f3b7b8f04e3fc3fcad975846ec101e0daa",
+  "binary_sha256": "a87538ee747f2d57428e05f163a613933537d687ea2d613137e2c84e0a9f6f5b",
+  "error": "no such column: id"
+}

@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "at": "2026-10-07T10:50:05.163924+00:00",
+  "source_commit": "15f787f3b7b8f04e3fc3fcad975846ec101e0daa",
+  "binary_sha256": "a87538ee747f2d57428e05f163a613933537d687ea2d613137e2c84e0a9f6f5b",
+  "task_id": "task-1d945325-81f2-4a5d-98a0-7c7b6eb61ecb",
+  "run_id": "run-70328703-47e5-43fa-ab72-215a3c024d9a",
+  "task_status": "uncertain",
+  "runtime_status": "succeeded",
+  "formal_duration_seconds": 1898.785088,
+  "proof_elapsed_seconds": 1860.0054349709535,
+  "frozen_timeout": 0,
+  "frozen_deadline": null,
+  "thread_id": "01a115de-8358-7db2-9008-e2680291422e",
+  "model_work_repeated": false,
+  "initial_harness_result_preserved": true,
+  "scope": "same original Run; actual pre-exit formal API snapshots, real tools and read-only persisted freeze verified; mutation Task review status retained"
+}

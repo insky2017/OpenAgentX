@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-07T10:16:55.968661+00:00",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx",
+  "binary_sha256": "a87538ee747f2d57428e05f163a613933537d687ea2d613137e2c84e0a9f6f5b",
+  "commit": "15f787f3b7b8f04e3fc3fcad975846ec101e0daa",
+  "harness_sha256": "89e69f1efeff3b2cd805a1314cd241ebb2aad3de7cfb56601520fc781010dcde",
+  "codex_binary": "/home/sky/.local/bin/codex",
+  "codex_version": "codex-cli 0.160.1",
+  "model": "gpt-6-astra",
+  "configured_effort": "ultra",
+  "tmux_server": "oax-terminal-5a190ba6be34",
+  "scope": "R isolated real CLI/Worker/tmux, no installed service or business acceptance"
+}

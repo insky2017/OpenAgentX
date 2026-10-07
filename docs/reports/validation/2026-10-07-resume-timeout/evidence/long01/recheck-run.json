@@ -1,0 +1,31 @@
+{
+  "instructions_sha256": "2347e12b1d94009ad37b63b0103b6f3df7135202122e60e0036d7b6b5af730dc",
+  "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/long01/profile/workers/identities/terminal-e2e-73e8ab.role.md",
+  "run_id": "run-70328703-47e5-43fa-ab72-215a3c024d9a",
+  "task_id": "task-1d945325-81f2-4a5d-98a0-7c7b6eb61ecb",
+  "agent_id": "terminal-e2e-73e8ab",
+  "version": 2,
+  "status": "succeeded",
+  "worker_instance_id": "worker-e4db173f-c95a-46b6-b55e-84c4cde48a1b",
+  "worker_generation": 1,
+  "execution_spec_version": 1,
+  "adapter_id": "codex-app-server",
+  "backend_id": "codex",
+  "model": "gpt-6-astra",
+  "reasoning_mode": "backend_default",
+  "network_mode": "inherit",
+  "network_policy_version": 1,
+  "network_binding_revision": 1,
+  "turn_result": {
+    "final_reply": true,
+    "runtime_status": "succeeded",
+    "body": "OAX_LONG_COMPLETED",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  },
+  "turn_result_state": "available",
+  "started_at": "2026-10-07T10:17:45.409284284Z",
+  "finished_at": "2026-10-07T10:49:24.194372888Z",
+  "created_at": "2026-10-07T10:17:45.409284284Z",
+  "updated_at": "2026-10-07T10:49:24.194372888Z"
+}

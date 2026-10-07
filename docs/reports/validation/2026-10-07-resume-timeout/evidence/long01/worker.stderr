@@ -1,0 +1,1 @@
+Error: Worker stopped abnormally: release Worker lease during shutdown: call Worker API: Post "http://unix/api/v1/workers/worker-e4db173f-c95a-46b6-b55e-84c4cde48a1b/release": dial unix /tmp/oax-codex-f1663b258f.sock: connect: connection refused

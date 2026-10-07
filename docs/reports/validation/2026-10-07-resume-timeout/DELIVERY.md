@@ -5,7 +5,7 @@
 - Codex 默认不设总执行截止（`timeout: 0s`），任务正常执行到 Runtime 完成；显式正时限和人工取消继续有效。AGY 保持原约定。控制面冻结规格、Worker descriptor、CLI 配置和 Adapter 一致；不是把30分钟简单改成4小时。
 - 已登记 Agent 的 `resume` 核对经认证安装中的正式身份、角色路径、workspace 和能力；不再依赖一次性接入回执的原始字节。未登记身份仍使用原注册保护。合法旧 Fleet 没有 `identity_file` 时，以正式档案核对，不伪造接入资料。
 - 已在正式安装上用候选 CLI 验证 Rhythm、Pay、Quote 的 `resume --no-open` 成功，原 thread 保持，没有重跑业务任务。该项证明 CLI 恢复链路，不代表正式 Runtime 已完成升级。
-- 本文初始版本仍处于真实长任务与联合验证阶段；安装、重启和最终工件结论以随后追加证据为准。
+- 真实长任务已通过只读复核：[结果](evidence/long01/recheck-result.json)。本地工具1860.005秒、正式Run1898.785秒、冻结timeout0/无deadline；仅一个Run succeeded。Task保留uncertain/business_effect_unverified，由独立文件证据核验本次测试效果。首次脚本列名错误保留为FAILED，没有重跑模型。联合工件及正式安装仍待下文最终结论。
 
 ## 为什么之前中断
 
