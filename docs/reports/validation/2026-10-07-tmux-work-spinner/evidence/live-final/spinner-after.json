@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-07T10:43:03.415527+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window": "@0",
+      "name": "terminal-e2e-2711e3",
+      "pane": "%0",
+      "index": "0",
+      "pid": "4113613",
+      "dead": "0",
+      "title": "sky"
+    },
+    {
+      "session": "OAX",
+      "window": "@1",
+      "name": "ordinary",
+      "pane": "%1",
+      "index": "0",
+      "pid": "4138067",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    }
+  ],
+  "options": {
+    "@0": "@oax_state idle\n@oax_window-status-current-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"\n@oax_window-status-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"\n@openagentx_agent_id terminal-e2e-2711e3\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on\nwindow-status-current-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"\nwindow-status-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"",
+    "@1": "automatic-rename off\nwindow-status-current-format \"USER-CURRENT:#W\"\nwindow-status-format \"USER:#W\""
+  },
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-990982018/server.sock",
+    "thread_id": "01a115f1-b91d-78e1-af8a-7e9b9fa62585",
+    "turn_id": "01a115f3-4df5-79b1-a682-55625be90f87",
+    "task_id": "task-7ee47d99-365a-4e74-bb70-5125fa56228e",
+    "run_id": "run-eae2a2e0-4ab1-401d-b0d0-bdadec9f84cb",
+    "state": "idle",
+    "pid": 4111076,
+    "updated_at": "2026-10-07T10:43:03.126241064Z"
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 4109887,
+      "starttime": "58791987"
+    },
+    {
+      "label": "worker",
+      "pid": 4111019,
+      "starttime": "58793035"
+    }
+  ],
+  "active_window": "@0"
+}

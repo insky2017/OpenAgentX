@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	workerclient "openagentx/internal/client/worker"
 	"openagentx/internal/domain"
+	"openagentx/internal/fleet"
 	openruntime "openagentx/internal/runtime"
 	"openagentx/internal/runtime/agy"
 	"openagentx/internal/runtime/codebuddy"
@@ -114,7 +115,12 @@ func RunWorkerProcess(ctx context.Context, configPath string) error {
 		return err
 	}
 	pool.SetNetworkMaterializer(materializer)
-	runner, err := residentworker.NewRunner(processConfig.RunnerConfig("worker-"+uuid.NewString()), client, pool, client)
+	config := processConfig.RunnerConfig("worker-" + uuid.NewString())
+	binary, _ := os.Executable()
+	status := fleet.StartWorkStatus(fleet.ExecRunner{}, processConfig.AgentID, binary)
+	defer status.Close()
+	config.ObserveWork = status.Observe
+	runner, err := residentworker.NewRunner(config, client, pool, client)
 	if err != nil {
 		return err
 	}

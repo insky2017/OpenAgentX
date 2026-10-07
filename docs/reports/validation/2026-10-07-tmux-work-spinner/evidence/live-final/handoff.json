@@ -1,0 +1,31 @@
+{
+  "root": "/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/live-03",
+  "socket": "/tmp/oax-codex-6b6fa663b0.sock",
+  "url": "http://127.0.0.1:42809",
+  "agent": "terminal-e2e-2711e3",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final",
+  "binary_sha256": "0235ee6721a294377077c50cea5110de259172b594dfabbe538cc3d66db47860",
+  "server": "oax-terminal-369a9539f722",
+  "windows": {
+    "native": "@0",
+    "ordinary": "@1"
+  },
+  "tasks": [
+    "task-7ee47d99-365a-4e74-bb70-5125fa56228e",
+    "task-c5a8b1be-32d4-40f5-a84b-e126129167d8"
+  ],
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 4109887,
+      "starttime": "58791987"
+    },
+    {
+      "label": "worker",
+      "pid": 4111019,
+      "starttime": "58793035"
+    }
+  ],
+  "profile": "/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/live-03/profile",
+  "at": "2026-10-07T10:43:03.543096+00:00"
+}

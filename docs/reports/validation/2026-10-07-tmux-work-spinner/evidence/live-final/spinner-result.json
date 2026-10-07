@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-07T10:43:03.416338+00:00",
+  "result": "PASS",
+  "evidence_level": "R real Codex Worker + formal API + isolated tmux PTY + independent file",
+  "binary_sha256": "0235ee6721a294377077c50cea5110de259172b594dfabbe538cc3d66db47860",
+  "task_id": "task-7ee47d99-365a-4e74-bb70-5125fa56228e",
+  "task_status": "uncertain",
+  "task_error": "business_effect_unverified",
+  "first_running_seconds": 1.047042571939528,
+  "frames_seen_in_attached_pty": [
+    "⠋",
+    "⠙",
+    "⠹",
+    "⠸",
+    "⠼",
+    "⠴",
+    "⠦",
+    "⠧",
+    "⠇",
+    "⠏"
+  ],
+  "proof": "spinner-proof.txt",
+  "proof_sha256": "e16d3ff07f7a4fb6ac31db5cb1d0f01eae9130661fa8e745372f851d4d06fd5a",
+  "normal_and_current": true,
+  "ordinary_formats_preserved": true,
+  "reverification": "No model replay. Corrected harness tmux show-options target from =OAX to OAX; rechecked saved actual samples, PTY status and Task/Run against independent file and current window options.",
+  "limits": "Approval and two-Agent isolation use real tmux + controllable Runtime integration tests. No production installed/restarted."
+}

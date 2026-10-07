@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-07T10:40:27.800270+00:00",
+  "path": "/api/control/v1/tasks",
+  "method": "POST",
+  "request": {
+    "target_agent_id": "terminal-e2e-2711e3",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "runtime_session": {
+      "backend_id": "codex",
+      "provider_session_id": "01a115f1-b91d-78e1-af8a-7e9b9fa62585"
+    },
+    "content": "Execute exactly one local Python command in this workspace: python3 -c \"import pathlib,time; pathlib.Path('spinner-started.txt').write_text('STARTED\\n'); time.sleep(20); pathlib.Path('spinner-proof.txt').write_text('SPINNER-PROOF-DONE\\n')\". Wait for the command to finish. Then reply exactly: SPINNER-PROOF-DONE. What next? Do not perform any other work or spawn subagents.",
+    "meta": {
+      "idempotency_key": "8b072c7df5610c3ec877f2e3"
+    }
+  },
+  "status": 200,
+  "response": {
+    "task_id": "task-7ee47d99-365a-4e74-bb70-5125fa56228e",
+    "task_version": 1,
+    "task_status": "queued",
+    "sequence": 2
+  }
+}

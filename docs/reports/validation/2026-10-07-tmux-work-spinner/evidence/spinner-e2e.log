@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-tmux-spinner-worktree/scripts/validation/tmux_work_spinner_e2e.py", line 103, in <module>
+    main()
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-tmux-spinner-worktree/scripts/validation/tmux_work_spinner_e2e.py", line 66, in main
+    require(detail['task']['status'] == 'succeeded', 'real task did not succeed')
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-tmux-spinner-worktree/scripts/validation/terminal_overview_e2e.py", line 37, in require
+    raise RuntimeError(message)
+RuntimeError: real task did not succeed

@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-07T10:43:03.406508+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-369a9539f722",
+    "show-options",
+    "-w",
+    "-t",
+    "@1"
+  ],
+  "returncode": 0,
+  "stdout": "automatic-rename off\nwindow-status-current-format \"USER-CURRENT:#W\"\nwindow-status-format \"USER:#W\"\n",
+  "stderr": ""
+}

@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-07T10:34:27.452670+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window": "@0",
+      "name": "terminal-e2e-e321d3",
+      "pane": "%0",
+      "index": "0",
+      "pid": "4073315",
+      "dead": "0",
+      "title": "sky"
+    },
+    {
+      "session": "OAX",
+      "window": "@1",
+      "name": "ordinary",
+      "pane": "%1",
+      "index": "0",
+      "pid": "4080719",
+      "dead": "0",
+      "title": "sky-LEGION-REN9000K-34IRZ"
+    }
+  ],
+  "options": {
+    "@0": "@oax_state idle\n@oax_window-status-current-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-v2' tmux-spinner),}\"\n@oax_window-status-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-v2' tmux-spinner),}\"\n@openagentx_agent_id terminal-e2e-e321d3\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on\nwindow-status-current-format \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-v2' tmux-spinner),}\"\nwindow-status-format \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-v2' tmux-spinner),}\"",
+    "@1": "automatic-rename off\nwindow-status-current-format \"USER-CURRENT:#W\"\nwindow-status-format \"USER:#W\""
+  },
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-2387851551/server.sock",
+    "thread_id": "01a115ed-2ead-7af1-9130-a570e8c82e8f",
+    "turn_id": "01a115ed-2fc0-7061-9cba-3df0a910b16e",
+    "task_id": "task-812e8fe7-69b3-4bc5-9dea-6350b0a3e277",
+    "run_id": "run-f7f75ed0-1813-4beb-986e-c8ab3dfe8c55",
+    "state": "idle",
+    "pid": 4070054,
+    "updated_at": "2026-10-07T10:34:25.557378299Z"
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 4068931,
+      "starttime": "58762230"
+    },
+    {
+      "label": "worker",
+      "pid": 4069983,
+      "starttime": "58763278"
+    }
+  ],
+  "active_window": "@1"
+}

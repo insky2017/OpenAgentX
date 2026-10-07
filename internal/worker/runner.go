@@ -82,6 +82,8 @@ func (r *Runner) Run(ctx context.Context) error {
 		return err
 	}
 
+	manager.observeWork = r.config.ObserveWork
+
 	runContext, cancelRun := context.WithCancel(ctx)
 	defer cancelRun()
 	group, groupContext := errgroup.WithContext(runContext)

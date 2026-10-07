@@ -8,6 +8,10 @@ import (
 )
 
 type Config struct {
+	// ObserveWork is an optional, non-blocking display projection; true means
+	// executing, false means finished or waiting for a human decision.
+	ObserveWork func(bool)
+
 	AgentID           string
 	WorkerInstanceID  string
 	Transport         domain.WorkerTransport

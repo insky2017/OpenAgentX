@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:43:03.414789+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-369a9539f722",
+    "list-windows",
+    "-t",
+    "=OAX",
+    "-F",
+    "#{window_id}\t#{window_active}"
+  ],
+  "returncode": 0,
+  "stdout": "@0\t1\n@1\t0\n",
+  "stderr": ""
+}

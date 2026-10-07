@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-07T10:38:27.334179+00:00",
+  "path": "/api/observe/v1/overview",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "agents": [
+      {
+        "agent_id": "terminal-e2e-2711e3",
+        "principal_id": "agent-terminal-e2e-2711e3",
+        "organization_id": "default",
+        "display_name": "终端真实验收",
+        "status": "active",
+        "version": 1,
+        "created_at": "2026-10-07T10:38:11.476004264Z",
+        "updated_at": "2026-10-07T10:38:11.476004264Z",
+        "readiness": {
+          "ready": false,
+          "can_start_now": false,
+          "reason": "运行环境或网络尚未就绪",
+          "next_action": "openagentx agent resume terminal-e2e-2711e3"
+        }
+      }
+    ],
+    "approvals": [],
+    "latest_sequence": 8,
+    "live_after_sequence": 8,
+    "server_time": "2026-10-07T10:38:27.333465263Z",
+    "tasks": [],
+    "workers": [
+      {
+        "worker_instance_id": "worker-1d69725f-d6f2-4945-a381-5721717be609",
+        "agent_id": "terminal-e2e-2711e3",
+        "generation": 1,
+        "status": "online",
+        "last_heartbeat_at": "2026-10-07T10:38:23.100634625Z",
+        "lease_until": "2026-10-07T10:38:53.100634625Z",
+        "started_at": "2026-10-07T10:38:23.097775062Z",
+        "updated_at": "2026-10-07T10:38:23.100634625Z"
+      }
+    ]
+  }
+}

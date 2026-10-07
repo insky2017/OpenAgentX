@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-07T10:43:03.497959+00:00",
+  "path": "/api/observe/v1/run-attempts/run-76d16eed-3efb-42f8-8128-0c199945f413",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "deadline_at": "2026-10-07T11:08:44.393393132Z",
+    "instructions_sha256": "f688a46048116c98b1b5b55414bdfdaaf5cc221eae0d5babf969c310556d172b",
+    "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/live-03/profile/workers/identities/terminal-e2e-2711e3.role.md",
+    "run_id": "run-76d16eed-3efb-42f8-8128-0c199945f413",
+    "task_id": "task-c5a8b1be-32d4-40f5-a84b-e126129167d8",
+    "agent_id": "terminal-e2e-2711e3",
+    "version": 2,
+    "status": "succeeded",
+    "worker_instance_id": "worker-1d69725f-d6f2-4945-a381-5721717be609",
+    "worker_generation": 1,
+    "execution_spec_version": 1,
+    "adapter_id": "codex-app-server",
+    "backend_id": "codex",
+    "model": "gpt-6-astra",
+    "reasoning_mode": "backend_default",
+    "network_mode": "inherit",
+    "network_policy_version": 1,
+    "network_binding_revision": 1,
+    "turn_result": {
+      "final_reply": true,
+      "runtime_status": "succeeded",
+      "body": "OAX-TERMINAL-ROLE terminal-e2e-2711e3 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/live-03/workspace",
+      "side_effects_source": "not_recorded",
+      "business_verification_source": "not_recorded"
+    },
+    "turn_result_state": "available",
+    "started_at": "2026-10-07T10:38:44.393393132Z",
+    "finished_at": "2026-10-07T10:38:51.838144995Z",
+    "created_at": "2026-10-07T10:38:44.393393132Z",
+    "updated_at": "2026-10-07T10:38:51.838144995Z"
+  }
+}

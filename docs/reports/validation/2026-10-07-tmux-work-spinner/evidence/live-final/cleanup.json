@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:43:58.751295+00:00",
+  "processes": [
+    {
+      "label": "worker",
+      "pid": 4111019,
+      "stopped": true
+    },
+    {
+      "label": "daemon",
+      "pid": 4109887,
+      "stopped": true
+    }
+  ],
+  "owned_tmux_server": "oax-terminal-369a9539f722",
+  "evidence_preserved": true,
+  "production_touched": false
+}

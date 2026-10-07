@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:40:36.142570+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-369a9539f722",
+    "display-message",
+    "-p",
+    "-t",
+    "@0",
+    "#{E:window-status-current-format}"
+  ],
+  "returncode": 0,
+  "stdout": "0:terminal-e2e-2711e3*\n",
+  "stderr": ""
+}

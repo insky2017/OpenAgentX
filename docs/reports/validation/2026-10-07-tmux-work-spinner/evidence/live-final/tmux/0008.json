@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-07T10:38:54.076262+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-369a9539f722",
+    "show-options",
+    "-w",
+    "-t",
+    "@0"
+  ],
+  "returncode": 0,
+  "stdout": "@oax_state idle\n@oax_window-status-current-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"\n@oax_window-status-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"\n@openagentx_agent_id terminal-e2e-2711e3\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on\nwindow-status-current-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"\nwindow-status-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final' tmux-spinner),}\"\n",
+  "stderr": ""
+}

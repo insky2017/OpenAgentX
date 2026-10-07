@@ -1,0 +1,14 @@
+{
+  "base_commit": "f3f1818",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final",
+  "binary_sha256": "0235ee6721a294377077c50cea5110de259172b594dfabbe538cc3d66db47860",
+  "source_sha256": {
+    "cmd/openagentx/main.go": "06297dae75518a2211bbac3efc2d12991e9afefbe69103bcbd0eff4726925051",
+    "internal/cli/worker/command.go": "074a83cd2726ffcf4550c14b17b4c161e0a00466004e661efa82a671860d3bcc",
+    "internal/worker/config.go": "19b3f0c97555408db1a75032e1633bb53f3411c363de48697f9571e50efff74d",
+    "internal/worker/runner.go": "8fe43e8041dd28cac2419ab217796fd945b3b94029b21a72617a8fcab244b839",
+    "internal/worker/run_manager.go": "243158e8c04f5c57895c6d349117a39ce7b40270e8ded2f2f844c6abdef25755",
+    "internal/worker/work_activity.go": "7124cbdec7fcfc4b4ccbab1163482e9057d871c26d5b0c247b50be584f949ad7",
+    "internal/fleet/work_status.go": "01949d9a2ed6bda15b553ee6decbca7ee65e725f9294ec6fd8bb68d647a52ed4"
+  }
+}

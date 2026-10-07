@@ -1,0 +1,8 @@
+First command ran with inherited umask 077:
+go test ./internal/worker ./internal/fleet ./internal/cli/worker ./cmd/openagentx
+--- FAIL: TestWriteExactFileAtomicRejectsSymlinkAndBroadPermissions (0.00s)
+    atomicfile_test.go:72: broad permissions accepted
+--- FAIL: TestReadSecureFileUsesOpenedRegularFileAndRejectsUnsafeInputs (0.00s)
+    atomicfile_test.go:98: broad private file accepted
+FAIL openagentx/internal/fleet 19.457s
+The two baseline tests create files requesting 0644; inherited umask 077 makes them 0600. umask 022 rerun passed. Original tool execution output preserved in this session.

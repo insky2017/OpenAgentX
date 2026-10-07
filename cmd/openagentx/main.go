@@ -31,6 +31,7 @@ import (
 	workercli "openagentx/internal/cli/worker"
 	"openagentx/internal/controlplane"
 	"openagentx/internal/domain"
+	"openagentx/internal/fleet"
 	"openagentx/internal/localprofile"
 	"openagentx/internal/network/secretstore"
 	openagentsqlite "openagentx/internal/persistence/sqlite"
@@ -48,6 +49,9 @@ func execute(args []string) int {
 		return workercli.ExecuteOpenAgentX(args, workercli.RunWorkerProcess)
 	}
 	switch args[0] {
+	case "tmux-spinner":
+		fmt.Print(fleet.SpinnerFrame(time.Now()))
+		return 0
 	case "init":
 		return admincli.ExecuteInit(args[1:], admincli.DefaultDependencies())
 	case "agent":

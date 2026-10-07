@@ -1,0 +1,10 @@
+=== RUN   TestResidentWorkerWaitDoesNotBlockHeartbeatOrActiveControlAndContinuesToNextTask
+--- PASS: TestResidentWorkerWaitDoesNotBlockHeartbeatOrActiveControlAndContinuesToNextTask (0.01s)
+=== RUN   TestWorkerActivityThroughRealTmux
+--- PASS: TestWorkerActivityThroughRealTmux (0.75s)
+PASS
+ok  	openagentx/internal/worker	1.798s
+=== RUN   TestWorkStatusIsolatedTmuxPreservesFormatsAndWindowIsolation
+--- PASS: TestWorkStatusIsolatedTmuxPreservesFormatsAndWindowIsolation (0.97s)
+PASS
+ok  	openagentx/internal/fleet	2.014s

@@ -35,6 +35,7 @@ type activeTurn struct {
 	request    openruntime.TurnRequest
 	handle     openruntime.TurnHandle
 	descriptor openruntime.AdapterDescriptor
+	activity   *workActivity
 }
 
 type ActiveRunManager struct {
@@ -50,6 +51,7 @@ type ActiveRunManager struct {
 	capacity    chan struct{}
 	draining    *atomic.Bool
 	shutdown    time.Duration
+	observeWork func(bool)
 }
 
 func NewActiveRunManager(
@@ -110,6 +112,14 @@ func (m *ActiveRunManager) Submit(ctx context.Context, item domain.MailboxItem) 
 
 func (m *ActiveRunManager) Run(ctx context.Context) error {
 	var active *activeTurn
+	if m.observeWork != nil {
+		m.observeWork(false)
+	}
+	defer func() {
+		if active != nil {
+			active.activity.finish()
+		}
+	}()
 	for {
 		select {
 		case <-ctx.Done():
@@ -184,20 +194,27 @@ func (m *ActiveRunManager) startWork(ctx context.Context, active *activeTurn, it
 	if err != nil {
 		return m.failStartedRun(ctx, begin.Turn, err)
 	}
+	activity := startWorkActivity(m.observeWork)
 	sink := openruntime.EventSinkFunc(func(eventContext context.Context, event openruntime.RuntimeEvent) error {
-		return m.client.AppendRunEvents(eventContext, begin.Turn.RunAttempt.ID, api.EventBatch{
+		err := m.client.AppendRunEvents(eventContext, begin.Turn.RunAttempt.ID, api.EventBatch{
 			WorkerInstanceID: m.session.Worker.ID, Generation: m.session.Worker.Generation,
 			FencingToken:       m.session.Worker.FencingToken,
 			ExpectedRunVersion: begin.Turn.RunAttempt.Version, Events: []openruntime.RuntimeEvent{event},
 		})
+		if err == nil {
+			activity.event(event)
+		}
+		return err
 	})
 	handle, err := adapter.StartTurn(ctx, begin.Turn, sink)
 	if err != nil {
+		activity.finish()
 		return m.failStartedRun(ctx, begin.Turn, err)
 	}
-	started := &activeTurn{request: begin.Turn, handle: handle, descriptor: descriptor}
+	started := &activeTurn{request: begin.Turn, handle: handle, descriptor: descriptor, activity: activity}
 	go func() {
 		result, waitErr := handle.Wait(ctx)
+		activity.finish()
 		m.completions <- waitResult{runID: begin.Turn.RunAttempt.ID, result: result, err: waitErr}
 	}()
 	return started, nil
@@ -267,6 +284,9 @@ func (m *ActiveRunManager) applyControl(ctx context.Context, active *activeTurn,
 				decision, err = m.resolver.ResolveApprovalDecision(ctx, item)
 				if err == nil {
 					err = active.handle.DecideApproval(ctx, decision)
+					if err == nil {
+						active.activity.decided(decision.ApprovalRequestID)
+					}
 				}
 			}
 		case domain.MailboxKindCancel:

@@ -1,0 +1,4 @@
+ok  	openagentx/internal/worker	2.372s
+ok  	openagentx/internal/fleet	20.609s
+ok  	openagentx/internal/cli/worker	0.755s
+ok  	openagentx/cmd/openagentx	0.584s

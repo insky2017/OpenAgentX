@@ -1,0 +1,2 @@
+# Preserve raw terminal cursor sequences and their significant trailing spaces.
+live-final/attached-client.pty.log -whitespace

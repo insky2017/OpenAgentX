@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-07T10:43:03.476252+00:00",
+  "path": "/api/observe/v1/tasks?limit=100",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "tasks": [
+      {
+        "id": "task-7ee47d99-365a-4e74-bb70-5125fa56228e",
+        "target_agent_id": "terminal-e2e-2711e3",
+        "intent": "mutation",
+        "status": "uncertain",
+        "summary": "Execute exactly one local Python command in this workspace: python3 -c \"import pathlib,time; pathlib.Path('spinner-started.txt').write_text('STARTED\\n'); time.…",
+        "created_at": "2026-10-07T10:40:27.797459689Z",
+        "updated_at": "2026-10-07T10:41:15.549467268Z"
+      },
+      {
+        "id": "task-c5a8b1be-32d4-40f5-a84b-e126129167d8",
+        "target_agent_id": "terminal-e2e-2711e3",
+        "intent": "query",
+        "status": "succeeded",
+        "summary": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+        "created_at": "2026-10-07T10:38:44.390079499Z",
+        "updated_at": "2026-10-07T10:38:51.838144995Z"
+      }
+    ],
+    "has_more": false
+  }
+}

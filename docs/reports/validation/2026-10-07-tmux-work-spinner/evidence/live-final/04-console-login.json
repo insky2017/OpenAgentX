@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/artifacts/openagentx-final",
+    "console",
+    "login"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nConsole  owner\r\nConsole  \r\nCLI session established for owner; expires 2026-11-06T10:38:21Z\r\n"
+}

@@ -1,0 +1,32 @@
+{
+  "deadline_at": "2026-10-07T11:10:27.801297482Z",
+  "instructions_sha256": "f688a46048116c98b1b5b55414bdfdaaf5cc221eae0d5babf969c310556d172b",
+  "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/live-03/profile/workers/identities/terminal-e2e-2711e3.role.md",
+  "run_id": "run-eae2a2e0-4ab1-401d-b0d0-bdadec9f84cb",
+  "task_id": "task-7ee47d99-365a-4e74-bb70-5125fa56228e",
+  "agent_id": "terminal-e2e-2711e3",
+  "version": 2,
+  "status": "succeeded",
+  "worker_instance_id": "worker-1d69725f-d6f2-4945-a381-5721717be609",
+  "worker_generation": 1,
+  "execution_spec_version": 1,
+  "adapter_id": "codex-app-server",
+  "backend_id": "codex",
+  "model": "gpt-6-astra",
+  "reasoning_mode": "backend_default",
+  "network_mode": "inherit",
+  "network_policy_version": 1,
+  "network_binding_revision": 1,
+  "turn_result": {
+    "final_reply": true,
+    "runtime_status": "succeeded",
+    "body": "SPINNER-PROOF-DONE. What next?",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  },
+  "turn_result_state": "available",
+  "started_at": "2026-10-07T10:40:27.801297482Z",
+  "finished_at": "2026-10-07T10:41:15.549467268Z",
+  "created_at": "2026-10-07T10:40:27.801297482Z",
+  "updated_at": "2026-10-07T10:41:15.549467268Z"
+}

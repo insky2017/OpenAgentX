@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-tmux-spinner-worktree/scripts/validation/tmux_work_spinner_e2e.py", line 113, in <module>
+    main()
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-tmux-spinner-worktree/scripts/validation/tmux_work_spinner_e2e.py", line 90, in main
+    require(run.tmux('show-options', '-v', '-t', '=OAX', 'status-interval') == '1', 'status interval is not one second')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-tmux-spinner-worktree/scripts/validation/terminal_overview_e2e.py", line 179, in tmux
+    require(process.returncode == 0, "owned tmux operation failed: " + args[0])
+  File "/home/sky/work/touzi/OneAxe/OpenAgentX-tmux-spinner-worktree/scripts/validation/terminal_overview_e2e.py", line 37, in require
+    raise RuntimeError(message)
+RuntimeError: owned tmux operation failed: show-options
