@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:41:32.639521+00:00",
+  "event": "bootstrap-index-20261007",
+  "prompt_sha256": "a43763c08533398a6329aaf08413d18b847c70059156417ff8c617dcb899dc6e",
+  "workspace": "/home/sky/docs",
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "sandbox": "danger-full-access",
+  "task_scope": "read-only",
+  "thread_before": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "operator_pid": 4145835,
+  "finished_at": "2026-10-07T10:45:20.460592+00:00",
+  "exit_code": 0,
+  "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "final_exists": true,
+  "turn_completed": true,
+  "status": "completed"
+}

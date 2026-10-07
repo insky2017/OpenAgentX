@@ -88,5 +88,35 @@
     "path": "/home/sky/docs/.oax-commander/events/api-read-20261007/stderr.log",
     "sha256": "354a9cd30447a4a1cb8ce9869fad1d8ebe4fef51f63f35351c6a67f44968436a",
     "bytes": 484
+  },
+  {
+    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/events.jsonl",
+    "sha256": "e4ff682a79955510b9322ac118670842c421381e4da35cd995691134405174be",
+    "bytes": 62804
+  },
+  {
+    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/final.md",
+    "sha256": "d48acb321ae0534b8e071e73aabce90907e38787650dcee3f5f73159f23c107f",
+    "bytes": 2568
+  },
+  {
+    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/prompt.md",
+    "sha256": "a43763c08533398a6329aaf08413d18b847c70059156417ff8c617dcb899dc6e",
+    "bytes": 1694
+  },
+  {
+    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/result.json",
+    "sha256": "167bc1bfbad4c571c288bd336a796c0b705e2e84565a90e47eb541185b883aeb",
+    "bytes": 603
+  },
+  {
+    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/started.json",
+    "sha256": "f009e6d94dc6d0a1f52bdd71c0638e4bcce29f053de3aa4f263ca62c3de181f2",
+    "bytes": 402
+  },
+  {
+    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/stderr.log",
+    "sha256": "0c33b10b9f2427058556f672cb2b5b0adb9f952470a80480499f1f0b9780e3a8",
+    "bytes": 968
   }
 ]

@@ -116,3 +116,11 @@ install -m 755 scripts/operations/oax-commander /home/sky/.local/bin/oax-command
 - 两次后续事件完成后独立 systemd 单元 inactive，`status` 返回 `writer_busy=false`。没有设置周期性模型唤醒。
 
 [脱敏验收证据](../reports/validation/2026-10-07-resume-timeout/evidence/commander01/)包含原生索引、每轮回执、成功轮最终回复、锁/幂等检查及私有原始记录 SHA-256 清单。自动化交接和只读恢复已验；用户交互终端渲染及实际维护部署仍未验，不混报为完整部署通过。
+
+### 全机文档索引补充交接
+
+`bootstrap-index-20261007` 于 10:45:20 UTC 在同 thread 完成，`turn.completed`、exit 0 与最终 `DOCS_INDEX_HANDOFF_20261007` 均保留。指挥者实际读取 docs 顶层名称和普通 Markdown 标题，确认没有顶层 AGENTS、README 或旧全机总览；新 COMMANDER.md 不冒充历史索引。
+
+识别 Voice、Colab、CLIProxyAPI、OneAxe Proxy、Sub2API 五组 README；支付账户资料仅识别标题，不展开正文。本轮限读 Authentik 查询说明、Voice README、Codex 宿主代理、Colab README 和 OneAxe Proxy 兼容入口五份必要说明，建立网络/远程访问、模型网关/开发宿主、身份/业务、云环境及本机硬件/媒体分组认知。原始运维说明的时效性仍需责任域核验，不构成当前部署或业务效果证据。
+
+未读恢复码、凭据、令牌、备份或私有支付配置，未进入业务工程；未发协作请求或执行维护。此有限事件结束后空闲，无常驻模型轮询。详细结果见 [索引交接回复](../reports/validation/2026-10-07-resume-timeout/evidence/commander01/bootstrap-index-20261007-final.md)。
