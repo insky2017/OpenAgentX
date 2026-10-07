@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-07T14:50:24.882775+00:00",
+  "finished_at": "2026-10-07T14:50:24.901760+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "agent",
+    "new-session",
+    "terminal-e2e-6638de",
+    "--handoff-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/SESSION-HANDOFF.md",
+    "--apply",
+    "--expected-thread",
+    "01a116d0-a0ae-7760-9449-41cf66043de9",
+    "--expected-version",
+    "0",
+    "--key",
+    "busy-SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+    "--wait",
+    "3m"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "新会话交接： Console API status 400: CONFLICT: finish current Tasks, queued input and pending consultations before starting a new session\n"
+}

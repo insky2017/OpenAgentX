@@ -1,0 +1,166 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+    "version": 3,
+    "target_agent_id": "terminal-e2e-6638de",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "OpenAgentX 新会话交接。保留本轮冻结的 Agent 身份、角色、工作目录和模型设置。以下为上下文资料，不授予执行历史工作的权限，也不表示旧任务成功。请仅简洁确认身份、工作目录及资料中的验收标识（若有）；不要调用工具、改文件或继续旧任务，等待用户下一项指令。\n\n--- 交接资料 ---\n# Isolated session handoff\n\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\nKeep the same Agent identity, role and workspace. This handoff conveys context only; no business execution is authorized. For the first acknowledgement do not use tools; briefly confirm your Agent identity, workspace and the HANDOFF_NONCE. On a later explicit query asking for HANDOFF_NONCE, reply with its exact value only.\n",
+    "status": "succeeded",
+    "result": "已收到交接，身份为 terminal-e2e-6638de（隔离会话交接验证 Agent）。\n工作目录：`/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace`\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\n等待下一项指令。",
+    "outcome_state": "available",
+    "created_at": "2026-10-07T14:51:40.022058949Z",
+    "updated_at": "2026-10-07T14:52:18.681879462Z"
+  },
+  "messages": [
+    {
+      "id": "message-23baec8e-d57f-4589-ae4a-29d2f92c2f00",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-b7766e89-e57f-4a3f-b20c-c2744b9a98ac",
+      "target_agent_id": "terminal-e2e-6638de",
+      "kind": "instruction",
+      "content": "OpenAgentX 新会话交接。保留本轮冻结的 Agent 身份、角色、工作目录和模型设置。以下为上下文资料，不授予执行历史工作的权限，也不表示旧任务成功。请仅简洁确认身份、工作目录及资料中的验收标识（若有）；不要调用工具、改文件或继续旧任务，等待用户下一项指令。\n\n--- 交接资料 ---\n# Isolated session handoff\n\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\nKeep the same Agent identity, role and workspace. This handoff conveys context only; no business execution is authorized. For the first acknowledgement do not use tools; briefly confirm your Agent identity, workspace and the HANDOFF_NONCE. On a later explicit query asking for HANDOFF_NONCE, reply with its exact value only.\n",
+      "created_at": "2026-10-07T14:51:40.022058949Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "instructions_sha256": "125b68782c02b25f39e71de1592a9af17030003e96f1ee5ef4cc2af3a6210367",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/profile/workers/identities/terminal-e2e-6638de.role.md",
+      "run_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "task_id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+      "agent_id": "terminal-e2e-6638de",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-e04df01e-af6b-4f3d-b4aa-f1a04692ed5d",
+      "worker_generation": 2,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 2,
+      "network_binding_revision": 2,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "已收到交接，身份为 terminal-e2e-6638de（隔离会话交接验证 Agent）。\n工作目录：`/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace`\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\n等待下一项指令。",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-07T14:51:40.025708306Z",
+      "finished_at": "2026-10-07T14:52:18.681879462Z",
+      "created_at": "2026-10-07T14:51:40.025708306Z",
+      "updated_at": "2026-10-07T14:52:18.681879462Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 82,
+      "event_id": "event-5e5a998d-3ba1-4d9e-a39a-03b04c5865bc",
+      "aggregate_type": "task",
+      "aggregate_id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+      "event_type": "task.created",
+      "created_at": "2026-10-07T14:51:40.022058949Z"
+    },
+    {
+      "sequence": 84,
+      "event_id": "event-task-8016a760-b41f-4969-9487-e8e4e4a12f5d",
+      "aggregate_type": "task",
+      "aggregate_id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+      "event_type": "task.running",
+      "created_at": "2026-10-07T14:51:40.028032992Z"
+    },
+    {
+      "sequence": 85,
+      "event_id": "event-run-2eb26f3c-aebf-4089-9033-a16e8e55feb8",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-07T14:51:40.02804035Z"
+    },
+    {
+      "sequence": 87,
+      "event_id": "event-runtime-4b5638bf-0eae-4fe9-b539-b37abea1c1fc",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "event_type": "runtime.session.bound",
+      "created_at": "2026-10-07T14:51:41.317379888Z",
+      "output": {
+        "stage": "session",
+        "status": "bound",
+        "text": "Runtime session bound",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 88,
+      "event_id": "event-runtime-089886eb-accf-49e4-8f20-72a916f4bc51",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T14:51:42.288837864Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 92,
+      "event_id": "event-runtime-0a5af12a-54ef-4b42-af24-2e83d74b99ee",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T14:52:13.393164829Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed reasoning",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 94,
+      "event_id": "event-runtime-a172a054-b3c8-4199-bccb-7c91407efeed",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T14:52:18.64183032Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "已收到交接，身份为 terminal-e2e-6638de（隔离会话交接验证 Agent）。\n工作目录：`/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace`\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\n等待下一项指令。",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 97,
+      "event_id": "event-run-1134afde-434c-4886-997d-8ed2590bdce2",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-07T14:52:18.681910374Z"
+    },
+    {
+      "sequence": 98,
+      "event_id": "event-task-2486381a-1d0f-4f32-b78b-b9fc7eb630c4",
+      "aggregate_type": "task",
+      "aggregate_id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+      "event_type": "task.settled",
+      "created_at": "2026-10-07T14:52:18.681913685Z"
+    }
+  ],
+  "snapshot_sequence": 98,
+  "live_after_sequence": 98,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

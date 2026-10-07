@@ -1,0 +1,90 @@
+{
+  "total_runs": 6,
+  "tasks": [
+    {
+      "task_id": "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+      "run_id": "run-0d3637f6-5ee8-4efc-ba95-3c16f74425b3",
+      "status": "succeeded",
+      "intent": "query",
+      "completion_basis": "query_result_delivered",
+      "model": "gpt-6-astra",
+      "thread_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+      "started_at": "2026-10-07T14:42:12.642205063Z",
+      "finished_at": "2026-10-07T14:42:25.30680657Z",
+      "result": "OAX-TERMINAL-ROLE terminal-e2e-6638de WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace",
+      "task_evidence": "tasks/task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4.json",
+      "run_evidence": "runs/run-0d3637f6-5ee8-4efc-ba95-3c16f74425b3.json"
+    },
+    {
+      "task_id": "task-25944d25-536a-4cd5-933d-fec3ae6b97ad",
+      "run_id": "run-c88374fd-fcc1-433b-b0dc-12b14915fc5f",
+      "status": "succeeded",
+      "intent": "query",
+      "completion_basis": "query_result_delivered",
+      "model": "gpt-6-astra",
+      "thread_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+      "started_at": "2026-10-07T14:50:24.873151798Z",
+      "finished_at": "2026-10-07T14:51:36.613241107Z",
+      "result": "BUSY_DONE",
+      "task_evidence": "tasks/task-25944d25-536a-4cd5-933d-fec3ae6b97ad.json",
+      "run_evidence": "runs/run-c88374fd-fcc1-433b-b0dc-12b14915fc5f.json"
+    },
+    {
+      "task_id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+      "run_id": "run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe",
+      "status": "succeeded",
+      "intent": "query",
+      "completion_basis": "query_result_delivered",
+      "model": "gpt-6-astra",
+      "thread_id": "01a116d9-48fc-7ce0-8bf1-015006451a70",
+      "started_at": "2026-10-07T14:51:40.025708306Z",
+      "finished_at": "2026-10-07T14:52:18.681879462Z",
+      "result": "已收到交接，身份为 terminal-e2e-6638de（隔离会话交接验证 Agent）。\n工作目录：`/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace`\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\n等待下一项指令。",
+      "task_evidence": "tasks/task-229dd0bb-a685-4d3d-9235-856536e3494b.json",
+      "run_evidence": "runs/run-b4cb3287-b6f8-46bb-8d8f-c1a75dcd6dbe.json"
+    },
+    {
+      "task_id": "task-cb6123d7-d58c-413f-89c9-0321fef3abea",
+      "run_id": "run-4d7c116b-b25c-4b43-aac6-dbfe35bb88ed",
+      "status": "succeeded",
+      "intent": "query",
+      "completion_basis": "query_result_delivered",
+      "model": "gpt-6-astra",
+      "thread_id": "01a116d9-48fc-7ce0-8bf1-015006451a70",
+      "started_at": "2026-10-07T14:52:38.814201014Z",
+      "finished_at": "2026-10-07T14:52:49.031568235Z",
+      "result": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+      "task_evidence": "tasks/task-cb6123d7-d58c-413f-89c9-0321fef3abea.json",
+      "run_evidence": "runs/run-4d7c116b-b25c-4b43-aac6-dbfe35bb88ed.json"
+    },
+    {
+      "task_id": "managed-task-3d8e7c62648f9e34f53f9df4345945ca",
+      "run_id": "run-457b6615-ad54-4ea1-a3e5-8e0342ba29ad",
+      "status": "succeeded",
+      "intent": "query",
+      "completion_basis": "query_result_delivered",
+      "model": "gpt-6-astra",
+      "thread_id": "01a116d9-48fc-7ce0-8bf1-015006451a70",
+      "started_at": "2026-10-07T14:52:53.866591694Z",
+      "finished_at": "2026-10-07T14:53:00.731176447Z",
+      "result": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+      "task_evidence": "tasks/managed-task-3d8e7c62648f9e34f53f9df4345945ca.json",
+      "run_evidence": "runs/run-457b6615-ad54-4ea1-a3e5-8e0342ba29ad.json"
+    },
+    {
+      "task_id": "task-f34f8892-8d42-4f39-8e45-e259dbf4778f",
+      "run_id": "run-88c79f20-1872-42b5-bc1a-7b32ee406881",
+      "status": "succeeded",
+      "intent": "query",
+      "completion_basis": "query_result_delivered",
+      "model": "gpt-6-astra",
+      "thread_id": "01a116d9-48fc-7ce0-8bf1-015006451a70",
+      "started_at": "2026-10-07T14:53:41.258600045Z",
+      "finished_at": "2026-10-07T14:53:48.248076351Z",
+      "result": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+      "task_evidence": "tasks/task-f34f8892-8d42-4f39-8e45-e259dbf4778f.json",
+      "run_evidence": "runs/run-88c79f20-1872-42b5-bc1a-7b32ee406881.json"
+    }
+  ],
+  "source": "formal Observe Task/Run/Journal plus per-task Worker runtime state"
+}

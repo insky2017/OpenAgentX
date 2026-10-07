@@ -1,0 +1,25 @@
+{
+  "session": {
+    "agent_id": "terminal-e2e-6638de",
+    "backend_id": "codex",
+    "thread_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+    "context_task_id": "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+    "version": 0,
+    "updated_at": "2026-10-07T14:50:24.757925011Z"
+  },
+  "tasks": [
+    "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4"
+  ],
+  "state": {
+    "endpoint": "unix:///tmp/oax-codex-2273507523/server.sock",
+    "thread_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+    "turn_id": "01a116d0-a1b4-74e1-b7dc-78901c123665",
+    "task_id": "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+    "run_id": "run-0d3637f6-5ee8-4efc-ba95-3c16f74425b3",
+    "state": "restored_unconfirmed",
+    "pid": 1569245
+  },
+  "workspace": {
+    "ROLE.md": "125b68782c02b25f39e71de1592a9af17030003e96f1ee5ef4cc2af3a6210367"
+  }
+}

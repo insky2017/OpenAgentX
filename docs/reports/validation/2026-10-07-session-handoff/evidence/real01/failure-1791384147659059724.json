@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-07T14:42:27.659064+00:00",
+  "status": "FAIL",
+  "type": "RuntimeError",
+  "message": "peer-apply: unexpected CLI exit; see retained evidence",
+  "note": "No automatic model retry. Owned fixture and first failure retained."
+}

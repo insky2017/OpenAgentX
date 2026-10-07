@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-07T14:50:19.182488+00:00",
+  "harness_sha256": "7fa99dfa051bef6dc98a2ebc603ae24f7e3b5c16ac730c1e78cb87cd3bf36149",
+  "candidate_sha256": "d3dd1a32311badf5f053fdee2305c49bb84f6cd4138a01fa7810e9cedac241a1",
+  "same_owned_root": true,
+  "completed_model_runs_reused": 1,
+  "existing_processes_preserved": [
+    {
+      "label": "daemon",
+      "pid": 1568463,
+      "starttime": "60283853"
+    },
+    {
+      "label": "worker",
+      "pid": 1569164,
+      "starttime": "60284379"
+    }
+  ]
+}

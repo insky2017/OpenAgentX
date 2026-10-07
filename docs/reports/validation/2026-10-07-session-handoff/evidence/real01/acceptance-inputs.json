@@ -1,0 +1,7 @@
+{
+  "nonce": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+  "max_model_runs": 6,
+  "harness_sha256": "32a89dd0a555f5c9dcc2ce3a2aab54ea66357471c4a97da4eda0e3cd14337c3f",
+  "candidate_sha256": "d3dd1a32311badf5f053fdee2305c49bb84f6cd4138a01fa7810e9cedac241a1",
+  "commit": "e644511"
+}

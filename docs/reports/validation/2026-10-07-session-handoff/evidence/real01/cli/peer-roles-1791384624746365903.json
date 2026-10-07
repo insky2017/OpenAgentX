@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-10-07T14:50:24.731641+00:00",
+  "finished_at": "2026-10-07T14:50:24.746375+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "collaborate",
+    "roles",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/roles.json",
+    "--expected-version",
+    "0"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"organization_id\": \"default\",\n  \"revision\": 1,\n  \"rules\": [\n    {\n      \"scope\": \"fixture.terminal-e2e-6638de\",\n      \"owner_agent_id\": \"terminal-e2e-6638de\",\n      \"description\": \"Read-only session handoff nonce confirmation; no tools or business execution.\"\n    }\n  ]\n}\n",
+  "stderr": ""
+}

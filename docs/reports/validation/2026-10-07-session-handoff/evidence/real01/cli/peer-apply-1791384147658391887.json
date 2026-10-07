@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-07T14:42:27.601004+00:00",
+  "finished_at": "2026-10-07T14:42:27.658402+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/peer-identity.json"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "read owner password: interactive terminal is required for password input\n"
+}

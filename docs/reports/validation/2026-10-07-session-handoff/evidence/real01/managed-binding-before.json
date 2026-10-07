@@ -1,0 +1,19 @@
+{
+  "mode": "managed",
+  "managed_context_task_id": "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+  "managed_backend_id": "codex",
+  "binding_id": "external-618be1d3-57f0-4c16-aa41-98ea9a5ef904",
+  "agent_id": "terminal-e2e-6638de",
+  "principal_id": "agent-terminal-e2e-6638de",
+  "organization_id": "default",
+  "host_id": "managed-worker",
+  "thread_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+  "generation": 1,
+  "state": "active",
+  "allowed_peer_agent_ids": [
+    "handoff-peer-7302990e"
+  ],
+  "token_expires_at": "[REDACTED]",
+  "created_at": "2026-10-07T14:50:24.757925011Z",
+  "updated_at": "2026-10-07T14:50:24.757925011Z"
+}

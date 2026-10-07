@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "evidence_level": "R isolated real runtime/PTTY/API",
+  "old_session": {
+    "agent_id": "terminal-e2e-6638de",
+    "backend_id": "codex",
+    "thread_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+    "context_task_id": "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+    "version": 0,
+    "updated_at": "2026-10-07T14:50:24.757925011Z"
+  },
+  "new_session": {
+    "agent_id": "terminal-e2e-6638de",
+    "backend_id": "codex",
+    "thread_id": "01a116d9-48fc-7ce0-8bf1-015006451a70",
+    "context_task_id": "task-229dd0bb-a685-4d3d-9235-856536e3494b",
+    "version": 1,
+    "updated_at": "2026-10-07T14:52:18.681879462Z"
+  },
+  "model_runs": 6,
+  "nonce": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+  "source_commit": "e644511",
+  "final_harness_sha256": "7fa99dfa051bef6dc98a2ebc603ae24f7e3b5c16ac730c1e78cb87cd3bf36149",
+  "finished_at": "2026-10-07T14:53:51.318151+00:00",
+  "binary_sha256": "d3dd1a32311badf5f053fdee2305c49bb84f6cd4138a01fa7810e9cedac241a1",
+  "preview_zero_write": true,
+  "busy_rejected": true,
+  "stale_view_rejected": true,
+  "restart_uses_new_thread": true,
+  "history_preserved": true,
+  "not_tested": [
+    "production deployment",
+    "peer automatic continuation",
+    "all cancellation/runtime failure combinations"
+  ]
+}

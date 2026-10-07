@@ -1,0 +1,13 @@
+[
+  {
+    "pid": 1613928,
+    "argv": [
+      "codex",
+      "resume",
+      "--remote",
+      "unix:///tmp/oax-native-3351106632/bridge.sock",
+      "--no-alt-screen",
+      "01a116d9-48fc-7ce0-8bf1-015006451a70"
+    ]
+  }
+]

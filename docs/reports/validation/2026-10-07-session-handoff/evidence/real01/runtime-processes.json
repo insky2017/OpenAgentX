@@ -1,0 +1,18 @@
+[
+  {
+    "label": "daemon",
+    "pid": 1568463,
+    "starttime": "60283853",
+    "state": "S",
+    "exe": "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "exe_sha256": "d3dd1a32311badf5f053fdee2305c49bb84f6cd4138a01fa7810e9cedac241a1"
+  },
+  {
+    "label": "worker-restarted",
+    "pid": 1619680,
+    "starttime": "60322221",
+    "state": "S",
+    "exe": "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "exe_sha256": "d3dd1a32311badf5f053fdee2305c49bb84f6cd4138a01fa7810e9cedac241a1"
+  }
+]

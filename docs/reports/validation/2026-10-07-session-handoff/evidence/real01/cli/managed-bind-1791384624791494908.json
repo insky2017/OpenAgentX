@@ -1,0 +1,20 @@
+{
+  "started_at": "2026-10-07T14:50:24.747186+00:00",
+  "finished_at": "2026-10-07T14:50:24.791506+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "collaborate",
+    "enable",
+    "--agent",
+    "terminal-e2e-6638de",
+    "--peers",
+    "handoff-peer-7302990e",
+    "--context-task",
+    "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+    "--backend",
+    "codex"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"automatic_delivery\": true,\n  \"binding\": {\n    \"mode\": \"managed\",\n    \"managed_context_task_id\": \"task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4\",\n    \"managed_backend_id\": \"codex\",\n    \"binding_id\": \"external-618be1d3-57f0-4c16-aa41-98ea9a5ef904\",\n    \"agent_id\": \"terminal-e2e-6638de\",\n    \"principal_id\": \"agent-terminal-e2e-6638de\",\n    \"organization_id\": \"default\",\n    \"host_id\": \"managed-worker\",\n    \"thread_id\": \"01a116d0-a0ae-7760-9449-41cf66043de9\",\n    \"generation\": 1,\n    \"state\": \"active\",\n    \"allowed_peer_agent_ids\": [\n      \"handoff-peer-7302990e\"\n    ],\n    \"token_expires_at\": \"2026-11-06T14:50:24.757925011Z\",\n    \"created_at\": \"2026-10-07T14:50:24.757925011Z\",\n    \"updated_at\": \"2026-10-07T14:50:24.757925011Z\"\n  },\n  \"credential_file\": \"/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/profile/external/terminal-e2e-6638de/credentials.json\",\n  \"next\": \"openagentx collaborate instructions --agent terminal-e2e-6638de\"\n}\n",
+  "stderr": ""
+}

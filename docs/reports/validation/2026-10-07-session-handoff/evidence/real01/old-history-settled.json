@@ -1,0 +1,38 @@
+{
+  "at": "2026-10-07T14:51:39.997135+00:00",
+  "access": "SQLite mode=ro; hashes only for history",
+  "tables": {
+    "tasks": {
+      "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4": "7fa0ef3fdc2c082da5671798c66a824ca4c8896b7448bf56f91c91bd4a4f2386",
+      "task-25944d25-536a-4cd5-933d-fec3ae6b97ad": "368fb05a46131427e0e434d709e59261304728a1a812cd42f1318c8575e85901"
+    },
+    "run_attempts": {
+      "run-0d3637f6-5ee8-4efc-ba95-3c16f74425b3": "7a47f8257d240a75f2ee1092280a8a15a2f869921164d3b21ce956a65d13295a",
+      "run-c88374fd-fcc1-433b-b0dc-12b14915fc5f": "b98a417724cb9abde76e628d1985cc8d9057f8271f15b5722e4452f4163c84a8"
+    },
+    "session_bindings": {
+      "binding-7a104b53-3ab8-4db4-b1bc-f09d0a16160d": "a44c78d2065159a3e69174d44200843bfa024f6120f2152b973c5c202a847d87",
+      "binding-855a7b30-3825-44eb-8a82-82b052a2281a": "63fb9215ce5f974b1fc7e481273984dbdcd134b82f39f3bc503afd8fb866be95"
+    }
+  },
+  "bindings": [
+    {
+      "session_binding_id": "binding-7a104b53-3ab8-4db4-b1bc-f09d0a16160d",
+      "context_id": "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+      "agent_id": "terminal-e2e-6638de",
+      "backend_id": "codex",
+      "provider_session_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+      "state": "active",
+      "version": 2
+    },
+    {
+      "session_binding_id": "binding-855a7b30-3825-44eb-8a82-82b052a2281a",
+      "context_id": "task-25944d25-536a-4cd5-933d-fec3ae6b97ad",
+      "agent_id": "terminal-e2e-6638de",
+      "backend_id": "codex",
+      "provider_session_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+      "state": "active",
+      "version": 2
+    }
+  ]
+}

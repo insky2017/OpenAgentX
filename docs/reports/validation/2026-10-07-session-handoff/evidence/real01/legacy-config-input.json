@@ -1,0 +1,7 @@
+{
+  "path": "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/profile/workers/terminal-e2e-6638de.yaml",
+  "thread_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+  "before_sha256": "ac6a9af7ab831fdea650f8bf2845a2683c1e2ff46aff8bc16dec30ae1e1d55f5",
+  "after_sha256": "c8a87513dd5a372372d64d26b23b6f08eda1cc15306d67d2f9f3a124313a76a1",
+  "scope": "owned fixture config only; demonstrates durable pointer wins over old Config.ThreadID"
+}

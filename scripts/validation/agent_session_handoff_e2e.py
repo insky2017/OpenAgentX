@@ -8,6 +8,7 @@ and independently verify session bindings; they do not set up or repair state.
 import argparse
 import datetime
 import hashlib
+import http.cookiejar
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,7 @@ import sqlite3
 import subprocess
 import sys
 import time
+import urllib.request
 
 sys.dont_write_bytecode = True
 from native_model_settings_e2e import SettingsRun
@@ -42,7 +44,7 @@ class HandoffRun(SettingsRun):
                 "When asked to confirm your role/workspace during initialization, reply exactly: " + self.expected + "\n")
         argv = [str(self.a.binary), *map(str, args)]
         # Setup init/login require an owned PTY, handled by the existing helper.
-        if label in {"01-join", "02-init", "03-apply", "04-console-login", "05-resume"}:
+        if label in {"01-join", "02-init", "03-apply", "04-console-login", "05-resume", "peer-apply"}:
             from codex_local_setup import Setup
             return Setup.cli(self, label, list(map(str, args)))
         started = now()
@@ -196,8 +198,8 @@ class HandoffRun(SettingsRun):
                   "scope": "owned fixture config only; demonstrates durable pointer wins over old Config.ThreadID"})
 
     def peer_setup(self, context_task):
-        self.peer = "handoff-peer-" + secrets.token_hex(4)
         identity = self.root / "peer-identity.json"
+        self.peer = json.loads(identity.read_text())["agent_id"] if identity.exists() else "handoff-peer-" + secrets.token_hex(4)
         identity.write_text(json.dumps({"version": 1, "agent_id": self.peer, "principal_id": "agent-" + self.peer,
             "organization_id": "default", "display_name": "Session handoff isolated external peer",
             "profile": {"instructions_path": str(self.root / "workspace/ROLE.md"), "workspace_root": str(self.root / "workspace")}}))
@@ -344,12 +346,100 @@ class HandoffRun(SettingsRun):
         (self.out / "SHA256SUMS").write_text("\n".join(sha(p) + "  " + str(p.relative_to(self.out))
             for p in sorted(self.out.rglob("*")) if p.is_file() and p.name != "SHA256SUMS") + "\n")
 
-    def run_acceptance(self):
-        self.prepare()  # existing real CLI setup, model initialization and native PTY
+    @classmethod
+    def resume_after_initialization(cls, args):
+        """Recover the same settled profile after a harness-only setup failure."""
+        self = cls.__new__(cls)
+        self.a, self.root, self.out = args, args.root, args.root / "evidence"
+        saved = json.loads((self.root / "handoff.json").read_text())
+        require(sha(args.binary) == saved["binary_sha256"], "resume needs the same fixed candidate")
+        require((self.out / "cleanup.json").exists(), "resume setup requires confirmed prior owned cleanup")
+        self.aid, self.server = saved["agent"], saved["server"]
+        self.socket, self.url = Path(saved["socket"]), saved["url"]
+        self.port = int(self.url.rsplit(":", 1)[1])
+        self.procs, self.task_ids = saved["processes"], saved["tasks"]
+        live = []
+        for proc in self.procs:
+            path = Path("/proc") / str(proc["pid"]) / "stat"
+            if path.exists():
+                fields = path.read_text().rsplit(")", 1)[1].split()
+                require(fields[19] == str(proc["starttime"]), "prior fixture PID reused")
+                if fields[0] not in {"Z", "X"}:
+                    live.append(proc)
+        if live:
+            require(sorted(p["label"] for p in live) == ["daemon", "worker"], "partial fixture lifecycle requires manual review")
+            resumed = cls.restore(args)
+            require(len(resumed.task_set()) == 1 and all(t["status"] == "succeeded" for t in resumed.all_tasks()),
+                    "live resume requires only the completed initialization")
+            resumed.nonce = json.loads((resumed.out / "acceptance-inputs.json").read_text())["nonce"]
+            resumed.client = AttachedClient(resumed)
+            resumed.save("resume-live-initialization-" + str(time.time_ns()) + ".json", {
+                "at": now(), "harness_sha256": sha(__file__), "candidate_sha256": sha(args.binary),
+                "same_owned_root": True, "completed_model_runs_reused": 1, "existing_processes_preserved": live})
+            return resumed
+        self.password = (self.root / "password").read_text()
+        self.env = {k: v for k, v in os.environ.items() if "proxy" not in k.lower()
+                    and not k.startswith(("AGY_", "OPENAGENTX_"))
+                    and k not in {"TMUX", "TMUX_PANE", "CODEX_THREAD_ID", "CODEX_SESSION_ID"}}
+        self.tools = self.root / "tools"
+        self.env.update(OPENAGENTX_HOME=str(self.root / "profile"), OPENAGENTX_SOCKET_PATH=str(self.socket),
+                        TERM="xterm-256color", PATH=str(self.tools) + os.pathsep + self.env["PATH"])
+        import shutil
+        self.tmux_binary = shutil.which("tmux")
+        self.tmux_calls = len(list((self.out / "tmux").glob("*.json")))
+        self.request_number = len(list((self.out / "http").glob("*.json")))
+        self.jar = http.cookiejar.CookieJar()
+        self.http = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(self.jar))
+        self.csrf, self.client, self.windows = "", None, {}
+        self.expected = "OAX-TERMINAL-ROLE " + self.aid + " WORKSPACE=" + str(self.root / "workspace")
+        self.workspace_before = json.loads((self.out / "workspace-before.json").read_text())
+        self.nonce = json.loads((self.out / "acceptance-inputs.json").read_text())["nonce"]
+        args.web = self.root / "webroot"
+        for proc in ["daemon", "worker"]:
+            for stream in ["stdout", "stderr"]:
+                path = self.root / (proc + "." + stream)
+                if path.exists():
+                    path.rename(self.root / ("before-resume-" + str(time.time_ns()) + "-" + path.name))
+        self.start("daemon", [str(args.binary), "serve", "--http-addr", "127.0.0.1:" + str(self.port), "--web-dir", str(args.web)])
+        self.wait(lambda: self.socket.exists(), 30)
+        login = self.api("/api/auth/v1/login", {"username": "owner", "password": self.password}, auth=True)
+        self.csrf = login["csrf_token"]
+        require(len(self.task_set()) == 1 and len(self.db_snapshot("resume-initial-history")["tables"]["run_attempts"]) == 1,
+                "resume-after-initialization requires exactly the completed initial Run")
+        base = self.env.copy()
+        config = self.root / "profile/workers" / (self.aid + ".yaml")
+        for line in config.with_suffix(".env").read_text().splitlines():
+            if line.strip() and not line.startswith("#"):
+                pair = shlex.split(line)
+                require(len(pair) == 1, "invalid owned EnvironmentFile")
+                key, value = pair[0].split("=", 1)
+                self.env[key] = value
+        self.start("worker", [str(args.binary), "worker", "run", "--config", str(config)])
+        self.env = base
+        self.wait(lambda: any(w["agent_id"] == self.aid and w["status"] == "online"
+                             for w in self.api("/api/observe/v1/overview")["workers"]), 120)
+        self.cli("resume-fixture", ["agent", "resume", self.aid, "--password-file", self.root / "password", "--no-open", "--wait", "3m"])
+        self.windows["native"] = self.tmux("new-session", "-d", "-x", "160", "-y", "45", "-P", "-F", "#{window_id}",
+                                            "-s", "OAX", "-n", self.aid, "sleep", "86400")
+        for option, value in [("pane-base-index", "0"), ("automatic-rename", "off"), ("remain-on-exit", "on")]:
+            self.tmux("set-option", "-w", "-t", self.windows["native"], option, value)
         self.client = AttachedClient(self)
-        self.nonce = "SESSION-HANDOFF-" + secrets.token_hex(12)
-        self.save("acceptance-inputs.json", {"nonce": self.nonce, "max_model_runs": 6,
-                  "harness_sha256": sha(__file__), "candidate_sha256": sha(self.a.binary), "commit": self.a.commit})
+        launcher = self.script("native-resume-fixture", [args.binary, "agent", "open", self.aid, "--native"])
+        self.tmux("respawn-pane", "-k", "-t", self.windows["native"] + ".0", launcher)
+        self.wait(self.lock_held, 60)
+        require(len(self.task_set()) == 1, "fixture reopening unexpectedly started model work")
+        self.save("resume-after-initialization.json", {"at": now(), "harness_sha256": sha(__file__),
+                  "candidate_sha256": sha(args.binary), "same_owned_root": True, "completed_model_runs_reused": 1})
+        self.checkpoint()
+        return self
+
+    def run_acceptance(self, resume=False):
+        if not resume:
+            self.prepare()  # existing real CLI setup, model initialization and native PTY
+            self.client = AttachedClient(self)
+            self.nonce = "SESSION-HANDOFF-" + secrets.token_hex(12)
+            self.save("acceptance-inputs.json", {"nonce": self.nonce, "max_model_runs": 6,
+                      "harness_sha256": sha(__file__), "candidate_sha256": sha(self.a.binary), "commit": self.a.commit})
         initial_id = next(iter(self.task_set()))
         initial = self.settle(initial_id, self.expected)
         # Verified contract: RunAttemptReadModel + panel.projectRunAttempt
@@ -358,7 +448,8 @@ class HandoffRun(SettingsRun):
         require(role_digest == sha(self.root / "workspace/ROLE.md"), "initial Run lacks matching frozen role digest")
         old = self.session()
         require(old["thread_id"] == self.task_thread(initial_id), "bootstrap session does not match native initialization")
-        self.configure_old_thread(old["thread_id"])
+        if not resume:
+            self.configure_old_thread(old["thread_id"])
         self.peer_setup(initial_id)
         # Version-zero bootstrap now comes from the newly installed managed
         # binding. Capture that stable source after binding setup.
@@ -436,6 +527,7 @@ class HandoffRun(SettingsRun):
         require(run_count <= 6, "model run budget exceeded")
         self.save("verdict.json", {"status": "PASS", "evidence_level": "R isolated real runtime/PTTY/API", "old_session": old,
             "new_session": new, "model_runs": run_count, "nonce": self.nonce, "source_commit": self.a.commit,
+            "final_harness_sha256": sha(__file__), "finished_at": now(),
             "binary_sha256": sha(self.a.binary), "preview_zero_write": True, "busy_rejected": True,
             "stale_view_rejected": True, "restart_uses_new_thread": True, "history_preserved": True,
             "not_tested": ["production deployment", "peer automatic continuation", "all cancellation/runtime failure combinations"]})
@@ -444,21 +536,22 @@ class HandoffRun(SettingsRun):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["run", "cleanup"])
+    parser.add_argument("action", choices=["run", "resume-after-initialization", "cleanup"])
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--commit", required=True)
     args = parser.parse_args()
     args.phase = "native"
     require(args.binary.is_absolute() and args.binary.is_file(), "absolute candidate binary required")
-    require(args.root.is_absolute() and (args.root.exists() if args.action == "cleanup" else not args.root.exists()),
+    require(args.root.is_absolute() and (not args.root.exists() if args.action == "run" else args.root.exists()),
             "run needs a new absolute private root; cleanup needs the existing owned fixture")
     os.umask(0o077)
-    run = HandoffRun.restore(args) if args.action == "cleanup" else HandoffRun(args)
+    run = (HandoffRun.restore(args) if args.action == "cleanup" else
+           HandoffRun.resume_after_initialization(args) if args.action == "resume-after-initialization" else HandoffRun(args))
     passed = False
     try:
-        if args.action == "run":
-            run.run_acceptance()
+        if args.action != "cleanup":
+            run.run_acceptance(resume=args.action == "resume-after-initialization")
             run.collect()
         run.cleanup_owned()
         run.manifest()

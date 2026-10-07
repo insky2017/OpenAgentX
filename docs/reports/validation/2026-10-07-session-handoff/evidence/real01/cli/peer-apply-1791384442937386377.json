@@ -1,0 +1,16 @@
+{
+  "started_at": "2026-10-07T14:47:22.930167+00:00",
+  "finished_at": "2026-10-07T14:47:22.937393+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/peer-identity.json",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/password"
+  ],
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "flag provided but not defined: -password-file\nUsage of agent apply:\n  -db value\n    \tTarget SQLite database path (default source: $OPENAGENTX_HOME/data/openagentx.db)\n  -file string\n    \tAgent identity definition\n  -owner-username string\n    \tOwner username (default \"owner\")\nUsage: openagentx agent apply [--db <path>] --file <identity.yaml> [--owner-username owner]\nDefault database source: $OPENAGENTX_DATABASE_PATH > $OPENAGENTX_HOME > ~/.openagentx/data/openagentx.db\n"
+}

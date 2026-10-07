@@ -1,0 +1,20 @@
+{
+  "started_at": "2026-10-07T14:50:24.792371+00:00",
+  "finished_at": "2026-10-07T14:50:24.821785+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "external",
+    "bind",
+    "--agent",
+    "handoff-peer-7302990e",
+    "--peers",
+    "terminal-e2e-6638de",
+    "--host",
+    "isolated-handoff-harness",
+    "--thread",
+    "external-peer-935c26c2"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"automatic_delivery\": false,\n  \"binding\": {\n    \"mode\": \"external\",\n    \"binding_id\": \"external-185db401-09ed-4b2d-b40d-f7e569a68727\",\n    \"agent_id\": \"handoff-peer-7302990e\",\n    \"principal_id\": \"agent-handoff-peer-7302990e\",\n    \"organization_id\": \"default\",\n    \"host_id\": \"isolated-handoff-harness\",\n    \"thread_id\": \"external-peer-935c26c2\",\n    \"generation\": 1,\n    \"state\": \"active\",\n    \"allowed_peer_agent_ids\": [\n      \"terminal-e2e-6638de\"\n    ],\n    \"token_expires_at\": \"2026-11-06T14:50:24.804588684Z\",\n    \"created_at\": \"2026-10-07T14:50:24.804588684Z\",\n    \"updated_at\": \"2026-10-07T14:50:24.804588684Z\"\n  },\n  \"credential_file\": \"/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/profile/external/handoff-peer-7302990e/credentials.json\",\n  \"next\": \"openagentx collaborate instructions --agent handoff-peer-7302990e\"\n}\n",
+  "stderr": ""
+}

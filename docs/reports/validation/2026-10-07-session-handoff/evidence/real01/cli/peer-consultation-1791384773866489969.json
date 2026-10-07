@@ -1,0 +1,22 @@
+{
+  "started_at": "2026-10-07T14:52:53.852311+00:00",
+  "finished_at": "2026-10-07T14:52:53.866499+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "collaborate",
+    "ask",
+    "--agent",
+    "handoff-peer-7302990e",
+    "--to",
+    "terminal-e2e-6638de",
+    "--scope",
+    "fixture.terminal-e2e-6638de",
+    "--key",
+    "handoff-consultation-SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+    "--content-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/peer-question.txt"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"task_id\": \"managed-task-3d8e7c62648f9e34f53f9df4345945ca\",\n  \"managed_state\": \"queued\",\n  \"scope\": \"fixture.terminal-e2e-6638de\",\n  \"processing_state\": \"accepted\",\n  \"processing_note\": \"Accepted for a read-only managed query; task=managed-task-3d8e7c62648f9e34f53f9df4345945ca\",\n  \"sequence\": 1,\n  \"message_id\": \"external-message-99675375-70e8-4f8e-a33c-d39bd9f37035\",\n  \"sender_agent_id\": \"handoff-peer-7302990e\",\n  \"target_agent_id\": \"terminal-e2e-6638de\",\n  \"sender_binding_id\": \"external-185db401-09ed-4b2d-b40d-f7e569a68727\",\n  \"sender_generation\": 1,\n  \"kind\": \"consultation\",\n  \"content\": \"Do not use tools. From your received session handoff, return only the value of HANDOFF_NONCE, with no extra text.\\n\",\n  \"idempotency_key\": \"handoff-consultation-SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\",\n  \"delivery_state\": \"pending\",\n  \"created_at\": \"2026-10-07T14:52:53.862993403Z\"\n}\n",
+  "stderr": ""
+}

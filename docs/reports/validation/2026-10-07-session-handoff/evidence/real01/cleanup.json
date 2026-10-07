@@ -1,0 +1,38 @@
+{
+  "at": "2026-10-07T14:54:06.793439+00:00",
+  "processes": [
+    {
+      "label": "worker-restarted",
+      "pid": 1619680,
+      "starttime": "60322221",
+      "stopped": true
+    },
+    {
+      "label": "worker",
+      "pid": 1569164,
+      "starttime": "60284379",
+      "stopped": true
+    },
+    {
+      "label": "daemon",
+      "pid": 1568463,
+      "starttime": "60283853",
+      "stopped": true
+    },
+    {
+      "label": "worker",
+      "pid": 1531852,
+      "starttime": "60253783",
+      "stopped": true
+    },
+    {
+      "label": "daemon",
+      "pid": 1530667,
+      "starttime": "60252734",
+      "stopped": true
+    }
+  ],
+  "owned_tmux_server": "oax-terminal-ea0950ddc5e8",
+  "evidence_preserved": true,
+  "production_touched": false
+}

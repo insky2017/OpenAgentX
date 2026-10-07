@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-07T14:52:58.877054+00:00",
+  "finished_at": "2026-10-07T14:52:58.887864+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "collaborate",
+    "inbox",
+    "--agent",
+    "handoff-peer-7302990e",
+    "--all"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"has_more\": false,\n  \"messages\": [],\n  \"next_after\": 0\n}\n",
+  "stderr": ""
+}

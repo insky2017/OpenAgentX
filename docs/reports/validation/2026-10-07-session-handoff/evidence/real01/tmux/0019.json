@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T14:47:17.814986+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-ea0950ddc5e8",
+    "respawn-pane",
+    "-k",
+    "-t",
+    "@0.0",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/native-resume-fixture.sh"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

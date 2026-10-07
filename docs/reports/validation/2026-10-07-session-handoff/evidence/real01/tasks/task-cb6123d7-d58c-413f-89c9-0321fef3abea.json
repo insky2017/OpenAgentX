@@ -1,0 +1,138 @@
+{
+  "task": {
+    "completion_basis": "query_result_delivered",
+    "id": "task-cb6123d7-d58c-413f-89c9-0321fef3abea",
+    "version": 3,
+    "target_agent_id": "terminal-e2e-6638de",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "query",
+    "content": "Do not use tools. From your received session handoff, reply with only the exact value of HANDOFF_NONCE. Do not infer it from this request.",
+    "status": "succeeded",
+    "result": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+    "outcome_state": "available",
+    "created_at": "2026-10-07T14:52:38.810964156Z",
+    "updated_at": "2026-10-07T14:52:49.031568235Z"
+  },
+  "messages": [
+    {
+      "id": "message-0f140a0c-080d-4515-aba7-14770dbaebbe",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-cb6123d7-d58c-413f-89c9-0321fef3abea",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-b7766e89-e57f-4a3f-b20c-c2744b9a98ac",
+      "target_agent_id": "terminal-e2e-6638de",
+      "kind": "instruction",
+      "content": "Do not use tools. From your received session handoff, reply with only the exact value of HANDOFF_NONCE. Do not infer it from this request.",
+      "created_at": "2026-10-07T14:52:38.810964156Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "instructions_sha256": "125b68782c02b25f39e71de1592a9af17030003e96f1ee5ef4cc2af3a6210367",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/profile/workers/identities/terminal-e2e-6638de.role.md",
+      "run_id": "run-4d7c116b-b25c-4b43-aac6-dbfe35bb88ed",
+      "task_id": "task-cb6123d7-d58c-413f-89c9-0321fef3abea",
+      "agent_id": "terminal-e2e-6638de",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-e04df01e-af6b-4f3d-b4aa-f1a04692ed5d",
+      "worker_generation": 2,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 2,
+      "network_binding_revision": 2,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-07T14:52:38.814201014Z",
+      "finished_at": "2026-10-07T14:52:49.031568235Z",
+      "created_at": "2026-10-07T14:52:38.814201014Z",
+      "updated_at": "2026-10-07T14:52:49.031568235Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 102,
+      "event_id": "event-57f7e933-d67b-4827-ab5a-f3c07e27f315",
+      "aggregate_type": "task",
+      "aggregate_id": "task-cb6123d7-d58c-413f-89c9-0321fef3abea",
+      "event_type": "task.created",
+      "created_at": "2026-10-07T14:52:38.810964156Z"
+    },
+    {
+      "sequence": 104,
+      "event_id": "event-task-fef540d9-a666-4c86-8e49-c85e81a08705",
+      "aggregate_type": "task",
+      "aggregate_id": "task-cb6123d7-d58c-413f-89c9-0321fef3abea",
+      "event_type": "task.running",
+      "created_at": "2026-10-07T14:52:38.815511104Z"
+    },
+    {
+      "sequence": 105,
+      "event_id": "event-run-e93e67e1-b6f3-4e16-b4aa-633f0f636254",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-4d7c116b-b25c-4b43-aac6-dbfe35bb88ed",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-07T14:52:38.815515729Z"
+    },
+    {
+      "sequence": 107,
+      "event_id": "event-runtime-823f41ae-fd59-4262-b12c-163ba8098979",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-4d7c116b-b25c-4b43-aac6-dbfe35bb88ed",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T14:52:40.284118559Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 109,
+      "event_id": "event-runtime-83ceb700-df63-4135-aed3-b17f7e093eaf",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-4d7c116b-b25c-4b43-aac6-dbfe35bb88ed",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T14:52:48.988027258Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 111,
+      "event_id": "event-run-e003f42a-d9e4-4ecf-a008-4d201863949a",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-4d7c116b-b25c-4b43-aac6-dbfe35bb88ed",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-07T14:52:49.031594048Z"
+    },
+    {
+      "sequence": 112,
+      "event_id": "event-task-78223ab2-d101-4ded-b3b8-89abbaf180ae",
+      "aggregate_type": "task",
+      "aggregate_id": "task-cb6123d7-d58c-413f-89c9-0321fef3abea",
+      "event_type": "task.settled",
+      "created_at": "2026-10-07T14:52:49.031597179Z"
+    }
+  ],
+  "snapshot_sequence": 112,
+  "live_after_sequence": 112,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

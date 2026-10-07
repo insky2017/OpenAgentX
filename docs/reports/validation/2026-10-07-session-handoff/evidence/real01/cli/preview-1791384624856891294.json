@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-10-07T14:50:24.839473+00:00",
+  "finished_at": "2026-10-07T14:50:24.856898+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "agent",
+    "new-session",
+    "terminal-e2e-6638de"
+  ],
+  "exit_code": 0,
+  "stdout": "Agent: terminal-e2e-6638de\n当前 thread: 01a116d0-a0ae-7760-9449-41cf66043de9\n会话版本: 0\nWorker: online\n模型: gpt-6-astra / \n交接内容: 0 bytes；本次只读。空闲后提交：\nopenagentx agent new-session terminal-e2e-6638de --handoff-file <FILE> --apply --expected-thread 01a116d0-a0ae-7760-9449-41cf66043de9 --expected-version 0\n",
+  "stderr": ""
+}

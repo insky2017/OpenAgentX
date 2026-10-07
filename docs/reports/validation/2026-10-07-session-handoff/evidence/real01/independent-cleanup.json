@@ -1,0 +1,58 @@
+{
+  "at": "2026-10-07T14:58:36.764997+00:00",
+  "processes": [
+    {
+      "label": "worker-restarted",
+      "pid": 1619680,
+      "starttime": "60322221",
+      "stopped": true,
+      "independently_verified_running": false,
+      "current_pid_exists": false
+    },
+    {
+      "label": "worker",
+      "pid": 1569164,
+      "starttime": "60284379",
+      "stopped": true,
+      "independently_verified_running": false,
+      "current_pid_exists": false
+    },
+    {
+      "label": "daemon",
+      "pid": 1568463,
+      "starttime": "60283853",
+      "stopped": true,
+      "independently_verified_running": false,
+      "current_pid_exists": false
+    },
+    {
+      "label": "worker",
+      "pid": 1531852,
+      "starttime": "60253783",
+      "stopped": true,
+      "independently_verified_running": false,
+      "current_pid_exists": false
+    },
+    {
+      "label": "daemon",
+      "pid": 1530667,
+      "starttime": "60252734",
+      "stopped": true,
+      "independently_verified_running": false,
+      "current_pid_exists": false
+    }
+  ],
+  "backend_processes": [
+    {
+      "pid": 1569245,
+      "source": "restart-before.json",
+      "process_exists": false
+    },
+    {
+      "pid": 1619772,
+      "source": "restart-after.json",
+      "process_exists": false
+    }
+  ],
+  "source": "read-only /proc checks of recorded owned PIDs"
+}

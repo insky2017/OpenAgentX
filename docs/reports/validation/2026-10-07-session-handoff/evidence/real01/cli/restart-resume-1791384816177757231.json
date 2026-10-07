@@ -1,0 +1,18 @@
+{
+  "started_at": "2026-10-07T14:53:18.988675+00:00",
+  "finished_at": "2026-10-07T14:53:36.177766+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "agent",
+    "resume",
+    "terminal-e2e-6638de",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/password",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit_code": 0,
+  "stdout": "Agent terminal-e2e-6638de 服务在线，当前代 3 网络已应用。\n终端真实验收 (terminal-e2e-6638de) · 可开始工作\n  当前：无\n  最近：SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n  打开：openagentx agent open terminal-e2e-6638de\n  恢复：openagentx agent resume terminal-e2e-6638de\n\n",
+  "stderr": ""
+}

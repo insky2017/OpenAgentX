@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "files_scanned": 87,
+  "known_credential_values_matched": 0,
+  "external_token_patterns_matched": 0,
+  "omitted": [
+    "credentials",
+    "database",
+    "full rollout",
+    "full model catalog",
+    "raw attached-client PTY stream"
+  ],
+  "raw_root": "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01",
+  "source_commit": "e644511f2763ebe7df40dc31f6efaf7a43067b2b",
+  "final_harness_sha256": "7fa99dfa051bef6dc98a2ebc603ae24f7e3b5c16ac730c1e78cb87cd3bf36149",
+  "embedded_vcs_metadata_is_source_proof": false,
+  "embedded_vcs_anomaly": {
+    "revision": "c5b93b7b9ffb2265f43196e7e00638aa51df5d64",
+    "modified": true,
+    "note": "linked worktree build recorded outer repository metadata; source mapping is separate from embedded metadata"
+  },
+  "source_mapping_proof": "checks/source-rebuild-proof.json",
+  "source_mapping_basis": "335 product source/dependency files equal e644511 and rebuilt binary SHA equals tested candidate; embedded metadata not used"
+}

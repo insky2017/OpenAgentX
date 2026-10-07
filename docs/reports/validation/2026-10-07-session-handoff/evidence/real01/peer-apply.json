@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/peer-identity.json"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOwner  \r\nCreated Agent \"handoff-peer-7302990e\" in Organization \"default\"\r\n"
+}

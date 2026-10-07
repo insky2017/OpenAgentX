@@ -1,0 +1,5 @@
+{
+  "reply": "已收到交接，身份为 terminal-e2e-6638de（隔离会话交接验证 Agent）。\n工作目录：`/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace`\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\n等待下一项指令。",
+  "contains_nonce": true,
+  "note": "Nonce inheritance is independently required by the following exact-reply query."
+}

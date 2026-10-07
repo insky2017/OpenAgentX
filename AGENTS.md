@@ -12,6 +12,8 @@
 
 ## 当前实施约定（2026-10-03）
 
+- **2026-10-07 新会话交接源码交付（未部署）**：产品 `e644511` 新增 `agent new-session`，默认只读预览，显式原 thread/版本及交接资料初始化新 thread，成功后原子发布活动会话与 managed 协作上下文；身份、职责、目录、模型、peer 和旧历史保留。隔离真实 Codex/原生 PTY 共 6 Run 验证预览/busy/幂等/旧 view 拒绝、nonce 继承、协作及 Worker 重启后继续新 thread，已通过；全仓 Go 检查通过。工件 SHA `d3dd1a32311badf5f053fdee2305c49bb84f6cd4138a01fa7810e9cedac241a1` 未安装，不因合入源码切换业务 thread；schema v7 只在隔离环境验证。Overview 用户已确认是多 pane，并非退出，本批不改。详见[交付与边界](docs/reports/validation/2026-10-07-session-handoff/DELIVERY.md)和[操作入口](docs/operations/agent-new-session.md)。
+
 - **2026-10-07 OpenAgentX 长会话恢复**：原会话响应 33,858,086 字节超过 32 MiB，导致 TUI resume 失败；产品 `5e82727` 将本地 RPC 响应限额提高至有限的 128 MiB。正式 CLI、OpenAgentX Worker 和原 `%11` 已切换到 SHA `4c448f6e7cdf94ccc4ad1c0c6e5de61ee4a4c3f86d70affa12dda009d5166f39`，原 thread/pane 与模型保持，真实 query Task/Run 及 TUI 回复通过。daemon 和其他五域进程仍保留上一批工件，不宣称全部升级。旧失败 Task 未重放；参见[恢复证据与边界](docs/design/2026-10-07-large-session-recovery.md)。
 
 - **2026-10-07 执行时限、resume、spinner 与输入确认交付**：已安装 `c35d702` 产品工件（SHA-256 `259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69`），独立 docs 指挥者完成受控重启；七服务与六 Bridge 实际 SHA 一致，六域 online/healthy/ready，原 thread/window/pane 和模型偏好保持。Codex 六域 `timeout: 0s`，当前正式 Run 无总截止；31分钟真实验收及最终工件原生输入/steer、spinner 联合验收通过，mutation Task 的 uncertain 原样保留。已登记 resume 不再依赖坏的一次性接入回执，Rhythm/Pay/Quote 正式恢复已验。两态 spinner 与 TUI 消费确认修复已上线。保留取消 fallback 重建 app-server 后旧 Bridge endpoint 不刷新、需同 thread 重开 view 的既有缺口，不宣称全部取消重连已修复。详见[本批交付](docs/reports/validation/2026-10-07-resume-timeout/DELIVERY.md)、[计划](docs/plans/2026-10-07-resume-timeout.md)和[指挥者交接](docs/operations/2026-10-07-commander-handoff.md)。下方模型设置部署、30分钟限制与坏 receipt 阻塞描述属于上一批历史状态，以本条新证据为准。

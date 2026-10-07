@@ -1,0 +1,48 @@
+{
+  "thread_id": "01a116d9-48fc-7ce0-8bf1-015006451a70",
+  "source": "/home/sky/.codex/sessions/2026/10/07/rollout-2026-10-07T22-51-41-01a116d9-48fc-7ce0-8bf1-015006451a70.jsonl",
+  "source_sha256": "f627c0e1488f94957cfe02eb4f4a74575fe4ee09c7fe0570db31d044eb1e64c3",
+  "events": [
+    {
+      "timestamp": "2026-10-07T14:51:41.372Z",
+      "ordinal": 1,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_started",
+        "turn_id": "01a116d9-49a8-7fb2-aaca-13add8d0e495",
+        "root_turn_id": "01a116d9-49a8-7fb2-aaca-13add8d0e495",
+        "started_at": 1791384701,
+        "model_context_window": 258400,
+        "collaboration_mode_kind": "default"
+      }
+    },
+    {
+      "type": "turn_context",
+      "timestamp": "2026-10-07T14:51:42.158Z",
+      "payload": {
+        "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace",
+        "model": "gpt-6-astra",
+        "effort": "ultra",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "danger-full-access"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-07T14:52:18.662Z",
+      "ordinal": 16,
+      "type": "event_msg",
+      "payload": {
+        "type": "task_complete",
+        "turn_id": "01a116d9-49a8-7fb2-aaca-13add8d0e495",
+        "last_agent_message": "已收到交接，身份为 terminal-e2e-6638de（隔离会话交接验证 Agent）。\n工作目录：`/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/workspace`\nHANDOFF_NONCE=SESSION-HANDOFF-9172b5b9472a1ac3b0654e43\n\n等待下一项指令。",
+        "started_at": 1791384701,
+        "completed_at": 1791384738,
+        "duration_ms": 37299,
+        "time_to_first_token_ms": "[REDACTED]"
+      }
+    }
+  ],
+  "tool_calls": []
+}

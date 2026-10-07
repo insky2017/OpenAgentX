@@ -2,7 +2,7 @@
 
 ## 目标与边界
 
-- 当前仅准备脚本，未启动模型、未执行真实验收、未声明通过。
+- 执行状态：固定 `e644511` 工件的隔离真实验收已完成，恰好 6 Run；结果和边界见 [DELIVERY](DELIVERY.md) 与[证据](evidence/README.md)。以下保留执行基线及必要夹具修正。
 - 使用独立 profile/daemon/Worker/Codex、随机 tmux socket、专属 workspace；不连接正式业务 pane，不重启正式服务。
 - 复用 `TerminalRun` / `SettingsRun` / `codex_local_setup` 的真实环境生成与证据逻辑；固定候选二进制及 SHA 后执行。
 - 所有领域写入经正式 CLI/API；SQLite 仅以 `mode=ro` 独立核对旧 Task/Run/session_bindings 哈希及绑定历史。
@@ -24,18 +24,18 @@
 | Worker 重启 | fixture 配置 thread_id 特意保留 old；只重启自有 Worker；pointer 与实际后续 query 都仍 new |
 | 历史保全 | 已完成旧 Task/Run/绑定逐行哈希一致，新旧 thread 绑定同时保留 |
 
-## 产品接口与脚本待对齐项
+## 已核对的产品接口
 
 - `GET /api/console/v1/agents/{id}/session?backend_id=codex` 返回 `agent_id/backend_id/thread_id/context_task_id/version/pending_task_id/updated_at`；version 0 为 durable bootstrap。
 - `agent new-session ID` 只读 preview；写入需 `--handoff-file --apply --expected-thread --expected-version --key [--wait 3m]`。
 - 首轮 ACK 的具体 prompt 以最终产品为准。脚本保存首轮是否含 nonce；精确 nonce 继承由后续明确问题独立验证，不把固定 ACK 与自定义回显冲突算成产品成功。
-- 待候选确定后核实 CLI 输出、旧 view 拒绝文案及失败终态；任何调整保留首次失败，不自动重跑模型。
+- 候选 CLI 输出及旧 view 拒绝已实际核实；失败/取消终态由必要事务集成检查覆盖。夹具调整保留首次失败，不自动重跑模型。
 
 ## 独立代码/集成审查
 
 候选固定后，只审本轮关键 CAS、pending 清理与失败回滚：请求和 Task 原子性、只有确认成功才发布 pointer、失败/取消/不确定保持旧 pointer、managed更新与pointer同事务、旧 view投递按当前pointer校验、Worker启动优先durable pointer。集成夹具与真实 Runtime/PTY 证据分开记录。
 
-## 执行入口（尚未执行）
+## 执行入口
 
 ```sh
 python3 scripts/validation/agent_session_handoff_e2e.py run \
@@ -44,7 +44,7 @@ python3 scripts/validation/agent_session_handoff_e2e.py run \
   --commit FULL_SOURCE_COMMIT
 ```
 
-每次必须新的私有 root；失败不自动重试、不销毁证据。完成后由验收执行者根据已记录 PID/starttime 安全清理自有进程，不触碰共享进程。入库前仅复制脱敏 evidence 与 SHA 清单，原始凭据/数据库/PTY 内容仍留私有目录。
+首次 `run` 必须新的私有 root；失败不自动重试、不销毁证据。此次初始化成功后遇到 peer 登记夹具认证失败，新增有界 `resume-after-initialization` 入口：仅接受同一工件、同一 root、且恰好一项已成功初始化 Task 的状态，核实 PID/starttime 后复用或恢复自有夹具；不重跑初始化。不能用此入口重试未知业务或已经开始交接的流程。完成后安全清理自有进程，不触碰共享进程。入库前仅复制脱敏 evidence 与 SHA 清单，原始凭据/数据库/PTY 内容仍留私有目录。
 
 ## 候选执行前静态修正（未运行模型）
 

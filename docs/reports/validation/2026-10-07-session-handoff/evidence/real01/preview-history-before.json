@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-07T14:50:24.835605+00:00",
+  "access": "SQLite mode=ro; hashes only for history",
+  "tables": {
+    "tasks": {
+      "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4": "7fa0ef3fdc2c082da5671798c66a824ca4c8896b7448bf56f91c91bd4a4f2386"
+    },
+    "run_attempts": {
+      "run-0d3637f6-5ee8-4efc-ba95-3c16f74425b3": "7a47f8257d240a75f2ee1092280a8a15a2f869921164d3b21ce956a65d13295a"
+    },
+    "session_bindings": {
+      "binding-7a104b53-3ab8-4db4-b1bc-f09d0a16160d": "a44c78d2065159a3e69174d44200843bfa024f6120f2152b973c5c202a847d87"
+    }
+  },
+  "bindings": [
+    {
+      "session_binding_id": "binding-7a104b53-3ab8-4db4-b1bc-f09d0a16160d",
+      "context_id": "task-06fcf57d-fa48-4712-bdc6-da675e3bb1e4",
+      "agent_id": "terminal-e2e-6638de",
+      "backend_id": "codex",
+      "provider_session_id": "01a116d0-a0ae-7760-9449-41cf66043de9",
+      "state": "active",
+      "version": 2
+    }
+  ]
+}

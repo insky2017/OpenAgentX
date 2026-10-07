@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-07T14:51:40.004351+00:00",
+  "finished_at": "2026-10-07T14:52:20.113580+00:00",
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/openagentx-e644511",
+    "agent",
+    "new-session",
+    "terminal-e2e-6638de",
+    "--handoff-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-session-handoff/real01/SESSION-HANDOFF.md",
+    "--apply",
+    "--expected-thread",
+    "01a116d0-a0ae-7760-9449-41cf66043de9",
+    "--expected-version",
+    "0",
+    "--key",
+    "switch-SESSION-HANDOFF-9172b5b9472a1ac3b0654e43",
+    "--wait",
+    "3m"
+  ],
+  "exit_code": 0,
+  "stdout": "交接 Task: task-229dd0bb-a685-4d3d-9235-856536e3494b\n新 thread: 01a116d9-48fc-7ce0-8bf1-015006451a70\n会话版本: 1；身份和旧历史保留。退出旧 view 后重新连接：\nopenagentx agent open terminal-e2e-6638de --native\n",
+  "stderr": ""
+}
