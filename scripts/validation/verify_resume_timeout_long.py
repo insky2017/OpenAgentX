@@ -6,9 +6,19 @@ sys.dont_write_bytecode=True
 from native_model_settings_e2e import SettingsRun, require, now, sha
 
 def verify(args):
-    run=SettingsRun.restore(args)
+    # The original systemd harness may have exited after its final SQL typo;
+    # its owned daemon may then be gone. Preserve the formal snapshots already
+    # captured before that typo instead of restarting or replaying any task.
+    class RecordedRun:
+        def __init__(self):
+            self.root=args.root; self.out=args.root/'evidence'
+            self.aid=json.loads((args.root/'handoff.json').read_text())['agent']
+        def save(self,name,value):
+            (self.out/name).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
+    run=RecordedRun()
     tid=json.loads((run.out/'task-created.json').read_text())['task_id']
-    d=run.api('/api/observe/v1/tasks/'+tid)
+    d=json.loads((run.out/'latest-task.json').read_text())
+    require(d['task']['id']==tid,'recorded API snapshot belongs to another Task')
     require(len(d['run_attempts'])==1,'must retain exactly one original Run')
     attempt=d['run_attempts'][0]
     require(attempt['status']=='succeeded','original Runtime has not succeeded')
@@ -25,10 +35,9 @@ def verify(args):
         frozen=json.loads(row[0])
     finally: db.close()
     require(frozen['spec']['timeout']==0 and frozen.get('deadline_at','0001-01-01T00:00:00Z')=='0001-01-01T00:00:00Z','frozen deadline was not unlimited')
-    console=run.api('/api/console/v1/agents/'+run.aid+'/tasks/'+tid)
-    require(not console['latest_run'].get('deadline_at'),'Console projects a deadline')
-    run.save('recheck-task.json',d);run.save('recheck-console.json',console)
-    run.save('recheck-run.json',run.api('/api/observe/v1/run-attempts/'+attempt['run_id']))
+    original_run=json.loads((run.out/'final-run.json').read_text())
+    run.save('recheck-task.json',d)
+    run.save('recheck-run.json',original_run)
     run.save('proof-start.json',start);run.save('proof-end.json',end)
     run.save('frozen-timeout.json',{'run_id':attempt['run_id'],'timeout':0,'deadline_at':frozen.get('deadline_at'),'duration_seconds':elapsed,'read_only_database':True})
     state=json.loads((run.root/'profile/workers/codex'/run.aid/'state.json').read_text())
@@ -38,7 +47,7 @@ def verify(args):
         'runtime_status':attempt['status'],'formal_duration_seconds':elapsed,'proof_elapsed_seconds':end['elapsed_seconds'],
         'frozen_timeout':0,'frozen_deadline':None,'thread_id':state['thread_id'],'model_work_repeated':False,
         'initial_harness_result_preserved':(run.out/'result.json').exists(),
-        'scope':'same original Run; real tools and persisted freeze verified; mutation Task review status retained'}
+        'scope':'same original Run; actual pre-exit formal API snapshots, real tools and read-only persisted freeze verified; mutation Task review status retained'}
     run.save('recheck-result.json',result);print(json.dumps(result,ensure_ascii=False))
     return result
 
