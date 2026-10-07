@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "at": "2026-10-07T12:33:34.548752+00:00",
+  "source_commit": "5e82727a7b7e88192417faa4d209ab244b2a4e31",
+  "binary_sha256": "4c448f6e7cdf94ccc4ad1c0c6e5de61ee4a4c3f86d70affa12dda009d5166f39",
+  "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+  "pane": "%11",
+  "restarted_services": [
+    "openagentx-worker@openagentx.service"
+  ],
+  "other_services_and_panes_preserved": true,
+  "readonly_task_verified": false
+}

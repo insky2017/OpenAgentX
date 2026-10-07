@@ -1,0 +1,10 @@
+{
+  "candidate-native-probe.json": "6c6a2cf1295ff1b47880d88d72bb50acd04d5cf033478ff7a1f9b48b7ecb18b8",
+  "first-reopen-failure.json": "e8294439e1b1f507600262e3d51af95ecf3223ca1a6597090f3ef6874eb6a19d",
+  "readonly-verification-result.json": "c966f43f84a1998bcc2d4aefc49c9eacc1e06a4d5640ff0749bdb66ae3f1d37c",
+  "readonly-verification-task.json": "cc488f3f62b1e76beba3691b40eceff767129d709951a8980e7e9728db8dd082",
+  "recovery-operations.jsonl": "b391ed7f4ac3668826ef346d29f6847a8f923a1994a4f20a50ea379f5e3489a1",
+  "recovery-result.json": "e8a89ab89eace944ffb21249d2b3b64f5d6ff1a6c3735d66cf3ac17666156238",
+  "scope-check.json": "61af8e73453975b4a86f358eba828bc196289fe6c0e0fd22e3702afdcdfdcf5f",
+  "tests.json": "3e3fd261343dc8b982c248cf388e70c2b8277c04b21aedc88ba4418655f9b9c5"
+}

@@ -1,0 +1,131 @@
+{
+  "before_service_pids": {
+    "openagentx.service": "189741",
+    "openagentx-worker@openagentx.service": "189847",
+    "openagentx-worker@rhythm.service": "189860",
+    "openagentx-worker@pay-service.service": "189863",
+    "openagentx-worker@quote-service.service": "189876",
+    "openagentx-worker@identity-service.service": "189893",
+    "openagentx-worker@oneaxe-voice.service": "189902"
+  },
+  "after_service_pids": {
+    "openagentx.service": "189741",
+    "openagentx-worker@openagentx.service": "640442",
+    "openagentx-worker@rhythm.service": "189860",
+    "openagentx-worker@pay-service.service": "189863",
+    "openagentx-worker@quote-service.service": "189876",
+    "openagentx-worker@identity-service.service": "189893",
+    "openagentx-worker@oneaxe-voice.service": "189902"
+  },
+  "openagentx_model_settings_unchanged": true,
+  "agents": {
+    "openagentx": {
+      "thread_before": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "thread_after": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "pane_before": {
+        "window": "@8",
+        "pane": "%11",
+        "pid": 627639,
+        "dead": false,
+        "name": "openagentx"
+      },
+      "pane_after": {
+        "window": "@8",
+        "pane": "%11",
+        "pid": 642908,
+        "dead": false,
+        "name": "openagentx"
+      }
+    },
+    "rhythm": {
+      "thread_before": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "thread_after": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "pane_before": {
+        "window": "@28",
+        "pane": "%55",
+        "pid": 203909,
+        "dead": false,
+        "name": "rhythm"
+      },
+      "pane_after": {
+        "window": "@28",
+        "pane": "%55",
+        "pid": 203909,
+        "dead": false,
+        "name": "rhythm"
+      }
+    },
+    "pay-service": {
+      "thread_before": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "thread_after": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "pane_before": {
+        "window": "@27",
+        "pane": "%54",
+        "pid": 205708,
+        "dead": false,
+        "name": "pay-service"
+      },
+      "pane_after": {
+        "window": "@27",
+        "pane": "%54",
+        "pid": 205708,
+        "dead": false,
+        "name": "pay-service"
+      }
+    },
+    "quote-service": {
+      "thread_before": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "thread_after": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "pane_before": {
+        "window": "@3",
+        "pane": "%3",
+        "pid": 207800,
+        "dead": false,
+        "name": "quote-service"
+      },
+      "pane_after": {
+        "window": "@3",
+        "pane": "%3",
+        "pid": 207800,
+        "dead": false,
+        "name": "quote-service"
+      }
+    },
+    "identity-service": {
+      "thread_before": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "thread_after": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "pane_before": {
+        "window": "@30",
+        "pane": "%60",
+        "pid": 209621,
+        "dead": false,
+        "name": "identity-service"
+      },
+      "pane_after": {
+        "window": "@30",
+        "pane": "%60",
+        "pid": 209621,
+        "dead": false,
+        "name": "identity-service"
+      }
+    },
+    "oneaxe-voice": {
+      "thread_before": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "thread_after": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "pane_before": {
+        "window": "@11",
+        "pane": "%17",
+        "pid": 211866,
+        "dead": false,
+        "name": "oneaxe-voice"
+      },
+      "pane_after": {
+        "window": "@11",
+        "pane": "%17",
+        "pid": 211866,
+        "dead": false,
+        "name": "oneaxe-voice"
+      }
+    }
+  }
+}

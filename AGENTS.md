@@ -12,6 +12,8 @@
 
 ## 当前实施约定（2026-10-03）
 
+- **2026-10-07 OpenAgentX 长会话恢复**：原会话响应 33,858,086 字节超过 32 MiB，导致 TUI resume 失败；产品 `5e82727` 将本地 RPC 响应限额提高至有限的 128 MiB。正式 CLI、OpenAgentX Worker 和原 `%11` 已切换到 SHA `4c448f6e7cdf94ccc4ad1c0c6e5de61ee4a4c3f86d70affa12dda009d5166f39`，原 thread/pane 与模型保持，真实 query Task/Run 及 TUI 回复通过。daemon 和其他五域进程仍保留上一批工件，不宣称全部升级。旧失败 Task 未重放；参见[恢复证据与边界](docs/design/2026-10-07-large-session-recovery.md)。
+
 - **2026-10-07 执行时限、resume、spinner 与输入确认交付**：已安装 `c35d702` 产品工件（SHA-256 `259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69`），独立 docs 指挥者完成受控重启；七服务与六 Bridge 实际 SHA 一致，六域 online/healthy/ready，原 thread/window/pane 和模型偏好保持。Codex 六域 `timeout: 0s`，当前正式 Run 无总截止；31分钟真实验收及最终工件原生输入/steer、spinner 联合验收通过，mutation Task 的 uncertain 原样保留。已登记 resume 不再依赖坏的一次性接入回执，Rhythm/Pay/Quote 正式恢复已验。两态 spinner 与 TUI 消费确认修复已上线。保留取消 fallback 重建 app-server 后旧 Bridge endpoint 不刷新、需同 thread 重开 view 的既有缺口，不宣称全部取消重连已修复。详见[本批交付](docs/reports/validation/2026-10-07-resume-timeout/DELIVERY.md)、[计划](docs/plans/2026-10-07-resume-timeout.md)和[指挥者交接](docs/operations/2026-10-07-commander-handoff.md)。下方模型设置部署、30分钟限制与坏 receipt 阻塞描述属于上一批历史状态，以本条新证据为准。
 
 - **2026-10-07 受管模型设置交付**：已安装产品源码 `4774f19` 工件；daemon、六域 Worker 与原生 Bridge 已重启/重连，实际运行 SHA 与已验工件一致，六域 online/healthy/ready，原 thread 与 window/pane 保持。真实模型切换、冻结 Run、文件效果及重启持久化在隔离环境通过；正式环境按限定范围恢复后核验通过，未重放业务任务。首次部署 FAILED 保留；Rhythm 注册输入摘要不符、Pay 接入收据 JSON 无效仍会阻断通用 `agent resume`，本次经正式网络 API 恢复可接单，并未绕过注册保护。30 分钟 Run 时限未改。证据、恢复边界与残留项见[本批交付](docs/reports/validation/2026-10-07-native-model-settings/DELIVERY.md)；本批用户授权重启，不受旧清理批次不重启约束限制。

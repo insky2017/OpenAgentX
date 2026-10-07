@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "at": "2026-10-07T12:37:32.775418+00:00",
+  "task": {
+    "task_id": "task-9284cabe-72f2-4933-a4a8-e4e84bc7ed4b",
+    "status": "succeeded",
+    "completion_basis": "query_result_delivered",
+    "result": "OAX_RECOVERY_READONLY_OK_20261007"
+  },
+  "run": {
+    "run_id": "run-0eaf66cf-0c96-486b-8d82-05a9204d7fd0",
+    "status": "succeeded",
+    "started_at": "2026-10-07T12:34:20.99870162Z",
+    "finished_at": "2026-10-07T12:34:46.64689226Z",
+    "deadline_at": null
+  },
+  "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+  "state": "idle",
+  "native_pane": "%11",
+  "native_final_reply_visible": true,
+  "old_failed_task_status": "uncertain"
+}

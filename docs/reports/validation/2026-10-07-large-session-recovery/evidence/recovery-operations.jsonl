@@ -1,0 +1,3 @@
+{"at": "2026-10-07T12:32:54.575530+00:00", "step": "target_graceful_stop_queued", "agent": "openagentx"}
+{"at": "2026-10-07T12:32:59.841834+00:00", "step": "binary_installed", "sha256": "4c448f6e7cdf94ccc4ad1c0c6e5de61ee4a4c3f86d70affa12dda009d5166f39"}
+{"at": "2026-10-07T12:33:34.549032+00:00", "step": "target_recovery_verified"}

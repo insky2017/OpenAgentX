@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "command": "go test ./internal/runtime/codex -run ^TestRPCReceivesLargeThreadHistory$ -count=1",
+    "exit_code": 1,
+    "error": "websocket: read limit exceeded"
+  },
+  "fixed": {
+    "command": "go test ./internal/runtime/codex ./internal/nativebridge",
+    "exit_code": 0
+  },
+  "source_commit": "5e82727a7b7e88192417faa4d209ab244b2a4e31"
+}

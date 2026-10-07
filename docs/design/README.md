@@ -4,6 +4,7 @@
 
 | 文档 | 用途 |
 |---|---|
+| [OpenAgentX 长会话恢复](2026-10-07-large-session-recovery.md) | 32 MiB 响应上限故障、单域恢复、原 thread/pane 与真实只读验收 |
 | [总体架构七视图](current-architecture.html) | 总览、任务流、领域初始化、AGY运行、事件观察、依赖及Codex原生终端 |
 | [架构说明与源码依据](CURRENT_ARCHITECTURE.md) | Markdown说明、实现状态及逐项证据 |
 | [事件协作与终端方案](event-collaboration.html) | 终端、Native Bridge、Worker 与协作任务；本批基础 Overview 交付与历史证据分别说明 |
