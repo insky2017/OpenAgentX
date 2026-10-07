@@ -1,0 +1,173 @@
+{
+  "at": "2026-10-07T10:57:03.158405+00:00",
+  "path": "/api/observe/v1/tasks/task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "query_result_delivered",
+      "id": "task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+      "version": 3,
+      "target_agent_id": "terminal-e2e-302fd7",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "query",
+      "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+      "status": "succeeded",
+      "result": "OAX-TERMINAL-ROLE terminal-e2e-302fd7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/workspace",
+      "outcome_state": "available",
+      "created_at": "2026-10-07T10:56:48.541117923Z",
+      "updated_at": "2026-10-07T10:56:59.739760615Z"
+    },
+    "messages": [
+      {
+        "id": "message-bdf99723-5097-4c9b-8cee-f61a7061a5c5",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-a11b3dfa-d79e-4df6-8311-e802ab13ff9f",
+        "target_agent_id": "terminal-e2e-302fd7",
+        "kind": "instruction",
+        "content": "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。",
+        "created_at": "2026-10-07T10:56:48.541117923Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "instructions_sha256": "7005aac6b1e74fc23d457fc3810b400a8a1ccfd0e78eaace0b0b902de8a07014",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/profile/workers/identities/terminal-e2e-302fd7.role.md",
+        "run_id": "run-898bdf92-ab3f-400b-932c-42f8b61bfa85",
+        "task_id": "task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+        "agent_id": "terminal-e2e-302fd7",
+        "version": 2,
+        "status": "succeeded",
+        "worker_instance_id": "worker-01f4d653-1db0-4f46-8987-2a8af7d63ed0",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result": {
+          "final_reply": true,
+          "runtime_status": "succeeded",
+          "body": "OAX-TERMINAL-ROLE terminal-e2e-302fd7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/workspace",
+          "side_effects_source": "not_recorded",
+          "business_verification_source": "not_recorded"
+        },
+        "turn_result_state": "available",
+        "started_at": "2026-10-07T10:56:48.543926736Z",
+        "finished_at": "2026-10-07T10:56:59.739760615Z",
+        "created_at": "2026-10-07T10:56:48.543926736Z",
+        "updated_at": "2026-10-07T10:56:59.739760615Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 15,
+        "event_id": "event-84ecc121-ff18-4d0c-8d3c-508b9fdb1b71",
+        "aggregate_type": "task",
+        "aggregate_id": "task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+        "event_type": "task.created",
+        "created_at": "2026-10-07T10:56:48.541117923Z"
+      },
+      {
+        "sequence": 17,
+        "event_id": "event-task-d13b7668-73f9-49f2-ae55-60e9a1d43210",
+        "aggregate_type": "task",
+        "aggregate_id": "task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+        "event_type": "task.running",
+        "created_at": "2026-10-07T10:56:48.545046185Z"
+      },
+      {
+        "sequence": 18,
+        "event_id": "event-run-1a69e4e0-c18d-400b-84fa-3e53f3efec02",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-898bdf92-ab3f-400b-932c-42f8b61bfa85",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-07T10:56:48.545050052Z"
+      },
+      {
+        "sequence": 20,
+        "event_id": "event-runtime-e5e49063-9acd-4ace-a48d-1b80473d3459",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-898bdf92-ab3f-400b-932c-42f8b61bfa85",
+        "event_type": "runtime.session.bound",
+        "created_at": "2026-10-07T10:56:49.963730302Z",
+        "output": {
+          "stage": "session",
+          "status": "bound",
+          "text": "Runtime session bound",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 21,
+        "event_id": "event-runtime-89bc11d4-6f3c-4b49-9dd4-e978ae372c96",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-898bdf92-ab3f-400b-932c-42f8b61bfa85",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-07T10:56:52.18529593Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 23,
+        "event_id": "event-runtime-484cf900-fcf5-42aa-86bd-694d255777b9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-898bdf92-ab3f-400b-932c-42f8b61bfa85",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-07T10:56:57.757813652Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed reasoning",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 24,
+        "event_id": "event-runtime-32c0aed4-57d1-4f8d-8f12-5233cd0b7599",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-898bdf92-ab3f-400b-932c-42f8b61bfa85",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-07T10:56:59.698719792Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "OAX-TERMINAL-ROLE terminal-e2e-302fd7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/workspace",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 26,
+        "event_id": "event-run-64bd1712-ba6c-493b-9539-cb48bb6e2a77",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-898bdf92-ab3f-400b-932c-42f8b61bfa85",
+        "event_type": "run_attempt.finished",
+        "created_at": "2026-10-07T10:56:59.739816798Z"
+      },
+      {
+        "sequence": 27,
+        "event_id": "event-task-294dce95-9a08-4904-8ad7-8a4aa8021b28",
+        "aggregate_type": "task",
+        "aggregate_id": "task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+        "event_type": "task.settled",
+        "created_at": "2026-10-07T10:56:59.739819986Z"
+      }
+    ],
+    "snapshot_sequence": 27,
+    "live_after_sequence": 27,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

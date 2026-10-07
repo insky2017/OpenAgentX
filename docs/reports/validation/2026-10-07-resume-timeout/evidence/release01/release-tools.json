@@ -1,0 +1,8 @@
+{
+  "sha256": {
+    "release-proof.py": "a253d0c69d0067dc367dd7c14629719363a38789583355f9148d56619237e8dd",
+    "release-steer.py": "d38359b6429c34413cd113757480360a7636620fa9427e5c9a9652ae0e587eda"
+  },
+  "duration_seconds": 15,
+  "exclusive_creation_rejects_duplicate_effects": true
+}

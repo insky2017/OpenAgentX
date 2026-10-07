@@ -1,0 +1,11 @@
+{
+  "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "workspace": "/home/sky/docs",
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "host": "independent-native-codex",
+  "created_at": "2026-10-07T10:29:07.146159+00:00",
+  "last_event": "resume-timeout-rollout-20261007",
+  "last_result": "completed",
+  "writer_busy": false
+}

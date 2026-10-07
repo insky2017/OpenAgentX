@@ -1,0 +1,50 @@
+{
+  "pane": {
+    "window": "@11",
+    "pane": "%17",
+    "pid": 211866,
+    "dead": false,
+    "name": "oneaxe-voice"
+  },
+  "processes": [
+    {
+      "pid": 211866,
+      "ppid": 7674,
+      "start": "59074722",
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "oneaxe-voice",
+        "--native",
+        "--db",
+        "/home/sky/.openagentx/data/openagentx.db",
+        "--socket",
+        "/home/sky/.openagentx/run/openagentx.sock",
+        "--file",
+        "/home/sky/.openagentx/fleet.yaml",
+        "--worker-dir",
+        "/home/sky/.openagentx/workers",
+        "--credentials",
+        "/home/sky/.openagentx/credentials.json"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 212077,
+      "ppid": 211866,
+      "start": "59074822",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-564798236/bridge.sock",
+        "--no-alt-screen",
+        "01a0ddcc-248f-7dd0-a263-67f1d53e0181"
+      ],
+      "comm": "codex"
+    }
+  ],
+  "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+  "bridge_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+}

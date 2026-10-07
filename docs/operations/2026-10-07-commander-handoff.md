@@ -1,4 +1,10 @@
-# 现有指挥者接管交接（2026-10-07）
+# 独立指挥者接管交接（2026-10-07）
+
+## 当前入口与结果
+
+指挥者在 `/home/sky/docs` 的独立原生 Codex 会话中执行；后台事件由 user-systemd 托管，**不会自动出现在 OAX tmux 窗口里**。运行 `oax-commander open` 进入同一会话的前台终端，`oax-commander status` 查看身份和最近结果。事件完成后进程退出，不持续调用模型。
+
+2026-10-07 本次维护事件已实际完成联合工件验收、唯一部署链、OAX 重启后的结果核对和回派。最后同 thread `turn.completed`、exit0，writer 已释放。下文保留初次发现、交接及失败证据；当前部署结论见末尾。
 
 ## 身份与宿主边界
 
@@ -16,19 +22,19 @@ AGY 的项目缓存中存在 docs 项目 `20d8fe72-b970-4d40-a8b5-c46e2abd17fd`�
 
 指挥者负责理解用户目标、分配领域负责人、协调依赖、核对真实验收与向用户交付；各领域仍保有其业务职责。OpenAgentX 领域负责控制面、Worker、原生桥接、Task/Run 持久化及协作协议实现。
 
-本批部署的唯一执行者是主代理所准备的 `scripts/validation/deploy_resume_timeout.py` 独立 systemd 部署链。接收交接的指挥者先只读检查其结果和服务状态；部署链运行期间绝不并行部署或再次重启。仅在该链已退出、结果明确失败并且原执行者已释放后，才能依据现有用户授权接续有界恢复。不得清空/重放历史排队任务，不直接改数据库，不主动重做未知业务副作用。
+本批主代理将唯一执行权移交给指挥者事件 `resume-timeout-rollout-20261007`。指挥者仅启动一次 `scripts/validation/rollout_resume_timeout_batch.py`，该脚本先做最终工件真实验收，再调用 `deploy_resume_timeout.py` 受控部署；指挥者跨重启等待并核对结果。部署链运行期间绝不并行部署或再次重启。仅在链已退出、结果明确失败且原执行者已释放后，才按既有用户授权有界恢复；本次 PASS，没有触发额外恢复。不得清空/重放历史任务、直接改数据库或主动重做未知业务副作用。
 
 指挥者的恢复宿主必须独立于 OAX daemon 及被重启的六域 Worker。外层普通进程可等待部署结果事件，只有新结果需要处理时调用一次既有宿主的模型入口；不使用定时 LLM 轮询，不依赖本聊天持续在线。不因仅启动一个进程就报告自动恢复已经验证。
 
 ## 当前批次与证据入口
 
-- 产品修复初始 commit：`15f787f3b7b8f04e3fc3fcad975846ec101e0daa`，Codex 默认 `timeout=0` 不设总截止，registered resume 核验权威身份；后续 quote-service 旧 manifest 兼容修复以实际候选 SHA 为准。
+- 产品修复初始 commit：`15f787f3b7b8f04e3fc3fcad975846ec101e0daa`；最终安装产品 `c35d70260eeb39bec83c457ff1acf06269ddf2be`，包含无总截止、registered resume、spinner、原生输入确认。
 - 实施工作树：`/home/sky/work/touzi/OneAxe/OpenAgentX-resume-timeout-worktree`；正式交付仓库：`/home/sky/work/touzi/OneAxe/steadyflow/OpenAgentX` 的 `main`。候选、Git 合入和实际安装分别核验。
-- 31 分钟真实验收独立单元：`oax-resume-timeout-e2e-20261007.service`；证据根：`~/.local/state/openagentx/validation/2026-10-07-resume-timeout/long01`。运行中不是 PASS。
+- 31 分钟真实验收独立单元：`oax-resume-timeout-e2e-20261007.service` 已完成；证据根：`~/.local/state/openagentx/validation/2026-10-07-resume-timeout/long01`，只读补判 PASS，未重跑模型。
 - 首轮脚本末尾 SQL 使用 `id` 而实际列为 `run_id` 的夹具问题必须保留失败记录，用只读查询补判；不得为这个夹具问题重跑模型或 31 分钟工具动作。
 - 部署结果由部署脚本的 `--evidence` 目录中 `result.json`、`operations.jsonl`、必要时 `recovery.json` 给出；先找到实际 systemd 单元及 argv，不猜测目录，不把 preflight 当部署完成。
 - 用户已授权必要重启，但必须保留六域原 thread、window/pane，并核验候选二进制 SHA、实际进程来源、schema、Worker readiness 和原会话恢复。
-- 旧进程 30 分钟截止仍可能打断旧 Run；新默认仅在经验证的候选工件安装和对应服务重启后生效。
+- 六域已受控重启，配置均为 `timeout: 0s`；新正式 Run 已核验无总截止。旧已冻结 Run/历史终态不改写。
 
 ## 权威领域档案快照
 
@@ -78,7 +84,7 @@ AGY 的项目缓存中存在 docs 项目 `20d8fe72-b970-4d40-a8b5-c46e2abd17fd`�
 2. 通过该宿主正式入口交付本文件，得到同一会话的明确收悉与职责确认。
 3. 指挥者在 OAX 之外观察部署结果，核对必要恢复，再把结果通知用户；记录宿主连续性和恢复行为证据。
 
-旧会话定位要求已被用户授权新建所替代。新 thread 已真实创建；首次沙箱读取失败保留，随后同 thread 组织交接及正式 CLI 状态核验通过。部署恢复的执行权尚未移交，不能报告恢复验收已通过。
+旧会话定位要求已被用户授权新建所替代。新 thread 已真实创建；首次沙箱读取失败保留，随后同 thread 组织交接及正式 CLI 状态核验通过。当前维护部署及跨 OAX 重启连续性也已通过，未模拟失败部署后的恢复分支。
 
 ## 用户入口与事件续办
 
@@ -86,7 +92,7 @@ AGY 的项目缓存中存在 docs 项目 `20d8fe72-b970-4d40-a8b5-c46e2abd17fd`�
 - 恢复原生终端：`oax-commander open`。默认上下文约束为只读，持有 writer 锁直至用户退出终端；事件与终端不能同时写同一 thread。
 - 后台事件续办：`oax-commander send --key <稳定事件ID> --prompt <提示文件绝对路径>`。普通 CLI 在独立 user-systemd 单元中运行一次 `codex exec resume <精确thread>`；无事件时没有模型进程。`event` 是其底层前台入口。
 - 稳定事件 ID 只执行一次；已有结果直接返回，已开始但未知终态不自动重试。发送时 writer 忙会明确拒绝且不提交；交接程序应在上轮退出后发送，不把拒绝当作已投递。
-- 部署权仍未移交。真实维护由唯一执行者明确交接完整脚本、固定候选 SHA 和证据路径，再使用 `oax-commander send --maintenance --key <稳定ID> --prompt <交接文件>`；该事件才允许正文指定的维护操作。默认事件自动前置只读约束。宿主因 bwrap 不可用采用 `danger-full-access`，此模式是明确的任务权限边界，不冒称 OS 强制只读。
+- 真实维护由唯一执行者明确交接完整脚本、固定候选 SHA 和证据路径，再使用 `oax-commander send --maintenance --key <稳定ID> --prompt <交接文件>`；该事件只允许正文指定的维护操作。本次交接已完成，不延伸为以后任意维护授权。默认事件自动前置只读约束。宿主因 bwrap 不可用采用 `danger-full-access`，此模式是明确的任务权限边界，不冒称 OS 强制只读。
 
 运行副本位于 `/home/sky/docs/.oax-commander/commander_session.py`；仓库源为 `scripts/operations/commander_session.py`。用户入口 `/home/sky/.local/bin/oax-commander` 指向运行副本，不依赖临时开发 worktree 存活。ROLE、交接副本、原始输出和 session.json 均保留在 docs 私有子目录。正式 OAX 注册、scope 配置或自动收 OAX Mailbox 尚未实施；这是独立原生组织指挥者入口。
 
@@ -99,6 +105,7 @@ install -d -m 700 /home/sky/docs/.oax-commander
 install -m 755 scripts/operations/commander_session.py /home/sky/docs/.oax-commander/commander_session.py
 install -m 600 docs/operations/independent-commander-role.md /home/sky/docs/.oax-commander/ROLE.md
 install -m 600 docs/operations/2026-10-07-commander-handoff.md /home/sky/docs/.oax-commander/organization-handoff.md
+install -m 600 docs/operations/commander-quickstart.md /home/sky/docs/COMMANDER.md
 install -m 755 scripts/operations/oax-commander /home/sky/.local/bin/oax-commander
 ```
 
@@ -115,7 +122,7 @@ install -m 755 scripts/operations/oax-commander /home/sky/.local/bin/oax-command
 - 活跃 writer 时终端打开被拒绝；同事件同正文直接返回既有结果，不调用模型，异正文复用同 key 被拒绝。
 - 两次后续事件完成后独立 systemd 单元 inactive，`status` 返回 `writer_busy=false`。没有设置周期性模型唤醒。
 
-[脱敏验收证据](../reports/validation/2026-10-07-resume-timeout/evidence/commander01/)包含原生索引、每轮回执、成功轮最终回复、锁/幂等检查及私有原始记录 SHA-256 清单。自动化交接和只读恢复已验；用户交互终端渲染及实际维护部署仍未验，不混报为完整部署通过。
+[脱敏验收证据](../reports/validation/2026-10-07-resume-timeout/evidence/commander01/)包含原生索引、每轮回执、成功轮最终回复、锁/幂等检查及私有原始记录 SHA-256 清单。该初始阶段验证自动化交接和只读恢复；后续实际部署另列如下。用户交互终端渲染仍未专项验收。
 
 ### 全机文档索引补充交接
 
@@ -124,3 +131,11 @@ install -m 755 scripts/operations/oax-commander /home/sky/.local/bin/oax-command
 识别 Voice、Colab、CLIProxyAPI、OneAxe Proxy、Sub2API 五组 README；支付账户资料仅识别标题，不展开正文。本轮限读 Authentik 查询说明、Voice README、Codex 宿主代理、Colab README 和 OneAxe Proxy 兼容入口五份必要说明，建立网络/远程访问、模型网关/开发宿主、身份/业务、云环境及本机硬件/媒体分组认知。原始运维说明的时效性仍需责任域核验，不构成当前部署或业务效果证据。
 
 未读恢复码、凭据、令牌、备份或私有支付配置，未进入业务工程；未发协作请求或执行维护。此有限事件结束后空闲，无常驻模型轮询。详细结果见 [索引交接回复](../reports/validation/2026-10-07-resume-timeout/evidence/commander01/bootstrap-index-20261007-final.md)。
+
+## 实际维护部署验收
+
+维护单元 `oax-commander-event-resume-timeout-rollout-20261007.service` 于10:55 UTC在上述同 thread开始、11:27 UTC完成；daemon 于11:22:39 UTC重启，指挥者独立宿主持续等待，随后实际读取部署结果、操作记录和回派回执。[事件结果](../reports/validation/2026-10-07-resume-timeout/evidence/commander-deployment01/result.json)与[最终回复](../reports/validation/2026-10-07-resume-timeout/evidence/commander-deployment01/final.md)保留同 thread、exit0、turn.completed。只执行一条部署链，没有平行部署或重复业务。
+
+[独立核验](../reports/validation/2026-10-07-resume-timeout/evidence/deployment01/independent-verification.json)确认七服务和六 Bridge 均为已验工件，六域原 thread/window/pane 保持。指挥者回派收尾任务的回执为 queued；本报告不把该回执说成任务已完成。本轮原 OpenAgentX 已在恢复后的另一个现有任务中继续收尾。
+
+这证明“独立指挥者能承担 OpenAgentX 自身重启期间的部署与核验”。失败部署恢复分支、无人值守故障自愈、OAX Mailbox 自动收信及跨域任务自动分发仍未验或未实现。下一次维护仍按具体授权、稳定事件 ID 和唯一 writer 交接。

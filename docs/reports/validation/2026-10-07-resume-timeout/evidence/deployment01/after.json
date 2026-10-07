@@ -1,0 +1,287 @@
+{
+  "at": "2026-10-07T11:25:34.890032+00:00",
+  "binary_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+  "states": {
+    "openagentx": {
+      "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "state": "running",
+      "task_id": "task-c7a21368-74e1-4f26-b425-77b39aff94ea",
+      "run_id": "run-69e12973-bde8-45a4-952d-46d3b3dfe73a",
+      "pid": 189950
+    },
+    "rhythm": {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "state": "restored_unconfirmed",
+      "task_id": "task-fa8f1340-28ff-4ad7-a4e2-e98a1add8afb",
+      "run_id": "run-68b4bd19-1e1d-4257-a2ef-d1aeab9334c1",
+      "pid": 189944
+    },
+    "pay-service": {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "state": "restored_unconfirmed",
+      "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+      "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+      "pid": 189946
+    },
+    "quote-service": {
+      "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "state": "restored_unconfirmed",
+      "task_id": "task-0bf1ba00-d06c-4203-b349-491f8b6e6334",
+      "run_id": "run-92fc2fd1-a499-472b-9038-69bcde19d8c6",
+      "pid": 189977
+    },
+    "identity-service": {
+      "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "state": "restored_unconfirmed",
+      "task_id": "task-96942a10-68f6-425c-bdb1-bcf009fae25a",
+      "run_id": "run-5c7699e8-4286-4d38-b2b2-252647f23196",
+      "pid": 190135
+    },
+    "oneaxe-voice": {
+      "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "state": "restored_unconfirmed",
+      "task_id": "task-0ed31dd5-78e5-450a-bf57-e62bd314f4e9",
+      "run_id": "run-899810e3-80f6-40fb-88f0-8b58499f0b06",
+      "pid": 190213
+    }
+  },
+  "panes": {
+    "openagentx": {
+      "window": "@8",
+      "pane": "%11",
+      "pid": 202702,
+      "dead": false,
+      "name": "openagentx"
+    },
+    "oneaxe-voice": {
+      "window": "@11",
+      "pane": "%17",
+      "pid": 211866,
+      "dead": false,
+      "name": "oneaxe-voice"
+    },
+    "rhythm": {
+      "window": "@28",
+      "pane": "%55",
+      "pid": 203909,
+      "dead": false,
+      "name": "rhythm"
+    },
+    "pay-service": {
+      "window": "@27",
+      "pane": "%54",
+      "pid": 205708,
+      "dead": false,
+      "name": "pay-service"
+    },
+    "quote-service": {
+      "window": "@3",
+      "pane": "%3",
+      "pid": 207800,
+      "dead": false,
+      "name": "quote-service"
+    },
+    "identity-service": {
+      "window": "@30",
+      "pane": "%60",
+      "pid": 209621,
+      "dead": false,
+      "name": "identity-service"
+    }
+  },
+  "workers": {
+    "openagentx": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": false,
+        "reason": "正在工作，新任务将排队"
+      },
+      "agent_id": "openagentx",
+      "mode": "normal",
+      "generation": 3,
+      "worker_status": "online",
+      "worker_instance_id": "worker-6c2e07da-4811-442c-9318-8a523a762208",
+      "last_heartbeat_at": "2026-10-07T11:25:25.184903185Z",
+      "lease_until": "2026-10-07T11:25:55.184903185Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "active_run": {
+        "run_id": "run-69e12973-bde8-45a4-952d-46d3b3dfe73a",
+        "task_id": "task-c7a21368-74e1-4f26-b425-77b39aff94ea",
+        "status": "starting",
+        "worker_instance_id": "worker-6c2e07da-4811-442c-9318-8a523a762208",
+        "worker_generation": 3,
+        "started_at": "2026-10-07T11:23:06.281848756Z",
+        "updated_at": "2026-10-07T11:25:25.184903185Z"
+      },
+      "suggested_task": {
+        "task_id": "task-c7a21368-74e1-4f26-b425-77b39aff94ea",
+        "version": 2,
+        "status": "running",
+        "intent": "mutation",
+        "summary": {
+          "omitted": true,
+          "sha256": "2da0d977e917f16c3d5488b20ae86fa5065bfc1fd0d2075273c8a21a80817d8f"
+        },
+        "updated_at": "2026-10-07T11:23:06.281848756Z"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 486025
+    },
+    "rhythm": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "rhythm",
+      "mode": "normal",
+      "generation": 4,
+      "worker_status": "online",
+      "worker_instance_id": "worker-4ac97c8a-c37e-40ec-9c12-41ef4ab95016",
+      "last_heartbeat_at": "2026-10-07T11:25:25.162116181Z",
+      "lease_until": "2026-10-07T11:25:55.162116181Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 486025
+    },
+    "pay-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "pay-service",
+      "mode": "normal",
+      "generation": 6,
+      "worker_status": "online",
+      "worker_instance_id": "worker-ac7c60d8-e780-4c75-a8fb-6eada0e5c1f4",
+      "last_heartbeat_at": "2026-10-07T11:25:25.190530503Z",
+      "lease_until": "2026-10-07T11:25:55.190530503Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 486025
+    },
+    "quote-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "quote-service",
+      "mode": "normal",
+      "generation": 55,
+      "worker_status": "online",
+      "worker_instance_id": "worker-8d2d4066-ba7b-410f-85ba-b7bac19b7917",
+      "last_heartbeat_at": "2026-10-07T11:25:25.210729025Z",
+      "lease_until": "2026-10-07T11:25:55.210729025Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 486025
+    },
+    "identity-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "identity-service",
+      "mode": "normal",
+      "generation": 3,
+      "worker_status": "online",
+      "worker_instance_id": "worker-d5525ad7-b724-4235-b681-8cf409c691d3",
+      "last_heartbeat_at": "2026-10-07T11:25:25.209685241Z",
+      "lease_until": "2026-10-07T11:25:55.209685241Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 486025
+    },
+    "oneaxe-voice": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "oneaxe-voice",
+      "mode": "normal",
+      "generation": 3,
+      "worker_status": "online",
+      "worker_instance_id": "worker-1122ed42-a50d-42ef-9797-fd29db8affb0",
+      "last_heartbeat_at": "2026-10-07T11:25:25.232279539Z",
+      "lease_until": "2026-10-07T11:25:55.232279539Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 486025
+    }
+  },
+  "service_pids": {
+    "openagentx.service": "189741",
+    "openagentx-worker@openagentx.service": "189847",
+    "openagentx-worker@rhythm.service": "189860",
+    "openagentx-worker@pay-service.service": "189863",
+    "openagentx-worker@quote-service.service": "189876",
+    "openagentx-worker@identity-service.service": "189893",
+    "openagentx-worker@oneaxe-voice.service": "189902"
+  },
+  "service_artifacts": {
+    "openagentx.service": {
+      "pid": 189741,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+      "started_at": "Wed 2026-10-07 19:22:39 CST"
+    },
+    "openagentx-worker@openagentx.service": {
+      "pid": 189847,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+      "started_at": "Wed 2026-10-07 19:22:44 CST"
+    },
+    "openagentx-worker@rhythm.service": {
+      "pid": 189860,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+      "started_at": "Wed 2026-10-07 19:22:44 CST"
+    },
+    "openagentx-worker@pay-service.service": {
+      "pid": 189863,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+      "started_at": "Wed 2026-10-07 19:22:44 CST"
+    },
+    "openagentx-worker@quote-service.service": {
+      "pid": 189876,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+      "started_at": "Wed 2026-10-07 19:22:44 CST"
+    },
+    "openagentx-worker@identity-service.service": {
+      "pid": 189893,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+      "started_at": "Wed 2026-10-07 19:22:44 CST"
+    },
+    "openagentx-worker@oneaxe-voice.service": {
+      "pid": 189902,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+      "started_at": "Wed 2026-10-07 19:22:44 CST"
+    }
+  }
+}

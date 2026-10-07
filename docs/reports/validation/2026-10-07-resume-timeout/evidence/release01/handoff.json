@@ -1,0 +1,30 @@
+{
+  "root": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01",
+  "socket": "/tmp/oax-codex-26aeb40231.sock",
+  "url": "http://127.0.0.1:34853",
+  "agent": "terminal-e2e-302fd7",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release",
+  "binary_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+  "server": "oax-terminal-4e0d5d025f28",
+  "windows": {
+    "native": "@0"
+  },
+  "tasks": [
+    "task-21af843d-f6ea-4a3d-9dcd-35041079a7df",
+    "task-86b2c202-c1c6-4a7b-9125-26c98f82f927"
+  ],
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 62029,
+      "starttime": "58900327"
+    },
+    {
+      "label": "worker",
+      "pid": 63060,
+      "starttime": "58901376"
+    }
+  ],
+  "profile": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/profile",
+  "at": "2026-10-07T10:57:55.667488+00:00"
+}

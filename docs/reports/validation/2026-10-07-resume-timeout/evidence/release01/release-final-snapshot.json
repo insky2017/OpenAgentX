@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-07T10:57:55.469320+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window": "@0",
+      "name": "terminal-e2e-302fd7",
+      "pane": "%0",
+      "index": "0",
+      "pid": "66302",
+      "dead": "0",
+      "title": "sky"
+    }
+  ],
+  "options": {
+    "@0": "@oax_state idle\n@oax_window-status-current-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\"\n@oax_window-status-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\"\n@openagentx_agent_id terminal-e2e-302fd7\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on\nwindow-status-current-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\"\nwindow-status-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\""
+  },
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-1773488528/server.sock",
+    "thread_id": "01a11602-443c-7dd3-8dbe-e07c1c94bcae",
+    "turn_id": "01a11602-7fe6-72c2-bda5-655b016d8cd7",
+    "task_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+    "run_id": "run-6ad95e27-40ac-4605-97d0-3f3a4cb9f5e7",
+    "state": "idle",
+    "pid": 63118,
+    "updated_at": "2026-10-07T10:57:46.538394956Z"
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 62029,
+      "starttime": "58900327"
+    },
+    {
+      "label": "worker",
+      "pid": 63060,
+      "starttime": "58901376"
+    }
+  ],
+  "active_window": "@0"
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-07T10:57:03.234460+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-4e0d5d025f28",
+    "show-options",
+    "-w",
+    "-t",
+    "@0"
+  ],
+  "returncode": 0,
+  "stdout": "@oax_state idle\n@oax_window-status-current-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\"\n@oax_window-status-format_suffix \"#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\"\n@openagentx_agent_id terminal-e2e-302fd7\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on\nwindow-status-current-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\"\nwindow-status-format \"#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\"\n",
+  "stderr": ""
+}

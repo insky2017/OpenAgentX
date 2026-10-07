@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-07T10:57:55.671925+00:00",
+  "path": "/api/console/v1/attach?agent_id=terminal-e2e-302fd7",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    },
+    "agent_id": "terminal-e2e-302fd7",
+    "mode": "normal",
+    "generation": 1,
+    "worker_status": "online",
+    "worker_instance_id": "worker-01f4d653-1db0-4f46-8987-2a8af7d63ed0",
+    "last_heartbeat_at": "2026-10-07T10:57:46.517123335Z",
+    "lease_until": "2026-10-07T10:58:16.517123335Z",
+    "backend_health": {
+      "codex": "healthy"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 52
+  }
+}

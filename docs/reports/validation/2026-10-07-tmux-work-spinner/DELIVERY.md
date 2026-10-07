@@ -1,6 +1,15 @@
 # 受管 tmux 窗口工作提示
 
-本批实现已受管 Agent 窗口的两态工作提示：running 时在原窗口文字后显示十帧 spinner，idle 不添加字符。保持窗口真实名称、Task/Run 状态、调度、取消、时限和 session 生命周期。源码分支 `codex/tmux-work-spinner` 从 `main f3f1818` 建立，未安装、未重启正式服务；由主代理统一整合和部署。
+本批实现已受管 Agent 窗口的两态工作提示：running 时在原窗口文字后显示十帧 spinner，idle 不添加字符。保持窗口真实名称、Task/Run 状态、调度、取消、时限和 session 生命周期。源码分支 `codex/tmux-work-spinner` 从 `main f3f1818` 建立，以 `dbdd4b3` 整合，现已随 `c35d702` 联合工件安装并完成正式重启；[统一交付](../2026-10-07-resume-timeout/DELIVERY.md)记录实际 SHA 和部署结果。
+
+## 修改文件
+
+- `internal/worker/work_activity.go`：把已有执行和审批生命周期投影为 bool，不增加持久任务状态。
+- `internal/worker/run_manager.go`、`runner.go`、`config.go`：连接生命周期回调及正常退出清理。
+- `internal/cli/worker/command.go`：创建显示发布器，将回调注入 Worker。
+- `internal/fleet/work_status.go`：受管窗口定位、两态选项、显示格式、十帧 helper。
+- `cmd/openagentx/main.go`：`tmux-spinner` 小命令入口。
+- `internal/worker/work_activity_integration_test.go`、`internal/fleet/work_status_integration_test.go`、`scripts/validation/tmux_work_spinner_e2e.py`：必要边界与真实验收；本报告及 `evidence/` 保存证据。
 
 ## 状态来源与接入点
 
@@ -43,3 +52,44 @@ Worker 是 systemd 后台服务，没有自身 tmux pane。它只读发现 `@ope
 测试适配器只用于可重复控制审批和 tmux 故障；不冒充真实模型证据。独立验证由主代理统一安排，本分支不自称独立复审通过。未验证 Worker 被 SIGKILL 后的陈旧显示回收；正常结束/退出会清除，崩溃遗留状态需后续 Worker 启动重新发布。窗口格式设置是当时继承格式的本地副本，后续全局格式变化不会自动穿透本地覆盖；显式窗口格式新编辑会保留。
 
 原始资料保留于 `/home/sky/.local/state/openagentx/validation/2026-10-07-tmux-work-spinner/`，脱敏副本及 SHA-256 [manifest](evidence/manifest.json)入库；[源码/工件绑定](evidence/source-artifact.json)固定全部修改产品源码的逐文件哈希及候选二进制 SHA-256。三个自有隔离 fixture 已按其保存的 PID/starttime 与原生命周期关闭，证据保留；正式六域与默认 tmux 服务器未操作。
+
+## 正式安装与最终显示
+
+上文“正式环境未操作”是独立功能验收阶段的边界。统一部署已于 2026-10-07 11:25 UTC 完成。[独立正式核验](../2026-10-07-resume-timeout/evidence/deployment01/independent-verification.json)在11:29 UTC观察到 OpenAgentX 为 running、其余五域 idle；六域原窗口名称及定位保持，current/non-current 格式均有后缀，OAX session 的刷新间隔为1秒。17个普通窗口当时没有 spinner 装饰；正式部署未采普通窗前快照，历史不变的证据来自独立隔离 tmux 验收，不能混称正式前后对比。
+
+实际六域窗口的两个格式均为：
+
+```tmux
+# 每个已核对身份的受管窗口使用这两个值；不是全局覆盖普通窗口。
+window-status-format "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+window-status-current-format "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+# 仅 OAX 所在 session：status-interval 1
+```
+
+helper 实现如下，由 CLI 直接 `fmt.Print(fleet.SpinnerFrame(time.Now()))`：
+
+```go
+func SpinnerFrame(now time.Time) string {
+    frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+    return " " + frames[now.Unix()%int64(len(frames))]
+}
+```
+
+两个 Agent 的 running/idle 相互独立，动画帧使用共同系统时钟，同秒通常相同；不额外建立每个 Agent 的动画状态。采用 `@oax_state` 作为显示投影，而工作状态直接取自既有 RunManager/Runtime 回调，避免建立第二套调度或状态账本。
+
+## 手动检查
+
+1. 打开已有 OAX session，空闲领域名后没有 spinner。在一个领域终端提交明确获准的短任务，执行过程中观察每秒转动，切换到其他窗口后原窗口仍显示。
+2. 在第二个领域提交另一条独立获准任务；观察两个窗口同时显示，其中一个完成后仅其 spinner 消失。普通窗口内容与名称不变。
+3. 等任务答复或现有命令/文件审批等待时，确认 spinner 消失。不要为了显示测试重放旧业务指令。
+4. 只读查看准确窗口映射及状态：
+
+```sh
+tmux list-windows -t OAX -F '#{window_id} #{window_name} #{@openagentx_agent_id} #{@oax_state}'
+tmux show-options -w -A -v -t @8 window-status-format
+tmux show-options -w -A -v -t @8 window-status-current-format
+tmux show-options -v -t OAX status-interval
+openagentx tmux-spinner
+```
+
+`@8` 是本批 OpenAgentX 原窗口，其他机器先按第一条输出定位。tmux 不存在、窗口关闭、执行失败等故障只在隔离测试环境验证；已有真实 tmux/Worker 集成及回归证据覆盖，不破坏正式终端做测试。

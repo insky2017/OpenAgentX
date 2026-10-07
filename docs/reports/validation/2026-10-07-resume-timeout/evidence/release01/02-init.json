@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release",
+    "init"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nOwner  \r\nConfirm owner  \r\nInitialized OpenAgentX owner \"owner\" and Organization \"default\"\r\n"
+}

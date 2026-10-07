@@ -1,0 +1,120 @@
+{
+  "at": "2026-10-07T10:57:18.902869+00:00",
+  "path": "/api/observe/v1/tasks/task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+      "version": 2,
+      "target_agent_id": "terminal-e2e-302fd7",
+      "organization_id": "default",
+      "dispatch_mode": "direct",
+      "intent": "mutation",
+      "content": "在当前隔离目录仅执行一次 python3 release-proof.py，等待同一个工具进程正常结束，不要后台脱离、重复启动、修改脚本或使用子代理。它会等待15秒并写入精确验收文件。完成后回复 OAX_RELEASE_PROOF_OK；若收到一条补充要求，只按补充要求继续，不重复之前的工具。",
+      "status": "running",
+      "outcome_state": "pending",
+      "created_at": "2026-10-07T10:57:03.832006452Z",
+      "updated_at": "2026-10-07T10:57:03.835989921Z"
+    },
+    "messages": [
+      {
+        "id": "message-1311d7ba-31c8-4937-a291-2b324460e68b",
+        "version": 1,
+        "sequence": 1,
+        "task_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+        "sender_agent_id": "",
+        "sender_principal_id": "human-owner-a11b3dfa-d79e-4df6-8311-e802ab13ff9f",
+        "target_agent_id": "terminal-e2e-302fd7",
+        "kind": "instruction",
+        "content": "在当前隔离目录仅执行一次 python3 release-proof.py，等待同一个工具进程正常结束，不要后台脱离、重复启动、修改脚本或使用子代理。它会等待15秒并写入精确验收文件。完成后回复 OAX_RELEASE_PROOF_OK；若收到一条补充要求，只按补充要求继续，不重复之前的工具。",
+        "created_at": "2026-10-07T10:57:03.832006452Z"
+      }
+    ],
+    "run_attempts": [
+      {
+        "instructions_sha256": "7005aac6b1e74fc23d457fc3810b400a8a1ccfd0e78eaace0b0b902de8a07014",
+        "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/profile/workers/identities/terminal-e2e-302fd7.role.md",
+        "run_id": "run-6ad95e27-40ac-4605-97d0-3f3a4cb9f5e7",
+        "task_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+        "agent_id": "terminal-e2e-302fd7",
+        "version": 1,
+        "status": "starting",
+        "worker_instance_id": "worker-01f4d653-1db0-4f46-8987-2a8af7d63ed0",
+        "worker_generation": 1,
+        "execution_spec_version": 1,
+        "adapter_id": "codex-app-server",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "reasoning_mode": "backend_default",
+        "network_mode": "inherit",
+        "network_policy_version": 1,
+        "network_binding_revision": 1,
+        "turn_result_state": "not_recorded",
+        "started_at": "2026-10-07T10:57:03.835989921Z",
+        "created_at": "2026-10-07T10:57:03.835989921Z",
+        "updated_at": "2026-10-07T10:57:16.51752436Z"
+      }
+    ],
+    "events": [
+      {
+        "sequence": 29,
+        "event_id": "event-355cc040-5404-42dc-8e3c-139d41284dae",
+        "aggregate_type": "task",
+        "aggregate_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+        "event_type": "task.created",
+        "created_at": "2026-10-07T10:57:03.832006452Z"
+      },
+      {
+        "sequence": 31,
+        "event_id": "event-task-b1af515a-e083-4256-baf3-f446f020e1cc",
+        "aggregate_type": "task",
+        "aggregate_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+        "event_type": "task.running",
+        "created_at": "2026-10-07T10:57:03.837800211Z"
+      },
+      {
+        "sequence": 32,
+        "event_id": "event-run-bcae3fbf-73be-4c29-82ec-249a1c0215f4",
+        "aggregate_type": "run_attempt",
+        "aggregate_id": "run-6ad95e27-40ac-4605-97d0-3f3a4cb9f5e7",
+        "event_type": "run_attempt.started",
+        "created_at": "2026-10-07T10:57:03.837806603Z"
+      },
+      {
+        "sequence": 34,
+        "event_id": "event-runtime-7cf09413-961c-4580-82f5-33f1240d51b9",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-6ad95e27-40ac-4605-97d0-3f3a4cb9f5e7",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-07T10:57:05.270734172Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "Codex completed userMessage",
+          "has_output": true
+        }
+      },
+      {
+        "sequence": 36,
+        "event_id": "event-runtime-f4950b0e-e208-45bf-98c0-72617f8d665f",
+        "aggregate_type": "runtime",
+        "aggregate_id": "run-6ad95e27-40ac-4605-97d0-3f3a4cb9f5e7",
+        "event_type": "runtime.turn.output",
+        "created_at": "2026-10-07T10:57:10.080712085Z",
+        "output": {
+          "stage": "output",
+          "status": "running",
+          "text": "我会仅执行一次指定命令，并等待同一进程正常结束。\n",
+          "has_output": true
+        }
+      }
+    ],
+    "snapshot_sequence": 37,
+    "live_after_sequence": 37,
+    "has_older_events": false,
+    "has_more_live_events": false
+  }
+}

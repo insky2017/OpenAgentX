@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "at": "2026-10-07T11:25:35.025869+00:00",
+  "binary_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+  "thread_preserved": [
+    "openagentx",
+    "rhythm",
+    "pay-service",
+    "quote-service",
+    "identity-service",
+    "oneaxe-voice"
+  ],
+  "restarted_services": [
+    "openagentx.service",
+    "openagentx-worker@openagentx.service",
+    "openagentx-worker@rhythm.service",
+    "openagentx-worker@pay-service.service",
+    "openagentx-worker@quote-service.service",
+    "openagentx-worker@identity-service.service",
+    "openagentx-worker@oneaxe-voice.service"
+  ],
+  "production_model_task_executed": false,
+  "isolated_model_e2e_required": true
+}

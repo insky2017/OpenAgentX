@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:55:38.343469+00:00",
+  "event": "resume-timeout-rollout-20261007",
+  "prompt_sha256": "a23fe7e61ed665878b1cf7e664b0e48708546573685d796b94d80810b2b892f8",
+  "workspace": "/home/sky/docs",
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "sandbox": "danger-full-access",
+  "task_scope": "authorized-maintenance",
+  "thread_before": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "operator_pid": 56362,
+  "finished_at": "2026-10-07T11:27:24.993790+00:00",
+  "exit_code": 0,
+  "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "final_exists": true,
+  "turn_completed": true,
+  "status": "completed"
+}

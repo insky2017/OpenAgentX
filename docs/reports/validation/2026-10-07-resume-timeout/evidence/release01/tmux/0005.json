@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:56:48.142653+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-4e0d5d025f28",
+    "respawn-pane",
+    "-k",
+    "-t",
+    "@0.0",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/native.sh"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

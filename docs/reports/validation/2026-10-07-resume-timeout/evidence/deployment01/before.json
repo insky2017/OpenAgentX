@@ -1,0 +1,741 @@
+{
+  "at": "2026-10-07T10:58:11.438824+00:00",
+  "binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+  "states": {
+    "openagentx": {
+      "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "state": "running",
+      "task_id": "task-4826edc8-9eda-40cb-87e8-7367210ad632",
+      "run_id": "run-f8ea5e77-a77a-45bf-9dba-7ebaf43caf62",
+      "pid": 2488243
+    },
+    "rhythm": {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "state": "running",
+      "task_id": "task-fa8f1340-28ff-4ad7-a4e2-e98a1add8afb",
+      "run_id": "run-68b4bd19-1e1d-4257-a2ef-d1aeab9334c1",
+      "pid": 2488251
+    },
+    "pay-service": {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "state": "restored_unconfirmed",
+      "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+      "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+      "pid": 2488244
+    },
+    "quote-service": {
+      "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "state": "idle",
+      "task_id": "task-0bf1ba00-d06c-4203-b349-491f8b6e6334",
+      "run_id": "run-92fc2fd1-a499-472b-9038-69bcde19d8c6",
+      "pid": 2488377
+    },
+    "identity-service": {
+      "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "state": "restored_unconfirmed",
+      "task_id": "task-96942a10-68f6-425c-bdb1-bcf009fae25a",
+      "run_id": "run-5c7699e8-4286-4d38-b2b2-252647f23196",
+      "pid": 2488433
+    },
+    "oneaxe-voice": {
+      "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "state": "restored_unconfirmed",
+      "task_id": "task-0ed31dd5-78e5-450a-bf57-e62bd314f4e9",
+      "run_id": "run-899810e3-80f6-40fb-88f0-8b58499f0b06",
+      "pid": 2488521
+    }
+  },
+  "panes": {
+    "openagentx": {
+      "window": "@8",
+      "pane": "%11",
+      "pid": 31132,
+      "dead": false,
+      "name": "openagentx"
+    },
+    "oneaxe-voice": {
+      "window": "@11",
+      "pane": "%17",
+      "pid": 32093,
+      "dead": false,
+      "name": "oneaxe-voice"
+    },
+    "rhythm": {
+      "window": "@28",
+      "pane": "%55",
+      "pid": 2531349,
+      "dead": false,
+      "name": "rhythm"
+    },
+    "pay-service": {
+      "window": "@27",
+      "pane": "%54",
+      "pid": 1129591,
+      "dead": false,
+      "name": "pay-service"
+    },
+    "quote-service": {
+      "window": "@3",
+      "pane": "%3",
+      "pid": 30767,
+      "dead": false,
+      "name": "quote-service"
+    },
+    "identity-service": {
+      "window": "@30",
+      "pane": "%60",
+      "pid": 3525429,
+      "dead": false,
+      "name": "identity-service"
+    }
+  },
+  "workers": {
+    "openagentx": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": false,
+        "reason": "正在工作，新任务将排队"
+      },
+      "agent_id": "openagentx",
+      "mode": "normal",
+      "generation": 2,
+      "worker_status": "online",
+      "worker_instance_id": "worker-05529e0b-550b-44f1-b93b-fb1947a85dfb",
+      "last_heartbeat_at": "2026-10-07T10:58:06.808113298Z",
+      "lease_until": "2026-10-07T10:58:36.808113298Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "active_run": {
+        "run_id": "run-f8ea5e77-a77a-45bf-9dba-7ebaf43caf62",
+        "task_id": "task-4826edc8-9eda-40cb-87e8-7367210ad632",
+        "status": "starting",
+        "worker_instance_id": "worker-05529e0b-550b-44f1-b93b-fb1947a85dfb",
+        "worker_generation": 2,
+        "started_at": "2026-10-07T10:57:44.211140728Z",
+        "updated_at": "2026-10-07T10:58:06.808113298Z"
+      },
+      "suggested_task": {
+        "task_id": "task-4826edc8-9eda-40cb-87e8-7367210ad632",
+        "version": 2,
+        "status": "running",
+        "intent": "mutation",
+        "summary": {
+          "omitted": true,
+          "sha256": "7c9691192f1b73408bbe4c0cb6d00db94375ca9d8fce0a0d5985e7a5178f083f"
+        },
+        "updated_at": "2026-10-07T10:57:44.211140728Z"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 485371
+    },
+    "rhythm": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": false,
+        "reason": "正在工作，新任务将排队"
+      },
+      "agent_id": "rhythm",
+      "mode": "normal",
+      "generation": 3,
+      "worker_status": "online",
+      "worker_instance_id": "worker-10d989db-1776-4a32-ba8c-3366da8c4d78",
+      "last_heartbeat_at": "2026-10-07T10:58:06.919306824Z",
+      "lease_until": "2026-10-07T10:58:36.919306824Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "active_run": {
+        "run_id": "run-68b4bd19-1e1d-4257-a2ef-d1aeab9334c1",
+        "task_id": "task-fa8f1340-28ff-4ad7-a4e2-e98a1add8afb",
+        "status": "starting",
+        "worker_instance_id": "worker-10d989db-1776-4a32-ba8c-3366da8c4d78",
+        "worker_generation": 3,
+        "started_at": "2026-10-07T10:52:33.674072534Z",
+        "updated_at": "2026-10-07T10:58:06.919306824Z"
+      },
+      "suggested_task": {
+        "task_id": "task-fa8f1340-28ff-4ad7-a4e2-e98a1add8afb",
+        "version": 2,
+        "status": "running",
+        "intent": "mutation",
+        "summary": {
+          "omitted": true,
+          "sha256": "02a76bca694681bc8f9c51461ec06a52b5722e40b52dc3f1033ef1df7bb68fb5"
+        },
+        "updated_at": "2026-10-07T10:52:33.674072534Z"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 485371
+    },
+    "pay-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "pay-service",
+      "mode": "normal",
+      "generation": 5,
+      "worker_status": "online",
+      "worker_instance_id": "worker-3bdf6a0d-484b-4042-be38-ccaf0ac30e9d",
+      "last_heartbeat_at": "2026-10-07T10:58:06.917530288Z",
+      "lease_until": "2026-10-07T10:58:36.917530288Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 485371
+    },
+    "quote-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "quote-service",
+      "mode": "normal",
+      "generation": 54,
+      "worker_status": "online",
+      "worker_instance_id": "worker-673f557a-ea7b-4f9d-b6b9-ba2e325273c6",
+      "last_heartbeat_at": "2026-10-07T10:58:06.948733118Z",
+      "lease_until": "2026-10-07T10:58:36.948733118Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 485371
+    },
+    "identity-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "identity-service",
+      "mode": "normal",
+      "generation": 2,
+      "worker_status": "online",
+      "worker_instance_id": "worker-7c223b8f-e8f7-4c10-9dc8-8cd3c08ba952",
+      "last_heartbeat_at": "2026-10-07T10:58:06.959614049Z",
+      "lease_until": "2026-10-07T10:58:36.959614049Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 485371
+    },
+    "oneaxe-voice": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "oneaxe-voice",
+      "mode": "normal",
+      "generation": 2,
+      "worker_status": "online",
+      "worker_instance_id": "worker-cde95c76-3e40-44c5-8226-acdc83e8cc76",
+      "last_heartbeat_at": "2026-10-07T10:58:06.994792396Z",
+      "lease_until": "2026-10-07T10:58:36.994792396Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 485371
+    }
+  },
+  "service_pids": {
+    "openagentx.service": "2487665",
+    "openagentx-worker@openagentx.service": "2488110",
+    "openagentx-worker@rhythm.service": "2488124",
+    "openagentx-worker@pay-service.service": "2488127",
+    "openagentx-worker@quote-service.service": "2488139",
+    "openagentx-worker@identity-service.service": "2488152",
+    "openagentx-worker@oneaxe-voice.service": "2488164"
+  },
+  "service_artifacts": {
+    "openagentx.service": {
+      "pid": 2487665,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:10 CST"
+    },
+    "openagentx-worker@openagentx.service": {
+      "pid": 2488110,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@rhythm.service": {
+      "pid": 2488124,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@pay-service.service": {
+      "pid": 2488127,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@quote-service.service": {
+      "pid": 2488139,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@identity-service.service": {
+      "pid": 2488152,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@oneaxe-voice.service": {
+      "pid": 2488164,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    }
+  },
+  "model_settings": {
+    "openagentx": {
+      "agent_id": "openagentx",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "effort": "",
+      "version": 0,
+      "models": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna"
+      ],
+      "model_efforts": {
+        "gpt-5.6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-5.6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-5.6-terra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-astra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6.1-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      }
+    },
+    "rhythm": {
+      "agent_id": "rhythm",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "effort": "",
+      "version": 0,
+      "models": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna"
+      ],
+      "model_efforts": {
+        "gpt-5.6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-5.6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-5.6-terra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-astra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6.1-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      }
+    },
+    "pay-service": {
+      "agent_id": "pay-service",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "effort": "",
+      "version": 0,
+      "models": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna"
+      ],
+      "model_efforts": {
+        "gpt-5.6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-5.6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-5.6-terra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-astra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6.1-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      }
+    },
+    "quote-service": {
+      "agent_id": "quote-service",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "effort": "",
+      "version": 0,
+      "models": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna"
+      ],
+      "model_efforts": {
+        "gpt-5.6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-5.6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-5.6-terra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-astra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6.1-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      }
+    },
+    "identity-service": {
+      "agent_id": "identity-service",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "effort": "",
+      "version": 0,
+      "models": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna"
+      ],
+      "model_efforts": {
+        "gpt-5.6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-5.6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-5.6-terra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-astra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6.1-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      }
+    },
+    "oneaxe-voice": {
+      "agent_id": "oneaxe-voice",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "effort": "",
+      "version": 0,
+      "models": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna"
+      ],
+      "model_efforts": {
+        "gpt-5.6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-5.6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-5.6-terra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-astra": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6-luna": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "gpt-6-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ],
+        "gpt-6.1-sol": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max",
+          "ultra"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-07T10:57:18.928205+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-4e0d5d025f28",
+    "show-options",
+    "-w",
+    "-A",
+    "-v",
+    "-t",
+    "@0",
+    "window-status-format"
+  ],
+  "returncode": 0,
+  "stdout": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release' tmux-spinner),}\n",
+  "stderr": ""
+}

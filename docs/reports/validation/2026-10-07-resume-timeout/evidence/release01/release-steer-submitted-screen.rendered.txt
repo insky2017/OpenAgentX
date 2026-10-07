@@ -1,0 +1,43 @@
+/init - create an AGENTS.md file with instructions for Codex
+  /status - show current session configuration
+  /permissions - choose what Codex is allowed to do
+  /model - choose what model and reasoning effort to use
+  /review - review any changes and find issues
+
+
+› OpenAgentX frozen Agent role (profile 1, SHA-256 7005aac6b1e74fc23d457fc3810b400a8a1ccfd0e78eaace0b0b902de8a07014):
+  You are an isolated OpenAgentX native model settings verification Agent. Work only in this assigned workspace. Execute exact requested local tools and write
+  only requested proof files. Never read credentials, message other Agents, alter services, inspect unrelated paths, or act on production. Do not spawn
+  subagents. When asked to confirm role/workspace reply exactly: OAX-TERMINAL-ROLE terminal-e2e-302fd7 WORKSPACE=/home/sky/.local/state/openagentx/
+  validation/2026-10-07-resume-timeout/release01/workspace
+
+
+  OpenAgentX Task ID: task-21af843d-f6ea-4a3d-9dcd-35041079a7df
+  Run ID: run-898bdf92-ab3f-400b-932c-42f8b61bfa85
+
+  请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。
+
+  Follow-up:
+  请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。
+
+
+• OAX-TERMINAL-ROLE terminal-e2e-302fd7 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/workspace
+
+  Worked for 9s • 18:56
+
+
+› 在当前隔离目录仅执行一次 python3 release-proof.py，等待同一个工具进程正常结束，不要后台脱离、重复启动、修改脚本或使用子代理。它会等待15秒并写入精确验收文件。
+  完成后回复 OAX_RELEASE_PROOF_OK；若收到一条补充要求，只按补充要求继续，不重复之前的工具。
+
+
+• 我会仅执行一次指定命令，并等待同一进程正常结束。
+
+◦ Working (15s • esc to interrupt) · 1 background terminal running · /ps to view · /stop to close
+
+• Messages to be submitted after next tool call (press esc to interrupt and send immediately)
+  ↳ After the current tool returns, execute exactly once python3 release-steer.py in this same workspace. Do not repeat any previous command. Then reply
+    OAX_RELEASE_PROOF_OK RELEASE_STEER_OK.
+
+› Ask Codex to do anything
+
+  GPT-6-Astra default · ~/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/workspace · 01a11602-443c-7dd3-8db…  ⚠ 2 warnings · f2 to view

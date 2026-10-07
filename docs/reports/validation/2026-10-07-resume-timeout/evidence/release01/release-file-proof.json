@@ -1,0 +1,10 @@
+{
+  "primary": {
+    "sha256": "c94aee88e43e10eb97ae59665199cfe348ca6c7f4420a9343aeac94416741eec",
+    "bytes_exact": true
+  },
+  "steer": {
+    "checked": true,
+    "bytes_exact": true
+  }
+}

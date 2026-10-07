@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:57:18.939182+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-4e0d5d025f28",
+    "send-keys",
+    "-t",
+    "@0.0",
+    "-l",
+    "After the current tool returns, execute exactly once python3 release-steer.py in this same workspace. Do not repeat any previous command. Then reply OAX_RELEASE_PROOF_OK RELEASE_STEER_OK."
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

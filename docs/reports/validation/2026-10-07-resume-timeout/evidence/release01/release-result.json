@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "at": "2026-10-07T10:57:55.470471+00:00",
+  "source_commit": "c35d70260eeb39bec83c457ff1acf06269ddf2be",
+  "binary_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+  "harness_sha256": "d80e97995ef7dd8ed45573036e2409acd66018bc403f98ebef179400c1cc0100",
+  "production_touched": false,
+  "agent_id": "terminal-e2e-302fd7",
+  "thread_id": "01a11602-443c-7dd3-8dbe-e07c1c94bcae",
+  "task_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+  "run_id": "run-6ad95e27-40ac-4605-97d0-3f3a4cb9f5e7",
+  "task_status": "uncertain",
+  "completion_basis": "",
+  "runtime_status": "succeeded",
+  "frozen_timeout": 0,
+  "frozen_deadline": null,
+  "steer_checked": true,
+  "pending_ui_clear": true,
+  "native_foreground_alive": true,
+  "canonical_indicator_running_then_idle": true,
+  "scope": "Final artifact isolated native input, one mutation Run, exact local effects, Journal, settings reads, same thread and idle terminal. Task uncertainty is retained.",
+  "not_tested": [
+    "production deployment",
+    "business workflows",
+    "31-minute duration"
+  ]
+}

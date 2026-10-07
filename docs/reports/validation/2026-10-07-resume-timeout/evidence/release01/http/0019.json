@@ -1,0 +1,74 @@
+{
+  "at": "2026-10-07T10:57:50.415874+00:00",
+  "path": "/api/console/v1/agents/terminal-e2e-302fd7/tasks/task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+  "method": "GET",
+  "request": null,
+  "status": 200,
+  "response": {
+    "task": {
+      "completion_basis": "",
+      "task_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+      "version": 4,
+      "agent_id": "terminal-e2e-302fd7",
+      "status": "uncertain",
+      "intent": "mutation",
+      "content": "在当前隔离目录仅执行一次 python3 release-proof.py，等待同一个工具进程正常结束，不要后台脱离、重复启动、修改脚本或使用子代理。它会等待15秒并写入精确验收文件。完成后回复 OAX_RELEASE_PROOF_OK；若收到一条补充要求，只按补充要求继续，不重复之前的工具。",
+      "result": "OAX_RELEASE_PROOF_OK RELEASE_STEER_OK",
+      "error": "business_effect_unverified",
+      "outcome_state": "available",
+      "created_at": "2026-10-07T10:57:03.832006452Z",
+      "updated_at": "2026-10-07T10:57:45.781564846Z"
+    },
+    "work_delivery": {
+      "mailbox_item_id": "mailbox-593b6c56-89d9-45e8-842c-2f4cd86afdad",
+      "kind": "task",
+      "lane": "work",
+      "state": "accepted",
+      "attempts": 1,
+      "worker_instance_id": "worker-01f4d653-1db0-4f46-8987-2a8af7d63ed0",
+      "lease_until": "2026-10-07T10:57:26.518567011Z",
+      "created_at": "2026-10-07T10:57:03.832006452Z",
+      "accepted_at": "2026-10-07T10:57:03.835989921Z"
+    },
+    "latest_run": {
+      "instructions_sha256": "7005aac6b1e74fc23d457fc3810b400a8a1ccfd0e78eaace0b0b902de8a07014",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/profile/workers/identities/terminal-e2e-302fd7.role.md",
+      "run_id": "run-6ad95e27-40ac-4605-97d0-3f3a4cb9f5e7",
+      "task_id": "task-86b2c202-c1c6-4a7b-9125-26c98f82f927",
+      "agent_id": "terminal-e2e-302fd7",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-01f4d653-1db0-4f46-8987-2a8af7d63ed0",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX_RELEASE_PROOF_OK RELEASE_STEER_OK",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-07T10:57:03.835989921Z",
+      "finished_at": "2026-10-07T10:57:45.781564846Z",
+      "created_at": "2026-10-07T10:57:03.835989921Z",
+      "updated_at": "2026-10-07T10:57:45.781564846Z"
+    },
+    "latest_message": {
+      "message_id": "message-729dc102-35f7-5c30-bc61-d733ae80b078",
+      "version": 1,
+      "sequence": 2,
+      "kind": "supplement",
+      "content": "After the current tool returns, execute exactly once python3 release-steer.py in this same workspace. Do not repeat any previous command. Then reply OAX_RELEASE_PROOF_OK RELEASE_STEER_OK.",
+      "created_at": "2026-10-07T10:57:19.352423151Z"
+    },
+    "snapshot_sequence": 52
+  }
+}

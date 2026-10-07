@@ -1,0 +1,29 @@
+{"at": "2026-10-07T10:58:11.528006+00:00", "step": "graceful_stop_queued", "agent": "openagentx", "generation": 2}
+{"at": "2026-10-07T10:58:11.536958+00:00", "step": "graceful_stop_queued", "agent": "rhythm", "generation": 3}
+{"at": "2026-10-07T10:58:11.545760+00:00", "step": "graceful_stop_queued", "agent": "pay-service", "generation": 5}
+{"at": "2026-10-07T10:58:11.553468+00:00", "step": "graceful_stop_queued", "agent": "quote-service", "generation": 54}
+{"at": "2026-10-07T10:58:11.557999+00:00", "step": "graceful_stop_queued", "agent": "identity-service", "generation": 2}
+{"at": "2026-10-07T10:58:11.572631+00:00", "step": "graceful_stop_queued", "agent": "oneaxe-voice", "generation": 2}
+{"at": "2026-10-07T11:22:38.877072+00:00", "step": "all_workers_offline"}
+{"at": "2026-10-07T11:22:38.997510+00:00", "step": "binary_installed", "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"}
+{"at": "2026-10-07T11:22:39.004048+00:00", "step": "timeout_configured", "agent": "openagentx", "timeout": "0s", "backup_sha256": "9f75fdde07bc56f480936d0cb17b7ca3e6646c215b15894c71df11fb592a5aa3"}
+{"at": "2026-10-07T11:22:39.008944+00:00", "step": "timeout_configured", "agent": "rhythm", "timeout": "0s", "backup_sha256": "d62459a33aaa6f6978a5d1815f7a06a2dc4de998687589df7cfb7bab515aaf75"}
+{"at": "2026-10-07T11:22:39.013683+00:00", "step": "timeout_configured", "agent": "pay-service", "timeout": "0s", "backup_sha256": "9acc2f9139439514e42a4be93c31a0390e81a464554273841d6534e9ee62b256"}
+{"at": "2026-10-07T11:22:39.018318+00:00", "step": "timeout_configured", "agent": "quote-service", "timeout": "0s", "backup_sha256": "30accab13ff5fb893cc73192856df2d64ec793ec3a04cd58eddaff261e75a75a"}
+{"at": "2026-10-07T11:22:39.023007+00:00", "step": "timeout_configured", "agent": "identity-service", "timeout": "0s", "backup_sha256": "6eceef481f3b7764930137b04bdc57b87d03f118ac9acd1fb60c04e9d5ff32cf"}
+{"at": "2026-10-07T11:22:39.027722+00:00", "step": "timeout_configured", "agent": "oneaxe-voice", "timeout": "0s", "backup_sha256": "6261af245c1ff96b77a1a62dcea97adb3c225d01fef72449e7b788848461abe8"}
+{"at": "2026-10-07T11:22:39.085464+00:00", "step": "daemon_restarted"}
+{"at": "2026-10-07T11:23:06.596292+00:00", "step": "network_generation_ready", "agent": "openagentx", "generation": 3}
+{"at": "2026-10-07T11:23:25.986563+00:00", "step": "network_generation_ready", "agent": "rhythm", "generation": 4}
+{"at": "2026-10-07T11:23:46.421944+00:00", "step": "network_generation_ready", "agent": "pay-service", "generation": 6}
+{"at": "2026-10-07T11:24:06.866449+00:00", "step": "network_generation_ready", "agent": "quote-service", "generation": 55}
+{"at": "2026-10-07T11:24:26.278336+00:00", "step": "network_generation_ready", "agent": "identity-service", "generation": 3}
+{"at": "2026-10-07T11:24:46.696587+00:00", "step": "network_generation_ready", "agent": "oneaxe-voice", "generation": 3}
+{"at": "2026-10-07T11:24:52.034572+00:00", "step": "native_reopened", "agent": "openagentx", "pane": "%11"}
+{"at": "2026-10-07T11:25:02.820224+00:00", "step": "native_reopened", "agent": "rhythm", "pane": "%55"}
+{"at": "2026-10-07T11:25:08.243655+00:00", "step": "native_reopened", "agent": "pay-service", "pane": "%54"}
+{"at": "2026-10-07T11:25:13.586781+00:00", "step": "native_reopened", "agent": "quote-service", "pane": "%3"}
+{"at": "2026-10-07T11:25:18.921032+00:00", "step": "native_reopened", "agent": "identity-service", "pane": "%60"}
+{"at": "2026-10-07T11:25:24.362430+00:00", "step": "native_reopened", "agent": "oneaxe-voice", "pane": "%17"}
+{"at": "2026-10-07T11:25:35.026143+00:00", "step": "deployment_verified"}
+{"at": "2026-10-07T11:25:35.029657+00:00", "step": "verification_queued", "task_id": "task-7d8c2265-010a-4c45-b6e3-67b61041a497"}

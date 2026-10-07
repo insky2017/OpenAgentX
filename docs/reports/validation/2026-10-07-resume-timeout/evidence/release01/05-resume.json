@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/openagentx-release",
+    "agent",
+    "resume",
+    "terminal-e2e-302fd7",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-resume-timeout/release01/password",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nAgent terminal-e2e-302fd7 服务在线，当前代 1 网络已应用。\r\n终端真实验收 (terminal-e2e-302fd7) · 可开始工作\r\n  当前：无\r\n  最近：暂无结果\r\n  打开：openagentx agent open terminal-e2e-302fd7\r\n  恢复：openagentx agent resume terminal-e2e-302fd7\r\n\r\n"
+}

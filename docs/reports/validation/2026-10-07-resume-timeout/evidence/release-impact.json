@@ -1,0 +1,9 @@
+{
+  "status": "APPROVED",
+  "long_test_binary_sha256": "a87538ee747f2d57428e05f163a613933537d687ea2d613137e2c84e0a9f6f5b",
+  "release_binary_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+  "runtime_deadline_source_unchanged": true,
+  "long_test_commit": "15f787f3b7b8f04e3fc3fcad975846ec101e0daa",
+  "release_commit": "c35d70260eeb39bec83c457ff1acf06269ddf2be",
+  "review": "Runtime/domain/planner source byte-equivalent; final differences are CLI legacy identity support, display-only Worker callback, native input ID receipt projection and ops/evidence. Exact final artifact native smoke is required separately."
+}

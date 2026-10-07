@@ -1,0 +1,50 @@
+{
+  "pane": {
+    "window": "@30",
+    "pane": "%60",
+    "pid": 209621,
+    "dead": false,
+    "name": "identity-service"
+  },
+  "processes": [
+    {
+      "pid": 209621,
+      "ppid": 7674,
+      "start": "59074188",
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "identity-service",
+        "--native",
+        "--db",
+        "/home/sky/.openagentx/data/openagentx.db",
+        "--socket",
+        "/home/sky/.openagentx/run/openagentx.sock",
+        "--file",
+        "/home/sky/.openagentx/fleet.yaml",
+        "--worker-dir",
+        "/home/sky/.openagentx/workers",
+        "--credentials",
+        "/home/sky/.openagentx/credentials.json"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 209822,
+      "ppid": 209621,
+      "start": "59074287",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-3226902145/bridge.sock",
+        "--no-alt-screen",
+        "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69"
+      ],
+      "comm": "codex"
+    }
+  ],
+  "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+  "bridge_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+}

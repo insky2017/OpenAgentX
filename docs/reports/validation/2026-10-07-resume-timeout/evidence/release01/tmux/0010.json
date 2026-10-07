@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:57:03.420667+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-4e0d5d025f28",
+    "send-keys",
+    "-t",
+    "@0.0",
+    "-l",
+    "在当前隔离目录仅执行一次 python3 release-proof.py，等待同一个工具进程正常结束，不要后台脱离、重复启动、修改脚本或使用子代理。它会等待15秒并写入精确验收文件。完成后回复 OAX_RELEASE_PROOF_OK；若收到一条补充要求，只按补充要求继续，不重复之前的工具。"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

@@ -1,0 +1,785 @@
+{
+  "at": "2026-10-07T11:29:46.680445+00:00",
+  "script_sha256": "30a1ac0636597664677da6d9a764dc378dc473fb28818529e133f6ad608fa81b",
+  "binary_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+  "read_only": true,
+  "snapshot": {
+    "at": "2026-10-07T11:29:47.124232+00:00",
+    "binary_sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+    "states": {
+      "openagentx": {
+        "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+        "state": "running",
+        "task_id": "task-c7a21368-74e1-4f26-b425-77b39aff94ea",
+        "run_id": "run-69e12973-bde8-45a4-952d-46d3b3dfe73a",
+        "pid": 189950
+      },
+      "rhythm": {
+        "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+        "state": "restored_unconfirmed",
+        "task_id": "task-fa8f1340-28ff-4ad7-a4e2-e98a1add8afb",
+        "run_id": "run-68b4bd19-1e1d-4257-a2ef-d1aeab9334c1",
+        "pid": 189944
+      },
+      "pay-service": {
+        "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+        "state": "restored_unconfirmed",
+        "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+        "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+        "pid": 189946
+      },
+      "quote-service": {
+        "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+        "state": "restored_unconfirmed",
+        "task_id": "task-0bf1ba00-d06c-4203-b349-491f8b6e6334",
+        "run_id": "run-92fc2fd1-a499-472b-9038-69bcde19d8c6",
+        "pid": 189977
+      },
+      "identity-service": {
+        "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+        "state": "restored_unconfirmed",
+        "task_id": "task-96942a10-68f6-425c-bdb1-bcf009fae25a",
+        "run_id": "run-5c7699e8-4286-4d38-b2b2-252647f23196",
+        "pid": 190135
+      },
+      "oneaxe-voice": {
+        "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+        "state": "restored_unconfirmed",
+        "task_id": "task-0ed31dd5-78e5-450a-bf57-e62bd314f4e9",
+        "run_id": "run-899810e3-80f6-40fb-88f0-8b58499f0b06",
+        "pid": 190213
+      }
+    },
+    "panes": {
+      "openagentx": {
+        "window": "@8",
+        "pane": "%11",
+        "pid": 202702,
+        "dead": false,
+        "name": "openagentx"
+      },
+      "oneaxe-voice": {
+        "window": "@11",
+        "pane": "%17",
+        "pid": 211866,
+        "dead": false,
+        "name": "oneaxe-voice"
+      },
+      "rhythm": {
+        "window": "@28",
+        "pane": "%55",
+        "pid": 203909,
+        "dead": false,
+        "name": "rhythm"
+      },
+      "pay-service": {
+        "window": "@27",
+        "pane": "%54",
+        "pid": 205708,
+        "dead": false,
+        "name": "pay-service"
+      },
+      "quote-service": {
+        "window": "@3",
+        "pane": "%3",
+        "pid": 207800,
+        "dead": false,
+        "name": "quote-service"
+      },
+      "identity-service": {
+        "window": "@30",
+        "pane": "%60",
+        "pid": 209621,
+        "dead": false,
+        "name": "identity-service"
+      }
+    },
+    "workers": {
+      "openagentx": {
+        "agent_id": "openagentx",
+        "generation": 3,
+        "worker_status": "online",
+        "worker_instance_id": "worker-6c2e07da-4811-442c-9318-8a523a762208",
+        "last_heartbeat_at": "2026-10-07T11:29:45.18324668Z",
+        "lease_until": "2026-10-07T11:30:15.18324668Z",
+        "backend_health": {
+          "codex": "healthy"
+        },
+        "readiness": {
+          "ready": true,
+          "can_start_now": false,
+          "reason": "正在工作，新任务将排队"
+        },
+        "active_run": {
+          "run_id": "run-69e12973-bde8-45a4-952d-46d3b3dfe73a",
+          "task_id": "task-c7a21368-74e1-4f26-b425-77b39aff94ea",
+          "status": "starting",
+          "worker_instance_id": "worker-6c2e07da-4811-442c-9318-8a523a762208",
+          "worker_generation": 3,
+          "started_at": "2026-10-07T11:23:06.281848756Z",
+          "updated_at": "2026-10-07T11:29:45.18324668Z"
+        }
+      },
+      "rhythm": {
+        "agent_id": "rhythm",
+        "generation": 4,
+        "worker_status": "online",
+        "worker_instance_id": "worker-4ac97c8a-c37e-40ec-9c12-41ef4ab95016",
+        "last_heartbeat_at": "2026-10-07T11:29:45.163908236Z",
+        "lease_until": "2026-10-07T11:30:15.163908236Z",
+        "backend_health": {
+          "codex": "healthy"
+        },
+        "readiness": {
+          "ready": true,
+          "can_start_now": true,
+          "reason": "可开始工作"
+        },
+        "active_run": null
+      },
+      "pay-service": {
+        "agent_id": "pay-service",
+        "generation": 6,
+        "worker_status": "online",
+        "worker_instance_id": "worker-ac7c60d8-e780-4c75-a8fb-6eada0e5c1f4",
+        "last_heartbeat_at": "2026-10-07T11:29:45.186954913Z",
+        "lease_until": "2026-10-07T11:30:15.186954913Z",
+        "backend_health": {
+          "codex": "healthy"
+        },
+        "readiness": {
+          "ready": true,
+          "can_start_now": true,
+          "reason": "可开始工作"
+        },
+        "active_run": null
+      },
+      "quote-service": {
+        "agent_id": "quote-service",
+        "generation": 55,
+        "worker_status": "online",
+        "worker_instance_id": "worker-8d2d4066-ba7b-410f-85ba-b7bac19b7917",
+        "last_heartbeat_at": "2026-10-07T11:29:45.208204828Z",
+        "lease_until": "2026-10-07T11:30:15.208204828Z",
+        "backend_health": {
+          "codex": "healthy"
+        },
+        "readiness": {
+          "ready": true,
+          "can_start_now": true,
+          "reason": "可开始工作"
+        },
+        "active_run": null
+      },
+      "identity-service": {
+        "agent_id": "identity-service",
+        "generation": 3,
+        "worker_status": "online",
+        "worker_instance_id": "worker-d5525ad7-b724-4235-b681-8cf409c691d3",
+        "last_heartbeat_at": "2026-10-07T11:29:45.213709463Z",
+        "lease_until": "2026-10-07T11:30:15.213709463Z",
+        "backend_health": {
+          "codex": "healthy"
+        },
+        "readiness": {
+          "ready": true,
+          "can_start_now": true,
+          "reason": "可开始工作"
+        },
+        "active_run": null
+      },
+      "oneaxe-voice": {
+        "agent_id": "oneaxe-voice",
+        "generation": 3,
+        "worker_status": "online",
+        "worker_instance_id": "worker-1122ed42-a50d-42ef-9797-fd29db8affb0",
+        "last_heartbeat_at": "2026-10-07T11:29:45.23228212Z",
+        "lease_until": "2026-10-07T11:30:15.23228212Z",
+        "backend_health": {
+          "codex": "healthy"
+        },
+        "readiness": {
+          "ready": true,
+          "can_start_now": true,
+          "reason": "可开始工作"
+        },
+        "active_run": null
+      }
+    },
+    "service_pids": {
+      "openagentx.service": "189741",
+      "openagentx-worker@openagentx.service": "189847",
+      "openagentx-worker@rhythm.service": "189860",
+      "openagentx-worker@pay-service.service": "189863",
+      "openagentx-worker@quote-service.service": "189876",
+      "openagentx-worker@identity-service.service": "189893",
+      "openagentx-worker@oneaxe-voice.service": "189902"
+    },
+    "service_artifacts": {
+      "openagentx.service": {
+        "pid": 189741,
+        "executable": "/home/sky/.local/bin/openagentx",
+        "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+        "started_at": "Wed 2026-10-07 19:22:39 CST"
+      },
+      "openagentx-worker@openagentx.service": {
+        "pid": 189847,
+        "executable": "/home/sky/.local/bin/openagentx",
+        "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+        "started_at": "Wed 2026-10-07 19:22:44 CST"
+      },
+      "openagentx-worker@rhythm.service": {
+        "pid": 189860,
+        "executable": "/home/sky/.local/bin/openagentx",
+        "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+        "started_at": "Wed 2026-10-07 19:22:44 CST"
+      },
+      "openagentx-worker@pay-service.service": {
+        "pid": 189863,
+        "executable": "/home/sky/.local/bin/openagentx",
+        "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+        "started_at": "Wed 2026-10-07 19:22:44 CST"
+      },
+      "openagentx-worker@quote-service.service": {
+        "pid": 189876,
+        "executable": "/home/sky/.local/bin/openagentx",
+        "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+        "started_at": "Wed 2026-10-07 19:22:44 CST"
+      },
+      "openagentx-worker@identity-service.service": {
+        "pid": 189893,
+        "executable": "/home/sky/.local/bin/openagentx",
+        "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+        "started_at": "Wed 2026-10-07 19:22:44 CST"
+      },
+      "openagentx-worker@oneaxe-voice.service": {
+        "pid": 189902,
+        "executable": "/home/sky/.local/bin/openagentx",
+        "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69",
+        "started_at": "Wed 2026-10-07 19:22:44 CST"
+      }
+    }
+  },
+  "service_active": {
+    "openagentx.service": "active",
+    "openagentx-worker@openagentx.service": "active",
+    "openagentx-worker@rhythm.service": "active",
+    "openagentx-worker@pay-service.service": "active",
+    "openagentx-worker@quote-service.service": "active",
+    "openagentx-worker@identity-service.service": "active",
+    "openagentx-worker@oneaxe-voice.service": "active"
+  },
+  "agents": {
+    "openagentx": {
+      "generation_before": 2,
+      "generation_now": 3,
+      "generation_after": 3,
+      "bridge": [
+        {
+          "pid": 202702,
+          "start": "59071499",
+          "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+        }
+      ],
+      "native_view_pids": [
+        202890
+      ],
+      "timeout": [
+        "0s"
+      ],
+      "worker_config_sha256": "f1ec0ec3368b391e5cce975069e6914a2af4466f901ad925627d29be7502f195",
+      "model_settings": {
+        "agent_id": "openagentx",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      },
+      "model_preferences_before": {
+        "agent_id": "openagentx",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      }
+    },
+    "rhythm": {
+      "generation_before": 3,
+      "generation_now": 4,
+      "generation_after": 4,
+      "bridge": [
+        {
+          "pid": 203909,
+          "start": "59072574",
+          "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+        }
+      ],
+      "native_view_pids": [
+        204094
+      ],
+      "timeout": [
+        "0s"
+      ],
+      "worker_config_sha256": "ad70077aaa160b33556cb3a94795bd7f156585ef7c3dcb5bb88db697c35e0034",
+      "model_settings": {
+        "agent_id": "rhythm",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      },
+      "model_preferences_before": {
+        "agent_id": "rhythm",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      }
+    },
+    "pay-service": {
+      "generation_before": 5,
+      "generation_now": 6,
+      "generation_after": 6,
+      "bridge": [
+        {
+          "pid": 205708,
+          "start": "59073111",
+          "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+        }
+      ],
+      "native_view_pids": [
+        205922
+      ],
+      "timeout": [
+        "0s"
+      ],
+      "worker_config_sha256": "9d845eb21cfd54b0a887ab816a3e8ab561345e034557e95bcbae3e6422dd12d0",
+      "model_settings": {
+        "agent_id": "pay-service",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      },
+      "model_preferences_before": {
+        "agent_id": "pay-service",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      }
+    },
+    "quote-service": {
+      "generation_before": 54,
+      "generation_now": 55,
+      "generation_after": 55,
+      "bridge": [
+        {
+          "pid": 207800,
+          "start": "59073653",
+          "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+        }
+      ],
+      "native_view_pids": [
+        208001
+      ],
+      "timeout": [
+        "0s"
+      ],
+      "worker_config_sha256": "f9d8cc574af2c6c06e5dd27cd0ff6ee18875efd7b2957640486efe53cef12e51",
+      "model_settings": {
+        "agent_id": "quote-service",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      },
+      "model_preferences_before": {
+        "agent_id": "quote-service",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      }
+    },
+    "identity-service": {
+      "generation_before": 2,
+      "generation_now": 3,
+      "generation_after": 3,
+      "bridge": [
+        {
+          "pid": 209621,
+          "start": "59074188",
+          "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+        }
+      ],
+      "native_view_pids": [
+        209822
+      ],
+      "timeout": [
+        "0s"
+      ],
+      "worker_config_sha256": "36cb228018e74303c94e81f5e9e4dab5763331848f311c1835a559bc1a730d2f",
+      "model_settings": {
+        "agent_id": "identity-service",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      },
+      "model_preferences_before": {
+        "agent_id": "identity-service",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      }
+    },
+    "oneaxe-voice": {
+      "generation_before": 2,
+      "generation_now": 3,
+      "generation_after": 3,
+      "bridge": [
+        {
+          "pid": 211866,
+          "start": "59074722",
+          "sha256": "259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69"
+        }
+      ],
+      "native_view_pids": [
+        212077
+      ],
+      "timeout": [
+        "0s"
+      ],
+      "worker_config_sha256": "6564316e0fb2181326f8ea983ef565142e57d9ddd99e241ea06f547ba2615320",
+      "model_settings": {
+        "agent_id": "oneaxe-voice",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      },
+      "model_preferences_before": {
+        "agent_id": "oneaxe-voice",
+        "backend_id": "codex",
+        "model": "gpt-6-astra",
+        "effort": "",
+        "version": 0
+      }
+    }
+  },
+  "current_run": {
+    "task_id": "task-c7a21368-74e1-4f26-b425-77b39aff94ea",
+    "latest_run": {
+      "run_id": "run-69e12973-bde8-45a4-952d-46d3b3dfe73a",
+      "status": "starting",
+      "started_at": "2026-10-07T11:23:06.281848756Z",
+      "finished_at": null,
+      "deadline_at": null,
+      "worker_generation": 3
+    },
+    "frozen": {
+      "timeout": 0,
+      "deadline_at": "0001-01-01T00:00:00Z",
+      "read_only_sqlite": true
+    }
+  },
+  "windows": [
+    {
+      "session": "OAX",
+      "window": "@2",
+      "name": "overview",
+      "managed": "1",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "OAX",
+      "window": "@8",
+      "name": "openagentx",
+      "managed": "1",
+      "agent": "openagentx",
+      "state": "running",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+    },
+    {
+      "session": "OAX",
+      "window": "@11",
+      "name": "oneaxe-voice",
+      "managed": "1",
+      "agent": "oneaxe-voice",
+      "state": "idle",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+    },
+    {
+      "session": "OAX",
+      "window": "@28",
+      "name": "rhythm",
+      "managed": "1",
+      "agent": "rhythm",
+      "state": "idle",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+    },
+    {
+      "session": "OAX",
+      "window": "@27",
+      "name": "pay-service",
+      "managed": "1",
+      "agent": "pay-service",
+      "state": "idle",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+    },
+    {
+      "session": "OAX",
+      "window": "@3",
+      "name": "quote-service",
+      "managed": "1",
+      "agent": "quote-service",
+      "state": "idle",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+    },
+    {
+      "session": "OAX",
+      "window": "@30",
+      "name": "identity-service",
+      "managed": "1",
+      "agent": "identity-service",
+      "state": "idle",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }#{?#{==:#{@oax_state},running},#('/home/sky/.local/bin/openagentx' tmux-spinner),}"
+    },
+    {
+      "session": "OAX",
+      "window": "@9",
+      "name": "api_proxy",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "OAX",
+      "window": "@10",
+      "name": "colab",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@0",
+      "name": "卢麒元投资追踪",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@13",
+      "name": "steadyFlow",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@14",
+      "name": "ASR服务",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@15",
+      "name": "简历",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@16",
+      "name": "sub2api",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@17",
+      "name": "CLIProxyAPI",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@18",
+      "name": "公众号",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@19",
+      "name": "金油比",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@20",
+      "name": "砂砾生物",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@21",
+      "name": "thsauto",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@22",
+      "name": "量化趋势",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@23",
+      "name": "zsh",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@24",
+      "name": "mgraftcp",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "bridge",
+      "window": "@29",
+      "name": "zsh",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    },
+    {
+      "session": "sunly",
+      "window": "@25",
+      "name": "zsh",
+      "managed": "",
+      "agent": "",
+      "state": "",
+      "format": "#I:#W#{?window_flags,#{window_flags}, }",
+      "current_format": "#I:#W#{?window_flags,#{window_flags}, }"
+    }
+  ],
+  "status_interval": "1",
+  "boundaries": [
+    "No deployment, restart, input injection, task submission, or business replay performed.",
+    "Current ordinary windows have no spinner; deployment before.json has no ordinary-window baseline, so historical unchanged claim is not established by this evidence.",
+    "No new 31-minute or native pending-message E2E run; prior exact-artifact acceptance remains separately recorded.",
+    "This is point-in-time deployment verification, not full lifecycle acceptance."
+  ],
+  "status": "PASS",
+  "checks": {
+    "installed_artifact": true,
+    "seven_live_service_artifacts": true,
+    "seven_services_active": true,
+    "openagentx_healthy_ready": true,
+    "openagentx_generation": true,
+    "openagentx_thread_pane_preserved": true,
+    "openagentx_native_artifact": true,
+    "openagentx_timeout_zero": true,
+    "openagentx_model_preferences_preserved": true,
+    "rhythm_healthy_ready": true,
+    "rhythm_generation": true,
+    "rhythm_thread_pane_preserved": true,
+    "rhythm_native_artifact": true,
+    "rhythm_timeout_zero": true,
+    "rhythm_model_preferences_preserved": true,
+    "pay-service_healthy_ready": true,
+    "pay-service_generation": true,
+    "pay-service_thread_pane_preserved": true,
+    "pay-service_native_artifact": true,
+    "pay-service_timeout_zero": true,
+    "pay-service_model_preferences_preserved": true,
+    "quote-service_healthy_ready": true,
+    "quote-service_generation": true,
+    "quote-service_thread_pane_preserved": true,
+    "quote-service_native_artifact": true,
+    "quote-service_timeout_zero": true,
+    "quote-service_model_preferences_preserved": true,
+    "identity-service_healthy_ready": true,
+    "identity-service_generation": true,
+    "identity-service_thread_pane_preserved": true,
+    "identity-service_native_artifact": true,
+    "identity-service_timeout_zero": true,
+    "identity-service_model_preferences_preserved": true,
+    "oneaxe-voice_healthy_ready": true,
+    "oneaxe-voice_generation": true,
+    "oneaxe-voice_thread_pane_preserved": true,
+    "oneaxe-voice_native_artifact": true,
+    "oneaxe-voice_timeout_zero": true,
+    "oneaxe-voice_model_preferences_preserved": true,
+    "current_formal_run_no_deadline": true,
+    "six_managed_spinner_formats": true,
+    "ordinary_windows_currently_no_spinner": true,
+    "spinner_matches_active_run": true,
+    "status_interval_one_second": true
+  },
+  "finished_at": "2026-10-07T11:29:48.185207+00:00"
+}

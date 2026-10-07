@@ -2,7 +2,7 @@
 
 ## 范围与验收
 
-本批结果：已实际消费的补充输入从原生 Codex TUI 待发送区移除，避免中断时把旧输入恢复成草稿、继而合并再提交。仅修改 Native Bridge 的输入确认投影；Task/Run/Message、Worker、业务内容与控制面 CAS/幂等入口仍为原权威路径。没有安装、重启或操作生产 pane，没有手工重发真实用户消息，没有直接修改数据库。
+本批结果：已实际消费的补充输入从原生 Codex TUI 待发送区移除，避免中断时把旧输入恢复成草稿、继而合并再提交。仅修改 Native Bridge 的输入确认投影；Task/Run/Message、Worker、业务内容与控制面 CAS/幂等入口仍为原权威路径。功能独立验收时未操作正式环境；现已由统一批次完成安装与六域原生 Bridge 重开，没有手工重发真实用户消息或直接修改数据库。
 
 验收包含：真实三条补充输入进入同一 Run、消费后待发送区清空、随后中断及新输入不重复执行旧消息；黄金协议集成覆盖 API 回执竞态、同 RPC 重试、回读确认、同文不同 ID 不误去重、正常输出继续流动。独立联合候选复验由主交付记录，不将本报告扩大为完整 ADR 验收。
 
@@ -34,3 +34,11 @@ Codex 0.160.1 TUI 用提交的 `clientUserMessageId` 匹配 `userMessage.clientI
 在同 thread **手工重开 view** 后，新输入写出 FRESH_OK，旧 ACK_A/B/C 仍各只有一行；三个 Task（初始化、主测试、新输入），原测试单 Run、三条 supplement。fresh Run succeeded，但 Task 仍 uncertain/business_effect_unverified，文件效果已独立核验，没有改写控制面结论。首次计数误把 instruction 包含在 supplements，纠正后只读复核；一次收集器文件名录入错误仅影响读取。实际原驱动和后续重开步骤均保留，最终整理的驱动未整套重跑。
 
 候选 SHA-256 `1c410ea963f54ce6006044bf3802a4932fbaf59684fa452dcc0ccf60b34c450f`，最终产品源码重建字节一致。两个隔离 profile 已安全停止，证据保留。正式环境未安装或重启。联合候选自然完成与继续输入由主批次独立复验。
+
+## 联合工件与正式部署
+
+上段未安装声明仅指独立功能验收阶段。修复以 `c35d702` 整合，最终联合工件 SHA-256 为 `259ffc489f5a85a369c5ab40577fbba762846b15d18cc2e7aeaed195cb833e69`；2026-10-07 11:25 UTC 正式安装并重启 daemon、六域 Worker、六原生 Bridge，原 thread/window/pane 保持。见[统一交付](../2026-10-07-resume-timeout/DELIVERY.md)及[独立进程核验](../2026-10-07-resume-timeout/evidence/deployment01/independent-verification.json)。
+
+最终工件在独立真实 TUI 中完成一次工具任务及一次 steer，单 Run、两份精确文件，消费后的 pending 区清空，原终端自然回到可输入状态，无需重开 view。见[联合结果](../2026-10-07-resume-timeout/evidence/release01/release-result.json)、[正式 Task/Journal](../2026-10-07-resume-timeout/evidence/release01/release-final-task.json)及[最终画面](../2026-10-07-resume-timeout/evidence/release01/release-final-screen.rendered.txt)。该流程验证正常完成，不替代前述取消路径的限制。
+
+用户观察“30分钟到后旧消息又弹回来”与两个机制相符：总截止触发中断，未正确确认的旧输入随中断恢复为草稿。已经证实确认错配和实际重复送达；不能把每一次历史弹回都断定为同一超时原因。此次同时取消默认总截止并修复输入确认，两项证据独立保留。已送达的历史内容不会从线程历史中删除；本批也不按文字去重合法的新输入。
