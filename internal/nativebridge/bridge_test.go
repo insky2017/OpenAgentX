@@ -31,6 +31,7 @@ type bridgeControlFixture struct {
 	snapshots  int
 	onSnapshot func()
 	onDispatch func()
+	onSteer    func()
 }
 
 func (c *bridgeControlFixture) Dispatch(_ context.Context, r api.CreateTaskRequest) (api.CreateTaskResponse, error) {
@@ -55,9 +56,13 @@ func (c *bridgeControlFixture) TaskSnapshot(_ context.Context, agent, task strin
 }
 func (c *bridgeControlFixture) Steer(_ context.Context, _ string, r api.CreateMessageRequest) (api.CreateMessageResponse, error) {
 	c.mu.Lock()
-	defer c.mu.Unlock()
 	c.steers = append(c.steers, r)
-	return api.CreateMessageResponse{}, nil
+	onSteer := c.onSteer
+	c.mu.Unlock()
+	if onSteer != nil {
+		onSteer()
+	}
+	return api.CreateMessageResponse{MessageID: "message-owned"}, nil
 }
 func (c *bridgeControlFixture) Cancel(_ context.Context, _ string, r api.CancelTaskRequest) (api.CancelTaskResponse, error) {
 	c.mu.Lock()

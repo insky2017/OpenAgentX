@@ -1,0 +1,75 @@
+{
+  "read_at": "2026-10-07T10:34:16.320777+00:00",
+  "access": "SQLite mode=ro, selected message fields; rollout read-only; no writes",
+  "aggregate": {
+    "message_id": "message-90e9b10c-79d9-5b6b-9e52-b838ee182316",
+    "task_id": "task-0c680070-7bed-4594-9ad5-50351f966561",
+    "created_at": "2026-10-07T10:27:32.424506034Z",
+    "bytes": 6644,
+    "sha256": "1c742a8805c88221534e9bc4eefbe98266f28726a30b59d933ad047dc0e61cf2"
+  },
+  "earlier_messages_fully_contained": [
+    {
+      "message_id": "message-50ad3911-2ff8-5a2f-846a-68180b046047",
+      "created_at": "2026-10-07T10:08:11.258286419Z",
+      "bytes": 66,
+      "sha256": "58cdf094eb711735bf6b6cffc7645dd6ef7e63d283c76d56552ee0139ce2bd5f"
+    },
+    {
+      "message_id": "message-415ac836-4039-57a4-b3a3-6ddb75567f74",
+      "created_at": "2026-10-07T10:17:02.220809574Z",
+      "bytes": 246,
+      "sha256": "6d7ddceaeec96b705cace39fbaede8b2ef18892156fc3efca709b71c6c509970"
+    },
+    {
+      "message_id": "message-a03993a0-1f40-563a-b09d-5f0bef5cd4f6",
+      "created_at": "2026-10-07T10:18:14.933005689Z",
+      "bytes": 333,
+      "sha256": "001a13386987154218f40b996e9acf6cfe2f592444d361ebab6a6e9756da1f50"
+    },
+    {
+      "message_id": "message-0ccb801e-2e66-5af0-9537-2103ff357734",
+      "created_at": "2026-10-07T10:19:02.857405443Z",
+      "bytes": 78,
+      "sha256": "1af9c6b89a3534b72a2cbcf82b5eba916a8efbe8f1f4489325e54327270f959d"
+    },
+    {
+      "message_id": "message-63cf6aa3-2f3f-54b5-967a-42ef22e2433d",
+      "created_at": "2026-10-07T10:20:11.003510472Z",
+      "bytes": 188,
+      "sha256": "6942d5a3f49400d885061243c36a1636b967f73d24fa05d6f83d8513dc6f7317"
+    },
+    {
+      "message_id": "message-6390eebb-aba3-5d6c-95c6-01d27b623eb0",
+      "created_at": "2026-10-07T10:21:24.738767616Z",
+      "bytes": 4457,
+      "sha256": "3b5de595a192bc48bedf38f2a0164359f27daba8a76b98e4729b725e30e64916"
+    },
+    {
+      "message_id": "message-1520be05-35a4-5715-9feb-fcd917bb5981",
+      "created_at": "2026-10-07T10:22:04.346805652Z",
+      "bytes": 42,
+      "sha256": "dca465a6f6054beff6898d48c457e4d7bfa35788856d19ab5e1a8fdd423b8341"
+    },
+    {
+      "message_id": "message-270d441a-6e88-5cdb-b373-65d428d394bb",
+      "created_at": "2026-10-07T10:23:19.660922297Z",
+      "bytes": 979,
+      "sha256": "118c98f4fea9712169975116a4ff6fd7c84afb70793dceead949a968387784a7"
+    },
+    {
+      "message_id": "message-20561602-9877-590b-900a-0c7cb02e36bd",
+      "created_at": "2026-10-07T10:25:17.334146902Z",
+      "bytes": 141,
+      "sha256": "81e6cde66316fe471c7401f9a84743f82f93d1e721771cc7d39e115d12bc7e42"
+    }
+  ],
+  "runtime_commit": {
+    "timestamp": "2026-10-07T10:27:39.558Z",
+    "event_type": "item_completed",
+    "item_type": "UserMessage",
+    "client_id": "message-90e9b10c-79d9-5b6b-9e52-b838ee182316",
+    "turn_id": "01a115e6-43f4-73f2-a55e-be17fe941865",
+    "ordinal": 19619
+  }
+}

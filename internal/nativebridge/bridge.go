@@ -64,6 +64,8 @@ type control interface {
 }
 type bridge struct {
 	settingsMu                                                        sync.Mutex
+	inputMu                                                           sync.Mutex
+	inputClientIDs                                                    map[string]string
 	control                                                           control
 	agentID, organizationID, backendID, threadID, statePath, endpoint string
 }
@@ -234,6 +236,7 @@ func (b *bridge) serve(w http.ResponseWriter, r *http.Request) {
 	defer unsubscribe()
 	var writeMu sync.Mutex
 	send := func(m codex.RPCMessage) error {
+		m = b.projectInputReceipts(m)
 		writeMu.Lock()
 		defer writeMu.Unlock()
 		conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
@@ -392,6 +395,9 @@ func (b *bridge) requestWithDispatch(ctx context.Context, upstream *codex.RPCCli
 		for {
 			state, err := readState(filepath.Join(filepath.Dir(b.statePath), "tasks", receipt.TaskID+".json"))
 			if err == nil && state.TaskID == receipt.TaskID && state.ThreadID == b.threadID && state.TurnID != "" {
+				b.inputMu.Lock()
+				b.rememberInputClientID(state.RunID, p.ClientUserMessageID)
+				b.inputMu.Unlock()
 				return rawResult(map[string]any{"turn": map[string]any{"id": state.TurnID, "status": "inProgress", "items": []any{}, "error": nil}})
 			}
 			select {
@@ -434,7 +440,15 @@ func (b *bridge) requestWithDispatch(ctx context.Context, upstream *codex.RPCCli
 		if err != nil {
 			return nil, err
 		}
-		_, err = b.control.Steer(ctx, state.TaskID, api.CreateMessageRequest{Meta: api.CommandMeta{IdempotencyKey: idempotencyKey, ExpectedVersion: snapshot.Task.Version}, Content: content})
+		// A fast Worker can commit the input before this API call returns.
+		// Hold only input receipt projection until its authoritative Message ID
+		// can be correlated with the foreground client's submission identity.
+		b.inputMu.Lock()
+		receipt, err := b.control.Steer(ctx, state.TaskID, api.CreateMessageRequest{Meta: api.CommandMeta{IdempotencyKey: idempotencyKey, ExpectedVersion: snapshot.Task.Version}, Content: content})
+		if err == nil {
+			b.rememberInputClientID(receipt.MessageID, p.ClientUserMessageID)
+		}
+		b.inputMu.Unlock()
 		if err != nil {
 			return nil, err
 		}

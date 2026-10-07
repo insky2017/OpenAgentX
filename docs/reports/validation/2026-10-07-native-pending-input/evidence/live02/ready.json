@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-07T10:39:57.557837+00:00",
+  "panes": [
+    {
+      "session": "OAX",
+      "window": "@0",
+      "name": "terminal-e2e-540f37",
+      "pane": "%0",
+      "index": "0",
+      "pid": "4126902",
+      "dead": "0",
+      "title": "sky"
+    }
+  ],
+  "options": {
+    "@0": "@openagentx_agent_id terminal-e2e-540f37\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on"
+  },
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-672910471/server.sock",
+    "thread_id": "01a115f2-9d5b-7420-84c9-0f4c9562d4f0",
+    "turn_id": "01a115f2-9e5c-7240-8ad9-5d0d6714f751",
+    "task_id": "task-c7104700-7722-41fd-8a7d-89a8d55fcd16",
+    "run_id": "run-733d5ba1-e5eb-4aa6-bf76-b9ebbb1be87b",
+    "state": "idle",
+    "pid": 4119192,
+    "updated_at": "2026-10-07T10:39:53.844299846Z"
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 4117959,
+      "starttime": "58797831"
+    },
+    {
+      "label": "worker",
+      "pid": 4119105,
+      "starttime": "58798880"
+    }
+  ],
+  "active_window": "@0"
+}

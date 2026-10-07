@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-07T10:49:09.642365+00:00",
+  "status": "PASS_INPUT_ACK_WITH_MANUAL_VIEW_REOPEN",
+  "binary_sha256": "1c410ea963f54ce6006044bf3802a4932fbaf59684fa452dcc0ccf60b34c450f",
+  "task_count": 3,
+  "steer_count": 3,
+  "steered_run_count": 1,
+  "receipts": "ACK_A\nACK_B\nACK_C\n",
+  "fresh": "FRESH_OK",
+  "fresh_task_status": "uncertain",
+  "fresh_run_status": "succeeded",
+  "task_uncertainty": "business_effect_unverified retained; fixture independently checks requested file",
+  "manual_same_thread_view_reopen": true,
+  "automatic_post_cancel_reconnect": "FAILED_CANCEL_FALLBACK_REPLACED_ENDPOINT",
+  "production_touched": false
+}

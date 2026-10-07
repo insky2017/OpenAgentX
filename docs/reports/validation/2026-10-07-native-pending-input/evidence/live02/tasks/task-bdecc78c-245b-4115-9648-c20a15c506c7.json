@@ -1,0 +1,182 @@
+{
+  "task": {
+    "completion_basis": "",
+    "id": "task-bdecc78c-245b-4115-9648-c20a15c506c7",
+    "version": 3,
+    "target_agent_id": "terminal-e2e-540f37",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "Execute one local python3 command that writes exactly FRESH_OK to fresh.txt. Do not append to receipts.txt and do not repeat earlier commands. Reply FRESH_OK.",
+    "status": "uncertain",
+    "result": "FRESH_OK",
+    "error": "business_effect_unverified",
+    "outcome_state": "available",
+    "created_at": "2026-10-07T10:45:59.393365781Z",
+    "updated_at": "2026-10-07T10:47:33.826058367Z"
+  },
+  "messages": [
+    {
+      "id": "message-8a2a47ec-5c71-430d-80c1-784c8723cb2f",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-bdecc78c-245b-4115-9648-c20a15c506c7",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-e90bc12b-b57d-46e0-b329-127ed502eb35",
+      "target_agent_id": "terminal-e2e-540f37",
+      "kind": "instruction",
+      "content": "Execute one local python3 command that writes exactly FRESH_OK to fresh.txt. Do not append to receipts.txt and do not repeat earlier commands. Reply FRESH_OK.",
+      "created_at": "2026-10-07T10:45:59.393365781Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-07T11:15:59.396821188Z",
+      "instructions_sha256": "6749e38fc01fec97747e02b90ebb925ec203cf6c1af60be75cc543ec7bc95e71",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-pending-input/live02/profile/workers/identities/terminal-e2e-540f37.role.md",
+      "run_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "task_id": "task-bdecc78c-245b-4115-9648-c20a15c506c7",
+      "agent_id": "terminal-e2e-540f37",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-1b121685-2ffc-4ede-8333-6e9e741c20d3",
+      "worker_generation": 1,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6-astra",
+      "reasoning_mode": "backend_default",
+      "network_mode": "inherit",
+      "network_policy_version": 1,
+      "network_binding_revision": 1,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "FRESH_OK",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-07T10:45:59.396821188Z",
+      "finished_at": "2026-10-07T10:47:33.826058367Z",
+      "created_at": "2026-10-07T10:45:59.396821188Z",
+      "updated_at": "2026-10-07T10:47:33.826058367Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 99,
+      "event_id": "event-7b203e7b-b726-489b-ab26-4bd045114a77",
+      "aggregate_type": "task",
+      "aggregate_id": "task-bdecc78c-245b-4115-9648-c20a15c506c7",
+      "event_type": "task.created",
+      "created_at": "2026-10-07T10:45:59.393365781Z"
+    },
+    {
+      "sequence": 101,
+      "event_id": "event-task-d3ea0b46-7225-467e-ae35-4e515a06e6bb",
+      "aggregate_type": "task",
+      "aggregate_id": "task-bdecc78c-245b-4115-9648-c20a15c506c7",
+      "event_type": "task.running",
+      "created_at": "2026-10-07T10:45:59.398031986Z"
+    },
+    {
+      "sequence": 102,
+      "event_id": "event-run-6fa92612-f42f-4af1-8df7-c78f86ef27a4",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-07T10:45:59.398038091Z"
+    },
+    {
+      "sequence": 105,
+      "event_id": "event-runtime-55679ff1-d0fd-4d1d-9a81-ce33c8e1f837",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T10:46:01.588477178Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 108,
+      "event_id": "event-runtime-2a1b8d33-2412-4b26-9daa-662e8d658c19",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T10:46:21.924729334Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed reasoning",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 110,
+      "event_id": "event-runtime-834093a5-4c0b-477e-828a-91977dee92b2",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T10:46:38.185727109Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "我将执行本地 python3 命令，将 FRESH_OK 写入 fresh.txt。",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 114,
+      "event_id": "event-runtime-f7160069-a28a-488d-b26a-880847359870",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T10:47:09.466477705Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed commandExecution",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 118,
+      "event_id": "event-runtime-4882768c-b109-4ed4-af3a-1299d209f477",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-07T10:47:33.781223702Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "FRESH_OK",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 120,
+      "event_id": "event-run-b7b7561a-086b-435c-a1ea-44b108f3e830",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-a2fa59b7-1a65-4a12-8e64-380a7e80570c",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-07T10:47:33.826082574Z"
+    },
+    {
+      "sequence": 121,
+      "event_id": "event-task-6822b55c-e57f-4054-ae3d-ec938bed3dc6",
+      "aggregate_type": "task",
+      "aggregate_id": "task-bdecc78c-245b-4115-9648-c20a15c506c7",
+      "event_type": "task.settled",
+      "created_at": "2026-10-07T10:47:33.826085763Z"
+    }
+  ],
+  "snapshot_sequence": 130,
+  "live_after_sequence": 130,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

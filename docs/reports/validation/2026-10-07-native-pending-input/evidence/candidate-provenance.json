@@ -1,0 +1,9 @@
+{
+  "build_base": "f3f1818",
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-07-pending-input/openagentx",
+  "binary_sha256": "1c410ea963f54ce6006044bf3802a4932fbaf59684fa452dcc0ccf60b34c450f",
+  "product_files": {
+    "internal/nativebridge/bridge.go": "8f5e31ac4583d36fad708e9a376bb9bca2dbc80c3fa4ad064a78a64d05270b51",
+    "internal/nativebridge/input_receipts.go": "debdb49f4ff74adce4827966f793b118e6f1ae74391dda9599c1daf512d01b3b"
+  }
+}

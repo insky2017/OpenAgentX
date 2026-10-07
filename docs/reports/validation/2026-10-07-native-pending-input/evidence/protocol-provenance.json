@@ -1,0 +1,29 @@
+{
+  "codex_version": "codex-cli 0.160.1",
+  "official_protocol": "https://developers.openai.com/codex/app-server/",
+  "native_sources": [
+    {
+      "url": "https://raw.githubusercontent.com/openai/codex/rust-v0.160.1/codex-rs/tui/src/chatwidget.rs",
+      "local_source": "/tmp/oax-pending-chatwidget.rs",
+      "sha256": "6b3ace72b6b4e2a24941b27a69ef95c35a7a5e599a730b6ead4233dde6df73d7"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/openai/codex/rust-v0.160.1/codex-rs/tui/src/chatwidget/input_restore.rs",
+      "local_source": "/tmp/oax-pending-input_restore.rs",
+      "sha256": "cf5dabc591fe35780af1e08ce61289b8acf659275dc708af51f5edc696cb91a4"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/openai/codex/rust-v0.160.1/codex-rs/tui/src/chatwidget/input_submission.rs",
+      "local_source": "/tmp/oax-pending-input_submission.rs",
+      "sha256": "5d0485e9bd4f673425ea80d9735484fb3e194072cd02490d8951df03c1028888"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/openai/codex/rust-v0.160.1/codex-rs/tui/src/chatwidget/reconnect.rs",
+      "local_source": "/tmp/oax-pending-reconnect.rs",
+      "sha256": "dff7370d17413d02872aef171c5be167dd52846131d5fb194b3e6e889b506f89"
+    }
+  ],
+  "golden_source": "Codex 0.160.1 thread/items/list read-only on owned current thread; userMessage identity and text replaced; original field shape preserved",
+  "local_golden": "internal/nativebridge/testdata/codex-0.160.1-user-message.json",
+  "source_scope": "TUI compares client ID when present; text fallback only when client ID absent. On interrupt, pending steers merge into restored composer or are resubmitted on Esc."
+}

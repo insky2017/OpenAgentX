@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-10-07T10:41:17.896787971Z",
+  "processes": [
+    {
+      "pid": 4144216,
+      "start_time": 58810547
+    },
+    {
+      "pid": 4119192,
+      "start_time": 58798952
+    },
+    {
+      "pid": 4127759,
+      "start_time": 58801242
+    },
+    {
+      "pid": 4127765,
+      "start_time": 58801243
+    },
+    {
+      "pid": 4127904,
+      "start_time": 58801250
+    },
+    {
+      "pid": 4136086,
+      "start_time": 58803963
+    },
+    {
+      "pid": 4136065,
+      "start_time": 58803956
+    }
+  ],
+  "stopped": true,
+  "thread_id": "01a115f2-9d5b-7420-84c9-0f4c9562d4f0",
+  "turn_id": "01a115f2-d9c4-77a0-bcbf-deb967a0fc70"
+}

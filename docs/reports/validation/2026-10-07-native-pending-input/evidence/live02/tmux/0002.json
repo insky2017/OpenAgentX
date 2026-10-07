@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-07T10:39:42.418200+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-158d051f14d0",
+    "set-option",
+    "-w",
+    "-t",
+    "@0",
+    "pane-base-index",
+    "0"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

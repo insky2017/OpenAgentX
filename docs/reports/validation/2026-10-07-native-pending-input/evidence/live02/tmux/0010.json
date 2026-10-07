@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T10:39:57.729672+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-158d051f14d0",
+    "send-keys",
+    "-t",
+    "@0.0",
+    "-l",
+    "Run exactly one local python3 command that writes started.txt containing STARTED, sleeps 45 seconds, then writes base.txt containing BASE_DONE. After that command, follow any new user input. Do not spawn agents or inspect other paths."
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

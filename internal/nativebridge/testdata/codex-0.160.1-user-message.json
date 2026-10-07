@@ -1,0 +1,15 @@
+{
+  "turnId": "turn-owned",
+  "item": {
+    "type": "userMessage",
+    "id": "item-owned",
+    "clientId": "message-owned",
+    "content": [
+      {
+        "type": "text",
+        "text": "follow up",
+        "text_elements": []
+      }
+    ]
+  }
+}

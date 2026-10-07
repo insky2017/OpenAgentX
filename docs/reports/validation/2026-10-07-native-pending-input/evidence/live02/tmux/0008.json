@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-07T10:39:57.550917+00:00",
+  "argv": [
+    "/usr/bin/tmux",
+    "-f",
+    "/dev/null",
+    "-L",
+    "oax-terminal-158d051f14d0",
+    "show-options",
+    "-w",
+    "-t",
+    "@0"
+  ],
+  "returncode": 0,
+  "stdout": "@openagentx_agent_id terminal-e2e-540f37\n@openagentx_managed 1\nallow-rename off\nautomatic-rename off\npane-base-index 0\npane-border-format \"Codex 受管原生终端 · 后台 Worker 独立运行\"\npane-border-status top\nremain-on-exit on\n",
+  "stderr": ""
+}
