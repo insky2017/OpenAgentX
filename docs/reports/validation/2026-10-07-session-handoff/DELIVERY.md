@@ -3,7 +3,7 @@
 ## 当前状态
 
 - **产品实现与隔离真实验收完成。** 产品提交 `e644511f2763ebe7df40dc31f6efaf7a43067b2b`，固定工件 SHA-256 为 `d3dd1a32311badf5f053fdee2305c49bb84f6cd4138a01fa7810e9cedac241a1`；收尾提交仅包含验证脚本、证据与文档。
-- **已合入本地 main，远端推送受阻。** GitHub 持续返回服务端 `Internal Server Error`，远端仍为 `8d32583`；[提交及失败记录](PUBLICATION.md)。不将本地合入视为已推送。
+- **已合入并推送 main。** 2026-10-08（UTC+8）通过一次性 `127.0.0.1:7898` 代理走 HTTPS，三项待推提交推送成功，远端完整 SHA 已核对为 `8de06a33b4e027794d3f7f59bba69294f7d06751`；本次记录更新另行提交。[代理验证、成功命令及首次失败记录](PUBLICATION.md)。
 - **未安装、未重启正式服务、未切换任何业务 Agent 的 thread。** 本批交付正式入口与已验证源码，生产启用仍需部署支持 schema v7/session_handoff 的 daemon、CLI 与目标 Worker。
 - 2026-10-07 收尾读取的 `~/.local/bin/openagentx` SHA 仍为 `4c448f6e7cdf94ccc4ad1c0c6e5de61ee4a4c3f86d70affa12dda009d5166f39`，不是本批工件。已安装状态与 Git 交付分别记录。
 
