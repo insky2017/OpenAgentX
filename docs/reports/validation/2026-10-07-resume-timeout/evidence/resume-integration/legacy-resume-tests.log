@@ -1,0 +1,32 @@
+=== RUN   TestPreparedRegistrationChecksIdentityOnceAndRejectsChangedInputs
+--- PASS: TestPreparedRegistrationChecksIdentityOnceAndRejectsChangedInputs (0.76s)
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/legacy-manifest-without-identity
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/damaged-receipt
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/stale-marker-and-mutable-timeout
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/mutable-execution-preference
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/principal-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/role-path-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/workspace-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/capability-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/worker-directory-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/empty-role
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/wrong-installation
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/unauthorized
+--- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt (0.80s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/legacy-manifest-without-identity (0.03s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/damaged-receipt (0.03s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/stale-marker-and-mutable-timeout (0.03s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/mutable-execution-preference (0.03s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/principal-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/role-path-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/workspace-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/capability-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/worker-directory-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/empty-role (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/wrong-installation (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/unauthorized (0.01s)
+=== RUN   TestUnregisteredResumeRejectsDamagedReceipt
+--- PASS: TestUnregisteredResumeRejectsDamagedReceipt (0.00s)
+PASS
+ok  	openagentx/internal/cli/fleet	1.595s

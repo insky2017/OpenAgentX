@@ -1,0 +1,21 @@
+{
+  "agent": "pay-service",
+  "before": {
+    "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "state": "restored_unconfirmed",
+    "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+    "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+    "pid": 2488244
+  },
+  "after": {
+    "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "state": "restored_unconfirmed",
+    "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+    "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+    "pid": 2488244
+  },
+  "returncode": 0,
+  "stdout": "Agent pay-service 服务在线，当前代 5 网络已应用。\nPay Service (pay-service) · 可开始工作\n  当前：无\n  最近：我的新身份是 OAX 托管支付领域 Agent **Pay Service**，Agent ID 为 `pay-service`。 我继承的原 Thread ID 为 `01a0e016-d951-77d1-bc7e-d13662f4823…\n  打开：openagentx agent open pay-service\n  恢复：openagentx agent resume pay-service\n\n",
+  "stderr": "",
+  "artifact": "1edc55a8dc4409fa5e522fdd50b6b1b83cc803079f8221e180e8c856f466f3a4"
+}

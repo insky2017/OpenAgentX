@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-07T10:23:56.488952+00:00",
+  "status": "DEPLOYMENT_FAIL_CLOSED_WITH_CHAIN_REQUIREMENTS",
+  "reviewed_script": "scripts/validation/deploy_resume_timeout.py",
+  "script_sha256": "8e9954adeeaef7240c5e99135bf8c8c5327b3ea7f1ada1013fb4662ecbefdd8e",
+  "confirmed": [
+    "Long real E2E status PASS and matching artifact SHA are required before production mutation.",
+    "Graceful stop waits for all workers offline and rejects active/uncertain Runtime; original thread IDs checked.",
+    "Foreground reconnection targets exact original window/pane, verifies old bridge argv and original-thread view, signals only bridge with pidfd, and checks newly running bridge SHA.",
+    "Each worker YAML has private backup, exactly one Codex backend changed to timeout0s, and original bytes checked before atomic replace.",
+    "Recovery does not replay business tasks or silently roll back binary/config; failures remain FAILED."
+  ],
+  "chain_requirements": [
+    "Preflight proof/snapshot failures occur before execute try/except; outer chain must persist failure and enqueue authorized operator followup.",
+    "15f787f long01 artifact differs from candidate after CLI legacy compatibility patch. Reuse requires explicit audited source-equivalence/impact record, both artifact hashes, and no overwriting old proof identity. Current equal-SHA gate correctly blocks unproven substitution.",
+    "Running long01 harness uses invalid SQL WHERE id; actual SQLite schema uses run_id. Preserve original harness failure, then verify the same completed Task/Run with corrected readonly query; do not rerun the model."
+  ],
+  "live_long_fixture_readonly_check": {
+    "run_id": "run-70328703-47e5-43fa-ab72-215a3c024d9a",
+    "observed_status": "starting",
+    "timeout": 0,
+    "deadline_at": "0001-01-01T00:00:00Z",
+    "actual_columns": [
+      "run_id",
+      "started_at",
+      "finished_at"
+    ],
+    "completed": false
+  },
+  "legacy_compatibility": {
+    "status": "PASS",
+    "test_log": "legacy-resume-tests.log",
+    "duration_seconds": 1.595,
+    "source_files": [
+      "internal/cli/fleet/agent_resume_identity.go",
+      "internal/cli/fleet/agent_resume_identity_test.go"
+    ],
+    "boundary": "Missing legacy identity_file uses authenticated same-installation registered profile plus canonical worker/workspace/role validation; present identity remains strictly compared. No identity, receipt, or DB writes."
+  }
+}

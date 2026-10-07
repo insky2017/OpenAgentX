@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-07T10:14:06.588983+00:00",
+  "status": "NO_BLOCKING_FINDINGS_WITHIN_REVIEWED_SCOPE",
+  "reviewer_scope": "Independent review of parent-authored unlimited-timeout product changes; self-review of reviewer-authored registered-resume changes. No production or 31-minute Runtime pass claimed.",
+  "source_sha256": {
+    "internal/cli/fleet/agent.go": "1a5c81d28f5726545f84d931925156f8403bf5dd0a6dd978a02178f10bbba0dc",
+    "internal/cli/fleet/agent_join.go": "c7b79aad9c7418e7af240ff6563b5fcd173d0d84b0dce0b3933b8f6105ca20a6",
+    "internal/cli/fleet/agent_enable.go": "9219c626e52c58170489d5bdb71535d2a8d23b926db99e47dd4becc28a7582f3",
+    "internal/cli/fleet/agent_resume_identity.go": "ac03d0c09fc36aa129fdc566e0815dc9f88767bf301d5a79b3fc432e09266a9f",
+    "internal/cli/worker/command.go": "bad72f74db5ca9b3995eccab8348b15678aafd474a66128d728cf915fc2b5e40",
+    "internal/domain/execution_contract.go": "63dd4e999c54158eb836a146064a3503fd740daf61191139405d50cccb2dd5bb",
+    "internal/controlplane/worker_service.go": "51916bf49fa5f8ae5ebc3432f82f07a7fa019c9c40a70c30adf51fb676373e76",
+    "internal/runtime/spec/resolver.go": "8d21d6b37906da5ac0c3826a289dea88b82af49c5eaa7650a1d7e7c6507ce5f5",
+    "internal/runtime/codex/adapter.go": "7a0d5c4559baef89519588fc46b63d1222e7bcf00f80ec97198bb4f5012219c2",
+    "internal/runtime/codex/turn.go": "972af551de2173301df439520a2c1abadfebbe3c1e82587afed2686e49b81dc3"
+  },
+  "findings": [],
+  "verified_contracts": [
+    "Codex missing or explicit zero timeout remains zero through CLI, worker config, descriptor, planning, ExecutionSpec validation and Runtime context; no new deadline is introduced.",
+    "Positive explicit timeout still freezes DeadlineAt; AGY retains positive-only ExecutionSpec and 30-minute fallback.",
+    "Resolver keeps zero Codex default; finite policy MaxTimeout rejects unlimited execution.",
+    "Runtime uses cancellable parent context when no deadline; explicit frozen deadlines still apply, manual cancellation and existing shutdown/failure paths remain.",
+    "Registered resume requires owner lifecycle authentication and matching daemon/database installation, then exact current principal/org/name/role path/workspace/capabilities and canonical worker configuration. Bootstrap receipts cannot bypass identity checks and no receipt/DB repair is silently performed."
+  ],
+  "tests": [
+    {
+      "log": "controlplane-timeout-tests.log",
+      "result": "PASS",
+      "duration_seconds": 0.53,
+      "scope": "Real SQLite BeginAttempt plus persisted Run; Codex zero, AGY default, existing explicit47s tests"
+    },
+    {
+      "log": "resolver-timeout-tests.log",
+      "result": "PASS",
+      "duration_seconds": 0.004,
+      "scope": "zero default retained; finite policy rejects unlimited; explicit47s retained"
+    }
+  ],
+  "limitations": [
+    "Registered profile stores a role path, not a permanently frozen role-content hash. Current role file must be readable/nonempty; per-Run content freezes remain authoritative.",
+    "Existing running Runs and explicit30m worker configurations retain prior settings until authorized deployment; unlimited default alone does not change them.",
+    "Pay damaged bootstrap receipt can still affect legacy status preparation until separately repaired; resume itself no longer parses it after authenticated identity validation.",
+    "31-minute real Runtime, exact running binary and deployed configuration verification remain with deployment harness."
+  ]
+}

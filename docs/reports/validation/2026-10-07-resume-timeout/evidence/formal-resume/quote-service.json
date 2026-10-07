@@ -1,0 +1,21 @@
+{
+  "agent": "quote-service",
+  "before": {
+    "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+    "state": "idle",
+    "task_id": "task-0bf1ba00-d06c-4203-b349-491f8b6e6334",
+    "run_id": "run-92fc2fd1-a499-472b-9038-69bcde19d8c6",
+    "pid": 2488377
+  },
+  "after": {
+    "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+    "state": "idle",
+    "task_id": "task-0bf1ba00-d06c-4203-b349-491f8b6e6334",
+    "run_id": "run-92fc2fd1-a499-472b-9038-69bcde19d8c6",
+    "pid": 2488377
+  },
+  "returncode": 0,
+  "stdout": "Agent quote-service 服务在线，当前代 54 网络已应用。\nQuote Service (quote-service) · 可开始工作\n  当前：无\n  最近：- 已实现独立只读 CSV 检查器，检查来源、历史遗漏、重复键、数值精度、冲突、日历及聚合/复权计算。 - **72 个正反例均符合预期**，包含 A 股、港股、ETF 真实小样例；损坏数据能被明确拒绝。 - [验收报告](/home/sk…\n  打开：openagentx agent open quote-service\n  恢复：openagentx agent resume quote-service\n\n",
+  "stderr": "",
+  "artifact": "1edc55a8dc4409fa5e522fdd50b6b1b83cc803079f8221e180e8c856f466f3a4"
+}

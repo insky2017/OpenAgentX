@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-07T10:08:42.404033+00:00",
+  "status": "PASS",
+  "source_base": "f3f181812f8dea0d22f5a50f267dd46edc3cf381",
+  "source_dirty": true,
+  "source_sha256": {
+    "internal/cli/fleet/agent.go": "b2432b96c0e0c58f2a0f988e422039cdfea51c87bd8ce46c0c22e9be3cf21ab8",
+    "internal/cli/fleet/agent_join.go": "c7b79aad9c7418e7af240ff6563b5fcd173d0d84b0dce0b3933b8f6105ca20a6",
+    "internal/cli/fleet/agent_enable.go": "9219c626e52c58170489d5bdb71535d2a8d23b926db99e47dd4becc28a7582f3",
+    "internal/cli/fleet/agent_resume_identity.go": "ac03d0c09fc36aa129fdc566e0815dc9f88767bf301d5a79b3fc432e09266a9f",
+    "internal/cli/fleet/agent_resume_identity_test.go": "9b5d1bb4b8fb37f0b2dc069cb0493db1797f41d7297648c3edb548869195a0df",
+    "internal/cli/fleet/agent_join_test.go": "086b1094f8abf38da58d695f76bc3dc724534418e2cca0b9031f1baa38daaf5a"
+  },
+  "scope": "Registered Agent resume identity check and Fleet regression. Real isolated SQLite registration; Console authentication and lifecycle behavior use existing test seams. Production resume and real model execution are not claimed.",
+  "change": "Registered resume verifies active identity/profile in read-only repository, owner lifecycle session, matching installation, canonical Fleet worker path and current identity role/workspace/principal/org/capabilities before ignoring one-time bootstrap receipts. Default execution preferences and timeout are not bootstrap invariants.",
+  "tests": [
+    {
+      "command": "go test ./internal/cli/fleet -run TestRegisteredResume|TestUnregisteredResume|TestAgentJoin|TestPreparedRegistration|TestPreparedEnable|TestAgentResume -count=1",
+      "result": "PASS",
+      "duration_seconds": 1.845
+    },
+    {
+      "command": "go test ./internal/cli/fleet -count=1 -v",
+      "umask": "077",
+      "result": "FAIL_FIXTURE",
+      "log": "fleet-tests.log",
+      "failure": "TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile uses WriteFile(0644), masked to 0600 by inherited umask077."
+    },
+    {
+      "command": "umask 022; go test ./internal/cli/fleet -count=1 -v",
+      "result": "PASS",
+      "duration_seconds": 13.82,
+      "log": "fleet-tests-umask022.log"
+    },
+    {
+      "command": "go build -o /tmp/openagentx-resume-check ./cmd/openagentx",
+      "result": "PASS"
+    }
+  ],
+  "known_boundaries": [
+    "No production service, database, configuration, receipt or registration marker changed by this subtask.",
+    "Current registered role path and readable nonempty contents are validated. AgentProfile has no permanent role-content hash; historical Run hashes are not identity authority.",
+    "No business task replay.",
+    "Bootstrap receipt repair and status behavior for damaged old receipts remain separate from this resume fix."
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-07T10:16:25.868166+00:00",
+  "status": "EVIDENCE_FIXES_REQUIRED_BEFORE_RUN",
+  "script": "scripts/validation/resume_timeout_e2e.py",
+  "findings": [
+    {
+      "id": "H1",
+      "issue": "Proof elapsed_seconds is written in model-accessible workspace; PASS does not check authoritative Run wall duration or final tool SHA.",
+      "minimal_fix": "Assert Run finished_at-started_at >=1860 and long-proof.py SHA unchanged; retain tool and Run evidence."
+    },
+    {
+      "id": "H2",
+      "issue": "Console deadline_at omission is checked, but persisted spec.timeout=0 is not explicitly captured.",
+      "minimal_fix": "Read isolated SQLite in mode=ro for the selected Run and retain only resolved timeout/deadline fields; assert zero and no deadline."
+    }
+  ],
+  "confirmed": [
+    "SettingsRun.setup inherits Codex join default without a timeout override.",
+    "Task/run endpoint field names and one-run invariant match current public API.",
+    "Task uncertain remains separate from Runtime succeeded and independent file effect.",
+    "No production service restart or business task dispatch in this isolated harness."
+  ]
+}

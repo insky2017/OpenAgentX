@@ -1,0 +1,14 @@
+=== RUN   TestAGYBeginFreezesProfileRoleCwdTimeoutAndNextRun
+--- PASS: TestAGYBeginFreezesProfileRoleCwdTimeoutAndNextRun (0.17s)
+=== RUN   TestCodexBeginFreezesProfileRoleCwdTimeoutAndNextRun
+--- PASS: TestCodexBeginFreezesProfileRoleCwdTimeoutAndNextRun (0.12s)
+=== RUN   TestBeginFreezesCodexUnlimitedDefaultWithoutChangingAGY
+=== RUN   TestBeginFreezesCodexUnlimitedDefaultWithoutChangingAGY/codex-app-server
+    codex_session_test.go:179: Real SQLite BeginAttempt and persisted Run agree on adapter-specific default timeout; no Runtime/model execution claimed.
+=== RUN   TestBeginFreezesCodexUnlimitedDefaultWithoutChangingAGY/agy-batch
+    codex_session_test.go:179: Real SQLite BeginAttempt and persisted Run agree on adapter-specific default timeout; no Runtime/model execution claimed.
+--- PASS: TestBeginFreezesCodexUnlimitedDefaultWithoutChangingAGY (0.22s)
+    --- PASS: TestBeginFreezesCodexUnlimitedDefaultWithoutChangingAGY/codex-app-server (0.12s)
+    --- PASS: TestBeginFreezesCodexUnlimitedDefaultWithoutChangingAGY/agy-batch (0.11s)
+PASS
+ok  	openagentx/internal/controlplane	0.530s

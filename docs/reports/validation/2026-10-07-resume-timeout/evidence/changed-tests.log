@@ -1,0 +1,5 @@
+ok  	openagentx/internal/runtime/codex	3.127s
+ok  	openagentx/internal/runtime/spec	0.005s
+ok  	openagentx/internal/cli/fleet	14.083s
+ok  	openagentx/internal/cli/worker	0.811s
+ok  	openagentx/internal/domain	0.005s

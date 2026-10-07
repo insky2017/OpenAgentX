@@ -1,0 +1,264 @@
+=== RUN   TestPreparedEnableAtomicRollbackAndPreservesOtherAgents
+--- PASS: TestPreparedEnableAtomicRollbackAndPreservesOtherAgents (0.04s)
+=== RUN   TestAgentJoinPreparesOfflineAndRejectsConflictingReplay
+--- PASS: TestAgentJoinPreparesOfflineAndRejectsConflictingReplay (0.11s)
+=== RUN   TestAgentJoinRejectsEnabledAndUnsafeEndpoint
+--- PASS: TestAgentJoinRejectsEnabledAndUnsafeEndpoint (0.00s)
+=== RUN   TestCodexEnvironmentUsesPersistentProxyAndPreservesExisting
+--- PASS: TestCodexEnvironmentUsesPersistentProxyAndPreservesExisting (0.02s)
+=== RUN   TestNativeOpenRequiresBridgeAndPreservesManagedReferences
+--- PASS: TestNativeOpenRequiresBridgeAndPreservesManagedReferences (0.00s)
+=== RUN   TestPreparedRegistrationChecksIdentityOnceAndRejectsChangedInputs
+--- PASS: TestPreparedRegistrationChecksIdentityOnceAndRejectsChangedInputs (0.76s)
+=== RUN   TestIsolatedTmuxNativeOpenIdentity
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/exact-pane
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367623691809340 scenario=exact-pane exact pane=%0 bridge called=true processes="%0:0:3870292\n%1:1:3870297\n%2:0:3870301" result=<nil>
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/same-identity
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367624699038428 scenario=same-identity exact pane=%0 bridge called=true processes="%0:0:3870549\n%1:1:3870554\n%2:0:3870559" result=<nil>
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/overview
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367625697180329 scenario=overview exact pane=%0 bridge called=false processes="%0:0:3870812\n%1:1:3870818\n%2:0:3870827" result=current tmux location is OAX:overview.0; switch to an Agent window before Attach
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/pane-one
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367626405476672 scenario=pane-one exact pane=%1 bridge called=false processes="%0:0:3871000\n%1:1:3871074\n%2:0:3871113" result=current tmux location is OAX:scratch.1; switch to OAX:scratch.0
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/other-identity
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367627140559731 scenario=other-identity exact pane=%0 bridge called=false processes="%0:0:3871438\n%1:1:3871443\n%2:0:3871447" result=current window is bound to Agent "risk"; rebinding to "quote" requires explicit confirmation in the Task 06 Console UI
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/duplicate-name
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367627978986484 scenario=duplicate-name exact pane=%0 bridge called=false processes="%0:0:3871650\n%1:1:3871655\n%2:0:3871659" result=unmanaged or incompatible tmux window "quote" occupies the target name; no binding was performed
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/duplicate-marker
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367628795388620 scenario=duplicate-marker exact pane=%0 bridge called=false processes="%0:0:3871857\n%1:1:3871862\n%2:0:3871866" result=Agent marker "quote" is duplicated by tmux windows "quote" and "unrelated"
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/non-oax
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367629542181275 scenario=non-oax exact pane=%0 bridge called=true processes="%0:0:3872045\n%1:1:3872075\n%2:0:3872088" result=<nil>
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/missing-pane
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367630138174281 scenario=missing-pane exact pane= bridge called=false processes="%0:0:3872225\n%1:1:3872230\n%2:0:3872234" result=cannot identify exact current tmux pane: TMUX_PANE is missing or invalid
+=== RUN   TestIsolatedTmuxNativeOpenIdentity/missing-target
+    agent_native_integration_test.go:108: isolated server=oax-native-identity-3870000-1791367630746653785 scenario=missing-target exact pane=%99999999 bridge called=false processes="%0:0:3872394\n%1:1:3872399\n%2:0:3872403" result=tmux returned an invalid current session name
+--- PASS: TestIsolatedTmuxNativeOpenIdentity (7.65s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/exact-pane (1.01s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/same-identity (1.00s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/overview (0.71s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/pane-one (0.73s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/other-identity (0.84s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/duplicate-name (0.82s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/duplicate-marker (0.75s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/non-oax (0.60s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/missing-pane (0.61s)
+    --- PASS: TestIsolatedTmuxNativeOpenIdentity/missing-target (0.59s)
+=== RUN   TestAgentRemovalLocalAtomicFailurePreservesRetainedAgent
+--- PASS: TestAgentRemovalLocalAtomicFailurePreservesRetainedAgent (0.08s)
+=== RUN   TestAgentRemovalRejectsSymlinksAndChangedArtifacts
+--- PASS: TestAgentRemovalRejectsSymlinksAndChangedArtifacts (0.06s)
+=== RUN   TestAgentRemovalProtectedAndSharedPathsBlock
+--- PASS: TestAgentRemovalProtectedAndSharedPathsBlock (0.06s)
+=== RUN   TestAgentRemovalInheritedTemplateNeverControlsAnotherProfile
+=== RUN   TestAgentRemovalInheritedTemplateNeverControlsAnotherProfile/inactive
+=== RUN   TestAgentRemovalInheritedTemplateNeverControlsAnotherProfile/active
+--- PASS: TestAgentRemovalInheritedTemplateNeverControlsAnotherProfile (0.11s)
+    --- PASS: TestAgentRemovalInheritedTemplateNeverControlsAnotherProfile/inactive (0.06s)
+    --- PASS: TestAgentRemovalInheritedTemplateNeverControlsAnotherProfile/active (0.06s)
+=== RUN   TestAgentRemovalResumesLocalCleanupAfterDatabaseCommit
+--- PASS: TestAgentRemovalResumesLocalCleanupAfterDatabaseCommit (1.03s)
+=== RUN   TestAgentRemovalPreservesSelectedWorkspaceOverlappingState
+=== RUN   TestAgentRemovalPreservesSelectedWorkspaceOverlappingState/same
+=== RUN   TestAgentRemovalPreservesSelectedWorkspaceOverlappingState/workspace_parent
+=== RUN   TestAgentRemovalPreservesSelectedWorkspaceOverlappingState/workspace_child
+--- PASS: TestAgentRemovalPreservesSelectedWorkspaceOverlappingState (0.17s)
+    --- PASS: TestAgentRemovalPreservesSelectedWorkspaceOverlappingState/same (0.06s)
+    --- PASS: TestAgentRemovalPreservesSelectedWorkspaceOverlappingState/workspace_parent (0.06s)
+    --- PASS: TestAgentRemovalPreservesSelectedWorkspaceOverlappingState/workspace_child (0.06s)
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/damaged-receipt
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/stale-marker-and-mutable-timeout
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/mutable-execution-preference
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/principal-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/role-path-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/workspace-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/capability-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/worker-directory-drift
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/empty-role
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/wrong-installation
+=== RUN   TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/unauthorized
+--- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt (0.83s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/damaged-receipt (0.03s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/stale-marker-and-mutable-timeout (0.02s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/mutable-execution-preference (0.03s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/principal-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/role-path-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/workspace-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/capability-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/worker-directory-drift (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/empty-role (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/wrong-installation (0.01s)
+    --- PASS: TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt/unauthorized (0.01s)
+=== RUN   TestUnregisteredResumeRejectsDamagedReceipt
+--- PASS: TestUnregisteredResumeRejectsDamagedReceipt (0.00s)
+=== RUN   TestAgentAddIncrementalIdempotentAndConflict
+    agent_test.go:85: D fixture: formal init/apply, two incremental Agents, repeat unchanged, conflict preserved; systemd/credentials are mocks.
+--- PASS: TestAgentAddIncrementalIdempotentAndConflict (1.00s)
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded
+=== RUN   TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed
+--- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/succeeded (0.00s)
+    --- PASS: TestAgentNetworkOnlyPublishesSucceededAndWaitsForCurrentGeneration/failed (0.00s)
+=== RUN   TestAgentExistingNamedNetworkRequiresExplicitRecovery
+--- PASS: TestAgentExistingNamedNetworkRequiresExplicitRecovery (0.00s)
+=== RUN   TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP
+=== RUN   TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/inherit/
+=== RUN   TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/inherit/test
+=== RUN   TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/inherit/publish
+=== RUN   TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/direct/
+=== RUN   TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/direct/test
+=== RUN   TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/direct/publish
+--- PASS: TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP (0.01s)
+    --- PASS: TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/inherit/ (0.00s)
+    --- PASS: TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/inherit/test (0.00s)
+    --- PASS: TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/inherit/publish (0.00s)
+    --- PASS: TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/direct/ (0.00s)
+    --- PASS: TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/direct/test (0.00s)
+    --- PASS: TestAgentExistingModeRecoveryUsesCurrentGenerationAndBindingCASHTTP/direct/publish (0.00s)
+=== RUN   TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop
+    agent_test.go:253: D fixture only: stop -> draining -> offline, no force-stop or systemctl kill
+--- PASS: TestAgentPauseOnlySelectedAgentAndPersistsGracefulStop (0.00s)
+=== RUN   TestAgentURLUsesActualServiceOverride
+--- PASS: TestAgentURLUsesActualServiceOverride (0.00s)
+=== RUN   TestAgentStatusIncludesReadinessLatestResultAndOpenAction
+--- PASS: TestAgentStatusIncludesReadinessLatestResultAndOpenAction (0.00s)
+=== RUN   TestAgentUnitInstallRefusesExistingConflict
+--- PASS: TestAgentUnitInstallRefusesExistingConflict (0.01s)
+=== RUN   TestAgentParseWizardHasOnlyThreePrompts
+--- PASS: TestAgentParseWizardHasOnlyThreePrompts (0.53s)
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/agy-batch
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/agy-batch/ready
+    agent_test.go:438: D fixture: only selected unit starts despite other Agent config missing; existing binding must match new generation; no Task API write
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/agy-batch/readiness-failed
+    agent_test.go:438: D fixture: only selected unit starts despite other Agent config missing; existing binding must match new generation; no Task API write
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/codex-app-server
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/codex-app-server/ready
+    agent_test.go:438: D fixture: only selected unit starts despite other Agent config missing; existing binding must match new generation; no Task API write
+=== RUN   TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/codex-app-server/readiness-failed
+    agent_test.go:438: D fixture: only selected unit starts despite other Agent config missing; existing binding must match new generation; no Task API write
+--- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks (0.09s)
+    --- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/agy-batch (0.05s)
+        --- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/agy-batch/ready (0.03s)
+        --- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/agy-batch/readiness-failed (0.02s)
+    --- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/codex-app-server (0.04s)
+        --- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/codex-app-server/ready (0.03s)
+        --- PASS: TestAgentResumeStartsOnlyTargetAndDoesNotReplayTasks/codex-app-server/readiness-failed (0.02s)
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration/model-
+=== RUN   TestAgentGeneratedConfigReachesRealWorkerRegistration/model-fixture-model
+--- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration (1.01s)
+    --- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration/model- (0.49s)
+    --- PASS: TestAgentGeneratedConfigReachesRealWorkerRegistration/model-fixture-model (0.52s)
+=== RUN   TestAgentURLResolvesActualMainPIDEnvironment
+--- PASS: TestAgentURLResolvesActualMainPIDEnvironment (0.00s)
+=== RUN   TestAgentNavigationBoundsOutputAndRetainsJSONOption
+--- PASS: TestAgentNavigationBoundsOutputAndRetainsJSONOption (0.00s)
+=== RUN   TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig
+--- PASS: TestFleetInitMissingManifestRequiresExplicitNonTTYSelectionAndImportsCanonicalConfig (0.03s)
+=== RUN   TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs
+--- PASS: TestFleetInitTTYUsesExplicitMultiSelectAndExistingCanonicalConfigs (0.02s)
+=== RUN   TestFleetInstallationMismatchNeverSendsStoredToken
+--- PASS: TestFleetInstallationMismatchNeverSendsStoredToken (0.00s)
+=== RUN   TestFleetUsesResolvedProfilePathsWithoutExplicitFlags
+--- PASS: TestFleetUsesResolvedProfilePathsWithoutExplicitFlags (0.00s)
+=== RUN   TestFleetInitConflictAndAtomicFailureAreNonDestructive
+--- PASS: TestFleetInitConflictAndAtomicFailureAreNonDestructive (0.01s)
+=== RUN   TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes
+--- PASS: TestFleetInitValidatesAndInstallsSameCapturedWorkerBytes (0.03s)
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink
+=== RUN   TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename
+--- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap (0.01s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/source_symlink (0.00s)
+    --- PASS: TestFleetInitRejectsWorkerSourceSymlinkAndCanonicalSwap/canonical_replaced_before_rename (0.01s)
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/symlink
+=== RUN   TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions
+--- PASS: TestFleetPrepareRejectsUnsafeManifestFile (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/symlink (0.00s)
+    --- PASS: TestFleetPrepareRejectsUnsafeManifestFile/broad_permissions (0.00s)
+=== RUN   TestFleetInitRejectsRelativeImportedWorkerPathSemantics
+--- PASS: TestFleetInitRejectsRelativeImportedWorkerPathSemantics (0.00s)
+=== RUN   TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts
+--- PASS: TestFleetRepeatedExplicitInitIsIdempotentAndDifferentManifestConflicts (0.00s)
+=== RUN   TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure
+--- PASS: TestFleetInitRecoversFromCanonicalConfigInstalledBeforeManifestFailure (0.04s)
+=== RUN   TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager
+--- PASS: TestFleetUpPreflightsActualUserUnitBeforeTmuxAndStartsWithUserManager (0.00s)
+=== RUN   TestFleetUpRejectsUnitMismatchBeforeAnyMutation
+--- PASS: TestFleetUpRejectsUnitMismatchBeforeAnyMutation (0.00s)
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace
+=== RUN   TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up
+--- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/workspace (0.00s)
+    --- PASS: TestFleetWorkspaceAndUpRejectMissingCanonicalBinaryBeforeHostMutation/up (0.00s)
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing
+=== RUN   TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable
+--- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/missing (0.00s)
+    --- PASS: TestFleetInitRejectsInvalidCanonicalBinaryBeforeFileOrTmuxMutation/non_executable (0.00s)
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/status
+=== RUN   TestFleetStatusAndDownDoNotRequireCanonicalBinary/down
+--- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/status (0.00s)
+    --- PASS: TestFleetStatusAndDownDoNotRequireCanonicalBinary/down (0.00s)
+=== RUN   TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile
+--- PASS: TestFleetPreflightRejectsUnsafeWorkerEnvironmentFile (0.00s)
+=== RUN   TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero
+--- PASS: TestFleetWorkspaceFlagRespawnsOnlyManagedDeadPaneZero (0.00s)
+=== RUN   TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser
+--- PASS: TestFleetStatusUsesReadScopeAndAllSystemctlCallsUseUser (0.00s)
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role
+=== RUN   TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope
+--- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/expired_local (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/revoked (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_role (0.00s)
+    --- PASS: TestFleetAuthenticationChecksRoleScopeExpiryAndDeletesOnlyUnauthenticated/wrong_scope (0.00s)
+=== RUN   TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline
+--- PASS: TestFleetDownQueuesAllThenObservesBusyIdleAndMultipleAgentsUntilOffline (0.00s)
+=== RUN   TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations
+--- PASS: TestFleetDownInterruptionKeepsIntentAndForceRequiresTwoConfirmations (0.00s)
+=== RUN   TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed
+--- PASS: TestFleetHelpHasNoPasswordOrUsernameAndInvalidOverridesFailClosed (0.00s)
+=== RUN   TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager
+--- PASS: TestVerifyUserUnitsRequiresExactCanonicalArgvAndUserManager (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured
+=== RUN   TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config
+--- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/extra_argument (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/unstructured (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMissingOrMismatchedActualArgv/different_config (0.00s)
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory
+=== RUN   TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file
+--- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/working_directory (0.00s)
+    --- PASS: TestVerifyUserUnitsRejectsMismatchedWorkingDirectoryOrEnvironmentFile/environment_file (0.00s)
+=== RUN   TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable
+--- PASS: TestCanonicalUserBinaryRejectsMissingSymlinkAndNonExecutable (0.00s)
+=== RUN   TestFleetLegacyManifestSelectsNativeCodexAndExplicitConsoleWithoutReplacingLivePane
+=== RUN   TestFleetLegacyManifestSelectsNativeCodexAndExplicitConsoleWithoutReplacingLivePane/false
+=== RUN   TestFleetLegacyManifestSelectsNativeCodexAndExplicitConsoleWithoutReplacingLivePane/true
+--- PASS: TestFleetLegacyManifestSelectsNativeCodexAndExplicitConsoleWithoutReplacingLivePane (0.01s)
+    --- PASS: TestFleetLegacyManifestSelectsNativeCodexAndExplicitConsoleWithoutReplacingLivePane/false (0.00s)
+    --- PASS: TestFleetLegacyManifestSelectsNativeCodexAndExplicitConsoleWithoutReplacingLivePane/true (0.00s)
+=== RUN   TestFleetUpWaitsForNativeEndpointAfterWorkerStartBeforeCreatingPane
+=== RUN   TestFleetUpWaitsForNativeEndpointAfterWorkerStartBeforeCreatingPane/init_before_up_false
+=== RUN   TestFleetUpWaitsForNativeEndpointAfterWorkerStartBeforeCreatingPane/init_before_up_true
+--- PASS: TestFleetUpWaitsForNativeEndpointAfterWorkerStartBeforeCreatingPane (0.01s)
+    --- PASS: TestFleetUpWaitsForNativeEndpointAfterWorkerStartBeforeCreatingPane/init_before_up_false (0.00s)
+    --- PASS: TestFleetUpWaitsForNativeEndpointAfterWorkerStartBeforeCreatingPane/init_before_up_true (0.00s)
+=== RUN   TestNativeReadinessFailureKeepsOtherAgentsAndLivePanes
+--- PASS: TestNativeReadinessFailureKeepsOtherAgentsAndLivePanes (0.00s)
+PASS
+ok  	openagentx/internal/cli/fleet	13.820s

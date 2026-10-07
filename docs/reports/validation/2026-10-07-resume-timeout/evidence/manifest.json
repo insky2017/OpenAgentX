@@ -1,0 +1,62 @@
+[
+  {
+    "path": "changed-tests.log",
+    "sha256": "afa7e3cc94f63eb6f034abb094a0a8f752690a74f4d7a9cedf3c883152e6b814"
+  },
+  {
+    "path": "formal-resume/pay-service.json",
+    "sha256": "abd0e8f1391279a606ccad0f4ae9de99df2a0c4b4cfc7fde18ca65515b586013"
+  },
+  {
+    "path": "formal-resume/quote-service.json",
+    "sha256": "a50663181300f951c8e8033bed20b13717ef1b44a8633cc610cd57a428a03476"
+  },
+  {
+    "path": "formal-resume/rhythm.json",
+    "sha256": "c3374f2d9e4dc9344006a78317b20454b997452c9c1a03fefe6d9f0982fbe3c1"
+  },
+  {
+    "path": "release-artifact.json",
+    "sha256": "bc755f291a3d8d18731e20ce586fa25cd2e3a1226b9576bece5bf57d53f22217"
+  },
+  {
+    "path": "resume-fixed-artifact.json",
+    "sha256": "4edb596080d5e46e5704a989671a446f6d0e58847ea10e5f892f8241da277756"
+  },
+  {
+    "path": "resume-integration/controlplane-timeout-tests.log",
+    "sha256": "f136a42215d28c1b6b0220fb8c42442c27479dadb1319eea00af860b48b23cd6"
+  },
+  {
+    "path": "resume-integration/deployment-script-review.json",
+    "sha256": "01cf08f473ea076544435c7c532758a902e3ff4b0310f82386b5d57648c9f056"
+  },
+  {
+    "path": "resume-integration/fleet-tests-umask022.log",
+    "sha256": "b5aeb57d3c696af68fe53a7fbd43f0e892abb4a803a512414f70ba777b6e150a"
+  },
+  {
+    "path": "resume-integration/fleet-tests.log",
+    "sha256": "b3c62811446586428fb7d9c287a1427656bf812befd67aac861b835d3167eed5"
+  },
+  {
+    "path": "resume-integration/legacy-resume-tests.log",
+    "sha256": "1fc6034bff47ba2dbd11247f750c8d4eb0aedb54f39e5081d3f0cea1692e5984"
+  },
+  {
+    "path": "resume-integration/long-harness-review-initial.json",
+    "sha256": "45e351106d9b2ca77b4ce65ce298e4f917f42c7de611130367ac4548edf0bac9"
+  },
+  {
+    "path": "resume-integration/product-review.json",
+    "sha256": "17620116eabdce678662623c94c9752f17f230db061f89880642e8eaece7521e"
+  },
+  {
+    "path": "resume-integration/resolver-timeout-tests.log",
+    "sha256": "6f7ee0392128f8863da002539f73f2dff4479437ef17960357ad4fe9e15591aa"
+  },
+  {
+    "path": "resume-integration/result.json",
+    "sha256": "43deea6059ecf58d7efb80183c1cf473a1b676c97c0a4aaf40c8c0f5278d4fc2"
+  }
+]

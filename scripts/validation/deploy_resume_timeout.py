@@ -226,7 +226,7 @@ class Rollout:
     def enqueue_verify(self, status):
         content = ('继续用户已授权的Codex无总截止与已登记Agent resume修复收尾。'
             '先完整读取 '+str(self.a.evidence/'result.json')+' 和 operations.jsonl，'
-            '以及 '+str(self.a.evidence.parent/'long01/evidence/result.json')+'。'
+            '以及 '+str(self.a.evidence.parent/'long01/evidence/recheck-result.json')+'。'
             '核验六域Worker、原thread和原pane、实际工件、正式Rhythm/Pay resume以及无deadline冻结规格。'
             '产品工作树 /home/sky/work/touzi/OneAxe/OpenAgentX-resume-timeout-worktree。'
             '若脚本失败，仅按原授权恢复受影响OAX服务，不重跑业务任务、不扩大范围。'
@@ -243,9 +243,18 @@ class Rollout:
     def execute(self):
         require(self.a.profile.resolve() == (Path.home() / '.openagentx').resolve(), 'this deployment targets the existing local systemd profile only')
         require(digest(self.a.candidate) == self.a.sha, 'candidate SHA differs')
-        proof = json.loads((self.a.evidence.parent/'long01/evidence/result.json').read_text())
-        require(proof['status'] == 'PASS' and proof['binary_sha256'] == self.a.sha, 'real long task proof must pass for this artifact')
+        proof = json.loads((self.a.evidence.parent/'long01/evidence/recheck-result.json').read_text())
+        require(proof['status'] == 'PASS', 'real long task must pass')
+        if proof['binary_sha256'] != self.a.sha:
+            reuse = json.loads((self.a.evidence.parent/'release-impact.json').read_text())
+            require(reuse['long_test_binary_sha256'] == proof['binary_sha256'] and reuse['release_binary_sha256'] == self.a.sha,
+                    'impact review must bind both exact artifacts')
+            require(reuse['status'] == 'APPROVED' and reuse['runtime_deadline_source_unchanged'] is True,
+                    'deadline source equivalence was not reviewed')
+            short = json.loads((self.a.evidence.parent/'release-smoke-result.json').read_text())
+            require(short['status'] == 'PASS' and short['binary_sha256'] == self.a.sha, 'final artifact real smoke must pass')
         before = self.snapshot()
+        before['model_settings'] = {agent:self.api('/api/console/v1/agents/'+agent+'/model-settings?backend_id=codex') for agent in AGENTS}
         self.before = before
         self.save('before.json', before)
         if not self.a.apply:
@@ -311,6 +320,8 @@ class Rollout:
                 require(not after['panes'][agent]['dead'], 'native terminal exited: ' + agent)
                 settings = self.api('/api/console/v1/agents/' + agent + '/model-settings?backend_id=codex')
                 require(len(settings['models']) > 1, 'missing live model catalog: ' + agent)
+                for key in ('model','effort','version'):
+                    require(settings.get(key) == before['model_settings'][agent].get(key), 'model preference changed: '+agent+' '+key)
                 self.save('settings-' + agent + '.json', settings)
                 capture = self.command('tmux', 'capture-pane', '-p', '-t', after['panes'][agent]['pane'], '-S', '-60')
                 # Native output can contain business text; only save status booleans.
