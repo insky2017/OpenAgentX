@@ -122,6 +122,11 @@ func (r *Repository) SetAgentModelSettings(ctx context.Context, agentID string, 
 		return result, err
 	}
 	defer tx.Rollback()
+	if request.ExpectedThreadID != "" {
+		if err := validateSessionThread(ctx, tx, agentID, request.BackendID, request.ExpectedThreadID); err != nil {
+			return result, err
+		}
+	}
 	result, err = effectiveModelSettings(ctx, tx, agentID, request.BackendID)
 	if err != nil {
 		return result, err

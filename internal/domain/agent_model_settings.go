@@ -13,13 +13,19 @@ type AgentModelSettings struct {
 }
 
 type AgentModelSettingsUpdate struct {
-	BackendID       string `json:"backend_id"`
-	Model           string `json:"model"`
-	Effort          string `json:"effort"`
-	ExpectedVersion int64  `json:"expected_version"`
+	ExpectedThreadID string `json:"expected_thread_id,omitempty"`
+	BackendID        string `json:"backend_id"`
+	Model            string `json:"model"`
+	Effort           string `json:"effort"`
+	ExpectedVersion  int64  `json:"expected_version"`
 }
 
 func (u AgentModelSettingsUpdate) Validate() error {
+	if u.ExpectedThreadID != "" {
+		if err := ValidateOpaqueID("expected_thread_id", u.ExpectedThreadID); err != nil {
+			return err
+		}
+	}
 	if err := ValidateIdentifier("backend_id", u.BackendID); err != nil {
 		return err
 	}

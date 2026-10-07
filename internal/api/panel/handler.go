@@ -1563,6 +1563,12 @@ func (h *Handler) createTask(w http.ResponseWriter, r *http.Request) {
 	if !requireIdempotencyHeader(w, r, req.Meta) {
 		return
 	}
+	if req.NewSession != nil {
+		if _, err := h.auth.Authorize(r, requestauth.Requirement{Role: domain.WebRoleOwner, Write: true, Scope: domain.CLIScopeConsoleControl}); err != nil {
+			h.auth.WriteFailure(w, err)
+			return
+		}
+	}
 	req.SenderPrincipalID = s.ID
 	v, e := h.commands.CreateTask(r.Context(), s.ID, req)
 	if e != nil {

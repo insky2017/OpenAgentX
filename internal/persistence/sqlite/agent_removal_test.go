@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"openagentx/internal/domain"
+	"openagentx/internal/persistence/sqlite/migrations"
 )
 
 func removalFixture(t *testing.T) (*Repository, string) {
@@ -225,7 +226,7 @@ func TestAgentRemovalV5ReadOnlyAndAdditiveUpgrade(t *testing.T) {
 	}
 	// An already-open v5-style connection still performs normal writes.
 	removalExec(t, db, `INSERT INTO event_journal(event_id,aggregate_type,aggregate_id,event_type,actor_principal_id,payload_json,created_at) VALUES('after-upgrade','principal','owner','owner.checked','owner','{}','2026-01-01T00:00:00Z')`)
-	if err = db.QueryRow("SELECT version FROM schema_meta").Scan(&v); err != nil || v != 6 {
+	if err = db.QueryRow("SELECT version FROM schema_meta").Scan(&v); err != nil || v != migrations.CurrentVersion {
 		t.Fatal("upgrade", v, err)
 	}
 	var installation string

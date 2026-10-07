@@ -89,7 +89,19 @@ func (s *CommandService) CreateTask(ctx context.Context, principal string, req a
 	item := &domain.MailboxItem{ID: itemID, TargetAgentID: req.TargetAgentID, Kind: domain.MailboxKindTask, Lane: domain.MailboxLaneWork, TaskID: taskID, State: domain.MailboxStatePending, CreatedAt: now}
 	payload := map[string]any{"target_agent_id": req.TargetAgentID, "intent": intent}
 	var result *domain.CreateTaskResult
-	if ref := req.RuntimeSession; ref != nil {
+	if req.NewSession != nil {
+		state, ok := s.state.(interface {
+			CreateTaskWithNewSession(context.Context, *domain.Task, *domain.Message, *domain.MailboxItem, *domain.JournalEvent, *domain.NewSessionRequest) (*domain.CreateTaskResult, error)
+		})
+		if !ok {
+			return nil, domain.ErrUnsupportedCapability
+		}
+		raw, _ := json.Marshal(req.NewSession)
+		digest := sha256.Sum256(raw)
+		payload["runtime_session_digest"] = hex.EncodeToString(digest[:])
+		payload["runtime_session_source"] = "new_session"
+		result, err = state.CreateTaskWithNewSession(ctx, task, message, item, commandEvent(taskID, "task.created", principal, "task", payload, now), req.NewSession)
+	} else if ref := req.RuntimeSession; ref != nil {
 		state, ok := s.state.(interface {
 			CreateTaskWithSession(context.Context, *domain.Task, *domain.Message, *domain.MailboxItem, *domain.JournalEvent, *domain.SessionBinding) (*domain.CreateTaskResult, error)
 			GetSessionBinding(context.Context, string, string, string) (*domain.SessionBinding, error)

@@ -155,7 +155,7 @@ func (b *bridge) updateSettings(ctx context.Context, method string, params json.
 	if expected != "" && expected != settingsVersion(current) {
 		return nil, errors.New("模型设置版本已变化；请刷新后重试")
 	}
-	next := domain.AgentModelSettingsUpdate{BackendID: b.backendID, Model: current.Model, Effort: current.Effort, ExpectedVersion: current.Version}
+	next := domain.AgentModelSettingsUpdate{BackendID: b.backendID, Model: current.Model, Effort: current.Effort, ExpectedVersion: current.Version, ExpectedThreadID: b.threadID}
 	if model != nil {
 		next.Model = *model
 	}

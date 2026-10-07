@@ -879,6 +879,28 @@ type M1TurnPlanner struct {
 }
 
 func (p M1TurnPlanner) Plan(ctx context.Context, task domain.Task, _ []domain.Message, backends []openruntime.BackendRegistration) (TurnPlan, error) {
+	if reader, ok := p.Bindings.(interface {
+		GetSessionHandoff(context.Context, string) (*domain.AgentSession, error)
+	}); ok {
+		handoff, err := reader.GetSessionHandoff(ctx, task.ID)
+		if err != nil {
+			return TurnPlan{}, err
+		}
+		if handoff != nil {
+			for _, backend := range backends {
+				if backend.BackendID == handoff.BackendID && backend.Descriptor.AdapterID == "codex-app-server" && backend.Descriptor.SessionHandoff && m1BackendUsable(backend) && containsSession(backend.Descriptor.SessionModes, domain.SessionModeNew) {
+					plan, err := p.planForBackend(ctx, task, backend, nil)
+					if err != nil {
+						return plan, err
+					}
+					plan.Execution.Spec.Session.ForceNew = true
+					plan.Execution.Sources["session"] = "agent_session_handoff"
+					return plan, nil
+				}
+			}
+			return TurnPlan{}, domain.ErrUnsupportedCapability
+		}
+	}
 	available := append([]openruntime.BackendRegistration(nil), backends...)
 	sort.Slice(available, func(i, j int) bool { return available[i].BackendID < available[j].BackendID })
 	// Preserve provider context whenever the currently available Backend can

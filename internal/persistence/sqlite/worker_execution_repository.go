@@ -237,6 +237,9 @@ func (r *Repository) BeginClaimedRunAttempt(
 		}
 		return nil, nil, domain.ErrInvalidTransition
 	}
+	if err := validateSessionRunAdmissionTx(ctx, tx, task, run); err != nil {
+		return nil, nil, err
+	}
 	if admissionErr := validateManagedTaskAdmissionTx(ctx, tx, task, run, guard.CheckedAt); admissionErr != nil {
 		if !managedAdmissionReviewable(admissionErr) {
 			return nil, nil, admissionErr
@@ -609,6 +612,14 @@ func appendRuntimeSessionBinding(ctx context.Context, tx *sql.Tx, guard domain.W
 	if task.IsTerminal() {
 		return domain.ErrInvalidTransition
 	}
+	var prior, backend string
+	if err := tx.QueryRowContext(ctx, `SELECT provider_session_id,backend_id FROM agent_sessions WHERE pending_task_id=?`, task.ID).Scan(&prior, &backend); err == nil {
+		if prior == payload.ProviderSessionID || backend != run.BackendID {
+			return domain.ErrConflict("handoff must bind a genuinely new thread on its selected backend")
+		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	var provider, state string
 	err := tx.QueryRowContext(ctx, `SELECT provider_session_id, state FROM session_bindings WHERE context_id=? AND agent_id=? AND backend_id=?`, run.TaskID, run.AgentID, run.BackendID).Scan(&provider, &state)
 	if err == nil {
@@ -743,6 +754,14 @@ func (r *Repository) FinishRun(
 		// evidence; this is not success or an automatic retry of the old work.
 		taskStatus = domain.TaskStatusWaitingInput
 	}
+	var isHandoff int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM agent_sessions WHERE pending_task_id=?`, task.ID).Scan(&isHandoff); err != nil {
+		return err
+	}
+	if isHandoff != 0 && taskStatus == domain.TaskStatusWaitingInput {
+		taskStatus = domain.TaskStatusFailed
+		reason = "session handoff did not return a complete query result"
+	}
 	finishedAt := guard.CheckedAt
 	run.Version++
 	run.Status = runStatus
@@ -871,6 +890,9 @@ func (r *Repository) FinishRun(
 	affected, err = result.RowsAffected()
 	if err != nil || affected != 1 {
 		return domain.ErrStaleVersion
+	}
+	if err := settleSessionHandoffTx(ctx, tx, task, guard.CheckedAt); err != nil {
+		return err
 	}
 	if err := r.completeManagedCollaborationTx(ctx, tx, task, run); err != nil {
 		return err

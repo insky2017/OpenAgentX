@@ -115,6 +115,9 @@ func (r *Repository) BindExternalSession(ctx context.Context, owner string, b do
 	if err = externalOwner(ctx, tx, owner); err != nil {
 		return nil, err
 	}
+	if err = sessionGate(ctx, tx, b.AgentID, ""); err != nil {
+		return nil, err
+	}
 	b.PrincipalID, b.OrganizationID, err = externalActiveAgent(ctx, tx, b.AgentID)
 	if err != nil {
 		return nil, err
@@ -201,6 +204,9 @@ func (r *Repository) RevokeExternalSession(ctx context.Context, owner, agentID s
 	}
 	defer tx.Rollback()
 	if err = externalOwner(ctx, tx, owner); err != nil {
+		return err
+	}
+	if err = sessionGate(ctx, tx, agentID, ""); err != nil {
 		return err
 	}
 	b, err := scanExternalBinding(tx.QueryRowContext(ctx, `SELECT `+externalBindingColumns+externalBindingJoin+` WHERE b.agent_id=?`, agentID))
@@ -313,6 +319,12 @@ func (r *Repository) SendExternalMessage(ctx context.Context, digest string, m d
 		return prior, nil
 	}
 	if !errors.Is(err, domain.ErrNotFound) {
+		return nil, err
+	}
+	if err := sessionGate(ctx, tx, b.AgentID, ""); err != nil {
+		return nil, err
+	}
+	if err := sessionGate(ctx, tx, m.TargetAgentID, ""); err != nil {
 		return nil, err
 	}
 	if m.Kind == domain.ExternalMessageResult {

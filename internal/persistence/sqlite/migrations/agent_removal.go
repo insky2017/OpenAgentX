@@ -26,9 +26,11 @@ func applyAgentRemoval(ctx context.Context, tx *sql.Tx, options migrationOptions
 		return fmt.Errorf("agent removal schema: %w", err)
 	}
 	if options.beforeV6Commit != nil {
-		return options.beforeV6Commit()
+		if err := options.beforeV6Commit(); err != nil {
+			return err
+		}
 	}
-	return nil
+	return applyAgentSessions(ctx, tx, options)
 }
 
 func migrateV5ToV6(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -65,7 +67,7 @@ func ValidateAgentRemovalCompatible(ctx context.Context, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	if v != 5 && v != 6 {
+	if v != 5 && v != 6 && v != 7 {
 		return ErrUnsupportedSchemaVersion
 	}
 	if err = validateBaseObjects(ctx, db); err != nil {
@@ -74,7 +76,7 @@ func ValidateAgentRemovalCompatible(ctx context.Context, db *sql.DB) error {
 	if err = validateExternalObjects(ctx, db); err != nil {
 		return err
 	}
-	if v == 6 {
+	if v >= 6 {
 		return validateAgentRemoval(ctx, db)
 	}
 	return nil

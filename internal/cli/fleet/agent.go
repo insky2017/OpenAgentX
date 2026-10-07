@@ -54,6 +54,9 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 		return 0
 	}
 	command := args[0]
+	if command == "new-session" {
+		return executeAgentNewSession(args[1:], deps)
+	}
 	if command == "remove" {
 		return executeAgentRemove(args[1:], deps)
 	}
@@ -252,6 +255,7 @@ func ExecuteAgent(args []string, dependencies Dependencies) int {
 }
 
 func agentUsage(w io.Writer) {
+	fmt.Fprintln(w, "       openagentx agent new-session AGENT [--handoff-file FILE] [--apply --expected-thread ID --expected-version N] (默认只读预览；保留身份和旧历史)")
 	fmt.Fprintln(w, "       openagentx agent remove AGENT [AGENT...] --purge-history [--dry-run | --yes] [--wait 3m] (默认仅预览，工作目录保留)")
 	fmt.Fprintln(w, "Usage: openagentx agent add [--runtime agy|codex] [--name NAME --workspace DIR --role FILE | --identity FILE] [--id ID] [--worker-config FILE] [--environment-file FILE] [--password-file FILE] [--configure-only]\n       openagentx agent join --id ID --name NAME --workspace DIR --role FILE [--thread-id ID --endpoint URL] [--handoff-file FILE] [--prepare]\n       openagentx agent <open|pause|resume|status> [AGENT] [--console|--native] [--no-open] [--watch] [--json] [--web-url URL]\n       Path overrides: --db --socket --file (Fleet manifest) --worker-dir --credentials")
 }

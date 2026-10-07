@@ -287,6 +287,9 @@ func settleInactiveCancellation(ctx context.Context, tx *sql.Tx, task *domain.Ta
 		return domain.ErrStaleVersion
 	}
 	task.Status = domain.TaskStatusCanceled
+	if err := settleSessionHandoffTx(ctx, tx, task, now); err != nil {
+		return err
+	}
 	return appendEvent("task", task.ID, "task.canceled", "cancel_requested", "canceled")
 }
 

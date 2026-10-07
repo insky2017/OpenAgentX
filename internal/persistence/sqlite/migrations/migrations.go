@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const CurrentVersion = 6
+const CurrentVersion = 7
 
 var (
 	ErrIncompatibleLegacySchema = errors.New("database contains a legacy schema without OpenAgentX schema metadata")
@@ -76,6 +76,7 @@ type migrationOptions struct {
 	beforeV4Commit    func() error
 	beforeV5Commit    func() error
 	beforeV6Commit    func() error
+	beforeV7Commit    func() error
 }
 
 func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
@@ -108,6 +109,8 @@ func apply(ctx context.Context, db *sql.DB, options migrationOptions) error {
 			return migrateV4ToV5(ctx, db, options)
 		case 5:
 			return migrateV5ToV6(ctx, db, options)
+		case 6:
+			return migrateV6ToV7(ctx, db, options)
 		default:
 			return fmt.Errorf("%w: got %d, want 1 or %d", ErrUnsupportedSchemaVersion, version, CurrentVersion)
 		}
@@ -301,7 +304,10 @@ func validateObjects(ctx context.Context, queryer schemaQueryer) error {
 	if err := validateExternalObjects(ctx, queryer); err != nil {
 		return err
 	}
-	return validateAgentRemoval(ctx, queryer)
+	if err := validateAgentRemoval(ctx, queryer); err != nil {
+		return err
+	}
+	return validateAgentSessions(ctx, queryer)
 }
 
 func validateBaseObjects(ctx context.Context, queryer schemaQueryer) error {

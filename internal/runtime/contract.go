@@ -57,6 +57,7 @@ func (m CancelMode) Valid() bool {
 }
 
 type AdapterDescriptor struct {
+	SessionHandoff        bool                   `json:"session_handoff,omitempty"`
 	ModelReasoningEfforts map[string][]string    `json:"model_reasoning_efforts,omitempty"`
 	DefaultTimeout        time.Duration          `json:"default_timeout,omitempty"`
 	AdapterID             string                 `json:"adapter_id"`

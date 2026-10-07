@@ -26,7 +26,7 @@ func (r *Repository) CreateTask(
 	mailboxItem *domain.MailboxItem,
 	event *domain.JournalEvent,
 ) (*CreateTaskResult, error) {
-	return r.createTask(ctx, task, initialMessage, mailboxItem, event, nil)
+	return r.createTask(ctx, task, initialMessage, mailboxItem, event, nil, nil)
 }
 
 // CreateTaskWithSession commits explicit native continuity with the Task,
@@ -35,9 +35,15 @@ func (r *Repository) CreateTaskWithSession(ctx context.Context, task *domain.Tas
 	if binding == nil {
 		return nil, domain.ErrInvalidInput("native session binding is required")
 	}
-	return r.createTask(ctx, task, initialMessage, mailboxItem, event, binding)
+	return r.createTask(ctx, task, initialMessage, mailboxItem, event, binding, nil)
 }
-func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialMessage *domain.Message, mailboxItem *domain.MailboxItem, event *domain.JournalEvent, binding *domain.SessionBinding) (*CreateTaskResult, error) {
+func (r *Repository) CreateTaskWithNewSession(ctx context.Context, task *domain.Task, message *domain.Message, item *domain.MailboxItem, event *domain.JournalEvent, request *domain.NewSessionRequest) (*domain.CreateTaskResult, error) {
+	if request == nil {
+		return nil, domain.ErrInvalidInput("new session request is required")
+	}
+	return r.createTask(ctx, task, message, item, event, nil, request)
+}
+func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialMessage *domain.Message, mailboxItem *domain.MailboxItem, event *domain.JournalEvent, binding *domain.SessionBinding, newSession *domain.NewSessionRequest) (*CreateTaskResult, error) {
 	if task == nil || mailboxItem == nil {
 		return nil, domain.ErrInvalidInput("task and mailbox item are required")
 	}
@@ -178,6 +184,36 @@ func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialM
 		return nil, fmt.Errorf("check task idempotency: %w", err)
 	}
 
+	var handoff *domain.AgentSession
+	if newSession != nil {
+		handoff, err = prepareSessionHandoffTx(ctx, tx, task, newSession)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		if err = sessionGate(ctx, tx, task.TargetAgentID, ""); err != nil {
+			return nil, err
+		}
+		if binding != nil {
+			var current string
+			e := tx.QueryRowContext(ctx, `SELECT provider_session_id FROM agent_sessions WHERE agent_id=? AND backend_id=?`, task.TargetAgentID, binding.BackendID).Scan(&current)
+			if e != nil && !errors.Is(e, sql.ErrNoRows) {
+				return nil, e
+			}
+			if e == nil && current != "" && current != binding.ProviderSessionID {
+				return nil, domain.ErrConflict("Agent session changed; reopen the native terminal")
+			}
+		} else {
+			current, e := scanAgentSession(tx.QueryRowContext(ctx, `SELECT `+agentSessionColumns+` FROM agent_sessions WHERE agent_id=? AND provider_session_id<>'' ORDER BY backend_id LIMIT 1`, task.TargetAgentID))
+			if e != nil && !errors.Is(e, sql.ErrNoRows) {
+				return nil, e
+			}
+			if e == nil {
+				binding = &domain.SessionBinding{ID: event.ID + "-active", ContextID: task.ID, AgentID: task.TargetAgentID, BackendID: current.BackendID, ProviderSessionID: current.ThreadID, State: domain.SessionBindingActive, Version: 1, CreatedAt: now, UpdatedAt: now}
+			}
+		}
+	}
+
 	if _, err := tx.ExecContext(ctx, `INSERT INTO tasks (`+taskColumns+`) VALUES (
 		?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		task.ID, task.Version, task.Status, task.SenderPrincipalID, task.TargetAgentID, task.DispatchMode, task.Intent, task.CompletionBasis,
@@ -188,6 +224,11 @@ func (r *Repository) createTask(ctx context.Context, task *domain.Task, initialM
 			return nil, domain.ErrIdempotencyConflict
 		}
 		return nil, fmt.Errorf("insert task: %w", err)
+	}
+	if handoff != nil {
+		if err = persistSessionHandoffTx(ctx, tx, handoff, task, now); err != nil {
+			return nil, err
+		}
 	}
 	if binding != nil {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO session_bindings (session_binding_id,context_id,agent_id,backend_id,provider_session_id,state,version,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)`, binding.ID, binding.ContextID, binding.AgentID, binding.BackendID, binding.ProviderSessionID, binding.State, binding.Version, formatTime(binding.CreatedAt), formatTime(binding.UpdatedAt)); err != nil {
@@ -375,6 +416,16 @@ func (r *Repository) CreateMessage(
 		return nil, replayErr
 	} else if replay != nil {
 		return replay, nil
+	}
+	if err := validateTaskSessionTx(ctx, tx, task); err != nil {
+		return nil, err
+	}
+	var handoff int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM agent_sessions WHERE pending_task_id=?`, task.ID).Scan(&handoff); err != nil {
+		return nil, err
+	}
+	if handoff != 0 {
+		return nil, domain.ErrConflict("session handoff input is frozen; wait for completion")
 	}
 	if task.Version != expectedTaskVersion {
 		return nil, domain.ErrStaleVersion

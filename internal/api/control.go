@@ -34,6 +34,7 @@ type CreateTaskRequest struct {
 	Intent            domain.TaskIntent               `json:"intent"`
 	ParentTaskID      string                          `json:"parent_task_id,omitempty"`
 	ContinueContext   bool                            `json:"continue_context,omitempty"`
+	NewSession        *domain.NewSessionRequest       `json:"new_session,omitempty"`
 	RuntimeSession    *domain.RuntimeSessionReference `json:"runtime_session,omitempty"`
 	Content           string                          `json:"content"`
 	Execution         *domain.ExecutionSpec           `json:"execution,omitempty"`
@@ -293,6 +294,15 @@ type NetworkOverviewResponse struct {
 }
 
 func (r CreateTaskRequest) Validate() error {
+	if r.NewSession != nil {
+		if err := r.NewSession.Validate(); err != nil {
+			return err
+		}
+		if r.RuntimeSession != nil || r.ContinueContext || r.ParentTaskID != "" || r.Intent != domain.TaskIntentQuery || r.Execution != nil {
+			return domain.ErrInvalidInput("new_session requires a standalone query without runtime_session or execution override")
+		}
+	}
+
 	if r.RuntimeSession != nil {
 		if err := r.RuntimeSession.Validate(); err != nil {
 			return err

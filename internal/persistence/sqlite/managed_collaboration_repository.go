@@ -44,12 +44,26 @@ func resolveManagedBindingTx(ctx context.Context, tx *sql.Tx, b *domain.External
 	if external != 0 {
 		return domain.ErrConflict("native thread is still owned by an external session")
 	}
+	if err := sessionGate(ctx, tx, b.AgentID, ""); err != nil {
+		return err
+	}
+	var active string
+	err = tx.QueryRowContext(ctx, `SELECT provider_session_id FROM agent_sessions WHERE agent_id=? AND backend_id=?`, b.AgentID, b.ManagedBackendID).Scan(&active)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if err == nil && active != "" && active != provider {
+		return domain.ErrConflict("managed context belongs to a retired Agent session")
+	}
 	b.HostID = "managed-worker"
 	b.ThreadID = provider
 	return nil
 }
 
 func (r *Repository) createManagedMessageTaskTx(ctx context.Context, tx *sql.Tx, m *domain.ExternalMessage, b *domain.ExternalSessionBinding, role string) error {
+	if err := sessionGate(ctx, tx, b.AgentID, ""); err != nil {
+		return err
+	}
 	if b.Mode != "managed" || b.State != "active" || !r.now().Before(b.TokenExpiresAt) {
 		return domain.ErrConflict("managed communication binding is not active")
 	}

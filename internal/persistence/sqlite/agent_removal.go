@@ -198,8 +198,11 @@ func (r *Repository) planAgentRemoval(ctx context.Context, q removalQuery, actor
 	if err := q.QueryRowContext(ctx, "SELECT version FROM schema_meta WHERE singleton=1").Scan(&s.plan.SchemaVersion); err != nil {
 		return nil, err
 	}
-	if s.plan.SchemaVersion != 5 && s.plan.SchemaVersion != 6 {
+	if s.plan.SchemaVersion != 5 && s.plan.SchemaVersion != 6 && s.plan.SchemaVersion != migrations.CurrentVersion {
 		return nil, migrations.ErrUnsupportedSchemaVersion
+	}
+	if s.plan.SchemaVersion >= 7 {
+		s.predicates["agent_sessions"] = "agent_id IN " + removalIn(ids)
 	}
 	h := sha256.New()
 	encoder := json.NewEncoder(h)
@@ -253,11 +256,16 @@ func (r *Repository) planAgentRemoval(ctx context.Context, q removalQuery, actor
 		for i := range values {
 			dest[i] = &values[i]
 		}
-		_ = encoder.Encode(table)
+		if table != "agent_sessions" {
+			_ = encoder.Encode(table)
+		}
 		for rows.Next() {
 			if err = rows.Scan(dest...); err != nil {
 				rows.Close()
 				return nil, err
+			}
+			if table == "agent_sessions" && s.plan.Counts[table] == 0 {
+				_ = encoder.Encode(table)
 			}
 			if err = encoder.Encode(values); err != nil {
 				rows.Close()
@@ -277,7 +285,7 @@ func (r *Repository) planAgentRemoval(ctx context.Context, q removalQuery, actor
 			s.plan.Counts[table] = 0
 		}
 	}
-	if s.plan.Counts["agents"] == 0 && s.plan.SchemaVersion == 6 {
+	if s.plan.Counts["agents"] == 0 && s.plan.SchemaVersion >= 6 {
 		encoded, _ := json.Marshal(ids)
 		var savedDigest, savedCounts string
 		err := q.QueryRowContext(ctx, "SELECT digest,counts_json FROM agent_removal_receipts WHERE actor_principal_id=? AND agent_ids_json=? ORDER BY created_at DESC LIMIT 1", actor, string(encoded)).Scan(&savedDigest, &savedCounts)
@@ -490,7 +498,7 @@ func (r *Repository) ApplyAgentRemoval(ctx context.Context, actor string, ids []
 	if err = tx.QueryRowContext(ctx, "SELECT version FROM schema_meta WHERE singleton=1").Scan(&version); err != nil {
 		return nil, err
 	}
-	if version != 6 {
+	if version != 6 && version != migrations.CurrentVersion {
 		return nil, migrations.ErrUnsupportedSchemaVersion
 	}
 	var savedIDs, savedCounts string
@@ -547,7 +555,7 @@ func (r *Repository) ApplyAgentRemoval(ctx context.Context, actor string, ids []
 	if err = r.inject(FaultAfterDelivery); err != nil {
 		return nil, err
 	}
-	order := []string{"managed_message_tasks", "external_messages", "external_session_bindings", "mailbox_items", "artifacts", "approval_decisions", "approval_requests", "workspace_leases", "run_attempts", "messages", "session_bindings", "tasks", "network_workflow_commands", "network_imports", "network_work_items", "network_mode_tests", "network_tests", "network_profile_bindings", "network_mode_policies", "worker_commands", "runtime_backend_registrations", "worker_instances", "external_role_scopes", "authority_policies", "position_assignments", "agent_profiles", "execution_profiles", "agents", "principals"}
+	order := []string{"agent_sessions", "managed_message_tasks", "external_messages", "external_session_bindings", "mailbox_items", "artifacts", "approval_decisions", "approval_requests", "workspace_leases", "run_attempts", "messages", "session_bindings", "tasks", "network_workflow_commands", "network_imports", "network_work_items", "network_mode_tests", "network_tests", "network_profile_bindings", "network_mode_policies", "worker_commands", "runtime_backend_registrations", "worker_instances", "external_role_scopes", "authority_policies", "position_assignments", "agent_profiles", "execution_profiles", "agents", "principals"}
 	for _, table := range order {
 		rowIDs := selected.rows[table]
 		for len(rowIDs) > 0 {

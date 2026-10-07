@@ -95,7 +95,7 @@ openagentx agent open research --native
 ## 日常观察与边界
 
 - `openagentx agent status <id>` 查看是否可开始、当前任务及最近结果。`openagentx agent open <id> --native` 打开原生 Codex；`--console` 打开 OAX 状态终端。两种界面都不承担后台监听职责。
-- 原生输入会创建正式 Task/Run；来自网页或 API 的后续任务排队执行。同一个 thread 不会同时启动两轮。默认新任务新会话；明确 `--thread-id` 加入的长期 Agent 延续该会话。
+- 原生输入会创建正式 Task/Run；来自网页或 API 的后续任务排队执行。同一个 thread 不会同时启动两轮。未登记活动会话时保留默认新任务新会话、明确 `--thread-id` 加入则续原会话的行为。使用 [`agent new-session`](agent-new-session.md) 完成正式交接后，后续任务采用已发布的新活动会话，旧历史保留。
 - 默认代理在创建时保存进 Agent 的私密环境文件。修改代理来源后，已经运行的进程不会自动更新；需要显式调整该 Agent 配置并恢复服务。Codex 当前支持 inherit/direct，命名网络 profile 暂不开放。
 - 当前 Codex 0.160.0 单独的 `turn/interrupt` 可能留下工具进程。本实现会核验实际停止，必要时终止该 Agent 的专属引擎，再在下一任务重建。同一引擎中旧任务留下的后台服务也可能停止，打开的原生终端需重开；其它 Agent、共享或外部引擎不会被这样终止。不要把需永久驻留的业务服务托管在该工具引擎中。
 - 工具副作用无法核实时保留 `uncertain`。文件 mutation 的 Run 成功而 Task 标记“效果待确认”不代表写文件失败；请结合工作目录中的实际产物验收。取消不会撤销已经写出的文件。

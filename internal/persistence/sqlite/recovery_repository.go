@@ -110,6 +110,15 @@ func (r *Repository) ReconcileExpired(ctx context.Context) error {
 			}
 		}
 	}
+	for _, row := range runRows {
+		task, e := scanTask(tx.QueryRowContext(ctx, `SELECT `+taskColumns+` FROM tasks WHERE task_id=?`, row.taskID))
+		if e != nil {
+			return e
+		}
+		if e = settleSessionHandoffTx(ctx, tx, task, now); e != nil {
+			return e
+		}
+	}
 	if err := r.inject(FaultBeforeCommit); err != nil {
 		return err
 	}

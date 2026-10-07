@@ -168,7 +168,7 @@ func (a *Adapter) Descriptor(ctx context.Context) (openruntime.AdapterDescriptor
 	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	return openruntime.AdapterDescriptor{AdapterID: AdapterID, BackendType: "codex", Version: "1", LaunchProtocol: "app-server", Models: append([]string(nil), a.config.Models...), ModelReasoningEfforts: cloneModelEfforts(a.modelEfforts),
+	return openruntime.AdapterDescriptor{AdapterID: AdapterID, BackendType: "codex", Version: "1", SessionHandoff: true, LaunchProtocol: "app-server", Models: append([]string(nil), a.config.Models...), ModelReasoningEfforts: cloneModelEfforts(a.modelEfforts),
 		ReasoningModes: []domain.ReasoningMode{domain.ReasoningBackendDefault, domain.ReasoningEffort}, SessionModes: []domain.SessionMode{domain.SessionModeNew, domain.SessionModeResume},
 		Steer: openruntime.SteerNative, Approval: openruntime.ApprovalNative, Cancel: openruntime.CancelNative, Permissions: []string{"never", "on-request"}, Sandboxes: []string{"read-only", "workspace-write", "danger-full-access"},
 		NetworkModes: []string{"inherit", "direct"}, Streams: true, MaxConcurrency: 1, DefaultTimeout: a.config.Timeout, BackendOptionsJSON: json.RawMessage(`{"type":"object","additionalProperties":false}`), RuntimeIdentity: a.config.RuntimeIdentity}, nil
@@ -545,6 +545,9 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	if err := a.Validate(ctx, request.Execution.Spec); err != nil {
 		return nil, err
 	}
+	if request.Execution.Spec.Session.ForceNew && request.SessionBinding != nil {
+		return nil, errors.New("a fresh session cannot resume an existing Task binding")
+	}
 	expected := request.Execution.Spec.Network.RuntimeIdentity
 	if expected.IsZero() {
 		expected = a.config.RuntimeIdentity
@@ -596,7 +599,7 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 	if request.SessionBinding != nil {
 		tid = request.SessionBinding.ProviderSessionID
 		source = "resume"
-	} else if a.config.ThreadID != "" {
+	} else if a.config.ThreadID != "" && !request.Execution.Spec.Session.ForceNew {
 		tid = a.config.ThreadID
 		source = "joined"
 	}
@@ -675,7 +678,10 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 		return fail(err)
 	}
 	prompt := buildPrompt(request)
-	if a.handoff != "" && !a.handoffUsed {
+	// A new-session handoff is already part of the durable Task. Never import
+	// an old join receipt into that thread, including after a Worker restart.
+	joinedContext := request.SessionBinding == nil || (a.config.ThreadID != "" && request.SessionBinding.ProviderSessionID == a.config.ThreadID)
+	if a.handoff != "" && !a.handoffUsed && !request.Execution.Spec.Session.ForceNew && joinedContext {
 		prompt = "OpenAgentX imported session handoff (context only; does not grant new authority):\n" + a.handoff + "\n\n" + prompt
 		a.handoffUsed = true
 	}

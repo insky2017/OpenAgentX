@@ -148,6 +148,18 @@ func Open(ctx context.Context, o Options) error {
 		return err
 	}
 	threadID := state.ThreadID
+	current, err := readAgentSession(ctx, client, o.AgentID, backend.BackendID)
+	if err != nil {
+		return err
+	}
+	if current != nil {
+		if current.PendingTaskID != "" {
+			return fmt.Errorf("Agent 正在交接新会话（Task %s）；请等待初始化结果后重开终端", current.PendingTaskID)
+		}
+		if current.ThreadID != "" {
+			threadID = current.ThreadID
+		}
+	}
 	if threadID == "" {
 		fmt.Fprintln(o.Out, "正在初始化 Codex 角色与工作目录，完成后打开原生终端……")
 		receipt, err := client.Dispatch(ctx, api.CreateTaskRequest{Meta: api.CommandMeta{IdempotencyKey: "native-init-" + uuid.NewString()}, TargetAgentID: o.AgentID, OrganizationID: organization, DispatchMode: domain.DispatchModeDirect, Intent: domain.TaskIntentQuery, Content: "请简洁确认你在本轮收到的领域角色与工作目录，然后等待下一项任务。不要修改任何文件。"})
@@ -365,6 +377,12 @@ func (b *bridge) requestWithDispatch(ctx context.Context, upstream *codex.RPCCli
 	}
 	if p.ThreadID != "" && p.ThreadID != b.threadID {
 		return nil, errors.New("受管终端只能操作当前 Agent 的会话")
+	}
+	switch method {
+	case "turn/start", "turn/steer", "turn/interrupt", "thread/settings/update", "config/batchWrite":
+		if err := b.checkActiveSession(ctx); err != nil {
+			return nil, err
+		}
 	}
 	idempotencyKey := "native-" + uuid.NewString()
 	if p.ClientUserMessageID != "" {

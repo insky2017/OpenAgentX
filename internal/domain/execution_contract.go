@@ -35,6 +35,7 @@ type ReasoningSpec struct {
 }
 
 type SessionSpec struct {
+	ForceNew  bool        `json:"force_new,omitempty"`
 	Mode      SessionMode `json:"mode"`
 	ContextID string      `json:"context_id,omitempty"`
 }
@@ -69,6 +70,9 @@ func (s ExecutionSpec) ValidateShape() error {
 	}
 	if !s.Reasoning.Mode.Valid() || !s.Session.Mode.Valid() {
 		return ErrInvalidInput("unsupported reasoning or session mode")
+	}
+	if s.Session.ForceNew && (s.Session.Mode != SessionModeNew || s.AdapterID != "codex-app-server") {
+		return ErrInvalidInput("force_new requires a new Codex session")
 	}
 	if s.Timeout < 0 || (s.Timeout == 0 && s.AdapterID != "codex-app-server") {
 		return ErrInvalidInput("execution timeout must be positive; Codex permits zero for no execution deadline")
