@@ -78,7 +78,10 @@ func DialRPC(ctx context.Context, endpoint string) (*RPCClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect Codex app-server: %w", err)
 	}
-	conn.SetReadLimit(32 << 20)
+	// thread/resume and thread/read include accumulated history. A long-lived
+	// managed thread can exceed 32 MiB before any new work is dispatched. Keep
+	// a finite bound on this private/local transport without truncating history.
+	conn.SetReadLimit(128 << 20)
 	c := &RPCClient{conn: conn, pending: map[string]chan RPCMessage{}, subs: map[uint64]chan RPCMessage{}, done: make(chan struct{})}
 	go c.readLoop()
 	return c, nil
