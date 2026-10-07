@@ -11,6 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 	admincli "openagentx/internal/cli/admin"
 	"openagentx/internal/domain"
+	fleetmodel "openagentx/internal/fleet"
 	"openagentx/internal/persistence/sqlite"
 )
 
@@ -85,6 +86,19 @@ func TestRegisteredResumeUsesCurrentIdentityInsteadOfBootstrapReceipt(t *testing
 		mutate func()
 		want   string
 	}{
+		{"legacy-manifest-without-identity", func() {
+			manifest, err := fleetmodel.LoadFile(f.manifest)
+			if err != nil {
+				t.Fatal(err)
+			}
+			manifest.Agents[0].IdentityFile = ""
+			encoded, err := fleetmodel.Encode(manifest)
+			if err != nil {
+				t.Fatal(err)
+			}
+			write(f.manifest, encoded)
+			write(receiptPath, []byte("{ broken legacy receipt"))
+		}, ""},
 		{"damaged-receipt", func() { write(receiptPath, []byte("{ broken receipt")) }, ""},
 		{"stale-marker-and-mutable-timeout", func() {
 			write(workerPath, []byte(strings.ReplaceAll(string(baseline[workerPath]), "timeout: 0s", "timeout: 2h")))

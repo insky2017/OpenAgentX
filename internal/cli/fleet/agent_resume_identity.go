@@ -63,30 +63,48 @@ func verifyRegisteredResume(ctx context.Context, o agentOptions, deps Dependenci
 		return false, err
 	}
 	entry := prepared[0]
-	if entry.entry.IdentityFile == "" {
-		return false, fmt.Errorf("registered Agent resume requires Fleet identity_file; use the formal Agent management entrypoint")
+	option := optionMap[o.id]
+	if option.AgentID != agent.ID || option.OrganizationID != agent.OrganizationID || option.DisplayName != agent.DisplayName {
+		return false, fmt.Errorf("registered Agent does not match authenticated Console identity")
 	}
-	identityPath := entry.entry.IdentityFile
-	if !filepath.IsAbs(identityPath) {
-		identityPath = filepath.Join(filepath.Dir(o.paths.manifest), identityPath)
-	}
-	if _, err = fleetmodel.ReadSecureFile(identityPath, fleetmodel.SecureFileOptions{MaximumBytes: 1 << 20, RequirePrivate: true}); err != nil {
+	if err = agent.Validate(); err != nil {
 		return false, err
 	}
-	definition, err := admincli.LoadAgentDefinition(identityPath)
-	if err != nil {
+	if err = profile.Validate(); err != nil {
 		return false, err
 	}
-	localCapabilities := append([]string(nil), definition.Profile.Capabilities...)
-	registeredCapabilities := append([]string(nil), profile.Capabilities...)
-	slices.Sort(localCapabilities)
-	slices.Sort(registeredCapabilities)
-	if definition.AgentID != agent.ID || definition.PrincipalID != agent.PrincipalID ||
-		definition.OrganizationID != agent.OrganizationID || definition.DisplayName != agent.DisplayName ||
-		filepath.Clean(definition.Profile.InstructionsPath) != filepath.Clean(profile.InstructionsPath) ||
-		filepath.Clean(definition.Profile.WorkspaceRoot) != filepath.Clean(profile.WorkspaceRoot) ||
-		!slices.Equal(localCapabilities, registeredCapabilities) {
-		return false, fmt.Errorf("local identity/role/workspace does not match registered Agent; use the formal Agent management entrypoint")
+	if !filepath.IsAbs(profile.WorkspaceRoot) || !filepath.IsAbs(profile.InstructionsPath) {
+		return false, fmt.Errorf("registered Agent workspace and role paths must be absolute")
+	}
+	workspace, err := os.Stat(profile.WorkspaceRoot)
+	if err != nil || !workspace.IsDir() {
+		return false, fmt.Errorf("registered Agent workspace must be an existing directory")
+	}
+	// Legacy Fleet entries legitimately omit identity_file. The authenticated
+	// installation's identity/profile remains authoritative in that case.
+	if entry.entry.IdentityFile != "" {
+		identityPath := entry.entry.IdentityFile
+		if !filepath.IsAbs(identityPath) {
+			identityPath = filepath.Join(filepath.Dir(o.paths.manifest), identityPath)
+		}
+		if _, err = fleetmodel.ReadSecureFile(identityPath, fleetmodel.SecureFileOptions{MaximumBytes: 1 << 20, RequirePrivate: true}); err != nil {
+			return false, err
+		}
+		definition, err := admincli.LoadAgentDefinition(identityPath)
+		if err != nil {
+			return false, err
+		}
+		localCapabilities := append([]string(nil), definition.Profile.Capabilities...)
+		registeredCapabilities := append([]string(nil), profile.Capabilities...)
+		slices.Sort(localCapabilities)
+		slices.Sort(registeredCapabilities)
+		if definition.AgentID != agent.ID || definition.PrincipalID != agent.PrincipalID ||
+			definition.OrganizationID != agent.OrganizationID || definition.DisplayName != agent.DisplayName ||
+			filepath.Clean(definition.Profile.InstructionsPath) != filepath.Clean(profile.InstructionsPath) ||
+			filepath.Clean(definition.Profile.WorkspaceRoot) != filepath.Clean(profile.WorkspaceRoot) ||
+			!slices.Equal(localCapabilities, registeredCapabilities) {
+			return false, fmt.Errorf("local identity/role/workspace does not match registered Agent; use the formal Agent management entrypoint")
+		}
 	}
 	// The registered role path is the Runtime's current source. Role contents
 	// are frozen per Run; there is no immutable bootstrap content hash.
