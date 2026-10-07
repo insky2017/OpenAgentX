@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-07T03:43:23.111265+00:00",
+  "status": "PASS_AFTER_SCOPED_RECOVERY",
+  "source_commit": "4774f19103ff2b9fff7eaf2ce2527578f3d75a55",
+  "installed_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+  "six_workers_online_healthy": true,
+  "six_original_threads_preserved": true,
+  "six_original_window_panes_reconnected": true,
+  "seven_services_and_six_bridges_match_verified_artifact": true,
+  "six_settings_apis_and_bridge_read_rpcs": true,
+  "production_business_tasks_replayed": false,
+  "initial_deployment_status": "FAILED (preserved in deployment01/result.json)",
+  "remaining": [
+    "rhythm registered handoff checksum mismatch",
+    "pay-service join receipt invalid JSON",
+    "30 minute Run timeout unchanged"
+  ],
+  "isolated_real_model_e2e": "PASS; production verification reads only"
+}

@@ -1,0 +1,11 @@
+{
+  "receipt": {
+    "agent_id": "pay-service",
+    "backend_id": "codex",
+    "binding_revision": 3,
+    "mode": "inherit",
+    "policy_version": 3,
+    "state": "pending",
+    "work_id": "network-mode-apply-98523d53-b484-4378-a0ec-df6077ee1867"
+  }
+}

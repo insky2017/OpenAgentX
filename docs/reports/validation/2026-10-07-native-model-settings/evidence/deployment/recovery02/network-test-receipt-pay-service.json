@@ -1,0 +1,12 @@
+{
+  "receipt": {
+    "agent_id": "pay-service",
+    "backend_id": "codex",
+    "binding_revision": 2,
+    "manifest_digest": "33317679d4cf2ac7234c85263dfb764deff6b2ff03c1abf6097ff9e17051a9c6",
+    "mode": "inherit",
+    "policy_version": 3,
+    "state": "pending",
+    "test_id": "network-mode-test-b9143a1e-43b1-473e-a500-07f105f934fb"
+  }
+}

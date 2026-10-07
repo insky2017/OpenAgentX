@@ -1,0 +1,43 @@
+{
+  "worker": {
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    },
+    "agent_id": "rhythm",
+    "mode": "normal",
+    "generation": 3,
+    "worker_status": "online",
+    "worker_instance_id": "worker-10d989db-1776-4a32-ba8c-3366da8c4d78",
+    "last_heartbeat_at": "2026-10-07T03:40:46.924260249Z",
+    "lease_until": "2026-10-07T03:41:16.924260249Z",
+    "backend_health": {
+      "codex": "healthy"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 468837
+  },
+  "binding": {
+    "agent_id": "rhythm",
+    "backend_id": "codex",
+    "mode": "inherit",
+    "policy_version": 3,
+    "test_id": "network-mode-test-61f9f590-85dc-4a39-b084-904e769e366c",
+    "manifest_digest": "6cced4421c939a56918d7a6291513ecdecebb63a1d9d19b6fe14f7d964aa76ae",
+    "runtime_identity": {
+      "adapter_id": "codex-app-server",
+      "adapter_version": "1",
+      "executable_sha256": "f34a4d2301892ae96c90097786bfe5dc269f187b6f69faf42a7b357b8c081e35"
+    },
+    "version": 3,
+    "desired_status": "applied",
+    "applied_worker_id": "worker-10d989db-1776-4a32-ba8c-3366da8c4d78",
+    "applied_generation": 3,
+    "applied_mode": "inherit",
+    "applied_policy_version": 3,
+    "applied_binding_revision": 3,
+    "updated_at": "2026-10-07T03:40:47.663932639Z"
+  }
+}

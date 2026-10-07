@@ -1,0 +1,47 @@
+{
+  "pane": {
+    "window": "@8",
+    "pane": "%11",
+    "pid": 31132,
+    "dead": false,
+    "name": "openagentx"
+  },
+  "processes": [
+    {
+      "pid": 31132,
+      "ppid": 7674,
+      "start": "57425",
+      "argv": [
+        "-zsh"
+      ],
+      "comm": "zsh"
+    },
+    {
+      "pid": 2510331,
+      "ppid": 31132,
+      "start": "56273473",
+      "argv": [
+        "openagentx",
+        "agent",
+        "open",
+        "openagentx",
+        "--native"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 2510780,
+      "ppid": 2510331,
+      "start": "56273588",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-3546793119/bridge.sock",
+        "--no-alt-screen",
+        "01a0c98a-bef8-7730-9b2b-cbc2f3594559"
+      ],
+      "comm": "codex"
+    }
+  ]
+}

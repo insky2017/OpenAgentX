@@ -1,0 +1,47 @@
+{
+  "pane": {
+    "window": "@30",
+    "pane": "%60",
+    "pid": 3525429,
+    "dead": false,
+    "name": "identity-service"
+  },
+  "processes": [
+    {
+      "pid": 3525429,
+      "ppid": 7674,
+      "start": "34121500",
+      "argv": [
+        "-zsh"
+      ],
+      "comm": "zsh"
+    },
+    {
+      "pid": 90909,
+      "ppid": 3525429,
+      "start": "35717993",
+      "argv": [
+        "openagentx",
+        "agent",
+        "open",
+        "identity-service",
+        "--native"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 93117,
+      "ppid": 90909,
+      "start": "35719399",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-1188676582/bridge.sock",
+        "--no-alt-screen",
+        "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69"
+      ],
+      "comm": "codex"
+    }
+  ]
+}

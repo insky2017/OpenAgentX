@@ -1,0 +1,47 @@
+{
+  "pane": {
+    "window": "@3",
+    "pane": "%3",
+    "pid": 30767,
+    "dead": false,
+    "name": "quote-service"
+  },
+  "processes": [
+    {
+      "pid": 30767,
+      "ppid": 7674,
+      "start": "57386",
+      "argv": [
+        "-zsh"
+      ],
+      "comm": "zsh"
+    },
+    {
+      "pid": 18653,
+      "ppid": 30767,
+      "start": "35593345",
+      "argv": [
+        "openagentx",
+        "agent",
+        "open",
+        "quote-service",
+        "--native"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 21538,
+      "ppid": 18653,
+      "start": "35596155",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-1950905418/bridge.sock",
+        "--no-alt-screen",
+        "01a1010a-c521-78b2-98f0-eaafa642c5fa"
+      ],
+      "comm": "codex"
+    }
+  ]
+}

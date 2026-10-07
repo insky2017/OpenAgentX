@@ -1,0 +1,44 @@
+{
+  "worker": {
+    "readiness": {
+      "ready": false,
+      "can_start_now": false,
+      "reason": "运行环境或网络尚未就绪",
+      "next_action": "openagentx agent resume rhythm"
+    },
+    "agent_id": "rhythm",
+    "mode": "normal",
+    "generation": 3,
+    "worker_status": "online",
+    "worker_instance_id": "worker-10d989db-1776-4a32-ba8c-3366da8c4d78",
+    "last_heartbeat_at": "2026-10-07T03:40:26.928875664Z",
+    "lease_until": "2026-10-07T03:40:56.928875664Z",
+    "backend_health": {
+      "codex": "unavailable"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 468818
+  },
+  "binding": {
+    "agent_id": "rhythm",
+    "backend_id": "codex",
+    "mode": "inherit",
+    "policy_version": 2,
+    "test_id": "network-mode-test-ebe989ee-2818-4b99-98df-92b4034b7969",
+    "manifest_digest": "832da5a3e299679b81d07cb66505f556d50bdf2fbd24a2ade20719728603b740",
+    "runtime_identity": {
+      "adapter_id": "codex-app-server",
+      "adapter_version": "1",
+      "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad"
+    },
+    "version": 2,
+    "desired_status": "applied",
+    "applied_worker_id": "worker-62fa1611-e4e3-45f1-83cc-eaaee8a2eea3",
+    "applied_generation": 2,
+    "applied_mode": "inherit",
+    "applied_policy_version": 2,
+    "applied_binding_revision": 2,
+    "updated_at": "2026-10-03T14:59:59.423288147Z"
+  }
+}

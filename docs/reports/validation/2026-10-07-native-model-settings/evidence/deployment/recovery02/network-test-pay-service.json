@@ -1,0 +1,56 @@
+{
+  "test_id": "network-mode-test-b9143a1e-43b1-473e-a500-07f105f934fb",
+  "agent_id": "pay-service",
+  "backend_id": "codex",
+  "policy_version": 3,
+  "mode": "inherit",
+  "manifest_digest": "33317679d4cf2ac7234c85263dfb764deff6b2ff03c1abf6097ff9e17051a9c6",
+  "worker_instance_id": "worker-3bdf6a0d-484b-4042-be38-ccaf0ac30e9d",
+  "generation": 5,
+  "runtime_identity": {
+    "adapter_id": "codex-app-server",
+    "adapter_version": "1",
+    "executable_sha256": "f34a4d2301892ae96c90097786bfe5dc269f187b6f69faf42a7b357b8c081e35"
+  },
+  "binding_revision": 2,
+  "state": "succeeded",
+  "duration_ms": 984,
+  "probe_results": [
+    {
+      "layer": "configuration",
+      "state": "passed"
+    },
+    {
+      "layer": "secret",
+      "state": "not_verified",
+      "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+    },
+    {
+      "layer": "endpoint",
+      "state": "not_verified",
+      "diagnostic_code": "INHERITED_CONFIGURATION_UNVERIFIED"
+    },
+    {
+      "layer": "direct_rules",
+      "state": "not_applicable"
+    },
+    {
+      "layer": "runtime_health",
+      "state": "passed",
+      "duration_ms": 257
+    },
+    {
+      "layer": "network_effect",
+      "state": "not_verified",
+      "diagnostic_code": "NOT_VERIFIED"
+    },
+    {
+      "layer": "model_call",
+      "state": "not_verified",
+      "diagnostic_code": "NOT_VERIFIED"
+    }
+  ],
+  "created_by": "human-owner-fcb97a48-054b-44fb-8b3f-0d44eb0dc973",
+  "created_at": "2026-10-07T03:40:49.421734186Z",
+  "finished_at": "2026-10-07T03:40:58.057730617Z"
+}

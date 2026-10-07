@@ -1,0 +1,284 @@
+{
+  "at": "2026-10-07T03:43:22.472103+00:00",
+  "binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+  "states": {
+    "openagentx": {
+      "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "state": "running",
+      "task_id": "task-ba0f9dac-d4ca-4f86-ae10-a5a4a003b932",
+      "run_id": "run-24d93238-0e63-4331-91c6-b1cc5fb58679",
+      "pid": 2488243
+    },
+    "rhythm": {
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "state": "restored_unconfirmed",
+      "task_id": "task-dbadcb8b-6277-41ec-abc0-d33004a56760",
+      "run_id": "run-1d74ae96-3dff-4deb-964b-e1fe511ae451",
+      "pid": 2488251
+    },
+    "pay-service": {
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "state": "restored_unconfirmed",
+      "task_id": "task-f645e6fa-aa85-4f0c-aec0-f14693efa9e7",
+      "run_id": "run-01d99954-9286-4bfa-a8c3-5cf64e7d1f16",
+      "pid": 2488244
+    },
+    "quote-service": {
+      "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "state": "restored_unconfirmed",
+      "task_id": "task-cdb3bd79-1f77-496e-bdca-b91e45c5c78e",
+      "run_id": "run-4cee9941-8a1b-4bf3-9d66-919ff2d294cb",
+      "pid": 2488377
+    },
+    "identity-service": {
+      "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "state": "restored_unconfirmed",
+      "task_id": "task-96942a10-68f6-425c-bdb1-bcf009fae25a",
+      "run_id": "run-5c7699e8-4286-4d38-b2b2-252647f23196",
+      "pid": 2488433
+    },
+    "oneaxe-voice": {
+      "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "state": "restored_unconfirmed",
+      "task_id": "task-0ed31dd5-78e5-450a-bf57-e62bd314f4e9",
+      "run_id": "run-899810e3-80f6-40fb-88f0-8b58499f0b06",
+      "pid": 2488521
+    }
+  },
+  "panes": {
+    "openagentx": {
+      "window": "@8",
+      "pane": "%11",
+      "pid": 31132,
+      "dead": false,
+      "name": "openagentx"
+    },
+    "oneaxe-voice": {
+      "window": "@11",
+      "pane": "%17",
+      "pid": 32093,
+      "dead": false,
+      "name": "oneaxe-voice"
+    },
+    "rhythm": {
+      "window": "@28",
+      "pane": "%55",
+      "pid": 2531349,
+      "dead": false,
+      "name": "rhythm"
+    },
+    "pay-service": {
+      "window": "@27",
+      "pane": "%54",
+      "pid": 1129591,
+      "dead": false,
+      "name": "pay-service"
+    },
+    "quote-service": {
+      "window": "@3",
+      "pane": "%3",
+      "pid": 30767,
+      "dead": false,
+      "name": "quote-service"
+    },
+    "identity-service": {
+      "window": "@30",
+      "pane": "%60",
+      "pid": 3525429,
+      "dead": false,
+      "name": "identity-service"
+    }
+  },
+  "workers": {
+    "openagentx": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": false,
+        "reason": "正在工作，新任务将排队"
+      },
+      "agent_id": "openagentx",
+      "mode": "normal",
+      "generation": 2,
+      "worker_status": "online",
+      "worker_instance_id": "worker-05529e0b-550b-44f1-b93b-fb1947a85dfb",
+      "last_heartbeat_at": "2026-10-07T03:43:16.808743153Z",
+      "lease_until": "2026-10-07T03:43:46.808743153Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "active_run": {
+        "run_id": "run-24d93238-0e63-4331-91c6-b1cc5fb58679",
+        "task_id": "task-ba0f9dac-d4ca-4f86-ae10-a5a4a003b932",
+        "status": "starting",
+        "worker_instance_id": "worker-05529e0b-550b-44f1-b93b-fb1947a85dfb",
+        "worker_generation": 2,
+        "started_at": "2026-10-07T03:36:38.352521054Z",
+        "updated_at": "2026-10-07T03:43:16.808743153Z"
+      },
+      "suggested_task": {
+        "task_id": "task-ba0f9dac-d4ca-4f86-ae10-a5a4a003b932",
+        "version": 2,
+        "status": "running",
+        "intent": "mutation",
+        "summary": "继续用户已批准的受管Codex模型切换修复收尾。独立部署脚本已结束，以结果文件中的状态为准。先完整读取 /home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/deployment01/result.json 和 operations.jsonl，核验六域Worker、原thread和准确原生pane，再检查实际设置API及本轮隔离真实E2E证据。不要重跑业务任务、不要新增目标。若部署失败，仅按原授权恢复受影响OAX服务，保持thread。将实际安装/重启结论补入仓库 docs/reports/validation/2026-10-07-native-model-settings/DELIVERY.md，提交合入并push main，给用户简洁中文最终汇报。产品实现工作树是 /home/sky/work/touzi/OneAxe/OpenAgentX-native-model-worktree。最多使用一个子代理。",
+        "updated_at": "2026-10-07T03:36:38.352521054Z"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 468942
+    },
+    "rhythm": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "rhythm",
+      "mode": "normal",
+      "generation": 3,
+      "worker_status": "online",
+      "worker_instance_id": "worker-10d989db-1776-4a32-ba8c-3366da8c4d78",
+      "last_heartbeat_at": "2026-10-07T03:43:16.929760401Z",
+      "lease_until": "2026-10-07T03:43:46.929760401Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 468942
+    },
+    "pay-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "pay-service",
+      "mode": "normal",
+      "generation": 5,
+      "worker_status": "online",
+      "worker_instance_id": "worker-3bdf6a0d-484b-4042-be38-ccaf0ac30e9d",
+      "last_heartbeat_at": "2026-10-07T03:43:16.917921261Z",
+      "lease_until": "2026-10-07T03:43:46.917921261Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 468942
+    },
+    "quote-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "quote-service",
+      "mode": "normal",
+      "generation": 54,
+      "worker_status": "online",
+      "worker_instance_id": "worker-673f557a-ea7b-4f9d-b6b9-ba2e325273c6",
+      "last_heartbeat_at": "2026-10-07T03:43:16.950113208Z",
+      "lease_until": "2026-10-07T03:43:46.950113208Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 468942
+    },
+    "identity-service": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "identity-service",
+      "mode": "normal",
+      "generation": 2,
+      "worker_status": "online",
+      "worker_instance_id": "worker-7c223b8f-e8f7-4c10-9dc8-8cd3c08ba952",
+      "last_heartbeat_at": "2026-10-07T03:43:16.96733639Z",
+      "lease_until": "2026-10-07T03:43:46.96733639Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 468942
+    },
+    "oneaxe-voice": {
+      "readiness": {
+        "ready": true,
+        "can_start_now": true,
+        "reason": "可开始工作"
+      },
+      "agent_id": "oneaxe-voice",
+      "mode": "normal",
+      "generation": 2,
+      "worker_status": "online",
+      "worker_instance_id": "worker-cde95c76-3e40-44c5-8226-acdc83e8cc76",
+      "last_heartbeat_at": "2026-10-07T03:43:16.993364146Z",
+      "lease_until": "2026-10-07T03:43:46.993364146Z",
+      "backend_health": {
+        "codex": "healthy"
+      },
+      "observe_base_path": "/api/observe/v1",
+      "control_base_path": "/api/control/v1",
+      "snapshot_sequence": 468942
+    }
+  },
+  "service_pids": {
+    "openagentx.service": "2487665",
+    "openagentx-worker@openagentx.service": "2488110",
+    "openagentx-worker@rhythm.service": "2488124",
+    "openagentx-worker@pay-service.service": "2488127",
+    "openagentx-worker@quote-service.service": "2488139",
+    "openagentx-worker@identity-service.service": "2488152",
+    "openagentx-worker@oneaxe-voice.service": "2488164"
+  },
+  "service_artifacts": {
+    "openagentx.service": {
+      "pid": 2487665,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:10 CST"
+    },
+    "openagentx-worker@openagentx.service": {
+      "pid": 2488110,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@rhythm.service": {
+      "pid": 2488124,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@pay-service.service": {
+      "pid": 2488127,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@quote-service.service": {
+      "pid": 2488139,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@identity-service.service": {
+      "pid": 2488152,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    },
+    "openagentx-worker@oneaxe-voice.service": {
+      "pid": 2488164,
+      "executable": "/home/sky/.local/bin/openagentx",
+      "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+      "started_at": "Wed 2026-10-07 11:35:15 CST"
+    }
+  }
+}

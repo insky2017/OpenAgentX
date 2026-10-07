@@ -9,7 +9,7 @@
 
 ## 当前交付状态
 
-- 产品实现、真实模型切换和最终发布工件的隔离重启复验已通过；正式安装/重启交由独立切换单元执行，运行态最终结果待追加，不能将代码合入视为已部署。
+- 产品实现和真实模型切换已通过；正式工件已安装，daemon、六域 Worker 和原生 Bridge 已切换。首次部署失败后，经限定范围恢复，2026-10-07 11:43 CST 正式核验为 `PASS_AFTER_SCOPED_RECOVERY`，见 [最终结果](evidence/deployment/recovery02/result.json)与 [独立复核](evidence/deployment/recovery02/independent-review.json)。不能将该结果解释为所有 CLI 生命周期缺陷已修复。
 - 已验发布源码 `4774f19103ff2b9fff7eaf2ce2527578f3d75a55`，二进制 SHA-256 `780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe`；独立 Git clone、`vcs.modified=false`，见 [工件来源](evidence/release-artifact.json)。
 - 开发工作树：`/home/sky/work/touzi/OneAxe/OpenAgentX-native-model-worktree`，分支 `codex/native-model-settings`，基线 `3e2a859`。
 - 本机原始证据：`~/.local/state/openagentx/validation/2026-10-07-native-model-settings/`。关键脱敏副本、首次失败、独立判定和 SHA manifest 保存在本目录 evidence 中。
@@ -24,15 +24,28 @@
 | 隔离重启首次阻断 | 已定位并修正部署顺序 | 仅启动 Worker 会保留旧 generation 的 inherit 网络绑定，Worker online 不等于可接单；恢复必须经过正式 `agent resume --no-open` 网络握手，不直接改数据库。 |
 | 最终工件重启后真实任务 | 通过 | 同一thread `01a11320-3816-7330-b3d9-506257c92737`、设置version3保留。原排队Task仅有一个Run `run-74349401-bdbc-4d78-96a8-31df2d758cbe`，`gpt-6.1-sol / high`，精确文件 `OAX_MODEL_AFTER_0cf391\n`。 |
 | 真实RPC边界 | 通过 | 六类非法写均拒绝，设置/任务集合和全局config SHA不变；重开后的resume/config/read/model/list投影一致。 |
+| 正式安装与运行工件 | 恢复后通过 | 七个服务、六个前台 Bridge 的实际 `/proc/PID/exe` SHA 均与已验工件一致；服务 PID 已变、Worker generation 上升。见 [运行快照](evidence/deployment/recovery02/final-snapshot.json)。 |
+| 正式六域与原终端 | 恢复后通过 | 六域 online/healthy/ready，原 thread、原 window/pane 不变；六域设置 API 与 Bridge 只读 `model/list`、`config/read` 成功。见 [运行检查](evidence/deployment/recovery02/final-runtime-checks.json)。真实模型选择及文件效果沿用同一工件的隔离 E2E，未重放正式业务任务。 |
+| 操作者自动接续 | 正在同原 thread 执行 | 部署脚本回派 `task-ba0f9dac…` / `run-24d93238…`，恢复后的本 Agent 实际读取结果并执行网络/前台恢复与归档；快照时任务仍在运行，不将其记为业务完成。见 [自动接续](evidence/deployment/recovery02/automatic-verification-task.json)。 |
 | 事务/版本/持久化 | 通过 | 真实 SQLite 集成验证偏好/profile/journal 失败回滚、CAS、重复同值、非法组合、重开仓库及真实 planner。见 [settings-boundary-tests.log](evidence/tests/settings-boundary-tests.log)。 |
 | 受影响包回归 | 通过 | [changed-packages-final.log](evidence/tests/changed-packages-final.log)。 |
 | 全套测试 | 未全部通过 | [首次全套结果](evidence/tests/go-test-all.log)：已有权限放宽与旧断言冲突，在 [main 基线复验](evidence/tests/baseline-main-tests.log) 同样失败；Console 首次刷新超时在 [单独复验](evidence/tests/console-workflow-recheck.log) 通过。首个新增持久化夹具 RuntimeIdentity 不匹配已修复，未把失败删除。 |
 
 ## 部署与恢复
 
-用户明确授权修复后部署并重启。`scripts/validation/deploy_native_model_settings.py` 默认只读检查；`--apply` 才执行正式 Worker stop 命令，等正在运行的任务自然结束，再原子安装、重启 daemon、启动六域 Worker，再逐域运行正式 `agent resume --no-open` 确认当前 generation 的网络应用，最后只在原受管 pane 已退出时重开原生入口。
+用户明确授权修复后部署并重启。独立单元 `oax-native-model-rollout-20261007.service` 经正式 Worker stop 等正在运行的任务自然结束，于 11:35 CST 原子安装并重启 daemon、六域 Worker。操作者自身也被正常收尾，脚本随后回派核验任务，在原 thread 继续处理。本次未强杀活动 Run、未重试 uncertain 业务任务、未修改业务工程或直接写数据库。
 
-操作者自己位于 `openagentx` Worker，故切换由独立 systemd user 单元执行，不依赖将被重启的进程。结果和恢复步骤保存在持久目录；失败时尝试恢复服务及操作者并提交核验任务，不静默回滚、不强杀正在执行的 Run、不重试 uncertain 业务任务。成功后逐域核对原 thread、准确 window/pane、Worker generation、模型目录和 CLI 工件 SHA，再由原 Agent 完成最终核验与报告提交。
+首次脚本结果保留为 [FAILED](evidence/deployment/deployment01/result.json)，其 [操作记录](evidence/deployment/deployment01/operations.jsonl) 与 [自动恢复记录](evidence/deployment/deployment01/recovery.json) 未覆盖：
+
+- Rhythm 的 `.registered` 摘要与当前 receipt/identity/worker/role 输入组合不符；无法仅凭摘要定位哪个输入改变。
+- Pay 的旧 `joins/pay-service.json` 不是有效 JSON，且无 `.registered`。两域 `agent resume` 在网络准备前失败，online Worker 的网络仍属于旧 generation。
+- 脚本误将 pane 进程未退出视为旧终端未退出；OpenAgentX pane 已回到原 zsh，其他五域则确实仍留着旧前台 bridge/TUI。shell 存活与 Bridge 存活需要分别核对。
+
+后续在本次恢复授权内执行最小处置：两域原 `inherit` 网络经正式 mode test/publish 应用到当前 generation；保留接入收据和注册保护。精确核对 PID、启动时间、argv、thread 和 pane 归属后，只结束旧前台 bridge 并重开原 native 入口，不再重启 Worker。原始屏幕只留本机私密目录，未入 Git。执行脚本与 [恢复操作记录](evidence/deployment/recovery02/operations.jsonl) 作为当次证据保存。
+
+最终七个服务与六个 Bridge 的实际可执行文件 SHA 均为上述已验工件；六域 generation 为 OpenAgentX 2、Rhythm 3、Pay 5、Quote 54、Identity 2、Voice 2。六个原 thread、原 `@window/%pane` 均保持，模型设置 API 和新 Bridge 只读 RPC 全部通过。独立子代理重新核实六域 ready 与准确前台归属；工件 SHA 和 RPC 核查另有 [最终运行检查](evidence/deployment/recovery02/final-runtime-checks.json) 举证。[正式证据清单](evidence/deployment/manifest.json) 包含首次失败及恢复后状态。
+
+本批部署脚本是当次执行记录，不是已验通用升级器；后续复用前须先处理两项接入收据缺陷，并修正空闲 shell 与旧前台进程的辨别。`agent open --native` 当前可用；两域通用 `agent resume` 仍有上述阻断，不能将网络恢复当作该命令已修复。
 
 ## 未扩展范围
 
@@ -48,4 +61,4 @@
 - 最近另外两次 Run 分别约 60 秒、30 秒结束，均早于自己的 deadline；rollout 只显示 interrupted，现有证据不能识别取消来源，保持未知。不能将全部历史取消归为同一原因。见 [短轮一](evidence/interruption/task-56d86c42-f007-41df-8375-1bf6424ec605.json)、[短轮二](evidence/interruption/task-0081e465-24e9-4a5f-9466-43889298d407.json)。
 - 后续建议：把长任务时限作为明确的 Agent 配置，终端显示截止时间和超时原因；需要跨轮续办时保存进度并从检查点恢复。不能对已发生副作用的取消任务自动重跑。本次模型切换发布不更改时限、取消语义或自动重试策略。
 
-该追加核查为只读诊断；其证据单独 [SHA-256 清单](evidence/interruption/manifest.json)保存。部署会有一次有意的自然收尾与原 thread 接续，不能与本次非预期硬截止混为一谈。
+该追加核查为只读诊断；其证据单独 [SHA-256 清单](evidence/interruption/manifest.json)保存。本次部署的自然收尾与原 thread 自动接续已经发生，不能与此前非预期硬截止混为一谈。

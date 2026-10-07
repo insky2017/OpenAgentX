@@ -1,0 +1,47 @@
+{
+  "pane": {
+    "window": "@27",
+    "pane": "%54",
+    "pid": 1129591,
+    "dead": false,
+    "name": "pay-service"
+  },
+  "processes": [
+    {
+      "pid": 1129591,
+      "ppid": 7674,
+      "start": "37392040",
+      "argv": [
+        "zsh"
+      ],
+      "comm": "zsh"
+    },
+    {
+      "pid": 1177832,
+      "ppid": 1129591,
+      "start": "37458373",
+      "argv": [
+        "openagentx",
+        "agent",
+        "open",
+        "pay-service",
+        "--native"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 1180441,
+      "ppid": 1177832,
+      "start": "37460381",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-3687013906/bridge.sock",
+        "--no-alt-screen",
+        "01a0e016-d951-77d1-bc7e-d13662f4823c"
+      ],
+      "comm": "codex"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "status": "FAILED",
+  "at": "2026-10-07T03:35:38.117318+00:00",
+  "error": "command failed (1): /home/sky/.local/bin/openagentx agent resume rhythm --no-open --wait 3m --db /home/sky/.openagentx/data/openagentx.db --socket /home/sky/.openagentx/run/openagentx.sock --file /home/sky/.openagentx/fleet.yaml --worker-dir /home/sky/.openagentx/workers --credentials /home/sky/.openagentx/credentials.json",
+  "installed": true,
+  "paused": true
+}

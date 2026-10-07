@@ -1,0 +1,49 @@
+{
+  "pane": {
+    "window": "@8",
+    "pane": "%11",
+    "pid": 31132,
+    "dead": false,
+    "name": "openagentx"
+  },
+  "processes": [
+    {
+      "pid": 31132,
+      "ppid": 7674,
+      "start": "57425",
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "openagentx",
+        "--native",
+        "--db",
+        "/home/sky/.openagentx/data/openagentx.db",
+        "--socket",
+        "/home/sky/.openagentx/run/openagentx.sock",
+        "--file",
+        "/home/sky/.openagentx/fleet.yaml",
+        "--worker-dir",
+        "/home/sky/.openagentx/workers",
+        "--credentials",
+        "/home/sky/.openagentx/credentials.json"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 2530687,
+      "ppid": 31132,
+      "start": "56293178",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-3141026577/bridge.sock",
+        "--no-alt-screen",
+        "01a0c98a-bef8-7730-9b2b-cbc2f3594559"
+      ],
+      "comm": "codex"
+    }
+  ],
+  "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559"
+}

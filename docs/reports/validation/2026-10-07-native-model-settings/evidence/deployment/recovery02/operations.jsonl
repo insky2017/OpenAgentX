@@ -1,0 +1,8 @@
+{"at": "2026-10-07T03:40:49.409961+00:00", "step": "network_restored", "agent": "rhythm", "generation": 3, "test_id": "network-mode-test-61f9f590-85dc-4a39-b084-904e769e366c"}
+{"at": "2026-10-07T03:41:09.492871+00:00", "step": "network_restored", "agent": "pay-service", "generation": 5, "test_id": "network-mode-test-b9143a1e-43b1-473e-a500-07f105f934fb"}
+{"at": "2026-10-07T03:41:46.702639+00:00", "step": "foreground_reconnected", "agent": "openagentx", "pane": "%11", "thread_preserved": true}
+{"at": "2026-10-07T03:41:50.417851+00:00", "step": "foreground_reconnected", "agent": "rhythm", "pane": "%55", "thread_preserved": true}
+{"at": "2026-10-07T03:41:54.372081+00:00", "step": "foreground_reconnected", "agent": "pay-service", "pane": "%54", "thread_preserved": true}
+{"at": "2026-10-07T03:41:58.322950+00:00", "step": "foreground_reconnected", "agent": "quote-service", "pane": "%3", "thread_preserved": true}
+{"at": "2026-10-07T03:42:03.335879+00:00", "step": "foreground_reconnected", "agent": "identity-service", "pane": "%60", "thread_preserved": true}
+{"at": "2026-10-07T03:42:08.318309+00:00", "step": "foreground_reconnected", "agent": "oneaxe-voice", "pane": "%17", "thread_preserved": true}

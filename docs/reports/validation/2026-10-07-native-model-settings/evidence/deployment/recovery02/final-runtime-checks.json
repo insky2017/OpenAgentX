@@ -1,0 +1,128 @@
+{
+  "openagentx": {
+    "generation": 2,
+    "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+    "pane": "%11",
+    "window": "@8",
+    "bridge_pid": 31132,
+    "bridge_binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+    "model_settings_api": true,
+    "bridge_model_list": [
+      "gpt-6.1-sol",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ],
+    "bridge_config_model": "gpt-6-astra",
+    "bridge_config_effort": null,
+    "backend_healthy": true
+  },
+  "rhythm": {
+    "generation": 3,
+    "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+    "pane": "%55",
+    "window": "@28",
+    "bridge_pid": 2531349,
+    "bridge_binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+    "model_settings_api": true,
+    "bridge_model_list": [
+      "gpt-6.1-sol",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ],
+    "bridge_config_model": "gpt-6-astra",
+    "bridge_config_effort": null,
+    "backend_healthy": true
+  },
+  "pay-service": {
+    "generation": 5,
+    "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+    "pane": "%54",
+    "window": "@27",
+    "bridge_pid": 1129591,
+    "bridge_binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+    "model_settings_api": true,
+    "bridge_model_list": [
+      "gpt-6.1-sol",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ],
+    "bridge_config_model": "gpt-6-astra",
+    "bridge_config_effort": null,
+    "backend_healthy": true
+  },
+  "quote-service": {
+    "generation": 54,
+    "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+    "pane": "%3",
+    "window": "@3",
+    "bridge_pid": 30767,
+    "bridge_binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+    "model_settings_api": true,
+    "bridge_model_list": [
+      "gpt-6.1-sol",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ],
+    "bridge_config_model": "gpt-6-astra",
+    "bridge_config_effort": null,
+    "backend_healthy": true
+  },
+  "identity-service": {
+    "generation": 2,
+    "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+    "pane": "%60",
+    "window": "@30",
+    "bridge_pid": 3525429,
+    "bridge_binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+    "model_settings_api": true,
+    "bridge_model_list": [
+      "gpt-6.1-sol",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ],
+    "bridge_config_model": "gpt-6-astra",
+    "bridge_config_effort": null,
+    "backend_healthy": true
+  },
+  "oneaxe-voice": {
+    "generation": 2,
+    "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+    "pane": "%17",
+    "window": "@11",
+    "bridge_pid": 32093,
+    "bridge_binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+    "model_settings_api": true,
+    "bridge_model_list": [
+      "gpt-6.1-sol",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ],
+    "bridge_config_model": "gpt-6-astra",
+    "bridge_config_effort": null,
+    "backend_healthy": true
+  }
+}

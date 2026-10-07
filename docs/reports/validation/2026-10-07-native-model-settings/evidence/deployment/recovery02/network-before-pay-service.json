@@ -1,0 +1,44 @@
+{
+  "worker": {
+    "readiness": {
+      "ready": false,
+      "can_start_now": false,
+      "reason": "运行环境或网络尚未就绪",
+      "next_action": "openagentx agent resume pay-service"
+    },
+    "agent_id": "pay-service",
+    "mode": "normal",
+    "generation": 5,
+    "worker_status": "online",
+    "worker_instance_id": "worker-3bdf6a0d-484b-4042-be38-ccaf0ac30e9d",
+    "last_heartbeat_at": "2026-10-07T03:40:46.916687068Z",
+    "lease_until": "2026-10-07T03:41:16.916687068Z",
+    "backend_health": {
+      "codex": "unavailable"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 468837
+  },
+  "binding": {
+    "agent_id": "pay-service",
+    "backend_id": "codex",
+    "mode": "inherit",
+    "policy_version": 2,
+    "test_id": "network-mode-test-d10adcd6-0afe-444c-89c5-22c63a075d01",
+    "manifest_digest": "a32e2faa5820c70d0707bd1c1e6545bc80c285c334e8e239cd52e1a67ac83400",
+    "runtime_identity": {
+      "adapter_id": "codex-app-server",
+      "adapter_version": "1",
+      "executable_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad"
+    },
+    "version": 2,
+    "desired_status": "applied",
+    "applied_worker_id": "worker-21864d68-0a41-4310-b01a-ffb4e803e209",
+    "applied_generation": 4,
+    "applied_mode": "inherit",
+    "applied_policy_version": 2,
+    "applied_binding_revision": 2,
+    "updated_at": "2026-10-04T23:22:19.896699879Z"
+  }
+}

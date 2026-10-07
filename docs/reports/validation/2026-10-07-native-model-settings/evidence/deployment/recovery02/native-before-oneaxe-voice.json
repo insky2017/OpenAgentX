@@ -1,0 +1,47 @@
+{
+  "pane": {
+    "window": "@11",
+    "pane": "%17",
+    "pid": 32093,
+    "dead": false,
+    "name": "oneaxe-voice"
+  },
+  "processes": [
+    {
+      "pid": 32093,
+      "ppid": 7674,
+      "start": "57454",
+      "argv": [
+        "-zsh"
+      ],
+      "comm": "zsh"
+    },
+    {
+      "pid": 301429,
+      "ppid": 32093,
+      "start": "36010461",
+      "argv": [
+        "openagentx",
+        "agent",
+        "open",
+        "oneaxe-voice",
+        "--native"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 303535,
+      "ppid": 301429,
+      "start": "36011868",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-2771765280/bridge.sock",
+        "--no-alt-screen",
+        "01a0ddcc-248f-7dd0-a263-67f1d53e0181"
+      ],
+      "comm": "codex"
+    }
+  ]
+}

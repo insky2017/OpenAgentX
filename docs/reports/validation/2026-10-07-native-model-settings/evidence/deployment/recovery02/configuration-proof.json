@@ -1,0 +1,24 @@
+{
+  "schema_meta_columns": [
+    "singleton",
+    "version",
+    "applied_at"
+  ],
+  "schema_meta_rows": [
+    [
+      1,
+      6,
+      "2026-10-05T05:30:17.436Z"
+    ]
+  ],
+  "worker_configuration_sha256": {
+    "openagentx": "9f75fdde07bc56f480936d0cb17b7ca3e6646c215b15894c71df11fb592a5aa3",
+    "rhythm": "d62459a33aaa6f6978a5d1815f7a06a2dc4de998687589df7cfb7bab515aaf75",
+    "pay-service": "9acc2f9139439514e42a4be93c31a0390e81a464554273841d6534e9ee62b256",
+    "quote-service": "30accab13ff5fb893cc73192856df2d64ec793ec3a04cd58eddaff261e75a75a",
+    "identity-service": "6eceef481f3b7764930137b04bdc57b87d03f118ac9acd1fb60c04e9d5ff32cf",
+    "oneaxe-voice": "6261af245c1ff96b77a1a62dcea97adb3c225d01fef72449e7b788848461abe8"
+  },
+  "schema_migrated_this_batch": false,
+  "network_reconfirmation": "formal API; original inherit mode preserved"
+}

@@ -1,0 +1,40 @@
+{
+  "pane": {
+    "window": "@28",
+    "pane": "%55",
+    "pid": 3584397,
+    "dead": false,
+    "name": "rhythm"
+  },
+  "processes": [
+    {
+      "pid": 3584397,
+      "ppid": 7674,
+      "start": "25807752",
+      "argv": [
+        "/home/sky/.local/bin/openagentx",
+        "agent",
+        "open",
+        "rhythm",
+        "--native",
+        "--file",
+        "/home/sky/.openagentx/fleets/rhythm-pay.yaml"
+      ],
+      "comm": "openagentx"
+    },
+    {
+      "pid": 3584466,
+      "ppid": 3584397,
+      "start": "25807759",
+      "argv": [
+        "codex",
+        "resume",
+        "--remote",
+        "unix:///tmp/oax-native-887650417/bridge.sock",
+        "--no-alt-screen",
+        "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9"
+      ],
+      "comm": "codex"
+    }
+  ]
+}

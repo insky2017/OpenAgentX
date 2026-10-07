@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-07T03:36:38.337777+00:00",
+  "results": {
+    "openagentx": "resumed_with_current_generation_network_without_forcing_active_work",
+    "rhythm": "command failed (1): /home/sky/.local/bin/openagentx agent resume rhythm --no-open --wait 3m --db /home/sky/.openagentx/data/openagentx.db --socket /home/sky/.openagentx/run/openagentx.sock --file /home/sky/.openagentx/fleet.yaml --worker-dir /home/sky/.openagentx/workers --credentials /home/sky/.openagentx/credentials.json",
+    "pay-service": "command failed (1): /home/sky/.local/bin/openagentx agent resume pay-service --no-open --wait 3m --db /home/sky/.openagentx/data/openagentx.db --socket /home/sky/.openagentx/run/openagentx.sock --file /home/sky/.openagentx/fleet.yaml --worker-dir /home/sky/.openagentx/workers --credentials /home/sky/.openagentx/credentials.json",
+    "quote-service": "resumed_with_current_generation_network_without_forcing_active_work",
+    "identity-service": "resumed_with_current_generation_network_without_forcing_active_work",
+    "oneaxe-voice": "resumed_with_current_generation_network_without_forcing_active_work",
+    "native_views": "old terminal did not exit: openagentx"
+  }
+}

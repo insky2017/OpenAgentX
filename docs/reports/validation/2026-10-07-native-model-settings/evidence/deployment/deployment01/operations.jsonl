@@ -1,0 +1,12 @@
+{"at": "2026-10-07T03:34:30.338677+00:00", "step": "graceful_stop_queued", "agent": "openagentx", "generation": 1}
+{"at": "2026-10-07T03:34:30.345195+00:00", "step": "graceful_stop_queued", "agent": "rhythm", "generation": 2}
+{"at": "2026-10-07T03:34:30.353894+00:00", "step": "graceful_stop_queued", "agent": "pay-service", "generation": 4}
+{"at": "2026-10-07T03:34:30.365435+00:00", "step": "graceful_stop_queued", "agent": "quote-service", "generation": 53}
+{"at": "2026-10-07T03:34:30.375365+00:00", "step": "graceful_stop_queued", "agent": "identity-service", "generation": 1}
+{"at": "2026-10-07T03:34:30.386080+00:00", "step": "graceful_stop_queued", "agent": "oneaxe-voice", "generation": 1}
+{"at": "2026-10-07T03:35:10.439541+00:00", "step": "all_workers_offline"}
+{"at": "2026-10-07T03:35:10.556565+00:00", "step": "binary_installed", "sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe"}
+{"at": "2026-10-07T03:35:10.637561+00:00", "step": "daemon_restarted"}
+{"at": "2026-10-07T03:35:38.109468+00:00", "step": "network_generation_ready", "agent": "openagentx", "generation": 2}
+{"at": "2026-10-07T03:35:38.117802+00:00", "step": "deployment_failed", "error": "command failed (1): /home/sky/.local/bin/openagentx agent resume rhythm --no-open --wait 3m --db /home/sky/.openagentx/data/openagentx.db --socket /home/sky/.openagentx/run/openagentx.sock --file /home/sky/.openagentx/fleet.yaml --worker-dir /home/sky/.openagentx/workers --credentials /home/sky/.openagentx/credentials.json"}
+{"at": "2026-10-07T03:36:38.351270+00:00", "step": "verification_queued", "task_id": "task-ba0f9dac-d4ca-4f86-ae10-a5a4a003b932"}

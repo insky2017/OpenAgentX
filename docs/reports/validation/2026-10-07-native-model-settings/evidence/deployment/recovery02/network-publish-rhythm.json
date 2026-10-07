@@ -1,0 +1,11 @@
+{
+  "receipt": {
+    "agent_id": "rhythm",
+    "backend_id": "codex",
+    "binding_revision": 3,
+    "mode": "inherit",
+    "policy_version": 3,
+    "state": "pending",
+    "work_id": "network-mode-apply-defb00f6-4924-4b05-bd73-193f27aa9849"
+  }
+}

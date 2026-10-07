@@ -1,0 +1,263 @@
+{
+  "checked_at": "2026-10-07T03:44:32.030257+00:00",
+  "scope": "Read-only runtime recovery verification; no business task execution, model setting mutation, service or config changes. Only this evidence JSON is written.",
+  "status": "PASS_WITH_KNOWN_RESUME_DEFECTS",
+  "agents": {
+    "openagentx": {
+      "checks": {
+        "online": true,
+        "backend_healthy": true,
+        "ready": true,
+        "thread_preserved": true,
+        "generation_advanced": true,
+        "exact_original_pane": true,
+        "pane_alive": true,
+        "pane_managed": true,
+        "one_exact_native_bridge": true,
+        "one_original_thread_native_view": true,
+        "network_current_generation": true
+      },
+      "generation": 2,
+      "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "runtime_state": "running",
+      "runtime_pid": 2488243,
+      "pane": {
+        "window": "@8",
+        "pane": "%11",
+        "pid": 31132,
+        "dead": false,
+        "managed": true
+      },
+      "bridge_pids": [
+        31132
+      ],
+      "view_pids": [
+        2530687
+      ],
+      "network_mode": "inherit",
+      "network_binding_version": 2,
+      "passed": true
+    },
+    "rhythm": {
+      "checks": {
+        "online": true,
+        "backend_healthy": true,
+        "ready": true,
+        "thread_preserved": true,
+        "generation_advanced": true,
+        "exact_original_pane": true,
+        "pane_alive": true,
+        "pane_managed": true,
+        "one_exact_native_bridge": true,
+        "one_original_thread_native_view": true,
+        "network_current_generation": true
+      },
+      "generation": 3,
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "runtime_state": "restored_unconfirmed",
+      "runtime_pid": 2488251,
+      "pane": {
+        "window": "@28",
+        "pane": "%55",
+        "pid": 2531349,
+        "dead": false,
+        "managed": true
+      },
+      "bridge_pids": [
+        2531349
+      ],
+      "view_pids": [
+        2531585
+      ],
+      "network_mode": "inherit",
+      "network_binding_version": 3,
+      "passed": true
+    },
+    "pay-service": {
+      "checks": {
+        "online": true,
+        "backend_healthy": true,
+        "ready": true,
+        "thread_preserved": true,
+        "generation_advanced": true,
+        "exact_original_pane": true,
+        "pane_alive": true,
+        "pane_managed": true,
+        "one_exact_native_bridge": true,
+        "one_original_thread_native_view": true,
+        "network_current_generation": true
+      },
+      "generation": 5,
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "runtime_state": "restored_unconfirmed",
+      "runtime_pid": 2488244,
+      "pane": {
+        "window": "@27",
+        "pane": "%54",
+        "pid": 1129591,
+        "dead": false,
+        "managed": true
+      },
+      "bridge_pids": [
+        1129591
+      ],
+      "view_pids": [
+        2533397
+      ],
+      "network_mode": "inherit",
+      "network_binding_version": 3,
+      "passed": true
+    },
+    "quote-service": {
+      "checks": {
+        "online": true,
+        "backend_healthy": true,
+        "ready": true,
+        "thread_preserved": true,
+        "generation_advanced": true,
+        "exact_original_pane": true,
+        "pane_alive": true,
+        "pane_managed": true,
+        "one_exact_native_bridge": true,
+        "one_original_thread_native_view": true,
+        "network_current_generation": true
+      },
+      "generation": 54,
+      "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "runtime_state": "restored_unconfirmed",
+      "runtime_pid": 2488377,
+      "pane": {
+        "window": "@3",
+        "pane": "%3",
+        "pid": 30767,
+        "dead": false,
+        "managed": true
+      },
+      "bridge_pids": [
+        30767
+      ],
+      "view_pids": [
+        2535313
+      ],
+      "network_mode": "inherit",
+      "network_binding_version": 2,
+      "passed": true
+    },
+    "identity-service": {
+      "checks": {
+        "online": true,
+        "backend_healthy": true,
+        "ready": true,
+        "thread_preserved": true,
+        "generation_advanced": true,
+        "exact_original_pane": true,
+        "pane_alive": true,
+        "pane_managed": true,
+        "one_exact_native_bridge": true,
+        "one_original_thread_native_view": true,
+        "network_current_generation": true
+      },
+      "generation": 2,
+      "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "runtime_state": "restored_unconfirmed",
+      "runtime_pid": 2488433,
+      "pane": {
+        "window": "@30",
+        "pane": "%60",
+        "pid": 3525429,
+        "dead": false,
+        "managed": true
+      },
+      "bridge_pids": [
+        3525429
+      ],
+      "view_pids": [
+        2537456
+      ],
+      "network_mode": "inherit",
+      "network_binding_version": 2,
+      "passed": true
+    },
+    "oneaxe-voice": {
+      "checks": {
+        "online": true,
+        "backend_healthy": true,
+        "ready": true,
+        "thread_preserved": true,
+        "generation_advanced": true,
+        "exact_original_pane": true,
+        "pane_alive": true,
+        "pane_managed": true,
+        "one_exact_native_bridge": true,
+        "one_original_thread_native_view": true,
+        "network_current_generation": true
+      },
+      "generation": 2,
+      "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "runtime_state": "restored_unconfirmed",
+      "runtime_pid": 2488521,
+      "pane": {
+        "window": "@11",
+        "pane": "%17",
+        "pid": 32093,
+        "dead": false,
+        "managed": true
+      },
+      "bridge_pids": [
+        32093
+      ],
+      "view_pids": [
+        2539306
+      ],
+      "network_mode": "inherit",
+      "network_binding_version": 2,
+      "passed": true
+    }
+  },
+  "automatic_verification_task": {
+    "task": {
+      "task_id": "task-ba0f9dac-d4ca-4f86-ae10-a5a4a003b932",
+      "status": "running",
+      "target_agent_id": null,
+      "version": 2
+    },
+    "latest_run": {
+      "run_id": "run-24d93238-0e63-4331-91c6-b1cc5fb58679",
+      "task_id": "task-ba0f9dac-d4ca-4f86-ae10-a5a4a003b932",
+      "status": "starting",
+      "worker_generation": 2,
+      "backend_id": "codex",
+      "model": "gpt-6-astra"
+    },
+    "runtime_task_matches": true,
+    "runtime_run_matches": true,
+    "original_thread_preserved": true
+  },
+  "known_resume_defects": {
+    "rhythm": {
+      "receipt_sha256": "84908434d39e4771a6b216ddffbcbb7d4109618bc0153a3308fc8a58fc4184c6",
+      "registered_marker_exists": true,
+      "receipt_json_valid": true,
+      "registered_digest_matches": false,
+      "receipt_thread_preserved": true
+    },
+    "pay-service": {
+      "receipt_sha256": "81a33c8ecdb7244ea0019be1d589c8da200e5b7c6ac8fb367363a058389646c2",
+      "registered_marker_exists": false,
+      "receipt_json_valid": false,
+      "parse_error": "Expecting property name enclosed in double quotes: line 2 column 3 (char 4)"
+    }
+  },
+  "limitations": [
+    "Role content preservation cannot be verified against before.json because it has no role digest.",
+    "Current verification Task is in progress; no completed-task or business-success claim.",
+    "Running binary hashes and bridge RPC checks belong to separately collected final-snapshot.json; not claimed by this check."
+  ],
+  "sources": [
+    "deployment01/before.json",
+    "live Console attach and task GET APIs",
+    "live Observe network-profiles GET API",
+    "live tmux metadata and /proc process metadata",
+    "local runtime state and join receipts"
+  ]
+}
