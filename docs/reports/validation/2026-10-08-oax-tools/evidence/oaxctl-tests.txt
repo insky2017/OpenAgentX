@@ -1,0 +1,11 @@
+test_invalid_host_is_rejected (__main__.OaxctlHTTPTest.test_invalid_host_is_rejected) ... ok
+test_login_dispatch_message_and_wait (__main__.OaxctlHTTPTest.test_login_dispatch_message_and_wait) ... ok
+test_lost_write_response_is_not_retried (__main__.OaxctlHTTPTest.test_lost_write_response_is_not_retried) ... ok
+test_relative_xdg_falls_back_and_paging_respects_deadline (__main__.OaxctlHTTPTest.test_relative_xdg_falls_back_and_paging_respects_deadline) ... ok
+test_retry_requires_version_and_no_write_is_sent (__main__.OaxctlHTTPTest.test_retry_requires_version_and_no_write_is_sent) ... ok
+test_session_redaction_readiness_and_redirect (__main__.OaxctlHTTPTest.test_session_redaction_readiness_and_redirect) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 3.365s
+
+OK

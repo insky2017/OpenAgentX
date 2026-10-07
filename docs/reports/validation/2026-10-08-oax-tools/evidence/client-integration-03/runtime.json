@@ -1,0 +1,7 @@
+{
+  "isolated_daemon_pid": 3632135,
+  "isolated_daemon_exit": 0,
+  "isolated_worker_pid": 3632329,
+  "isolated_worker_exit": 0,
+  "private_root": "/home/sky/.local/state/openagentx/validation/2026-10-08-oax-tools/client-integration-03"
+}

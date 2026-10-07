@@ -1,0 +1,8 @@
+{
+  "binary_sha256": "a7693ef8f9b8bd2319c71fefefeb50d6880eae342edafa89a57c59ac222d39b9",
+  "client_sha256": "2080d683734ed44a828422b26f28a207fd3a6546a250c92b93296c3356189b63",
+  "harness_sha256": "02b2458150f688d50f8c37fe36f11d32e55ca0ccc64cf9cdb6b704cc4b48555e",
+  "source_commit": "5307788e9ba681e4c7afe7e4d6c80297aa9e7db2",
+  "started_at": "2026-10-07T21:07:12.093458+00:00",
+  "scope": "isolated real daemon and SQLite; no Worker/model/business execution"
+}

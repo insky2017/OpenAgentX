@@ -1,121 +1,121 @@
 [
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-20261007/events.jsonl",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-20261007/events.jsonl",
     "sha256": "e06f16823d6fb1a9fe1d7db4860acb42b72ea5040f391683bb466a2d8987012e",
     "bytes": 4741
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-20261007/final.md",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-20261007/final.md",
     "sha256": "e26dca4d185f7787e5ef78634bc913d321404d3d2ca5f8f97d1fa40a6f4686fd",
     "bytes": 1814
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-20261007/prompt.md",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-20261007/prompt.md",
     "sha256": "eb15a0c5e8631688a80b2ee38f51238fb518dea399f06bb7f8775650ed8bebed",
     "bytes": 1458
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-20261007/result.json",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-20261007/result.json",
     "sha256": "5d7e33746739f28c2c34346c24fee93b4f37a1d36093703b4f97ba61c7dd5cec",
     "bytes": 499
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-20261007/started.json",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-20261007/started.json",
     "sha256": "f5644f0752de2b6a32c7b0c167a2958152c1e4ecc2aba843d3d79d5e878ddbd9",
     "bytes": 324
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-20261007/stderr.log",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-20261007/stderr.log",
     "sha256": "7b1e760d2d4758a77a6b6e64278c8d7c21149ea66196c5c8bc748d9cac1e1fbd",
     "bytes": 685
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/handoff-read-20261007/events.jsonl",
+    "path": "/home/sky/.local/state/oaxops/events/handoff-read-20261007/events.jsonl",
     "sha256": "89829435911ec6d29dde1df20d4a709d1352e63e93ffaf738ed55e1558db84c9",
     "bytes": 24642
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/handoff-read-20261007/final.md",
+    "path": "/home/sky/.local/state/oaxops/events/handoff-read-20261007/final.md",
     "sha256": "ed744c064b047138f0f940ecff155c320d0d085d16c4e691b966e47255742abd",
     "bytes": 2264
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/handoff-read-20261007/prompt.md",
+    "path": "/home/sky/.local/state/oaxops/events/handoff-read-20261007/prompt.md",
     "sha256": "0bde0fab9f8b7a37d85df28e91092cb6599f21db6a8dbc5004ed46c7061a41b1",
     "bytes": 1203
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/handoff-read-20261007/result.json",
+    "path": "/home/sky/.local/state/oaxops/events/handoff-read-20261007/result.json",
     "sha256": "7833464f7b4755052e46f924f16649bcc3b0dba9177859c3d296e0646a573d8e",
     "bytes": 623
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/handoff-read-20261007/started.json",
+    "path": "/home/sky/.local/state/oaxops/events/handoff-read-20261007/started.json",
     "sha256": "1774ce943e271424ff4d1e0a057a725f50a45f81f475dd689a64dbedcec37723",
     "bytes": 422
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/handoff-read-20261007/stderr.log",
+    "path": "/home/sky/.local/state/oaxops/events/handoff-read-20261007/stderr.log",
     "sha256": "c52e1de7bda3dcfbcba4e5a366e5dbc76192343b679095aeca54daa0a93681d6",
     "bytes": 484
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/api-read-20261007/events.jsonl",
+    "path": "/home/sky/.local/state/oaxops/events/api-read-20261007/events.jsonl",
     "sha256": "b24878f0b5b09dc7d3358bcb048018cdd7924b0f71084af174532f8ace8e0c89",
     "bytes": 44048
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/api-read-20261007/final.md",
+    "path": "/home/sky/.local/state/oaxops/events/api-read-20261007/final.md",
     "sha256": "5b285e4f36b030cde6200dcf314bea2c18520dd87325ca1ee3f24a76265e490e",
     "bytes": 1218
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/api-read-20261007/prompt.md",
+    "path": "/home/sky/.local/state/oaxops/events/api-read-20261007/prompt.md",
     "sha256": "3a3b8bad33318e52afd8f87207524c38d66090f21d2057673c1fd4945722b2a4",
     "bytes": 969
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/api-read-20261007/result.json",
+    "path": "/home/sky/.local/state/oaxops/events/api-read-20261007/result.json",
     "sha256": "b1e56db449e598b01a855f741c255933fb282e37c33d7467eb87b2223000e454",
     "bytes": 596
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/api-read-20261007/started.json",
+    "path": "/home/sky/.local/state/oaxops/events/api-read-20261007/started.json",
     "sha256": "987c0ed42fc9f1ededf97ac8bd3dd17c196b2748f9e6f3bc20683a85f492dbfb",
     "bytes": 395
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/api-read-20261007/stderr.log",
+    "path": "/home/sky/.local/state/oaxops/events/api-read-20261007/stderr.log",
     "sha256": "354a9cd30447a4a1cb8ce9869fad1d8ebe4fef51f63f35351c6a67f44968436a",
     "bytes": 484
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/events.jsonl",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-index-20261007/events.jsonl",
     "sha256": "e4ff682a79955510b9322ac118670842c421381e4da35cd995691134405174be",
     "bytes": 62804
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/final.md",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-index-20261007/final.md",
     "sha256": "d48acb321ae0534b8e071e73aabce90907e38787650dcee3f5f73159f23c107f",
     "bytes": 2568
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/prompt.md",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-index-20261007/prompt.md",
     "sha256": "a43763c08533398a6329aaf08413d18b847c70059156417ff8c617dcb899dc6e",
     "bytes": 1694
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/result.json",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-index-20261007/result.json",
     "sha256": "167bc1bfbad4c571c288bd336a796c0b705e2e84565a90e47eb541185b883aeb",
     "bytes": 603
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/started.json",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-index-20261007/started.json",
     "sha256": "f009e6d94dc6d0a1f52bdd71c0638e4bcce29f053de3aa4f263ca62c3de181f2",
     "bytes": 402
   },
   {
-    "path": "/home/sky/docs/.oax-commander/events/bootstrap-index-20261007/stderr.log",
+    "path": "/home/sky/.local/state/oaxops/events/bootstrap-index-20261007/stderr.log",
     "sha256": "0c33b10b9f2427058556f672cb2b5b0adb9f952470a80480499f1f0b9780e3a8",
     "bytes": 968
   }

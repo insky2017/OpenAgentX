@@ -1,0 +1,5 @@
+{
+  "pid": 3655812,
+  "status_before": "online",
+  "reason": "hold isolated Worker before dispatch; no runtime model call"
+}

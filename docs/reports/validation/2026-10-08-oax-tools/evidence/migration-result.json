@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-07T21:08:50.120628+00:00",
+  "status": "PASS",
+  "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+  "source_root_removed": true,
+  "old_entry_removed": true,
+  "old_runtime_removed": true,
+  "new_state_root": "/home/sky/.local/state/oaxops",
+  "lock_inode_preserved": true,
+  "session_sha256": "8d379b5332b0bf47d132d3459a4800e47e4d9a8b6a5bc89e878387a0a8d9c441",
+  "event_files_preserved": 30,
+  "all_initial_files_unchanged_before_role_update": true,
+  "source_sha256": "1a7f7efbf9241d9682feddbfd1eee0ea52aee885700709d9f0493eec14b5a730",
+  "installed_sha256": "1a7f7efbf9241d9682feddbfd1eee0ea52aee885700709d9f0493eec14b5a730",
+  "pane": "%64",
+  "window": "@33",
+  "no_model_invoked": true
+}

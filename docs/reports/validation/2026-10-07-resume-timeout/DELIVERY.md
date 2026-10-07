@@ -18,7 +18,7 @@
 
 产品及部署脚本已在 `c6e4a775dd61cddff9d3c5d7da697a135f1f0c67` 合入并推送 main。后续交付文档提交不改变已安装产品源码来源。安装位置为 `~/.local/bin/openagentx`，schema 仍为 v6，无数据库迁移。
 
-本次唯一部署由 `/home/sky/docs` 的[独立指挥者](../../../operations/2026-10-07-commander-handoff.md)执行：10:58:11 UTC 正式请求六域 graceful stop，等待活动任务自然结束；11:22:38 全部旧 Worker 离线后安装，11:22:39 更新配置并重启 daemon，随后恢复六域 Worker 与原生终端。11:25:35 返回 [PASS](evidence/deployment01/result.json)。完整步骤见 [operations.jsonl](evidence/deployment01/operations.jsonl)。没有强杀活动 Run、重放不确定业务任务或直接修改数据库。此次存在授权的服务重启间隔，不能描述为进程全程不中断。
+本次唯一部署由 `/home/sky/docs` 的[独立指挥者](../../../operations/2026-10-07-oaxops-handoff.md)执行：10:58:11 UTC 正式请求六域 graceful stop，等待活动任务自然结束；11:22:38 全部旧 Worker 离线后安装，11:22:39 更新配置并重启 daemon，随后恢复六域 Worker 与原生终端。11:25:35 返回 [PASS](evidence/deployment01/result.json)。完整步骤见 [operations.jsonl](evidence/deployment01/operations.jsonl)。没有强杀活动 Run、重放不确定业务任务或直接修改数据库。此次存在授权的服务重启间隔，不能描述为进程全程不中断。
 
 [独立现场核验](evidence/deployment01/independent-verification.json)直接读取运行进程工件、正式 API、配置和 tmux；七服务及六 Bridge 的 `/proc/PID/exe` 哈希全部一致。六域对照如下（原值见 [before](evidence/deployment01/before.json)，部署后见 [after](evidence/deployment01/after.json)）：
 
@@ -60,7 +60,7 @@ Rhythm 的旧 `.registered` 摘要与当前资料组合不符；Pay 的旧 recei
 ## 相关并行事项
 
 - [tmux 两态 spinner](../2026-10-07-tmux-work-spinner/DELIVERY.md)与[原生消息确认](../2026-10-07-native-pending-input/DELIVERY.md)随最终工件安装；各自真实验收与限制单独报告。
-- 指挥者新 thread `01a115e8-e528-75f3-9e30-612d617cfb84` 在独立 user-systemd 运行，已读组织分工及 docs 索引，并实际执行本次部署。它从10:55到11:27跨越 OAX 重启，最后同 thread `turn.completed`、exit0；见[回执](evidence/commander-deployment01/result.json)和[回复](evidence/commander-deployment01/final.md)。它不在 OAX tmux 中自动创建窗口；`oax-commander open` 才进入同一原生前台，`status` 可查最近事件。当前 writer 已释放，无空闲模型轮询，也尚未接入 OAX Mailbox 自动收件。
+- 指挥者新 thread `01a115e8-e528-75f3-9e30-612d617cfb84` 在独立 user-systemd 运行，已读组织分工及 docs 索引，并实际执行本次部署。它从10:55到11:27跨越 OAX 重启，最后同 thread `turn.completed`、exit0；见[回执](evidence/commander-deployment01/result.json)和[回复](evidence/commander-deployment01/final.md)。它不在 OAX tmux 中自动创建窗口；`oaxops open` 才进入同一原生前台，`status` 可查最近事件。当前 writer 已释放，无空闲模型轮询，也尚未接入 OAX Mailbox 自动收件。
 - 保留一个已证实、独立于输入确认的既有问题：取消后台工具缺失 OS PID 时，fallback 会重建 app-server；旧 Bridge 仍连接旧 endpoint，可能停在 Reconnecting，需同 thread 重开 view。本批真实补充输入确认已通过，但不宣称取消后的自动重连已修好。
 
 ## 证据

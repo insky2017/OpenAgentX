@@ -1,0 +1,102 @@
+[
+  {
+    "label": "login",
+    "argv": [
+      "login"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"user_id\": \"human-owner-b055e67a-d9a8-4bd2-891e-2c60e5b2637a\",\n  \"username\": \"owner\",\n  \"roles\": [\n    \"owner\"\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "whoami",
+    "argv": [
+      "whoami"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"user_id\": \"human-owner-b055e67a-d9a8-4bd2-891e-2c60e5b2637a\",\n  \"username\": \"owner\",\n  \"roles\": [\n    \"owner\"\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "agents",
+    "argv": [
+      "agents",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "[\n  {\n    \"agent_id\": \"oaxctl-acceptance-7a303515\",\n    \"principal_id\": \"agent-oaxctl-acceptance-7a303515\",\n    \"organization_id\": \"default\",\n    \"display_name\": \"OAX client acceptance\",\n    \"status\": \"active\",\n    \"version\": 1,\n    \"created_at\": \"2026-10-07T21:06:16.465806514Z\",\n    \"updated_at\": \"2026-10-07T21:06:16.465806514Z\"\n  }\n]\n",
+    "stderr": ""
+  },
+  {
+    "label": "agents-text",
+    "argv": [
+      "agents"
+    ],
+    "exit_code": 0,
+    "stdout": "oaxctl-acceptance-7a303515 OAX client acceptance\n",
+    "stderr": ""
+  },
+  {
+    "label": "tasks",
+    "argv": [
+      "tasks",
+      "--json",
+      "--agent",
+      "oaxctl-acceptance-7a303515"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"tasks\": [],\n  \"has_more\": false\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "dispatch",
+    "argv": [
+      "dispatch",
+      "oaxctl-acceptance-7a303515",
+      "isolated API queue fixture",
+      "--key",
+      "oaxctl-fixture-task-dedae9efe06c"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"idempotency_key\": \"oaxctl-fixture-task-dedae9efe06c\",\n  \"task_id\": \"task-5f81c331-6af3-4e5f-a793-debe425ad3db\",\n  \"task_version\": 1,\n  \"task_status\": \"queued\",\n  \"sequence\": 1\n}\n",
+    "stderr": "dispatch idempotency_key=oaxctl-fixture-task-dedae9efe06c\n"
+  },
+  {
+    "label": "dispatch-replay",
+    "argv": [
+      "dispatch",
+      "oaxctl-acceptance-7a303515",
+      "isolated API queue fixture",
+      "--key",
+      "oaxctl-fixture-task-dedae9efe06c"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"idempotency_key\": \"oaxctl-fixture-task-dedae9efe06c\",\n  \"task_id\": \"task-5f81c331-6af3-4e5f-a793-debe425ad3db\",\n  \"task_version\": 1,\n  \"task_status\": \"queued\",\n  \"sequence\": 1\n}\n",
+    "stderr": "dispatch idempotency_key=oaxctl-fixture-task-dedae9efe06c\n"
+  },
+  {
+    "label": "show",
+    "argv": [
+      "show",
+      "task-5f81c331-6af3-4e5f-a793-debe425ad3db"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"task\": {\n    \"completion_basis\": \"\",\n    \"id\": \"task-5f81c331-6af3-4e5f-a793-debe425ad3db\",\n    \"version\": 1,\n    \"target_agent_id\": \"oaxctl-acceptance-7a303515\",\n    \"organization_id\": \"default\",\n    \"dispatch_mode\": \"direct\",\n    \"intent\": \"query\",\n    \"content\": \"isolated API queue fixture\",\n    \"status\": \"queued\",\n    \"outcome_state\": \"pending\",\n    \"created_at\": \"2026-10-07T21:06:18.065694394Z\",\n    \"updated_at\": \"2026-10-07T21:06:18.065694394Z\"\n  },\n  \"messages\": [\n    {\n      \"id\": \"message-0e780fc0-e644-475a-a7fd-145cb4424a1b\",\n      \"version\": 1,\n      \"sequence\": 1,\n      \"task_id\": \"task-5f81c331-6af3-4e5f-a793-debe425ad3db\",\n      \"sender_agent_id\": \"\",\n      \"sender_principal_id\": \"human-owner-b055e67a-d9a8-4bd2-891e-2c60e5b2637a\",\n      \"target_agent_id\": \"oaxctl-acceptance-7a303515\",\n      \"kind\": \"instruction\",\n      \"content\": \"isolated API queue fixture\",\n      \"created_at\": \"2026-10-07T21:06:18.065694394Z\"\n    }\n  ],\n  \"run_attempts\": [],\n  \"events\": [\n    {\n      \"sequence\": 7,\n      \"event_id\": \"event-b786f9e0-6173-4679-aab1-1ca8268165a8\",\n      \"aggregate_type\": \"task\",\n      \"aggregate_id\": \"task-5f81c331-6af3-4e5f-a793-debe425ad3db\",\n      \"event_type\": \"task.created\",\n      \"created_at\": \"2026-10-07T21:06:18.065694394Z\"\n    }\n  ],\n  \"snapshot_sequence\": 7,\n  \"live_after_sequence\": 7,\n  \"has_older_events\": false,\n  \"has_more_live_events\": false\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "say",
+    "argv": [
+      "say",
+      "task-5f81c331-6af3-4e5f-a793-debe425ad3db",
+      "isolated supplement",
+      "--key",
+      "oaxctl-fixture-message-ee85b66ca7e9",
+      "--expected-version",
+      "1"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "say idempotency_key=oaxctl-fixture-message-ee85b66ca7e9 expected_version=1\noaxctl: HTTP 400; request was not retried\n"
+  }
+]

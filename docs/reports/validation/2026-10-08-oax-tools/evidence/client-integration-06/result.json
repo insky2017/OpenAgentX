@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "agent_id": "oaxctl-acceptance-6e330a99",
+  "task_id": "task-fa22a852-40dd-4d13-934d-8655d7a16039",
+  "cases": [
+    "HTTPS session/cookie/CSRF and public session redaction",
+    "agents readiness/tasks",
+    "dispatch replay/key conflict",
+    "show",
+    "say version/replay/stale version",
+    "wait timeout",
+    "SQLite crosscheck"
+  ],
+  "limit": "Isolated Worker was paused before dispatch; no model or Run started. Business execution was not tested."
+}

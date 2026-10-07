@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "oaxops": {
+    "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84",
+    "workspace": "/home/sky/docs",
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "host": "independent-native-codex",
+    "created_at": "2026-10-07T10:29:07.146159+00:00",
+    "last_event": "resume-timeout-rollout-20261007",
+    "last_result": "completed",
+    "writer_busy": true
+  },
+  "pane": "%64",
+  "window": "@33",
+  "tmux_visible_location": "OAX:7:oaxops",
+  "single_writer_second_open_rejected": true,
+  "resumed_processes": [
+    {
+      "pid": 3644027,
+      "mode": "resume",
+      "thread_id": "01a115e8-e528-75f3-9e30-612d617cfb84"
+    }
+  ],
+  "seven_services_unchanged": true,
+  "oaxctl_help_exit": 0,
+  "source_installed_sha256": {
+    "oaxctl": "674e38a2618da69f07c0e2ebbf03377c9d7c711a88efa64ffe0f96e17fec893b",
+    "oaxops": "1a7f7efbf9241d9682feddbfd1eee0ea52aee885700709d9f0493eec14b5a730"
+  },
+  "entry_modes": {
+    "oaxctl": "0o755",
+    "oaxops": "0o755"
+  },
+  "original_pane_shell_pid_preserved": true,
+  "ops_codex_process_reopened": true
+}

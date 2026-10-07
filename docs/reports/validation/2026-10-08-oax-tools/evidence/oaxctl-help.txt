@@ -1,0 +1,9 @@
+usage: oaxctl [-h] {login,whoami,agents,tasks,dispatch,say,show,wait,get} ...
+
+OpenAgentX remote HTTPS control client
+
+positional arguments:
+  {login,whoami,agents,tasks,dispatch,say,show,wait,get}
+
+options:
+  -h, --help            show this help message and exit

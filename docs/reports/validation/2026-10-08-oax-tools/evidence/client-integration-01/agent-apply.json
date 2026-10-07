@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-08-oax-tools/acceptance-openagentx",
+    "agent",
+    "apply",
+    "--file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-08-oax-tools/client-integration-01/identity.yaml"
+  ],
+  "exit_code": 0,
+  "output": "\u001b]11;?\u001b\\\u001b[6nOwner password: \r\nCreated Agent \"oaxctl-acceptance-2065b07e\" in Organization \"default\"\r\n"
+}

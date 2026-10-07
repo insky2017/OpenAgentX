@@ -1,0 +1,11 @@
+{
+  "task_id": "task-fa22a852-40dd-4d13-934d-8655d7a16039",
+  "counts": {
+    "tasks": 1,
+    "messages": 2,
+    "runs": 0
+  },
+  "task_status": "queued",
+  "task_version": 2,
+  "access": "SQLite URI mode=ro"
+}

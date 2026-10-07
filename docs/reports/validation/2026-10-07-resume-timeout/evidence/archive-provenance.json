@@ -734,19 +734,19 @@
       "archive_sha256": "31a46897eb2d69f708ff0b280257c5ca478825bc63150d21d62a2cd7b61f27ce"
     },
     {
-      "source": "/home/sky/docs/.oax-commander/events/resume-timeout-rollout-20261007/result.json",
+      "source": "/home/sky/.local/state/oaxops/events/resume-timeout-rollout-20261007/result.json",
       "archive": "commander-deployment01/result.json",
       "source_sha256": "8f2d0354c9bf111e0b941df05ae66ba96be176c0f1d8ae2ea5949f6b62a9d38b",
       "archive_sha256": "8f2d0354c9bf111e0b941df05ae66ba96be176c0f1d8ae2ea5949f6b62a9d38b"
     },
     {
-      "source": "/home/sky/docs/.oax-commander/events/resume-timeout-rollout-20261007/final.md",
+      "source": "/home/sky/.local/state/oaxops/events/resume-timeout-rollout-20261007/final.md",
       "archive": "commander-deployment01/final.md",
       "source_sha256": "3d9ee4586c8e7f991eb2bcb3dc27574199b619e5b658d033d036a8dff560d188",
       "archive_sha256": "3d9ee4586c8e7f991eb2bcb3dc27574199b619e5b658d033d036a8dff560d188"
     },
     {
-      "source": "/home/sky/docs/.oax-commander/events/resume-timeout-rollout-20261007/started.json",
+      "source": "/home/sky/.local/state/oaxops/events/resume-timeout-rollout-20261007/started.json",
       "archive": "commander-deployment01/started.json",
       "source_sha256": "81cd442d95c87656bae3a0c6ad539bb447da58a6f7831772377896f90bbe576f",
       "archive_sha256": "81cd442d95c87656bae3a0c6ad539bb447da58a6f7831772377896f90bbe576f"

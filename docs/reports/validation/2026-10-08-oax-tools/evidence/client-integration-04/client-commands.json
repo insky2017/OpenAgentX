@@ -1,0 +1,11 @@
+[
+  {
+    "label": "login",
+    "argv": [
+      "login"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"principal\": {\n    \"user_id\": \"human-owner-1e06e147-d9e9-4cbb-a2d2-8502ea674452\",\n    \"username\": \"owner\",\n    \"roles\": [\n      \"owner\"\n    ]\n  },\n  \"idle_expires_at\": \"2026-10-07T21:38:41.740970398Z\",\n  \"absolute_expires_at\": \"2026-10-08T21:08:41.740970398Z\"\n}\n",
+    "stderr": ""
+  }
+]

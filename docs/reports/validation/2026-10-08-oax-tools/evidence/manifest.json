@@ -1,0 +1,244 @@
+{
+  "files": [
+    {
+      "path": "evidence/INDEPENDENT-TOOLS-REVIEW.md",
+      "bytes": 1961,
+      "sha256": "37736aa3f34e2a64a689076f85f52c530dd60b0073930e3967f5a322053f1841"
+    },
+    {
+      "path": "evidence/client-integration-01/agent-apply.json",
+      "bytes": 421,
+      "sha256": "f4ad11114c232344af51ba50039ab609a544d99c91884dc92859888d1174adc8"
+    },
+    {
+      "path": "evidence/client-integration-01/client-commands.json",
+      "bytes": 1046,
+      "sha256": "79fee75b6011a20fac5130e33153f26ae7cb2c6ab0b0793c385cf0e2e2486d2d"
+    },
+    {
+      "path": "evidence/client-integration-01/init.json",
+      "bytes": 307,
+      "sha256": "24a818ae57ef1836687b6c15319400ba2a712f99d3b2203789de21d4690f7eef"
+    },
+    {
+      "path": "evidence/client-integration-01/manifest.json",
+      "bytes": 462,
+      "sha256": "2cc60a522cbebaf2ecafc44455d88e50956e54184362db56ebfe291e39dd84af"
+    },
+    {
+      "path": "evidence/client-integration-01/result.json",
+      "bytes": 73,
+      "sha256": "dc910a07ad654982c7fa9efca6f2a5eec7b3722b4478a0352abb7e2f0e664a87"
+    },
+    {
+      "path": "evidence/client-integration-01/runtime.json",
+      "bytes": 175,
+      "sha256": "a6d0f3a96efaf098c62313e2563d824962245bbdee840e5e5364d15edc616c14"
+    },
+    {
+      "path": "evidence/client-integration-02/agent-apply.json",
+      "bytes": 421,
+      "sha256": "496c62636bdcc4b7757c4448e1a262a33b4f19c765e2b1a7e22fb9c4dd6dae5b"
+    },
+    {
+      "path": "evidence/client-integration-02/client-commands.json",
+      "bytes": 4658,
+      "sha256": "4e3898f73205386fad0edf2d937cc9c4ea2ce34418dbcb5bbcc63f901d483abd"
+    },
+    {
+      "path": "evidence/client-integration-02/init.json",
+      "bytes": 307,
+      "sha256": "24a818ae57ef1836687b6c15319400ba2a712f99d3b2203789de21d4690f7eef"
+    },
+    {
+      "path": "evidence/client-integration-02/manifest.json",
+      "bytes": 462,
+      "sha256": "1ef2be22ab0de6ed6717ed328d90aa5438dcfa00701f0eb37632dd09d5550486"
+    },
+    {
+      "path": "evidence/client-integration-02/result.json",
+      "bytes": 182,
+      "sha256": "8f0e46ac51bd1d06f5fb5b3f4d3bca97c30b3b3f06bc4809498cfabeac4768b7"
+    },
+    {
+      "path": "evidence/client-integration-02/runtime.json",
+      "bytes": 175,
+      "sha256": "32f03dd1ee187ec57740a4c2139b6215b2a2662f56a5272a110d6befe55405ce"
+    },
+    {
+      "path": "evidence/client-integration-03/agent-apply.json",
+      "bytes": 421,
+      "sha256": "69ce0a4bf34f5c5e1b71465453d547448d3768f57be4fbb79a52028f64c6d410"
+    },
+    {
+      "path": "evidence/client-integration-03/client-commands.json",
+      "bytes": 45597,
+      "sha256": "11dca33316c9ed16f37988519a34e357c08719c7d048265d7216df5e5a7675fe"
+    },
+    {
+      "path": "evidence/client-integration-03/init.json",
+      "bytes": 307,
+      "sha256": "24a818ae57ef1836687b6c15319400ba2a712f99d3b2203789de21d4690f7eef"
+    },
+    {
+      "path": "evidence/client-integration-03/manifest.json",
+      "bytes": 462,
+      "sha256": "c34d39a7906d3dbf56eb66148c74e6a3f4bf01d9c9f5e8a1548e2e365273dc72"
+    },
+    {
+      "path": "evidence/client-integration-03/result.json",
+      "bytes": 77,
+      "sha256": "c5c3ead528edc880e008000f41cd85882301eef3f9f9a56f6cab5e72be4638dc"
+    },
+    {
+      "path": "evidence/client-integration-03/runtime.json",
+      "bytes": 238,
+      "sha256": "21b10ef253de01888567f26b275fa34ccb5c26a9534fe125ec31ebac01113698"
+    },
+    {
+      "path": "evidence/client-integration-04/agent-apply.json",
+      "bytes": 421,
+      "sha256": "83462c656397aab497f768df89dc446ac2c97cdea1fb2ba21474040d35c00928"
+    },
+    {
+      "path": "evidence/client-integration-04/client-commands.json",
+      "bytes": 423,
+      "sha256": "32527a4177d281a605437f8df7b7fb3f66a120f01cf2a3d960baea3552b15178"
+    },
+    {
+      "path": "evidence/client-integration-04/init.json",
+      "bytes": 307,
+      "sha256": "24a818ae57ef1836687b6c15319400ba2a712f99d3b2203789de21d4690f7eef"
+    },
+    {
+      "path": "evidence/client-integration-04/manifest.json",
+      "bytes": 462,
+      "sha256": "55bf883cc5721db31d0163d2fea09c6b84bfdc7a81314bf8d1eb7cc6e76cf611"
+    },
+    {
+      "path": "evidence/client-integration-04/result.json",
+      "bytes": 62,
+      "sha256": "2d956653d7e5e3c0b6c96dd5f9e97d58da6024d58b8a9b386912f90acd7e6cda"
+    },
+    {
+      "path": "evidence/client-integration-04/runtime.json",
+      "bytes": 238,
+      "sha256": "d3d6e33c3c17a8868d0c3126c148f093c423d0453289e5bd219bbb2e00c03b18"
+    },
+    {
+      "path": "evidence/client-integration-05/agent-apply.json",
+      "bytes": 421,
+      "sha256": "c74ccd6cdf94e596284407b5031eb3ccb345a37bdc81561ea4479fa7c6ac0149"
+    },
+    {
+      "path": "evidence/client-integration-05/client-commands.json",
+      "bytes": 11617,
+      "sha256": "179cf4546682c2794382431fded55541fb05c05978c80dbd6fde37b684495986"
+    },
+    {
+      "path": "evidence/client-integration-05/database-crosscheck.json",
+      "bytes": 211,
+      "sha256": "639d9b33a50969ccba6427e4744b9e1731f89dd85083a4781dffa68f06da3b41"
+    },
+    {
+      "path": "evidence/client-integration-05/init.json",
+      "bytes": 307,
+      "sha256": "24a818ae57ef1836687b6c15319400ba2a712f99d3b2203789de21d4690f7eef"
+    },
+    {
+      "path": "evidence/client-integration-05/manifest.json",
+      "bytes": 481,
+      "sha256": "be9900e23f77e6152ac83e3dec6162f56f386dfafd639c3c7121dc8df270be83"
+    },
+    {
+      "path": "evidence/client-integration-05/result.json",
+      "bytes": 419,
+      "sha256": "6ab3dc25ef98ad87fb614270aa58554bd45b0a9e5b53cb113bb4b0d474a4db32"
+    },
+    {
+      "path": "evidence/client-integration-05/runtime.json",
+      "bytes": 238,
+      "sha256": "71877bb10dfe834e24faf6354671f10015bd6e9da0b6f0005a393ad9470e55dd"
+    },
+    {
+      "path": "evidence/client-integration-05/worker-freeze.json",
+      "bytes": 125,
+      "sha256": "c47d3aff823f21a0bb1a7d108930dbc5acb3021e5a29d819e68606d95eec05e4"
+    },
+    {
+      "path": "evidence/client-integration-06/agent-apply.json",
+      "bytes": 421,
+      "sha256": "6ff9465e5b5a3977542c3d4fb8988975134762fe768139c95362aa96895fa03b"
+    },
+    {
+      "path": "evidence/client-integration-06/client-commands.json",
+      "bytes": 12880,
+      "sha256": "fc34eb583fa7c5a2169ffb122701e53e6c0a85bf08a1d9ffe4cb6b5bf046f3d9"
+    },
+    {
+      "path": "evidence/client-integration-06/database-crosscheck.json",
+      "bytes": 211,
+      "sha256": "11630bb58abead6d352169fbeadaa65d66cd7f10388edc1c5dafd7356f3c5616"
+    },
+    {
+      "path": "evidence/client-integration-06/init.json",
+      "bytes": 307,
+      "sha256": "24a818ae57ef1836687b6c15319400ba2a712f99d3b2203789de21d4690f7eef"
+    },
+    {
+      "path": "evidence/client-integration-06/manifest.json",
+      "bytes": 481,
+      "sha256": "2c915edc2a75376d5a0fe24b385a6e5cc095f49917a10fb6df407fc6ace0cfe3"
+    },
+    {
+      "path": "evidence/client-integration-06/result.json",
+      "bytes": 485,
+      "sha256": "d7cda07e04379daf11bf86c624c59084dde49ca4ad7d67a719ac3bb04bdb7e30"
+    },
+    {
+      "path": "evidence/client-integration-06/runtime.json",
+      "bytes": 238,
+      "sha256": "bb80e39a26f11d3e79bbedd3e8f2cb87268836122c9ebae9a0ce2eb095699ba0"
+    },
+    {
+      "path": "evidence/client-integration-06/worker-freeze.json",
+      "bytes": 125,
+      "sha256": "6f50b1eba268abfe17fb5205ebb3ed5105c786e1bd874cbb7e604dbda86ff009"
+    },
+    {
+      "path": "evidence/final-checks.json",
+      "bytes": 241,
+      "sha256": "21857c23cd2c2c304c7ac331b96560f1eb477dd4daf1ab1ba37e33f95abfde80"
+    },
+    {
+      "path": "evidence/installation.json",
+      "bytes": 1070,
+      "sha256": "1f5a3eb74a3a3e5c2630f034dcdbe4c0caba52b20562625749a28d195eee767e"
+    },
+    {
+      "path": "evidence/migrated-receipt-check.json",
+      "bytes": 178,
+      "sha256": "ac0c0ed74cfb5fd170786d9e26dd2042f8b54e30ade5adf598b39b084032dd04"
+    },
+    {
+      "path": "evidence/migration-result.json",
+      "bytes": 716,
+      "sha256": "5c768d5c9a6005ac66bef70c576642fcd3e860b28464cd8777f371a0a234eeb1"
+    },
+    {
+      "path": "evidence/oaxctl-help.txt",
+      "bytes": 264,
+      "sha256": "2cf3e85a2f09e13a9206619f9fd3a976972237d30f6c3509d7a72486411c41b4"
+    },
+    {
+      "path": "evidence/oaxctl-tests.txt",
+      "bytes": 816,
+      "sha256": "f2af50a80428b12db4743f87432e1da328256ebbb0dbeba26f8b4cfe51b55af9"
+    },
+    {
+      "path": "evidence/oaxops-tests.txt",
+      "bytes": 463,
+      "sha256": "dd1007a385cf46cce63944eff9dcfb0f19b5bf4cff4e80bfe26f0398deead361"
+    }
+  ]
+}

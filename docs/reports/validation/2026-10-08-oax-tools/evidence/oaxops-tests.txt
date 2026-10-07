@@ -1,0 +1,8 @@
+test_existing_event_is_never_replayed (__main__.HostOperatorTest.test_existing_event_is_never_replayed) ... ok
+test_existing_receipt_through_user_systemd (__main__.HostOperatorTest.test_existing_receipt_through_user_systemd) ... ok
+test_status_is_read_only_and_reports_writer_lock (__main__.HostOperatorTest.test_status_is_read_only_and_reports_writer_lock) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.737s
+
+OK

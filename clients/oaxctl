@@ -1,0 +1,318 @@
+#!/usr/bin/env python3
+"""Small HTTPS client for the OpenAgentX web control API."""
+
+import argparse
+import getpass
+import http.cookiejar
+import json
+import os
+import pathlib
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import uuid
+
+
+TERMINAL = {"succeeded", "failed", "canceled", "uncertain"}
+USER_AGENT = "curl/8.5.0 oaxctl/1.0"
+
+
+class ClientError(Exception):
+    pass
+
+
+def xdg_path(variable, fallback, name):
+    configured = pathlib.Path(os.environ.get(variable) or "")
+    base = configured if configured.is_absolute() else pathlib.Path.home() / fallback
+    return base / name
+
+
+def read_json(path):
+    with path.open(encoding="utf-8") as handle:
+        value = json.load(handle)
+    if not isinstance(value, dict):
+        raise ClientError(f"invalid JSON object: {path}")
+    return value
+
+
+def private_directory(path):
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if path.is_symlink() or path.stat().st_mode & 0o077:
+        raise ClientError(f"state directory must have mode 0700: {path}")
+
+
+def private_save(path, save):
+    old_umask = os.umask(0o077)
+    try:
+        if path.exists() and (path.is_symlink() or path.stat().st_mode & 0o077):
+            raise ClientError(f"session file must have mode 0600: {path}")
+        save()
+        path.chmod(0o600)
+    finally:
+        os.umask(old_umask)
+
+
+def quote_id(value):
+    return urllib.parse.quote(value, safe="")
+
+
+class RejectRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        return None
+
+
+def public_session(result):
+    return {key: result[key] for key in ("principal", "idle_expires_at", "absolute_expires_at") if key in result}
+
+
+class Client:
+    def __init__(self):
+        config = xdg_path("XDG_CONFIG_HOME", ".config", "oaxctl") / "config.json"
+        self.state = xdg_path("XDG_STATE_HOME", ".local/state", "oaxctl")
+        settings = read_json(config) if config.exists() else {}
+        self.base = (os.environ.get("OAXCTL_URL") or settings.get("url") or "https://agentx.oneaxe.cn").rstrip("/")
+        self.username = os.environ.get("OAXCTL_USER") or settings.get("username")
+        self.password = os.environ.get("OAXCTL_PASSWORD")
+        parsed = urllib.parse.urlsplit(self.base)
+        if parsed.scheme not in ("https", "http") or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ("", "/"):
+            raise ClientError("invalid server URL")
+        try:
+            parsed.port
+        except ValueError:
+            raise ClientError("invalid server URL port") from None
+        if parsed.scheme == "http" and parsed.hostname not in ("localhost", "127.0.0.1", "::1"):
+            raise ClientError("remote server URL must use HTTPS")
+        private_directory(self.state)
+        self.cookie_file = self.state / "cookies.txt"
+        self.session_file = self.state / "session.json"
+        self.jar = http.cookiejar.MozillaCookieJar(str(self.cookie_file))
+        if self.cookie_file.exists():
+            if self.cookie_file.is_symlink() or self.cookie_file.stat().st_mode & 0o077:
+                raise ClientError(f"cookie file must have mode 0600: {self.cookie_file}")
+            self.jar.load(ignore_discard=True, ignore_expires=False)
+        self.opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.jar), RejectRedirect())
+        if self.session_file.exists() and (self.session_file.is_symlink() or self.session_file.stat().st_mode & 0o077):
+            raise ClientError(f"session file must have mode 0600: {self.session_file}")
+        self.csrf = read_json(self.session_file).get("csrf_token") if self.session_file.exists() else None
+
+    def request(self, method, path, body=None, key=None, csrf=None):
+        payload = json.dumps(body).encode("utf-8") if body is not None else None
+        req = urllib.request.Request(self.base + path, data=payload, method=method)
+        req.add_header("Accept", "application/json")
+        req.add_header("User-Agent", os.environ.get("OAXCTL_UA", USER_AGENT))
+        req.add_header("Origin", self.base)
+        if payload is not None:
+            req.add_header("Content-Type", "application/json")
+        if key:
+            req.add_header("Idempotency-Key", key)
+        if csrf:
+            req.add_header("X-CSRF-Token", csrf)
+        try:
+            with self.opener.open(req, timeout=40) as response:
+                raw = response.read()
+        except urllib.error.HTTPError as error:
+            raise ClientError(f"HTTP {error.code}; request was not retried") from None
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            raise ClientError(f"transport failure ({type(error).__name__}); write outcome may be unknown; retry only with the same key and payload") from None
+        try:
+            result = json.loads(raw) if raw.strip() else {}
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise ClientError("invalid JSON response; write outcome may be unknown") from None
+        if not isinstance(result, (dict, list)):
+            raise ClientError("unexpected JSON response; write outcome may be unknown")
+        return result
+
+    def save_session(self, result):
+        csrf = result.get("csrf_token")
+        if not isinstance(csrf, str) or not csrf:
+            raise ClientError("session response has no csrf_token")
+        self.csrf = csrf
+        private_save(self.cookie_file, lambda: self.jar.save(ignore_discard=True, ignore_expires=False))
+        private_save(self.session_file, lambda: self.session_file.write_text(json.dumps({"csrf_token": csrf}), encoding="utf-8"))
+
+    def login(self):
+        if not self.username:
+            raise ClientError("set username in ~/.config/oaxctl/config.json or OAXCTL_USER")
+        password = self.password or (getpass.getpass("OpenAgentX password: ") if sys.stdin.isatty() else None)
+        if not password:
+            raise ClientError("login requires a password from the terminal or OAXCTL_PASSWORD")
+        self.jar.clear()
+        result = self.request("POST", "/api/auth/v1/login", {"username": self.username, "password": password})
+        self.save_session(result)
+        return result
+
+    def session(self):
+        try:
+            result = self.request("GET", "/api/auth/v1/session")
+        except ClientError as error:
+            if str(error).startswith("HTTP 401"):
+                return self.login()
+            raise
+        self.save_session(result)
+        return result
+
+    def get(self, path):
+        try:
+            return self.request("GET", path)
+        except ClientError as error:
+            if str(error).startswith("HTTP 401"):
+                self.login()
+                return self.request("GET", path)
+            raise
+
+    def write(self, path, body, key):
+        if not key or body.get("meta", {}).get("idempotency_key") != key:
+            raise ClientError("Idempotency-Key must match request meta")
+        self.session()
+        return self.request("POST", path, body, key=key, csrf=self.csrf)
+
+
+def task_detail(client, task_id, after=0, limit=100):
+    query = urllib.parse.urlencode({"after_sequence": after, "limit": limit})
+    return client.get(f"/api/observe/v1/tasks/{quote_id(task_id)}?{query}")
+
+
+def content_of(value):
+    if value == "-":
+        return sys.stdin.read()
+    if value.startswith("@"):
+        return pathlib.Path(value[1:]).read_text(encoding="utf-8")
+    return value
+
+
+def emit(value):
+    print(json.dumps(value, ensure_ascii=False, indent=2))
+
+
+def wait_task(client, task_id, timeout, interval, quiet):
+    deadline = time.monotonic() + timeout
+    cursor = 0
+    previous = None
+    while True:
+        detail = task_detail(client, task_id, after=cursor, limit=499)
+        task = detail["task"]
+        for event in detail.get("events", []):
+            cursor = max(cursor, event.get("sequence", 0))
+            if not quiet:
+                print(f"[{event.get('sequence')}] {event.get('event_type', '')}", flush=True)
+        status = task.get("status")
+        if status != previous:
+            print(f"{task_id}: {status} (version {task.get('version')})", flush=True)
+            previous = status
+        has_more = detail.get("has_more_live_events")
+        if status in TERMINAL and not has_more:
+            emit({"status": status, "outcome_state": task.get("outcome_state"), "result": task.get("result")})
+            return 0 if status == "succeeded" else 4
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            print(f"client wait expired; task remains {status}; resume with: oaxctl wait {task_id}", file=sys.stderr)
+            return 3
+        if not has_more:
+            time.sleep(min(interval, remaining))
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="oaxctl", description="OpenAgentX remote HTTPS control client")
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name in ("login", "whoami", "agents", "tasks", "dispatch", "say", "show", "wait", "get"):
+        command = commands.add_parser(name)
+        if name in ("dispatch", "say"):
+            command.add_argument("target")
+            command.add_argument("content", help="text, - for stdin, or @file")
+            command.add_argument("--key", help="stable idempotency key for manual retry")
+            command.add_argument("--wait", action="store_true")
+            if name == "dispatch":
+                command.add_argument("--intent", choices=("query", "mutation"), default="query")
+            else:
+                command.add_argument("--expected-version", type=int, help="required when retrying with --key")
+        elif name in ("show", "wait"):
+            command.add_argument("target")
+        elif name == "get":
+            command.add_argument("path", help="/api/observe/v1/... or /api/auth/v1/session (redacted)")
+        if name in ("dispatch", "say", "wait"):
+            command.add_argument("--timeout", type=int, default=600, help="client wait limit in seconds")
+            command.add_argument("--interval", type=int, default=30, help="poll interval in seconds")
+            command.add_argument("--quiet", action="store_true", help="suppress event lines")
+        if name in ("agents", "tasks"):
+            command.add_argument("--json", action="store_true")
+        if name == "tasks":
+            command.add_argument("--agent")
+            command.add_argument("--limit", type=int, default=20)
+    args = parser.parse_args()
+    if hasattr(args, "timeout") and (args.timeout < 0 or args.interval <= 0):
+        parser.error("--timeout must be nonnegative and --interval must be positive")
+    try:
+        client = Client()
+        if args.command == "login":
+            emit(public_session(client.login()))
+        elif args.command == "whoami":
+            emit(public_session(client.session()))
+        elif args.command == "agents":
+            agents = client.get("/api/observe/v1/overview")["agents"]
+            if args.json:
+                emit(agents)
+            else:
+                for agent in agents:
+                    readiness = agent.get("readiness") or {}
+                    ready = "yes" if readiness.get("ready") else "no"
+                    start = "yes" if readiness.get("can_start_now") else "no"
+                    print(f"{agent.get('agent_id', ''):24} ready={ready:3} can_start_now={start:3} {readiness.get('reason', '')}")
+        elif args.command == "tasks":
+            if not 1 <= args.limit <= 100:
+                parser.error("--limit must be 1..100")
+            query = {"limit": args.limit}
+            if args.agent:
+                query["agent_id"] = args.agent
+            result = client.get("/api/observe/v1/tasks?" + urllib.parse.urlencode(query))
+            if args.json:
+                emit(result)
+            else:
+                for task in result.get("tasks", []):
+                    print(f"{task.get('id', ''):42} {task.get('status', ''):12} {task.get('target_agent_id', ''):18} {task.get('summary', '')}")
+        elif args.command == "dispatch":
+            agents = client.get("/api/observe/v1/agents")
+            agent = next((agent for agent in agents if agent.get("agent_id") == args.target), None)
+            if agent is None:
+                raise ClientError(f"unknown agent: {args.target}")
+            key = args.key or "oaxctl-task-" + uuid.uuid4().hex
+            body = {"meta": {"idempotency_key": key}, "target_agent_id": args.target,
+                    "organization_id": agent.get("organization_id") or "default", "dispatch_mode": "direct",
+                    "intent": args.intent, "content": content_of(args.content)}
+            print(f"dispatch idempotency_key={key}", file=sys.stderr, flush=True)
+            result = client.write("/api/control/v1/tasks", body, key)
+            emit({"idempotency_key": key, **result})
+            if args.wait:
+                return wait_task(client, result["task_id"], args.timeout, args.interval, args.quiet)
+        elif args.command == "say":
+            if args.key and args.expected_version is None:
+                parser.error("--key requires --expected-version so a retry preserves the payload")
+            version = args.expected_version
+            if version is None:
+                version = task_detail(client, args.target, limit=1)["task"]["version"]
+            if version <= 0:
+                parser.error("--expected-version must be positive")
+            key = args.key or "oaxctl-message-" + uuid.uuid4().hex
+            body = {"meta": {"idempotency_key": key, "expected_version": version}, "content": content_of(args.content)}
+            print(f"say idempotency_key={key} expected_version={version}", file=sys.stderr, flush=True)
+            result = client.write(f"/api/control/v1/tasks/{quote_id(args.target)}/messages", body, key)
+            emit({"idempotency_key": key, "expected_version": version, **result})
+            if args.wait:
+                return wait_task(client, args.target, args.timeout, args.interval, args.quiet)
+        elif args.command == "show":
+            emit(task_detail(client, args.target))
+        elif args.command == "wait":
+            return wait_task(client, args.target, args.timeout, args.interval, args.quiet)
+        elif args.command == "get":
+            if not (args.path.startswith("/api/observe/v1/") or args.path == "/api/auth/v1/session") or urllib.parse.urlsplit(args.path).netloc:
+                parser.error("get accepts only observe paths or the session path")
+            emit(public_session(client.session()) if args.path == "/api/auth/v1/session" else client.get(args.path))
+        return 0
+    except (ClientError, OSError, ValueError, KeyError, TypeError) as error:
+        print(f"oaxctl: {error}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

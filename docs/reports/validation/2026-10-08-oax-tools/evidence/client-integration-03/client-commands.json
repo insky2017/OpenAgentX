@@ -1,0 +1,361 @@
+[
+  {
+    "label": "login",
+    "argv": [
+      "login"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"user_id\": \"human-owner-8ecf0f19-78a7-4f38-b4bb-759fc8af1e95\",\n  \"username\": \"owner\",\n  \"roles\": [\n    \"owner\"\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "whoami",
+    "argv": [
+      "whoami"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"user_id\": \"human-owner-8ecf0f19-78a7-4f38-b4bb-759fc8af1e95\",\n  \"username\": \"owner\",\n  \"roles\": [\n    \"owner\"\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "agents",
+    "argv": [
+      "agents",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "[\n  {\n    \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n    \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n    \"organization_id\": \"default\",\n    \"display_name\": \"OAX client acceptance\",\n    \"status\": \"active\",\n    \"version\": 1,\n    \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n    \"updated_at\": \"2026-10-07T21:07:22.786527253Z\"\n  }\n]\n",
+    "stderr": ""
+  },
+  {
+    "label": "agents-text",
+    "argv": [
+      "agents"
+    ],
+    "exit_code": 0,
+    "stdout": "oaxctl-acceptance-27175a9a OAX client acceptance\n",
+    "stderr": ""
+  },
+  {
+    "label": "tasks",
+    "argv": [
+      "tasks",
+      "--json",
+      "--agent",
+      "oaxctl-acceptance-27175a9a"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"tasks\": [],\n  \"has_more\": false\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 6,\n  \"live_after_sequence\": 6,\n  \"server_time\": \"2026-10-07T21:07:24.762709531Z\",\n  \"tasks\": [],\n  \"workers\": []\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 8,\n  \"live_after_sequence\": 8,\n  \"server_time\": \"2026-10-07T21:07:25.423273127Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:25.266262728Z\",\n      \"lease_until\": \"2026-10-07T21:07:55.266262728Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:25.266262728Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 8,\n  \"live_after_sequence\": 8,\n  \"server_time\": \"2026-10-07T21:07:26.088541183Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:25.266262728Z\",\n      \"lease_until\": \"2026-10-07T21:07:55.266262728Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:25.266262728Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 9,\n  \"live_after_sequence\": 9,\n  \"server_time\": \"2026-10-07T21:07:26.779565511Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:26.270770153Z\",\n      \"lease_until\": \"2026-10-07T21:07:56.270770153Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:26.270770153Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 10,\n  \"live_after_sequence\": 10,\n  \"server_time\": \"2026-10-07T21:07:27.443148127Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:27.270267208Z\",\n      \"lease_until\": \"2026-10-07T21:07:57.270267208Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:27.270267208Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 10,\n  \"live_after_sequence\": 10,\n  \"server_time\": \"2026-10-07T21:07:28.12988416Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:27.270267208Z\",\n      \"lease_until\": \"2026-10-07T21:07:57.270267208Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:27.270267208Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 11,\n  \"live_after_sequence\": 11,\n  \"server_time\": \"2026-10-07T21:07:28.796915058Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:28.27051704Z\",\n      \"lease_until\": \"2026-10-07T21:07:58.27051704Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:28.27051704Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 12,\n  \"live_after_sequence\": 12,\n  \"server_time\": \"2026-10-07T21:07:29.458766964Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:29.270342916Z\",\n      \"lease_until\": \"2026-10-07T21:07:59.270342916Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:29.270342916Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 12,\n  \"live_after_sequence\": 12,\n  \"server_time\": \"2026-10-07T21:07:30.118667705Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:29.270342916Z\",\n      \"lease_until\": \"2026-10-07T21:07:59.270342916Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:29.270342916Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 13,\n  \"live_after_sequence\": 13,\n  \"server_time\": \"2026-10-07T21:07:30.781569216Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:30.270084846Z\",\n      \"lease_until\": \"2026-10-07T21:08:00.270084846Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:30.270084846Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 14,\n  \"live_after_sequence\": 14,\n  \"server_time\": \"2026-10-07T21:07:31.446518835Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:31.271366799Z\",\n      \"lease_until\": \"2026-10-07T21:08:01.271366799Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:31.271366799Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 14,\n  \"live_after_sequence\": 14,\n  \"server_time\": \"2026-10-07T21:07:32.106816823Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:31.271366799Z\",\n      \"lease_until\": \"2026-10-07T21:08:01.271366799Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:31.271366799Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 15,\n  \"live_after_sequence\": 15,\n  \"server_time\": \"2026-10-07T21:07:32.776108547Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:32.270309133Z\",\n      \"lease_until\": \"2026-10-07T21:08:02.270309133Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:32.270309133Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 16,\n  \"live_after_sequence\": 16,\n  \"server_time\": \"2026-10-07T21:07:33.447737923Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:33.270626378Z\",\n      \"lease_until\": \"2026-10-07T21:08:03.270626378Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:33.270626378Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 16,\n  \"live_after_sequence\": 16,\n  \"server_time\": \"2026-10-07T21:07:34.114010801Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:33.270626378Z\",\n      \"lease_until\": \"2026-10-07T21:08:03.270626378Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:33.270626378Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 17,\n  \"live_after_sequence\": 17,\n  \"server_time\": \"2026-10-07T21:07:34.765612659Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:34.27069713Z\",\n      \"lease_until\": \"2026-10-07T21:08:04.27069713Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:34.27069713Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 18,\n  \"live_after_sequence\": 18,\n  \"server_time\": \"2026-10-07T21:07:35.424960312Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:35.270744271Z\",\n      \"lease_until\": \"2026-10-07T21:08:05.270744271Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:35.270744271Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 18,\n  \"live_after_sequence\": 18,\n  \"server_time\": \"2026-10-07T21:07:36.092703891Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:35.270744271Z\",\n      \"lease_until\": \"2026-10-07T21:08:05.270744271Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:35.270744271Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 19,\n  \"live_after_sequence\": 19,\n  \"server_time\": \"2026-10-07T21:07:36.758098617Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:36.270119692Z\",\n      \"lease_until\": \"2026-10-07T21:08:06.270119692Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:36.270119692Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 20,\n  \"live_after_sequence\": 20,\n  \"server_time\": \"2026-10-07T21:07:37.431402976Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:37.27096988Z\",\n      \"lease_until\": \"2026-10-07T21:08:07.27096988Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:37.27096988Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 20,\n  \"live_after_sequence\": 20,\n  \"server_time\": \"2026-10-07T21:07:38.098510445Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:37.27096988Z\",\n      \"lease_until\": \"2026-10-07T21:08:07.27096988Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:37.27096988Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 21,\n  \"live_after_sequence\": 21,\n  \"server_time\": \"2026-10-07T21:07:38.757956454Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:38.271121646Z\",\n      \"lease_until\": \"2026-10-07T21:08:08.271121646Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:38.271121646Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 22,\n  \"live_after_sequence\": 22,\n  \"server_time\": \"2026-10-07T21:07:39.412373679Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:39.272603186Z\",\n      \"lease_until\": \"2026-10-07T21:08:09.272603186Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:39.272603186Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 22,\n  \"live_after_sequence\": 22,\n  \"server_time\": \"2026-10-07T21:07:40.072496707Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:39.272603186Z\",\n      \"lease_until\": \"2026-10-07T21:08:09.272603186Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:39.272603186Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 23,\n  \"live_after_sequence\": 23,\n  \"server_time\": \"2026-10-07T21:07:40.747269188Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:40.270671736Z\",\n      \"lease_until\": \"2026-10-07T21:08:10.270671736Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:40.270671736Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 24,\n  \"live_after_sequence\": 24,\n  \"server_time\": \"2026-10-07T21:07:41.415777814Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:41.270655122Z\",\n      \"lease_until\": \"2026-10-07T21:08:11.270655122Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:41.270655122Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 24,\n  \"live_after_sequence\": 24,\n  \"server_time\": \"2026-10-07T21:07:42.077886108Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:41.270655122Z\",\n      \"lease_until\": \"2026-10-07T21:08:11.270655122Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:41.270655122Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 25,\n  \"live_after_sequence\": 25,\n  \"server_time\": \"2026-10-07T21:07:42.744330876Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:42.272000182Z\",\n      \"lease_until\": \"2026-10-07T21:08:12.272000182Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:42.272000182Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 26,\n  \"live_after_sequence\": 26,\n  \"server_time\": \"2026-10-07T21:07:43.418560131Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:43.271779988Z\",\n      \"lease_until\": \"2026-10-07T21:08:13.271779988Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:43.271779988Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 26,\n  \"live_after_sequence\": 26,\n  \"server_time\": \"2026-10-07T21:07:44.085928866Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:43.271779988Z\",\n      \"lease_until\": \"2026-10-07T21:08:13.271779988Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:43.271779988Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "overview-before-freeze",
+    "argv": [
+      "get",
+      "/api/observe/v1/overview"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"principal_id\": \"agent-oaxctl-acceptance-27175a9a\",\n      \"organization_id\": \"default\",\n      \"display_name\": \"OAX client acceptance\",\n      \"status\": \"active\",\n      \"version\": 1,\n      \"created_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"updated_at\": \"2026-10-07T21:07:22.786527253Z\",\n      \"readiness\": {\n        \"ready\": false,\n        \"can_start_now\": false,\n        \"reason\": \"后台未运行\",\n        \"next_action\": \"openagentx agent resume oaxctl-acceptance-27175a9a\"\n      }\n    }\n  ],\n  \"approvals\": [],\n  \"latest_sequence\": 27,\n  \"live_after_sequence\": 27,\n  \"server_time\": \"2026-10-07T21:07:44.747736186Z\",\n  \"tasks\": [],\n  \"workers\": [\n    {\n      \"worker_instance_id\": \"worker-da520dce-3676-462a-9af5-ab68e559da7f\",\n      \"agent_id\": \"oaxctl-acceptance-27175a9a\",\n      \"generation\": 1,\n      \"status\": \"degraded\",\n      \"last_heartbeat_at\": \"2026-10-07T21:07:44.271491079Z\",\n      \"lease_until\": \"2026-10-07T21:08:14.271491079Z\",\n      \"started_at\": \"2026-10-07T21:07:25.26256804Z\",\n      \"updated_at\": \"2026-10-07T21:07:44.271491079Z\"\n    }\n  ]\n}\n",
+    "stderr": ""
+  }
+]
