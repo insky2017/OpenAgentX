@@ -1,0 +1,29 @@
+{
+  "source": "read-only SQLite; preference writes were performed through formal API",
+  "events": [
+    {
+      "sequence": 32,
+      "event_id": "event-model-21c95350-540f-40f7-9002-1ce23b2b0823",
+      "aggregate_id": "terminal-e2e-1adf74",
+      "event_type": "agent.model_settings.updated",
+      "payload_json": "{\"backend_id\": \"codex\", \"effort\": \"high\", \"model\": \"gpt-6.1-sol\", \"version\": 1}",
+      "created_at": "2026-10-06T21:31:36.583649879Z"
+    },
+    {
+      "sequence": 62,
+      "event_id": "event-model-e65a2015-1c46-4002-a1cb-c7bab965a8c8",
+      "aggregate_id": "terminal-e2e-1adf74",
+      "event_type": "agent.model_settings.updated",
+      "payload_json": "{\"backend_id\": \"codex\", \"effort\": \"high\", \"model\": \"gpt-6-astra\", \"version\": 2}",
+      "created_at": "2026-10-06T21:36:19.982179269Z"
+    },
+    {
+      "sequence": 65,
+      "event_id": "event-model-f92242a1-f5bd-4605-aaff-40aa7c31683e",
+      "aggregate_id": "terminal-e2e-1adf74",
+      "event_type": "agent.model_settings.updated",
+      "payload_json": "{\"backend_id\": \"codex\", \"effort\": \"high\", \"model\": \"gpt-6.1-sol\", \"version\": 3}",
+      "created_at": "2026-10-06T21:36:38.43242013Z"
+    }
+  ]
+}

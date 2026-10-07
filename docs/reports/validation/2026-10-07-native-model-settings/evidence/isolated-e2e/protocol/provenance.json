@@ -1,0 +1,6 @@
+{
+  "codex_version": "0.160.1",
+  "generated_with": "codex app-server generate-ts --experimental",
+  "full_private_schema_manifest": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/protocol/manifest.json",
+  "full_private_schema_manifest_sha256": "df927a1dc4b58edfe92fae99d669f2e6957f180e71953799f7b7bc0867a58826"
+}

@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-06T21:51:53.740935+00:00",
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-1796448474/server.sock",
+    "thread_id": "01a11320-3816-7330-b3d9-506257c92737",
+    "turn_id": "01a1132f-282e-7ab0-96f0-2159e1a9188d",
+    "task_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+    "run_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+    "state": "idle",
+    "pid": 805200,
+    "updated_at": "2026-10-06T21:51:47.990309505Z"
+  },
+  "attach": {
+    "readiness": {
+      "ready": true,
+      "can_start_now": true,
+      "reason": "可开始工作"
+    },
+    "agent_id": "terminal-e2e-1adf74",
+    "mode": "normal",
+    "generation": 2,
+    "worker_status": "online",
+    "worker_instance_id": "worker-70508ac5-41bd-4716-9ed0-349b9f91b42c",
+    "last_heartbeat_at": "2026-10-06T21:51:47.968151907Z",
+    "lease_until": "2026-10-06T21:52:17.968151907Z",
+    "backend_health": {
+      "codex": "healthy"
+    },
+    "observe_base_path": "/api/observe/v1",
+    "control_base_path": "/api/control/v1",
+    "snapshot_sequence": 196
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 804576,
+      "starttime": "54136023"
+    },
+    {
+      "label": "worker",
+      "pid": 805114,
+      "starttime": "54136523"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/openagentx-4774f19",
+    "agent",
+    "resume",
+    "terminal-e2e-1adf74",
+    "--password-file",
+    "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/password",
+    "--no-open",
+    "--wait",
+    "3m"
+  ],
+  "exit": 0,
+  "transcript": "\u001b]11;?\u001b\\\u001b[6nAgent terminal-e2e-1adf74 服务在线，当前代 2 网络已应用。\r\n终端真实验收 (terminal-e2e-1adf74) · 正在工作，新任务将排队\r\n  当前：task-2fb618be-eff1-4e00-aa5a-94b86f8a0411 · starting\r\n  最近：task-2fb618be-eff1-4e00-aa5a-94b86f8a0411 · running\r\n  打开：openagentx agent open terminal-e2e-1adf74\r\n  恢复：openagentx agent resume terminal-e2e-1adf74\r\n\r\n"
+}

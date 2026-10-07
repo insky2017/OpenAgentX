@@ -1,0 +1,16 @@
+{
+  "task_id": "task-56d86c42-f007-41df-8375-1bf6424ec605",
+  "task": {
+    "status": "canceled",
+    "created_at": "2026-10-05T10:47:44.823580815Z",
+    "updated_at": "2026-10-05T10:48:44.683131988Z"
+  },
+  "latest_run": {
+    "deadline_at": "2026-10-05T11:17:44.827846639Z",
+    "run_id": "run-0076ae1c-79b2-4eb1-a620-b22b8ab92448",
+    "status": "canceled",
+    "worker_generation": 1,
+    "started_at": "2026-10-05T10:47:44.827846639Z",
+    "finished_at": "2026-10-05T10:48:44.683131988Z"
+  }
+}

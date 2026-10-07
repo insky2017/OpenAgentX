@@ -1,0 +1,5 @@
+{
+  "binary": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/candidate02",
+  "sha256": "072c53c0ab859bad073334ba31e19bbd0caf87ffd9240c1d96855f7b2c6befc5",
+  "scope": "bridge only; daemon and Worker retain candidate01"
+}

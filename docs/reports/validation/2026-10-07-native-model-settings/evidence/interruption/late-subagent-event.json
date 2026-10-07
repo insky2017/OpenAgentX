@@ -1,0 +1,10 @@
+{
+  "source_line": 18600,
+  "timestamp": "2026-10-06T21:54:14.378Z",
+  "type": "event_msg",
+  "event_type": "item_completed",
+  "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+  "item_type": "SubAgentActivity",
+  "started_at_ms": 1791323654378,
+  "completed_at_ms": 1791323654378
+}

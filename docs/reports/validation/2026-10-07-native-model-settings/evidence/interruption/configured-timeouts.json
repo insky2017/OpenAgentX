@@ -1,0 +1,38 @@
+{
+  "openagentx": [
+    {
+      "adapter_id": "codex-app-server",
+      "timeout": "30m0s"
+    }
+  ],
+  "rhythm": [
+    {
+      "adapter_id": "codex-app-server",
+      "timeout": "30m0s"
+    }
+  ],
+  "pay-service": [
+    {
+      "adapter_id": "codex-app-server",
+      "timeout": "30m0s"
+    }
+  ],
+  "quote-service": [
+    {
+      "adapter_id": "codex-app-server",
+      "timeout": "30m0s"
+    }
+  ],
+  "identity-service": [
+    {
+      "adapter_id": "codex-app-server",
+      "timeout": "30m0s"
+    }
+  ],
+  "oneaxe-voice": [
+    {
+      "adapter_id": "codex-app-server",
+      "timeout": "30m0s"
+    }
+  ]
+}

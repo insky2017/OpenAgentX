@@ -1,0 +1,142 @@
+{
+  "checked_at": "2026-10-07T03:33:18.711150+00:00",
+  "status": "PASS_READONLY_SYSTEMD_PREFLIGHT",
+  "unit": "oax-native-model-preflight-20261007.service",
+  "installed_sha256": "ddfaff6bd4370639b40bb6c2760e02e9245d948a2c62d149a4b2328a7a9479a7",
+  "service_artifacts": {
+    "openagentx.service": {
+      "pid": 3577886,
+      "executable": "/home/sky/.local/bin/openagentx (deleted)",
+      "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+      "started_at": "Sat 2026-10-03 22:58:51 CST"
+    },
+    "openagentx-worker@openagentx.service": {
+      "pid": 58865,
+      "executable": "/home/sky/.local/bin/openagentx (deleted)",
+      "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+      "started_at": "Mon 2026-10-05 02:23:54 CST"
+    },
+    "openagentx-worker@rhythm.service": {
+      "pid": 3580837,
+      "executable": "/home/sky/.local/bin/openagentx (deleted)",
+      "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+      "started_at": "Sat 2026-10-03 22:59:37 CST"
+    },
+    "openagentx-worker@pay-service.service": {
+      "pid": 1175344,
+      "executable": "/home/sky/.local/bin/openagentx (deleted)",
+      "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+      "started_at": "Mon 2026-10-05 07:21:58 CST"
+    },
+    "openagentx-worker@quote-service.service": {
+      "pid": 15339,
+      "executable": "/home/sky/.local/bin/openagentx (deleted)",
+      "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+      "started_at": "Mon 2026-10-05 02:10:48 CST"
+    },
+    "openagentx-worker@identity-service.service": {
+      "pid": 85950,
+      "executable": "/home/sky/.local/bin/openagentx (deleted)",
+      "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+      "started_at": "Mon 2026-10-05 02:31:22 CST"
+    },
+    "openagentx-worker@oneaxe-voice.service": {
+      "pid": 298177,
+      "executable": "/home/sky/.local/bin/openagentx (deleted)",
+      "sha256": "15fd8699c2f07af80966dc3edc355ee90f260e109c9715f402aedd16b90d97ca",
+      "started_at": "Mon 2026-10-05 03:20:41 CST"
+    }
+  },
+  "agents": {
+    "openagentx": {
+      "state": "running",
+      "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+      "worker_status": "online",
+      "generation": 1,
+      "pane": {
+        "window": "@8",
+        "pane": "%11",
+        "pid": 31132,
+        "dead": false,
+        "name": "openagentx"
+      }
+    },
+    "rhythm": {
+      "state": "idle",
+      "thread_id": "01a0b4e3-7b2e-7822-8ae1-9f0e812115a9",
+      "worker_status": "online",
+      "generation": 2,
+      "pane": {
+        "window": "@28",
+        "pane": "%55",
+        "pid": 3584397,
+        "dead": false,
+        "name": "rhythm"
+      }
+    },
+    "pay-service": {
+      "state": "idle",
+      "thread_id": "01a0e016-d951-77d1-bc7e-d13662f4823c",
+      "worker_status": "online",
+      "generation": 4,
+      "pane": {
+        "window": "@27",
+        "pane": "%54",
+        "pid": 1129591,
+        "dead": false,
+        "name": "pay-service"
+      }
+    },
+    "quote-service": {
+      "state": "idle",
+      "thread_id": "01a1010a-c521-78b2-98f0-eaafa642c5fa",
+      "worker_status": "online",
+      "generation": 53,
+      "pane": {
+        "window": "@3",
+        "pane": "%3",
+        "pid": 30767,
+        "dead": false,
+        "name": "quote-service"
+      }
+    },
+    "identity-service": {
+      "state": "idle",
+      "thread_id": "01a0e344-8d5f-7f30-a2a7-f5e217bf3f69",
+      "worker_status": "online",
+      "generation": 1,
+      "pane": {
+        "window": "@30",
+        "pane": "%60",
+        "pid": 3525429,
+        "dead": false,
+        "name": "identity-service"
+      }
+    },
+    "oneaxe-voice": {
+      "state": "idle",
+      "thread_id": "01a0ddcc-248f-7dd0-a263-67f1d53e0181",
+      "worker_status": "online",
+      "generation": 1,
+      "pane": {
+        "window": "@11",
+        "pane": "%17",
+        "pid": 32093,
+        "dead": false,
+        "name": "oneaxe-voice"
+      }
+    }
+  },
+  "initial_preflight_failure": {
+    "scope": "Agent tool process could not read sibling service /proc/exe",
+    "error": "PermissionError on /proc/3577886/exe",
+    "production_mutation": false,
+    "resolution": "Same read-only preflight under independent systemd user unit succeeded with actual live binary digests"
+  },
+  "source_review": {
+    "reviewer": "voice_model_readonly",
+    "blocking_findings": [],
+    "scope": "CLI argv, stop API, graceful drain, network resume, original-thread verification task"
+  },
+  "not_claimed": "正式部署或重启已完成"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "task-review-fdd51826-7223-546b-b2c8-4c48236fc343",
+  "task_id": "task-870f9cf7-b92f-49df-8ce3-8ea4cd17a098",
+  "run_id": "run-39d486da-fb8c-47f1-9a40-a9363bd83310",
+  "run_version": 2,
+  "result_sha256": "85649d3c3a2921df97bbe9f47139b292f0234f89e6385cff40595c6f448d08b3",
+  "decision": "accepted",
+  "note": "Independent fixture verification: model-proof-before.txt exact bytes OAX_MODEL_BEFORE_6a451c\\n, SHA256 c2b51224394a42f6a57e0644077e16b16a7a970248cb7ae8c83b19d962775180. Run and rollout model=gpt-6.1-sol effort=high.",
+  "reviewed_by": "human-owner-4a5129de-6c3a-43e6-817d-efddd968de07",
+  "created_at": "2026-10-06T21:41:16.809732618Z",
+  "sequence": 106,
+  "task_version": 4
+}

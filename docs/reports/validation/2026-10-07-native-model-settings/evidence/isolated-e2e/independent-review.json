@@ -1,0 +1,25 @@
+{
+  "at": "2026-10-06T21:53:10.435550+00:00",
+  "scope": "Main-agent changes: API authorization, persistent profile CAS and journal transaction, planner freeze, true Codex catalog, and deployment script. Reviewer also implemented nativebridge; bridge correctness is supported separately by real E2E and parent review.",
+  "blocking_findings_remaining": [],
+  "resolved_findings": [
+    {
+      "issue": "failed deployment could leave all Workers stopped with no follow-up",
+      "resolution": "4774 adds best-effort service recovery, durable recovery outcome, and FAILED verification Task when operator returns",
+      "validation": "source review; failure recovery was not run against production"
+    },
+    {
+      "issue": "bare Worker restart did not reconfirm inherited network binding",
+      "resolution": "formal agent resume --no-open included in fixture and main deployment procedure",
+      "validation": "same queued second-proof Task executed once after actual formal resume"
+    }
+  ],
+  "nonblocking_notes": [
+    "Model preference is read during BeginAttempt planning before Run persistence; completed Runs are immutable.",
+    "Session-only TUI model selection is projected into Agent preference by deliberate OAX scope."
+  ],
+  "not_claimed": [
+    "independent implementation of bridge",
+    "production restart success"
+  ]
+}

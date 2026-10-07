@@ -1,0 +1,176 @@
+{
+  "review": {
+    "id": "task-review-fdaabe7d-502b-57e5-897d-151a043f7126",
+    "task_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+    "run_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+    "run_version": 2,
+    "result_sha256": "7bf6e1b502c1eeb1ff5ce5fa5f652882fcb98daf7a68f6e4ae7a36eea259f1b9",
+    "decision": "accepted",
+    "note": "Independent verification after daemon/Worker/native restart: model-proof-after.txt exact expected bytes; SHA256 2663b0a54f9191765031a0e016d3e1ce4fb10cb22dbf79e84c6a226527007c33. Run model=gpt-6.1-sol effort=high, original thread preserved.",
+    "reviewed_by": "human-owner-4a5129de-6c3a-43e6-817d-efddd968de07",
+    "created_at": "2026-10-06T21:47:37.234798438Z",
+    "sequence": 170,
+    "task_version": 4
+  },
+  "task": {
+    "completion_basis": "",
+    "id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+    "version": 4,
+    "target_agent_id": "terminal-e2e-1adf74",
+    "organization_id": "default",
+    "dispatch_mode": "direct",
+    "intent": "mutation",
+    "content": "在当前指定工作目录执行且仅执行一次：python3 -c 'from pathlib import Path; Path(\"model-proof-after.txt\").write_text(\"OAX_MODEL_AFTER_0cf391\\n\")'。禁止读取其他目录、禁止调用子代理。完成后只回复 OAX_MODEL_AFTER_0cf391。",
+    "status": "uncertain",
+    "result": "OAX_MODEL_AFTER_0cf391",
+    "error": "business_effect_unverified",
+    "outcome_state": "available",
+    "created_at": "2026-10-06T21:42:58.879402545Z",
+    "updated_at": "2026-10-06T21:47:37.234798438Z"
+  },
+  "messages": [
+    {
+      "id": "message-2caf01d3-9c06-473b-93f0-b527de9d4e03",
+      "version": 1,
+      "sequence": 1,
+      "task_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+      "sender_agent_id": "",
+      "sender_principal_id": "human-owner-4a5129de-6c3a-43e6-817d-efddd968de07",
+      "target_agent_id": "terminal-e2e-1adf74",
+      "kind": "instruction",
+      "content": "在当前指定工作目录执行且仅执行一次：python3 -c 'from pathlib import Path; Path(\"model-proof-after.txt\").write_text(\"OAX_MODEL_AFTER_0cf391\\n\")'。禁止读取其他目录、禁止调用子代理。完成后只回复 OAX_MODEL_AFTER_0cf391。",
+      "created_at": "2026-10-06T21:42:58.879402545Z"
+    }
+  ],
+  "run_attempts": [
+    {
+      "deadline_at": "2026-10-06T22:16:58.807923505Z",
+      "instructions_sha256": "363eb2a69944450137250f5c0671b06b757061e79af31c3c92a39685608464ff",
+      "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/profile/workers/identities/terminal-e2e-1adf74.role.md",
+      "run_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+      "task_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+      "agent_id": "terminal-e2e-1adf74",
+      "version": 2,
+      "status": "succeeded",
+      "worker_instance_id": "worker-70508ac5-41bd-4716-9ed0-349b9f91b42c",
+      "worker_generation": 2,
+      "execution_spec_version": 1,
+      "adapter_id": "codex-app-server",
+      "backend_id": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_mode": "effort",
+      "reasoning_value": "high",
+      "network_mode": "inherit",
+      "network_policy_version": 2,
+      "network_binding_revision": 2,
+      "turn_result": {
+        "final_reply": true,
+        "runtime_status": "succeeded",
+        "body": "OAX_MODEL_AFTER_0cf391",
+        "side_effects_source": "not_recorded",
+        "business_verification_source": "not_recorded"
+      },
+      "turn_result_state": "available",
+      "started_at": "2026-10-06T21:46:58.807923505Z",
+      "finished_at": "2026-10-06T21:47:08.039079438Z",
+      "created_at": "2026-10-06T21:46:58.807923505Z",
+      "updated_at": "2026-10-06T21:47:08.039079438Z"
+    }
+  ],
+  "events": [
+    {
+      "sequence": 120,
+      "event_id": "event-1bbb2301-a56a-4a41-ba2a-26577068dc6e",
+      "aggregate_type": "task",
+      "aggregate_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+      "event_type": "task.created",
+      "created_at": "2026-10-06T21:42:58.879402545Z"
+    },
+    {
+      "sequence": 158,
+      "event_id": "event-task-977e5f21-6a39-4c9f-b610-f534e26ddb02",
+      "aggregate_type": "task",
+      "aggregate_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+      "event_type": "task.running",
+      "created_at": "2026-10-06T21:46:58.809524928Z"
+    },
+    {
+      "sequence": 159,
+      "event_id": "event-run-74287af9-c164-4e61-9af7-879ada1b5ac8",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+      "event_type": "run_attempt.started",
+      "created_at": "2026-10-06T21:46:58.809533405Z"
+    },
+    {
+      "sequence": 161,
+      "event_id": "event-runtime-9b52a1a0-c90c-48d9-8459-caeaab7b9e7c",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-06T21:47:01.754528847Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed userMessage",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 162,
+      "event_id": "event-runtime-b3ab04f6-bdcd-4dc9-83ae-fea0678fc723",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-06T21:47:05.677852093Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "Codex completed commandExecution",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 164,
+      "event_id": "event-runtime-8ac18cc6-f405-4275-ae43-21fb99b8bcdd",
+      "aggregate_type": "runtime",
+      "aggregate_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+      "event_type": "runtime.turn.output",
+      "created_at": "2026-10-06T21:47:08.004221453Z",
+      "output": {
+        "stage": "output",
+        "status": "running",
+        "text": "OAX_MODEL_AFTER_0cf391",
+        "has_output": true
+      }
+    },
+    {
+      "sequence": 166,
+      "event_id": "event-run-723b6277-a0e8-42b9-869f-401fa6fc3172",
+      "aggregate_type": "run_attempt",
+      "aggregate_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+      "event_type": "run_attempt.finished",
+      "created_at": "2026-10-06T21:47:08.039152244Z"
+    },
+    {
+      "sequence": 167,
+      "event_id": "event-task-f85ffb2f-ce21-420a-a246-e7a202845d01",
+      "aggregate_type": "task",
+      "aggregate_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+      "event_type": "task.settled",
+      "created_at": "2026-10-06T21:47:08.039159891Z"
+    },
+    {
+      "sequence": 170,
+      "event_id": "task-review-fdaabe7d-502b-57e5-897d-151a043f7126",
+      "aggregate_type": "task",
+      "aggregate_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+      "event_type": "task.result_reviewed",
+      "created_at": "2026-10-06T21:47:37.234798438Z"
+    }
+  ],
+  "snapshot_sequence": 170,
+  "live_after_sequence": 170,
+  "has_older_events": false,
+  "has_more_live_events": false
+}

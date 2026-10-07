@@ -1,0 +1,162 @@
+{
+  "since": "2026-10-07 05:19:00 CST",
+  "until": "2026-10-07 05:56:00 CST",
+  "entries": [
+    {
+      "__REALTIME_TIMESTAMP": "1791321607320739",
+      "_PID": "58865",
+      "_COMM": "openagentx",
+      "MESSAGE": "2026/10/07 05:20:07 WARN Runtime executable changed; continuing with current executable adapter_id=codex-app-server expected_sha256=12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad actual_sha256=f34a4d2301892ae96c90097786bfe5dc269f187b6f69faf42a7b357b8c081e35"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791321608104004",
+      "_PID": "58865",
+      "_COMM": "openagentx",
+      "MESSAGE": "2026/10/07 05:20:08 WARN Runtime executable changed; continuing with current executable adapter_id=codex-app-server expected_sha256=12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad actual_sha256=f34a4d2301892ae96c90097786bfe5dc269f187b6f69faf42a7b357b8c081e35"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322211897865",
+      "_PID": "703749",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=703441] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322214208709",
+      "_PID": "705057",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=704685] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322217767876",
+      "_PID": "707626",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=707234] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322218267997",
+      "_PID": "708077",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=707628] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322218364590",
+      "_PID": "708148",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=707499] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322220695932",
+      "_PID": "709498",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=709227] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322222746524",
+      "_PID": "710936",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=710287] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322223307194",
+      "_PID": "711117",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=710939] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322228007500",
+      "_PID": "713188",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=712547] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322228011459",
+      "_PID": "713191",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=712547] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322228015502",
+      "_PID": "713193",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=712547] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322228664789",
+      "_PID": "713407",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=713199] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322228898890",
+      "_PID": "713497",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=713199] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322229611124",
+      "_PID": "713844",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=713560] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322232406430",
+      "_PID": "716217",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=714282] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322232409900",
+      "_PID": "716223",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=714282] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322232414303",
+      "_PID": "716225",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=714282] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322233102761",
+      "_PID": "716799",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=716221] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322233106499",
+      "_PID": "716800",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=716221] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322235272319",
+      "_PID": "717434",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=717212] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322235448078",
+      "_PID": "717462",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=717455] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322235550173",
+      "_PID": "717480",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=717455] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322239332405",
+      "_PID": "718365",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=718363] pututline: Permission denied"
+    },
+    {
+      "__REALTIME_TIMESTAMP": "1791322239395698",
+      "_PID": "718374",
+      "_COMM": "utempter",
+      "MESSAGE": "[ppid=718363] pututline: Permission denied"
+    }
+  ]
+}

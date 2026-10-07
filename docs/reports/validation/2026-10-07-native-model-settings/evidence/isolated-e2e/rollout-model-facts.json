@@ -1,0 +1,27 @@
+{
+  "source": "/home/sky/.codex/sessions/2026/10/07/rollout-2026-10-07T05-30-41-01a11320-3816-7330-b3d9-506257c92737.jsonl",
+  "source_sha256": "5405935392faac5b2a1139f3a50c64530ec04984fcb98af79a101d1ac7dfc0f6",
+  "turn_contexts": [
+    {
+      "timestamp": "2026-10-06T21:30:43.935Z",
+      "turn_id": "01a11320-394c-7e01-b638-1c7590c038b5",
+      "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/workspace",
+      "model": "gpt-6-astra",
+      "effort": "ultra"
+    },
+    {
+      "timestamp": "2026-10-06T21:36:53.688Z",
+      "turn_id": "01a11325-e730-7a31-a2d4-1edc31d49c51",
+      "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/workspace",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    {
+      "timestamp": "2026-10-06T21:47:01.585Z",
+      "turn_id": "01a1132f-282e-7ab0-96f0-2159e1a9188d",
+      "cwd": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/workspace",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  ]
+}

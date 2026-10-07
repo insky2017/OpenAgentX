@@ -1,0 +1,32 @@
+{
+  "deadline_at": "2026-10-06T22:00:39.854273526Z",
+  "instructions_sha256": "363eb2a69944450137250f5c0671b06b757061e79af31c3c92a39685608464ff",
+  "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/profile/workers/identities/terminal-e2e-1adf74.role.md",
+  "run_id": "run-433236c3-b87f-4ec3-94bf-7dc8aeca1cf2",
+  "task_id": "task-b4aa2b63-fe51-4094-8c57-5924e61c3eef",
+  "agent_id": "terminal-e2e-1adf74",
+  "version": 2,
+  "status": "succeeded",
+  "worker_instance_id": "worker-a5f90498-25ba-40ba-8b6c-46b871da4cd7",
+  "worker_generation": 1,
+  "execution_spec_version": 1,
+  "adapter_id": "codex-app-server",
+  "backend_id": "codex",
+  "model": "gpt-6-astra",
+  "reasoning_mode": "backend_default",
+  "network_mode": "inherit",
+  "network_policy_version": 1,
+  "network_binding_revision": 1,
+  "turn_result": {
+    "final_reply": true,
+    "runtime_status": "succeeded",
+    "body": "OAX-TERMINAL-ROLE terminal-e2e-1adf74 WORKSPACE=/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/workspace",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  },
+  "turn_result_state": "available",
+  "started_at": "2026-10-06T21:30:39.854273526Z",
+  "finished_at": "2026-10-06T21:30:47.895804358Z",
+  "created_at": "2026-10-06T21:30:39.854273526Z",
+  "updated_at": "2026-10-06T21:30:47.895804358Z"
+}

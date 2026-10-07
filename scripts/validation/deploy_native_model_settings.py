@@ -83,9 +83,16 @@ class Rollout:
         return json.loads(raw) if raw else {}
 
     def command(self, *argv):
-        p = subprocess.run(argv, text=True, capture_output=True, timeout=120)
+        p = subprocess.run(argv, text=True, capture_output=True, timeout=240)
         require(p.returncode == 0, f'command failed ({p.returncode}): {shlex.join(argv)}')
         return p.stdout.strip()
+
+    def agent_command(self, action, agent, *options):
+        return [str(self.a.installed), 'agent', action, agent, *options,
+                '--db', str(self.a.profile / 'data/openagentx.db'),
+                '--socket', self.sp, '--file', str(self.a.profile / 'fleet.yaml'),
+                '--worker-dir', str(self.a.profile / 'workers'),
+                '--credentials', str(self.a.profile / 'credentials.json')]
 
     def attach(self, agent):
         return self.api('/api/console/v1/attach?agent_id=' + agent)
@@ -111,10 +118,19 @@ class Rollout:
         return result
 
     def snapshot(self):
+        units = ['openagentx.service'] + ['openagentx-worker@' + a + '.service' for a in AGENTS]
+        service_pids = {unit: self.command('systemctl', '--user', 'show', unit, '-p', 'MainPID', '--value')
+                        for unit in units}
+        service_artifacts = {}
+        for unit, pid in service_pids.items():
+            require(pid.isdigit() and int(pid) > 0, 'service has no live process: ' + unit)
+            executable = Path('/proc') / pid / 'exe'
+            service_artifacts[unit] = {'pid': int(pid), 'executable': os.readlink(executable),
+                'sha256': digest(executable),
+                'started_at': self.command('systemctl', '--user', 'show', unit, '-p', 'ExecMainStartTimestamp', '--value')}
         return {'at': now(), 'binary_sha256': digest(self.a.installed), 'states': self.states(),
                 'panes': self.panes(), 'workers': {a: self.attach(a) for a in AGENTS},
-                'service_pids': {unit: self.command('systemctl', '--user', 'show', unit, '-p', 'MainPID', '--value')
-                    for unit in ['openagentx.service'] + ['openagentx-worker@' + a + '.service' for a in AGENTS]}}
+                'service_pids': service_pids, 'service_artifacts': service_artifacts}
 
     def wait(self, predicate, seconds, label):
         end = time.monotonic() + seconds
@@ -136,7 +152,7 @@ class Rollout:
             require(current['window'] == recorded['window'] and current['pane'] == recorded['pane'], 'pane identity changed: ' + agent)
             # Never overwrite a replacement pane or someone's newly opened shell.
             if current['dead']:
-                command = shlex.join([str(self.a.installed), 'agent', 'open', agent, '--native'])
+                command = shlex.join(self.agent_command('open', agent, '--native'))
                 self.command('tmux', 'respawn-pane', '-t', current['pane'], command)
                 self.event('native_reopened', agent=agent, pane=current['pane'])
             else:
@@ -153,13 +169,16 @@ class Rollout:
         key = 'native-model-rollout-verify-' + self.a.sha[:20]
         receipt = self.api('/api/control/v1/tasks', {'meta': {'idempotency_key': key},
             'target_agent_id': 'openagentx', 'organization_id': 'default', 'dispatch_mode': 'direct',
-            'intent': 'mutation', 'content': content})
+            'intent': 'mutation', 'content': content,
+            'runtime_session': {'backend_id': 'codex', 'provider_session_id': self.before['states']['openagentx']['thread_id']}})
         self.save('verification-task.json', receipt)
         self.event('verification_queued', task_id=receipt['task_id'])
 
     def execute(self):
+        require(self.a.profile.resolve() == (Path.home() / '.openagentx').resolve(), 'this deployment targets the existing local systemd profile only')
         require(digest(self.a.candidate) == self.a.sha, 'candidate SHA differs')
         before = self.snapshot()
+        self.before = before
         self.save('before.json', before)
         if not self.a.apply:
             self.event('preflight_only', candidate_sha256=self.a.sha)
@@ -203,12 +222,21 @@ class Rollout:
             def ready():
                 return all(self.attach(a)['worker_status'] == 'online' for a in AGENTS)
             self.wait(ready, 180, 'six new Workers online')
+            for agent in AGENTS:
+                self.command(*self.agent_command('resume', agent, '--no-open', '--wait', '3m'))
+                attached = self.attach(agent)
+                require(attached.get('backend_health', {}).get('codex') == 'healthy', 'network/backend not ready: ' + agent)
+                self.event('network_generation_ready', agent=agent, generation=attached['generation'])
             self.wait(lambda: all(p['dead'] for p in self.panes().values()), 45, 'old native views exit')
             self.resume_panes(before)
             self.wait(lambda: all(not p['dead'] for p in self.panes().values()), 60, 'six foreground views')
             # Opening a new foreground view must not create or replace a thread.
             time.sleep(10)
             after = self.snapshot()
+            require(after['binary_sha256'] == self.a.sha, 'installed binary changed during rollout')
+            for unit, artifact in after['service_artifacts'].items():
+                require(artifact['sha256'] == self.a.sha, 'service is not running the verified binary: ' + unit)
+                require(after['service_pids'][unit] != before['service_pids'][unit], 'service did not restart: ' + unit)
             for agent in AGENTS:
                 require(after['states'][agent]['thread_id'] == before['states'][agent]['thread_id'], 'thread changed: ' + agent)
                 require(after['workers'][agent]['generation'] > before['workers'][agent]['generation'], 'Worker generation did not advance: ' + agent)
@@ -247,10 +275,12 @@ class Rollout:
                         self.wait(can_resume, 180, 'graceful-stop recovery ' + agent)
                         # start has no effect on an already active unit.
                         self.command('systemctl', '--user', 'start', unit)
-                        recovery[agent] = 'start_requested_without_forcing_active_work'
+                        self.wait(lambda: self.attach(agent)['worker_status'] == 'online', 90, 'Worker recovery ' + agent)
+                        self.command(*self.agent_command('resume', agent, '--no-open', '--wait', '3m'))
+                        recovery[agent] = 'resumed_with_current_generation_network_without_forcing_active_work'
                     except Exception as recovery_error:
                         recovery[agent] = str(recovery_error)
-                self.wait(lambda: self.attach('openagentx')['worker_status'] == 'online', 180, 'operator recovery')
+                self.wait(lambda: self.attach('openagentx').get('backend_health', {}).get('codex') == 'healthy', 180, 'operator recovery')
                 try:
                     self.resume_panes(before)
                 except Exception as pane_error:

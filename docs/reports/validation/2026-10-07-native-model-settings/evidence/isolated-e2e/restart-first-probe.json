@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-06T21:46:09.381934+00:00",
+  "status": "BLOCKED_NETWORK_RECONFIRMATION_AFTER_BARE_PROCESS_RESTART",
+  "evidence_source": "read-only SQLite plus formal console attach; no database writes",
+  "bindings": [
+    {
+      "agent_id": "terminal-e2e-1adf74",
+      "backend_id": "codex",
+      "mode": "inherit",
+      "version": 1,
+      "desired_status": "applied",
+      "applied_worker_id": "worker-a5f90498-25ba-40ba-8b6c-46b871da4cd7",
+      "applied_generation": 1,
+      "applied_mode": "inherit",
+      "applied_binding_revision": 1,
+      "diagnostic": null
+    }
+  ],
+  "backends": [
+    {
+      "worker_instance_id": "worker-70508ac5-41bd-4716-9ed0-349b9f91b42c",
+      "backend_id": "codex",
+      "health": "healthy",
+      "network": {
+        "mode": "inherit",
+        "runtime_identity": {}
+      }
+    },
+    {
+      "worker_instance_id": "worker-a5f90498-25ba-40ba-8b6c-46b871da4cd7",
+      "backend_id": "codex",
+      "health": "healthy",
+      "network": {
+        "mode": "inherit",
+        "policy_version": 1,
+        "binding_revision": 1,
+        "manifest_digest": "71ba695c310975f4957bf15f475e8c52d936f8e7ffc48da38fcde3d9b0383e22",
+        "runtime_identity": {
+          "adapter_id": "codex-app-server",
+          "adapter_version": "1",
+          "executable_sha256": "f34a4d2301892ae96c90097786bfe5dc269f187b6f69faf42a7b357b8c081e35"
+        }
+      }
+    }
+  ],
+  "pending_task_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+  "pending_task_has_run": false
+}

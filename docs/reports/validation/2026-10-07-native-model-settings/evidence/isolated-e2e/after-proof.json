@@ -1,0 +1,11 @@
+{
+  "path": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/workspace/model-proof-after.txt",
+  "sha256": "2663b0a54f9191765031a0e016d3e1ce4fb10cb22dbf79e84c6a226527007c33",
+  "exact_bytes": true,
+  "task_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+  "run_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+  "model": "gpt-6.1-sol",
+  "reasoning_value": "high",
+  "task_status_before_review": "uncertain",
+  "release_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe"
+}

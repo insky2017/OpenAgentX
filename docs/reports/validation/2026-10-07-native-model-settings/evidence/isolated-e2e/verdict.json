@@ -1,0 +1,52 @@
+{
+  "status": "PASS_ISOLATED_NATIVE_MODEL_SETTINGS",
+  "at": "2026-10-06T21:53:10.381873+00:00",
+  "release_commit": "4774f19103ff2b9fff7eaf2ce2527578f3d75a55",
+  "release_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+  "codex_version": "0.160.1",
+  "thread": "01a11320-3816-7330-b3d9-506257c92737",
+  "agent": "terminal-e2e-1adf74",
+  "checks": {
+    "real_native_menu": true,
+    "authoritative_settings_api": true,
+    "actual_first_file_proof": true,
+    "daemon_worker_native_restart": true,
+    "same_thread_after_restart": true,
+    "formal_network_resume_after_restart": true,
+    "actual_second_file_proof": true,
+    "run_and_rollout_model_effort_match": true,
+    "six_unsafe_rpc_rejections": true,
+    "global_config_unchanged_on_real_menu_and_rejections": true
+  },
+  "task_status_boundary": "Both mutation Tasks remain uncertain/business_effect_unverified; each Runtime Run succeeded and each independently checked file was accepted through the formal Owner review API. No task status was rewritten.",
+  "first_failure": "candidate01 rejected actual TUI collaborationMode; captured request became golden protocol test and candidate02 fixed menu handling.",
+  "restart_first_probe": "Bare daemon/Worker restart left inherit network binding on generation 1; formal agent resume --no-open refreshed binding and the same queued Task ran once. Harness and deployment now include that step.",
+  "not_tested": [
+    "production deployment",
+    "payment or other business domain effects",
+    "full ADR matrix",
+    "in-flight model change behavior"
+  ],
+  "evidence_levels": [
+    "D critical protocol and transaction tests separately recorded by main",
+    "R isolated real CLI/API/PTY/Codex/file effects"
+  ],
+  "owned_fixture_cleanup": {
+    "at": "2026-10-06T21:52:08.942343+00:00",
+    "processes": [
+      {
+        "label": "worker",
+        "pid": 805114,
+        "stopped": true
+      },
+      {
+        "label": "daemon",
+        "pid": 804576,
+        "stopped": true
+      }
+    ],
+    "owned_tmux_server": "oax-terminal-c2b9ac56a348",
+    "evidence_preserved": true,
+    "production_touched": false
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "captured_at": "2026-10-07T03:27:29.261411+00:00",
+  "source": "/home/sky/.codex/sessions/2026/09/22/rollout-2026-09-22T22-35-08-01a0c98a-bef8-7730-9b2b-cbc2f3594559.jsonl",
+  "source_size": 131761724,
+  "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+  "task_id": "task-bad9a0de-4c32-47f0-98e8-3fbf1149e2a0",
+  "run_id": "run-3e1356d3-3656-43f6-be8d-c6622cce89df",
+  "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+  "contexts": [
+    {
+      "source_line": 17902,
+      "timestamp": "2026-10-06T21:20:10.157Z",
+      "type": "turn_context",
+      "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+      "model": "gpt-6-astra",
+      "effort": "ultra"
+    },
+    {
+      "source_line": 17961,
+      "timestamp": "2026-10-06T21:23:36.461Z",
+      "type": "turn_context",
+      "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+      "model": "gpt-6-astra",
+      "effort": "ultra"
+    }
+  ],
+  "lifecycle": [
+    {
+      "source_line": 17898,
+      "timestamp": "2026-10-06T21:20:10.125Z",
+      "type": "task_started",
+      "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+      "reason": null,
+      "started_at": 1791321610,
+      "completed_at": null,
+      "duration_ms": null
+    },
+    {
+      "source_line": 18599,
+      "timestamp": "2026-10-06T21:50:06.549Z",
+      "type": "turn_aborted",
+      "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+      "reason": "interrupted",
+      "started_at": 1791321610,
+      "completed_at": 1791323406,
+      "duration_ms": 1796425
+    }
+  ],
+  "compactions": [
+    {
+      "source_line": 17959,
+      "timestamp": "2026-10-06T21:23:36.455Z",
+      "type": "compacted",
+      "payload_keys": [
+        "message",
+        "replacement_history",
+        "replacement_history_metadata",
+        "guardian_history",
+        "retained_context",
+        "window_number",
+        "first_window_id",
+        "previous_window_id",
+        "window_id",
+        "compaction_response_id",
+        "latest_token_usage_record",
+        "resume_metadata"
+      ]
+    }
+  ],
+  "last_tools": [
+    {
+      "source_line": 18579,
+      "timestamp": "2026-10-06T21:49:43.420Z",
+      "type": "response_item",
+      "item_type": "custom_tool_call",
+      "tool_name": "exec",
+      "call_id": "call_f3133108a5d940519c38ce69a4edbd00"
+    },
+    {
+      "source_line": 18582,
+      "timestamp": "2026-10-06T21:49:43.563Z",
+      "type": "response_item",
+      "item_type": "custom_tool_call_output",
+      "tool_name": null,
+      "call_id": "call_f3133108a5d940519c38ce69a4edbd00"
+    },
+    {
+      "source_line": 18586,
+      "timestamp": "2026-10-06T21:49:51.958Z",
+      "type": "response_item",
+      "item_type": "custom_tool_call",
+      "tool_name": "exec",
+      "call_id": "call_6d70491d97fb46389f314b3ec345d15e"
+    },
+    {
+      "source_line": 18589,
+      "timestamp": "2026-10-06T21:49:52.062Z",
+      "type": "response_item",
+      "item_type": "custom_tool_call_output",
+      "tool_name": null,
+      "call_id": "call_6d70491d97fb46389f314b3ec345d15e"
+    },
+    {
+      "source_line": 18593,
+      "timestamp": "2026-10-06T21:50:05.180Z",
+      "type": "response_item",
+      "item_type": "custom_tool_call",
+      "tool_name": "exec",
+      "call_id": "call_04dd3c97b5f744bfb837cbb12538ddf7"
+    },
+    {
+      "source_line": 18596,
+      "timestamp": "2026-10-06T21:50:05.407Z",
+      "type": "response_item",
+      "item_type": "custom_tool_call_output",
+      "tool_name": null,
+      "call_id": "call_04dd3c97b5f744bfb837cbb12538ddf7"
+    }
+  ],
+  "assistant_final_messages": 0,
+  "recent_lifecycle": [
+    {
+      "source_line": 17797,
+      "timestamp": "2026-10-05T10:48:44.664Z",
+      "type": "turn_aborted",
+      "turn_id": "01a10bad-49d7-7531-94de-3e359a3bda49",
+      "reason": "interrupted",
+      "started_at": 1791197268,
+      "completed_at": 1791197324,
+      "duration_ms": 56201
+    },
+    {
+      "source_line": 17799,
+      "timestamp": "2026-10-05T10:49:29.654Z",
+      "type": "task_started",
+      "turn_id": "01a10bae-d522-7060-8c86-d5c3aeb3e5d3",
+      "reason": null,
+      "started_at": 1791197369,
+      "completed_at": null,
+      "duration_ms": null
+    },
+    {
+      "source_line": 17813,
+      "timestamp": "2026-10-05T10:49:57.026Z",
+      "type": "turn_aborted",
+      "turn_id": "01a10bae-d522-7060-8c86-d5c3aeb3e5d3",
+      "reason": "interrupted",
+      "started_at": 1791197369,
+      "completed_at": 1791197397,
+      "duration_ms": 27373
+    },
+    {
+      "source_line": 17815,
+      "timestamp": "2026-10-05T10:50:43.757Z",
+      "type": "task_started",
+      "turn_id": "01a10baf-f69b-7680-9f32-b016e9dedb57",
+      "reason": null,
+      "started_at": 1791197443,
+      "completed_at": null,
+      "duration_ms": null
+    },
+    {
+      "source_line": 17896,
+      "timestamp": "2026-10-05T10:54:23.245Z",
+      "type": "task_complete",
+      "turn_id": "01a10baf-f69b-7680-9f32-b016e9dedb57",
+      "reason": null,
+      "started_at": 1791197443,
+      "completed_at": 1791197663,
+      "duration_ms": 219489
+    },
+    {
+      "source_line": 17898,
+      "timestamp": "2026-10-06T21:20:10.125Z",
+      "type": "task_started",
+      "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+      "reason": null,
+      "started_at": 1791321610,
+      "completed_at": null,
+      "duration_ms": null
+    },
+    {
+      "source_line": 18599,
+      "timestamp": "2026-10-06T21:50:06.549Z",
+      "type": "turn_aborted",
+      "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+      "reason": "interrupted",
+      "started_at": 1791321610,
+      "completed_at": 1791323406,
+      "duration_ms": 1796425
+    },
+    {
+      "source_line": 18602,
+      "timestamp": "2026-10-07T03:23:52.194Z",
+      "type": "task_started",
+      "turn_id": "01a11463-91e8-7363-8d88-272ef20880d0",
+      "reason": null,
+      "started_at": 1791343432,
+      "completed_at": null,
+      "duration_ms": null
+    }
+  ],
+  "interpretation": {
+    "old_turn_ended": "explicit turn_aborted reason=interrupted",
+    "not_normal_completion": true,
+    "compaction_did_not_end_turn": true,
+    "aborted_after_ms": 1796425,
+    "suspected_timeout": "Duration is approximately 30 minutes. Confirm with authoritative Run deadline/events; interruption metadata alone cannot identify caller.",
+    "bridge_disconnect_proven": false
+  }
+}

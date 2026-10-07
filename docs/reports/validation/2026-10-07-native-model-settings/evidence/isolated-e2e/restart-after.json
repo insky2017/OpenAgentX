@@ -1,0 +1,98 @@
+{
+  "at": "2026-10-06T21:42:29.032073+00:00",
+  "engine": {
+    "endpoint": "unix:///tmp/oax-codex-1796448474/server.sock",
+    "thread_id": "01a11320-3816-7330-b3d9-506257c92737",
+    "turn_id": "01a11325-e730-7a31-a2d4-1edc31d49c51",
+    "task_id": "task-870f9cf7-b92f-49df-8ce3-8ea4cd17a098",
+    "run_id": "run-39d486da-fb8c-47f1-9a40-a9363bd83310",
+    "state": "restored_unconfirmed",
+    "pid": 805200,
+    "updated_at": "2026-10-06T21:42:27.979916393Z"
+  },
+  "settings": {
+    "agent_id": "terminal-e2e-1adf74",
+    "backend_id": "codex",
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "version": 3,
+    "models": [
+      "gpt-6-astra",
+      "gpt-6.1-sol",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ],
+    "model_efforts": {
+      "gpt-5.6-luna": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "gpt-5.6-sol": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "gpt-5.6-terra": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "gpt-6-astra": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "gpt-6-luna": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "gpt-6-sol": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "gpt-6.1-sol": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ]
+    }
+  },
+  "processes": [
+    {
+      "label": "daemon",
+      "pid": 804576,
+      "starttime": "54136023"
+    },
+    {
+      "label": "worker",
+      "pid": 805114,
+      "starttime": "54136523"
+    }
+  ],
+  "binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe"
+}

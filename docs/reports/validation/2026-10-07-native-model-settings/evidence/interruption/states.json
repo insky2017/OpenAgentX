@@ -1,0 +1,29 @@
+{
+  "state.json": {
+    "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+    "turn_id": "01a11463-91e8-7363-8d88-272ef20880d0",
+    "task_id": "task-6462d378-c9d2-4bba-8054-865d05d422e7",
+    "run_id": "run-0628f8d6-5941-4c40-b8a3-2675e46d4e48",
+    "state": "running",
+    "pid": 3218736,
+    "updated_at": "2026-10-07T03:27:25.980789287Z"
+  },
+  "tasks/task-bad9a0de-4c32-47f0-98e8-3fbf1149e2a0.json": {
+    "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+    "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+    "task_id": "task-bad9a0de-4c32-47f0-98e8-3fbf1149e2a0",
+    "run_id": "run-3e1356d3-3656-43f6-be8d-c6622cce89df",
+    "state": "idle",
+    "pid": 3218736,
+    "updated_at": "2026-10-07T03:23:45.97810719Z"
+  },
+  "tasks/task-6462d378-c9d2-4bba-8054-865d05d422e7.json": {
+    "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+    "turn_id": "01a11463-91e8-7363-8d88-272ef20880d0",
+    "task_id": "task-6462d378-c9d2-4bba-8054-865d05d422e7",
+    "run_id": "run-0628f8d6-5941-4c40-b8a3-2675e46d4e48",
+    "state": "running",
+    "pid": 3218736,
+    "updated_at": "2026-10-07T03:27:25.980789287Z"
+  }
+}

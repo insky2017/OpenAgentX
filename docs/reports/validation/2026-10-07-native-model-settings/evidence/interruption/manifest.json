@@ -1,0 +1,18 @@
+{
+  "sha256": {
+    "rollout-facts.json": "218c20dd72c8a179f94e30adb14acf857626e209c6a0fb6f6fa9c72cd773652c",
+    "task-0081e465-24e9-4a5f-9466-43889298d407.json": "5bacf6407cf763010ff1971b33fb7ed464c33300db2f449085dfc7fa22971705",
+    "worker-journal-window.json": "d58197954a982d05ebc70ab60957a1a947b839cffaf620c2f07487f151b8b3c0",
+    "task-e9c4d34e-ef72-44d2-85b9-e53335618c29.json": "1408ab0c20f939786d7bf887ad4567f9e5f0e4b552f4a93661519fedac3ed3d8",
+    "worker-service.txt": "ea19c59a345caeab836e15b84961cdf9ed1693e80ad1c3125fc9ce72f1f169ce",
+    "independent-assessment.json": "58bea234d4fd29a5fac4fc8b9b15a2712d4da89cfad1e8f06ca19581c2b64f7b",
+    "late-subagent-event.json": "f2e4c93939648fed6dcd036d8c60a094cdbcee1294c8216c528e35b19d9651d6",
+    "task-6462d378-c9d2-4bba-8054-865d05d422e7.json": "a48c757d95c5c5c2dbfb4b6393fc5fa3ff92120bb0c72e0d10b670b0c3a74451",
+    "states.json": "d10fc501140902f5ba09b0fb9c4d0bd524c5c4d4d4e09f8ddd39842af38a7661",
+    "history-abort-samples.json": "76c21502c4517b952c80bf1bddc43c6265c39f15e805adfd81408c5c2be5fb48",
+    "task-56d86c42-f007-41df-8375-1bf6424ec605.json": "1bd16b356500bcc1112caa5c8ef70c12ed671d9da3dcd533a0075131f372a14c",
+    "configured-timeouts.json": "ca843cbc8d16f8b094b235ba7354a702616abfbb783d344d8e1e5e0a6b606eec",
+    "task-bad9a0de-4c32-47f0-98e8-3fbf1149e2a0.json": "e18b2311b2991986f88678d693bad250596a86a731c816932226a2a97ab0dfa6",
+    "interruption-template.json": "87dbf11cf5f70a90ce7cf44db607e26d6adea19bcea53a66c5ac29f4e4f2a5ea"
+  }
+}

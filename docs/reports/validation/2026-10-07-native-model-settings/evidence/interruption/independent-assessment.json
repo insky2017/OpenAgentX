@@ -1,0 +1,27 @@
+{
+  "captured_at": "2026-10-07T03:30:02.686009+00:00",
+  "scope": "只读核查同一正式线程最近3次turn_aborted；不改配置、不重启、不重试任务。",
+  "target": {
+    "task_id": "task-bad9a0de-4c32-47f0-98e8-3fbf1149e2a0",
+    "run_id": "run-3e1356d3-3656-43f6-be8d-c6622cce89df",
+    "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae"
+  },
+  "independently_observed": [
+    "Codex于北京时间2026-10-07 05:20:10.125开始turn，在05:50:06.549记录turn_aborted reason=interrupted，持续1796425毫秒。",
+    "该turn没有task_complete或assistant final；05:23:36.455压缩后仍继续同一turn并调用工具，因此压缩不是结束原因。",
+    "最后工具输出05:50:05.407，距interrupt约1.142秒。",
+    "Worker日志目标时窗26条：2条Runtime executable changed，24条utempter Permission denied；没有可证明Bridge断连的日志。",
+    "旧Task和当前Task的Worker状态文件均指向backend PID 3218736；该快照支持复用后端，不能单独证明全时段连续存活。",
+    "最近另外两次中断仅56.201秒和27.373秒，现有rollout证据不能识别其取消来源，也不能归为30分钟超时。"
+  ],
+  "parent_console_api_observation": {
+    "source": "父代理/root经正式Console API核验后于本次会话提供；本子代理未重复请求API",
+    "started_at": "2026-10-06T21:20:06.517731044Z",
+    "deadline_at": "2026-10-06T21:50:06.517731044Z",
+    "finished_at": "2026-10-06T21:50:06.573807599Z",
+    "status": "canceled",
+    "worker_timeout": "30m0s"
+  },
+  "conclusion": "目标旧turn中断与OAX Run的30分钟deadline精确吻合，按联合证据判定为30分钟超时触发取消；没有证据将该次停止归因于TUI Bridge断连。此判断不推广到所有历史取消。",
+  "pending": "另两次短时取消来源由父代理复用正式API核对；本子代理不扩大历史样本。"
+}

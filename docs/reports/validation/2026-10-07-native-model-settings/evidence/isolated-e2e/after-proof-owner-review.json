@@ -1,0 +1,13 @@
+{
+  "id": "task-review-fdaabe7d-502b-57e5-897d-151a043f7126",
+  "task_id": "task-2fb618be-eff1-4e00-aa5a-94b86f8a0411",
+  "run_id": "run-74349401-bdbc-4d78-96a8-31df2d758cbe",
+  "run_version": 2,
+  "result_sha256": "7bf6e1b502c1eeb1ff5ce5fa5f652882fcb98daf7a68f6e4ae7a36eea259f1b9",
+  "decision": "accepted",
+  "note": "Independent verification after daemon/Worker/native restart: model-proof-after.txt exact expected bytes; SHA256 2663b0a54f9191765031a0e016d3e1ce4fb10cb22dbf79e84c6a226527007c33. Run model=gpt-6.1-sol effort=high, original thread preserved.",
+  "reviewed_by": "human-owner-4a5129de-6c3a-43e6-817d-efddd968de07",
+  "created_at": "2026-10-06T21:47:37.234798438Z",
+  "sequence": 170,
+  "task_version": 4
+}

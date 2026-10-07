@@ -1,0 +1,7 @@
+{
+  "source_line": 18598,
+  "timestamp": "2026-10-06T21:50:06.539Z",
+  "type": "response_item",
+  "role": "developer",
+  "message": "<turn_aborted>\nThe previous turn was interrupted on purpose. Any running unified exec processes may still be running in the background. If any tools/commands were aborted, they may have partially executed.\n</turn_aborted>"
+}

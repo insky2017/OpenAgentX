@@ -1,0 +1,35 @@
+{
+  "entries": [
+    {
+      "kind": "product",
+      "stage": "candidate01 native model menu",
+      "observed": "thread/settings/update rejected collaborationMode while config/batchWrite persisted selection",
+      "evidence": [
+        "first-menu-failure.rendered.txt",
+        "menu-rpc.jsonl"
+      ],
+      "resolution": "whitelisted nested model/effort only, golden protocol test, real menu retest on candidate02 and final release passed"
+    },
+    {
+      "kind": "protocol-capture fixture",
+      "stage": "attempt1",
+      "observed": "TERM=dumb refused interactive TUI",
+      "resolution": "explicit TERM=xterm-256color for owned capture process"
+    },
+    {
+      "kind": "protocol-capture fixture",
+      "stage": "attempt2",
+      "observed": "proxy default 1MiB websocket frame limit rejected 13,945,590-byte app-server frame",
+      "resolution": "32MiB bounded proxy frame limit; capture records only selected settings RPCs"
+    },
+    {
+      "kind": "restart procedure",
+      "stage": "final-release first restart probe",
+      "observed": "Worker online but stale-generation inherit network binding left second Task queued without Run",
+      "evidence": [
+        "restart-first-probe.json"
+      ],
+      "resolution": "formal agent resume --no-open reconfirmed current-generation network; same queued Task executed once"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-06T21:42:37.228519+00:00",
+  "source_commit": "4774f19103ff2b9fff7eaf2ce2527578f3d75a55",
+  "binary_sha256": "780adff7f44cc6c71f37e52e8afc1bcacdfde8436045b3f52d0bc2dfe3614dbe",
+  "vcs_modified": false,
+  "build_source": "independent_git_clone",
+  "codex_version": "0.160.1",
+  "schema": 6
+}

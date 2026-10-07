@@ -1,0 +1,63 @@
+{
+  "source": "/home/sky/.codex/sessions/2026/09/22/rollout-2026-09-22T22-35-08-01a0c98a-bef8-7730-9b2b-cbc2f3594559.jsonl",
+  "selection": "Last three turn_aborted lifecycle events in this thread; metadata only",
+  "samples": [
+    {
+      "source_line": 17797,
+      "timestamp": "2026-10-05T10:48:44.664Z",
+      "turn_id": "01a10bad-49d7-7531-94de-3e359a3bda49",
+      "reason": "interrupted",
+      "started_at": 1791197268,
+      "completed_at": 1791197324,
+      "duration_ms": 56201,
+      "worker_state": {
+        "source": "/home/sky/.openagentx/workers/codex/openagentx/tasks/task-56d86c42-f007-41df-8375-1bf6424ec605.json",
+        "task_id": "task-56d86c42-f007-41df-8375-1bf6424ec605",
+        "run_id": "run-0076ae1c-79b2-4eb1-a620-b22b8ab92448",
+        "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+        "turn_id": "01a10bad-49d7-7531-94de-3e359a3bda49",
+        "state": "idle",
+        "pid": 3218736,
+        "updated_at": "2026-10-05T10:49:25.988416936Z"
+      }
+    },
+    {
+      "source_line": 17813,
+      "timestamp": "2026-10-05T10:49:57.026Z",
+      "turn_id": "01a10bae-d522-7060-8c86-d5c3aeb3e5d3",
+      "reason": "interrupted",
+      "started_at": 1791197369,
+      "completed_at": 1791197397,
+      "duration_ms": 27373,
+      "worker_state": {
+        "source": "/home/sky/.openagentx/workers/codex/openagentx/tasks/task-0081e465-24e9-4a5f-9466-43889298d407.json",
+        "task_id": "task-0081e465-24e9-4a5f-9466-43889298d407",
+        "run_id": "run-265cc241-3e53-43d5-9272-0e05312aba5d",
+        "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+        "turn_id": "01a10bae-d522-7060-8c86-d5c3aeb3e5d3",
+        "state": "idle",
+        "pid": 3218736,
+        "updated_at": "2026-10-05T10:50:35.98214021Z"
+      }
+    },
+    {
+      "source_line": 18599,
+      "timestamp": "2026-10-06T21:50:06.549Z",
+      "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+      "reason": "interrupted",
+      "started_at": 1791321610,
+      "completed_at": 1791323406,
+      "duration_ms": 1796425,
+      "worker_state": {
+        "source": "/home/sky/.openagentx/workers/codex/openagentx/tasks/task-bad9a0de-4c32-47f0-98e8-3fbf1149e2a0.json",
+        "task_id": "task-bad9a0de-4c32-47f0-98e8-3fbf1149e2a0",
+        "run_id": "run-3e1356d3-3656-43f6-be8d-c6622cce89df",
+        "thread_id": "01a0c98a-bef8-7730-9b2b-cbc2f3594559",
+        "turn_id": "01a11316-976e-70b0-92c5-ddf9c1d631ae",
+        "state": "idle",
+        "pid": 3218736,
+        "updated_at": "2026-10-07T03:23:45.97810719Z"
+      }
+    }
+  ]
+}

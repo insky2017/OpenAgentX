@@ -1,0 +1,33 @@
+{
+  "deadline_at": "2026-10-06T22:06:51.937498685Z",
+  "instructions_sha256": "363eb2a69944450137250f5c0671b06b757061e79af31c3c92a39685608464ff",
+  "instructions_path": "/home/sky/.local/state/openagentx/validation/2026-10-07-native-model-settings/fixture01/profile/workers/identities/terminal-e2e-1adf74.role.md",
+  "run_id": "run-39d486da-fb8c-47f1-9a40-a9363bd83310",
+  "task_id": "task-870f9cf7-b92f-49df-8ce3-8ea4cd17a098",
+  "agent_id": "terminal-e2e-1adf74",
+  "version": 2,
+  "status": "succeeded",
+  "worker_instance_id": "worker-a5f90498-25ba-40ba-8b6c-46b871da4cd7",
+  "worker_generation": 1,
+  "execution_spec_version": 1,
+  "adapter_id": "codex-app-server",
+  "backend_id": "codex",
+  "model": "gpt-6.1-sol",
+  "reasoning_mode": "effort",
+  "reasoning_value": "high",
+  "network_mode": "inherit",
+  "network_policy_version": 1,
+  "network_binding_revision": 1,
+  "turn_result": {
+    "final_reply": true,
+    "runtime_status": "succeeded",
+    "body": "OAX_MODEL_BEFORE_6a451c",
+    "side_effects_source": "not_recorded",
+    "business_verification_source": "not_recorded"
+  },
+  "turn_result_state": "available",
+  "started_at": "2026-10-06T21:36:51.937498685Z",
+  "finished_at": "2026-10-06T21:37:03.194666653Z",
+  "created_at": "2026-10-06T21:36:51.937498685Z",
+  "updated_at": "2026-10-06T21:37:03.194666653Z"
+}

@@ -1,0 +1,154 @@
+{
+  "at": "2026-10-06T21:43:25.033830+00:00",
+  "cases": [
+    {
+      "label": "cross_thread",
+      "request": {
+        "id": 2,
+        "method": "thread/settings/update",
+        "params": {
+          "threadId": "not-the-owned-thread",
+          "model": "gpt-6-astra"
+        }
+      },
+      "response": {
+        "id": 2,
+        "error": {
+          "code": -32001,
+          "message": "受管终端只能操作当前 Agent 的会话"
+        }
+      }
+    },
+    {
+      "label": "unsupported_model",
+      "request": {
+        "id": 3,
+        "method": "thread/settings/update",
+        "params": {
+          "threadId": "01a11320-3816-7330-b3d9-506257c92737",
+          "model": "invalid-oax-model"
+        }
+      },
+      "response": {
+        "id": 3,
+        "error": {
+          "code": -32001,
+          "message": "Console API status 400: INVALID_INPUT: model or reasoning effort is not supported by this Agent backend"
+        }
+      }
+    },
+    {
+      "label": "unsupported_effort",
+      "request": {
+        "id": 4,
+        "method": "thread/settings/update",
+        "params": {
+          "threadId": "01a11320-3816-7330-b3d9-506257c92737",
+          "effort": "invalid-oax-effort"
+        }
+      },
+      "response": {
+        "id": 4,
+        "error": {
+          "code": -32001,
+          "message": "Console API status 400: INVALID_INPUT: model or reasoning effort is not supported by this Agent backend"
+        }
+      }
+    },
+    {
+      "label": "mixed_permissions",
+      "request": {
+        "id": 5,
+        "method": "config/batchWrite",
+        "params": {
+          "edits": [
+            {
+              "keyPath": "model",
+              "value": "gpt-6-astra",
+              "mergeStrategy": "replace"
+            },
+            {
+              "keyPath": "approval_policy",
+              "value": "never",
+              "mergeStrategy": "replace"
+            }
+          ]
+        }
+      },
+      "response": {
+        "id": 5,
+        "error": {
+          "code": -32001,
+          "message": "受管终端仅允许模型配置，不支持 approval_policy"
+        }
+      }
+    },
+    {
+      "label": "global_file",
+      "request": {
+        "id": 6,
+        "method": "config/batchWrite",
+        "params": {
+          "filePath": "/home/sky/.codex/config.toml",
+          "edits": [
+            {
+              "keyPath": "model",
+              "value": "gpt-6-astra",
+              "mergeStrategy": "replace"
+            }
+          ]
+        }
+      },
+      "response": {
+        "id": 6,
+        "error": {
+          "code": -32001,
+          "message": "受管终端不允许写配置文件；模型偏好仅保存在 OAX"
+        }
+      }
+    },
+    {
+      "label": "stale_version",
+      "request": {
+        "id": 7,
+        "method": "config/batchWrite",
+        "params": {
+          "expectedVersion": "oax-agent-model:999",
+          "edits": [
+            {
+              "keyPath": "model",
+              "value": "gpt-6-astra",
+              "mergeStrategy": "replace"
+            }
+          ]
+        }
+      },
+      "response": {
+        "id": 7,
+        "error": {
+          "code": -32001,
+          "message": "模型设置版本已变化；请刷新后重试"
+        }
+      }
+    }
+  ],
+  "reads": {
+    "thread/resume": {
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high"
+    },
+    "config/read": {
+      "model": "gpt-6.1-sol",
+      "model_reasoning_effort": "high"
+    },
+    "model/list": [
+      "gpt-6.1-sol",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna"
+    ]
+  }
+}

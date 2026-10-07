@@ -1,0 +1,3 @@
+ok  	openagentx/internal/runtime/codex	1.033s [no tests to run]
+ok  	openagentx/internal/nativebridge	1.041s
+ok  	openagentx/internal/persistence/sqlite	1.508s
