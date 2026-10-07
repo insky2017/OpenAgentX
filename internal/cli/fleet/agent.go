@@ -33,10 +33,12 @@ import (
 	"openagentx/internal/domain"
 	fleetmodel "openagentx/internal/fleet"
 	"openagentx/internal/localprofile"
+	codexruntime "openagentx/internal/runtime/codex"
 	workerconfig "openagentx/internal/worker"
 )
 
 type agentOptions struct {
+	registeredResume                                                                                                                            bool // Set only after authenticated existing-identity verification.
 	id, name, workspace, role, roleText, identity, workerSource, environmentSource, passwordFile, username, organization, webURL, binary, model string
 	timeout, wait                                                                                                                               time.Duration
 	console, noOpen, watch, configureOnly, jsonOutput                                                                                           bool
@@ -299,7 +301,7 @@ func parseAgentOptions(command string, args []string, deps Dependencies) (agentO
 	f.StringVar(&o.webURL, "web-url", os.Getenv("OPENAGENTX_WEB_URL"), "Web origin (otherwise discover from user service)")
 	f.StringVar(&o.binary, "runtime-binary", "", "Runtime executable (agy-graft or codex by runtime)")
 	f.StringVar(&o.model, "model", "", "Runtime model")
-	f.DurationVar(&o.timeout, "timeout", 30*time.Minute, "Per-run timeout")
+	f.DurationVar(&o.timeout, "timeout", 30*time.Minute, "Per-run timeout for add/join (Codex default 0 = no execution deadline; AGY default 30m)")
 	f.DurationVar(&o.wait, "wait", 3*time.Minute, "Startup/network readiness deadline")
 	f.BoolVar(&o.console, "console", false, "Open terminal Console")
 	f.BoolVar(&o.noOpen, "no-open", false, "Print status without opening UI")
@@ -309,13 +311,23 @@ func parseAgentOptions(command string, args []string, deps Dependencies) (agentO
 	if err := f.Parse(args); err != nil {
 		return o, err
 	}
+
+	timeoutExplicit := false
+	f.Visit(func(option *flag.Flag) {
+		if option.Name == "timeout" {
+			timeoutExplicit = true
+		}
+	})
+	if !timeoutExplicit && o.runtime == "codex" {
+		o.timeout = codexruntime.DefaultTimeout
+	}
 	if f.NArg() == 1 && o.id == "" {
 		o.id = f.Arg(0)
 	} else if f.NArg() != 0 {
 		return o, fmt.Errorf("unexpected positional arguments")
 	}
-	if o.wait <= 0 || o.timeout <= 0 {
-		return o, fmt.Errorf("wait and timeout must be positive")
+	if o.wait <= 0 || o.timeout < 0 || (o.runtime != "codex" && o.timeout == 0) {
+		return o, fmt.Errorf("wait must be positive; timeout must be positive except Codex permits 0 (no execution deadline)")
 	}
 	if o.runtime != "agy" && o.runtime != "codex" {
 		return o, fmt.Errorf("runtime must be agy or codex")

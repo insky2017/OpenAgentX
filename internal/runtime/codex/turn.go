@@ -50,6 +50,7 @@ func (h *turnHandle) collect() {
 	defer h.cancel()
 	result := openruntime.TurnResult{Status: openruntime.TurnResultUncertain, ProviderSessionID: h.threadID}
 	var streamErr error = h.initialError
+	deadlineReason := ""
 	finalByID := map[string]string{}
 	toolSeen := false
 	pendingOtherTools := map[string]string{}
@@ -67,6 +68,13 @@ func (h *turnHandle) collect() {
 			result.Status = openruntime.TurnResultUncertain
 			result.FinalReply = false
 			result.Error = "Codex Runtime ended without a fully verified protocol result: " + safeoutput.RedactText(streamErr.Error())
+		}
+		if deadlineReason != "" && result.Status != openruntime.TurnResultSucceeded {
+			if result.Error != "" {
+				result.Error = deadlineReason + "; " + result.Error
+			} else {
+				result.Error = deadlineReason
+			}
 		}
 		result = safeoutput.SanitizeTurnResult(result)
 		h.adapter.mu.Lock()
@@ -91,6 +99,10 @@ func (h *turnHandle) collect() {
 		select {
 		case <-ctxDone:
 			ctxDone = nil
+			if errors.Is(h.ctx.Err(), context.DeadlineExceeded) {
+				deadline, _ := h.ctx.Deadline()
+				deadlineReason = "OAX 执行时限已到，已请求停止本轮（deadline_exceeded；截止 " + deadline.UTC().Format(time.RFC3339) + "）；已完成的操作可能仍有效，任务未自动重试"
+			}
 			cancelCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			err := h.RequestCancel(cancelCtx)
 			cancel()

@@ -12,6 +12,8 @@
 
 ## 当前实施约定（2026-10-03）
 
+- **2026-10-07 执行时限与 resume 修复**：用户授权修复及必要重启；Codex 正常任务默认不设总截止（`timeout: 0s`），保留显式限时/人工取消，AGY不变。已登记 Agent 以认证安装内正式身份恢复，不依赖一次性接入回执。按[本轮计划](docs/plans/2026-10-07-resume-timeout.md)保留真实超过30分钟、正式恢复与原thread/pane证据。
+
 - **2026-10-07 受管模型设置交付**：已安装产品源码 `4774f19` 工件；daemon、六域 Worker 与原生 Bridge 已重启/重连，实际运行 SHA 与已验工件一致，六域 online/healthy/ready，原 thread 与 window/pane 保持。真实模型切换、冻结 Run、文件效果及重启持久化在隔离环境通过；正式环境按限定范围恢复后核验通过，未重放业务任务。首次部署 FAILED 保留；Rhythm 注册输入摘要不符、Pay 接入收据 JSON 无效仍会阻断通用 `agent resume`，本次经正式网络 API 恢复可接单，并未绕过注册保护。30 分钟 Run 时限未改。证据、恢复边界与残留项见[本批交付](docs/reports/validation/2026-10-07-native-model-settings/DELIVERY.md)；本批用户授权重启，不受旧清理批次不重启约束限制。
 
 - **2026-10-05 测试 Agent 清理交付**：CLI 已安装 `3b6989e`，正式数据库 schema v6；11 个明确测试身份、33 Task、35 Run、67,275 条专属事件、12 个原生会话及 8 个专属目录已清理，保留六业务领域与旧 `orchestrator`，总览余 7 身份。首次整批达到 2 秒上限后完整回滚，实际副本验证后分 8 个关联组完成，没有放宽截止或改写数据库绕过正式入口。清理结束快照六域进程/thread 均不变；后续 turn 中断间隔自身域 backend/native 进程发生变化、thread 未变，原因未确认，不能将跨时段对照报告为全部连续。证据与边界见[本批交付](docs/reports/validation/2026-10-05-agent-cleanup/DELIVERY.md)及[实施计划](docs/plans/2026-10-05-agent-cleanup.md)。旧 Worker 对控制面断连仍不能容错，本批未重启正式 daemon、业务 Worker、Runtime/native；后续不得据此推断重启也无损。两条混合组织历史快照、共享日志、业务目录、Git 历史报告与本批验收证据保留。此前“清理测试进程不删除证据”的通用约定，在用户本次明确选定的专属测试历史范围内按最新删除要求执行。

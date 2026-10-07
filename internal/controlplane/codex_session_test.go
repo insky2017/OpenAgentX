@@ -124,3 +124,59 @@ func TestRuntimeSessionPayloadRejectsUnknownInvalidAndTrailingData(t *testing.T)
 		}
 	}
 }
+
+func TestBeginFreezesCodexUnlimitedDefaultWithoutChangingAGY(t *testing.T) {
+	for _, adapterID := range []string{"codex-app-server", "agy-batch"} {
+		t.Run(adapterID, func(t *testing.T) {
+			e := newWorkerTestEnvironment(t, nil)
+			dir := t.TempDir()
+			role := filepath.Join(dir, "role.md")
+			if err := os.WriteFile(role, []byte("Isolated timeout validation role."), 0600); err != nil {
+				t.Fatal(err)
+			}
+			e.service.state = &agyProfileState{WorkerState: e.repository, profile: &domain.AgentProfileRecord{AgentID: e.agentID, Version: 1, InstructionsPath: role, WorkspaceRoot: dir}}
+			e.backend.Descriptor.AdapterID = adapterID
+			e.backend.Descriptor.RuntimeIdentity.AdapterID = adapterID
+			e.backend.Descriptor.DefaultTimeout = 0
+			session := e.register(t, "worker-default-timeout")
+			e.heartbeat(t, session)
+			e.createTask(t, "default-timeout")
+			item, err := e.service.ClaimMailbox(context.Background(), e.workerID, session.SessionToken, claimRequest(session, 1))
+			if err != nil || item == nil {
+				t.Fatalf("claim=%v err=%v", item, err)
+			}
+			begin, err := e.service.BeginAttempt(context.Background(), e.workerID, session.SessionToken, item.ID, api.BeginAttemptRequest{WorkerInstanceID: session.Worker.ID, AgentID: e.agentID, Generation: session.Worker.Generation, FencingToken: session.Worker.FencingToken, ExpectedItemState: domain.MailboxStateClaimed})
+			if err != nil {
+				t.Fatal(err)
+			}
+			saved, err := e.repository.GetRunAttempt(context.Background(), begin.Turn.RunAttempt.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var frozen domain.ResolvedExecutionSpec
+			if err = json.Unmarshal([]byte(saved.ResolvedExecutionJSON), &frozen); err != nil {
+				t.Fatal(err)
+			}
+			for _, execution := range []domain.ResolvedExecutionSpec{begin.Turn.Execution, frozen} {
+				if err := execution.Spec.ValidateShape(); err != nil {
+					t.Fatal(err)
+				}
+				if adapterID == "codex-app-server" {
+					if execution.Spec.Timeout != 0 || !execution.DeadlineAt.IsZero() {
+						t.Fatalf("Codex default gained a cutoff: %+v", execution)
+					}
+				} else {
+					if execution.Spec.Timeout != 30*time.Minute || !execution.DeadlineAt.Equal(saved.StartedAt.Add(30*time.Minute)) {
+						t.Fatalf("AGY default timeout changed: %+v", execution)
+					}
+					zero := execution.Spec
+					zero.Timeout = 0
+					if err := zero.ValidateShape(); err == nil {
+						t.Fatal("AGY accepted an unlimited execution spec")
+					}
+				}
+			}
+			t.Log("Real SQLite BeginAttempt and persisted Run agree on adapter-specific default timeout; no Runtime/model execution claimed.")
+		})
+	}
+}

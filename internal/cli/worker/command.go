@@ -531,7 +531,14 @@ func codexConfigFromOptions(options map[string]any, configDir string) (codex.Con
 	common := map[string]any{}
 	for key, value := range options {
 		switch key {
-		case "binary", "models", "working_dir", "timeout":
+		case "timeout":
+			raw, ok := value.(string)
+			timeout, err := time.ParseDuration(raw)
+			if !ok || err != nil || timeout < 0 {
+				return cfg, domain.ErrInvalidInput("Codex timeout must be non-negative; 0 disables the execution deadline")
+			}
+			cfg.Timeout = timeout
+		case "binary", "models", "working_dir":
 			common[key] = value
 		case "thread_id", "endpoint", "handoff_file", "state_dir":
 			text, ok := value.(string)
@@ -568,6 +575,5 @@ func codexConfigFromOptions(options map[string]any, configDir string) (codex.Con
 		cfg.Models = parsed.Models
 	}
 	cfg.WorkingDir = parsed.WorkingDir
-	cfg.Timeout = parsed.Timeout
 	return cfg, nil
 }

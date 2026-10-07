@@ -391,35 +391,55 @@ func TestHandoffNeverOverwrittenAndFrozenRoleInjected(t *testing.T) {
 }
 
 func TestCancellationWaitsForExactTerminal(t *testing.T) {
-	f := newFake(t)
-	f.onTurn = func(c *websocket.Conn, m RPCMessage) {
-		writeResult(c, m.ID, map[string]any{"turn": map[string]any{"id": "native-turn", "status": "inProgress"}})
-		var cancel RPCMessage
-		if c.ReadJSON(&cancel) != nil {
-			return
+	for _, deadlineExpired := range []bool{false, true} {
+		name := "manual"
+		if deadlineExpired {
+			name = "execution-deadline"
 		}
-		if cancel.Method != "turn/interrupt" {
-			t.Errorf("method=%s", cancel.Method)
-		}
-		var p map[string]string
-		_ = json.Unmarshal(cancel.Params, &p)
-		if p["turnId"] != "native-turn" {
-			t.Error("wrong cancel target")
-		}
-		writeResult(c, cancel.ID, map[string]any{})
-		writeEvent(c, "turn/completed", map[string]any{"threadId": "native-thread", "turn": map[string]any{"id": "native-turn", "status": "interrupted"}})
-	}
-	a := f.adapter(t, nil)
-	h, err := a.StartTurn(context.Background(), fixtureRequest(), successfulSink())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = h.RequestCancel(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	r, err := h.Wait(context.Background())
-	if err != nil || r.Status != openruntime.TurnResultCanceled || r.FinalReply {
-		t.Fatalf("%+v %v", r, err)
+		t.Run(name, func(t *testing.T) {
+			f := newFake(t)
+			f.onTurn = func(c *websocket.Conn, m RPCMessage) {
+				writeResult(c, m.ID, map[string]any{"turn": map[string]any{"id": "native-turn", "status": "inProgress"}})
+				var cancel RPCMessage
+				if c.ReadJSON(&cancel) != nil {
+					return
+				}
+				if cancel.Method != "turn/interrupt" {
+					t.Errorf("method=%s", cancel.Method)
+				}
+				var p map[string]string
+				_ = json.Unmarshal(cancel.Params, &p)
+				if p["turnId"] != "native-turn" {
+					t.Error("wrong cancel target")
+				}
+				writeResult(c, cancel.ID, map[string]any{})
+				writeEvent(c, "turn/completed", map[string]any{"threadId": "native-thread", "turn": map[string]any{"id": "native-turn", "status": "interrupted"}})
+			}
+			a := f.adapter(t, nil)
+			request := fixtureRequest()
+			request.Execution.Spec.Timeout = 0
+			if deadlineExpired {
+				request.Execution.Spec.Timeout = time.Second
+			}
+			h, err := a.StartTurn(context.Background(), request, successfulSink())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !deadlineExpired {
+				if err = h.RequestCancel(context.Background()); err != nil {
+					t.Fatal(err)
+				}
+			}
+			waitCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			r, err := h.Wait(waitCtx)
+			if err != nil || r.Status != openruntime.TurnResultCanceled || r.FinalReply {
+				t.Fatalf("%+v %v", r, err)
+			}
+			if strings.Contains(r.Error, "deadline_exceeded") != deadlineExpired {
+				t.Fatalf("deadline and manual cancel must remain distinguishable: %+v", r)
+			}
+		})
 	}
 }
 

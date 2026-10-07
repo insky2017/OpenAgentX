@@ -9,7 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"openagentx/internal/domain"
 	fleetmodel "openagentx/internal/fleet"
+	"openagentx/internal/persistence/sqlite"
 	workerconfig "openagentx/internal/worker"
 )
 
@@ -177,7 +179,8 @@ func TestNativeOpenRequiresBridgeAndPreservesManagedReferences(t *testing.T) {
 func TestPreparedRegistrationChecksIdentityOnceAndRejectsChangedInputs(t *testing.T) {
 	f := newFleetFixture(t)
 	now := time.Now()
-	deps, _, _, stderr := fixtureDeps(f, now, ownerConsole(now))
+	client := ownerConsole(now)
+	deps, store, _, stderr := fixtureDeps(f, now, client)
 	args := append(f.args("join"), "--id", "research", "--name", "Research", "--workspace", f.home, "--role-text", "Research only.")
 	if code := ExecuteAgent(args, deps); code != 0 {
 		t.Fatalf("prepare: %d %s", code, stderr)
@@ -190,6 +193,20 @@ func TestPreparedRegistrationChecksIdentityOnceAndRejectsChangedInputs(t *testin
 	if err := registerPreparedAgent(context.Background(), &o, withDefaults(deps)); err != nil {
 		t.Fatal(err)
 	}
+
+	repo, err := sqlite.OpenMaintenance(context.Background(), f.database, true, sqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	installation, err := repo.InstallationID(context.Background())
+	repo.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.probe.InstallationID = installation
+	client.session.InstallationID = installation
+	store.credential.InstallationID = installation
+	client.options = []domain.ConsoleAgentOption{{AgentID: "research", OrganizationID: "default", DisplayName: "Research", WorkerStatus: domain.WorkerStatusOffline}}
 	if err := os.Remove(password); err != nil {
 		t.Fatal(err)
 	}
@@ -199,10 +216,10 @@ func TestPreparedRegistrationChecksIdentityOnceAndRejectsChangedInputs(t *testin
 	if code := ExecuteAgent(args, deps); code == 0 {
 		t.Fatal("re-preparing a registered handoff must not claim offline state")
 	}
-	if err := os.WriteFile(filepath.Join(f.workerDir, "identities", "research.md"), []byte("Different role"), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(f.workerDir, "identities", "research.md"), nil, 0600); err != nil {
 		t.Fatal(err)
 	}
 	if err := registerPreparedAgent(context.Background(), &o, withDefaults(deps)); err == nil {
-		t.Fatal("changed role accepted after registration")
+		t.Fatal("empty role accepted after registration")
 	}
 }

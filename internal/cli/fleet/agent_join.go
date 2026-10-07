@@ -164,6 +164,14 @@ func registerPreparedAgent(ctx context.Context, o *agentOptions, deps Dependenci
 	if err := domain.ValidateIdentifier("agent_id", o.id); err != nil {
 		return err
 	}
+	registered, err := verifyRegisteredResume(ctx, *o, deps)
+	if err != nil {
+		return err
+	}
+	if registered {
+		o.registeredResume = true
+		return nil
+	}
 	data, err := fleetmodel.ReadSecureFile(joinReceiptPath(*o), fleetmodel.SecureFileOptions{MaximumBytes: 1 << 20, RequirePrivate: true})
 	if errors.Is(err, os.ErrNotExist) {
 		return nil

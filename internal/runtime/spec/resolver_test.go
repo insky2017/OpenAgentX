@@ -38,3 +38,22 @@ func TestResolveAcceptsOnlyMatchingBackendNetworkProfile(t *testing.T) {
 		t.Fatalf("matching network profile rejected: resolved=%+v err=%v", resolved, err)
 	}
 }
+
+func TestResolveCodexUnlimitedDefaultHonorsPolicyLimit(t *testing.T) {
+	registration := openruntime.BackendRegistration{BackendID: "local", Descriptor: openruntime.AdapterDescriptor{
+		AdapterID: "codex-app-server", Models: []string{"model-a"},
+		ReasoningModes: []domain.ReasoningMode{domain.ReasoningBackendDefault},
+		SessionModes:   []domain.SessionMode{domain.SessionModeNew},
+	}}
+	resolved, err := Resolve(context.Background(), domain.ExecutionSpec{}, domain.ExecutionSpec{}, registration, Policy{})
+	if err != nil || resolved.Spec.Timeout != 0 || !resolved.DeadlineAt.IsZero() {
+		t.Fatalf("unlimited Codex default changed: %+v err=%v", resolved, err)
+	}
+	if _, err := Resolve(context.Background(), domain.ExecutionSpec{}, domain.ExecutionSpec{}, registration, Policy{MaxTimeout: time.Hour}); err == nil {
+		t.Fatal("unlimited execution bypassed the finite policy limit")
+	}
+	resolved, err = Resolve(context.Background(), domain.ExecutionSpec{Timeout: 47 * time.Second}, domain.ExecutionSpec{}, registration, Policy{MaxTimeout: time.Hour})
+	if err != nil || resolved.Spec.Timeout != 47*time.Second {
+		t.Fatalf("explicit finite timeout changed: %+v err=%v", resolved, err)
+	}
+}

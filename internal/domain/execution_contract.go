@@ -70,8 +70,8 @@ func (s ExecutionSpec) ValidateShape() error {
 	if !s.Reasoning.Mode.Valid() || !s.Session.Mode.Valid() {
 		return ErrInvalidInput("unsupported reasoning or session mode")
 	}
-	if s.Timeout <= 0 {
-		return ErrInvalidInput("execution timeout must be positive")
+	if s.Timeout < 0 || (s.Timeout == 0 && s.AdapterID != "codex-app-server") {
+		return ErrInvalidInput("execution timeout must be positive; Codex permits zero for no execution deadline")
 	}
 	if s.Budget.MaxTokens < 0 {
 		return ErrInvalidInput("max_tokens cannot be negative")

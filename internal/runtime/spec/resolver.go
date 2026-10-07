@@ -89,7 +89,7 @@ func Resolve(ctx context.Context, requested domain.ExecutionSpec, defaults domai
 		resolved.Network = defaults.Network
 		sources["network"] = "profile_default"
 	}
-	if resolved.Timeout <= 0 {
+	if resolved.Timeout == 0 && resolved.AdapterID != "codex-app-server" {
 		resolved.Timeout = 30 * time.Minute
 		sources["timeout"] = "resolver_default"
 	}
@@ -119,7 +119,7 @@ func Resolve(ctx context.Context, requested domain.ExecutionSpec, defaults domai
 	if !containsReasoning(registration.Descriptor.ReasoningModes, resolved.Reasoning.Mode) || !containsSession(registration.Descriptor.SessionModes, resolved.Session.Mode) {
 		return domain.ResolvedExecutionSpec{}, domain.ErrUnsupportedCapability
 	}
-	if policy.MaxTimeout > 0 && resolved.Timeout > policy.MaxTimeout {
+	if policy.MaxTimeout > 0 && (resolved.Timeout == 0 || resolved.Timeout > policy.MaxTimeout) {
 		return domain.ResolvedExecutionSpec{}, domain.ErrForbidden("execution timeout exceeds policy")
 	}
 	if policy.MaxTokens > 0 && resolved.Budget.MaxTokens > policy.MaxTokens {

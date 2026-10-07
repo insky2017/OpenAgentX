@@ -15,19 +15,23 @@ import (
 // Only an explicitly resumed prepared Agent is promoted into bulk Fleet startup.
 // Call after Worker, generation, network and readiness checks have all succeeded.
 func enablePreparedAgent(o agentOptions, deps Dependencies) error {
-	receipt, err := fleetmodel.ReadSecureFile(joinReceiptPath(o), fleetmodel.SecureFileOptions{MaximumBytes: 1 << 20, RequirePrivate: true})
-	if errors.Is(err, os.ErrNotExist) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	var prepared joinReceipt
-	if err = json.Unmarshal(receipt, &prepared); err != nil {
-		return err
-	}
-	if prepared.Version != 1 || prepared.AgentID != o.id {
-		return fmt.Errorf("invalid prepared Agent receipt")
+	// A registered Agent has already been checked against the live installation.
+	// Its bootstrap receipt is not an activation authority.
+	if !o.registeredResume {
+		receipt, err := fleetmodel.ReadSecureFile(joinReceiptPath(o), fleetmodel.SecureFileOptions{MaximumBytes: 1 << 20, RequirePrivate: true})
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var prepared joinReceipt
+		if err = json.Unmarshal(receipt, &prepared); err != nil {
+			return err
+		}
+		if prepared.Version != 1 || prepared.AgentID != o.id {
+			return fmt.Errorf("invalid prepared Agent receipt")
+		}
 	}
 	fd, err := unix.Open(o.paths.manifest+".lock", unix.O_CREAT|unix.O_RDWR|unix.O_CLOEXEC|unix.O_NOFOLLOW, 0600)
 	if err != nil {

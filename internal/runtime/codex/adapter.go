@@ -22,6 +22,10 @@ import (
 
 const AdapterID = "codex-app-server"
 
+// DefaultTimeout leaves normal Codex work running until completion or cancellation.
+// A positive explicit timeout remains authoritative for each frozen Run.
+const DefaultTimeout time.Duration = 0
+
 type Config struct {
 	DiscoverModels  bool
 	Binary          string
@@ -85,8 +89,8 @@ func NewAdapter(config Config) (*Adapter, error) {
 			return nil, err
 		}
 	}
-	if config.Timeout <= 0 {
-		config.Timeout = 15 * time.Minute
+	if config.Timeout < 0 {
+		return nil, domain.ErrInvalidInput("Codex timeout cannot be negative; zero means no execution deadline")
 	}
 	if config.WorkingDir == "" {
 		config.WorkingDir, _ = os.Getwd()
@@ -554,11 +558,20 @@ func (a *Adapter) StartTurn(ctx context.Context, request openruntime.TurnRequest
 			return nil, err
 		}
 	}
-	deadline := time.Now().Add(request.Execution.Spec.Timeout)
-	if !request.Execution.DeadlineAt.IsZero() && request.Execution.DeadlineAt.Before(deadline) {
-		deadline = request.Execution.DeadlineAt
+	var deadline time.Time
+	if request.Execution.Spec.Timeout > 0 {
+		deadline = time.Now().Add(request.Execution.Spec.Timeout)
 	}
-	turnCtx, cancel := context.WithDeadline(ctx, deadline)
+	if frozen := request.Execution.DeadlineAt; !frozen.IsZero() && (deadline.IsZero() || frozen.Before(deadline)) {
+		deadline = frozen
+	}
+	var turnCtx context.Context
+	var cancel context.CancelFunc
+	if deadline.IsZero() {
+		turnCtx, cancel = context.WithCancel(ctx)
+	} else {
+		turnCtx, cancel = context.WithDeadline(ctx, deadline)
+	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	fail := func(err error) (openruntime.TurnHandle, error) { cancel(); return nil, err }

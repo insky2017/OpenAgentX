@@ -484,7 +484,9 @@ func (s *WorkerService) BeginAttempt(ctx context.Context, principalID string, to
 			return nil, err
 		}
 		plan.Execution.AgentInput = input
-		plan.Execution.DeadlineAt = guard.CheckedAt.Add(plan.Execution.Spec.Timeout)
+		if plan.Execution.Spec.Timeout > 0 {
+			plan.Execution.DeadlineAt = guard.CheckedAt.Add(plan.Execution.Spec.Timeout)
+		}
 		if plan.Execution.Sources == nil {
 			plan.Execution.Sources = map[string]string{}
 		}
@@ -960,7 +962,7 @@ func m1PlanForBackend(task domain.Task, backend openruntime.BackendRegistration,
 	}
 	timeout := 30 * time.Minute
 	timeoutSource := "m1_default"
-	if (backend.Descriptor.AdapterID == "agy-batch" || backend.Descriptor.AdapterID == "codex-app-server") && backend.Descriptor.DefaultTimeout > 0 {
+	if backend.Descriptor.AdapterID == "codex-app-server" || (backend.Descriptor.AdapterID == "agy-batch" && backend.Descriptor.DefaultTimeout > 0) {
 		timeout = backend.Descriptor.DefaultTimeout
 		timeoutSource = "worker_descriptor"
 	}
