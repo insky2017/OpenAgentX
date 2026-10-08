@@ -1,5 +1,7 @@
 # OpenAgentX 用户级安装与启动指南
 
+远程查询、派发任务见 [oaxctl](oaxctl.md)；宿主授权维护见 [oaxops](oaxops.md)。本页说明 `openagentx` 的本机安装与管理。
+
 ## 适用范围
 
 本指南用于单机 Linux 用户级部署，目标是从一个已验证的 OpenAgentX 发布产物快速进入可用的

@@ -2,6 +2,16 @@
 
 OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持久化组织、任务、Mailbox、RunAttempt、Worker lease 和 Event Journal；Worker 作为独立进程通过 Unix Socket 或 mTLS HTTPS 长轮询工作；Runtime Adapter 按 Run 驱动具体执行后端：Codex 复用专属 app-server 与 thread，AGY 等后端按各自协议执行。
 
+## 使用入口
+
+| 需要做什么 | 命令 | 使用指南 |
+| --- | --- | --- |
+| 本机服务、Agent 与终端管理 | `openagentx` | [安装与使用](docs/operations/openagentx-user-install-guide.md) |
+| 手机或远程查询、派发任务 | `oaxctl` | [远程客户端](docs/operations/oaxctl.md) |
+| 宿主授权维护与跨重启核验 | `oaxops` | [宿主运维](docs/operations/oaxops.md) |
+
+客户端开发参见 [HTTP 接口契约](docs/api/http-client.md)。
+
 ## 架构
 
 正式文档维护在本工程 `main` 分支的 [docs/design](docs/design/README.md)；外部阅读目录仅保留副本。
@@ -13,7 +23,6 @@ OpenAgentX 是面向异构 Agent Runtime 的组织协作控制面。daemon 持�
 - [测试 Agent 清理](docs/operations/agent-removal.md) · [11 身份实际清理与验收](docs/reports/validation/2026-10-05-agent-cleanup/DELIVERY.md)：预览并删除选定身份、Worker 与所属 OAX 历史，原生会话及外部目录按归属单独核对。
 - [事件协作与终端方案（HTML）](docs/design/event-collaboration.html)：终端、Native Bridge、Worker、app-server 与消息任务的关系，以及两条事件连接。
 - [新的 Codex 会话怎样加入（HTML）](docs/design/codex-session-join.html)：已实现的 Skill 安装、自检和简化准备、三种会话入口与自动协作前置条件；命令见[接入指南](docs/operations/codex-agent-entry.md)。
-- [远程控制客户端 `oaxctl`](docs/operations/oaxctl.md) · [宿主运维 Agent `oaxops`](docs/operations/oaxops.md) · [HTTP 客户端协议](docs/api/http-client.md)：远程派发/查询与宿主维护分别使用独立入口。
 - [同一 Agent 交接到新 thread](docs/operations/agent-new-session.md)：正式预览、版本校验、交接初始化与旧历史保留；实际工件与验收见[本批交付](docs/reports/validation/2026-10-07-session-handoff/DELIVERY.md)。
 - [Rhythm / Pay 使用与恢复](docs/operations/rhythm-pay-managed-handoff.md) · [原会话切换及真实自动往返证据](docs/reports/validation/2026-10-03-rhythm-pay-managed/DELIVERY.md)。原身份已迁入；协作通过不等于收费业务完成。
 

@@ -1,8 +1,17 @@
 # oaxops：宿主运维 Agent
 
-`oaxops` 是运行在 `/home/sky/docs` 的独立原生 Codex 会话入口。它按授权事件执行组织交接、宿主维护和跨 OpenAgentX 重启的核验；不是 OAX Worker，也不自动接收 OAX Mailbox。无事件时不启动模型。当前会话 thread 由私有 `session.json` 保存，迁移时须保持原值。
+`oaxops` 在 `/home/sky/docs` 的独立 Codex 会话中执行授权维护和跨 OAX 重启核验；不自动接收 OAX Mailbox。没有事件时不调用模型。
 
-安装仓库中的 `scripts/operations/oaxops` 至 `~/.local/bin/oaxops` 并赋予执行权限。状态目录遵循 `XDG_STATE_HOME/oaxops`，默认 `~/.local/state/oaxops`；其中 `session.json` 保存活动 thread，`events/<key>/` 保存唯一事件及回执，`writer.lock` 用于排除并行写入。工作目录固定为 `/home/sky/docs`。
+## 安装与使用
+
+当前宿主已安装到 `~/.local/bin/oaxops`。从仓库根更新：
+
+```sh
+install -Dm755 scripts/operations/oaxops "$HOME/.local/bin/oaxops"
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+状态保存在 `${XDG_STATE_HOME:-$HOME/.local/state}/oaxops/`；`session.json` 保存原 thread，`events/<key>/` 保存事件及回执，`writer.lock` 保证单 writer。
 
 ```sh
 oaxops status
@@ -11,8 +20,21 @@ oaxops send --key <稳定事件ID> --prompt <绝对路径文件>
 oaxops send --maintenance --key <稳定事件ID> --prompt <已授权维护交接文件>
 ```
 
-`status` 只读显示活动 thread、最近结果和 writer 是否忙；`open` 在当前终端恢复原 thread。`send` 启动 `oaxops-event-<key>` 用户级临时 systemd 单元，返回只说明单元已提交；最终结果须查 `status` 和 `events/<key>/result.json`。普通事件默认附加只读约束。`--maintenance` 只承接正文明确授权的具体维护，不授予长期维护权限。宿主当前采用 `danger-full-access`，提示词中的只读约束不是操作系统隔离。
+`status` 查看 thread、最近结果及忙锁；`open` 进入原会话。`send` 成功仅表示临时 systemd 单元已提交，完成情况要查回执。普通事件默认只读；`--maintenance` 只承接正文的具体授权。当前宿主使用 `danger-full-access`，只读提示词不是 OS 隔离。
 
-同一 key 与相同正文只返回原结果，不重复调用模型；同一 key 改变正文会拒绝。事件已开始但没有结果回执时返回非零，须人工核实，不自动重跑。失败或不确定回执的重复查询也返回非零。前台终端和后台事件共用一把锁；当前本机 Codex 入口直接指向可执行文件，执行进程继承锁，避免 Python 入口意外退出后立即放行第二个 writer。
+## 结果与排障
 
-首次创建独立 thread 仅在明确授权且没有活动 `session.json` 时使用 `oaxops init --key <事件ID> --prompt <文件>`；已有会话应使用 `event` 或 `send`。原有会话及事件回执在安装前迁移至新的状态目录，原 thread 必须保持不变。`ROLE.md` 和 `organization-handoff.md` 随私有状态一起保存；安装和迁移细节见当批交付记录。
+将 `YOUR_EVENT_ID` 换成提交时的 key：
+
+```sh
+oaxops_key=YOUR_EVENT_ID
+oaxops_state="${XDG_STATE_HOME:-$HOME/.local/state}/oaxops"
+cat "$oaxops_state/events/$oaxops_key/result.json"
+journalctl --user -u "oaxops-event-$oaxops_key.service" -n 50 --no-pager
+```
+
+- `writer_busy=true`：前台 `open` 也占锁；空闲时退出前台，或等当前事件结束，再提交。不要删除锁文件。
+- 缺少结果回执或 `status=uncertain`：先核对该事件的 `started.json`、`events.jsonl` 和日志，不换 key 重跑。临时单元结束后可能已被回收，结果以持久回执为准。
+- 同 key、同正文返回原回执；改正文会被拒绝，失败或不确定回执返回非零。该轮 `completed` 不代替业务效果核验。
+
+已有会话无需 `init`。只有明确授权新建且没有活动会话时才使用 `init --key ... --prompt ...`；保留原 thread 和历史回执。角色与交接见状态目录中的 `ROLE.md`、`organization-handoff.md`。
